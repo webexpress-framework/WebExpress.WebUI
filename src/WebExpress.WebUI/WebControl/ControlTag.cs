@@ -91,7 +91,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var pillClass = Pill ? "badge-pill" : "";
+            var pillClass = Pill ? "rounded-pill" : "";
 
             if (_items.Count == 0)
             {

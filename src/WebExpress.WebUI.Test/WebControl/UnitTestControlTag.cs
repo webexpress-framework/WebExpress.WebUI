@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<span class=""badge badge-pill""></span>")]
-        [InlineData("id", @"<span id=""id"" class=""badge badge-pill""></span>")]
+        [InlineData(null, @"<span class=""badge rounded-pill""></span>")]
+        [InlineData("id", @"<span id=""id"" class=""badge rounded-pill""></span>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -36,9 +36,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the text property of the tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<span class=""badge badge-pill""></span>")]
-        [InlineData("abc", @"<span class=""badge badge-pill"">abc</span>")]
-        [InlineData("webexpress.webui:plugin.name", @"<span class=""badge badge-pill"">WebExpress.WebUI</span>")]
+        [InlineData(null, @"<span class=""badge rounded-pill""></span>")]
+        [InlineData("abc", @"<span class=""badge rounded-pill"">abc</span>")]
+        [InlineData("webexpress.webui:plugin.name", @"<span class=""badge rounded-pill"">WebExpress.WebUI</span>")]
         public void Text(string text, string expected)
         {
             // preconditions
@@ -61,7 +61,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(false, @"<span class=""badge""></span>")]
-        [InlineData(true, @"<span class=""badge badge-pill""></span>")]
+        [InlineData(true, @"<span class=""badge rounded-pill""></span>")]
         public void Pill(bool pill, string expected)
         {
             // preconditions
@@ -83,15 +83,15 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the layout property of the tag control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorBackgroundBadge.Default, @"<span class=""badge badge-pill""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Primary, @"<span class=""badge badge-pill bg-primary""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Secondary, @"<span class=""badge badge-pill bg-secondary""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Info, @"<span class=""badge badge-pill bg-info""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Success, @"<span class=""badge badge-pill bg-success""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Warning, @"<span class=""badge badge-pill bg-warning""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Danger, @"<span class=""badge badge-pill bg-danger""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Light, @"<span class=""badge badge-pill bg-light""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Dark, @"<span class=""badge badge-pill bg-dark""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Default, @"<span class=""badge rounded-pill""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Primary, @"<span class=""badge rounded-pill text-bg-primary""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Secondary, @"<span class=""badge rounded-pill text-bg-secondary""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Info, @"<span class=""badge rounded-pill text-bg-info""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Success, @"<span class=""badge rounded-pill text-bg-success""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Warning, @"<span class=""badge rounded-pill text-bg-warning""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Danger, @"<span class=""badge rounded-pill text-bg-danger""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Light, @"<span class=""badge rounded-pill text-bg-light""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Dark, @"<span class=""badge rounded-pill text-bg-dark""></span>")]
         public void Layout(TypeColorBackgroundBadge layout, string expected)
         {
             // preconditions

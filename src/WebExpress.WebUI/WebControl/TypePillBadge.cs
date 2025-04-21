@@ -30,7 +30,7 @@
         {
             return layout switch
             {
-                TypePillBadge.Pill => "badge-pill",
+                TypePillBadge.Pill => "rounded-pill",
                 _ => string.Empty,
             };
         }

@@ -63,7 +63,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<span class=""badge""></span>")]
-        [InlineData("http://example.com", @"<a class=""badge"" href=""http://example.com/""></a>")]
+        [InlineData("http://example.com", @"<a class=""badge link"" href=""http://example.com/""></a>")]
         public void Uri(string uri, string expected)
         {
             // preconditions
@@ -117,13 +117,12 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeColorBackgroundBadge.Default, @"<span class=""badge""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Primary, @"<span class=""badge bg-primary""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Secondary, @"<span class=""badge bg-secondary""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Warning, @"<span class=""badge bg-warning""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Danger, @"<span class=""badge bg-danger""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Dark, @"<span class=""badge bg-dark""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Light, @"<span class=""badge bg-light""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Transparent, @"<span class=""badge bg-transparent""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Primary, @"<span class=""badge text-bg-primary""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Secondary, @"<span class=""badge text-bg-secondary""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Warning, @"<span class=""badge text-bg-warning""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Danger, @"<span class=""badge text-bg-danger""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Dark, @"<span class=""badge text-bg-dark""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Light, @"<span class=""badge text-bg-light""></span>")]
         public void BackgroundColor(TypeColorBackgroundBadge backgroundColor, string expected)
         {
             // preconditions
@@ -146,7 +145,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypePillBadge.None, @"<span class=""badge""></span>")]
-        [InlineData(TypePillBadge.Pill, @"<span class=""badge badge-pill""></span>")]
+        [InlineData(TypePillBadge.Pill, @"<span class=""badge rounded-pill""></span>")]
         public void Pill(TypePillBadge pill, string expected)
         {
             // preconditions

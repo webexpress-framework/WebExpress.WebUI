@@ -77,7 +77,7 @@ namespace WebExpress.WebUI.WebControl
                 return new HtmlElementTextSemanticsA(new HtmlText(Value))
                 {
                     Id = Id,
-                    Class = Css.Concatenate("badge", GetClasses()),
+                    Class = Css.Concatenate("badge link", GetClasses()),
                     Style = GetStyles(),
                     Href = Uri.ToString(),
                     Role = Role
