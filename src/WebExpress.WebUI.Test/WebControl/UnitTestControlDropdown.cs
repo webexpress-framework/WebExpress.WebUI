@@ -148,7 +148,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDropdown()
             {
-                Toogle = toogle
+                Toggle = toogle
             };
 
             // test execution

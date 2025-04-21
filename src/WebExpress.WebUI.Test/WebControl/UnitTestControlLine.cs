@@ -37,13 +37,13 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeColorLine.Default, @"<hr>")]
-        [InlineData(TypeColorLine.Primary, @"<hr class=""bg-primary"">")]
-        [InlineData(TypeColorLine.Secondary, @"<hr class=""bg-secondary"">")]
-        [InlineData(TypeColorLine.Info, @"<hr class=""bg-info"">")]
-        [InlineData(TypeColorLine.Warning, @"<hr class=""bg-warning"">")]
-        [InlineData(TypeColorLine.Danger, @"<hr class=""bg-danger"">")]
-        [InlineData(TypeColorLine.Light, @"<hr class=""bg-light"">")]
-        [InlineData(TypeColorLine.Dark, @"<hr class=""bg-dark"">")]
+        [InlineData(TypeColorLine.Primary, @"<hr class=""text-primary"">")]
+        [InlineData(TypeColorLine.Secondary, @"<hr class=""text-secondary"">")]
+        [InlineData(TypeColorLine.Info, @"<hr class=""text-info"">")]
+        [InlineData(TypeColorLine.Warning, @"<hr class=""text-warning"">")]
+        [InlineData(TypeColorLine.Danger, @"<hr class=""text-danger"">")]
+        [InlineData(TypeColorLine.Light, @"<hr class=""text-light"">")]
+        [InlineData(TypeColorLine.Dark, @"<hr class=""text-dark"">")]
         public void Color(TypeColorLine color, string expected)
         {
             // preconditions

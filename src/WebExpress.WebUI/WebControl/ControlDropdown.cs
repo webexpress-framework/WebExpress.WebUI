@@ -54,7 +54,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets an indicator that indicates that a menu is present.
         /// </summary>
-        public TypeToggleDropdown Toogle
+        public TypeToggleDropdown Toggle
         {
             get => (TypeToggleDropdown)GetProperty(TypeToggleDropdown.None);
             set => SetProperty(value, () => value.ToClass());

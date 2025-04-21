@@ -65,14 +65,14 @@
         {
             return color switch
             {
-                TypeColorLine.Primary => "bg-primary",
-                TypeColorLine.Secondary => "bg-secondary",
-                TypeColorLine.Success => "bg-success",
-                TypeColorLine.Info => "bg-info",
-                TypeColorLine.Warning => "bg-warning",
-                TypeColorLine.Danger => "bg-danger",
-                TypeColorLine.Light => "bg-light",
-                TypeColorLine.Dark => "bg-dark",
+                TypeColorLine.Primary => "text-primary",
+                TypeColorLine.Secondary => "text-secondary",
+                TypeColorLine.Success => "text-success",
+                TypeColorLine.Info => "text-info",
+                TypeColorLine.Warning => "text-warning",
+                TypeColorLine.Danger => "text-danger",
+                TypeColorLine.Light => "text-light",
+                TypeColorLine.Dark => "text-dark",
                 _ => string.Empty,
             };
         }
