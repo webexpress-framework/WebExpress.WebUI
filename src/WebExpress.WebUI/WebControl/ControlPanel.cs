@@ -40,6 +40,15 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Returns or sets the theme of the control.
+        /// </summary>
+        public virtual TypeTheme Theme
+        {
+            get => (TypeTheme)GetProperty(TypeTheme.None, "data-bs-theme");
+            set => SetProperty(value, null, null, "data-bs-theme");
+        }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -127,14 +136,13 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return new HtmlElementTextContentDiv(_content
-                .Select(x => x.Render(renderContext, visualTree))
-                .ToArray())
+            return new HtmlElementTextContentDiv([.. _content.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
                 Class = GetClasses(),
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
-                Role = Role
+                Role = Role,
+                DataTheme = Theme.ToValue()
             };
         }
     }

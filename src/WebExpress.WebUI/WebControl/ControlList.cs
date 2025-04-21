@@ -132,7 +132,7 @@ namespace WebExpress.WebUI.WebControl
                     break;
             }
 
-            var html = new HtmlElementTextContentUl(li.ToArray())
+            var html = new HtmlElementTextContentUl([.. li])
             {
                 Id = Id,
                 Class = Css.Concatenate("", GetClasses()),

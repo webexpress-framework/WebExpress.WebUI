@@ -1,4 +1,5 @@
-﻿using WebExpress.WebUI.Test.Fixture;
+﻿using WebExpress.WebCore.WebUri;
+using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
 
@@ -14,8 +15,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the badge control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<span class=""wx-badge""></span>")]
-        [InlineData("id", @"<span id=""id"" class=""wx-badge""></span>")]
+        [InlineData(null, @"<span class=""badge""></span>")]
+        [InlineData("id", @"<span id=""id"" class=""badge""></span>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -36,10 +37,10 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the badge control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<span class=""wx-badge""></span>")]
-        [InlineData(-10, @"<span class=""wx-badge"">-10</span>")]
-        [InlineData(0, @"<span class=""wx-badge"">0</span>")]
-        [InlineData(10, @"<span class=""wx-badge"">10</span>")]
+        [InlineData(null, @"<span class=""badge""></span>")]
+        [InlineData(-10, @"<span class=""badge"">-10</span>")]
+        [InlineData(0, @"<span class=""badge"">0</span>")]
+        [InlineData(10, @"<span class=""badge"">10</span>")]
         public void Value(int? value, string expected)
         {
             // preconditions
@@ -48,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlBadge()
             {
-                Value = value
+                Value = value?.ToString()
             };
 
             // test execution
@@ -61,8 +62,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the uri property of the badge control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<span class=""wx-badge""></span>")]
-        [InlineData("http://example.com", @"<a class=""wx-badge"" href=""http://example.com/""></a>")]
+        [InlineData(null, @"<span class=""badge""></span>")]
+        [InlineData("http://example.com", @"<a class=""badge"" href=""http://example.com/""></a>")]
         public void Uri(string uri, string expected)
         {
             // preconditions
@@ -71,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlBadge()
             {
-                Uri = uri != null ? new Uri(uri) : null
+                Uri = uri != null ? new UriEndpoint(uri) : null
             };
 
             // test execution
@@ -84,16 +85,16 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the text color property of the badge control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorText.Default, @"<span class=""wx-badge""></span>")]
-        [InlineData(TypeColorText.Primary, @"<span class=""wx-badge text-primary""></span>")]
-        [InlineData(TypeColorText.Secondary, @"<span class=""wx-badge text-secondary""></span>")]
-        [InlineData(TypeColorText.Info, @"<span class=""wx-badge text-info""></span>")]
-        [InlineData(TypeColorText.Success, @"<span class=""wx-badge text-success""></span>")]
-        [InlineData(TypeColorText.Warning, @"<span class=""wx-badge text-warning""></span>")]
-        [InlineData(TypeColorText.Danger, @"<span class=""wx-badge text-danger""></span>")]
-        [InlineData(TypeColorText.Light, @"<span class=""wx-badge text-light""></span>")]
-        [InlineData(TypeColorText.Dark, @"<span class=""wx-badge text-dark""></span>")]
-        [InlineData(TypeColorText.Muted, @"<span class=""wx-badge text-muted""></span>")]
+        [InlineData(TypeColorText.Default, @"<span class=""badge""></span>")]
+        [InlineData(TypeColorText.Primary, @"<span class=""badge text-primary""></span>")]
+        [InlineData(TypeColorText.Secondary, @"<span class=""badge text-secondary""></span>")]
+        [InlineData(TypeColorText.Info, @"<span class=""badge text-info""></span>")]
+        [InlineData(TypeColorText.Success, @"<span class=""badge text-success""></span>")]
+        [InlineData(TypeColorText.Warning, @"<span class=""badge text-warning""></span>")]
+        [InlineData(TypeColorText.Danger, @"<span class=""badge text-danger""></span>")]
+        [InlineData(TypeColorText.Light, @"<span class=""badge text-light""></span>")]
+        [InlineData(TypeColorText.Dark, @"<span class=""badge text-dark""></span>")]
+        [InlineData(TypeColorText.Muted, @"<span class=""badge text-muted""></span>")]
         public void TextColor(TypeColorText color, string expected)
         {
             // preconditions
@@ -115,14 +116,14 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the background color property of the badge control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorBackgroundBadge.Default, @"<span class=""wx-badge""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Primary, @"<span class=""wx-badge bg-primary""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Secondary, @"<span class=""wx-badge bg-secondary""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Warning, @"<span class=""wx-badge bg-warning""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Danger, @"<span class=""wx-badge bg-danger""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Dark, @"<span class=""wx-badge bg-dark""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Light, @"<span class=""wx-badge bg-light""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Transparent, @"<span class=""wx-badge bg-transparent""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Default, @"<span class=""badge""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Primary, @"<span class=""badge bg-primary""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Secondary, @"<span class=""badge bg-secondary""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Warning, @"<span class=""badge bg-warning""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Danger, @"<span class=""badge bg-danger""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Dark, @"<span class=""badge bg-dark""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Light, @"<span class=""badge bg-light""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Transparent, @"<span class=""badge bg-transparent""></span>")]
         public void BackgroundColor(TypeColorBackgroundBadge backgroundColor, string expected)
         {
             // preconditions
@@ -144,8 +145,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the pill property of the badge control.
         /// </summary>
         [Theory]
-        [InlineData(TypePillBadge.None, @"<span class=""wx-badge""></span>")]
-        [InlineData(TypePillBadge.Pill, @"<span class=""wx-badge badge-pill""></span>")]
+        [InlineData(TypePillBadge.None, @"<span class=""badge""></span>")]
+        [InlineData(TypePillBadge.Pill, @"<span class=""badge badge-pill""></span>")]
         public void Pill(TypePillBadge pill, string expected)
         {
             // preconditions

@@ -46,7 +46,8 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("callout", GetClasses()),
                 Style = GetStyles(),
-                Role = Role
+                Role = Role,
+                DataTheme = Theme.ToValue()
             };
 
             if (Title != null)

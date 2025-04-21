@@ -12,6 +12,8 @@ namespace WebExpress.WebUI.WebControl
     /// </summary>
     public abstract class Control : IControl
     {
+        private readonly Dictionary<string, Tuple<object, Func<string>, Func<string>>> _propertys = [];
+
         /// <summary>
         /// Returns or sets the horizontal alignment.
         /// </summary>
@@ -127,11 +129,6 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<string> Styles { get; set; } = [];
 
         /// <summary>
-        /// Returns or sets properties determined by enums.
-        /// </summary>
-        protected Dictionary<string, Tuple<object, Func<string>, Func<string>>> Propertys { get; private set; } = [];
-
-        /// <summary>
         /// Returns or sets the role.
         /// </summary>
         public string Role { get; set; }
@@ -168,9 +165,9 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The value.</returns>
         protected Enum GetProperty(Enum defaultValue, [CallerMemberName] string propertyName = "")
         {
-            if (Propertys.ContainsKey(propertyName))
+            if (_propertys.ContainsKey(propertyName))
             {
-                var item = Propertys[propertyName];
+                var item = _propertys[propertyName];
 
                 return (Enum)item.Item1;
             }
@@ -185,9 +182,9 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The value.</returns>
         protected Enum GetProperty([CallerMemberName] string propertyName = "")
         {
-            if (Propertys.ContainsKey(propertyName))
+            if (_propertys.ContainsKey(propertyName))
             {
-                var item = Propertys[propertyName];
+                var item = _propertys[propertyName];
 
                 return (Enum)item.Item1;
             }
@@ -202,9 +199,9 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The value.</returns>
         protected IProperty GetPropertyObject([CallerMemberName] string propertyName = "")
         {
-            if (Propertys.ContainsKey(propertyName))
+            if (_propertys.ContainsKey(propertyName))
             {
-                var item = Propertys[propertyName];
+                var item = _propertys[propertyName];
 
                 return (IProperty)item.Item1;
             }
@@ -219,9 +216,9 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The value.</returns>
         protected string GetPropertyValue([CallerMemberName] string propertyName = "")
         {
-            if (Propertys.ContainsKey(propertyName))
+            if (_propertys.ContainsKey(propertyName))
             {
-                var item = Propertys[propertyName];
+                var item = _propertys[propertyName];
 
                 return item.Item2();
             }
@@ -238,13 +235,13 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="propertyName">The name of the property.</param>
         protected void SetProperty(Enum value, Func<string> callbackClass, Func<string> callbackStyle = null, [CallerMemberName] string propertyName = "")
         {
-            if (!Propertys.ContainsKey(propertyName))
+            if (!_propertys.ContainsKey(propertyName))
             {
-                Propertys.Add(propertyName, new Tuple<object, Func<string>, Func<string>>(value, callbackClass, callbackStyle));
+                _propertys.Add(propertyName, new Tuple<object, Func<string>, Func<string>>(value, callbackClass, callbackStyle));
                 return;
             }
 
-            Propertys[propertyName] = new Tuple<object, Func<string>, Func<string>>(value, callbackClass, callbackStyle);
+            _propertys[propertyName] = new Tuple<object, Func<string>, Func<string>>(value, callbackClass, callbackStyle);
         }
 
         /// <summary>
@@ -256,13 +253,13 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="propertyName">The name of the property.</param>
         protected void SetProperty(IProperty value, Func<string> callbackClass, Func<string> callbackStyle = null, [CallerMemberName] string propertyName = "")
         {
-            if (!Propertys.ContainsKey(propertyName))
+            if (!_propertys.ContainsKey(propertyName))
             {
-                Propertys.Add(propertyName, new Tuple<object, Func<string>, Func<string>>(value, callbackClass, callbackStyle));
+                _propertys.Add(propertyName, new Tuple<object, Func<string>, Func<string>>(value, callbackClass, callbackStyle));
                 return;
             }
 
-            Propertys[propertyName] = new Tuple<object, Func<string>, Func<string>>(value, callbackClass, callbackStyle);
+            _propertys[propertyName] = new Tuple<object, Func<string>, Func<string>>(value, callbackClass, callbackStyle);
         }
 
         /// <summary>
@@ -274,13 +271,13 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="propertyName">The name of the property.</param>
         protected void SetProperty(Func<string> callbackClass, Func<string> callbackStyle = null, [CallerMemberName] string propertyName = "")
         {
-            if (!Propertys.ContainsKey(propertyName))
+            if (!_propertys.ContainsKey(propertyName))
             {
-                Propertys.Add(propertyName, new Tuple<object, Func<string>, Func<string>>(null, callbackClass, callbackStyle));
+                _propertys.Add(propertyName, new Tuple<object, Func<string>, Func<string>>(null, callbackClass, callbackStyle));
                 return;
             }
 
-            Propertys[propertyName] = new Tuple<object, Func<string>, Func<string>>(null, callbackClass, callbackStyle);
+            _propertys[propertyName] = new Tuple<object, Func<string>, Func<string>>(null, callbackClass, callbackStyle);
         }
 
         /// <summary>
@@ -289,7 +286,11 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The css classes.</returns>
         protected string GetClasses()
         {
-            var list = Propertys.Values.Select(x => x.Item2()).Where(x => !string.IsNullOrEmpty(x)).Distinct();
+            var list = _propertys.Values
+                .Where(x => x.Item2 != null)
+                .Select(x => x.Item2())
+                .Where(x => !string.IsNullOrEmpty(x))
+                .Distinct();
 
             return string.Join(" ", Classes.Union(list));
         }
@@ -300,9 +301,28 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The css styles.</returns>
         protected string GetStyles()
         {
-            var list = Propertys.Values.Where(x => x.Item3 != null).Select(x => x.Item3()).Where(x => !string.IsNullOrEmpty(x)).Distinct();
+            var list = _propertys.Values
+                .Where(x => x.Item3 != null)
+                .Select(x => x.Item3())
+                .Where(x => !string.IsNullOrEmpty(x))
+                .Distinct();
 
             return string.Join(" ", Styles.Union(list));
+        }
+
+        /// <summary>
+        /// Returns all attributes.
+        /// </summary>
+        /// <returns>The attributes.</returns>
+        protected string GetAttributes()
+        {
+            var list = _propertys
+                .Where(x => x.Value.Item2 != null)
+                .Where(x => x.Value.Item3 != null)
+                .Select(x => $"{x.Key}=\"{x.Value.Item1}\"")
+                .Distinct();
+
+            return string.Join(" ", list);
         }
 
         /// <summary>

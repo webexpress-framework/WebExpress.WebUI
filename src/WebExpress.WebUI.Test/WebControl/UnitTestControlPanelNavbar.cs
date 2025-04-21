@@ -112,6 +112,30 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the theme property of the panel control.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeTheme.None, @"<nav class=""navbar"">*</nav>")]
+        [InlineData(TypeTheme.Light, @"<nav class=""navbar"" data-bs-theme=""light"">*</nav>")]
+        [InlineData(TypeTheme.Dark, @"<nav class=""navbar"" data-bs-theme=""dark"">*</nav>")]
+        public void Theme(TypeTheme theme, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlPanelNavbar()
+            {
+                Theme = theme
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests the add function of the navbar control.
         /// </summary>
         [Theory]

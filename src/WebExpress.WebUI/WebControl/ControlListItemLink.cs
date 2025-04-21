@@ -98,11 +98,10 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var param = GetParams();
-
-            var html = new HtmlElementTextSemanticsA(Content.Select(x => x.Render(renderContext, visualTree)).ToArray())
+            var link = new HtmlElementTextSemanticsA(Content.Select(x => x.Render(renderContext, visualTree)).ToArray())
             {
                 Id = Id,
-                Class = Css.Concatenate("list-group-item-action", GetClasses()),
+                Class = Css.Concatenate("link"),
                 Style = GetStyles(),
                 Role = Role,
                 Href = Uri?.ToString() + (param.Length > 0 ? "?" + param : string.Empty),
@@ -113,7 +112,7 @@ namespace WebExpress.WebUI.WebControl
 
             if (Icon != null)
             {
-                html.Add(new ControlIcon()
+                link.Add(new ControlIcon()
                 {
                     Icon = Icon,
                     Margin = !string.IsNullOrWhiteSpace(Text) ? new PropertySpacingMargin
@@ -129,7 +128,7 @@ namespace WebExpress.WebUI.WebControl
 
             if (!string.IsNullOrWhiteSpace(Text))
             {
-                html.Add(new HtmlText(I18N.Translate(renderContext.Request?.Culture, Text)));
+                link.Add(new HtmlText(I18N.Translate(renderContext.Request?.Culture, Text)));
             }
 
             //if (Modal != null)
@@ -142,10 +141,17 @@ namespace WebExpress.WebUI.WebControl
 
             if (!string.IsNullOrWhiteSpace(Tooltip))
             {
-                html.AddUserAttribute("data-bs-toggle", "tooltip");
+                link.AddUserAttribute("data-bs-toggle", "tooltip");
             }
 
-            return html;
+            return new HtmlElementTextContentLi(link)
+            {
+                Id = Id,
+                Class = Css.Concatenate("list-group-item-action", GetClasses()),
+                Style = GetStyles(),
+                Role = Role,
+                OnClick = OnClick?.ToString()
+            }; ;
         }
     }
 }

@@ -61,7 +61,8 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("card", GetClasses()),
                 Style = GetStyles(),
-                Role = Role
+                Role = Role,
+                DataTheme = Theme.ToValue()
             };
 
             if (!string.IsNullOrWhiteSpace(Header))

@@ -78,7 +78,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanel()
             {
-                Direction = direction,
+                Direction = direction
             };
 
             // test execution
@@ -102,7 +102,31 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanel()
             {
-                Fluid = fluid,
+                Fluid = fluid
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the theme property of the panel control.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeTheme.None, @"<div></div>")]
+        [InlineData(TypeTheme.Light, @"<div data-bs-theme=""light""></div>")]
+        [InlineData(TypeTheme.Dark, @"<div data-bs-theme=""dark""></div>")]
+        public void Theme(TypeTheme theme, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlPanel()
+            {
+                Theme = theme
             };
 
             // test execution
