@@ -5,6 +5,7 @@ using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebMessage;
 using WebExpress.WebCore.WebUri;
+using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -199,7 +200,7 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextSemanticsA([.. _controls.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
-                Class = Css.Concatenate("link", GetClasses()),
+                Class = Css.Concatenate("link", Icon is ImageIcon ? "d-inline-flex align-items-baseline" : null, GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
                 Href = Uri?.ToString() + (param.Length > 0 ? "?" + param : string.Empty),
@@ -215,10 +216,10 @@ namespace WebExpress.WebUI.WebControl
                     Icon = Icon,
                     Margin = !string.IsNullOrWhiteSpace(Text) ? new PropertySpacingMargin
                     (
-                        PropertySpacing.Space.None,
+                        PropertySpacing.Space.Auto,
                         PropertySpacing.Space.Two,
-                        PropertySpacing.Space.None,
-                        PropertySpacing.Space.None
+                        PropertySpacing.Space.Auto,
+                        PropertySpacing.Space.Auto
                     ) : new PropertySpacingMargin(PropertySpacing.Space.None)
                 }.Render(renderContext, visualTree));
             }
