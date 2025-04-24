@@ -11,6 +11,6 @@
         /// <value>
         /// A string representing the CSS class for the seedling icon.
         /// </value>
-        protected override string Class => "fas fa-seedling";
+        public override string Class => "fas fa-seedling";
     }
 }

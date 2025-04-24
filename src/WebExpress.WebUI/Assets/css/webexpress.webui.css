@@ -2,6 +2,11 @@ body, html {
     height: 100%;
 }
 
+pre {
+    font-family: var(--bs-font-monospace);
+    color: var(--bs-code-color);
+}
+
 .drag-over {
     border: dashed 1px red;
 }

@@ -12,7 +12,7 @@ namespace WebExpress.WebUI.WebIcon
         /// <summary>
         /// Returns the CSS class associated with the icon.
         /// </summary>
-        protected abstract string Class { get; }
+        public abstract string Class { get; }
 
         /// <summary>
         /// Converts the icon to an HTML representation.

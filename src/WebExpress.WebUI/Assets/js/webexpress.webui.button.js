@@ -1,82 +1,138 @@
 /**
- * A simple button.
+ * A simple button with icon and a label.
  * The following events are triggered:
- * - webexpress.webui.click
+ * - webexpress.webui.click Event triggered when an element is clicked
  */
-webexpress.webui.buttonCtrl = class extends webexpress.webui.events {
-    _button = $("<button class='btn'/>");
-
+webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Constructor
-     * @param settings Options for styling the control:
-     *        - id Sets the id of the control.
-     *        - css The CSS classes used to design the control.
-     *        - label The text.
-     *        - icon The Icon class of the control.
-     *        - color The color of the control text.
-     *        - disabled Indicates whether the control is disabled.
-     *        - url The URL the button points to.
-     *        - onclick The click event handler for the button.
+     * @param {HTMLElement} elem - The DOM element associated with the instance.
      */
-    constructor(settings) {
-        super();
-        
-        const id = settings.id;
-        const css = settings.css;
-        const label = settings.label || "";
-        const icon = settings.icon;
-        const color = settings.color;
-        const disabled = settings.disabled ?? false;
-        const url = settings.url;
-        const onclick = settings.onclick;
-        
-        // Create the button icon and text
-        const buttonIcon = $("<i class='me-2'>").addClass(icon);
-        const buttonText = $("<span>").text(label);
+    constructor(elem) {
+        super(elem);
 
-        let buttonContent;
-        
-        if (icon) {
-            buttonContent = $("<div>").append(buttonIcon).append(buttonText);
-        }
-        else {
-            buttonContent = $("<div>").append(buttonText);
-        }
-                
-        if (url) {
-            buttonContent = $("<a class='link'>").attr("href", url).append(buttonContent);
-        }
+        // Initialize properties
+        this._label = $(elem).text() || "";
+        this._icon = $(elem).data("icon") || null;
+        this._image = $(elem).data("image") || null;
+        this._color = $(elem).data("color") || null;
 
-        this._button.append(buttonContent);
-        this._button.attr("id", id || "");
+        // Clean up the DOM element and prepare it for rendering
+        $(elem).removeData().empty().addClass("btn wx-button");
 
-        if (css) {
-            this._button.addClass(css);
-        }
+        // Render the button
+        this.render();
 
-        if (color) {
-            this._button.addClass(color);
-        }
-
-        if (disabled) {
-            this._button.attr("disabled", "disabled");
-        }
-
-        if (onclick) {
-            const func = Function("sender", onclick);
-            this._button.click((e) => { func(this._button); });
-        }
-
-        // Trigger click event
-        this._button.click(() => {
-            this.trigger('webexpress.webui.click');
+        // Attach the click event listener
+        $(elem).click(() => {
+            $(document).trigger("webexpress.webui.click", elem.id);
         });
     }
 
     /**
-     * Returns the control.
+     * Getter for the button label.
+     * @returns {string} The current label of the button.
      */
-    get getCtrl() {
-        return this._button;
+    get label() {
+        return this._label;
     }
-}
+
+    /**
+     * Setter for the button label.
+     * Updates the label and re-renders the button.
+     * @param {string} value - The new label value.
+     */
+    set label(value) {
+        this._label = value;
+        this.update();
+    }
+
+    /**
+     * Getter for the button icon.
+     * @returns {string|null} The current icon class of the button.
+     */
+    get icon() {
+        return this._icon;
+    }
+
+    /**
+     * Setter for the button icon.
+     * Updates the icon and re-renders the button.
+     * @param {string|null} value - The new icon class.
+     */
+    set icon(value) {
+        this._icon = value;
+        this.update();
+    }
+
+    /**
+     * Getter for the button color.
+     * @returns {string|null} The current color class of the button.
+     */
+    get color() {
+        return this._color;
+    }
+
+    /**
+     * Setter for the button color.
+     * Updates the color and re-renders the button.
+     * @param {string|null} value - The new color class.
+     */
+    set color(value) {
+        this._color = value;
+        this.update();
+    }
+
+    /**
+     * Renders the button control.
+     * Updates the DOM element based on the current properties.
+     */
+    render() {
+        // Clear existing content
+        $(this._element).empty();
+
+        // Append image if defined
+        if (this._image) {
+            const img = $("<img>").attr("src", this._image);
+            $(this._element).append(img);
+        }
+
+        // Append icon if defined
+        if (this._icon) {
+            const icon = $("<i>").addClass(this._icon);
+            $(this._element).append(icon);
+        }
+
+        // Append label
+        const buttonText = $("<span>").text(this._label);
+        $(this._element).append(buttonText);
+
+        // Update color classes
+        this._updateColorClass();
+    }
+
+    /**
+     * Updates the button's color CSS class.
+     * Removes any existing color classes and applies the new color.
+     */
+    _updateColorClass() {
+        $(this._element).removeClass((_, className) => {
+            return (className.match(/(^|\s)btn-\S+/g) || []).join(" ");
+        });
+
+        if (this._color) {
+            $(this._element).addClass(this._color);
+        }
+    }
+
+    /**
+     * Updates the button's appearance.
+     * Calls the render method to refresh the DOM element.
+     */
+    update() {
+        this.render();
+    }
+};
+
+// Register the class in the controller
+webexpress.webui.Controller.registerClass("wx-webui-button", webexpress.webui.ButtonCtrl);

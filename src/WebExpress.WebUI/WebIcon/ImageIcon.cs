@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.WebIcon
         /// Returns the URI associated with the icon.
         /// This property must be implemented by derived classes to provide the specific URI of the icon.
         /// </summary>
-        protected IUri Uri { get; }
+        public IUri Uri { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ImageIcon"/> class.

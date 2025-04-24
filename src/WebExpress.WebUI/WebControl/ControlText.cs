@@ -213,13 +213,21 @@ namespace WebExpress.WebUI.WebControl
                     };
                     break;
                 case TypeFormatText.Code:
-                    html = new HtmlElementTextSemanticsCode(new HtmlText(text))
-                    {
-                        Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
-                        Role = Role
-                    };
+                    html = text.Split('\n').Length > 1
+                        ? new HtmlElementTextContentPre(new HtmlText(text))
+                        {
+                            Id = Id,
+                            Class = GetClasses(),
+                            Style = GetStyles(),
+                            Role = Role
+                        }
+                        : new HtmlElementTextSemanticsCode(new HtmlText(text))
+                        {
+                            Id = Id,
+                            Class = GetClasses(),
+                            Style = GetStyles(),
+                            Role = Role
+                        };
                     break;
                 case TypeFormatText.Output:
                     html = new HtmlElementTextSemanticsSamp(new HtmlText(text))

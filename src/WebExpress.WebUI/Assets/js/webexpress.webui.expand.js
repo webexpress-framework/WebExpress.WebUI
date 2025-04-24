@@ -1,103 +1,183 @@
 /**
- * A container for showing and hiding content.
- * The following events are triggered:
- * - webexpress.webui.change.visibility 
+ * A container for showing and hiding content. 
+ * This class extends the base Control class to create an expandable/collapsible UI component.
+ * Triggers the following events:
+ * - webexpress.webui.change.visibility: Fired when the visibility of the content changes.
  */
-webexpress.webui.expandCtrl = class extends webexpress.webui.events {
-    _container = $("<span class='expand'>");
-    _content = $("<div/>");
-    _expandicon = $("<a class='wx-expand-angle me-2' href='#'/>");
-    _expand = true;
-
+webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
     /**
-     * Constructor
-     * @param settings Options for styling the control:
-     *        - id Sets the id of the control.
-     *        - css The CSS classes used to design the control.
-     *        - header The headline text.
-     *        - headerCss The CSS classes used to design the header.
+     * Constructor to initialize the expandable container.
+     * @param {HTMLElement} elem - The DOM element associated with the expandable instance.
      */
-    constructor(settings) {
-        const id = settings.id;
-        const css = settings.css;
-        const header = settings.header ?? "";
-        const headerCss = settings.headerCss ?? "text-primary";
+    constructor(elem) {
+        super(elem);
 
-        const expandheader = $("<span>").addClass(headerCss).attr("aria-label", header).text(header);
+        // Initialize properties
+        this._initializeProperties(elem);
 
-        super();
+        // Clean up the DOM
+        $(elem).removeData().empty().addClass("wx-expand");
 
-        this._container.attr("id", id || "");
-
-        // Toggle expand state on click of expand icon or header
-        this._expandicon.click(() => {
-            this.expand = !this.expand;
-        });
-
-        expandheader.click(() => {
-            this.expand = !this.expand;
-        });
-
-        this._container.append(this._expandicon);
-        this._container.append(expandheader);
-        this._container.append(this._content);
-
-        this.expand = true;
+        // Render the initial state
+        this.render();
     }
 
     /**
-     * Update of the control.
+     * Initializes properties from the DOM element's data attributes.
+     * @param {HTMLElement} elem - The DOM element to extract data attributes from.
      */
-    update() {
-        this._content.toggleClass("hide");
+    _initializeProperties(elem) {
+        this._iconOpen = $(elem).data("icon-opened") || $(elem).data("icon") || null;
+        this._iconClose = $(elem).data("icon-closed") || $(elem).data("icon") || null;
+        this._imageOpen = $(elem).data("image-opened") || $(elem).data("image") || null;
+        this._imageClose = $(elem).data("image-closed") || $(elem).data("image") || null;
+        this._colorClass = $(elem).data("color") || "";
+        this._headerText = $(elem).data("header") || "";
+        this._headerCss = $(elem).data("headercss") || "text-primary";
+        this._expand = $(elem).data("expanded") === true || false;
+        this._contentHtml = $(elem).html();
     }
 
     /**
-     * Determines if the control is expanded.
+     * Toggles the expand/collapse state of the container.
+     * Reverses the current state of `this.expand`.
+     */
+    toggleExpand() {
+        this.expand = !this.expand;
+    }
+
+    /**
+     * Getter for the expand state.
+     * @returns {boolean} True if the container is expanded, false if it is collapsed.
      */
     get expand() {
         return this._expand;
     }
 
     /**
-     * Show or hide the control content. 
-     * @param value A value that determines whether the control is expanded or closed.
+     * Setter for the expand state. Updates the UI and triggers an event when the state changes.
+     * @param {boolean} value - The desired expand state (true to expand, false to collapse).
      */
     set expand(value) {
         if (this._expand !== value) {
-            this.trigger('webexpress.webui.change.visibility', value);
             this._expand = value;
+            $(document).trigger(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, value);
+            this.render();
         }
+    }
 
+    /**
+     * Getter for the header text.
+     * @returns {string} The text displayed in the header.
+     */
+    get header() {
+        return this._headerText;
+    }
+
+    /**
+     * Setter for the header text. Updates the header and re-renders the component.
+     * @param {string} value - The new header text.
+     */
+    set header(value) {
+        this._headerText = value;
+        this.render();
+    }
+
+    /**
+     * Getter for the content HTML.
+     * @returns {string} The HTML content inside the container.
+     */
+    get contentHtml() {
+        return this._contentHtml;
+    }
+
+    /**
+     * Setter for the content HTML. Updates the container content and re-renders.
+     * @param {string} html - The new HTML content.
+     */
+    set contentHtml(html) {
+        this._contentHtml = html;
+        this.render();
+    }
+
+    /**
+     * Renders the expandable container.
+     * Updates the DOM based on the current properties.
+     */
+    render() {
+        $(this._element).empty(); // Clear existing content
+
+        // Create the header
+        const expander = this._createExpander();
+        const icon = this._createIcon();
+        const img = this._createImage();
+        const header = this._createHeader();
+
+        // Create the content container
+        const contentContainer = $("<div/>")
+            .html(this._contentHtml)
+            .toggleClass("hide", !this._expand);
+
+        // Append elements to the DOM container
+        $(this._element).append(expander, img, icon, header, contentContainer);
+
+        // Update internal content reference
+        this._content = contentContainer;
+    }
+
+    /**
+     * Creates the expander button (toggle arrow).
+     * @returns {jQuery} The expander element.
+     */
+    _createExpander() {
+        const expander = $("<a class='wx-expand-angle me-2' href='#'></a>");
+        expander.toggleClass("wx-expand-angle-down", this._expand);
+        expander.click(() => this.toggleExpand());
+        return expander;
+    }
+
+    /**
+     * Creates the icon element for the header.
+     * @returns {jQuery|null} The icon element or null if no icon is defined.
+     */
+    _createIcon() {
+        if (!this._iconOpen && !this._iconClose) return null;
+
+        const icon = $("<i/>").addClass(this._colorClass);
         if (this._expand) {
-            this._content.removeClass("hide");
-            this._expandicon.addClass("wx-expand-angle-down");
+            icon.addClass(this._iconOpen);
         } else {
-            this._content.addClass("hide");
-            this._expandicon.removeClass("wx-expand-angle-down");
+            icon.addClass(this._iconClose);
         }
+        icon.click(() => this.toggleExpand());
+        return icon;
     }
 
     /**
-     * Returns the contents.
+     * Creates the image element for the header.
+     * @returns {jQuery|null} The image element or null if no image is defined.
      */
-    get content() {
-        return this._content.children();
+    _createImage() {
+        if (!this._imageOpen && !this._imageClose) return null;
+
+        const img = $("<img/>");
+        img.attr("src", this._expand ? this._imageOpen : this._imageClose);
+        img.click(() => this.toggleExpand());
+        return img;
     }
 
     /**
-     * Sets the content.
-     * @param content An array of contents.
+     * Creates the header text element.
+     * @returns {jQuery} The header element.
      */
-    set content(content) {
-        this._content.children().remove();
-        this._content.append(content);
+    _createHeader() {
+        return $("<span/>")
+            .addClass(this._headerCss)
+            .attr("aria-label", this._headerText)
+            .text(this._headerText)
+            .click(() => this.toggleExpand());
     }
+};
 
-    /**
-     * Returns the control.
-     */
-    get getCtrl() {
-        return this._container;
-    }
-}
+// Register the class in the controller
+webexpress.webui.Controller.registerClass("wx-webui-expand", webexpress.webui.ExpandableCtrl);

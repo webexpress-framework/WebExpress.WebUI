@@ -1,249 +1,255 @@
 /**
- * A selection box.
+ * A selection box extending the base Control class.
  * The following events are triggered:
  * - webexpress.webui.change.filter with parameter filter.
  * - webexpress.webui.change.value with parameter value.
+ * - webexpress.webui.dropdown.show
+ * - webexpress.webui.dropdown.hidden
  */
-webexpress.webui.selectionCtrl = class extends webexpress.webui.events {
-    _container = $("<span class='wx-selection form-control' />");
-    _selection = $("<ul/>");
-    _hidden = $("<input type='hidden'/>");
-    _dropdownmenu = $("<div class='dropdown-menu'/>");
-    _dropdownoptions = $("<ul/>");
-    _filter = $("<input type='text'/>");
-    _options = [];
-    _values = []; // array with selected ids from _options.
-    _placeholder = null;
-    _hidedescription = false;
-    _multiselect = false;
-    _optionfilter = (x, y) => x?.toLowerCase().startsWith(y?.toLowerCase());
-
+webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Constructor
-     * @param settings Options for styling the control:
-     *        - id Sets the id of the control.
-     *        - css The CSS classes used to design the control.
-     *        - placeholder The placeholder text.
-     *        - hidedescription Disabled the description.
-     *        - multiselect Allows you to select multiple items.
+     * @param {HTMLElement} element - The DOM element for the selection control.
      */
-    constructor(settings) {
-        super();
+    constructor(element) {
+        super(element);
 
-        const id = settings.id;
-        const name = settings.name;
-        const css = settings.css;
-        const hidedescription = settings.hidedescription;
-        const multiselect = settings.multiselect;
-        const placeholder = settings.placeholder !== undefined ? settings.placeholder : null;
+        // Initialize properties
+        this._placeholder = $(element).attr("placeholder") || "Select an option";
+        this._multiselect = $(element).data("multiselection") === true;
+        this._values = [];
+        this._items = [];
+        this._optionfilter = (x, y) => x?.toLowerCase().startsWith(y?.toLowerCase());
 
-        const dropdown = $("<span data-bs-toggle='dropdown' aria-expanded='false'/>");
-        const expand = $("<a class='fas fa-angle-down' href='#'/>");
+        // Build and append components
+        const hiddenInput = this._createHiddenInput($(element).attr("name"));
+        const dropdown = this._createDropdown();
+        const dropdownMenu = this._createDropdownMenu();
 
-        this._container.attr("id", id ?? "");
+        this._parseItemsFromElements(
+            $(element).find(".wx-selection-header, .wx-selection-divider, .wx-selection-item, .wx-selection-footer")
+        );
 
-        if (css != null) {
-            this._container.addClass(css);
-        }
+        $(element)
+            .removeData()
+            .empty()
+            .addClass("wx-selection form-control")
+            .append(dropdown, dropdownMenu, hiddenInput);
 
-        if (name != null) {
-            this._hidden.attr("name", name);
-        }
-
-        if (hidedescription != null) {
-            this._hidedescription = hidedescription;
-        }
-
-        if (multiselect != null) {
-            this._multiselect = multiselect;
-        }
-
-        this._container.on('show.bs.dropdown', () => {
-            const width = this._container.width();
-            this._dropdownmenu.width(width);
-        });
-
-        this._container.on('shown.bs.dropdown', () => {
-            this._filter.focus();
-            this.update();
-        });
-
-        this._filter.keyup((e) => {
-            const filter = this._filter.val();
-            e.stopPropagation();
-            this.trigger('webexpress.webui.change.filter', filter !== undefined || filter != null ? filter : "");
-            this.update();
-            if (this._dropdownmenu.is(":hidden")) {
-                dropdown.dropdown('toggle');
-            }
-        });
-
-        this._placeholder = placeholder;
-
-        this._dropdownmenu.append(this._filter);
-        this._dropdownmenu.append(this._dropdownoptions);
-
-        dropdown.append(this._selection);
-        dropdown.append(expand);
-
-        this._container.append(dropdown);
-        this._container.append(this._dropdownmenu);
-        this._container.append(this._hidden);
-
-        this.value = [];
+        this.render();
     }
 
     /**
-     * Update of the control.
+     * Creates a hidden input for form submission.
+     * @param {string} name - The name attribute for the hidden input.
+     * @returns {jQuery} The hidden input element.
      */
-    update() {
-        this._dropdownoptions.children().remove();
+    _createHiddenInput(name) {
+        const hiddenInput = $("<input>").attr({ type: "hidden", name: name || "" });
+        this._hidden = hiddenInput;
+        return hiddenInput;
+    }
 
-        this._options.forEach((option) => {
-            const id = option.id ?? null;
-            const label = option.label ?? null;
-            if (!this._values.includes(id)) {
-                if (id == null && (label == null || label == '-')) {
-                    const li = $("<li class='dropdown-divider'/>");
-                    this._dropdownoptions.append(li);
-                } else if (id == null && label != null) {
-                    const li = $("<li class='dropdown-header'>" + label + "</li>");
-                    this._dropdownoptions.append(li);
-                } else {
-                    const description = option.description != null && option.description.length > 0 ? option.description : null;
-                    const image = option.image ?? null;
-                    const color = option.color ?? 'text-dark';
-                    const instruction = option.instruction != null ? "<small>(" + option.instruction + ")</small>": "";
-                    const li = $("<li class='dropdown-item'/>");
-                    const a = $("<a class='link " + color + "' href='javascript:void(0)'>" + option.label + "</a>" + instruction);
-                    const p = $("<p class='small text-muted'>" + description + "</p>");
+    /**
+     * Creates the dropdown container.
+     * @returns {jQuery} The dropdown element.
+     */
+    _createDropdown() {
+        const dropdown = $("<div>");
+        const selection = $("<ul>");
+        const expandIcon = $("<a>").addClass("fas fa-angle-down").attr("href", "#");
 
-                    if (image != null) {
-                        const box = $("<span/>");
-                        const span = $("<span/>");
-                        const img = $("<img src='" + image + "' alt=''/>");
+        dropdown.append(selection, expandIcon);
+        this._selection = selection;
 
-                        box.append(img);
-                        box.append(a);
-                        span.append(box);
-                        if (!this._hidedescription && description != null) {
-                            span.append(p);
-                        }
-                        li.append(span);
-                    } else {
-                        li.append(a);
-                        if (!this._hidedescription && description != null) {
-                            li.append(p);
-                        }
-                    }
+        dropdown.click((e) => {
+            e.stopPropagation();
+            const isVisible = this._dropdownmenu.is(":visible");
+            this._dropdownmenu.css("display", isVisible ? "none" : "flex");
+            if (!isVisible) {
+                $(document).trigger(webexpress.webui.Event.DROPDOWN_SHOW_EVENT, "");
+            } else {
+                $(document).trigger(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, "");
+            }
+            this._dropdownmenu.width($(this._element).width());
+        });
 
-                    li.click(() => {
-                        if (!this._multiselect) {
-                            this.value = [];
-                        }
-
-                        if (!this._values.includes(option.id)) {
-                            const value = this.value.slice();
-                            value.push(option.id);
-                            this.value = value;
-                            this._filter.val("");
-                        }
-                        this.update();
-                    });
-
-                    if (this._optionfilter(option.label, this._filter.val())) {
-                        this._dropdownoptions.append(li);
-                    }
-                }
+        $(document).click((e) => {
+            if (!dropdown[0].contains(e.target) && !this._dropdownmenu[0].contains(e.target)) {
+                this._dropdownmenu.css("display", "none");
             }
         });
 
-        this._selection.children("li").remove();
-        this._values.forEach((value) => {
-            const option = this._options.find(elem => elem.id == value);
-            if (option != null) {
-                const label = option.label ?? null;
-                const image = option.image ?? null;
-                const color = option.color ?? 'text-dark';
-                const a = $("<a class='link " + color + "' href='javascript:void(0)'>" + option.label + "</a>");
-                const close = $("<a class='fas fa-times' href='#'/>");
-                const li = $("<li/>");
+        return dropdown;
+    }
 
-                close.click(() => {
-                    this.value = this._values.filter(item => item !== value);
+    /**
+     * Creates the dropdown menu container.
+     * @returns {jQuery} The dropdown menu element.
+     */
+    _createDropdownMenu() {
+        const dropdownMenu = $("<div>").addClass("dropdown-menu");
+        const dropdownOptions = $("<ul>");
+        this._dropdownoptions = dropdownOptions;
+        dropdownMenu.append(this._createFilterContainer(), dropdownOptions);
+        this._dropdownmenu = dropdownMenu;
+        return dropdownMenu;
+    }
+
+    /**
+     * Creates the filter container with input and clear button.
+     * @returns {jQuery} The filter container element.
+     */
+    _createFilterContainer() {
+        const filterContainer = $("<div>");
+        const filterInput = $("<input>").attr({ type: "text", "aria-label": "Filter" });
+        const clearButton = $("<a>")
+            .addClass("fas fa-times")
+            .attr({ "aria-label": "Clear Filter", role: "button" });
+
+        filterContainer.append(filterInput, clearButton);
+
+        filterInput.on("input", () => {
+            const filter = filterInput.val();
+            $(document).trigger(webexpress.webui.Event.CHANGE_FILTER_EVENT, filter || "");
+            this.render();
+        });
+
+        clearButton.click((e) => {
+            e.stopPropagation();
+            filterInput.val("");
+            $(document).trigger(webexpress.webui.Event.CHANGE_FILTER_EVENT, "");
+            this.render();
+        });
+
+        this._filter = filterInput;
+        this._clearFilterButton = clearButton;
+
+        return filterContainer;
+    }
+
+    /**
+     * Parses items from child elements in the selection control.
+     * @param {jQuery} elements - The child elements to parse.
+     */
+    _parseItemsFromElements(elements) {
+        const items = [];
+        const value = [...this.value];
+
+        elements.each((_, elem) => {
+            const $elem = $(elem);
+
+            if ($elem.hasClass("wx-selection-divider")) {
+                items.push({ type: "divider" });
+            } else if ($elem.hasClass("wx-selection-header")) {
+                items.push({ type: "header", description: $elem.html() });
+            } else if ($elem.hasClass("wx-selection-footer")) {
+                const footer = $("<footer>").html($elem.html());
+                this._dropdownmenu.append(footer);
+            } else {
+                const id = $elem.attr("id") || null;
+                const selected = $elem.is("[selected]");
+
+                items.push({
+                    id,
+                    label: $elem.data("label"),
+                    labelColor: $elem.data("label-color"),
+                    icon: $elem.data("icon"),
+                    image: $elem.data("image"),
+                    content: $elem.html(),
+                    description: $elem.data("description"),
+                    disabled: $elem.is("[disabled]"),
+                    renderFunction: $elem.data("render")
+                        ? new Function("item", `return (${$elem.data("render")})(item);`)
+                        : null,
                 });
 
-                if (image != null) {
-                    const img = $("<img src='" + image + "' alt=''/>");
-                    li.append(img);
-                    li.append(a);
-                    li.append(close);
-                    this._selection.append(li);
+                if (selected) value.push(id);
+            }
+        });
+
+        this.value = value;
+        this._items = items;
+    }
+
+    /**
+     * Render the selection control.
+     */
+    render() {
+        this._dropdownoptions.empty();
+
+        this._items.forEach((item) => {
+            if (item.type === "divider") {
+                this._dropdownoptions.append($("<li>").addClass("dropdown-divider"));
+            } else if (item.type === "header") {
+                this._dropdownoptions.append($("<li>").addClass("dropdown-header").html(item.description));
+            } else if (!this._values.includes(item.id)) {
+                const li = $("<li>")
+                    .addClass("dropdown-item")
+                    .toggleClass("disabled", item.disabled);
+
+                if (item.renderFunction) {
+                    li.html(item.renderFunction(item));
                 } else {
-                    li.append($("<span>" + label + "</span>"));
-                    li.append(close);
-                    this._selection.append(li);
+                    if (item.icon) li.append($("<i>").addClass(`${item.icon} me-2`));
+                    if (item.image) li.append($("<img>").attr("src", item.image));
+                    li.append($("<span>").text(item.label));
+                }
+
+                li.click(() => {
+                    if (!this._multiselect) this.value = [];
+                    if (!this._values.includes(item.id)) this.value = [...this.value, item.id];
+                    this.render();
+                });
+
+                if (!item.label || item.label.toLowerCase().includes(this._filter.val().toLowerCase())) {
+                    this._dropdownoptions.append(li);
                 }
             }
         });
-    }
 
-    /**
-     * Returns the options.
-     */
-    get options() {
-        return this._options;
-    }
+        this._selection.empty();
+        this._values.forEach((value) => {
+            const item = this._items.find((i) => i.id === value);
+            if (item) {
+                const li = $("<li>").addClass(item.labelColor).text(item.label);
+                const closeButton = $("<a>").addClass("fas fa-times").click(() => {
+                    this.value = this._values.filter((v) => v !== value);
+                    this.render();
+                });
+                li.append(closeButton);
+                this._selection.append(li);
+            }
+        });
 
-    /**
-     * Sets the options.
-     * @param data An array with object ids {id, label, description, image, color, instruction}.
-     */
-    set options(options) {
-        if (options != null) {
-            // determine selected options
-            let selectedOptions = this.selectedOptions;
-            // remove the selected options if they are included in the new options
-            selectedOptions = selectedOptions.filter(elem => !options.some(o => o.id === elem.id));
-            // join the selected and the new options
-            this._options = [...new Set([...options, ...selectedOptions])];
-        } else {
-            this._options = [];
+        if (this._values.length === 0) {
+            this._selection.html($("<span>").text(this._placeholder));
         }
-        this.update();
     }
 
-    /**
-     * Returns the selected options.
-     */
-    get selectedOptions() {
-        return this._options.filter(elem => this.value.includes(elem.id));
+    /** Getters and setters for options and values */
+    get options() {
+        return this._items;
     }
 
-    /**
-     * Returns the selected options.
-     */
+    set options(items) {
+        this._items = items || [];
+        this.render();
+    }
+
     get value() {
         return this._values;
     }
 
-    /**
-     * Sets the selected options.
-     * @param values Sets the id of the selected option.
-     */
     set value(values) {
-        if (this._values != values) {
+        if (this._values !== values) {
             this._values = values;
-            this.update();
-            this._hidden.val(this._values.join(';'));
-            this.trigger('webexpress.webui.change.value', values);
+            this.render();
+            this._hidden.val(this._values.join(";"));
+            $(document).trigger("webexpress.webui.change.value", values);
         }
     }
+};
 
-    /**
-     * Returns the control.
-     */
-    get getCtrl() {
-        return this._container;
-    }
-}
+// Register the class
+webexpress.webui.Controller.registerClass("wx-webui-selection", webexpress.webui.SelectionCtrl);
