@@ -173,6 +173,91 @@ webexpress.webui.Ctrl = class {
 }
 
 /**
+ * Base class for popper Controls.
+ */
+webexpress.webui.PopperCtrl = class extends webexpress.webui.Ctrl {
+    /**
+     * Initializes Popper.js for managing the menu box positioning.
+     * @param {HTMLElement} container - The container element (searchBox) to position the suggestion box relative to.
+     * @param {jQuery} dropdownmenu - The menu box element.
+     */
+    _initializePopper(container, dropdownmenu) {
+        // Map to track the visibility state of each menu
+        this._menuVisibilityMap = this._menuVisibilityMap || new Map();
+
+        const popperInstance = Popper.createPopper(container, dropdownmenu[0], {
+            placement: "bottom-start",
+            modifiers: [
+                {
+                    name: "offset",
+                    options: {
+                        offset: [0, 4], // Offset the suggestion box slightly
+                    },
+                },
+                {
+                    name: "preventOverflow",
+                    options: {
+                        boundary: "viewport", // Ensure the suggestion box stays within the viewport
+                    },
+                },
+            ],
+        });
+
+        // Hide the suggestion box when clicking outside of it
+        $(document).on("click", (event) => {
+            if (!$(event.target).closest(this._element).length) {
+                if (this._menuVisibilityMap.get(dropdownmenu)) {
+                    this._menuVisibilityMap.delete(dropdownmenu);
+                    // Trigger the DROPDOWN_HIDDEN_EVENT when the suggestion box is hidden
+                    $(document).trigger(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
+                        id: $(this._element).attr("id")
+                    });
+                }
+            }
+        });
+
+        // Register the ESC key to close the suggestion menu
+        $(document).on("keydown", (event) => {
+            if (event.key === "Escape") {
+                dropdownmenu.trigger("hide").hide();
+                if (this._menuVisibilityMap.get(dropdownmenu)) {
+                    this._menuVisibilityMap.delete(dropdownmenu);
+                    // Trigger the DROPDOWN_HIDDEN_EVENT when the suggestion box is hidden
+                    $(document).trigger(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
+                        id: $(this._element).attr("id")
+                    });
+                }
+            }
+        });
+
+        // Update Popper instance when the suggestion box is shown
+        dropdownmenu.on("show", () => {
+            // Update Popper instance and adjust width
+            popperInstance.update();
+            dropdownmenu.width($(this._element).width());
+
+            // Set the visibility of the current menu to true
+            this._menuVisibilityMap.set(dropdownmenu, true);
+
+            // Trigger the DROPDOWN_SHOW_EVENT to signal that the suggestion box is shown
+            $(document).trigger(webexpress.webui.Event.DROPDOWN_SHOW_EVENT, {
+                id: $(this._element).attr("id")
+            });
+        });
+
+        // Optional: Trigger DROPDOWN_HIDDEN_EVENT on manual hide
+        dropdownmenu.on("hide", () => {
+            if (this._menuVisibilityMap.get(dropdownmenu)) {
+                $(document).trigger(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
+                    id: $(this._element).attr("id")
+                });
+            }
+            this._menuVisibilityMap.delete(dropdownmenu);
+        });
+    }
+}
+
+/**
  * A utility class for defining and managing event names within the WebExpress UI framework.
  */
 webexpress.webui.Event = class {
@@ -192,4 +277,8 @@ webexpress.webui.Event = class {
     static COLUMN_REORDER_EVENT = "webexpress.webui.table.column.reorder";
     // Event triggered when a table is sorted
     static TABLE_SORT_EVENT = "webexpress.webui.table.sorted";
+    // Event triggered when the value of an input or control changes
+    static CHANGE_VALUE_EVENT = "webexpress.webui.change.value";
+    // Event triggered when a node is moved in a tree control
+    static MOVE_EVENT = "webexpress.webui.tree.node.move";
 }

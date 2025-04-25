@@ -1,12 +1,12 @@
 /**
  * A selection box extending the base Control class.
  * The following events are triggered:
- * - webexpress.webui.change.filter with parameter filter.
- * - webexpress.webui.change.value with parameter value.
- * - webexpress.webui.dropdown.show
- * - webexpress.webui.dropdown.hidden
+ * - webexpress.webui.Event.CHANGE_FILTER_EVENT
+ * - webexpress.webui.Event.CHANGE_VALUE_EVENT
+ * - webexpress.webui.Event.DROPDOWN_SHOW_EVENT
+ * - webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT
  */
-webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
+webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
     /**
      * Constructor
      * @param {HTMLElement} element - The DOM element for the selection control.
@@ -15,6 +15,7 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         // Initialize properties
+        const name = $(element).attr("name");
         this._placeholder = $(element).attr("placeholder") || "Select an option";
         this._multiselect = $(element).data("multiselection") === true;
         this._values = [];
@@ -22,7 +23,7 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
         this._optionfilter = (x, y) => x?.toLowerCase().startsWith(y?.toLowerCase());
 
         // Build and append components
-        const hiddenInput = this._createHiddenInput($(element).attr("name"));
+        const hiddenInput = this._createHiddenInput(name);
         const dropdown = this._createDropdown();
         const dropdownMenu = this._createDropdownMenu();
 
@@ -31,10 +32,13 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
         );
 
         $(element)
-            .removeData()
+            .removeAttr("name placeholder data-multiselection")
             .empty()
-            .addClass("wx-selection form-control")
-            .append(dropdown, dropdownMenu, hiddenInput);
+            .addClass("wx-selection")
+            .append(hiddenInput, dropdown, dropdownMenu);
+
+        // Attach the suggestion box using Popper.js
+        this._initializePopper(dropdown[0], dropdownMenu);
 
         this.render();
     }
@@ -55,7 +59,7 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
      * @returns {jQuery} The dropdown element.
      */
     _createDropdown() {
-        const dropdown = $("<div>");
+        const dropdown = $("<div>").addClass("form-control");
         const selection = $("<ul>");
         const expandIcon = $("<a>").addClass("fas fa-angle-down").attr("href", "#");
 
@@ -63,20 +67,16 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
         this._selection = selection;
 
         dropdown.click((e) => {
-            e.stopPropagation();
-            const isVisible = this._dropdownmenu.is(":visible");
-            this._dropdownmenu.css("display", isVisible ? "none" : "flex");
-            if (!isVisible) {
-                $(document).trigger(webexpress.webui.Event.DROPDOWN_SHOW_EVENT, "");
+            if (this._dropdownmenu.is(":visible")) {
+                this._dropdownmenu.trigger("hide").hide();
             } else {
-                $(document).trigger(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, "");
+                this._dropdownmenu.css("display", "flex").trigger("show").show();
             }
-            this._dropdownmenu.width($(this._element).width());
         });
 
         $(document).click((e) => {
             if (!dropdown[0].contains(e.target) && !this._dropdownmenu[0].contains(e.target)) {
-                this._dropdownmenu.css("display", "none");
+                this._dropdownmenu.trigger("hide").hide();
             }
         });
 
@@ -191,9 +191,17 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
                 if (item.renderFunction) {
                     li.html(item.renderFunction(item));
                 } else {
-                    if (item.icon) li.append($("<i>").addClass(`${item.icon} me-2`));
-                    if (item.image) li.append($("<img>").attr("src", item.image));
-                    li.append($("<span>").text(item.label));
+                    if (item.disabled) {
+                        const span = $("<span>").text(item.label);
+                        if (item.icon) span.prepend($("<i>").addClass(item.icon));
+                        if (item.image) span.prepend($("<img>").attr("src", item.image));
+                        li.append(span);
+                    } else {
+                        const a = $("<a href='#'>").text(item.label);
+                        if (item.icon) a.prepend($("<i>").addClass(item.icon));
+                        if (item.image) a.prepend($("<img>").attr("src", item.image));
+                        li.append(a);
+                    }
                 }
 
                 li.click(() => {
@@ -212,11 +220,17 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
         this._values.forEach((value) => {
             const item = this._items.find((i) => i.id === value);
             if (item) {
-                const li = $("<li>").addClass(item.labelColor).text(item.label);
+                const li = $("<li>").addClass(item.labelColor);
+                const span = $("<span>");
                 const closeButton = $("<a>").addClass("fas fa-times").click(() => {
                     this.value = this._values.filter((v) => v !== value);
                     this.render();
                 });
+
+                if (item.image) span.append($("<img>").attr("src", item.image));
+                if (item.icon) span.append($("<i>").addClass(`${item.icon} me-2`));
+                span.append($("<span>").text(item.label));
+                li.append(span);
                 li.append(closeButton);
                 this._selection.append(li);
             }
@@ -227,20 +241,33 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
         }
     }
 
-    /** Getters and setters for options and values */
+    /** 
+     * Getters for options. 
+     * @returns {Array} The current options as a list.
+     */
     get options() {
         return this._items;
     }
 
+    /**
+     * Updates the options and triggers a re-render of the component.
+     */
     set options(items) {
         this._items = items || [];
         this.render();
     }
 
+    /** 
+     * Getter for the value.
+     * @returns {Array} The current value as a list.
+     */
     get value() {
         return this._values;
     }
 
+    /**
+     * Updates value and triggers events.
+     */
     set value(values) {
         if (this._values !== values) {
             this._values = values;

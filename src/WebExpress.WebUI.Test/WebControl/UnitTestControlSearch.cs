@@ -83,5 +83,59 @@ namespace WebExpress.WebUI.Test.WebControl
             AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-search""><div id=""1"" class=""wx-search-suggestion"" data-icon=""fas fa-home"" data-favorited=""true"">Home</div>*</div>", html);
 
         }
+
+        /// <summary>
+        /// Tests the enable favorited property of the search control.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-webui-search"">*</div>")]
+        [InlineData(true, @"<div class=""wx-webui-search"" data-favorited=""true"">*</div>")]
+        public void EnableFavorited(bool enableFavorited, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+
+            var control = new ControlSearch(null, [new ControlSearchItemSuggestion("1")
+            {
+                Label = "Home",
+                Icon = new IconHome(),
+                Favorited = true,
+            }])
+            {
+                EnableFavorited = enableFavorited
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the value property of the search control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-webui-search"">*</div>")]
+        [InlineData("", @"<div class=""wx-webui-search"">*</div>")]
+        [InlineData("hello", @"<div class=""wx-webui-search"" data-value=""hello"">*</div>")]
+        public void Value(string searchTerm, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+
+            var control = new ControlSearch()
+            {
+                Value = searchTerm
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
     }
 }

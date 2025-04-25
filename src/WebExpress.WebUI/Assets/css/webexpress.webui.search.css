@@ -83,26 +83,27 @@
             }
 
                 /* Styling for suggestion container */
-                .wx-search > div:nth-child(2) > ul > li > div {
-                    height: 16px;
+                .wx-search > div:nth-child(2) > ul > li > a {
                     vertical-align: middle;
                     margin: 0.5em;
+                    text-decoration: none;
+                    cursor: pointer;
                 }
 
                     /* Styling for suggestion images */
-                    .wx-search > div:nth-child(2) > ul > li > div > img {
+                    .wx-search > div:nth-child(2) > ul > li > a > img {
                         height: 16px;
                         vertical-align: middle;
                         margin-right: 0.5em;
                     }
 
                     /* Styling for suggestion icons */
-                    .wx-search > div:nth-child(2) > ul > li > div > i {
+                    .wx-search > div:nth-child(2) > ul > li > a > i {
                         margin-right: 0.5em;
                     }
 
                     /* Styling for suggestion label */
-                    .wx-search > div:nth-child(2) > ul > li > div > span {
+                    .wx-search > div:nth-child(2) > ul > li > a > span {
                         color: var(--bs-body-color);
                     }
 

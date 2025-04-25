@@ -40,6 +40,11 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         public IControl Footer { get; set; }
 
+        // <summary>
+        /// Returns or sets a value indicating whether favorited suggestions are enabled.
+        /// </summary>
+        public bool EnableFavorited { get; set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ControlSearch"/> class.
         /// </summary>
@@ -109,6 +114,16 @@ namespace WebExpress.WebUI.WebControl
             if (!string.IsNullOrWhiteSpace(Placeholder))
             {
                 html.AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder));
+            }
+
+            if (EnableFavorited)
+            {
+                html.AddUserAttribute("data-favorited", "true");
+            }
+
+            if (!string.IsNullOrWhiteSpace(Value))
+            {
+                html.AddUserAttribute("data-value", Value);
             }
 
             return html;
