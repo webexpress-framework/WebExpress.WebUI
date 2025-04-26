@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -27,17 +28,17 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the tree is sorted.
+        /// Returns or sets a value indicating whether to show an indicator for expandable nodes.
         /// </summary>
-        public bool Sorted { get; set; }
+        public bool DisableIndicator { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the tree should display a border.
+        /// Returns or sets a value indicating whether the tree nodes are movable.
         /// </summary>
-        public bool ShowBorder { get; set; }
+        public bool Movable { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the class.
+        /// Initializes a new instance of the <see cref="ControlTree"/> class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
         /// <param name="items">The tree items to be added to the control.</param>
@@ -45,7 +46,6 @@ namespace WebExpress.WebUI.WebControl
             : base(id)
         {
             _nodes.AddRange(items);
-            ShowBorder = true;
         }
 
         /// <summary>
@@ -55,7 +55,8 @@ namespace WebExpress.WebUI.WebControl
         public void Add(params ControlTreeItem[] items)
         {
             _nodes.AddRange(items);
-        }
+        }
+
         /// <summary>
         /// Adds the specified tree items to the control.
         /// </summary>
@@ -82,40 +83,99 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var items = (from x in Nodes select x.Render(renderContext, visualTree)).ToList();
-
-            switch (Layout)
-            {
-                case TypeLayoutTree.Horizontal:
-                case TypeLayoutTree.Flush:
-                case TypeLayoutTree.Group:
-                    items.ForEach(x => x.AddClass("list-group-item"));
-                    break;
-            }
-
-            var html = new HtmlElementTextContentUl([.. items])
+            var html = new HtmlElementTextContentDiv([.. GetHtml(_nodes)])
             {
                 Id = Id,
-                Class = Css.Concatenate("", GetClasses()),
-                Style = GetStyles(),
-                Role = Role
+                Class = "wx-webui-tree"
             };
 
-            if (Layout == TypeLayoutTree.TreeView)
+            if (Layout != TypeLayoutTree.Default)
             {
-                visualTree.AddScript("treeview", @"var toggler = document.getElementsByClassName(""tree-treeview-angle"");
-                for (var i = 0; i < toggler.length; i++)
-                {
-                    toggler[i].addEventListener(""click"", function() {
-                        this.parentElement.parentElement.querySelector("".tree-treeview-node"").classList.toggle(""tree-node-hide"");
-                        this.classList.toggle(""tree-treeview-angle-down"");
-
-                    });
+                html.AddUserAttribute("data-layout", Layout.ToClass());
             }
-            ");
+
+            if (DisableIndicator)
+            {
+                html.AddUserAttribute("data-indicator", "false");
+            }
+
+            if (Movable)
+            {
+                html.AddUserAttribute("data-movable", "true");
             }
 
             return html;
+        }
+
+        /// <summary>
+        /// Recursively generates HTML elements for the given tree nodes.
+        /// </summary>
+        /// <param name="nodes">The collection of tree nodes to process.</param>
+        /// <returns>A collection of HTML div elements representing the tree nodes.</returns>
+        private static IEnumerable<HtmlElementTextContentDiv> GetHtml(IEnumerable<ControlTreeItem> nodes)
+        {
+            return nodes.Select(x =>
+            {
+                var div = new HtmlElementTextContentDiv([.. GetHtml(x.Children)])
+                {
+                    Id = x.Id,
+                    Class = Css.Concatenate("wx-tree-node"),
+                };
+
+                div.AddUserAttribute("data-label", x.Label);
+
+                if (x.Expand)
+                {
+                    div.AddUserAttribute("data-expand", "true");
+                }
+
+                if (x.IconOpen == x.IconClose && x.Icon is Icon icon)
+                {
+                    div.AddUserAttribute("data-icon", icon.Class);
+                }
+
+                if (x.IconOpen != x.IconClose && x.IconOpen is Icon iconOpen)
+                {
+                    div.AddUserAttribute("data-icon-opened", iconOpen.Class);
+                }
+
+                if (x.IconOpen != x.IconClose && x.IconClose is Icon iconClose)
+                {
+                    div.AddUserAttribute("data-icon-closed", iconClose.Class);
+                }
+
+                if (x.IconOpen == x.IconClose && x.Icon is ImageIcon image)
+                {
+                    div.AddUserAttribute("data-image", image.Uri?.ToString());
+                }
+
+                if (x.IconOpen != x.IconClose && x.IconOpen is ImageIcon imageOpen)
+                {
+                    div.AddUserAttribute("data-image-opened", imageOpen.Uri?.ToString());
+                }
+
+                if (x.IconOpen != x.IconClose && x.IconClose is ImageIcon imageClose)
+                {
+                    div.AddUserAttribute("data-image-closed", imageClose.Uri?.ToString());
+                }
+
+                if (x is ControlTreeItemLink linkNode)
+                {
+                    div.AddUserAttribute("data-url", linkNode.Uri?.ToString());
+
+                    if (linkNode.Target != TypeTarget.None)
+                    {
+                        div.AddUserAttribute("data-target", linkNode.Target.ToString().ToLower());
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(linkNode.Tooltip))
+                    {
+                        div.AddUserAttribute("data-tooltip", linkNode.Tooltip);
+                    }
+                }
+
+                return div;
+            });
         }
     }
 }

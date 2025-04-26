@@ -108,6 +108,7 @@ namespace WebExpress.WebUI.WebPage
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.selection.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.table.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.toolpanel.css"));
+            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.tree.css"));
 
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/jquery-3.7.1.min.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/popper.min.js"));
@@ -124,6 +125,7 @@ namespace WebExpress.WebUI.WebPage
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.search.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.selection.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.table.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.tree.js"));
 
             _meta.Add("charset", "UTF-8");
             _meta.Add("viewport", "width=device-width, initial-scale=1");

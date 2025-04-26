@@ -65,6 +65,7 @@
 		<None Remove="Assets\css\webexpress.webui.selection.css" />
 		<None Remove="Assets\css\webexpress.webui.table.css" />
 		<None Remove="Assets\css\webexpress.webui.toolpanel.css" />
+		<None Remove="Assets\css\webexpress.webui.tree.css" />
 		<None Remove="Assets\fonts\fa-brands-400.ttf" />
 		<None Remove="Assets\fonts\fa-brands-400.woff2" />
 		<None Remove="Assets\fonts\fa-regular-400.ttf" />
@@ -200,6 +201,7 @@
 		<None Remove="Assets\js\webexpress.webui.search.js" />
 		<None Remove="Assets\js\webexpress.webui.selection.js" />
 		<None Remove="Assets\js\webexpress.webui.table.js" />
+		<None Remove="Assets\js\webexpress.webui.tree.js" />
 		<None Remove="Internationalization\de" />
 		<None Remove="Internationalization\en" />
 	</ItemGroup>
@@ -238,6 +240,7 @@
 		</EmbeddedResource>
 		<EmbeddedResource Include="Assets\css\summernote-bs5.min.css" />
 		<EmbeddedResource Include="Assets\css\webexpress.webui.table.css" />
+		<EmbeddedResource Include="Assets\css\webexpress.webui.tree.css" />
 		<EmbeddedResource Include="Assets\fonts\fa-brands-400.ttf" />
 		<EmbeddedResource Include="Assets\fonts\fa-brands-400.woff2" />
 		<EmbeddedResource Include="Assets\fonts\fa-regular-400.ttf" />
@@ -388,6 +391,7 @@
 		<EmbeddedResource Include="Assets\js\webexpress.webui.pagination.js" />
 		<EmbeddedResource Include="Assets\js\webexpress.webui.table.js" />
 		<EmbeddedResource Include="Assets\js\webexpress.webui.js" />
+		<EmbeddedResource Include="Assets\js\webexpress.webui.tree.js" />
 		<EmbeddedResource Include="Internationalization\de" />
 		<EmbeddedResource Include="Internationalization\en" />
 	</ItemGroup>

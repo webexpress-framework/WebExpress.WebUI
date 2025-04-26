@@ -14,8 +14,11 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         // Initialize properties
-        this._container = $("<ul>");
         this._nodes = this._parseNodes($(element).children(".wx-tree-node"));
+        this._layout = $(element).data("layout") || null;
+        this._showIndicator = $(element).data("indicator") == false ? false : true;
+        this._movable = $(element).data("movable") || false;
+        this._container = $("<ul>").addClass(this._getLayoutClasses());
 
         // Clean up the DOM
         $(element).empty().addClass("wx-tree").append(this._container);
@@ -26,6 +29,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Enables drag and drop functionality for the tree.
+     * @private
      * @param {jQuery} element - The node element.
      * @param {Object} node - The node object.
      */
@@ -101,6 +105,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Moves a node to a new parent or position in the tree.
+     * @private
      * @param {Object} draggedNode - The node being dragged.
      * @param {Object} targetNode - The target node where the dragged node will be moved.
      */
@@ -135,6 +140,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Parses child elements as tree nodes.
+     * @private
      * @param {jQuery} elements - The child elements to parse.
      * @param {Object} [parentNode] - The parent node, optional for the root level.
      * @returns {Array} An array of parsed tree nodes.
@@ -154,6 +160,8 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 color: $elem.data("color") || "",
                 expand: $elem.data("expand") === true,
                 url: $elem.data("url") || null,
+                target: $elem.data("target") || null,
+                tooltip: $elem.data("tooltip") || null,
                 render: $elem.data("render") || null,
                 parent: parent
             };
@@ -169,6 +177,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Renders the tree structure with ARIA attributes.
+     * @private
      * @param {jQuery} container - The container for appending tree nodes.
      * @param {Array} nodes - The tree node data to render.
      */
@@ -178,35 +187,66 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
 
         nodes.forEach((node) => {
             // Create the tree item
-            const li = $("<li>").addClass("wx-tree-node").attr("id", node.id);
+            const li = $("<li>").attr("id", node.id);
             li.attr("role", "treeitem"); // ARIA role for tree item
             li.attr("aria-expanded", node.expand || false); // Indicate expanded/collapsed state
             li.attr("aria-level", this._getNodeLevel(node)); // Indicate the nesting level
+
+            switch (this._layout) {
+                case "wx-tree-group":
+                    li.addClass("list-group-item");
+                    break;
+                case "wx-tree-flush":
+                    li.addClass("list-group-item");
+                    break;
+                case "wx-tree-horizontal":
+                    li.addClass("list-group-item");
+                    break;
+                case "wx-tree-flat":
+                    break;
+                default:
+                    li.addClass("wx-tree-node");
+                    break;
+            }
 
             // If the node is selectable, add aria-selected
             if (node.selectable) {
                 li.attr("aria-selected", node.selected || false);
             }
 
-            const expand = $("<a href='#'>").addClass(node.color);
+            const labelContainer = node.url ? $("<a>") : $("<button>");
             const img = $("<img/>");
             const icon = $("<i>");
 
+            labelContainer
+                .addClass("wx-tree-label-container")
+                .addClass(node.color);
+
             // Add image, icon, or label
-            this._addNodeContent(expand, node, img, icon);
-            li.append(expand);
+            this._addNodeContent(labelContainer, node, img, icon);
+            li.append(labelContainer);
 
             if (node.url) {
-                expand.attr("href", node.url);
+                labelContainer.attr("href", node.url);
+            }
+
+            if (node.target) {
+                labelContainer.attr("target", node.target);
+            }
+
+            if (node.tooltip) {
+                labelContainer.attr("title", node.tooltip);
             }
 
             // Handle expandable nodes
             if (node.children && node.children.length > 0) {
-                const ul = $("<ul>");
+                const ul = $("<ul>").addClass(this._getLayoutClasses());
                 ul.attr("role", "group"); // ARIA role for the group of children
                 const indicator = $("<span>").addClass("wx-tree-indicator-angle");
 
-                expand.prepend(indicator);
+                if (this._showIndicator) {
+                    labelContainer.prepend(indicator);
+                }
                 li.append(ul);
 
                 if (node.expand) {
@@ -214,31 +254,36 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                     indicator.addClass("wx-tree-expand");
                 }
 
-                expand.click(() => {
+                labelContainer.click(() => {
                     this._toggleNode(node, ul, icon, img, indicator);
                 });
             } else {
                 // Add leaf node indicator
-                expand.prepend($("<i>").addClass("wx-tree-indicator-dot"));
+                if (this._showIndicator) {
+                    labelContainer.prepend($("<i>").addClass("wx-tree-indicator-dot"));
+                }
             }
 
-            expand.click(() => {
+            labelContainer.click(() => {
                 $(document).trigger(webexpress.webui.Event.CLICK_EVENT,
                     {
                         id: $(this._element).attr("id"),
-                        node: node
+                        node: node.id
                     });
             });
 
             // Append the node to the container
             container.append(li);
 
-            this._enableDragAndDrop(expand, node);
+            if (this._movable) {
+                this._enableDragAndDrop(labelContainer, node);
+            }
         });
     }
 
     /**
      * Calculates the nesting level of a node.
+     * @private
      * @param {Object} node - The tree node data.
      * @returns {number} The nesting level of the node.
      */
@@ -253,6 +298,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Toggles the expand/collapse state of a tree node.
+     * @private
      * @param {Object} node - The tree node data.
      * @param {jQuery} ul - The child container for the node's children.
      * @param {jQuery} icon - The icon element for the node.
@@ -283,6 +329,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Adds content (image, icon, or label) to a tree node.
+     * @private
      * @param {jQuery} expand - The container for the node's expand/collapse elements.
      * @param {Object} node - The tree node data.
      * @param {jQuery} img - The image element for the node.
@@ -312,6 +359,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Recursively finds a node in the tree by its ID.
+     * @private
      * @param {string} id - The ID of the node to find.
      * @param {Array} nodes - The array of nodes to search through.
      * @returns {Object|null} The node with the matching ID, or null if not found.
@@ -336,6 +384,27 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
         // Return null if the node with the ID is not found
         return null;
     }
+
+    /**
+        * Returns the appropriate CSS classes for the tree layout.
+        * @private
+        * @returns {string|null} The CSS classes for the current layout, or null if no specific layout is set.
+        */
+    _getLayoutClasses() {
+        switch (this._layout) {
+            case "wx-tree-group":
+                return "list-group";
+            case "wx-tree-flush":
+                return "list-group list-group-flush";
+            case "wx-tree-flat":
+                return "list-unstyled";
+            case "wx-tree-horizontal":
+                return "list-group list-group-horizontal";
+            default:
+                return null;
+        }
+    }
+        
 
     /**
      * Refreshes the tree control by rendering the latest node structure.
