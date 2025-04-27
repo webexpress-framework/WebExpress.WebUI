@@ -213,7 +213,7 @@ namespace WebExpress.WebUI.WebControl
                     };
                     break;
                 case TypeFormatText.Code:
-                    html = text.Split('\n').Length > 1
+                    html = text?.Split('\n').Length > 1
                         ? new HtmlElementTextContentPre(new HtmlText(text))
                         {
                             Id = Id,

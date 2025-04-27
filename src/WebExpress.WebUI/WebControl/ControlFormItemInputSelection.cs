@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.Json;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -26,11 +26,6 @@ namespace WebExpress.WebUI.WebControl
         /// Returns or sets the label of the selected options.
         /// </summary>
         public string Placeholder { get; set; }
-
-        /// <summary>
-        /// Returns or sets whether to display the description of the option or hide it.
-        /// </summary>
-        public bool HideDescription { get; set; }
 
         /// <summary>
         /// Allows you to select multiple items.
@@ -96,7 +91,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
-            var classes = Classes.ToList();
+            var classes = new List<string>(["wx-webui-selection"]);
+            classes.AddRange(Classes);
 
             if (Disabled)
             {
@@ -113,13 +109,68 @@ namespace WebExpress.WebUI.WebControl
                     break;
             }
 
-            var html = new HtmlElementTextContentDiv()
+            var html = new HtmlElementTextContentDiv([.._options.Select(x => {
+                var option = new HtmlElementTextContentDiv(x.Content?.Render(renderContext, visualTree))
+                {
+                    Id = x.Id,
+                    Class = "wx-selection-item"
+                };
+
+                option.AddUserAttribute("data-label", I18N.Translate(x.Label));
+
+                if (x.Icon is Icon icon)
+                {
+                    option.AddUserAttribute("data-icon", icon.Class);
+                }
+
+                if (x.Icon is ImageIcon image)
+                {
+                    option.AddUserAttribute("data-image", image.Uri?.ToString());
+                }
+
+                if (x.LabelColor != TypeColorSelection.Default)
+                {
+                    option.AddUserAttribute("data-label-color", x.LabelColor.ToClass());
+                }
+
+                if (x.Selected)
+                {
+                    option.AddUserAttribute("selected");
+                }
+
+                if (x.Disabled)
+                {
+                    option.AddUserAttribute("disabled");
+                }
+
+                return option;
+
+            })])
             {
                 Id = Id,
+                Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
                 Style = GetStyles()
             };
 
-            visualTree.AddScript(Id, GetScript(Id, string.Join(" ", classes)));
+            if (!string.IsNullOrWhiteSpace(Name))
+            {
+                html.AddUserAttribute("name", Name);
+            }
+
+            if (!string.IsNullOrWhiteSpace(Placeholder))
+            {
+                html.AddUserAttribute("placeholder", I18N.Translate(Placeholder));
+            }
+
+            if (MultiSelect)
+            {
+                html.AddUserAttribute("data-multiselection", "true");
+            }
+
+            if (!string.IsNullOrWhiteSpace(Value))
+            {
+                html.AddUserAttribute("data-value", Value);
+            }
 
             return html;
         }
@@ -131,46 +182,6 @@ namespace WebExpress.WebUI.WebControl
         public override void Validate(IRenderControlFormContext renderContext)
         {
             base.Validate(renderContext);
-        }
-
-        /// <summary>
-        /// Generates the javascript to control the control.
-        /// </summary>
-        /// <param name="id">The ID of the control.</param>
-        /// <param name="css">The CSS classes that are assigned to the control.</param>
-        /// <returns>The javascript code.</returns>
-        protected virtual string GetScript(string id, string css)
-        {
-            var settings = new
-            {
-                id = id,
-                name = Id,
-                css = css,
-                placeholder = Placeholder,
-                hidedescription = HideDescription,
-                multiselect = MultiSelect
-            };
-
-            var jsonOptions = new JsonSerializerOptions { WriteIndented = false };
-            var settingsJson = JsonSerializer.Serialize(settings, jsonOptions);
-            var optionsJson = JsonSerializer.Serialize(Options, jsonOptions);
-            var builder = new StringBuilder();
-
-            builder.AppendLine($"let options = {optionsJson};");
-            builder.AppendLine($"let settings = {settingsJson};");
-            builder.AppendLine($"let container = $('#{id}');");
-            builder.AppendLine($"let obj = new webexpress.webui.selectionCtrl(settings);");
-            builder.AppendLine($"obj.options = options;");
-            builder.AppendLine($"obj.value = [{string.Join(",", Values.Select(x => $"'{x}'"))}];");
-
-            if (OnChange != null)
-            {
-                builder.AppendLine($"obj.on('webexpress.webui.change.value', {OnChange});");
-            }
-
-            builder.AppendLine($"container.replaceWith(obj.getCtrl);");
-
-            return builder.ToString();
         }
     }
 }

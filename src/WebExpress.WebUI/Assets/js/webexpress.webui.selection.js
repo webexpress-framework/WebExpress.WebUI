@@ -17,7 +17,7 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
         // Initialize properties
         const name = $(element).attr("name");
         this._placeholder = $(element).attr("placeholder") || "Select an option";
-        this._multiselect = $(element).data("multiselection") === true;
+        this._multiselect = $(element).data("multiselection") || false;
         this._values = [];
         this._items = [];
         this._optionfilter = (x, y) => x?.toLowerCase().startsWith(y?.toLowerCase());
@@ -142,7 +142,7 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
             if ($elem.hasClass("wx-selection-divider")) {
                 items.push({ type: "divider" });
             } else if ($elem.hasClass("wx-selection-header")) {
-                items.push({ type: "header", description: $elem.html() });
+                items.push({ type: "header", content: $elem.html() });
             } else if ($elem.hasClass("wx-selection-footer")) {
                 const footer = $("<footer>").html($elem.html());
                 this._dropdownmenu.append(footer);
@@ -157,7 +157,6 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
                     icon: $elem.data("icon"),
                     image: $elem.data("image"),
                     content: $elem.html(),
-                    description: $elem.data("description"),
                     disabled: $elem.is("[disabled]"),
                     renderFunction: $elem.data("render")
                         ? new Function("item", `return (${$elem.data("render")})(item);`)
@@ -182,7 +181,7 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
             if (item.type === "divider") {
                 this._dropdownoptions.append($("<li>").addClass("dropdown-divider"));
             } else if (item.type === "header") {
-                this._dropdownoptions.append($("<li>").addClass("dropdown-header").html(item.description));
+                this._dropdownoptions.append($("<li>").addClass("dropdown-header").html(item.content));
             } else if (!this._values.includes(item.id)) {
                 const li = $("<li>")
                     .addClass("dropdown-item")
@@ -192,12 +191,12 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
                     li.html(item.renderFunction(item));
                 } else {
                     if (item.disabled) {
-                        const span = $("<span>").text(item.label);
+                        const span = $("<button disabled>").html(item.content);
                         if (item.icon) span.prepend($("<i>").addClass(item.icon));
                         if (item.image) span.prepend($("<img>").attr("src", item.image));
                         li.append(span);
                     } else {
-                        const a = $("<a href='#'>").text(item.label);
+                        const a = $("<button>").html(item.content);
                         if (item.icon) a.prepend($("<i>").addClass(item.icon));
                         if (item.image) a.prepend($("<img>").attr("src", item.image));
                         li.append(a);

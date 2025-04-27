@@ -50,7 +50,7 @@
                     margin-right: 0.5em;
                 }
 
-            .wx-selection > div:nth-child(2) > ul > li > a {
+            .wx-selection > div:nth-child(2) > ul > li > button {
                 margin-left: 0.5em;
                 margin-right: 0.1em;
                 text-decoration: none;
@@ -58,7 +58,7 @@
                 color: var(--bs-border-color);
             }
 
-                .wx-selection > div:nth-child(2) > ul > li > a:hover {
+                .wx-selection > div:nth-child(2) > ul > li > button:hover {
                     color: var(--bs-secondary);
                 }
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
@@ -21,11 +22,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the layout.
         /// </summary>
-        public TypeLayoutTree Layout
-        {
-            get => (TypeLayoutTree)GetProperty(TypeLayoutTree.Default);
-            set => SetProperty(value, () => value.ToClass());
-        }
+        public TypeLayoutTree Layout { get; set; } = TypeLayoutTree.Default;
 
         /// <summary>
         /// Returns or sets a value indicating whether to show an indicator for expandable nodes.
@@ -83,10 +80,14 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var classes = new List<string>(["wx-webui-tree"]);
+            classes.AddRange(Classes);
+
             var html = new HtmlElementTextContentDiv([.. GetHtml(_nodes)])
             {
                 Id = Id,
-                Class = "wx-webui-tree"
+                Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
+                Style = GetStyles()
             };
 
             if (Layout != TypeLayoutTree.Default)
@@ -122,7 +123,7 @@ namespace WebExpress.WebUI.WebControl
                     Class = Css.Concatenate("wx-tree-node"),
                 };
 
-                div.AddUserAttribute("data-label", x.Label);
+                div.AddUserAttribute("data-label", I18N.Translate(x.Label));
 
                 if (x.Expand)
                 {

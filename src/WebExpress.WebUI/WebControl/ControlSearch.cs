@@ -73,6 +73,9 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var classes = new List<string>(["wx-webui-search"]);
+            classes.AddRange(Classes);
+
             var html = new HtmlElementTextContentDiv
             (
                 [.. _suggestion.Select(x =>
@@ -108,7 +111,8 @@ namespace WebExpress.WebUI.WebControl
             )
             {
                 Id = Id,
-                Class = "wx-webui-search"
+                Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
+                Style = GetStyles()
             };
 
             if (!string.IsNullOrWhiteSpace(Placeholder))
