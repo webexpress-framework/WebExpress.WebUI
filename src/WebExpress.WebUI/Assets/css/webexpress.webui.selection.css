@@ -50,16 +50,16 @@
                     margin-right: 0.5em;
                 }
 
-            .wx-selection > div:nth-child(2) > ul > li > button {
+            .wx-selection > div:nth-child(2) > ul > li > a {
                 margin-left: 0.5em;
                 margin-right: 0.1em;
                 text-decoration: none;
                 font-size: 1em;
-                color: var(--bs-border-color);
+                color: var(--bs-secondary);
             }
 
-                .wx-selection > div:nth-child(2) > ul > li > button:hover {
-                    color: var(--bs-secondary);
+                .wx-selection > div:nth-child(2) > ul > li > a:hover {
+                    color: var(--bs-secondary-hover);
                 }
 
         .wx-selection > div:nth-child(2) > a {
@@ -136,37 +136,30 @@
             cursor: pointer;
         }
 
-        .wx-selection div:nth-child(3) > ul > li > a {
-            text-decoration: none;
+        .wx-selection div:nth-child(3) > ul > li > button {
+            background: 0, 0;
+            border: 0;
         }
 
-            .wx-selection div:nth-child(3) > ul > li > a > img {
+            .wx-selection div:nth-child(3) > ul > li > button:not(:disabled) {
+                color: var(--bs-link-color);
+            }
+
+                .wx-selection div:nth-child(3) > ul > li > button:not(:disabled):hover {
+                    color: var(--bs-link-hover-color);
+                }
+
+            .wx-selection div:nth-child(3) > ul > li > button > img {
                 height: 1em;
                 margin-right: 0.5em;
                 vertical-align: middle;
             }
 
-            .wx-selection div:nth-child(3) > ul > li > a > i {
+            .wx-selection div:nth-child(3) > ul > li > button > i {
                 margin-right: 0.5em;
             }
 
-            .wx-selection div:nth-child(3) > ul > li > a > span {
-            }
-
-        .wx-selection div:nth-child(3) > ul > li > span {
-        }
-
-            .wx-selection div:nth-child(3) > ul > li > span > img {
-                height: 1em;
-                margin-right: 0.5em;
-                vertical-align: middle;
-            }
-
-            .wx-selection div:nth-child(3) > ul > li > span > i {
-                margin-right: 0.5em;
-            }
-
-            .wx-selection div:nth-child(3) > ul > li > span > span {
+            .wx-selection div:nth-child(3) > ul > li > button > span {
             }
 
         .wx-selection div:nth-child(3) > ul > li > div {

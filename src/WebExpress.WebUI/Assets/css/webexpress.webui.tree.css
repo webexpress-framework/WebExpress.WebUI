@@ -52,6 +52,7 @@
     color: var(--bs-link-color);
     padding: 0;
     text-decoration: none;
+    width: 100%
 }
 
     .wx-tree-label-container:hover {
@@ -87,3 +88,11 @@
         z-index: 1000;
     }
 
+/* Drag indicator style */
+.wx-tree-drag-indicator {
+    position: absolute;
+    height: 2px;
+    border-bottom: 2px dashed var(--bs-success);
+    z-index: 1000;
+    pointer-events: none; /* Prevent interaction with the indicator */
+}

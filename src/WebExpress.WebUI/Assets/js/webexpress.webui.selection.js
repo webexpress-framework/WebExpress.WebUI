@@ -152,11 +152,11 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
 
                 items.push({
                     id,
-                    label: $elem.data("label"),
+                    label: $elem.data("label") || $elem.text(),
                     labelColor: $elem.data("label-color"),
                     icon: $elem.data("icon"),
                     image: $elem.data("image"),
-                    content: $elem.html(),
+                    content: $elem.html() || $elem.data("label"),
                     disabled: $elem.is("[disabled]"),
                     renderFunction: $elem.data("render")
                         ? new Function("item", `return (${$elem.data("render")})(item);`)

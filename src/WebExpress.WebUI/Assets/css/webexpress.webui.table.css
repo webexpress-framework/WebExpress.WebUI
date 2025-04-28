@@ -1,0 +1,104 @@
+﻿.wx-table {
+    caption-side: bottom;
+    border-collapse: collapse;
+}
+
+    .wx-table > thead {
+    }
+
+        .wx-table > thead > tr {
+        }
+
+            .wx-table > thead > tr > th {
+                box-sizing: border-box;
+                position: relative; /* Allows absolute positioning of the sort indicator */
+                text-align: left; /* Align the header text to the left */
+                padding-right: 20px; /* Create space for the sort indicator */
+                outline: 0;
+            }
+
+                /* Sorting indicator for ascending order */
+                .wx-table > thead > tr > th.wx-sort-asc::after {
+                    content: "▲"; /* Upward arrow for ascending order */
+                    font-size: 0.5em; /* Smaller size for the arrow */
+                    position: absolute; /* Position relative to the th element */
+                    right: 5px; /* Position the arrow 5px from the right edge */
+                    top: 50%; /* Center the arrow vertically */
+                    transform: translateY(-50%); /* Adjust for perfect vertical centering */
+                    color: var(--bs-secondary); /* Use Bootstrap's secondary color */
+                }
+
+                /* Sorting indicator for descending order */
+                .wx-table > thead > tr > th.wx-sort-desc::after {
+                    content: "▼"; /* Downward arrow for descending order */
+                    font-size: 0.5em; /* Smaller size for the arrow */
+                    position: absolute; /* Position relative to the th element */
+                    right: 5px; /* Position the arrow 5px from the right edge */
+                    top: 50%; /* Center the arrow vertically */
+                    transform: translateY(-50%); /* Adjust for perfect vertical centering */
+                    color: var(--bs-secondary); /* Use Bootstrap's secondary color */
+                }
+
+                /* Hover effect for sortable column headers */
+                .wx-table > thead > tr > th:hover {
+                    background-color: var(--bs-light); /* Highlight the header on hover */
+                    cursor: pointer; /* Indicate that the column is clickable */
+                }
+
+/* Support for dark mode hover */
+[data-bs-theme=dark] .wx-table > thead > tr > th:hover {
+    background-color: var(--bs-dark); /* Dark background for hover */
+    color: var(--bs-light); /* Light text color for contrast */
+}
+
+.wx-table > thead > tr > th > img {
+    margin-right: 0.5em;
+    height: 1em;
+    min-width: 1em;
+    vertical-align: middle;
+}
+
+.wx-table > thead > tr > th > i {
+    margin-right: 0.5em;
+}
+
+.wx-table > tbody > tr > td > img {
+    margin-right: 0.5em;
+    height: 1em;
+    min-width: 1em;
+    vertical-align: middle;
+}
+
+.wx-table > tbody > tr > td > i {
+    margin-right: 0.5em;
+}
+
+/* Styling for dragging elements */
+.wx-table-dragging {
+    opacity: 0.5;
+}
+
+.wx-table-drag-handle {
+    cursor: grab;
+    color: var(--bs-secondary);
+}
+
+    .wx-table-drag-handle:hover {
+        color: var(--bs-secondary);
+    }
+
+/* Indicator for columns */
+.wx-table-drag-indicator {
+    position: absolute;
+    border-left: 2px dashed var(--bs-success);
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* Indicator for rows */
+.wx-table-drag-placeholder {
+    background-color: var(--bs-success-bg-subtle); /* Highlights the drop target with a green shade */
+    border: 2px dashed var(--bs-success); /* Adds a dashed border for visual emphasis */
+    z-index: 1000;
+    pointer-events: none;
+}

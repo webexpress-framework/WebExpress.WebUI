@@ -1,0 +1,13 @@
+.wx-button {
+}
+
+    .wx-button > img {
+        margin-right: 0.5em;
+        height: 1em;
+        min-width: 1em;
+        vertical-align: middle;
+    }
+
+    .wx-button > i {
+        margin-right: 0.5em;
+    }

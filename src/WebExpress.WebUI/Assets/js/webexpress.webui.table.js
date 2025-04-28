@@ -1,4 +1,4 @@
-/**
+﻿/**
  * A table control extending the base Control class with column reordering functionality and visual indicators.
  */
 webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
@@ -11,6 +11,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     _rows = [];
     _footer = [];
     _draggedColumn = null; // Track the column being dragged
+    _draggedRow = null; // Track the row being dragged
+    _dragColumnIndicator = null; // Indicator for columns
 
     /**
      * Constructor to initialize the table control.
@@ -18,6 +20,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
      */
     constructor(element) {
         super(element);
+
+        this._movableRow = $(element).data("movable-row") || false;
 
         // Initialize table structure and parse existing data
         this._initializeTable(element);
@@ -39,6 +43,197 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             .empty()
             .append(this._col, this._head, this._body, this._foot)
             .addClass("wx-table table table-hover");
+
+        // Create visual indicators for column and row dragging
+        this._dragColumnIndicator = $("<div>")
+            .addClass("wx-table-drag-indicator")
+            .hide(); // Initially hidden
+
+        // Append indicators to the document body
+        $(element).append(this._dragColumnIndicator);
+    }
+
+    /**
+     * Enables drag and drop functionality for columns.
+     * @param {HTMLElement} element - The DOM element representing the column header.
+     * @param {Object} column - The column object associated with the header.
+     */
+    _enableDragAndDropColumn(element, column) {
+        const $th = $(element);
+        $th.attr("draggable", true);
+
+        $th.on("dragstart", (event) => {
+            this._draggedColumn = column;
+            element.addClass("wx-table-dragging");
+        });
+        $th.on("dragend", (event) => {
+            $th.removeClass("wx-table-dragging");
+            this._dragColumnIndicator.removeClass().hide();
+            this._draggedColumn = null;
+        });
+        $th.on("dragover", (event) => {
+            if (!this._draggedColumn) {
+                return;
+            }
+
+            event.preventDefault(); // Allow dropping
+            // Calculate the position of the mouse relative to the column
+            const offset = $th.offset();
+            const mouseX = event.originalEvent.pageX; // Mouse's X position
+            const width = $th.outerWidth();
+            const isLeft = mouseX < offset.left + width / 2; // Check if in the left half
+
+            const height = $th.outerHeight();
+
+            // Position the column indicator
+            this._dragColumnIndicator
+                .css({
+                    top: offset.top,
+                    left: isLeft ? offset.left - 2 : offset.left + width - 2, // Show indicator on the left or right
+                    height: height,
+                })
+                .show();
+        });
+        $th.on("dragleave", (event) => {
+            this._dragColumnIndicator.hide();
+        });
+        $th.on("drop", (event) => {
+            event.preventDefault();
+
+            // Prevent invalid operations where draggedColumn or targetColumn are null
+            if (this._draggedColumn === null || column === null || this._draggedColumn === column) {
+                return;
+            }
+
+            // Find the indices of the dragged column and the target column
+            const sourceIndex = this._columns.indexOf(this._draggedColumn);
+            const targetIndex = this._columns.indexOf(column);
+
+            // Ensure both columns exist in the array
+            if (sourceIndex === -1 || targetIndex === -1) {
+                return;
+            }
+
+            // Calculate the position of the mouse relative to the target column
+            const $th = $(event.currentTarget);
+            const offset = $th.offset();
+            const mouseX = event.originalEvent.pageX; // Mouse's X position
+            const width = $th.outerWidth();
+            const insertBefore = mouseX < offset.left + width / 2; // Determine if insertion should happen before
+
+            // Adjust the target index based on the relative position
+            let adjustedTargetIndex = targetIndex;
+            if (insertBefore) {
+                if (sourceIndex < targetIndex) {
+                    adjustedTargetIndex -= 1; // Move leftward if the source is before the target
+                }
+            } else {
+                if (sourceIndex > targetIndex) {
+                    adjustedTargetIndex += 1; // Move rightward if the source is after the target
+                }
+            }
+
+            // Edge cases: Prevent unnecessary shifts if the source is already correctly placed
+            if (sourceIndex === adjustedTargetIndex) {
+                return;
+            }
+
+            // Reorder columns
+            const movedColumn = this._columns.splice(sourceIndex, 1)[0];
+            this._columns.splice(adjustedTargetIndex, 0, movedColumn);
+
+            // Reorder rows
+            this._rows = this._rows.map(row => {
+                const rowArray = Object.entries(row).sort((a, b) => a[0] - b[0]).map(entry => entry[1]);
+                const movedCell = rowArray.splice(sourceIndex, 1)[0];
+                rowArray.splice(adjustedTargetIndex, 0, movedCell);
+                return rowArray.reduce((acc, cellData, index) => {
+                    acc[index] = cellData;
+                    return acc;
+                }, {});
+            });
+
+            // Re-render the table
+            this.render();
+
+            // Trigger a custom event for column reorder
+            this._triggerColumnReorderEvent(sourceIndex, adjustedTargetIndex);
+        });
+    }
+
+    /**
+     * Enables drag and drop functionality for rows.
+     * @param {HTMLElement} element - The DOM element representing the column header.
+     * @param {Object} row - The row object.
+     */
+    _enableDragAndDropRow(element, row) {
+        const $handle = $(element);
+        const $tr = $handle.closest("tr");
+        $handle.attr("draggable", true); // Make the row handle draggable
+
+        // Event listener for the start of the drag operation
+        $handle.on("dragstart", (event) => {
+            this._draggedRow = row; // Set the currently dragged row
+            $handle.closest("tr").addClass("wx-table-dragging"); // Add a CSS class for visual feedback
+
+            // Create a placeholder to show the position during dragging
+            this._placeholder = $("<tr/>")
+                .addClass("wx-table-drag-placeholder")
+                .height($handle.closest("tr").height());
+            $handle.closest("tr").after(this._placeholder);
+        });
+
+        // Event listener for the end of the drag operation
+        $handle.on("dragend", (event) => {
+            $tr.removeClass("wx-table-dragging"); // Remove the visual feedback class
+            this._placeholder.replaceWith($tr); // Replace placeholder with the dragged row
+            this._placeholder = null; // Clear the placeholder reference
+            this._draggedRow = null; // Clear the reference to the dragged row
+        });
+
+        // Event listener for when the dragged row is over another row
+        $tr.on("dragover", (event) => {
+            if (!this._draggedRow) {
+                return;
+            }
+
+            event.preventDefault(); // Allow the drop action
+
+            const targetRow = $(event.currentTarget);
+            const offset = targetRow.offset();
+            const mouseY = event.originalEvent.pageY; // Y position of the mouse
+            const halfHeight = targetRow.outerHeight() / 2; // Calculate the midpoint of the row
+
+            if (mouseY < offset.top + halfHeight) {
+                // If the mouse is in the top half of the row, show the indicator above
+                this._placeholder.insertBefore(targetRow);
+            } else {
+                // If the mouse is in the bottom half of the row, show the indicator below
+                this._placeholder.insertAfter(targetRow);
+            }
+        });
+
+        // Event listener for when the dragged row leaves another row
+        $tr.on("dragleave", (event) => {
+        });
+
+        // Event listener for when the dragged row is dropped
+        $tr.on("drop", (event) => {
+            event.preventDefault(); // Prevent the default drop behavior
+
+            // Update the internal row order based on the new position
+            const newIndex = this._body.find("tr").index(this._placeholder);
+            const oldIndex = this._rows.indexOf(this._draggedRow);
+
+            if (newIndex !== oldIndex && newIndex >= 0 && newIndex < this._rows.length) {
+                // Remove the dragged row from its old position and insert it at the new position
+                this._rows.splice(oldIndex, 1);
+                this._rows.splice(newIndex, 0, this._draggedRow);
+            }
+
+            // Re-render the table to reflect the new row order
+            this.render();
+        });
     }
 
     /**
@@ -155,7 +350,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         // Ensure the header row exists
         let headRow = this._head.find("tr");
         if (headRow.length === 0) {
-            headRow = $("<tr/>");
+            headRow = $("<tr>");
             this._head.append(headRow);
         }
 
@@ -165,7 +360,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
             if (th.length === 0) {
                 // Create a new th if it doesn't exist
-                th = $("<th/>")
+                th = $("<th>")
                     .attr("draggable", true)
                     .data("index", index);
                 headRow.append(th);
@@ -181,30 +376,25 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             th.empty();
 
             // Set column width
-            const col = $("<col/>");
-            if (column.width) {
-                col.attr("style", `width: ${column.width};`);
-            }
-            this._col.append(col);
+            //const col = $("<col>");
+            //if (column.width) {
+            //    col.attr("style", `width: ${column.width};`);
+            //}
+            //this._col.append(col);
 
             // Add icon or image to the header
             if (column.icon) {
-                th.append($("<i/>").addClass(`${column.icon} me-2`));
+                th.append($("<i>").addClass(column.icon));
             }
             if (column.image) {
-                th.append($("<img/>").attr("src", column.image).addClass("me-2"));
+                th.append($("<img>").attr("src", column.image));
             }
 
             // Add label
             th.append(column.label);
 
             // Add drag-and-drop event handlers for column reordering
-            th.off("dragstart dragend dragover dragleave drop");
-            th.on("dragstart", (event) => this._onDragStart(event, index));
-            th.on("dragend", (event) => this._onDragEnd(event));
-            th.on("dragover", (event) => this._onDragOver(event, index));
-            th.on("dragleave", () => this._onDragLeave(th));
-            th.on("drop", (event) => this._onDrop(event, index));
+            this._enableDragAndDropColumn(th, column);
         });
 
         // Remove extra th elements if columns are reduced
@@ -212,6 +402,10 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
         // Reattach sort handlers
         this._attachSortHandlers();
+
+        if (this._movableRow) {
+            headRow.prepend($("<th>"));
+        }
     }
 
     /**
@@ -245,103 +439,6 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Handles the dragstart event for column reordering.
-     * @param {Event} event - The dragstart event.
-     * @param {number} index - The index of the column being dragged.
-     */
-    _onDragStart(event, index) {
-        this._draggedColumn = index; // Store the index of the dragged column
-        const tableId = $(this._element).attr("id"); // Get the ID of the current table
-        event.originalEvent.dataTransfer.setData("text/plain", JSON.stringify({ index, tableId }));
-        const th = this._head.find("tr").children("th").eq(index);
-        th.addClass("wx-dragging");
-    }
-
-    /**
-     * Handles the dragend event globally to clean up the dragging state.
-     * @param {Event} event - The dragend event.
-     */
-    _onDragEnd(event) {
-        // Remove the dragging class from all columns
-        this._head.find("tr").children("th").removeClass("wx-dragging wx-drop-target");
-        this._draggedColumn = null; // Reset the dragged column
-    }
-
-    /**
-     * Handles the dragover event for column reordering.
-     * @param {Event} event - The dragover event.
-     * @param {number} index - The index of the column where the drag is over.
-     */
-    _onDragOver(event, index) {
-        event.preventDefault(); // Allow dropping
-
-        // Highlight the column as a potential drop target
-        const th = this._head.find("tr").children("th").eq(index);
-        th.addClass("wx-drop-target");
-    }
-
-    /**
-     * Handles the dragleave event to remove the drop target highlight.
-     * @param {jQuery} th - The <th> element being left.
-     */
-    _onDragLeave(th) {
-        th.removeClass("wx-drop-target");
-    }
-
-    /**
-     * Handles the drop event for column reordering.
-     */
-    _onDrop(event, targetIndex) {
-        event.preventDefault();
-
-        // Parse the data from the dragstart event
-        const dragData = JSON.parse(event.originalEvent.dataTransfer.getData("text/plain"));
-        const sourceIndex = dragData.index;
-        const sourceTableId = dragData.tableId;
-
-        // Get the ID of the current table
-        const currentTableId = $(this._element).attr("id");
-
-        // Remove drop target class
-        const th = this._head.find("tr").children("th").eq(targetIndex);
-        th.removeClass("wx-drop-target");
-
-        // Ensure the drop is within the same table
-        if (sourceTableId !== currentTableId) {
-            return;
-        }
-
-        // Ensure sourceIndex and targetIndex are valid
-        if (isNaN(sourceIndex) || isNaN(targetIndex)) {
-            console.error("Invalid source or target index:", sourceIndex, targetIndex);
-            return;
-        }
-
-        if (sourceIndex !== targetIndex) {
-            // Reorder columns
-            const movedColumn = this._columns.splice(sourceIndex, 1)[0];
-            this._columns.splice(targetIndex, 0, movedColumn);
-
-            // Reorder rows
-            this._rows = this._rows.map(row => {
-                const rowArray = Object.entries(row).sort((a, b) => a[0] - b[0]).map(entry => entry[1]);
-                const movedCell = rowArray.splice(sourceIndex, 1)[0];
-                rowArray.splice(targetIndex, 0, movedCell);
-                return rowArray.reduce((acc, cellData, index) => {
-                    acc[index] = cellData;
-                    return acc;
-                }, {});
-            });
-
-            // Re-render the table
-            this.render();
-
-            // Trigger a custom event for column reorder
-            this._triggerColumnReorderEvent(sourceIndex, targetIndex);
-        }
-    }
-
-    /**
      * Triggers a custom event to notify about column reordering.
      * @param {number} sourceIndex - The original index of the column.
      * @param {number} targetIndex - The new index of the column.
@@ -364,12 +461,22 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Adds a row to the table body.
+     * Adds a row to the table body with a dropdown for row shifting.
      * @param {Object} row - The row data.
      */
     _addRow(row) {
         const tr = $("<tr/>");
 
+        if (this._movableRow) {
+            // Create a draggable handle at the beginning of each row
+            const dragHandle = $("<td/>")
+                .addClass("wx-table-drag-handle")
+                .text("⇅");
+            tr.append(dragHandle);
+            this._enableDragAndDropRow(dragHandle, row);
+        }
+
+        // Add the rest of the row's data
         this._columns.forEach((_, index) => {
             const cellData = row[index] || {};
             const td = $("<td/>");

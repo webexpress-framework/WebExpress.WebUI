@@ -6,6 +6,10 @@
  * - webexpress.webui.Event.MOVE_EVENT
  */
 webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
+    _dragover = null; // store the currently dragged node
+    _dragIndicator = null; // store the drag indicator element
+    _dragoverPosition = null; // store the current drag position (above, child, below)
+
     /**
      * Constructor for initializing the tree control.
      * @param {HTMLElement} element - The DOM element for the tree control.
@@ -23,6 +27,12 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
         // Clean up the DOM
         $(element).empty().addClass("wx-tree").append(this._container);
 
+        // Create the drag indicator element
+        this._dragIndicator = $("<div>")
+            .addClass("wx-tree-drag-indicator")
+            .hide(); // Initially hidden
+        $(element).append(this._dragIndicator);
+
         // Render the tree
         this.render();
     }
@@ -39,49 +49,72 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
 
         // Handle drag start
         element.on("dragstart", (event) => {
+            this._dragover = node;
             event.originalEvent.dataTransfer.setData("text/plain", JSON.stringify(
                 {
                     element: element,
                     node: node.id,
                 }));
 
-            event.addClass("wx-dragging");
+            element.addClass("wx-dragging");
         });
 
         // Handle drag over
         element.on("dragover", (event) => {
             event.preventDefault(); // Allow dropping by preventing default behavior
 
-            // ToDo: Prevent moving a node into its own children
-            /*const data = event.originalEvent.dataTransfer.getData("text/plain");
-            const draggedData = JSON.parse(data);
-            const draggedNode = this._findNodeById(draggedData.node);
-
-            // Check if the current element is a child of the dragged node
-            let isChild = false;
-            let currentNode = node;
-
-            while (currentNode) {
-                if (currentNode === draggedNode) {
-                    isChild = true;
-                    break;
-                }
-                currentNode = currentNode.parent; // Traverse up the tree
+            if (this._isChildNode(this._dragover, node)) {
+                // Prevent showing the indicator if the target node is a child of the dragged node
+                this._dragIndicator.hide();
+                return;
             }
 
-            if (isChild) {
-                // Do not allow dropping on a child node
-                return;
-            }*/
+            // Each node is divided into three areas: the top 25% for moving above the 
+            // element, the middle 50% for moving as a child, and the bottom 25% for 
+            // moving below the element.
+            const offset = element.offset();
+            const height = element.outerHeight();
+            const mouseY = event.originalEvent.pageY;
 
-            // Mark the element as a valid drop target
-            element.addClass("wx-drop-target");
+            // Calculate the mouse position relative to the element
+            const relativeY = mouseY - offset.top;
+
+            if (relativeY < height * 0.25) {
+                // Top 25% of the element
+                this._dragIndicator
+                    .css({
+                        top: offset.top - 2, // Slightly above the top
+                        left: offset.left,
+                        width: element.outerWidth(),
+                    })
+                    .show();
+                element.removeClass("wx-drop-target");
+                this._dragoverPosition = "above";
+            } else if (relativeY < height * 0.75) {
+                // Middle 50% of the element
+                this._dragIndicator.hide();
+                element.addClass("wx-drop-target");
+                this._dragoverPosition = "child";
+            } else {
+                // Bottom 25% of the element
+                this._dragIndicator
+                    .css({
+                        top: offset.top + height - 2, // Slightly below the bottom
+                        left: offset.left,
+                        width: element.outerWidth(),
+                    })
+                    .show();
+                element.removeClass("wx-drop-target");
+                this._dragoverPosition = "below";
+            }
         });
 
         // Handle drag leave
         element.on("dragleave", () => {
             // Hide the drag indicator when leaving the target area
             element.removeClass("wx-drop-target");
+            // Hide the drag indicator when leaving the target area
+            this._dragIndicator.hide();
         });
 
         // Handle drop
@@ -91,51 +124,131 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             const draggedNode = this._findNodeById(draggedData.node);
             const targetNode = node;
 
-            if (draggedNode && targetNode) {
-                this._moveNode(draggedNode, targetNode);
+            // Prevent moving a parent node into one of its children
+            if (this._isChildNode(draggedNode, targetNode)) {
+                this._dragIndicator.hide();
+                element.removeClass("wx-drop-target");
+                return;
             }
+
+            if (draggedNode && targetNode && draggedNode != targetNode) {
+                if (this._dragoverPosition === "above") {
+                    this._insertNodeAbove(draggedNode, targetNode);
+                } else if (this._dragoverPosition === "child") {
+                    this._insertNodeAsChild(draggedNode, targetNode);
+                } else if (this._dragoverPosition === "below") {
+                    this._insertNodeBelow(draggedNode, targetNode);
+                }
+            }
+
+            this._dragIndicator.hide(); // Hide the drag indicator after dropping
         });
 
         // Handle drag end
         element.on("dragend", () => {
+            this._dragover = null;
+            this._dragIndicator.hide(); // Hide the indicator when dragging ends
             // Remove the dragging class from all columns
             element.removeClass("wx-dragging wx-drop-target");
         });
     }
 
     /**
-     * Moves a node to a new parent or position in the tree.
+     * Checks if a target node is a child of the dragged node.
      * @private
      * @param {Object} draggedNode - The node being dragged.
-     * @param {Object} targetNode - The target node where the dragged node will be moved.
+     * @param {Object} targetNode - The target node to check.
+     * @returns {boolean} True if the target node is a child of the dragged node, false otherwise.
      */
-    _moveNode(draggedNode, targetNode) {
-        // Remove the dragged node from its current parent's children
-        if (draggedNode.parent) {
-            draggedNode.parent.children = draggedNode.parent.children.filter(
-                (child) => child !== draggedNode
-            );
-        } else {
-            // If the node is at the root level, remove it from the main node list
-            this._nodes = this._nodes.filter((node) => node !== draggedNode);
+    _isChildNode(draggedNode, targetNode) {
+        let currentNode = targetNode;
+
+        // Traverse up the tree to check if the targetNode is a child of draggedNode
+        while (currentNode) {
+            if (currentNode === draggedNode) {
+                return true;
+            }
+            currentNode = currentNode.parent;
         }
 
-        // Set the new parent for the dragged node
-        draggedNode.parent = targetNode;
+        return false;
+    }
 
-        // Add the dragged node to the children of the target node
+    /**
+     * Inserts a node above the target node.
+     * @private
+     * @param {Object} draggedNode - The node being dragged.
+     * @param {Object} targetNode - The target node where the dragged node will be inserted above.
+     */
+    _insertNodeAbove(draggedNode, targetNode) {
+        this._removeNodeFromCurrentPosition(draggedNode);
+
+        const parent = targetNode.parent;
+        if (parent) {
+            const index = parent.children.indexOf(targetNode);
+            parent.children.splice(index, 0, draggedNode);
+            draggedNode.parent = parent;
+        } else {
+            const index = this._nodes.indexOf(targetNode);
+            this._nodes.splice(index, 0, draggedNode);
+            draggedNode.parent = null;
+        }
+
+        this.render(); // Re-render the tree
+    }
+
+    /**
+     * Inserts a node as a child of the target node.
+     * @private
+     * @param {Object} draggedNode - The node being dragged.
+     * @param {Object} targetNode - The target node where the dragged node will be inserted as a child.
+     */
+    _insertNodeAsChild(draggedNode, targetNode) {
+        this._removeNodeFromCurrentPosition(draggedNode);
+
         targetNode.children = targetNode.children || [];
         targetNode.children.push(draggedNode);
+        draggedNode.parent = targetNode;
 
-        // Trigger a MOVE_EVENT to notify external listeners
-        $(document).trigger(webexpress.webui.Event.MOVE_EVENT, {
-            id: $(this._element).attr("id"),
-            node: draggedNode.id,
-            newParentId: targetNode.id
-        });
+        this.render(); // Re-render the tree
+    }
 
-        // Re-render the tree to reflect the new structure
-        this.render();
+    /**
+     * Inserts a node below the target node.
+     * @private
+     * @param {Object} draggedNode - The node being dragged.
+     * @param {Object} targetNode - The target node where the dragged node will be inserted below.
+     */
+    _insertNodeBelow(draggedNode, targetNode) {
+        this._removeNodeFromCurrentPosition(draggedNode);
+
+        const parent = targetNode.parent;
+        if (parent) {
+            const index = parent.children.indexOf(targetNode);
+            parent.children.splice(index + 1, 0, draggedNode);
+            draggedNode.parent = parent;
+        } else {
+            const index = this._nodes.indexOf(targetNode);
+            this._nodes.splice(index + 1, 0, draggedNode);
+            draggedNode.parent = null;
+        }
+
+        this.render(); // Re-render the tree
+    }
+
+    /**
+     * Removes a node from its current position in the tree.
+     * @private
+     * @param {Object} node - The node to be removed.
+     */
+    _removeNodeFromCurrentPosition(node) {
+        if (node.parent) {
+            node.parent.children = node.parent.children.filter(
+                (child) => child !== node
+            );
+        } else {
+            this._nodes = this._nodes.filter((n) => n !== node);
+        }
     }
 
     /**
@@ -404,7 +517,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 return null;
         }
     }
-        
+
 
     /**
      * Refreshes the tree control by rendering the latest node structure.
