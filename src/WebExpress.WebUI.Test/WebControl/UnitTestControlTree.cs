@@ -152,7 +152,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the uri property of the tree control item.
+        /// Tests the tooltip property of the tree control item.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-tree""><div class=""wx-tree-node""></div></div>")]
@@ -189,6 +189,28 @@ namespace WebExpress.WebUI.Test.WebControl
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTree(null, new ControlTreeItemLink() { Target = target })
+            {
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the active property of the tree control item.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-webui-tree""><div class=""wx-tree-node""></div></div>")]
+        [InlineData(true, @"<div class=""wx-webui-tree""><div class=""wx-tree-node"" data-active=""true""></div></div>")]
+        public void Active(bool active, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTree(null, new ControlTreeItem() { Active = active })
             {
             };
 

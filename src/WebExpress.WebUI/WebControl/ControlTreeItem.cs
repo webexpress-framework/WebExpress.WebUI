@@ -46,6 +46,11 @@ namespace WebExpress.WebUI.WebControl
         public string Tooltip { get; set; }
 
         /// <summary>
+        /// Returns or sets a value indicating whether the tree item is active.
+        /// </summary>
+        public bool Active { get; set; }
+
+        /// <summary>
         /// Returns the child tree items.
         /// </summary>
         public IEnumerable<ControlTreeItem> Children => _children;

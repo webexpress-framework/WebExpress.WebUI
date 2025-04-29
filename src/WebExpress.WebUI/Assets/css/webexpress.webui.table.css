@@ -4,6 +4,10 @@
 }
 
     .wx-table > thead {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
     }
 
         .wx-table > thead > tr {
@@ -91,7 +95,7 @@
 .wx-table-drag-indicator {
     position: absolute;
     border-left: 2px dashed var(--bs-success);
-    z-index: 1000;
+    z-index: 2000;
     pointer-events: none;
 }
 
@@ -101,4 +105,20 @@
     border: 2px dashed var(--bs-success); /* Adds a dashed border for visual emphasis */
     z-index: 1000;
     pointer-events: none;
+}
+
+/* Styling for the resizer element on each column header */
+.wx-table-column-resizer {
+    position: absolute; /* Position the resizer relative to the header */
+    right: 0; /* Align the resizer to the right edge */
+    top: 0;
+    bottom: 0;
+    width: 5px; /* Width of the resizer area */
+    cursor: col-resize; /* Change cursor to indicate resizable functionality */
+    z-index: 1000; /* Ensure the resizer is on top */
+}
+
+/* Styling applied to the body during a resize operation */
+.wx-table-resizing {
+    cursor: col-resize !important; /* Force the column resize cursor during the operation */
 }

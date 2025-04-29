@@ -80,10 +80,22 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            return Render(renderContext, visualTree, Nodes);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="nodes">The collection of tree nodes to process.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<ControlTreeItem> nodes)
+        {
             var classes = new List<string>(["wx-webui-tree"]);
             classes.AddRange(Classes);
 
-            var html = new HtmlElementTextContentDiv([.. GetHtml(_nodes)])
+            var html = new HtmlElementTextContentDiv([.. GetHtml(nodes)])
             {
                 Id = Id,
                 Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
@@ -158,6 +170,11 @@ namespace WebExpress.WebUI.WebControl
                 if (x.IconOpen != x.IconClose && x.IconClose is ImageIcon imageClose)
                 {
                     div.AddUserAttribute("data-image-closed", imageClose.Uri?.ToString());
+                }
+
+                if (x.Active)
+                {
+                    div.AddUserAttribute("data-active", "true");
                 }
 
                 if (x is ControlTreeItemLink linkNode)

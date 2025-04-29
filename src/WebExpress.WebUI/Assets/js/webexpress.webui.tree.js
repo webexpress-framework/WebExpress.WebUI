@@ -270,6 +270,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 iconClose: $elem.data("icon-closed") || $elem.data("icon") || null,
                 imageOpen: $elem.data("image-opened") || $elem.data("image") || null,
                 imageClose: $elem.data("image-closed") || $elem.data("image") || null,
+                active: $elem.data("active") || false,
                 color: $elem.data("color") || "",
                 expand: $elem.data("expand") === true,
                 url: $elem.data("url") || null,
@@ -355,7 +356,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             if (node.children && node.children.length > 0) {
                 const ul = $("<ul>").addClass(this._getLayoutClasses());
                 ul.attr("role", "group"); // ARIA role for the group of children
-                const indicator = $("<span>").addClass("wx-tree-indicator-angle");
+                const indicator = $("<i>").addClass("wx-tree-indicator-angle");
 
                 if (this._showIndicator) {
                     labelContainer.prepend(indicator);
@@ -449,25 +450,33 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
      * @param {jQuery} icon - The icon element for the node.
      */
     _addNodeContent(expand, node, img, icon) {
-        if (node.imageOpen) {
-            img.attr("src", node.expand ? node.imageOpen : node.imageClose);
-            expand.append(img);
-        }
+        const div = $("<div>");
 
-        if (node.iconOpen) {
-            icon.addClass(node.expand ? node.iconOpen : node.iconClose);
-            expand.append(icon);
+        if (node.active) {
+            div.addClass("active");
         }
 
         if (typeof node.render === "string") {
             const render = new Function("node", node.render);
             const renderResult = render(node);
             if (renderResult) {
-                expand.append(renderResult);
+                div.append(renderResult);
             }
         } else {
-            expand.append($("<span>").text(node.label));
+            if (node.imageOpen) {
+                img.attr("src", node.expand ? node.imageOpen : node.imageClose);
+                div.append(img);
+            }
+
+            if (node.iconOpen) {
+                icon.addClass(node.expand ? node.iconOpen : node.iconClose);
+                div.append(icon);
+            }
+
+            div.append($("<span>").text(node.label));
         }
+
+        expand.append(div);
     }
 
     /**

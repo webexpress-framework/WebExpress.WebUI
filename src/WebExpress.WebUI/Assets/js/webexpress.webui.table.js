@@ -21,19 +21,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     constructor(element) {
         super(element);
 
-        this._movableRow = $(element).data("movable-row") || false;
-
         // Initialize table structure and parse existing data
-        this._initializeTable(element);
-        this.render(); // Render the initial state of the table
-    }
-
-    /**
-     * Initializes the table structure and parses columns, rows, and footer.
-     * @param {HTMLElement} element - The DOM element for the table control.
-     */
-    _initializeTable(element) {
-        // Parse data from the DOM
+        this._movableRow = $(element).data("movable-row") || false;
         this._columns = this._parseColumns($(element).find("thead th"));
         this._rows = this._parseRows($(element).find("tbody tr"));
         this._footer = this._parseFooter($(element).find("tfoot tr"));
@@ -51,6 +40,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
         // Append indicators to the document body
         $(element).append(this._dragColumnIndicator);
+        this.render(); // Render the initial state of the table
     }
 
     /**
@@ -63,20 +53,34 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         $th.attr("draggable", true);
 
         $th.on("dragstart", (event) => {
+            if (!event.ctrlKey) {
+                event.preventDefault(); // Prevent drag if Ctrl is not pressed
+                return;
+            }
+
+            const resizerArea = $(event.target).closest(".wx-table-column-resizer");
+            if (resizerArea.length > 0) {
+                event.preventDefault(); // Prevent drag if the drag starts from the resizer area
+                return;
+            }
+
             this._draggedColumn = column;
-            element.addClass("wx-table-dragging");
+            $th.addClass("wx-table-dragging");
         });
-        $th.on("dragend", (event) => {
+
+        $th.on("dragend", () => {
             $th.removeClass("wx-table-dragging");
             this._dragColumnIndicator.removeClass().hide();
             this._draggedColumn = null;
         });
+
         $th.on("dragover", (event) => {
-            if (!this._draggedColumn) {
-                return;
+            if (!this._draggedColumn || !event.ctrlKey) {
+                return; // Prevent dragover if no column is being dragged or Ctrl is not pressed
             }
 
             event.preventDefault(); // Allow dropping
+
             // Calculate the position of the mouse relative to the column
             const offset = $th.offset();
             const mouseX = event.originalEvent.pageX; // Mouse's X position
@@ -94,10 +98,16 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 })
                 .show();
         });
-        $th.on("dragleave", (event) => {
+
+        $th.on("dragleave", () => {
             this._dragColumnIndicator.hide();
         });
+
         $th.on("drop", (event) => {
+            if (!event.ctrlKey) {
+                return; // Prevent dropping if Ctrl is not pressed
+            }
+
             event.preventDefault();
 
             // Prevent invalid operations where draggedColumn or targetColumn are null
@@ -153,11 +163,15 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 }, {});
             });
 
-            // Re-render the table
-            this.render();
+            // Cancel drag
+            this._dragColumnIndicator.hide();
+            this._draggedColumn = null;
 
             // Trigger a custom event for column reorder
             this._triggerColumnReorderEvent(sourceIndex, adjustedTargetIndex);
+
+            // Re-render the table
+            this.render();
         });
     }
 
@@ -237,6 +251,72 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Enables resizable columns by adding resizer handles to each header element.
+     * @param {HTMLElement} element - The DOM element representing the column header.
+     * @param {Object} column - The column object associated with the header.
+     */
+    _enableResizableColumns(element, column) {
+        const $th = $(element);
+
+        // Create and configure the resizer element
+        const resizer = $("<div>")
+            .addClass("wx-table-column-resizer")
+            .on("click", (event) => event.stopPropagation())
+            .on("mousedown", (event) => this._onResizeStart(event, $th));
+
+        // Append the resizer to the right side of the header
+        $th.css("position", "relative").append(resizer);
+
+        // Attach mousemove and mouseup handlers to the document for resizing
+        $(document)
+            .on("mousemove", (event) => this._onResize(event, $th, column))
+            .on("mouseup", () => this._onResizeEnd($th));
+    }
+
+    /**
+     * Handler for the start of the resizing process.
+     * @param {MouseEvent} event - The mousedown event.
+     * @param {jQuery} $th - The header element being resized.
+     */
+    _onResizeStart(event, $th) {
+        this._resizingColumn = $th; // Store the column being resized
+        this._resizeStartX = event.pageX; // Record the initial mouse position
+        this._resizeStartWidth = $th.outerWidth(); // Record the initial column width
+        $("body").addClass("wx-table-resizing"); // Add a visual cue for resizing
+    }
+
+    /**
+     * Handler for mouse movement during resizing.
+     * @param {MouseEvent} event - The mousemove event.
+     * @param {jQuery} $th - The header element being resized.
+     * @param {Object} column - The column object.
+     */
+    _onResize(event, $th, column) {
+        if (!this._resizingColumn && this._resizingColumn != $th) return; // Exit if no column is being resized
+
+        // Calculate the new width based on mouse movement
+        const deltaX = event.pageX - this._resizeStartX;
+        const newWidth = Math.max(this._resizeStartWidth + deltaX, 30); // Minimum width
+
+        // Apply the new width to the header and associated column
+        this._resizingColumn.css("width", `${newWidth}px`);
+        column.width = newWidth;
+    }
+
+    /**
+     * Handler for the end of the resizing process.
+     * @param {jQuery} $th - The header element being resized.
+     */
+    _onResizeEnd($th) {
+        if (!this._resizingColumn && this._resizingColumn != $th) return; // Exit if no column is being resized
+
+        this._resizingColumn = null; // Clear the reference to the resizing column
+        this._resizeStartX = null;
+        this._resizeStartWidth = null;
+        $("body").removeClass("wx-table-resizing"); // Remove the resizing visual cue
+    }
+
+    /**
      * Parses column definitions from <thead>.
      * @param {jQuery} columns - The <th> elements.
      * @returns {Array} Parsed column definitions.
@@ -249,6 +329,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 icon: $th.data("icon") || null,
                 image: $th.data("image") || null,
                 width: $th.attr("width") || null,
+                sort: $th.data("sort") || null
             };
         }).get();
     }
@@ -303,14 +384,16 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Orders the table rows based on a specific column and sort direction.
-     * @param {number} columnIndex - The index of the column to sort by.
-     * @param {string} direction - The sort direction, "asc" for ascending or "desc" for descending.
+     * Orders the table rows based on a specific column object and sort direction.
+     * @param {Object} column - The column object to sort by.
      */
-    orderRows(columnIndex, direction = "asc") {
+    orderRows(column) {
+        // Find the index of the column object in the columns array
+        const columnIndex = this._columns.indexOf(column);
+
         // Validate the column index
-        if (columnIndex < 0 || columnIndex >= this._columns.length) {
-            console.error(`Invalid column index: ${columnIndex}`);
+        if (columnIndex === -1) {
+            console.error(`Column not found: ${JSON.stringify(column)}`);
             return;
         }
 
@@ -319,12 +402,12 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             const cellA = a[columnIndex]?.text || "";
             const cellB = b[columnIndex]?.text || "";
 
-            if (direction === "asc") {
+            if (column.sort === "asc") {
                 return cellA.localeCompare(cellB, undefined, { numeric: true });
-            } else if (direction === "desc") {
+            } else if (column.sort === "desc") {
                 return cellB.localeCompare(cellA, undefined, { numeric: true });
             } else {
-                console.error(`Invalid sort direction: ${direction}`);
+                console.error(`Invalid sort direction: ${column.sort}`);
                 return 0;
             }
         });
@@ -348,39 +431,35 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
      */
     _renderColumns() {
         // Ensure the header row exists
-        let headRow = this._head.find("tr");
-        if (headRow.length === 0) {
-            headRow = $("<tr>");
-            this._head.append(headRow);
+        const headRow = $("<tr>");
+        this._head.empty().append(headRow);
+
+        if (this._movableRow) {
+            headRow.append($("<th>"));
+            this._col.empty().append($("<col>").attr("style", "width: 0.1em;"));
         }
 
         // Update or create each column header (th)
         this._columns.forEach((column, index) => {
-            let th = this._head.find("th").eq(index);
+            const th = $("<th>").attr("draggable", true);
+            const isLastColumn = index === this._columns.length - 1;
 
-            if (th.length === 0) {
-                // Create a new th if it doesn't exist
-                th = $("<th>")
-                    .attr("draggable", true)
-                    .data("index", index);
-                headRow.append(th);
-            }
+            headRow.append(th);
 
             // Preserve existing sort direction and classes
-            const currentDirection = th.data("sort");
+            const currentDirection = column.sort;
             if (currentDirection) {
                 th.addClass(currentDirection === "asc" ? "wx-sort-asc" : "wx-sort-desc");
             }
 
-            // Clear the contents and re-add column information
-            th.empty();
-
             // Set column width
-            //const col = $("<col>");
-            //if (column.width) {
-            //    col.attr("style", `width: ${column.width};`);
-            //}
-            //this._col.append(col);
+            const col = $("<col>");
+            if (isLastColumn) {
+                col.attr("style", "width: auto;");
+            } else if (column.width) {
+                col.attr("style", `width: ${column.width}px;`);
+            }
+            this._col.append(col);
 
             // Add icon or image to the header
             if (column.icon) {
@@ -395,45 +474,43 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
             // Add drag-and-drop event handlers for column reordering
             this._enableDragAndDropColumn(th, column);
+            this._enableResizableColumns(th, column);
+            // Reattach sort handlers
+            this._attachSortHandlers(th, column);
         });
-
-        // Remove extra th elements if columns are reduced
-        headRow.children("th").slice(this._columns.length).remove();
-
-        // Reattach sort handlers
-        this._attachSortHandlers();
-
-        if (this._movableRow) {
-            headRow.prepend($("<th>"));
-        }
     }
 
     /**
      * Attaches click event handlers to the column headers for sorting.
+     * @param {HTMLElement} element - The DOM element representing the column header.
+     * @param {Object} column - The column object associated with the header.
      */
-    _attachSortHandlers() {
-        this._head.find("th").each((index, th) => {
-            $(th).off("click").on("click", () => {
-                const currentDirection = $(th).data("sort") || "asc";
-                const newDirection = currentDirection === "asc" ? "desc" : "asc";
+    _attachSortHandlers(element, column) {
+        const $th = $(element); // Get the jQuery object for the header element
 
-                // Update the sort direction in jQuery and the DOM
-                this._head.find("th").data("sort", null);
-                $(th).data("sort", newDirection);
+        $th.on("click", () => {
 
-                // Remove sort indicators from all headers and add to the clicked one
-                this._head.find("th").removeClass("wx-sort-asc wx-sort-desc");
-                $(th).addClass(newDirection === "asc" ? "wx-sort-asc" : "wx-sort-desc");
+            // Determine the new sort direction
+            const currentDirection = column.sort || "asc";
 
-                // Sort rows based on the clicked column and direction
-                this.orderRows(index, newDirection);
+            // Resets the sort direction for all columns
+            this._columns.forEach((column) => {
+                column.sort = null; // Set the sort property to null
+            });
 
-                // Trigger a custom sort event
-                $(document).trigger(webexpress.webui.Event.TABLE_SORT_EVENT, {
-                    columnIndex: index,
-                    sortDirection: newDirection,
-                    columnLabel: $(th).text().trim() // Optional: provide column label
-                });
+            // Update the sort direction in the DOM
+            this._head.find("th").removeClass("wx-sort-asc wx-sort-desc");
+            $th.addClass(column.sort === "asc" ? "wx-sort-asc" : "wx-sort-desc");
+
+            // Sort rows based on the column and direction
+            column.sort = currentDirection === "asc" ? "desc" : "asc";
+            this.orderRows(column);
+
+            // Trigger a custom sort event
+            $(document).trigger(webexpress.webui.Event.TABLE_SORT_EVENT, {
+                columnId: column.id,
+                sortDirection: column.sort,
+                columnLabel: $th.text().trim()
             });
         });
     }
@@ -471,7 +548,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             // Create a draggable handle at the beginning of each row
             const dragHandle = $("<td/>")
                 .addClass("wx-table-drag-handle")
-                .text("⇅");
+                .text("☰");
             tr.append(dragHandle);
             this._enableDragAndDropRow(dragHandle, row);
         }
