@@ -13,7 +13,7 @@ namespace WebExpress.WebUI.WebControl
     /// <remarks>
     /// This control allows users to select one or more options from a predefined list.
     /// </remarks>
-    public class ControlFormItemInputSelection : ControlFormItemInput
+    public class ControlFormItemInputSelection : ControlFormItemInput, IControlFormItemInputSelection
     {
         private readonly List<ControlFormItemInputSelectionItem> _options = [];
 
@@ -40,7 +40,9 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the value.
         /// </summary>
-        public virtual IEnumerable<string> Values => base.Value != null ? base.Value.Split(';', System.StringSplitOptions.RemoveEmptyEntries) : [];
+        public virtual IEnumerable<string> Values => base.Value != null
+            ? base.Value.Split(';', System.StringSplitOptions.RemoveEmptyEntries)
+            : [];
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -57,18 +59,24 @@ namespace WebExpress.WebUI.WebControl
         /// Adds one or more items to the selection options.
         /// </summary>
         /// <param name="items">The items to add to the selection options.</param>
-        public void Add(params ControlFormItemInputSelectionItem[] items)
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlFormItemInputSelection Add(params ControlFormItemInputSelectionItem[] items)
         {
             _options.AddRange(items);
+
+            return this;
         }
 
         /// <summary>
         /// Removes an item from the selection options.
         /// </summary>
         /// <param name="item">The item to remove from the selection options.</param>
-        public void Remove(ControlFormItemInputSelectionItem item)
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlFormItemInputSelection Remove(ControlFormItemInputSelectionItem item)
         {
             _options.Remove(item);
+
+            return this;
         }
 
         /// <summary>

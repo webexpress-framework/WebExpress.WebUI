@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a dropdown control that can contain multiple items.
     /// </summary>
-    public class ControlDropdown : Control, IControlNavigationItem
+    public class ControlDropdown : Control, IControlDropdown, IControlNavigationItem
     {
         private readonly List<IControlDropdownItem> _items = [];
 
@@ -143,26 +143,35 @@ namespace WebExpress.WebUI.WebControl
         /// </code>
         /// This method accepts any item that implements the <see cref="IControlDropdownItem"/> interface.
         /// </remarks>
-        public void Add(params IControlDropdownItem[] items)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlDropdown Add(params IControlDropdownItem[] items)
         {
             _items.AddRange(items);
+
+            return this;
         }
 
         /// <summary>
         /// Adds a new separator.
         /// </summary>
-        public void AddSeperator()
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlDropdown AddSeperator()
         {
             _items.Add(null);
+
+            return this;
         }
 
         /// <summary>
         /// Adds a new head.
         /// </summary>
         /// <param name="text">The headline text.</param>
-        public void AddHeader(string text)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlDropdown AddHeader(string text)
         {
             _items.Add(new ControlDropdownItemHeader() { Text = text });
+
+            return this;
         }
 
         /// <summary>

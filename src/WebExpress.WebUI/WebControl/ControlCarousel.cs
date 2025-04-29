@@ -7,7 +7,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a carousel control that can contain multiple carousel items.
     /// </summary>
-    public class ControlCarousel : Control
+    public class ControlCarousel : Control, IControlCarousel
     {
         private readonly List<ControlCarouselItem> _items = [];
 
@@ -34,27 +34,37 @@ namespace WebExpress.WebUI.WebControl
         /// Adds one or more carousel items to the carousel.
         /// </summary>
         /// <param name="items">The carousel items to be added.</param>
-        public void Add(params ControlCarouselItem[] items)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlCarousel Add(params ControlCarouselItem[] items)
         {
             _items.AddRange(items);
+
+            return this;
         }
 
         /// <summary>
         /// Adds one or more carousel items to the carousel.
         /// </summary>
         /// <param name="items">The carousel items to be added.</param>
-        public void Add(IEnumerable<ControlCarouselItem> items)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlCarousel Add(IEnumerable<ControlCarouselItem> items)
         {
             _items.AddRange(items);
+
+            return this;
         }
 
         /// <summary>
         /// Clears all carousel items from the carousel.
         /// </summary>
-        public void Clear()
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlCarousel Clear()
         {
             _items.Clear();
-        }
+
+            return this;
+        }
+
         /// <summary>
         /// Converts the control to an HTML representation.
         /// </summary>

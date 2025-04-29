@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a tree control that can display hierarchical data.
     /// </summary>
-    public class ControlTree : Control
+    public class ControlTree : Control, IControlTree
     {
         private readonly List<ControlTreeItem> _nodes = [];
 
@@ -49,27 +49,36 @@ namespace WebExpress.WebUI.WebControl
         /// Adds the specified tree items to the control.
         /// </summary>
         /// <param name="items">The tree items to be added.</param>
-        public void Add(params ControlTreeItem[] items)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlTree Add(params ControlTreeItem[] items)
         {
             _nodes.AddRange(items);
+
+            return this;
         }
 
         /// <summary>
         /// Adds the specified tree items to the control.
         /// </summary>
         /// <param name="items">The tree items to be added.</param>
-        public void Add(IEnumerable<ControlTreeItem> items)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlTree Add(IEnumerable<ControlTreeItem> items)
         {
             _nodes.AddRange(items);
+
+            return this;
         }
 
         /// <summary>
         /// Removes the specified tree item from the control.
         /// </summary>
         /// <param name="item">The tree item to be removed.</param>
-        public void Remove(ControlTreeItem item)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlTree Remove(ControlTreeItem item)
         {
             _nodes.Remove(item);
+
+            return this;
         }
 
         /// <summary>

@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a control that splits the available space into two resizable panels.
     /// </summary>
-    public class ControlPanelSplit : Control
+    public class ControlPanelSplit : Control, IControlPanelSplit
     {
         private readonly List<IControl> _panel1 = [];
         private readonly List<IControl> _panel2 = [];
@@ -85,36 +85,48 @@ namespace WebExpress.WebUI.WebControl
         /// Adds controls to the left or top panel.
         /// </summary>
         /// <param name="controls">The controls to add.</param>
-        public void AddPanel1(params IControl[] controls)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlPanelSplit AddPanel1(params IControl[] controls)
         {
             _panel1.AddRange(controls);
+
+            return this;
         }
 
         /// <summary>
         /// Removes a control from the left or top panel.
         /// </summary>
         /// <param name="control">The control to remove.</param>
-        public void RemovePanel1(IControl control)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlPanelSplit RemovePanel1(IControl control)
         {
             _panel1.Remove(control);
+
+            return this;
         }
 
         /// <summary>
         /// Adds controls to the right or bottom panel.
         /// </summary>
         /// <param name="controls">The controls to add.</param>
-        public void AddPanel2(params IControl[] controls)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlPanelSplit AddPanel2(params IControl[] controls)
         {
             _panel2.AddRange(controls);
+
+            return this;
         }
 
         /// <summary>
         /// Removes a control from the right or bottom panel.
         /// </summary>
         /// <param name="control">The control to remove.</param>
-        public void RemovePanel2(IControl control)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlPanelSplit RemovePanel2(IControl control)
         {
             _panel2.Remove(control);
+
+            return this;
         }
 
         /// <summary>

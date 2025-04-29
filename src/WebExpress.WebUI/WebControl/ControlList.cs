@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a control list that can contain multiple control list items.
     /// </summary>
-    public class ControlList : Control
+    public class ControlList : Control, IControlList
     {
         private readonly List<ControlListItem> _items = [];
 
@@ -54,9 +54,12 @@ namespace WebExpress.WebUI.WebControl
         /// </code>
         /// This method accepts any item that derives from <see cref="ControlListItem"/>.
         /// </remarks>
-        public void Add(params ControlListItem[] items)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlList Add(params ControlListItem[] items)
         {
             _items.AddRange(items);
+
+            return this;
         }
 
         /// <summary>
@@ -76,9 +79,12 @@ namespace WebExpress.WebUI.WebControl
         /// </code>
         /// This method accepts any item that derives from <see cref="ControlListItem"/>.
         /// </remarks>
-        public void Add(IEnumerable<ControlListItem> items)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlList Add(IEnumerable<ControlListItem> items)
         {
             _items.AddRange(items);
+
+            return this;
         }
 
         /// <summary>
@@ -97,9 +103,12 @@ namespace WebExpress.WebUI.WebControl
         /// </code>
         /// This method accepts any item that derives from <see cref="ControlListItem"/>.
         /// </remarks>
-        public void Remove(ControlListItem item)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlList Remove(ControlListItem item)
         {
             _items.Remove(item);
+
+            return this;
         }
 
         /// <summary>

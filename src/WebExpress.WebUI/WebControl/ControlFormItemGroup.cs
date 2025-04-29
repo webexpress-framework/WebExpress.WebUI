@@ -6,7 +6,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Grouping of controls.
     /// </summary>
-    public abstract class ControlFormItemGroup : ControlFormItem, IFormValidation
+    public abstract class ControlFormItemGroup : ControlFormItem, IControlFormItemGroup, IFormValidation
     {
         private readonly List<ControlFormItem> _items = [];
         private readonly List<ValidationResult> _validationResults = [];
@@ -73,9 +73,12 @@ namespace WebExpress.WebUI.WebControl
         /// maintaining the order of addition.
         /// This method accepts any item that derives from <see cref="ControlListItem"/>.
         /// </remarks>
-        public void Add(params ControlFormItem[] items)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlFormItemGroup Add(params ControlFormItem[] items)
         {
             _items.AddRange(items);
+
+            return this;
         }
 
         /// <summary>
@@ -88,9 +91,12 @@ namespace WebExpress.WebUI.WebControl
         /// maintaining the order of addition.
         /// This method accepts any item that derives from <see cref="ControlListItem"/>.
         /// </remarks>
-        public virtual void Add(IEnumerable<ControlFormItem> items)
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlFormItemGroup Add(IEnumerable<ControlFormItem> items)
         {
             _items.AddRange(items);
+
+            return this;
         }
 
         /// <summary>
@@ -102,9 +108,12 @@ namespace WebExpress.WebUI.WebControl
         /// current form of items. If the item does not exist in the list, the method does nothing.
         /// This method accepts any item that derives from <see cref="ControlListItem"/>.
         /// </remarks>
-        public virtual void Remove(ControlFormItem item)
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlFormItemGroup Remove(ControlFormItem item)
         {
             _items.Remove(item);
+
+            return this;
         }
 
         /// <summary>

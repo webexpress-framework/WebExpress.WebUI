@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a control that displays a list of links with optional icons and names.
     /// </summary>
-    public class ControlLinkList : Control
+    public class ControlLinkList : Control, IControlLinkList
     {
         private readonly List<IControlLink> _links = [];
 
@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary> 
         /// <param name="links">The links to add to the content.</param> 
         /// <remarks> 
-        /// This method allows adding one or multiple links to the <see cref="Links"/> collection of 
+        /// This method allows adding one or multiple links to the collection of 
         /// the link list control. It is useful for dynamically constructing the user interface by appending 
         /// various links to the link list content. 
         /// Example usage: 
@@ -62,9 +62,12 @@ namespace WebExpress.WebUI.WebControl
         /// </code> 
         /// This method accepts any control that implements the <see cref="IControlLink"/> interface.
         /// </remarks>
-        public virtual void Add(params IControlLink[] links)
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlLinkList Add(params IControlLink[] links)
         {
             _links.AddRange(links);
+
+            return this;
         }
 
         /// <summary> 
@@ -72,7 +75,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary> 
         /// <param name="links">The links to add to the content.</param> 
         /// <remarks> 
-        /// This method allows adding one or multiple links to the <see cref="Links"/> collection of 
+        /// This method allows adding one or multiple links to the collection of 
         /// the link list control. It is useful for dynamically constructing the user interface by appending 
         /// various links to the link list content. 
         /// Example usage: 
@@ -84,9 +87,12 @@ namespace WebExpress.WebUI.WebControl
         /// </code> 
         /// This method accepts any control that implements the <see cref="IControlLink"/> interface.
         /// </remarks>
-        public virtual void Add(IEnumerable<IControlLink> links)
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlLinkList Add(IEnumerable<IControlLink> links)
         {
             _links.AddRange(links);
+
+            return this;
         }
 
         /// <summary>
@@ -94,12 +100,15 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="link">The link to remove from the content.</param>
         /// <remarks>
-        /// This method allows removing a specific link from the <see cref="Links"/> collection of 
+        /// This method allows removing a specific link from the collection of 
         /// the link list control.
         /// </remarks>
-        public virtual void Remove(IControlLink link)
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlLinkList Remove(IControlLink link)
         {
             _links.Remove(link);
+
+            return this;
         }
 
         /// <summary>

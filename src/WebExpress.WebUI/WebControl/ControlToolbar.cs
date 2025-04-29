@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a toolbar control that can contain various toolbar items.
     /// </summary>
-    public class ControlToolbar : Control
+    public class ControlToolbar : Control, IControlToolbar
     {
         private List<IControlToolbarItem> _items = [];
 
@@ -78,10 +78,15 @@ namespace WebExpress.WebUI.WebControl
         /// </code>
         /// This method accepts any item that derives from <see cref="ControlListItem"/>.
         /// </remarks>
-        public void Add(params IControlToolbarItem[] items)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlToolbar Add(params IControlToolbarItem[] items)
         {
             _items.AddRange(items);
-        }        /// <summary>
+
+            return this;
+        }
+
+        /// <summary>
         /// Adds one or more toolbar items to the toolbar.
         /// </summary>
         /// <param name="items">The toolbar items to add.</param>
@@ -98,9 +103,12 @@ namespace WebExpress.WebUI.WebControl
         /// </code>
         /// This method accepts any item that derives from <see cref="IControlToolbarItem"/>.
         /// </remarks>
-        public void Add(IEnumerable<IControlToolbarItem> items)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlToolbar Add(IEnumerable<IControlToolbarItem> items)
         {
             _items.AddRange(items);
+
+            return this;
         }
 
         /// <summary>
@@ -119,9 +127,12 @@ namespace WebExpress.WebUI.WebControl
         /// </code>
         /// This method accepts any item that derives from <see cref="IControlToolbarItem"/>.
         /// </remarks>
-        public void Remove(IControlToolbarItem item)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlToolbar Remove(IControlToolbarItem item)
         {
             _items.Remove(item);
+
+            return this;
         }
 
         /// <summary>

@@ -264,9 +264,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Instructs to reload the initial form data.
         /// </summary>
-        public void Reset()
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlForm Reset()
         {
             Fill(null);
+
+            return this;
         }
 
         /// <summary>
@@ -521,9 +524,12 @@ namespace WebExpress.WebUI.WebControl
         /// </code> 
         /// This method accepts any control that implements the <see cref="ControlFormItem"/> interface.
         /// </remarks>
-        public void Add(params ControlFormItem[] items)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlForm Add(params ControlFormItem[] items)
         {
             _items.AddRange(items);
+
+            return this;
         }
 
         /// <summary> 
@@ -543,9 +549,12 @@ namespace WebExpress.WebUI.WebControl
         /// </code> 
         /// This method accepts any control that implements the <see cref="ControlFormItem"/> interface.
         /// </remarks>
-        public void Add(IEnumerable<ControlFormItem> items)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlForm Add(IEnumerable<ControlFormItem> items)
         {
             _items.AddRange(items);
+
+            return this;
         }
 
         /// <summary>
@@ -556,25 +565,32 @@ namespace WebExpress.WebUI.WebControl
         /// This method allows removing a specific form item from the <see cref="Items"/> collection of 
         /// the form.
         /// </remarks>
-        public virtual void Remove(ControlFormItem item)
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlForm Remove(ControlFormItem item)
         {
             _items.Remove(item);
+
+            return this;
         }
 
         /// <summary>
         /// Adds a preferences control.
         /// </summary>
         /// <param name="controls">The controls.</param>
-        public void AddPreferencesControl(params ControlFormItem[] controls)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlForm AddPreferencesControl(params ControlFormItem[] controls)
         {
             _preferencesControls.AddRange(controls);
+
+            return this;
         }
 
         /// <summary>
         /// Adds a preferences form control button.
         /// </summary>
         /// <param name="button">The form buttons.</param>
-        public void AddPreferencesButton(params ControlFormItemButton[] buttons)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlForm AddPreferencesButton(params ControlFormItemButton[] buttons)
         {
             foreach (var button in buttons)
             {
@@ -589,22 +605,28 @@ namespace WebExpress.WebUI.WebControl
             }
 
             _preferencesButtons.AddRange(buttons);
+
+            return this;
         }
 
         /// <summary>
         /// Adds a primary control.
         /// </summary>
         /// <param name="controls">The controls.</param>
-        public void AddPrimaryControl(params ControlFormItem[] controls)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlForm AddPrimaryControl(params ControlFormItem[] controls)
         {
             _primaryControls.AddRange(controls);
+
+            return this;
         }
 
         /// <summary>
         /// Adds a primary form control button.
         /// </summary>
         /// <param name="button">The form buttons.</param>
-        public void AddPrimaryButton(params ControlFormItemButton[] buttons)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlForm AddPrimaryButton(params ControlFormItemButton[] buttons)
         {
             foreach (var button in buttons)
             {
@@ -619,22 +641,28 @@ namespace WebExpress.WebUI.WebControl
             }
 
             _primaryButtons.AddRange(buttons);
+
+            return this;
         }
 
         /// <summary>
         /// Adds a secondary control.
         /// </summary>
         /// <param name="controls">The controls.</param>
-        public void AddSecondaryControl(params ControlFormItem[] controls)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlForm AddSecondaryControl(params ControlFormItem[] controls)
         {
             _secondaryControls.AddRange(controls);
+
+            return this;
         }
 
         /// <summary>
         /// Adds a secondary form control button.
         /// </summary>
         /// <param name="button">The form buttons.</param>
-        public void AddSecondaryButton(params ControlFormItemButton[] buttons)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlForm AddSecondaryButton(params ControlFormItemButton[] buttons)
         {
             foreach (var button in buttons)
             {
@@ -649,17 +677,23 @@ namespace WebExpress.WebUI.WebControl
             }
 
             _secondaryButtons.AddRange(buttons);
+
+            return this;
         }
 
         /// <summary>
         /// Removes a form control button from the form.
         /// </summary>
         /// <param name="button">The form button.</param>
-        public void RemoveButton(ControlFormItemButton button)
+        /// <returns>The current instance for method chaining.</returns>
+
+        public IControlForm RemoveButton(ControlFormItemButton button)
         {
             _preferencesButtons.Remove(button);
             _primaryButtons.Remove(button);
             _secondaryButtons.Remove(button);
+
+            return this;
         }
 
         /// <summary>

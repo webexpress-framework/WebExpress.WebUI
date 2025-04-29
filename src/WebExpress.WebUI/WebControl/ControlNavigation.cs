@@ -7,7 +7,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a navigation control.
     /// </summary>
-    public class ControlNavigation : Control
+    public class ControlNavigation : Control, IControlNavigation
     {
         private List<IControlNavigationItem> _items = [];
 
@@ -87,7 +87,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary> 
         /// <param name="items">The items to add to the control.</param> 
         /// <remarks> 
-        /// This method allows adding one or multiple items to the <see cref="Items"/> collection of 
+        /// This method allows adding one or multiple items to the collection of 
         /// the control.
         /// Example usage: 
         /// <code> 
@@ -98,9 +98,12 @@ namespace WebExpress.WebUI.WebControl
         /// </code> 
         /// This method accepts any items that implements the <see cref="IControlNavigationItem"/> interface.
         /// </remarks>
-        public virtual void Add(params IControlNavigationItem[] items)
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlNavigation Add(params IControlNavigationItem[] items)
         {
             _items.AddRange(items);
+
+            return this;
         }
 
         /// <summary> 
@@ -108,7 +111,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary> 
         /// <param name="items">The items to add to the control.</param> 
         /// <remarks> 
-        /// This method allows adding one or multiple items to the <see cref="Items"/> collection of 
+        /// This method allows adding one or multiple items to the collection of 
         /// the control.
         /// Example usage: 
         /// <code> 
@@ -119,9 +122,12 @@ namespace WebExpress.WebUI.WebControl
         /// </code> 
         /// This method accepts any items that implements the <see cref="IControlNavigationItem"/> interface.
         /// </remarks>
-        public virtual void Add(IEnumerable<IControlNavigationItem> controls)
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlNavigation Add(IEnumerable<IControlNavigationItem> items)
         {
-            _items.AddRange(controls);
+            _items.AddRange(items);
+
+            return this;
         }
 
         /// <summary>
@@ -129,12 +135,15 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="item">The item to remove from the content.</param>
         /// <remarks>
-        /// This method allows removing a specific item from the <see cref="Items"/> collection of 
+        /// This method allows removing a specific item from the collection of 
         /// the control.
         /// </remarks>
-        public virtual void Remove(IControlNavigationItem item)
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlNavigation Remove(IControlNavigationItem item)
         {
             _items.Remove(item);
+
+            return this;
         }
 
         /// <summary>

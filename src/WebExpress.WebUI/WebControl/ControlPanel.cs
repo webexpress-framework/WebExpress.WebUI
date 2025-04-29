@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a control panel that can contain multiple child controls and manage their layout and rendering.
     /// </summary>
-    public class ControlPanel : Control
+    public class ControlPanel : Control, IControlPanel
     {
         private readonly List<IControl> _content = [];
 
@@ -76,9 +76,12 @@ namespace WebExpress.WebUI.WebControl
         /// </code> 
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
-        public virtual void Add(params IControl[] controls)
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlPanel Add(params IControl[] controls)
         {
             _content.AddRange(controls);
+
+            return this;
         }
 
         /// <summary> 
@@ -98,9 +101,12 @@ namespace WebExpress.WebUI.WebControl
         /// </code> 
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
-        public virtual void Add(IEnumerable<IControl> controls)
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlPanel Add(IEnumerable<IControl> controls)
         {
             _content.AddRange(controls);
+
+            return this;
         }
 
         /// <summary>
@@ -111,9 +117,12 @@ namespace WebExpress.WebUI.WebControl
         /// This method allows removing a specific control from the <see cref="Content"/> collection of 
         /// the control panel.
         /// </remarks>
-        public virtual void Remove(IControl control)
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlPanel Remove(IControl control)
         {
             _content.Remove(control);
+
+            return this;
         }
 
         /// <summary>
@@ -123,9 +132,12 @@ namespace WebExpress.WebUI.WebControl
         /// This method removes all controls from the <see cref="Content"/> collection of the control panel.
         /// It is useful for resetting the panel's content to an empty state.
         /// </remarks>
-        public virtual void Clear()
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlPanel Clear()
         {
             _content.Clear();
+
+            return this;
         }
 
         /// <summary>

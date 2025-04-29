@@ -56,7 +56,8 @@ namespace WebExpress.WebUI.WebControl
         public void Add(params IControl[] items)
         {
             _items.AddRange(items);
-        }
+        }
+
         /// <summary>
         /// Adds a divider to the control.
         /// </summary>
