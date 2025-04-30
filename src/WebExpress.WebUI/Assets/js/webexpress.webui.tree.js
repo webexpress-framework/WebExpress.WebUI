@@ -49,6 +49,11 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
 
         // Handle drag start
         element.on("dragstart", (event) => {
+            if (!event.ctrlKey) {
+                event.preventDefault(); // Prevent drag if Ctrl is not pressed
+                return;
+            }
+
             this._dragover = node;
             event.originalEvent.dataTransfer.setData("text/plain", JSON.stringify(
                 {
@@ -301,10 +306,14 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
 
         nodes.forEach((node) => {
             // Create the tree item
-            const li = $("<li>").attr("id", node.id);
-            li.attr("role", "treeitem"); // ARIA role for tree item
-            li.attr("aria-expanded", node.expand || false); // Indicate expanded/collapsed state
-            li.attr("aria-level", this._getNodeLevel(node)); // Indicate the nesting level
+            const li = $("<li>").attr("id", node.id)
+                .attr("role", "treeitem") // ARIA role for tree item
+                .attr("aria-expanded", node.expand || false) // Indicate expanded/collapsed state
+                .attr("aria-level", this._getNodeLevel(node)); // Indicate the nesting level
+            const div = $("<div>");
+            const ul = $("<ul>") // children
+                .addClass(this._getLayoutClasses())
+                .attr("role", "group"); // ARIA role for the group of children
 
             switch (this._layout) {
                 case "wx-tree-group":
@@ -333,12 +342,76 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             const icon = $("<i>");
 
             labelContainer
-                .addClass("wx-tree-label-container")
-                .addClass(node.color);
+                .addClass(node.color)
+                .addClass("wx-tree-label-container");
 
             // Add image, icon, or label
-            this._addNodeContent(labelContainer, node, img, icon);
-            li.append(labelContainer);
+            if (node.active) {
+                labelContainer
+                    .removeClass(node.color)
+                    .addClass("active");
+            }
+
+            labelContainer.click(() => {
+                $(document).trigger(webexpress.webui.Event.CLICK_EVENT,
+                    {
+                        id: $(this._element).attr("id"),
+                        node: node.id
+                    });
+            });
+
+            // Handle expandable nodes
+            if (this._showIndicator && node.children?.length > 0) {
+                const indicator = $("<i>").addClass("wx-tree-indicator-angle");
+                div.append(indicator);
+                indicator.click(() => {
+                    this._toggleNode(node, ul, icon, img, indicator);
+                });
+                labelContainer.click(() => {
+                    this._toggleNode(node, ul, icon, img, indicator);
+                });
+                if (node.expand) {
+                    indicator.addClass("wx-tree-expand");
+                    icon.removeClass(node.iconClose).addClass(node.iconOpen);
+                    img.attr("src", node.imageOpen);
+                }
+            } else {
+                // Add leaf node indicator
+                if (this._showIndicator) {
+                    div.append($("<i>").addClass("wx-tree-indicator-dot"));
+                }
+            }
+
+            if (typeof node.render === "string") {
+                const render = new Function("node", node.render);
+                const renderResult = render(node);
+                if (renderResult) {
+                    labelContainer.append(renderResult);
+                }
+            } else {
+                if (node.imageOpen) {
+                    img.attr("src", node.expand ? node.imageOpen : node.imageClose);
+                    labelContainer.append(img);
+                }
+
+                if (node.iconOpen) {
+                    icon.addClass(node.expand ? node.iconOpen : node.iconClose);
+                    labelContainer.append(icon);
+                }
+
+                labelContainer.append($("<span>").text(node.label));
+            }
+
+            div.append(labelContainer);
+            li.append(div);
+
+            // Handle expandable nodes
+            if (node.children && node.children.length > 0) {
+                li.append(ul);
+                if (node.expand) {
+                    this._renderTree(ul, node.children);
+                }
+            }
 
             if (node.url) {
                 labelContainer.attr("href", node.url);
@@ -351,40 +424,6 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             if (node.tooltip) {
                 labelContainer.attr("title", node.tooltip);
             }
-
-            // Handle expandable nodes
-            if (node.children && node.children.length > 0) {
-                const ul = $("<ul>").addClass(this._getLayoutClasses());
-                ul.attr("role", "group"); // ARIA role for the group of children
-                const indicator = $("<i>").addClass("wx-tree-indicator-angle");
-
-                if (this._showIndicator) {
-                    labelContainer.prepend(indicator);
-                }
-                li.append(ul);
-
-                if (node.expand) {
-                    this._renderTree(ul, node.children);
-                    indicator.addClass("wx-tree-expand");
-                }
-
-                labelContainer.click(() => {
-                    this._toggleNode(node, ul, icon, img, indicator);
-                });
-            } else {
-                // Add leaf node indicator
-                if (this._showIndicator) {
-                    labelContainer.prepend($("<i>").addClass("wx-tree-indicator-dot"));
-                }
-            }
-
-            labelContainer.click(() => {
-                $(document).trigger(webexpress.webui.Event.CLICK_EVENT,
-                    {
-                        id: $(this._element).attr("id"),
-                        node: node.id
-                    });
-            });
 
             // Append the node to the container
             container.append(li);
@@ -427,56 +466,18 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             });
 
         if (!node.expand) {
-            indicator.addClass("wx-tree-expand");
+            indicator.addClass("wx-tree-expand-animation");;
             icon.removeClass(node.iconClose).addClass(node.iconOpen);
             img.attr("src", node.imageOpen);
             this._renderTree(ul, node.children);
         } else {
-            indicator.removeClass("wx-tree-expand");
+            indicator.removeClass("wx-tree-expand wx-tree-expand-animation");
             icon.removeClass(node.iconOpen).addClass(node.iconClose);
             img.attr("src", node.imageClose);
             ul.empty();
         }
 
         node.expand = !node.expand;
-    }
-
-    /**
-     * Adds content (image, icon, or label) to a tree node.
-     * @private
-     * @param {jQuery} expand - The container for the node's expand/collapse elements.
-     * @param {Object} node - The tree node data.
-     * @param {jQuery} img - The image element for the node.
-     * @param {jQuery} icon - The icon element for the node.
-     */
-    _addNodeContent(expand, node, img, icon) {
-        const div = $("<div>");
-
-        if (node.active) {
-            div.addClass("active");
-        }
-
-        if (typeof node.render === "string") {
-            const render = new Function("node", node.render);
-            const renderResult = render(node);
-            if (renderResult) {
-                div.append(renderResult);
-            }
-        } else {
-            if (node.imageOpen) {
-                img.attr("src", node.expand ? node.imageOpen : node.imageClose);
-                div.append(img);
-            }
-
-            if (node.iconOpen) {
-                icon.addClass(node.expand ? node.iconOpen : node.iconClose);
-                div.append(icon);
-            }
-
-            div.append($("<span>").text(node.label));
-        }
-
-        expand.append(div);
     }
 
     /**
