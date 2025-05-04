@@ -15,7 +15,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""radio""><label><input type=""radio""></label></div>")]
-        [InlineData("id", @"<div class=""radio""><label><input id=""id"" type=""radio""></label></div>")]
+        [InlineData("id", @"<div class=""radio""><label><input id=""id"" name=""id"" type=""radio""></label></div>")]
         public void Id(string id, string expected)
         {
             // preconditions

@@ -91,7 +91,7 @@ namespace WebExpress.WebUI.WebPage
 
             Title = pageContext?.PageTitle;
 
-            var contextPath = pageContext.ApplicationContext?.ContextPath;
+            var contextPath = pageContext.ApplicationContext?.Route;
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/fontawesome.min.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/bootstrap.min.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/solid.css"));

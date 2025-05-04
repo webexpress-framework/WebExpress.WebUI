@@ -42,7 +42,6 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemInputFile(string id = null)
             : base(!string.IsNullOrWhiteSpace(id) ? id : "file")
         {
-            Name = Id;
             Margin = new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.Two, PropertySpacing.Space.None, PropertySpacing.Space.None);
         }
 

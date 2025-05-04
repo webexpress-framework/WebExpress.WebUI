@@ -135,7 +135,7 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="renderContext">The context in which the control is rendered.</param>
         protected virtual void Initialize(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var contextPath = renderContext?.PageContext?.ApplicationContext?.ContextPath;
+            var contextPath = renderContext?.PageContext?.ApplicationContext?.Route;
             visualTree.AddHeaderScriptLink(RouteEndpoint.Combine(contextPath, "/assets/js/split.min.js"));
 
             var init1 = 0;

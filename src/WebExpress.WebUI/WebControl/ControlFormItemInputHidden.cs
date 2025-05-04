@@ -15,7 +15,6 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemInputHidden(string id = null)
             : base(id)
         {
-            Name = Id;
         }
 
         /// <summary>

@@ -45,7 +45,6 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemInputSelection(string id = null, params ControlFormItemInputSelectionItem[] items)
             : base(id)
         {
-            Name = id;
             _options.AddRange(items);
         }
 

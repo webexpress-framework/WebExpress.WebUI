@@ -17,7 +17,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<button type=""button"" class=""btn""></button>")]
-        [InlineData("id", @"<button id=""id"" type=""button"" class=""btn""></button>")]
+        [InlineData("id", @"<button id=""id"" name=""id"" type=""button"" class=""btn""></button>")]
         public void Id(string id, string expected)
         {
             // preconditions

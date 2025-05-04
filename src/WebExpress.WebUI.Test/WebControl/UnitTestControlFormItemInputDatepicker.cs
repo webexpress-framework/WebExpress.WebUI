@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the form datepicker control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<input id=""datepicker"" type=""text"" class=""form-control"">")]
-        [InlineData("id", @"<input id=""id"" type=""text"" class=""form-control"">")]
+        [InlineData(null, @"<input id=""datepicker"" name=""datepicker"" type=""text"" class=""form-control"">")]
+        [InlineData("id", @"<input id=""id"" name=""id"" type=""text"" class=""form-control"">")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -61,8 +61,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form datepicker control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<input id=""datepicker"" type=""text"" class=""form-control"">*")]
-        [InlineData("2023-10-10", @"*<input id=""datepicker"" type=""text"" class=""form-control"" value=""2023-10-10"">*")]
+        [InlineData(null, @"*<input id=""datepicker"" name=""datepicker"" type=""text"" class=""form-control"">*")]
+        [InlineData("2023-10-10", @"*<input id=""datepicker"" name=""datepicker"" type=""text"" class=""form-control"" value=""2023-10-10"">*")]
         public void Value(string value, string expected)
         {
             // preconditions
@@ -85,8 +85,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the required property of the form datepicker control.
         /// </summary>
         [Theory]
-        [InlineData(false, @"<input id=""datepicker"" type=""text"" class=""form-control"">")]
-        [InlineData(true, @"<input id=""datepicker"" type=""text"" class=""form-control"">")]
+        [InlineData(false, @"<input id=""datepicker"" name=""datepicker"" type=""text"" class=""form-control"">")]
+        [InlineData(true, @"<input id=""datepicker"" name=""datepicker"" type=""text"" class=""form-control"">")]
         public void Required(bool required, string expected)
         {
             // preconditions

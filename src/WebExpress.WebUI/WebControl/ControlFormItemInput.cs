@@ -73,6 +73,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemInput(string id)
             : base(id)
         {
+            Name = id;
         }
 
         /// <summary>

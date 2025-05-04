@@ -87,6 +87,7 @@ namespace WebExpress.WebUI.WebControl
         {
             _content.AddRange(content);
 
+            Name = Id;
             Disabled = false;
             Size = TypeSizeButton.Default;
         }

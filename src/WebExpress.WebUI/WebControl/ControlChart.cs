@@ -74,7 +74,8 @@ namespace WebExpress.WebUI.WebControl
             : base(id)
         {
             _datasets.AddRange(datasets);
-        }
+        }
+
         /// <summary>
         /// Initializes the control.
         /// </summary>
@@ -82,8 +83,8 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="visualTree">The visual tree representing the control's structure.</param>
         protected void Initialize(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            visualTree.AddHeaderScriptLink(RouteEndpoint.Combine(renderContext.PageContext?.ApplicationContext?.ContextPath, "/assets/js/Chart.min.js"));
-            visualTree.AddCssLink(RouteEndpoint.Combine(renderContext.PageContext?.ApplicationContext?.ContextPath, "/assets/css/Chart.min.css"));
+            visualTree.AddHeaderScriptLink(RouteEndpoint.Combine(renderContext.PageContext?.ApplicationContext?.Route, "/assets/js/Chart.min.js"));
+            visualTree.AddCssLink(RouteEndpoint.Combine(renderContext.PageContext?.ApplicationContext?.Route, "/assets/css/Chart.min.css"));
 
             var builder = new StringBuilder();
             var data = new List<StringBuilder>();

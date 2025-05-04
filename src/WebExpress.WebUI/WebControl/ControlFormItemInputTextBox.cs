@@ -64,7 +64,6 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemInputTextBox(string id = null)
             : base(id)
         {
-            Name = Id;
             Margin = new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.Two, PropertySpacing.Space.None, PropertySpacing.Space.None);
         }
 
@@ -78,7 +77,7 @@ namespace WebExpress.WebUI.WebControl
 
             if (Format == TypesEditTextFormat.Wysiwyg)
             {
-                var contextPath = renderContext?.PageContext?.ApplicationContext?.ContextPath;
+                var contextPath = renderContext?.PageContext?.ApplicationContext?.Route;
                 //renderContext.AddCssLinks(UriResource.Combine(contextPath, "/assets/css/summernote-bs5.min.css"));
                 //renderContext.AddHeaderScriptLinks(UriResource.Combine(contextPath, "/assets/js/summernote-bs5.min.js"));
             }

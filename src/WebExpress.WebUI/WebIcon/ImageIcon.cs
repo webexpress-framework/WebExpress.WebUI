@@ -43,7 +43,7 @@ namespace WebExpress.WebUI.WebIcon
         protected ImageIcon(IUri uri, PropertySizeIcon size, IApplicationContext applicationContext = null)
         {
             var assembly = GetType().Assembly;
-            var applicationPath = applicationContext?.ContextPath;
+            var applicationPath = applicationContext?.Route;
             var pluginPath = applicationContext?.PluginContext?.Assembly == assembly
                 ? applicationPath
                 : applicationPath?.Concat(assembly.GetName().Name.ToLower());

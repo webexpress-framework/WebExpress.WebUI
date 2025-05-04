@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using WebExpress.WebCore.WebMessage;
+using WebExpress.WebCore.WebUri;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -32,12 +33,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the target URI.
         /// </summary>
-        string Uri { get; set; }
+        IUri Uri { get; set; }
 
         /// <summary>
         /// Returns or sets the redirect URI.
         /// </summary>
-        string RedirectUri { get; set; }
+        IUri RedirectUri { get; set; }
 
         /// <summary>
         /// Returns or sets the form items.
@@ -50,6 +51,12 @@ namespace WebExpress.WebUI.WebControl
         RequestMethod Method { get; set; }
 
         /// <summary>
+        /// Returns or sets the confirmation control that is displayed 
+        /// instead of the form after the form has been successfully submitted.
+        /// </summary>
+        IControl Conformation { get; set; }
+
+        /// <summary>
         /// Initialize the form with data using the specified action.
         /// </summary>
         /// <param name="handler">The action to execute for filling the form.</param>
@@ -59,7 +66,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Checks the form for correctness of the data.
         /// </summary>
-        /// <param name="handler">The action to execute for validation the form.</param>
+        /// <param name="handler">The action to execute for validating the form.</param>
         /// <returns>The current instance for method chaining.</returns>
         IControlForm Validate(Action<ControlFormEventFormValidate> handler);
 

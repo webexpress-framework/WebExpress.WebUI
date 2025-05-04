@@ -17,7 +17,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<select class=""form-select""></select>")]
-        [InlineData("id", @"<select id=""id"" class=""form-select""></select>")]
+        [InlineData("id", @"<select id=""id"" name=""id"" class=""form-select""></select>")]
         public void Id(string id, string expected)
         {
             // preconditions

@@ -9,6 +9,7 @@ using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebMessage;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebCore.WebScope;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebFragment;
 using WebExpress.WebUI.WebPage;
 using WebExpress.WebUI.WebSection;
@@ -56,12 +57,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the target uri.
         /// </summary>
-        public string Uri { get; set; }
+        public IUri Uri { get; set; }
 
         /// <summary>
         /// Returns or sets the redirect uri.
         /// </summary>
-        public string RedirectUri { get; set; }
+        public IUri RedirectUri { get; set; }
 
         /// <summary>
         /// Returns or sets the form layout.
@@ -144,6 +145,12 @@ namespace WebExpress.WebUI.WebControl
             get => (TypeJustifiedFlexbox)GetProperty(TypeJustifiedFlexbox.Start);
             set => SetProperty(value, () => value.ToClass());
         }
+
+        /// <summary>
+        /// Returns or sets the confirmation control that is displayed 
+        /// instead of the form after the form has been successfully submitted.
+        /// </summary>
+        public IControl Conformation { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ControlForm"/> class with the specified items.
@@ -263,7 +270,7 @@ namespace WebExpress.WebUI.WebControl
                 OnValidate(validateEventArgument);
                 validationResults.AddRange(validateEventArgument.Results);
 
-                if (!validationResults.Any())
+                if (validationResults.Count == 0)
                 {
                     foreach (var item in items.Where(x => x is IControlFormProcess).Select(x => x as IControlFormProcess))
                     {
@@ -273,9 +280,14 @@ namespace WebExpress.WebUI.WebControl
                     // valid form
                     OnProcess(new ControlFormEventFormProzess() { Context = renderFormContext });
 
-                    if (!string.IsNullOrWhiteSpace(RedirectUri?.ToString()))
+                    if (RedirectUri?.Empty == false)
                     {
                         throw new RedirectException(RedirectUri);
+                    }
+
+                    if (Conformation != null)
+                    {
+                        return Conformation.Render(renderContext, visualTree);
                     }
                 }
             }
@@ -296,15 +308,6 @@ namespace WebExpress.WebUI.WebControl
             form.Add(FormId.Render(renderFormContext, visualTree));
 
             var header = new HtmlElementSectionHeader();
-            header.Add(new ControlProgressBar()
-            {
-                Format = TypeFormatProgress.Animated,
-                Color = new PropertyColorProgress(TypeColorProgress.Success),
-                Margin = new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.None, PropertySpacing.Space.None, PropertySpacing.Space.Three),
-                Styles = ["height: 3px;", "display: none;"],
-                Value = 0
-            }.Render(renderFormContext, visualTree));
-
 
             var headerPreferences = WebEx.ComponentHub.FragmentManager.GetFragments<IFragmentControl, SectionFormHeaderPreferences>
             (
@@ -397,7 +400,7 @@ namespace WebExpress.WebUI.WebControl
             footer.Add(footerPrimary.Select(x => x.Render(renderFormContext, visualTree)));
             footer.Add(footerSecondary.Select(x => x.Render(renderFormContext, visualTree)));
 
-            if (headerPreferences.Any() || headerPrimary.Any() || headerSecondary.Any())
+            if (header.Elements.Any())
             {
                 form.Add(header);
             }

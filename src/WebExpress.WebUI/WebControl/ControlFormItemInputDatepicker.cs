@@ -60,7 +60,7 @@ namespace WebExpress.WebUI.WebControl
         {
             AutoInitialize = true;
 
-            var contextPath = renderContext.PageContext?.ApplicationContext?.ContextPath;
+            var contextPath = renderContext.PageContext?.ApplicationContext?.Route;
 
             //if (state == ControlFormState.New)
             //{

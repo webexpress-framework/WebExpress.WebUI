@@ -15,7 +15,6 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemButtonSubmit(string id = null, params IControl[] content)
             : base(id, content)
         {
-            Name = Id;
             Text = "webexpress.webui:form.submit.label";
             Icon = new IconSave();
             Color = new PropertyColorButton(TypeColorButton.Success);

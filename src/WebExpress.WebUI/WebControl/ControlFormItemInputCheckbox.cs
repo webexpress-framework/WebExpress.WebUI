@@ -32,7 +32,6 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemInputCheckbox(string id = null)
             : base(id)
         {
-            Name = id;
         }
 
         /// <summary>
