@@ -66,13 +66,12 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlModalForm()
-            {
-            };
+            var control = new ControlModalForm();
+            var form = new ControlModalForm();
 
             // test execution
-            control.Add(new ControlFormItemInputTextBox() { Value = "abc" });
-            var html = control.Render(context, visualTree);
+            form.Add(new ControlFormItemInputTextBox());
+            var html = form.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(@"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*<input * type=""text"" class=""form-control"">*</form>", html);
         }

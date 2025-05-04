@@ -143,7 +143,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCombobox();
-            control.Prepend.Add(new ControlText { Text = "prepend" });
+            control.AddPrepend(new ControlText { Text = "prepend" });
 
             // test execution
             var html = control.Render(context, visualTree);
@@ -164,7 +164,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCombobox();
-            control.Append.Add(new ControlText { Text = "append" });
+            control.AddPrepend(new ControlText { Text = "append" });
 
             // test execution
             var html = control.Render(context, visualTree);

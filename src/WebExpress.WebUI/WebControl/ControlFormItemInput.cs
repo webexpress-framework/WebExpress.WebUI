@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using WebExpress.WebCore.WebIcon;
 
 namespace WebExpress.WebUI.WebControl
@@ -11,21 +10,25 @@ namespace WebExpress.WebUI.WebControl
     /// <remarks>
     /// This class provides the base functionality for form input items.
     /// </remarks>
-    public abstract class ControlFormItemInput : ControlFormItem, IControlFormLabel, IFormValidation
+    public abstract class ControlFormItemInput : ControlFormItem, IControlFormItemInput, IControlFormLabel, IControlFormValidation
     {
-        private readonly List<ValidationResult> _validationResults = [];
         private readonly List<IControl> _prepend = [];
         private readonly List<IControl> _append = [];
 
         /// <summary>
-        /// Event to validate the input values.
+        /// Event is raised when the form's data needs to be determined.
         /// </summary>
-        public event EventHandler<ValidationEventArgs> Validation;
+        public event Action<ControlFormEventItemInitialize> InitializeItem;
 
         /// <summary>
-        /// Determines whether the inputs are valid.
+        /// Event to validate the input values.
         /// </summary>
-        public virtual IEnumerable<ValidationResult> ValidationResults => _validationResults;
+        public event Action<ControlFormEventItemValidate> ValidateItem;
+
+        /// <summary>
+        /// Event is raised when the items's data needs to be determined.
+        /// </summary>
+        public event Action<ControlFormEventItemProzess> ProcessItem;
 
         /// <summary>
         /// Returns or sets the icon.
@@ -50,53 +53,18 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns the elements that are displayed in front of the control.
         /// </summary>
-        public List<IControl> Prepend => _prepend;
+        public IEnumerable<IControl> Prepend => _prepend;
 
         /// <summary>
         /// Returns the elements that are displayed after the control.
         /// </summary>
-        public List<IControl> Append => _append;
+        public IEnumerable<IControl> Append => _append;
 
-        /// <summary>
-        /// Returns or sets whether the form element has been validated.
-        /// </summary>
-        private bool IsValidated { get; set; }
 
         /// <summary>
         /// Returns or sets an object that is linked to the control.
         /// </summary>
         public object Tag { get; set; }
-
-        /// <summary>
-        /// Returns the most serious validation result.
-        /// </summary>
-        public virtual TypesInputValidity ValidationResult
-        {
-            get
-            {
-                var buf = ValidationResults;
-
-                if (buf.Where(x => x.Type == TypesInputValidity.Error).Any())
-                {
-                    return TypesInputValidity.Error;
-                }
-                else if (buf.Where(x => x.Type == TypesInputValidity.Warning).Any())
-                {
-                    return TypesInputValidity.Warning;
-                }
-                else if (buf.Where(x => x.Type == TypesInputValidity.Success).Any())
-                {
-                    return TypesInputValidity.Success;
-                }
-
-                return IsValidated ? TypesInputValidity.Success : TypesInputValidity.Default;
-            }
-        }
-
-        /// <summary>
-        /// Returns or sets the value.
-        /// </summary>
-        public virtual string Value { get; set; } = string.Empty;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -105,66 +73,6 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemInput(string id)
             : base(id)
         {
-            IsValidated = false;
-        }
-
-        /// <summary>
-        /// Adds one or more controls to the prepend list.
-        /// </summary>
-        /// <param name="controls">The controls to add.</param>
-        public void AddPrepend(params IControl[] controls)
-        {
-            _prepend.AddRange(controls);
-        }
-
-        /// <summary>
-        /// Removes a control from the prepend list.
-        /// </summary>
-        /// <param name="control">The control to remove.</param>
-        public void RemovePrepend(IControl control)
-        {
-            _prepend.Remove(control);
-        }
-
-        /// <summary>
-        /// Adds one or more controls to the append list.
-        /// </summary>
-        /// <param name="controls">The controls to add.</param>
-        public void AddAppend(params IControl[] controls)
-        {
-            _append.AddRange(controls);
-        }
-        /// <summary>
-        /// Removes a control from the append list.
-        /// </summary>
-        /// <param name="control">The control to remove.</param>
-        public void RemoveAppend(IControl control)
-        {
-            _append.Remove(control);
-        }
-
-        /// <summary>
-        /// Adds a collection of validation results to the existing validation results.
-        /// </summary>
-        /// <param name="validationResults">The validation results to add.</param>
-        /// <remarks>
-        /// This method appends the specified collection of <see cref="ValidationResult"/> instances to the 
-        /// current list of validation results. It ensures that the new validation results are concatenated 
-        /// with the existing ones, maintaining the order of addition.
-        /// This method accepts any item that derives from <see cref="ValidationResult"/>.
-        /// </remarks>
-        public virtual void AddValidationResult(params ValidationResult[] validationResults)
-        {
-            _validationResults.AddRange(validationResults);
-        }
-
-        /// <summary>
-        /// Removes a validation result from the validation results collection.
-        /// </summary>
-        /// <param name="control">The control to remove.</param>
-        public virtual void RemoveValidationResult(ValidationResult validationResult)
-        {
-            _validationResults.Remove(validationResult);
         }
 
         /// <summary>
@@ -173,37 +81,162 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="renderContext">The context in which the control is rendered.</param>
         public override void Initialize(IRenderControlFormContext renderContext)
         {
+            var eventArgument = new ControlFormEventItemInitialize() { Context = renderContext };
+
+            OnInitialize(eventArgument);
+
+            renderContext.SetValue(this, eventArgument.Value);
+        }
+
+        /// <summary>
+        /// Initialize the form item with data using the specified action.
+        /// </summary>
+        /// <param name="handler">The action to execute for filling the form.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlFormItemInput Initialize(Action<ControlFormEventItemInitialize> handler)
+        {
+            InitializeItem += handler;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Validates the input elements within a form for correctness of the data.
+        /// </summary>
+        /// <param name="renderContext">The context in which the inputs are validated, containing form data and state.</param>
+        /// <returns>A collection of <see cref="ValidationResult"/> objects representing the validation 
+        /// results for each input element. Each result indicates whether the input is valid or contains errors.
+        /// </returns>
+        public virtual IEnumerable<ValidationResult> Validate(IRenderControlFormContext renderContext)
+        {
+            var validationResults = new List<ValidationResult>();
+            if (!Disabled)
+            {
+                var eventArgument = new ControlFormEventItemValidate()
+                {
+                    Context = renderContext,
+                    Value = renderContext.GetValue(this),
+                };
+                OnValidate(eventArgument);
+
+                validationResults.AddRange(eventArgument.Results);
+            }
+
+            return validationResults;
+        }
+
+        /// <summary>
+        /// Checks the form item for correctness of the data.
+        /// </summary>
+        /// <param name="handler">The action to execute for validation the form item.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlFormItemInput Validate(Action<ControlFormEventItemValidate> handler)
+        {
+            ValidateItem += handler;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Processes the form control using the specified rendering context.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        public virtual void Process(IRenderControlFormContext renderContext)
+        {
+            var eventArgument = new ControlFormEventItemProzess()
+            {
+                Context = renderContext,
+                Value = renderContext.GetValue(this)
+            };
+
+            OnProcess(eventArgument);
+        }
+
+        /// <summary>
+        /// Processes the form with the specified handler.
+        /// </summary>
+        /// <param name="handler">The action to execute for processing the form.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlFormItemInput Process(Action<ControlFormEventItemProzess> handler)
+        {
+            ProcessItem += handler;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds one or more controls to the prepend list.
+        /// </summary>
+        /// <param name="controls">The controls to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlFormItemInput AddPrepend(params IControl[] controls)
+        {
+            _prepend.AddRange(controls);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Removes a control from the prepend list.
+        /// </summary>
+        /// <param name="control">The control to remove.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlFormItemInput RemovePrepend(IControl control)
+        {
+            _prepend.Remove(control);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds one or more controls to the append list.
+        /// </summary>
+        /// <param name="controls">The controls to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlFormItemInput AddAppend(params IControl[] controls)
+        {
+            _append.AddRange(controls);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Removes a control from the append list.
+        /// </summary>
+        /// <param name="control">The control to remove.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlFormItemInput RemoveAppend(IControl control)
+        {
+            _append.Remove(control);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Raises the data delivery event.
+        /// </summary>
+        /// <param name="eventArgument">The event argument.</param>
+        protected virtual void OnInitialize(ControlFormEventItemInitialize eventArgument)
+        {
+            InitializeItem?.Invoke(eventArgument);
         }
 
         /// <summary>
         /// Raises the validation event.
         /// </summary>
-        /// <param name="e">The event argument.</param>
-        protected virtual void OnValidation(ValidationEventArgs e)
+        /// <param name="eventArgument">The event argument.</param>
+        protected virtual void OnValidate(ControlFormEventItemValidate eventArgument)
         {
-            Validation?.Invoke(this, e);
+            ValidateItem?.Invoke(eventArgument);
         }
 
         /// <summary>
-        /// Checks the input element for correctness of the data.
+        /// Raises the process event.
         /// </summary>
-        /// <param name="renderContext">The context in which the inputs are validated.</param>
-        public virtual void Validate(IRenderControlFormContext renderContext)
+        /// <param name="eventArgument">The event argument.</param>
+        protected virtual void OnProcess(ControlFormEventItemProzess eventArgument)
         {
-            IsValidated = true;
-
-            if (ValidationResults is List<ValidationResult> validationResults)
-            {
-                validationResults.Clear();
-
-                if (!Disabled)
-                {
-                    var args = new ValidationEventArgs() { Value = Value, Context = renderContext };
-                    OnValidation(args);
-
-                    validationResults.AddRange(args.Results);
-                }
-            }
+            ProcessItem?.Invoke(eventArgument);
         }
     }
 }

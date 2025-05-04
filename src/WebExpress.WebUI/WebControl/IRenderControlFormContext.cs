@@ -11,11 +11,26 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns the form in which the control is rendered.
         /// </summary>
-        public IControlForm Form { get; }
+        IControlForm Form { get; }
 
         /// <summary>
-        /// Returns the validation errors.
+        /// Returns the dictionary of input controls and their associated values.
         /// </summary>
-        public IEnumerable<ValidationResult> ValidationResults { get; }
+        IReadOnlyDictionary<IControlFormItemInput, string> Values { get; }
+
+        /// <summary>
+        /// Retrieves the value associated with the specified input control.
+        /// </summary>
+        /// <param name="input">The input control whose value is to be retrieved.</param>
+        /// <returns>The value associated with the input control, or the default value of <typeparamref name="T"/> if not found.</returns>
+        string GetValue(IControlFormItemInput input);
+
+        /// <summary>
+        /// Sets the value for the specified input control.
+        /// </summary>
+        /// <param name="input">The input control for which the value is to be set.</param>
+        /// <param name="value">The value to set for the input control.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        IRenderControlFormContext SetValue(IControlFormItemInput input, string value);
     }
 }

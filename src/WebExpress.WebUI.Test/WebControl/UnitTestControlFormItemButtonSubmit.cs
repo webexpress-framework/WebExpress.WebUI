@@ -64,8 +64,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeSizeButton.Default, @"<button type=""submit"" class=""btn me-2 btn-success"">*</button>")]
-        [InlineData(TypeSizeButton.Small, @"<button type=""submit"" class=""btn me-2 btn-success btn-sm"">*</button>")]
-        [InlineData(TypeSizeButton.Large, @"<button type=""submit"" class=""btn me-2 btn-success btn-lg"">*</button>")]
+        [InlineData(TypeSizeButton.Small, @"<button type=""submit"" class=""btn me-2 btn-sm btn-success"">*</button>")]
+        [InlineData(TypeSizeButton.Large, @"<button type=""submit"" class=""btn me-2 btn-lg btn-success"">*</button>")]
         public void Size(TypeSizeButton size, string expected)
         {
             // preconditions

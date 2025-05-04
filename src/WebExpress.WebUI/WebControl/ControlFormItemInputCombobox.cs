@@ -48,15 +48,6 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Initializes the form element.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        public override void Initialize(IRenderControlFormContext renderContext)
-        {
-            Value = renderContext.Request.GetParameter(Name)?.Value;
-        }
-
-        /// <summary>
         /// Converts the control to an HTML representation.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
@@ -64,6 +55,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            var value = renderContext.GetValue(this);
             var html = new HtmlElementFieldSelect()
             {
                 Id = Id,
@@ -82,25 +74,16 @@ namespace WebExpress.WebUI.WebControl
                     html.Add(new HtmlElementFormOptgroup() { Label = v.Text });
                     foreach (var s in v.SubItems)
                     {
-                        html.Add(new HtmlElementFormOption() { Value = s.Value, Text = I18N.Translate(renderContext.Request?.Culture, s.Text), Selected = (s.Value == Value) });
+                        html.Add(new HtmlElementFormOption() { Value = s.Value, Text = I18N.Translate(renderContext.Request?.Culture, s.Text), Selected = (s.Value == value) });
                     }
                 }
                 else
                 {
-                    html.Add(new HtmlElementFormOption() { Value = v.Value, Text = I18N.Translate(renderContext.Request?.Culture, v.Text), Selected = (v.Value == Value) });
+                    html.Add(new HtmlElementFormOption() { Value = v.Value, Text = I18N.Translate(renderContext.Request?.Culture, v.Text), Selected = (v.Value == value) });
                 }
             }
 
             return html;
-        }
-
-        /// <summary>
-        /// Checks the input element for correctness of the data.
-        /// </summary>
-        /// <param name="renderContext">The context in which the inputs are validated.</param>
-        public override void Validate(IRenderControlFormContext renderContext)
-        {
-            base.Validate(renderContext);
         }
     }
 }

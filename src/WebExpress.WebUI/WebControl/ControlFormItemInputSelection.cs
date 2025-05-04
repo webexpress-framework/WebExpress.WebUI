@@ -38,13 +38,6 @@ namespace WebExpress.WebUI.WebControl
         public PropertyOnChange OnChange { get; set; }
 
         /// <summary>
-        /// Returns or sets the value.
-        /// </summary>
-        public virtual IEnumerable<string> Values => base.Value != null
-            ? base.Value.Split(';', System.StringSplitOptions.RemoveEmptyEntries)
-            : [];
-
-        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -52,6 +45,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemInputSelection(string id = null, params ControlFormItemInputSelectionItem[] items)
             : base(id)
         {
+            Name = id;
             _options.AddRange(items);
         }
 
@@ -80,18 +74,6 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Initializes the form element.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        public override void Initialize(IRenderControlFormContext renderContext)
-        {
-            if (renderContext.Request.HasParameter(Name))
-            {
-                Value = renderContext?.Request.GetParameter(Name)?.Value;
-            }
-        }
-
-        /// <summary>
         /// Converts the control to an HTML representation.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
@@ -99,22 +81,13 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            var value = renderContext.GetValue(this);
             var classes = new List<string>(["wx-webui-selection"]);
             classes.AddRange(Classes);
 
             if (Disabled)
             {
                 classes.Add("disabled");
-            }
-
-            switch (ValidationResult)
-            {
-                case TypesInputValidity.Warning:
-                    classes.Add("input-warning");
-                    break;
-                case TypesInputValidity.Error:
-                    classes.Add("input-error");
-                    break;
             }
 
             var html = new HtmlElementTextContentDiv([.._options.Select(x => {
@@ -175,21 +148,12 @@ namespace WebExpress.WebUI.WebControl
                 html.AddUserAttribute("data-multiselection", "true");
             }
 
-            if (!string.IsNullOrWhiteSpace(Value))
+            if (!string.IsNullOrWhiteSpace(value))
             {
-                html.AddUserAttribute("data-value", Value);
+                html.AddUserAttribute("data-value", value);
             }
 
             return html;
-        }
-
-        /// <summary>
-        /// Checks the input element for correctness of the data.
-        /// </summary>
-        /// <param name="renderContext">The context in which the inputs are validated.</param>
-        public override void Validate(IRenderControlFormContext renderContext)
-        {
-            base.Validate(renderContext);
         }
     }
 }

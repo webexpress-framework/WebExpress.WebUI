@@ -23,6 +23,7 @@ namespace WebExpress.WebUI.WebControl
         /// Initializes the form element.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="state">The state of the form control, such as New, Update, Submit, or Reset.</param>
         public override void Initialize(IRenderControlFormContext renderContext)
         {
             var renderGroupContext = new RenderControlFormGroupContext(renderContext, this);

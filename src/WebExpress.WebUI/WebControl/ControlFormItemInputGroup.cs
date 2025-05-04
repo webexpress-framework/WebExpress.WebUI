@@ -15,16 +15,6 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemGroup Group { get; private set; }
 
         /// <summary>
-        /// Determines whether the inputs are valid.
-        /// </summary>
-        public override IEnumerable<ValidationResult> ValidationResults => Group != null ? Group.ValidationResults : [];
-
-        /// <summary>
-        /// Returns the most serious validation result.
-        /// </summary>
-        public override TypesInputValidity ValidationResult => Group != null ? Group.ValidationResult : TypesInputValidity.Default;
-
-        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -58,17 +48,20 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Checks the input element for correctness of the data.
+        /// Validates the input elements within a form for correctness of the data.
         /// </summary>
-        /// <param name="renderContext">The context in which the inputs are validated.</param>
-        public override void Validate(IRenderControlFormContext renderContext)
+        /// <param name="renderContext">The context in which the inputs are validated, containing form data and state.</param>
+        /// <returns>A collection of <see cref="ValidationResult"/> objects representing the validation 
+        /// results for each input element. Each result indicates whether the input is valid or contains errors.
+        /// </returns>
+        public override IEnumerable<ValidationResult> Validate(IRenderControlFormContext renderContext)
         {
             if (Disabled)
             {
-                return;
+                return [];
             }
 
-            Group.Validate(renderContext);
+            return Group.Validate(renderContext);
         }
     }
 }

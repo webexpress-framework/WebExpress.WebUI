@@ -17,7 +17,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-selection""></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-webui-selection""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-selection"" name=""id""></div>")]
         public void Id(string id, string expected)
         {
             // preconditions

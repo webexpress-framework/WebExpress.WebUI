@@ -32,18 +32,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemInputCheckbox(string id = null)
             : base(id)
         {
-            Value = "false";
-        }
-
-        /// <summary>
-        /// Initializes the form element.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        public override void Initialize(IRenderControlFormContext renderContext)
-        {
-            var value = renderContext.Request.GetParameter(Name)?.Value;
-
-            Value = string.IsNullOrWhiteSpace(value) || !value.Equals("on", StringComparison.OrdinalIgnoreCase) ? "false" : "true";
+            Name = id;
         }
 
         /// <summary>
@@ -54,6 +43,12 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            var value = renderContext.GetValue(this);
+            value = value?.Equals("true", StringComparison.OrdinalIgnoreCase) == true ||
+                    value?.Equals("on", StringComparison.OrdinalIgnoreCase) == true
+                        ? "true"
+                        : "false";
+
             var html = new HtmlElementTextContentDiv
             (
                 new HtmlElementFieldLabel
@@ -64,8 +59,7 @@ namespace WebExpress.WebUI.WebControl
                         Pattern = Pattern,
                         Type = "checkbox",
                         Disabled = Disabled,
-                        //Role = Role,
-                        Checked = Value.Equals("true")
+                        Checked = value?.Equals("true") ?? false
                     },
                     new HtmlText
                     (
@@ -84,15 +78,6 @@ namespace WebExpress.WebUI.WebControl
             };
 
             return html;
-        }
-
-        /// <summary>
-        /// Checks the input element for correctness of the data.
-        /// </summary>
-        /// <param name="renderContext">The context in which the inputs are validated.</param>
-        public override void Validate(IRenderControlFormContext renderContext)
-        {
-            base.Validate(renderContext);
         }
     }
 }

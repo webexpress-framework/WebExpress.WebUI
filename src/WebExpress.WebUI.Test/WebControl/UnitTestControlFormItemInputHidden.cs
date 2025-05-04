@@ -61,22 +61,22 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form hidden control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<input type=""hidden"">")]
-        [InlineData("abc", @"<input value=""abc"" type=""hidden"">")]
+        [InlineData(null, @"*<input type=""hidden"">*")]
+        [InlineData("abc", @"*<input value=""abc"" type=""hidden"">*")]
         public void Value(string value, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputHidden()
+            var control = new ControlFormItemInputHidden();
+            var form = new ControlForm().Add(control).Initialize(renderContext =>
             {
-                Value = value
-            };
+                renderContext.SetValue(control, value);
+            });
 
             // test execution
-            var html = control.Render(context, visualTree);
+            var html = form.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }

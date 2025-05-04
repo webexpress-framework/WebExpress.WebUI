@@ -64,8 +64,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeSizeButton.Default, @"<button type=""reset"" class=""btn me-2 btn-secondary"">*</button>")]
-        [InlineData(TypeSizeButton.Small, @"<button type=""reset"" class=""btn me-2 btn-secondary btn-sm"">*</button>")]
-        [InlineData(TypeSizeButton.Large, @"<button type=""reset"" class=""btn me-2 btn-secondary btn-lg"">*</button>")]
+        [InlineData(TypeSizeButton.Small, @"<button type=""reset"" class=""btn me-2 btn-sm btn-secondary"">*</button>")]
+        [InlineData(TypeSizeButton.Large, @"<button type=""reset"" class=""btn me-2 btn-lg btn-secondary"">*</button>")]
         public void Size(TypeSizeButton size, string expected)
         {
             // preconditions

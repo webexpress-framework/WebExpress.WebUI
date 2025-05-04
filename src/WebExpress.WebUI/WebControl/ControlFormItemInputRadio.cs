@@ -49,14 +49,6 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Initializes the form element.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        public override void Initialize(IRenderControlFormContext renderContext)
-        {
-        }
-
-        /// <summary>
         /// Converts the control to an HTML representation.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
@@ -64,9 +56,11 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
-            if (!string.IsNullOrWhiteSpace(Value))
+            var value = renderContext?.GetValue(this);
+
+            if (!string.IsNullOrWhiteSpace(value))
             {
-                Checked = Value == Option;
+                Checked = value == Option;
             }
 
             var c = new List<string>
@@ -111,15 +105,6 @@ namespace WebExpress.WebUI.WebControl
             };
 
             return html;
-        }
-
-        /// <summary>
-        /// Checks the input element for correctness of the data.
-        /// </summary>
-        /// <param name="renderContext">The context in which the inputs are validated.</param>
-        public override void Validate(IRenderControlFormContext renderContext)
-        {
-            base.Validate(renderContext);
         }
     }
 }

@@ -61,22 +61,22 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form move control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div id=""selection-move-*""></div>")]
-        [InlineData("abc", @"<div id=""selection-move-*""></div>")]
+        [InlineData(null, @"*<div id=""selection-move-*""></div>*")]
+        [InlineData("abc", @"*<div id=""selection-move-*""></div>*")]
         public void Value(string value, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputMove()
+            var control = new ControlFormItemInputMove();
+            var form = new ControlForm().Add(control).Initialize(renderContext =>
             {
-                Value = value
-            };
+                renderContext.SetValue(control, value);
+            });
 
             // test execution
-            var html = control.Render(context, visualTree);
+            var html = form.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }

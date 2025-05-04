@@ -65,15 +65,6 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Initializes the form element.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        public override void Initialize(IRenderControlFormContext renderContext)
-        {
-            Value = renderContext?.Request.GetParameter(Name)?.Value;
-        }
-
-        /// <summary>
         /// Converts the control to an HTML representation.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
@@ -81,20 +72,15 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
-            var resultClasses = ValidationResult switch
-            {
-                TypesInputValidity.Warning => "input-warning",
-                TypesInputValidity.Error => "input-error",
-                _ => ""
-            };
+            var value = renderContext.GetValue(this);
 
             var html = new HtmlElementFieldInput()
             {
                 Id = Id,
-                Value = Value,
+                Value = value,
                 Name = Name,
                 Type = "file",
-                Class = Css.Concatenate("form-control-file", resultClasses, GetClasses()),
+                Class = Css.Concatenate("form-control-file", GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
                 Placeholder = Placeholder
@@ -106,24 +92,30 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Checks the input element for correctness of the data.
+        /// Validates the input elements within a form for correctness of the data.
         /// </summary>
-        /// <param name="renderContext">The context in which the inputs are validated.</param>
-        public override void Validate(IRenderControlFormContext renderContext)
+        /// <param name="renderContext">The context in which the inputs are validated, containing form data and state.</param>
+        /// <returns>A collection of <see cref="ValidationResult"/> objects representing the validation 
+        /// results for each input element. Each result indicates whether the input is valid or contains errors.
+        /// </returns>
+        public override IEnumerable<ValidationResult> Validate(IRenderControlFormContext renderContext)
         {
+            var validationResults = new List<ValidationResult>();
+            var value = renderContext.GetValue(this);
+
             if (Disabled)
             {
-                return;
+                return [];
             }
 
-            if (Required && string.IsNullOrWhiteSpace(base.Value))
+            if (Required && string.IsNullOrWhiteSpace(value))
             {
-                AddValidationResult(new ValidationResult(TypesInputValidity.Error, "webexpress.webui:form.inputfile.validation.required"));
-
-                return;
+                validationResults.Add(new ValidationResult(TypesInputValidity.Error, "webexpress.webui:form.inputfile.validation.required"));
             }
 
-            base.Validate(renderContext);
+            validationResults.AddRange(base.Validate(renderContext));
+
+            return validationResults;
         }
     }
 }

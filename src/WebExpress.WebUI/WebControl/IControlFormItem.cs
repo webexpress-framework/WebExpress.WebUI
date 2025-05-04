@@ -10,5 +10,11 @@
         /// This name is used to identify the form item in the context of form submissions.
         /// </summary>
         string Name { get; set; }
+
+        /// <summary>
+        /// Initializes the form element with the specified render context and form state.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        void Initialize(IRenderControlFormContext renderContext);
     }
 }

@@ -1,4 +1,5 @@
-﻿using WebExpress.WebUI.Test.Fixture;
+﻿using WebExpress.WebCore.WebMessage;
+using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
 
@@ -62,8 +63,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypesEditTextFormat.Default, @"<input type=""text"" class=""form-control"">")]
-        [InlineData(TypesEditTextFormat.Multiline, @"<textarea class=""form-control""></textarea>")]
-        [InlineData(TypesEditTextFormat.Wysiwyg, @"<textarea id=""*"" class=""form-control""></textarea>")]
+        [InlineData(TypesEditTextFormat.Multiline, @"<textarea class=""form-control"" rows=""8""></textarea>")]
+        [InlineData(TypesEditTextFormat.Wysiwyg, @"<textarea id=""*"" class=""form-control"" rows=""8""></textarea>")]
         public void Format(TypesEditTextFormat format, string expected)
         {
             // preconditions
@@ -255,27 +256,214 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the value property of the form text control.
+        /// Tests the value method of the form text control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<input type=""text"" class=""form-control"">")]
-        [InlineData("abc", @"<input value=""abc"" type=""text"" class=""form-control"">")]
-        public void Value(string value, string expected)
+        [InlineData(null, @"*<input type=""text"" class=""form-control"">*")]
+        [InlineData("abc", @"*<input value=""abc"" type=""text"" class=""form-control"">*")]
+        public void ValueForm(string value, string expected)
         {
             // preconditions
+            var initialized = false;
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputTextBox()
-            {
-                Value = value
-            };
+            var control = new ControlFormItemInputTextBox();
+            var form = new ControlForm().Add(control)
+                .Initialize(renderContext =>
+                {
+                    renderContext.SetValue(control, value);
+                    initialized = true;
+                });
 
             // test execution
-            var html = control.Render(context, visualTree);
+            var html = form.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
+            Assert.True(initialized);
+        }
+
+        /// <summary>
+        /// Tests the value method of the form text control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"*<input type=""text"" class=""form-control"">*")]
+        [InlineData("abc", @"*<input value=""abc"" type=""text"" class=""form-control"">*")]
+        public void ValueItem(string value, string expected)
+        {
+            // preconditions
+            var initialized = false;
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputTextBox()
+                .Initialize(arg =>
+                {
+                    arg.Value = value;
+                    initialized = true;
+                });
+            var form = new ControlForm().Add(control);
+
+            // test execution
+            var html = form.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+            Assert.True(initialized);
+        }
+
+        /// <summary>
+        /// Tests the validate method of the form text control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"*<input id=""text-box"" name=""text-box"" type=""text"" class=""form-control"">*")]
+        [InlineData("abc", @"*<input id=""text-box"" value=""abc"" name=""text-box"" type=""text"" class=""form-control"">*")]
+        public void ValidateForm(string value, string expected)
+        {
+            // preconditions
+            var validated = false;
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputTextBox("text-box").Initialize(args =>
+            {
+                args.Value = value;
+            });
+            var form = new ControlForm()
+                .Add(control)
+                .Validate
+                (
+                    x =>
+                    {
+                        x
+                        .Add(true, "validation1", TypesInputValidity.Warning)
+                        .Add(true, "validation2")
+                        .Add(false, "validation3");
+                        validated = true;
+                    }
+                );
+
+            context.Request.AddParameter(new Parameter(form.Id, context.Request?.Session.Id.ToString(), ParameterScope.Parameter));
+            context.Request.AddParameter(new Parameter("text-box", value, ParameterScope.Parameter));
+
+            // test execution
+            var html = form.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+            Assert.True(validated);
+        }
+
+        /// <summary>
+        /// Tests the validate method of the form text control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"*<input id=""text-box"" name=""text-box"" type=""text"" class=""form-control"">*")]
+        [InlineData("abc", @"*<input id=""text-box"" value=""abc"" name=""text-box"" type=""text"" class=""form-control"">*")]
+        public void ValidateItem(string value, string expected)
+        {
+            // preconditions
+            var validated = false;
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputTextBox("text-box")
+                .Validate
+                (
+                    x =>
+                    {
+                        x
+                        .Add(x.Value != null, "validation1", TypesInputValidity.Warning)
+                        .Add(x.Value?.Length > 3, "validation2")
+                        .Add(false, "validation3");
+                        validated = true;
+                    }
+                );
+            var form = new ControlForm()
+                .Add(control);
+
+            context.Request.AddParameter(new Parameter(form.Id, context.Request?.Session.Id.ToString(), ParameterScope.Parameter));
+            context.Request.AddParameter(new Parameter("text-box", value, ParameterScope.Parameter));
+
+            // test execution
+            var html = form.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+            Assert.True(validated);
+        }
+
+        /// <summary>
+        /// Tests the process method of the form text control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"*<input id=""text-box"" name=""text-box"" type=""text"" class=""form-control"">*")]
+        [InlineData("abc", @"*<input id=""text-box"" value=""abc"" name=""text-box"" type=""text"" class=""form-control"">*")]
+        public void ProcessForm(string value, string expected)
+        {
+            // preconditions
+            var processed = false;
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputTextBox("text-box")
+                .Initialize(args =>
+                {
+                    args.Value = value;
+                });
+            var form = new ControlForm()
+                .Add(control)
+                .Process
+                (
+                    x =>
+                    {
+                        processed = true;
+                    }
+                );
+
+            context.Request.AddParameter(new Parameter(form.Id, context.Request?.Session.Id.ToString(), ParameterScope.Parameter));
+            context.Request.AddParameter(new Parameter("text-box", value, ParameterScope.Parameter));
+
+            // test execution
+            var html = form.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+            Assert.True(processed);
+        }
+
+        /// <summary>
+        /// Tests the process method of the form text control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"*<input id=""text-box"" name=""text-box"" type=""text"" class=""form-control"">*")]
+        [InlineData("abc", @"*<input id=""text-box"" value=""abc"" name=""text-box"" type=""text"" class=""form-control"">*")]
+        public void ProcessItem(string value, string expected)
+        {
+            // preconditions
+            var processed = false;
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputTextBox("text-box")
+                .Initialize(arg =>
+                {
+                    arg.Value = value;
+                })
+                .Process
+                (
+                    x =>
+                    {
+                        processed = true;
+                    }
+                );
+            var form = new ControlForm()
+                .Add(control);
+
+            context.Request.AddParameter(new Parameter(form.Id, context.Request?.Session.Id.ToString(), ParameterScope.Parameter));
+            context.Request.AddParameter(new Parameter("text-box", value, ParameterScope.Parameter));
+
+            // test execution
+            var html = form.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+            Assert.True(processed);
         }
     }
 }

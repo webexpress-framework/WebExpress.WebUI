@@ -22,7 +22,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlForm(id)
             {
@@ -38,14 +38,14 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the backgroundcolor property of the form control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorBackground.Default, @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Primary, @"<form class=""bg-primary"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Secondary, @"<form class=""bg-secondary"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Warning, @"<form class=""bg-warning"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Danger, @"<form class=""bg-danger"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Dark, @"<form class=""bg-dark"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Light, @"<form class=""bg-light"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Transparent, @"<form class=""bg-transparent"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Default, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Primary, @"<form id=""*"" class=""bg-primary"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Secondary, @"<form id=""*"" class=""bg-secondary"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Warning, @"<form id=""*"" class=""bg-warning"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Danger, @"<form id=""*"" class=""bg-danger"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Dark, @"<form id=""*"" class=""bg-dark"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Light, @"<form id=""*"" class=""bg-light"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Transparent, @"<form id=""*"" class=""bg-transparent"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void BackgroundColor(TypeColorBackground color, string expected)
         {
             // preconditions
@@ -67,14 +67,14 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the name property of the form control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData("abc", @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""abc"">*</form>")]
+        [InlineData(null, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData("abc", @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""abc"">*</form>")]
         public void Name(string name, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlForm()
             {
@@ -91,15 +91,15 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the method property of the form control.
         /// </summary>
         [Theory]
-        [InlineData(RequestMethod.NONE, @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(RequestMethod.POST, @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(RequestMethod.GET, @"<form action=""http://localhost:8080/"" method=""GET"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(RequestMethod.NONE, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(RequestMethod.POST, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(RequestMethod.GET, @"<form id=""*"" action=""http://localhost:8080/"" method=""GET"" enctype=""multipart/form-data"">*</form>")]
         public void Method(RequestMethod method, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlForm()
             {
@@ -116,14 +116,14 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the form layout property of the form control.
         /// </summary>
         [Theory]
-        [InlineData(TypeLayoutForm.Default, @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeLayoutForm.Inline, @"<form class=""wx-form-inline"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeLayoutForm.Default, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeLayoutForm.Inline, @"<form id=""*"" class=""wx-form-inline"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void FormLayout(TypeLayoutForm formLayout, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlForm()
             {
@@ -140,15 +140,15 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the item layout property of the form control.
         /// </summary>
         [Theory]
-        [InlineData(TypeLayoutFormItem.Horizontal, @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeLayoutFormItem.Vertical, @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeLayoutFormItem.Mix, @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeLayoutFormItem.Horizontal, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeLayoutFormItem.Vertical, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeLayoutFormItem.Mix, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void ItemLayout(TypeLayoutFormItem itemLayout, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlForm()
             {
@@ -165,11 +165,11 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the justify property of the form control.
         /// </summary>
         [Theory]
-        [InlineData(TypeJustifiedFlexbox.None, @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeJustifiedFlexbox.Start, @"<form class=""justify-content-start"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeJustifiedFlexbox.Around, @"<form class=""justify-content-around"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeJustifiedFlexbox.Between, @"<form class=""justify-content-between"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeJustifiedFlexbox.End, @"<form class=""justify-content-end"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeJustifiedFlexbox.None, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeJustifiedFlexbox.Start, @"<form id=""*"" class=""justify-content-start"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeJustifiedFlexbox.Around, @"<form id=""*"" class=""justify-content-around"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeJustifiedFlexbox.Between, @"<form id=""*"" class=""justify-content-between"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeJustifiedFlexbox.End, @"<form id=""*"" class=""justify-content-end"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void Justify(TypeJustifiedFlexbox justify, string expected)
         {
             // preconditions
@@ -196,14 +196,14 @@ namespace WebExpress.WebUI.Test.WebControl
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlForm();
 
             var html = control.Render(context, visualTree);
 
             // test execution
-            AssertExtensions.EqualWithPlaceholders(@"<form action=*", html.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<form id=""*"" action=*", html.Trim());
         }
 
         /// <summary>
@@ -215,7 +215,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlForm();
             control.AddPrimaryButton(new ControlFormItemButtonSubmit("") { Text = "sendbutton" });
@@ -224,6 +224,30 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // test execution
             Assert.Contains(@"sendbutton", html.Trim());
+        }
+
+        /// <summary>
+        /// Tests the value property of the form text control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<form *>*<input type=""text"" class=""form-control"">*</form>")]
+        [InlineData("abc", @"<form *>*<input value=""abc"" type=""text"" class=""form-control"">*</form>")]
+        public void Value(string value, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputTextBox();
+            var form = new ControlForm().Add(control).Initialize(renderContext =>
+            {
+                renderContext.SetValue(control, value);
+            });
+
+            // test execution
+            var html = form.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
         }
     }
 }

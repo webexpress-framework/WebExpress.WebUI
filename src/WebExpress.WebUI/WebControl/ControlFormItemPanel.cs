@@ -59,6 +59,14 @@ namespace WebExpress.WebUI.WebControl
             _content.AddRange(controls.Where(x => x != null));
         }
 
+        /// <summary>
+        /// Initializes the form element.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        public override void Initialize(IRenderControlFormContext renderContext)
+        {
+        }
+
         /// <summary> 
         /// Adds one or more controls to the content of the control panel.
         /// </summary> 
@@ -114,14 +122,6 @@ namespace WebExpress.WebUI.WebControl
         public virtual void Remove(Control control)
         {
             _content.Remove(control);
-        }
-
-        /// <summary>
-        /// Initializes the form element.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        public override void Initialize(IRenderControlFormContext renderContext)
-        {
         }
 
         /// <summary>

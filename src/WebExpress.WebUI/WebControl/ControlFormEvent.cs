@@ -5,7 +5,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Event argument for forms.
     /// </summary>
-    public class FormEventArgs : EventArgs
+    public class ControlFormEvent : EventArgs
     {
         /// <summary>
         /// The form render context.
@@ -15,7 +15,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
-        public FormEventArgs()
+        public ControlFormEvent()
         {
         }
     }

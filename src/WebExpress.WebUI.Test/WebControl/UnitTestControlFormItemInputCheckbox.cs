@@ -15,7 +15,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""checkbox""><label><input type=""checkbox""></label></div>")]
-        [InlineData("id", @"<div id=""id"" class=""checkbox""><label><input type=""checkbox""></label></div>")]
+        [InlineData("id", @"<div id=""id"" class=""checkbox""><label><input name=""id"" type=""checkbox""></label></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -101,6 +101,56 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // test execution
             var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the value method of the form text control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"*<input type=""checkbox"">*")]
+        [InlineData(false, @"*<input type=""checkbox"">*")]
+        [InlineData(true, @"*<input type=""checkbox"" checked>*")]
+        public void ValueForm(bool? value, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputCheckbox();
+            var form = new ControlForm().Add(control).Initialize(renderContext =>
+            {
+                renderContext.SetValue(control, value?.ToString());
+            });
+
+            // test execution
+            var html = form.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the value method of the form text control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"*<input type=""checkbox"">*")]
+        [InlineData(false, @"*<input type=""checkbox"">*")]
+        [InlineData(true, @"*<input type=""checkbox"" checked>*")]
+        public void ValueItem(bool? value, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputCheckbox().Initialize(args =>
+            {
+                args.Value = value?.ToString();
+            });
+            var form = new ControlForm().Add(control);
+
+            // test execution
+            var html = form.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }

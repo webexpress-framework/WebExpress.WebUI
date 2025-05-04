@@ -16,6 +16,7 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
 
         // Initialize properties
         const name = $(element).attr("name");
+        const value = $(element).data("value") || null;
         this._placeholder = $(element).attr("placeholder") || "Select an option";
         this._multiselect = $(element).data("multiselection") || false;
         this._values = [];
@@ -30,6 +31,11 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
         this._parseItemsFromElements(
             $(element).find(".wx-selection-header, .wx-selection-divider, .wx-selection-item, .wx-selection-footer")
         );
+
+
+        if (value) {
+            this.value = String(value).split(";");
+        }
 
         $(element)
             .removeAttr("name placeholder data-multiselection")
@@ -71,6 +77,7 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
                 this._dropdownmenu.trigger("hide").hide();
             } else {
                 this._dropdownmenu.css("display", "flex").trigger("show").show();
+                this._filter.focus();
             }
         });
 
@@ -148,7 +155,6 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
                 this._dropdownmenu.append(footer);
             } else {
                 const id = $elem.attr("id") || null;
-                const selected = $elem.is("[selected]");
 
                 items.push({
                     id,
@@ -162,8 +168,6 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
                         ? new Function("item", `return (${$elem.data("render")})(item);`)
                         : null,
                 });
-
-                if (selected) value.push(id);
             }
         });
 

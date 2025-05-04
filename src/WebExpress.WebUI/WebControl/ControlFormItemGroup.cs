@@ -6,51 +6,15 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Grouping of controls.
     /// </summary>
-    public abstract class ControlFormItemGroup : ControlFormItem, IControlFormItemGroup, IFormValidation
+    public abstract class ControlFormItemGroup : ControlFormItem, IControlFormItemGroup, IControlFormValidation
     {
-        private readonly List<ControlFormItem> _items = [];
+        private readonly List<IControlFormItem> _items = [];
         private readonly List<ValidationResult> _validationResults = [];
 
         /// <summary>
         /// Returns the form items.
         /// </summary>
-        public ICollection<ControlFormItem> Items => _items;
-
-        /// <summary>
-        /// Determines whether the inputs are valid.
-        /// </summary>
-        public IEnumerable<ValidationResult> ValidationResults => _validationResults;
-
-        /// <summary>
-        /// Returns or sets whether the form element has been validated.
-        /// </summary>
-        private bool IsValidated { get; set; }
-
-        /// <summary>
-        /// Returns the most serious validation result.
-        /// </summary>
-        public virtual TypesInputValidity ValidationResult
-        {
-            get
-            {
-                var buf = ValidationResults;
-
-                if (buf.Where(x => x.Type == TypesInputValidity.Error).Any())
-                {
-                    return TypesInputValidity.Error;
-                }
-                else if (buf.Where(x => x.Type == TypesInputValidity.Warning).Any())
-                {
-                    return TypesInputValidity.Warning;
-                }
-                else if (buf.Where(x => x.Type == TypesInputValidity.Success).Any())
-                {
-                    return TypesInputValidity.Success;
-                }
-
-                return IsValidated ? TypesInputValidity.Success : TypesInputValidity.Default;
-            }
-        }
+        public ICollection<IControlFormItem> Items => _items;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -161,21 +125,24 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Checks the input element for correctness of the data.
+        /// Validates the input elements within a form for correctness of the data.
         /// </summary>
-        /// <param name="renderContext">The context in which the inputs are validated.</param>
-        public virtual void Validate(IRenderControlFormContext renderContext)
+        /// <param name="renderContext">The context in which the inputs are validated, containing form data and state.</param>
+        /// <returns>A collection of <see cref="ValidationResult"/> objects representing the validation 
+        /// results for each input element. Each result indicates whether the input is valid or contains errors.
+        /// </returns>
+        public virtual IEnumerable<ValidationResult> Validate(IRenderControlFormContext renderContext)
         {
-            var validationResults = ValidationResults as List<ValidationResult>;
+            var validationResults = new List<ValidationResult>();
 
             validationResults.Clear();
 
-            foreach (var v in Items.Where(x => x is IFormValidation).Select(x => x as IFormValidation))
+            foreach (var v in Items.Where(x => x is IControlFormValidation).Select(x => x as IControlFormValidation))
             {
-                v.Validate(renderContext);
-
-                validationResults.AddRange(v.ValidationResults);
+                validationResults.AddRange(v.Validate(renderContext));
             }
+
+            return validationResults;
         }
     }
 }

@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.Json;
-using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -60,18 +57,6 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Initializes the form element.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        public override void Initialize(IRenderControlFormContext renderContext)
-        {
-            if (renderContext.Request.HasParameter(Name))
-            {
-                Value = renderContext?.Request.GetParameter(Name)?.Value;
-            }
-        }
-
-        /// <summary>
         /// Converts the control to an HTML representation.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
@@ -86,16 +71,6 @@ namespace WebExpress.WebUI.WebControl
                 classes.Add("disabled");
             }
 
-            switch (ValidationResult)
-            {
-                case TypesInputValidity.Warning:
-                    classes.Add("input-warning");
-                    break;
-                case TypesInputValidity.Error:
-                    classes.Add("input-error");
-                    break;
-            }
-
             var html = new HtmlElementTextContentDiv()
             {
                 Id = $"selection-move-{Id}",
@@ -108,15 +83,6 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Checks the input element for correctness of the data.
-        /// </summary>
-        /// <param name="renderContext">The context in which the inputs are validated.</param>
-        public override void Validate(IRenderControlFormContext renderContext)
-        {
-            base.Validate(renderContext);
-        }
-
-        /// <summary>
         /// Generates the javascript to control the control.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -124,40 +90,42 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The javascript code.</returns>
         protected virtual string GetScript(string id, string css)
         {
-            var settings = new
-            {
-                Id = id,
-                Name = Id,
-                CSS = css,
-                Header = new
-                {
-                    Selected = I18N.Translate(SelectedHeader),
-                    Available = I18N.Translate(AvailableHeader)
-                },
-                Buttons = new
-                {
-                    ToSelectedAll = I18N.Translate("˂˂"),
-                    ToSelected = I18N.Translate("˂"),
-                    ToAvailableAll = I18N.Translate("˃˃"),
-                    ToAvailable = I18N.Translate("˃")
-                }
-            };
+            //var settings = new
+            //{
+            //    Id = id,
+            //    Name = Id,
+            //    CSS = css,
+            //    Header = new
+            //    {
+            //        Selected = I18N.Translate(SelectedHeader),
+            //        Available = I18N.Translate(AvailableHeader)
+            //    },
+            //    Buttons = new
+            //    {
+            //        ToSelectedAll = I18N.Translate("˂˂"),
+            //        ToSelected = I18N.Translate("˂"),
+            //        ToAvailableAll = I18N.Translate("˃˃"),
+            //        ToAvailable = I18N.Translate("˃")
+            //    }
+            //};
 
-            var jsonOptions = new JsonSerializerOptions { WriteIndented = false };
-            var settingsJson = JsonSerializer.Serialize(settings, jsonOptions);
-            var optionsJson = JsonSerializer.Serialize(Options, jsonOptions);
-            var valuesJson = JsonSerializer.Serialize(Value?.Split(";", System.StringSplitOptions.RemoveEmptyEntries), jsonOptions);
-            var builder = new StringBuilder();
+            //var jsonOptions = new JsonSerializerOptions { WriteIndented = false };
+            //var settingsJson = JsonSerializer.Serialize(settings, jsonOptions);
+            //var optionsJson = JsonSerializer.Serialize(Options, jsonOptions);
+            //var valuesJson = JsonSerializer.Serialize(Value?.Split(";", System.StringSplitOptions.RemoveEmptyEntries), jsonOptions);
+            //var builder = new StringBuilder();
 
-            builder.Append($"var options = {optionsJson};");
-            builder.Append($"var settings = {settingsJson};");
-            builder.Append($"var container = $('#{id}');");
-            builder.Append($"var obj = new webexpress.webui.moveCtrl(settings);");
-            builder.Append($"obj.options = options;");
-            builder.Append($"obj.value = {(!string.IsNullOrWhiteSpace(valuesJson) ? valuesJson : "[]")};");
-            builder.Append($"container.replaceWith(obj.getCtrl);");
+            //builder.Append($"var options = {optionsJson};");
+            //builder.Append($"var settings = {settingsJson};");
+            //builder.Append($"var container = $('#{id}');");
+            //builder.Append($"var obj = new webexpress.webui.moveCtrl(settings);");
+            //builder.Append($"obj.options = options;");
+            //builder.Append($"obj.value = {(!string.IsNullOrWhiteSpace(valuesJson) ? valuesJson : "[]")};");
+            //builder.Append($"container.replaceWith(obj.getCtrl);");
 
-            return builder.ToString();
+            //return builder.ToString();
+
+            return string.Empty;
         }
     }
 }

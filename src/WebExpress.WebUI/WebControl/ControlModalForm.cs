@@ -25,8 +25,8 @@ namespace WebExpress.WebUI.WebControl
             : base("modal_" + id)
         {
             Form = items != null ? new ControlForm(id, items) : new ControlForm(id);
-            Form.InitializeForm += OnInitializeForm;
-            Form.Validated += OnValidatedForm;
+            //Form.InitializeForm += OnInitializeForm;
+            //Form.Validated += OnValidatedForm;
         }
 
         /// <summary> 
@@ -91,7 +91,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The event argument.</param>
-        private void OnInitializeForm(object sender, FormEventArgs e)
+        private void OnInitializeForm(object sender, ControlFormEvent e)
         {
             ShowIfCreated = false;
         }
@@ -128,7 +128,7 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="visualTree">The visual tree representing the control's structure.</param>
         /// <param name="items">The form items.</param>
         /// <returns>An HTML node representing the rendered control.</returns>
-        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<ControlFormItem> items)
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlFormItem> items)
         {
             var fade = Fade;
             var classes = Classes.ToList();

@@ -19,15 +19,6 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Initializes the form element.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        public override void Initialize(IRenderControlFormContext renderContext)
-        {
-            Value = renderContext?.Request.GetParameter(Name)?.Value;
-        }
-
-        /// <summary>
         /// Converts the control to an HTML representation.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
@@ -35,10 +26,12 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            var value = renderContext?.GetValue(this);
+
             return new HtmlElementFieldInput()
             {
                 Id = Id,
-                Value = Value,
+                Value = value,
                 Name = Name,
                 Type = "hidden",
                 Role = Role

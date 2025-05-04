@@ -62,7 +62,12 @@ namespace WebExpress.WebUI.WebControl
 
             var contextPath = renderContext.PageContext?.ApplicationContext?.ContextPath;
 
-            Value = renderContext?.Request.GetParameter(Name)?.Value;
+            //if (state == ControlFormState.New)
+            //{
+            //    return;
+            //}
+
+            //Value = renderContext?.Request.GetParameter(Name)?.Value;
 
             //renderContext.AddHeaderScriptLinks(UriResource.Combine(contextPath, "/assets/js/bootstrap-datepicker.min.js"));
             //renderContext.AddHeaderScriptLinks(UriResource.Combine(contextPath, "/assets/js/locales_datepicker/bootstrap-datepicker." + context.Culture.TwoLetterISOLanguageName.ToLower() + ".min.js"));
@@ -79,6 +84,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            var value = renderContext.GetValue(this);
             //if (Disabled)
             //{
             //    Classes.Add("disabled");
@@ -96,7 +102,7 @@ namespace WebExpress.WebUI.WebControl
                 Name = Name,
                 Type = "text",
                 Class = "form-control",
-                Value = Value
+                Value = value
             };
 
             //var span = new HtmlElementTextSemanticsSpan()
@@ -117,15 +123,6 @@ namespace WebExpress.WebUI.WebControl
             //};
 
             return input;
-        }
-
-        /// <summary>
-        /// Checks the input element for correctness of the data.
-        /// </summary>
-        /// <param name="renderContext">The context in which the inputs are validated.</param>
-        public override void Validate(IRenderControlFormContext renderContext)
-        {
-            base.Validate(renderContext);
         }
     }
 }

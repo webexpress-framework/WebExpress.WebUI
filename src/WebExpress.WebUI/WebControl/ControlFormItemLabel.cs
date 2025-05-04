@@ -17,7 +17,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the associated form field.
         /// </summary>
-        public ControlFormItem FormItem { get; set; }
+        public IControlFormItem FormItem { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.

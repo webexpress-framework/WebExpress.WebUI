@@ -11,17 +11,17 @@ namespace WebExpress.WebUI.WebControl
     /// </summary>
     public class RenderControlFormContext : RenderControlContext, IRenderControlFormContext
     {
-        private readonly List<ValidationResult> _validationResults = [];
+        private readonly Dictionary<IControlFormItemInput, string> _values = new();
 
         /// <summary>
-        /// The form in which the control is rendered.
+        /// Returns the form in which the control is rendered.
         /// </summary>
         public IControlForm Form { get; private set; }
 
         /// <summary>
-        /// Returns the validation errors.
+        /// Returns the dictionary of input controls and their associated values.
         /// </summary>
-        public IEnumerable<ValidationResult> ValidationResults => _validationResults;
+        public IReadOnlyDictionary<IControlFormItemInput, string> Values => _values;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -48,13 +48,52 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Copy-Constructor
+        /// Initializes a new instance of the class by copying an existing context.
         /// </summary>
-        /// <param name="context">The render context to copy./param>
-        public RenderControlFormContext(IRenderControlFormContext context)
-            : this(context, context?.Form)
+        /// <param name="renderContext">The render context to copy.</param>
+        public RenderControlFormContext(IRenderControlFormContext renderContext)
+            : this(renderContext, renderContext?.Form)
         {
-            //AddScripts(context.Scripts);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the class.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="form">The form in which the control is rendered.</param>
+        public RenderControlFormContext(IRenderControlFormContext renderContext, IControlForm form)
+            : base(renderContext)
+        {
+            Form = form;
+            _values = new Dictionary<IControlFormItemInput, string>(renderContext.Values);
+        }
+
+        /// <summary>
+        /// Retrieves the value associated with the specified input control.
+        /// </summary>
+        /// <param name="input">The input control whose value is to be retrieved.</param>
+        /// <returns>The value associated with the input control, or <c>null</c> if not found.</returns>
+        public string GetValue(IControlFormItemInput input)
+        {
+            _values.TryGetValue(input, out var obj);
+
+            return obj;
+        }
+
+        /// <summary>
+        /// Sets the value for the specified input control.
+        /// </summary>
+        /// <param name="input">The input control for which the value is to be set.</param>
+        /// <param name="value">The value to set for the input control.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IRenderControlFormContext SetValue(IControlFormItemInput input, string value)
+        {
+            if (!_values.TryAdd(input, value))
+            {
+                _values[input] = value;
+            }
+
+            return this;
         }
     }
 }

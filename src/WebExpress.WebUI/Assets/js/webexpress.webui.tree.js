@@ -367,9 +367,11 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 indicator.click(() => {
                     this._toggleNode(node, ul, icon, img, indicator);
                 });
-                labelContainer.click(() => {
-                    this._toggleNode(node, ul, icon, img, indicator);
-                });
+                if (!node.url) {
+                    labelContainer.click(() => {
+                        this._toggleNode(node, ul, icon, img, indicator);
+                    });
+                }
                 if (node.expand) {
                     indicator.addClass("wx-tree-expand");
                     icon.removeClass(node.iconClose).addClass(node.iconOpen);

@@ -15,7 +15,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Determines whether the control is automatically initialized.
         /// </summary>
-        public bool AutoInitialize { get; set; }
+        public bool AutoInitialize { get; set; } = true;
 
         /// <summary>
         /// Determines whether it is a multi-line text box.
@@ -55,7 +55,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the height of the text field (for Multiline and WYSIWYG).
         /// </summary>
-        public uint? Rows { get; set; }
+        public uint? Rows { get; set; } = 8;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -76,11 +76,6 @@ namespace WebExpress.WebUI.WebControl
         {
             base.Initialize(renderContext);
 
-            Rows = 8;
-            AutoInitialize = true;
-
-            Value = renderContext?.Request.GetParameter(Name)?.Value;
-
             if (Format == TypesEditTextFormat.Wysiwyg)
             {
                 var contextPath = renderContext?.PageContext?.ApplicationContext?.ContextPath;
@@ -98,24 +93,15 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var id = Id ?? Guid.NewGuid().ToString();
-
-            var classes = new List<string>(Classes);
-
-            classes.Add("form-control");
+            var value = renderContext.GetValue(this);
+            var classes = new List<string>(Classes)
+            {
+                "form-control"
+            };
 
             if (Disabled)
             {
                 classes.Add("disabled");
-            }
-
-            switch (ValidationResult)
-            {
-                case TypesInputValidity.Warning:
-                    classes.Add("input-warning");
-                    break;
-                case TypesInputValidity.Error:
-                    classes.Add("input-error");
-                    break;
             }
 
             if (AutoInitialize && Format == TypesEditTextFormat.Wysiwyg && !string.IsNullOrWhiteSpace(Id))
@@ -132,7 +118,7 @@ namespace WebExpress.WebUI.WebControl
                 TypesEditTextFormat.Multiline => new HtmlElementFormTextarea()
                 {
                     Id = Id,
-                    Value = Value,
+                    Value = value,
                     Name = Name,
                     Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
                     Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
@@ -143,7 +129,7 @@ namespace WebExpress.WebUI.WebControl
                 TypesEditTextFormat.Wysiwyg => new HtmlElementFormTextarea()
                 {
                     Id = id,
-                    Value = Value,
+                    Value = value,
                     Name = Name,
                     Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
                     Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
@@ -154,7 +140,7 @@ namespace WebExpress.WebUI.WebControl
                 _ => new HtmlElementFieldInput()
                 {
                     Id = Id,
-                    Value = Value,
+                    Value = value,
                     Name = Name,
                     MinLength = MinLength?.ToString(),
                     MaxLength = MaxLength?.ToString(),
@@ -171,34 +157,40 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Checks the input element for correctness of the data.
+        /// Validates the input elements within a form for correctness of the data.
         /// </summary>
-        /// <param name="renderContext">The context in which the inputs are validated.</param>
-        public override void Validate(IRenderControlFormContext renderContext)
+        /// <param name="renderContext">The context in which the inputs are validated, containing form data and state.</param>
+        /// <returns>A collection of <see cref="ValidationResult"/> objects representing the validation 
+        /// results for each input element. Each result indicates whether the input is valid or contains errors.
+        /// </returns>
+        public override IEnumerable<ValidationResult> Validate(IRenderControlFormContext renderContext)
         {
-            base.Validate(renderContext);
+            var validationResults = new List<ValidationResult>(base.Validate(renderContext));
+            var value = renderContext.GetValue(this);
 
             if (Disabled)
             {
-                return;
+                return [];
             }
 
-            if (Required && string.IsNullOrWhiteSpace(base.Value))
+            if (Required && string.IsNullOrWhiteSpace(value))
             {
-                AddValidationResult(new ValidationResult(TypesInputValidity.Error, "webexpress.webui:form.inputtextbox.validation.required"));
+                validationResults.AddRange(new ValidationResult(TypesInputValidity.Error, "webexpress.webui:form.inputtextbox.validation.required"));
 
-                return;
+                return validationResults;
             }
 
-            if (!string.IsNullOrWhiteSpace(MinLength?.ToString()) && Convert.ToInt32(MinLength) > base.Value.Length)
+            if (!string.IsNullOrWhiteSpace(MinLength?.ToString()) && Convert.ToInt32(MinLength) > value?.Length)
             {
-                AddValidationResult(new ValidationResult(TypesInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputtextbox.validation.min"), MinLength)));
+                validationResults.AddRange(new ValidationResult(TypesInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputtextbox.validation.min"), MinLength)));
             }
 
-            if (!string.IsNullOrWhiteSpace(MaxLength?.ToString()) && Convert.ToInt32(MaxLength) < base.Value.Length)
+            if (!string.IsNullOrWhiteSpace(MaxLength?.ToString()) && Convert.ToInt32(MaxLength) < value?.Length)
             {
-                AddValidationResult(new ValidationResult(TypesInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputtextbox.validation.max"), MaxLength)));
+                validationResults.AddRange(new ValidationResult(TypesInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputtextbox.validation.max"), MaxLength)));
             }
+
+            return validationResults;
         }
     }
 }
