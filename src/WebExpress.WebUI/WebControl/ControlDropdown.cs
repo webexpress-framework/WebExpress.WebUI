@@ -284,14 +284,6 @@ namespace WebExpress.WebUI.WebControl
                 }
             );
 
-            var modals = Items.Where(x => x is ControlDropdownItemLink)
-                .Select(x => x as ControlDropdownItemLink)
-                .Select(x => x.Modal)
-                .Where(x => x.Type == TypeModal.Modal)
-                .Select(x => x.Modal.Render(renderContext, visualTree));
-
-            html.Add(modals);
-
             return html;
         }
     }

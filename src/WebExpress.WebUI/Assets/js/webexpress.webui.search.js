@@ -36,7 +36,7 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
             .append(this._searchIcon, this._searchInput, this._searchClear)
             .addClass("form-control");
 
-        // Append components to the main container
+        // Clean up the DOM element and append components to the element
         $(this._element)
             .removeAttr("name placeholder data-favorited")
             .empty()

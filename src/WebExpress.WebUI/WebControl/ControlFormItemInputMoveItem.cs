@@ -4,9 +4,9 @@ using WebExpress.WebCore.WebIcon;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents an item in a selection input form.
+    /// Represents an item in a move input form.
     /// </summary>
-    public class ControlFormItemInputSelectionItem
+    public class ControlFormItemInputMoveItem
     {
         /// <summary>
         /// Gets the unique identifier of the selection item.
@@ -27,33 +27,10 @@ namespace WebExpress.WebUI.WebControl
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Gets or sets the color of the label.
-        /// </summary>
-        [JsonPropertyName("labelcolor")]
-        public TypeColorSelection LabelColor { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the selection item is selected.
-        /// </summary>
-        [JsonPropertyName("selected")]
-        public bool Selected { get; set; }
-
-        /// <summary>
-        /// Returns or sets a value indicating whether the selection item is disabled.
-        /// </summary>
-        [JsonPropertyName("disabled")]
-        public bool Disabled { get; set; }
-
-        /// <summary>
-        /// Gets or sets the content of the selection item.
-        /// </summary>
-        public IControl Content { get; set; }
-
-        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The unique identifier of the selection item. Optional.</param>
-        public ControlFormItemInputSelectionItem(string id = null)
+        public ControlFormItemInputMoveItem(string id = null)
         {
             Id = id;
         }

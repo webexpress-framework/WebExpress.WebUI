@@ -16,8 +16,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the form submit button control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<button type=""submit"" class=""btn me-2 btn-success""><span class=""fas fa-save me-2""></span>Submit</button>")]
-        [InlineData("id", @"<button id=""id"" name=""id"" type=""submit"" class=""btn me-2 btn-success"">*</span>Submit</button>")]
+        [InlineData(null, @"<button type=""submit"" class=""btn me-2 btn-success""><i class=""fas fa-save me-2""></i>Submit</button>")]
+        [InlineData("id", @"<button id=""id"" name=""id"" type=""submit"" class=""btn me-2 btn-success"">*</i>Submit</button>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -39,8 +39,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the text property of the form submit button control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<button type=""submit"" class=""btn me-2 btn-success""><span class=""fas fa-save""></span></button>")]
-        [InlineData("abc", @"<button type=""submit"" class=""btn me-2 btn-success""><span class=""fas fa-save me-2""></span>abc</button>")]
+        [InlineData(null, @"<button type=""submit"" class=""btn me-2 btn-success""><i class=""fas fa-save""></i></button>")]
+        [InlineData("abc", @"<button type=""submit"" class=""btn me-2 btn-success""><i class=""fas fa-save me-2""></i>abc</button>")]
         public void Text(string text, string expected)
         {
             // preconditions
@@ -204,7 +204,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<button type=""submit"" class=""btn me-2 btn-success"">*</button>")]
-        [InlineData(typeof(IconStar), @"<button type=""submit"" class=""btn me-2 btn-success""><span class=""fas fa-star me-2""></span>Submit</button>")]
+        [InlineData(typeof(IconStar), @"<button type=""submit"" class=""btn me-2 btn-success""><i class=""fas fa-star me-2""></i>Submit</button>")]
         public void Icon(Type icon, string expected)
         {
             // preconditions
@@ -253,12 +253,12 @@ namespace WebExpress.WebUI.Test.WebControl
             var html5 = control5.Render(context, visualTree);
             var html6 = control6.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<button type=""submit"" class=""btn me-2 btn-success""><span class=""fas fa-save me-2""></span>Submit<span class=""fas fa-star""></span></button>", html1.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<button type=""submit"" class=""btn me-2 btn-success""><span class=""fas fa-save me-2""></span>Submit<span class=""fas fa-star""></span></button>", html2.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<button type=""submit"" class=""btn me-2 btn-success""><span class=""fas fa-save me-2""></span>Submit<span class=""fas fa-star""></span></button>", html3.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<button type=""submit"" class=""btn me-2 btn-success""><span class=""fas fa-save me-2""></span>Submit<span class=""fas fa-star""></span></button>", html4.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<button type=""submit"" class=""btn me-2 btn-success""><span class=""fas fa-save me-2""></span>Submit<span class=""fas fa-star""></span></button>", html5.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<button type=""submit"" class=""btn me-2 btn-success""><span class=""fas fa-save me-2""></span>Submit<span class=""fas fa-star""></span></button>", html6.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<button type=""submit"" class=""btn me-2 btn-success""><i class=""fas fa-save me-2""></i>Submit<i class=""fas fa-star""></i></button>", html1.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<button type=""submit"" class=""btn me-2 btn-success""><i class=""fas fa-save me-2""></i>Submit<i class=""fas fa-star""></i></button>", html2.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<button type=""submit"" class=""btn me-2 btn-success""><i class=""fas fa-save me-2""></i>Submit<i class=""fas fa-star""></i></button>", html3.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<button type=""submit"" class=""btn me-2 btn-success""><i class=""fas fa-save me-2""></i>Submit<i class=""fas fa-star""></i></button>", html4.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<button type=""submit"" class=""btn me-2 btn-success""><i class=""fas fa-save me-2""></i>Submit<i class=""fas fa-star""></i></button>", html5.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<button type=""submit"" class=""btn me-2 btn-success""><i class=""fas fa-save me-2""></i>Submit<i class=""fas fa-star""></i></button>", html6.Trim());
         }
     }
 }

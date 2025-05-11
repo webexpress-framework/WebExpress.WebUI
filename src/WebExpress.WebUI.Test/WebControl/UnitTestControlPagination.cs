@@ -14,7 +14,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the pagination control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<ul class=""pagination""><li class=""page-item disabled""><a class=""link page-link""><span class=""fas fa-angle-left""></span></a></li><li class=""page-item""><a class=""link page-link"" href=""?offset=%2D1"">0</a></li><li class=""page-item disabled""><a class=""link page-link""><span class=""fas fa-angle-right""></span></a></li></ul>")]
+        [InlineData(null, @"<ul class=""pagination""><li class=""page-item disabled""><a class=""link page-link""><i class=""fas fa-angle-left""></i></a></li><li class=""page-item""><a class=""link page-link"" href=""?offset=%2D1"">0</a></li><li class=""page-item disabled""><a class=""link page-link""><i class=""fas fa-angle-right""></i></a></li></ul>")]
         [InlineData("id", @"<ul id=""id"" class=""pagination"">*</ul>")]
         public void Id(string id, string expected)
         {

@@ -1,31 +1,35 @@
 /**
  * A simple button with icon and a label.
  * The following events are triggered:
- * - webexpress.webui.click Event triggered when an element is clicked
+ * - webexpress.webui.Event.CLICK_EVENT
  */
 webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Constructor
-     * @param {HTMLElement} elem - The DOM element associated with the instance.
+     * @param {HTMLElement} element - The DOM element associated with the instance.
      */
-    constructor(elem) {
-        super(elem);
+    constructor(element) {
+        super(element);
 
         // Initialize properties
-        this._label = $(elem).text() || "";
-        this._icon = $(elem).data("icon") || null;
-        this._image = $(elem).data("image") || null;
-        this._color = $(elem).data("color") || null;
+        this._label = $(element).text() || "";
+        this._icon = $(element).data("icon") || null;
+        this._image = $(element).data("image") || null;
+        this._color = $(element).data("color") || null;
 
-        // Clean up the DOM element and prepare it for rendering
-        $(elem).removeData().empty().addClass("btn wx-button");
+        // Clean up the DOM element
+        $(element).empty()
+            .removeAttr("data-icon data-image data-color")
+            .addClass("btn wx-button");
 
         // Render the button
         this.render();
 
         // Attach the click event listener
-        $(elem).click(() => {
-            $(document).trigger("webexpress.webui.click", elem.id);
+        $(element).click(() => {
+            $(document).trigger(webexpress.webui.Event.CLICK_EVENT, {
+                id: $(this._element).attr("id") || null
+            });
         });
     }
 
@@ -123,14 +127,6 @@ webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
         if (this._color) {
             $(this._element).addClass(this._color);
         }
-    }
-
-    /**
-     * Updates the button's appearance.
-     * Calls the render method to refresh the DOM element.
-     */
-    update() {
-        this.render();
     }
 };
 

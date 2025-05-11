@@ -118,7 +118,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<a class=""link nav-link""></a>")]
-        [InlineData(typeof(IconStar), @"<a class=""link nav-link""><span class=""fas fa-star""></span></a>")]
+        [InlineData(typeof(IconStar), @"<a class=""link nav-link""><i class=""fas fa-star""></i></a>")]
         public void Icon(Type icon, string expected)
         {
             // preconditions
@@ -263,12 +263,12 @@ namespace WebExpress.WebUI.Test.WebControl
             var html5 = control5.Render(context, visualTree);
             var html6 = control6.Render(context, visualTree);
 
-            Assert.Equal(@"<a class=""link""><span class=""fas fa-star""></span></a>", html1.Trim());
-            Assert.Equal(@"<a class=""link""><span class=""fas fa-star""></span></a>", html2.Trim());
-            Assert.Equal(@"<a class=""link""><span class=""fas fa-star""></span></a>", html3.Trim());
-            Assert.Equal(@"<a class=""link""><span class=""fas fa-star""></span></a>", html4.Trim());
-            Assert.Equal(@"<a class=""link""><span class=""fas fa-star""></span></a>", html5.Trim());
-            Assert.Equal(@"<a class=""link""><span class=""fas fa-star""></span></a>", html6.Trim());
+            Assert.Equal(@"<a class=""link""><i class=""fas fa-star""></i></a>", html1.Trim());
+            Assert.Equal(@"<a class=""link""><i class=""fas fa-star""></i></a>", html2.Trim());
+            Assert.Equal(@"<a class=""link""><i class=""fas fa-star""></i></a>", html3.Trim());
+            Assert.Equal(@"<a class=""link""><i class=""fas fa-star""></i></a>", html4.Trim());
+            Assert.Equal(@"<a class=""link""><i class=""fas fa-star""></i></a>", html5.Trim());
+            Assert.Equal(@"<a class=""link""><i class=""fas fa-star""></i></a>", html6.Trim());
         }
     }
 }

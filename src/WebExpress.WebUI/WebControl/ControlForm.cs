@@ -153,7 +153,7 @@ namespace WebExpress.WebUI.WebControl
         public IControl Conformation { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ControlForm"/> class with the specified items.
+        /// Initializes a new instance of the class with an automatically assigned ID.
         /// </summary>
         /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
         /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
@@ -233,7 +233,6 @@ namespace WebExpress.WebUI.WebControl
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlFormItem> items)
         {
             var renderFormContext = new RenderControlFormContext(renderContext, this);
-            var session = renderContext.Request.Session.Id;
             var validationResults = new List<ValidationResult>();
 
             // check if and how the form was submitted

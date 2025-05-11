@@ -165,7 +165,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<button type=""button"" class=""btn""></button>")]
-        [InlineData(typeof(IconStar), @"<button type=""button"" class=""btn""><span class=""fas fa-star""></span></button>")]
+        [InlineData(typeof(IconStar), @"<button type=""button"" class=""btn""><i class=""fas fa-star""></i></button>")]
         public void Icon(Type icon, string expected)
         {
             // preconditions
@@ -212,12 +212,12 @@ namespace WebExpress.WebUI.Test.WebControl
             var html5 = control5.Render(context, visualTree);
             var html6 = control6.Render(context, visualTree);
 
-            Assert.Equal(@"<button type=""button"" class=""btn""><span class=""fas fa-star""></span></button>", html1.Trim());
-            Assert.Equal(@"<button type=""button"" class=""btn""><span class=""fas fa-star""></span></button>", html2.Trim());
-            Assert.Equal(@"<button type=""button"" class=""btn""><span class=""fas fa-star""></span></button>", html3.Trim());
-            Assert.Equal(@"<button type=""button"" class=""btn""><span class=""fas fa-star""></span></button>", html4.Trim());
-            Assert.Equal(@"<button type=""button"" class=""btn""><span class=""fas fa-star""></span></button>", html5.Trim());
-            Assert.Equal(@"<button type=""button"" class=""btn""><span class=""fas fa-star""></span></button>", html6.Trim());
+            Assert.Equal(@"<button type=""button"" class=""btn""><i class=""fas fa-star""></i></button>", html1.Trim());
+            Assert.Equal(@"<button type=""button"" class=""btn""><i class=""fas fa-star""></i></button>", html2.Trim());
+            Assert.Equal(@"<button type=""button"" class=""btn""><i class=""fas fa-star""></i></button>", html3.Trim());
+            Assert.Equal(@"<button type=""button"" class=""btn""><i class=""fas fa-star""></i></button>", html4.Trim());
+            Assert.Equal(@"<button type=""button"" class=""btn""><i class=""fas fa-star""></i></button>", html5.Trim());
+            Assert.Equal(@"<button type=""button"" class=""btn""><i class=""fas fa-star""></i></button>", html6.Trim());
         }
     }
 }

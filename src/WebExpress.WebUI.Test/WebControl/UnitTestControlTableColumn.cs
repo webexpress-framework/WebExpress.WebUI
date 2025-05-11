@@ -93,7 +93,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<th><div></div></th>")]
-        [InlineData(typeof(IconStar), @"<th><div><span class=""fas fa-star""></span></div></th>")]
+        [InlineData(typeof(IconStar), @"<th><div><i class=""fas fa-star""></i></div></th>")]
         public void Icon(Type icon, string expected)
         {
             // preconditions

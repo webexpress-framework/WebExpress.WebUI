@@ -70,9 +70,15 @@ namespace WebExpress.WebUI.WebControl
                     label.Classes = ["me-2"];
                     help.Text = I18N.Translate(renderGroupContext.Request?.Culture, input?.Help);
 
-                    if (icon.Icon != null && !string.IsNullOrWhiteSpace(label.Text))
+                    if (icon.Icon != null && string.IsNullOrWhiteSpace(label.Text))
                     {
-                        icon.Classes = ["me-2", "pt-1"];
+                        icon.Classes = ["pt-1"];
+
+                        row.Add(new HtmlElementTextContentDiv(icon.Render(renderGroupContext, visualTree)));
+                    }
+                    else if (icon.Icon != null)
+                    {
+                        icon.Classes = ["pt-1"];
 
                         row.Add(new HtmlElementTextContentDiv(icon.Render(renderGroupContext, visualTree), label.Render(renderGroupContext, visualTree)));
                     }

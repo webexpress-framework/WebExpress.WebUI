@@ -1,4 +1,6 @@
-﻿namespace WebExpress.WebUI.WebControl
+﻿using System.Collections.Generic;
+
+namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// Represents a form item input selection control.
@@ -6,6 +8,21 @@
     /// </summary>
     public interface IControlFormItemInputSelection : IControlFormItem
     {
+        /// <summary>
+        /// Returns the entries.
+        /// </summary>
+        public IEnumerable<ControlFormItemInputSelectionItem> Options { get; }
+
+        /// <summary>
+        /// Returns or sets the label of the selected options.
+        /// </summary>
+        public string Placeholder { get; set; }
+
+        /// <summary>
+        /// Allows you to select multiple items.
+        /// </summary>
+        public bool MultiSelect { get; set; }
+
         /// <summary>
         /// Adds one or more items to the selection options.
         /// </summary>

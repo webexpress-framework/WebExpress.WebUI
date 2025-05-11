@@ -1,7 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebMessage;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -9,30 +13,124 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a modal form control that can display a form in a modal dialog.
     /// </summary>
-    public class ControlModalForm : ControlModal
+    public class ControlModalForm : ControlModal, IControlForm
     {
+        private readonly ControlForm _form;
+
         /// <summary>
-        /// Returns the form.
+        /// Event is raised when the form's data needs to be determined.
         /// </summary>
-        public ControlForm Form { get; private set; }
+        public event Action<ControlFormEventFormInitialize> InitializeForm;
+
+        /// <summary>
+        /// Event to validate the input values.
+        /// </summary>
+        public event Action<ControlFormEventFormValidate> ValidateForm;
+
+        /// <summary>
+        /// Event is raised when the form is about to be processed.
+        /// </summary>
+        public event Action<ControlFormEventFormProzess> ProcessForm;
+
+        /// <summary>
+        /// Returns or sets the name of the form.
+        /// </summary>
+        public string Name { get => _form.Name; set => _form.Name = value; }
+
+        /// <summary>
+        /// Returns or sets the target uri.
+        /// </summary>
+        public IUri Uri { get => _form.Uri; set => _form.Uri = value; }
+
+        /// <summary>
+        /// Returns or sets the redirect uri.
+        /// </summary>
+        public IUri RedirectUri { get => _form.RedirectUri; set => _form.RedirectUri = value; }
+
+        /// <summary>
+        /// Returns the form items.
+        /// </summary>
+        public IEnumerable<IControlFormItem> Items => _form.Items;
+
+        /// <summary>
+        /// Returns or sets the request method.
+        /// </summary>
+        public RequestMethod Method { get => _form.Method; set => _form.Method = value; }
+
+        /// <summary>
+        /// Returns or sets the confirmation control that is displayed 
+        /// instead of the form after the form has been successfully submitted.
+        /// </summary>
+        public IControl Conformation { get => _form.Conformation; set => _form.Conformation = value; }
+
+        /// <summary>
+        /// Initializes a new instance of the class with an automatically assigned ID.
+        /// </summary>
+        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
+        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
+        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
+        /// <param name="items">The form controls.</param>
+        public ControlModalForm([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null, params IControlFormItem[] items)
+            : this($"modal_{instance}_{file}_{line}".GetHashCode().ToString("X"), items)
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
         /// <param name="items">The form controls.</param>
-        public ControlModalForm(string id = null, params ControlFormItem[] items)
-            : base("modal_" + id)
+        public ControlModalForm(string id, params IControlFormItem[] items)
+            : base(id)
         {
-            Form = items != null ? new ControlForm(id, items) : new ControlForm(id);
-            //Form.InitializeForm += OnInitializeForm;
-            //Form.Validated += OnValidatedForm;
+            _form = new ControlForm(id != null ? $"form_{id}" : null, items ?? []);
+
+            _form.InitializeForm += (e) => InitializeForm?.Invoke(e);
+            _form.ValidateForm += (e) => ValidateForm?.Invoke(e);
+            _form.ProcessForm += (e) => ProcessForm?.Invoke(e);
+        }
+
+        /// <summary>
+        /// Initialize the form with data using the specified action.
+        /// </summary>
+        /// <param name="handler">The action to execute for filling the form.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlForm Initialize(Action<ControlFormEventFormInitialize> handler)
+        {
+            _form.InitializeForm += handler;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Checks the form for correctness of the data.
+        /// </summary>
+        /// <param name="handler">The action to execute for validation the form.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlForm Validate(Action<ControlFormEventFormValidate> handler)
+        {
+            _form.ValidateForm += handler;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Processes the form with the specified handler.
+        /// </summary>
+        /// <param name="handler">The action to execute for processing the form.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlForm Process(Action<ControlFormEventFormProzess> handler)
+        {
+            _form.ProcessForm += handler;
+
+            return this;
         }
 
         /// <summary> 
         /// Adds one or more form items to the content of the form.
         /// </summary> 
-        /// <param name="controls">The form items to add to the form.</param> 
+        /// <param name="items">The form items to add to the form.</param> 
+        /// <returns>The current instance for method chaining.</returns>
         /// <remarks> 
         /// This method allows adding one or multiple form items to the <see cref="ControlFormItem"/> collection of 
         /// the form. It is useful for dynamically constructing the user interface by appending 
@@ -46,15 +144,18 @@ namespace WebExpress.WebUI.WebControl
         /// </code> 
         /// This method accepts any control that implements the <see cref="ControlFormItem"/> interface.
         /// </remarks>
-        public virtual void Add(params ControlFormItem[] items)
+        public virtual IControlForm Add(params IControlFormItem[] items)
         {
-            Form.Add(items);
+            _form.Add(items);
+
+            return this;
         }
 
         /// <summary> 
         /// Adds one or more form items to the content of the form.
         /// </summary> 
-        /// <param name="controls">The form items to add to the form.</param> 
+        /// <param name="items">The form items to add to the form.</param> 
+        /// <returns>The current instance for method chaining.</returns>
         /// <remarks> 
         /// This method allows adding one or multiple form items to the <see cref="ControlFormItem"/> collection of 
         /// the form. It is useful for dynamically constructing the user interface by appending 
@@ -68,46 +169,110 @@ namespace WebExpress.WebUI.WebControl
         /// </code> 
         /// This method accepts any control that implements the <see cref="ControlFormItem"/> interface.
         /// </remarks>
-        public virtual void Add(IEnumerable<ControlFormItem> items)
+        public virtual IControlForm Add(IEnumerable<IControlFormItem> items)
         {
-            Form.Add(items);
+            _form.Add(items);
+
+            return this;
         }
 
         /// <summary>
         /// Removes a form item from the content of the form.
         /// </summary>
         /// <param name="item">The form item to remove from the form.</param>
+        /// <returns>The current instance for method chaining.</returns>
         /// <remarks>
-        /// This method allows removing a specific form item from the <see cref="Items"/> collection of 
-        /// the form.
+        /// This method allows removing a specific form item of the form.
         /// </remarks>
-        public virtual void Remove(ControlFormItem item)
+        public virtual IControlForm Remove(IControlFormItem item)
         {
-            Form.Remove(item);
+            _form.Remove(item);
+
+            return this;
         }
 
         /// <summary>
-        /// Invoked when the form is initialized.
+        /// Adds a preferences control.
         /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The event argument.</param>
-        private void OnInitializeForm(object sender, ControlFormEvent e)
+        /// <param name="controls">The controls.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlForm AddPreferencesControl(params IControlFormItem[] controls)
         {
-            ShowIfCreated = false;
+            _form.AddPreferencesControl(controls);
+
+            return this;
         }
 
         /// <summary>
-        /// Invoked when the form has been validated.
+        /// Adds a preferences form control button.
         /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The event argument.</param>
-        private void OnValidatedForm(object sender, ValidationResultEventArgs e)
+        /// <param name="button">The form buttons.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlForm AddPreferencesButton(params IControlFormItemButton[] buttons)
         {
-            if (!e.Valid)
-            {
-                ShowIfCreated = true;
-                Fade = false;
-            }
+            _form.AddPreferencesButton(buttons);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a primary control.
+        /// </summary>
+        /// <param name="controls">The controls.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlForm AddPrimaryControl(params IControlFormItem[] controls)
+        {
+            _form.AddPrimaryControl(controls);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a primary form control button.
+        /// </summary>
+        /// <param name="button">The form buttons.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlForm AddPrimaryButton(params IControlFormItemButton[] buttons)
+        {
+            _form.AddPrimaryButton(buttons);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a secondary control.
+        /// </summary>
+        /// <param name="controls">The controls.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlForm AddSecondaryControl(params IControlFormItem[] controls)
+        {
+            _form.AddSecondaryControl(controls);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a secondary form control button.
+        /// </summary>
+        /// <param name="button">The form buttons.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlForm AddSecondaryButton(params IControlFormItemButton[] buttons)
+        {
+            _form.AddSecondaryButton(buttons);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Removes a form control button from the form.
+        /// </summary>
+        /// <param name="button">The form button.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlForm RemoveButton(IControlFormItemButton button)
+        {
+            _form.RemoveButton(button);
+
+            return this;
         }
 
         /// <summary>
@@ -118,7 +283,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return Render(renderContext, visualTree, Form.Items);
+            return Render(renderContext, visualTree, _form.Items);
         }
 
         /// <summary>
@@ -130,97 +295,25 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlFormItem> items)
         {
-            var fade = Fade;
             var classes = Classes.ToList();
 
-            var form = Form.Render(renderContext, visualTree, items) as HtmlElementFormForm;
-
-            classes.Add("modal");
-
-            if (Fade)
-            {
-                classes.Add("fade");
-            }
-
-            var headerText = new HtmlElementSectionH4(I18N.Translate(renderContext.Request?.Culture, Header))
-            {
-                Class = "modal-title"
-            };
-
-            var headerButton = new HtmlElementFieldButton()
-            {
-                Class = "btn-close"
-            };
-            headerButton.AddUserAttribute("aria-label", "close");
-            headerButton.AddUserAttribute("data-bs-dismiss", "modal");
-
-            var header = new HtmlElementTextContentDiv(headerText, headerButton)
-            {
-                Class = "modal-header"
-            };
-
+            var form = _form.Render(renderContext, visualTree, items) as HtmlElementFormForm;
             var formElements = form.Elements.Where(x => x is not HtmlElementSectionFooter && x is not HtmlElementTextContentDiv);
+            var buttons = _form.Buttons.Select(x => x.Render(new RenderControlFormContext(renderContext, _form), visualTree));
 
-            var body = new HtmlElementTextContentDiv([.. formElements])
-            {
-                Class = "modal-body"
-            };
-
-            var footer = default(HtmlElementTextContentDiv);
-            var cancelFooterButton = new ControlButtonLink()
-            {
-                Text = I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:modal.close.label")
-            }.Render(renderContext, visualTree) as HtmlElement;
-            cancelFooterButton.AddUserAttribute("data-bs-dismiss", "modal");
-
-            var buttons = Form.Buttons.Select(x => x.Render(new RenderControlFormContext(renderContext, Form), visualTree));
-
-            footer = new HtmlElementTextContentDiv([.. buttons.Concat([cancelFooterButton])])
-            {
-                Class = "modal-footer d-flex justify-content-between"
-            };
-
-            var content = new HtmlElementTextContentDiv(header, body, footer)
-            {
-                Class = "modal-content"
-            };
-
-            var dialog = new HtmlElementTextContentDiv(content)
-            {
-                Class = "modal-dialog",
-                Role = "document"
-            };
-
-            var html = new HtmlElementTextContentDiv(dialog)
+            var html = new HtmlElementTextContentDiv([.. formElements])
             {
                 Id = Id,
-                Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
+                Class = Css.Concatenate("wx-webui-modal", classes),
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
                 Role = "dialog"
-            };
-
-            if (!string.IsNullOrWhiteSpace(OnShownCode))
-            {
-                var shown = "$('#" + Id + "').on('shown.bs.modal', function(e) { " + OnShownCode + " });";
-                visualTree.AddScript(Id + "_shown", shown);
             }
-
-            if (!string.IsNullOrWhiteSpace(OnHiddenCode))
-            {
-                var hidden = "$('#" + Id + "').on('hidden.bs.modal', function() { " + OnHiddenCode + " });";
-                visualTree.AddScript(Id + "_hidden", hidden);
-            }
-
-            if (ShowIfCreated)
-            {
-                var show = "$('#" + Id + "').modal('show');";
-                visualTree.AddScript(Id + "_showifcreated", show);
-            }
+            .AddUserAttribute("data-title", I18N.Translate(Header))
+            .AddUserAttribute("data-size", Size.ToClass())
+            .AddUserAttribute("data-close-label", I18N.Translate(CloseLabel));
 
             form.Clear();
             form.Add(html);
-
-            Fade = fade;
 
             return form;
         }

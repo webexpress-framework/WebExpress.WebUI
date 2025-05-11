@@ -65,9 +65,9 @@ namespace WebExpress.WebUI.WebControl
         public string Value { get; set; }
 
         /// <summary>
-        /// Returns or sets a modal dialogue.
+        /// Returns or sets the id of a modal dialogue.
         /// </summary>
-        public PropertyModal Modal { get; set; }
+        public string Modal { get; set; }
 
         /// <summary>
         /// Returns or sets the icon.
@@ -99,44 +99,36 @@ namespace WebExpress.WebUI.WebControl
         /// Adds one or more controls to the content.
         /// </summary>
         /// <param name="controls">The controls to add to the content.</param>
-        /// <remarks>
-        /// This method allows adding one or multiple controls to the <see cref="Content"/> collection of the control panel. 
-        /// It is useful for dynamically constructing the user interface by appending various controls to the panel's content.
-        /// 
-        /// Example usage:
-        /// <code>
-        /// var button = new ControlButton();
-        /// var text1 = new ControlText { Text = "A" };
-        /// var text2 = new ControlText { Text = "B" };
-        /// button.Add(text1, text2);
-        /// </code>
-        /// This method accepts any control that implements the <see cref="IControl"/> interface.
-        /// </remarks>
-        public void Add(params IControl[] items)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlButton Add(params IControl[] items)
         {
             _content.AddRange(items);
+
+            return this;
         }
 
         /// <summary>
         /// Adds one or more controls to the content.
         /// </summary>
         /// <param name="controls">The controls to add to the content.</param>
-        /// <remarks>
-        /// This method allows adding one or multiple controls to the <see cref="Content"/> collection of the control panel. 
-        /// It is useful for dynamically constructing the user interface by appending various controls to the panel's content.
-        /// 
-        /// Example usage:
-        /// <code>
-        /// var button = new ControlButton();
-        /// var text1 = new ControlText { Text = "A" };
-        /// var text2 = new ControlText { Text = "B" };
-        /// button.Add(new List<IControl>([text1, text2]));
-        /// </code>
-        /// This method accepts any control that implements the <see cref="IControl"/> interface.
-        /// </remarks>
-        public void Add(IEnumerable<IControl> items)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlButton Add(IEnumerable<IControl> items)
         {
             _content.AddRange(items);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Removes a control from the content of the button.
+        /// </summary>
+        /// <param name="control">The control to remove from the content.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlButton Remove(IControl control)
+        {
+            _content.Remove(control);
+
+            return this;
         }
 
         /// <summary>
@@ -189,24 +181,10 @@ namespace WebExpress.WebUI.WebControl
                 html.Add(_content.Select(x => x.Render(renderContext, visualTree)).ToArray());
             }
 
-            if (Modal == null || Modal.Type == TypeModal.None)
+            if (!string.IsNullOrWhiteSpace(Modal))
             {
-
-            }
-            else if (Modal.Type == TypeModal.Form)
-            {
-                html.OnClick = $"new webexpress.webui.modalFormCtrl({{ close: '{I18N.Translate(renderContext.Request.Culture, "webexpress.webui:form.cancel.label")}', uri: '{Modal.Uri}', size: '{Modal.Size.ToString().ToLower()}', redirect: '{Modal.RedirectUri}'}});";
-            }
-            else if (Modal.Type == TypeModal.Brwoser)
-            {
-                html.OnClick = $"new webexpress.WebUI.modalPageCtrl({{ close: '{I18N.Translate(renderContext.Request.Culture, "webexpress.webui:form.cancel.label")}', uri: '{Modal.Uri}', size: '{Modal.Size.ToString().ToLower()}', redirect: '{Modal.RedirectUri}'}});";
-            }
-            else if (Modal.Type == TypeModal.Modal)
-            {
-                html.AddUserAttribute("data-bs-toggle", "modal");
-                html.AddUserAttribute("data-bs-target", "#" + Modal.Modal.Id);
-
-                return new HtmlList(html, Modal.Modal.Render(renderContext, visualTree));
+                html.AddUserAttribute("data-wx-toggle", "modal");
+                html.AddUserAttribute("data-wx-target", $"#{Modal}");
             }
 
             return html;

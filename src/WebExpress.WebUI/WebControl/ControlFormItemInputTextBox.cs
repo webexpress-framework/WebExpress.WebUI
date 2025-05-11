@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -58,10 +59,21 @@ namespace WebExpress.WebUI.WebControl
         public uint? Rows { get; set; } = 8;
 
         /// <summary>
+        /// Initializes a new instance of the class with an automatically assigned ID.
+        /// </summary>
+        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
+        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
+        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
+        public ControlFormItemInputTextBox([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null)
+            : this($"textbox_{instance}_{file}_{line}".GetHashCode().ToString("X"))
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        public ControlFormItemInputTextBox(string id = null)
+        public ControlFormItemInputTextBox(string id)
             : base(id)
         {
             Margin = new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.Two, PropertySpacing.Space.None, PropertySpacing.Space.None);

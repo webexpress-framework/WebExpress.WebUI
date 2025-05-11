@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -8,52 +11,70 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a form item input control that allows moving items between available and selected lists.
     /// </summary>
-    public class ControlFormItemInputMove : ControlFormItemInput
+    public class ControlFormItemInputMove : ControlFormItemInput, IControlFormItemInputMove
     {
-        private readonly List<ControlFormItemInputSelectionItem> _options = [];
+        private readonly List<ControlFormItemInputMoveItem> _options = [];
 
         /// <summary>
-        /// Returns the entries.
+        /// Returns the collection of available options for the control.
         /// </summary>
-        public IEnumerable<ControlFormItemInputSelectionItem> Options => _options;
+        public IEnumerable<ControlFormItemInputMoveItem> Options => _options;
 
         /// <summary>
-        /// Returns or sets the label of the selected options.
+        /// Returns or sets the label displayed for the selected options list.
         /// </summary>
-        public string SelectedHeader { get; set; } = "webexpress.webui:form.selectionmove.selected";
+        public string SelectedHeader { get; set; } = "webexpress.webui:form.move.selected";
 
         /// <summary>
-        /// Returns or sets the label.
+        /// Returns or sets the label displayed for the available options list.
         /// </summary>
-        public string AvailableHeader { get; set; } = "webexpress.webui:form.selectionmove.available";
+        public string AvailableHeader { get; set; } = "webexpress.webui:form.move.available";
 
         /// <summary>
-        /// Initializes a new instance of the class.
+        /// Initializes a new instance of the class with an automatically assigned ID.
         /// </summary>
-        /// <param name="id">The id of the control.</param>
-        /// <param name="items">The entries.</param>
-        public ControlFormItemInputMove(string id = null, params ControlFormItemInputSelectionItem[] items)
-            : base(string.IsNullOrEmpty(id) ? typeof(ControlFormItemInputSelection).GUID.ToString() : id)
+        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
+        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
+        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
+        /// <param name="items">The initial set of items to populate the control.</param>
+        public ControlFormItemInputMove([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null, params ControlFormItemInputMoveItem[] items)
+            : this($"move_{instance}_{file}_{line}".GetHashCode().ToString("X"))
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the class with a specified ID.
+        /// </summary>
+        /// <param name="id">The unique identifier for the control.</param>
+        /// <param name="items">The initial set of items to populate the control.</param>
+        public ControlFormItemInputMove(string id, params ControlFormItemInputMoveItem[] items)
+            : base(id)
         {
             _options.AddRange(items);
         }
 
         /// <summary>
-        /// Adds one or more items to the selection options.
+        /// Adds one or more items to the available options list.
         /// </summary>
-        /// <param name="items">The items to add to the selection options.</param>
-        public void Add(params ControlFormItemInputSelectionItem[] items)
+        /// <param name="items">The items to add to the available options list.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlFormItemInputMove Add(params ControlFormItemInputMoveItem[] items)
         {
             _options.AddRange(items);
+
+            return this;
         }
 
         /// <summary>
-        /// Removes an item from the selection options.
+        /// Removes a specific item from the available options list.
         /// </summary>
-        /// <param name="item">The item to remove from the selection options.</param>
-        public void Remove(ControlFormItemInputSelectionItem item)
+        /// <param name="item">The item to remove from the available options list.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlFormItemInputMove Remove(ControlFormItemInputMoveItem item)
         {
             _options.Remove(item);
+
+            return this;
         }
 
         /// <summary>
@@ -64,6 +85,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            var value = renderContext.GetValue(this);
             var classes = Classes.ToList();
 
             if (Disabled)
@@ -71,61 +93,36 @@ namespace WebExpress.WebUI.WebControl
                 classes.Add("disabled");
             }
 
-            var html = new HtmlElementTextContentDiv()
+            var html = new HtmlElementTextContentDiv([.. _options.Select(x => new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(x.Label)))
+                {
+                    Id = x.Id,
+                    Class = "wx-webui-move-option"
+                }
+                    .AddUserAttribute("data-icon", (x.Icon as Icon)?.Class)
+                    .AddUserAttribute("data-image", (x.Icon as ImageIcon)?.Uri.ToString()))])
             {
-                Id = $"selection-move-{Id}",
+                Id = Id,
+                Class = Css.Concatenate("wx-webui-move", classes),
                 Style = GetStyles()
-            };
+            }
+                .AddUserAttribute("name", Name);
 
-            visualTree.AddScript(Id, GetScript($"selection-move-{Id}", string.Join(" ", classes)));
+            if (!string.IsNullOrEmpty(SelectedHeader))
+            {
+                html.AddUserAttribute("data-header-selected", I18N.Translate(SelectedHeader));
+            }
+
+            if (!string.IsNullOrEmpty(AvailableHeader))
+            {
+                html.AddUserAttribute("data-header-available", I18N.Translate(AvailableHeader));
+            }
+
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                html.AddUserAttribute("data-value", value);
+            }
 
             return html;
-        }
-
-        /// <summary>
-        /// Generates the javascript to control the control.
-        /// </summary>
-        /// <param name="id">The id of the control.</param>
-        /// <param name="css">The css classes that are assigned to the control.</param>
-        /// <returns>The javascript code.</returns>
-        protected virtual string GetScript(string id, string css)
-        {
-            //var settings = new
-            //{
-            //    Id = id,
-            //    Name = Id,
-            //    CSS = css,
-            //    Header = new
-            //    {
-            //        Selected = I18N.Translate(SelectedHeader),
-            //        Available = I18N.Translate(AvailableHeader)
-            //    },
-            //    Buttons = new
-            //    {
-            //        ToSelectedAll = I18N.Translate("˂˂"),
-            //        ToSelected = I18N.Translate("˂"),
-            //        ToAvailableAll = I18N.Translate("˃˃"),
-            //        ToAvailable = I18N.Translate("˃")
-            //    }
-            //};
-
-            //var jsonOptions = new JsonSerializerOptions { WriteIndented = false };
-            //var settingsJson = JsonSerializer.Serialize(settings, jsonOptions);
-            //var optionsJson = JsonSerializer.Serialize(Options, jsonOptions);
-            //var valuesJson = JsonSerializer.Serialize(Value?.Split(";", System.StringSplitOptions.RemoveEmptyEntries), jsonOptions);
-            //var builder = new StringBuilder();
-
-            //builder.Append($"var options = {optionsJson};");
-            //builder.Append($"var settings = {settingsJson};");
-            //builder.Append($"var container = $('#{id}');");
-            //builder.Append($"var obj = new webexpress.webui.moveCtrl(settings);");
-            //builder.Append($"obj.options = options;");
-            //builder.Append($"obj.value = {(!string.IsNullOrWhiteSpace(valuesJson) ? valuesJson : "[]")};");
-            //builder.Append($"container.replaceWith(obj.getCtrl);");
-
-            //return builder.ToString();
-
-            return string.Empty;
         }
     }
 }

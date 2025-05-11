@@ -35,6 +35,28 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the auto id property of the form text box control.
+        /// </summary>
+        [Theory]
+        [InlineData(@"<input id=""*"" name=""*"" type=""text"" class=""form-control"">")]
+        public void AutoId(string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputTextBox()
+            {
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests the name property of the form text control.
         /// </summary>
         [Theory]
@@ -47,7 +69,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputTextBox()
+            var control = new ControlFormItemInputTextBox(null)
             {
                 Name = name
             };
@@ -72,7 +94,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputTextBox()
+            var control = new ControlFormItemInputTextBox(null)
             {
                 Format = format
             };
@@ -96,7 +118,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputTextBox()
+            var control = new ControlFormItemInputTextBox(null)
             {
                 Description = description
             };
@@ -120,7 +142,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputTextBox()
+            var control = new ControlFormItemInputTextBox(null)
             {
                 Placeholder = placeholder
             };
@@ -145,7 +167,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputTextBox()
+            var control = new ControlFormItemInputTextBox(null)
             {
                 MinLength = minLength
             };
@@ -170,7 +192,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputTextBox()
+            var control = new ControlFormItemInputTextBox(null)
             {
                 MaxLength = maxLength
             };
@@ -194,7 +216,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputTextBox()
+            var control = new ControlFormItemInputTextBox(null)
             {
                 Required = required
             };
@@ -218,7 +240,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputTextBox()
+            var control = new ControlFormItemInputTextBox(null)
             {
                 Pattern = pattern
             };
@@ -243,7 +265,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputTextBox()
+            var control = new ControlFormItemInputTextBox(null)
             {
                 Rows = rows,
                 Format = TypesEditTextFormat.Multiline
@@ -268,7 +290,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputTextBox();
+            var control = new ControlFormItemInputTextBox(null);
             var form = new ControlForm().Add(control)
                 .Initialize(renderContext =>
                 {
@@ -296,7 +318,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputTextBox()
+            var control = new ControlFormItemInputTextBox(null)
                 .Initialize(arg =>
                 {
                     arg.Value = value;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -8,7 +9,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a checkbox input form item control.
     /// </summary>
-    public class ControlFormItemInputCheckbox : ControlFormItemInput
+    public class ControlFormItemInputCheckBox : ControlFormItemInput
     {
         /// <summary>
         /// Returns or sets whether the checkbox should be displayed on a new line.
@@ -26,10 +27,21 @@ namespace WebExpress.WebUI.WebControl
         public string Pattern { get; set; }
 
         /// <summary>
+        /// Initializes a new instance of the class with an automatically assigned ID.
+        /// </summary>
+        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
+        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
+        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
+        public ControlFormItemInputCheckBox([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null)
+            : this($"checkbox_{instance}_{file}_{line}".GetHashCode().ToString("X"))
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id.</param>
-        public ControlFormItemInputCheckbox(string id = null)
+        public ControlFormItemInputCheckBox(string id)
             : base(id)
         {
         }

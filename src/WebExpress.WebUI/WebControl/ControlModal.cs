@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -9,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a modal control that can display content in a modal dialog.
     /// </summary>
-    public class ControlModal : Control
+    public class ControlModal : Control, IControlModal
     {
         private readonly List<IControl> _content = [];
 
@@ -19,37 +20,44 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControl> Content => _content;
 
         /// <summary>
-        /// Returns or sets whether the fader effect should be used.
-        /// </summary>
-        public bool Fade { get; set; } = true;
-
-        /// <summary>
         /// Returns or sets the header.
         /// </summary>
         public string Header { get; set; }
 
-        /// <summary>
-        /// Returns or sets whether the modal should be displayed when the control is loaded or only after the user is prompted.
-        /// </summary>
-        public bool ShowIfCreated { get; set; }
+        /// <summary>  
+        /// Returns or sets the size of the modal dialog.  
+        /// </summary>  
+        /// <value>  
+        /// One of the values of the <see cref="TypeModalSize"/> enumeration, specifying the size of the modal.  
+        /// </value>  
+        /// <remarks>  
+        /// This property allows you to define the size of the modal dialog, such as Default, Small, Large, ExtraLarge, or Fullscreen.  
+        /// </remarks>  
+        public TypeModalSize Size { get; set; }
 
         /// <summary>
-        /// Returns or sets the jquerry code to be executed when the modal dialog is displayed.
+        /// Returns or sets the label for the close button of the modal.
         /// </summary>
-        public string OnShownCode { get; set; }
+        public string CloseLabel { get; set; } = "webexpress.webui:modal.close.label";
 
         /// <summary>
-        /// Returns or sets the jquerry code to be executed when the modal dialog is hidden.
+        /// Initializes a new instance of the class with an automatically assigned ID.
         /// </summary>
-        public string OnHiddenCode { get; set; }
+        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
+        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
+        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
+        /// <param name="content">The content of the html element.</param>
+        public ControlModal([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null, params IControl[] content)
+            : this($"modal_{instance}_{file}_{line}".GetHashCode().ToString("X"), content)
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        /// <param name="text">The text.</param>
         /// <param name="content">The content of the html element.</param>
-        public ControlModal(string id = null, params IControl[] content)
+        public ControlModal(string id, params IControl[] content)
             : base(id)
         {
             _content.AddRange(content);
@@ -59,6 +67,7 @@ namespace WebExpress.WebUI.WebControl
         /// Adds one or more controls to the content of the modal.
         /// </summary> 
         /// <param name="controls">The controls to add to the modal.</param> 
+        /// <returns>The current instance for method chaining.</returns>
         /// <remarks> 
         /// This method allows adding one or multiple controls to the <see cref="Content"/> collection of 
         /// the modal. It is useful for dynamically constructing the user interface by appending 
@@ -72,15 +81,18 @@ namespace WebExpress.WebUI.WebControl
         /// </code> 
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
-        public virtual void Add(params IControl[] controls)
+        public IControlModal Add(params IControl[] controls)
         {
             _content.AddRange(controls);
+
+            return this;
         }
 
         /// <summary> 
         /// Adds one or more controls to the content of the modal.
         /// </summary> 
-        /// <param name="controls">The controls to add to the v.</param> 
+        /// <param name="controls">The controls to add to the modal.</param> 
+        /// <returns>The current instance for method chaining.</returns>
         /// <remarks> 
         /// This method allows adding one or multiple controls to the <see cref="Content"/> collection of 
         /// the modal. It is useful for dynamically constructing the user interface by appending 
@@ -94,22 +106,27 @@ namespace WebExpress.WebUI.WebControl
         /// </code> 
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
-        public virtual void Add(IEnumerable<IControl> controls)
+        public IControlModal Add(IEnumerable<IControl> controls)
         {
             _content.AddRange(controls);
+
+            return this;
         }
 
         /// <summary>
         /// Removes a control from the content of the modal.
         /// </summary>
         /// <param name="control">The control to remove from the content.</param>
+        /// <returns>The current instance for method chaining.</returns>
         /// <remarks>
         /// This method allows removing a specific control from the <see cref="Content"/> collection of 
         /// the modal.
         /// </remarks>
-        public virtual void Remove(IControl control)
+        public IControlModal Remove(IControl control)
         {
             _content.Remove(control);
+
+            return this;
         }
 
         /// <summary>
@@ -120,86 +137,14 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var classes = Classes.ToList();
-            classes.Add("modal");
-
-            if (Fade)
-            {
-                classes.Add("fade");
-            }
-
-            var headerText = new HtmlElementSectionH4(I18N.Translate(renderContext.Request, Header))
-            {
-                Class = "modal-title"
-            };
-
-            var headerButton = new HtmlElementFieldButton()
-            {
-                Class = "btn-close"
-            };
-            headerButton.AddUserAttribute("aria-label", "close");
-            headerButton.AddUserAttribute("data-bs-dismiss", "modal");
-
-            var header = new HtmlElementTextContentDiv(headerText, headerButton)
-            {
-                Class = "modal-header"
-            };
-
-            var body = new HtmlElementTextContentDiv(Content.Select(x => x.Render(renderContext, visualTree)).ToArray())
-            {
-                Class = "modal-body"
-            };
-
-            var footer = default(HtmlElementTextContentDiv);
-
-            var footerButton = new HtmlElementFieldButton(new HtmlText(I18N.Translate(renderContext.Request, "webexpress.webui:modal.close.label")))
-            {
-                Type = "button",
-                Class = Css.Concatenate("btn", new PropertyColorButton(TypeColorButton.Primary).ToStyle())
-            };
-            footerButton.AddUserAttribute("data-bs-dismiss", "modal");
-
-            footer = new HtmlElementTextContentDiv(footerButton)
-            {
-                Class = "modal-footer"
-            };
-
-            var content = new HtmlElementTextContentDiv(header, body, footer)
-            {
-                Class = "modal-content"
-            };
-
-            var dialog = new HtmlElementTextContentDiv(content)
-            {
-                Class = "modal-dialog",
-                Role = "document"
-            };
-
-            var html = new HtmlElementTextContentDiv(dialog)
+            var html = new HtmlElementTextContentDiv([.. _content.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
-                Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
-                Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
-                Role = "dialog"
-            };
-
-            if (!string.IsNullOrWhiteSpace(OnShownCode))
-            {
-                var shown = "$('#" + Id + "').on('shown.bs.modal', function(e) { " + OnShownCode + " });";
-                visualTree.AddScript(Id + "_shown", shown);
+                Class = Css.Concatenate("wx-webui-modal", GetClasses())
             }
-
-            if (!string.IsNullOrWhiteSpace(OnHiddenCode))
-            {
-                var hidden = "$('#" + Id + "').on('hidden.bs.modal', function() { " + OnHiddenCode + " });";
-                visualTree.AddScript(Id + "_hidden", hidden);
-            }
-
-            if (ShowIfCreated)
-            {
-                var show = "$('#" + Id + "').modal('show');";
-                visualTree.AddScript(Id + "_showifcreated", show);
-            }
+            .AddUserAttribute("data-title", I18N.Translate(Header))
+            .AddUserAttribute("data-size", Size.ToClass())
+            .AddUserAttribute("data-close-label", I18N.Translate(CloseLabel));
 
             return html;
         }

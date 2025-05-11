@@ -99,7 +99,12 @@ namespace WebExpress.WebUI.WebControl
                     label.FormItem = item;
                     help.Text = I18N.Translate(renderGroupContext.Request?.Culture, input?.Help);
 
-                    if (icon.Icon != null && !string.IsNullOrWhiteSpace(label.Text))
+                    if (icon.Icon != null && string.IsNullOrWhiteSpace(label.Text))
+                    {
+                        icon.Classes = ["me-2", "pt-1"];
+                        row.Add(new HtmlElementTextContentDiv(icon.Render(renderContext, visualTree)));
+                    }
+                    else if (icon.Icon != null)
                     {
                         icon.Classes = ["me-2", "pt-1"];
                         row.Add(new HtmlElementTextContentDiv(icon.Render(renderContext, visualTree), label.Render(renderGroupContext, visualTree))

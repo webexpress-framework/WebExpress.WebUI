@@ -32,11 +32,11 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
             $(element).find(".wx-selection-header, .wx-selection-divider, .wx-selection-item, .wx-selection-footer")
         );
 
-
         if (value) {
             this.value = String(value).split(";");
         }
 
+        // Clean up the DOM element
         $(element)
             .removeAttr("name placeholder data-multiselection")
             .empty()
@@ -276,7 +276,10 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
             this._values = values;
             this.render();
             this._hidden.val(this._values.join(";"));
-            $(document).trigger("webexpress.webui.change.value", values);
+            $(document).trigger(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
+                id: $(this._element).attr("id"),
+                value: values
+            });
         }
     }
 };

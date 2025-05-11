@@ -164,7 +164,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<li class=""list-group-item-action""><a class=""link""></a></li>")]
-        [InlineData(typeof(IconStar), @"<li class=""list-group-item-action""><a class=""link""><span class=""fas fa-star""></span></a></li>")]
+        [InlineData(typeof(IconStar), @"<li class=""list-group-item-action""><a class=""link""><i class=""fas fa-star""></i></a></li>")]
         public void Icon(Type icon, string expected)
         {
             // preconditions
@@ -234,12 +234,12 @@ namespace WebExpress.WebUI.Test.WebControl
             var html5 = control5.Render(context, visualTree);
             var html6 = control6.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""link""><span class=""fas fa-star""></span></a></li>", html1);
-            AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""link""><span class=""fas fa-star""></span></a></li>", html2);
-            AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""link""><span class=""fas fa-star""></span></a></li>", html3);
-            AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""link""><span class=""fas fa-star""></span></a></li>", html4);
-            AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""link""><span class=""fas fa-star""></span></a></li>", html5);
-            AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""link""><span class=""fas fa-star""></span></a></li>", html6);
+            AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""link""><i class=""fas fa-star""></i></a></li>", html1);
+            AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""link""><i class=""fas fa-star""></i></a></li>", html2);
+            AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""link""><i class=""fas fa-star""></i></a></li>", html3);
+            AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""link""><i class=""fas fa-star""></i></a></li>", html4);
+            AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""link""><i class=""fas fa-star""></i></a></li>", html5);
+            AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""link""><i class=""fas fa-star""></i></a></li>", html6);
         }
     }
 }

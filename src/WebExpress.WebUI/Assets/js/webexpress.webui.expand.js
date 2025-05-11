@@ -2,24 +2,38 @@
  * A container for showing and hiding content. 
  * This class extends the base Control class to create an expandable/collapsible UI component.
  * Triggers the following events:
- * - webexpress.webui.change.visibility: Fired when the visibility of the content changes.
+ * - webexpress.webui.Event.CHANGE_VISIBILITY_EVENT
  */
 webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Constructor to initialize the expandable container.
-     * @param {HTMLElement} elem - The DOM element associated with the expandable instance.
+     * @param {HTMLElement} element - The DOM element associated with the expandable instance.
      */
-    constructor(elem) {
-        super(elem);
+    constructor(element) {
+        super(element);
 
         // Initialize properties
-        this._initializeProperties(elem);
+        this._initializeProperties(element);
 
         // Clean up the DOM
-        $(elem).removeData().empty().addClass("wx-expand");
+        $(element).empty()
+            .removeAttr("data-icon data-icon-opened data-icon-closed data-image data-image-opened data-image-closed")
+            .removeAttr("data-color data-header data-headercss data-expanded")
+            .addClass("wx-expand");
 
-        // Render the initial state
-        this.render();
+        // Create the header
+        this._expander = this._createExpander();
+        const icon = this._createIcon();
+        const img = this._createImage();
+        const header = this._createHeader();
+
+        // Create the content container
+        this._content = $("<div/>")
+            .append(this._contentHtml)
+            .toggleClass("hide", !this._expand);
+
+        // Append elements to the DOM container
+        $(this._element).append(this._expander, img, icon, header, this._content);            
     }
 
     /**
@@ -35,7 +49,9 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
         this._headerText = $(elem).data("header") || "";
         this._headerCss = $(elem).data("headercss") || "text-primary";
         this._expand = $(elem).data("expanded") === true || false;
-        this._contentHtml = $(elem).html();
+        this._contentHtml = [...$(elem)[0].childNodes].map(node => {
+            return $(node).clone(true, true)[0];
+        });
     }
 
     /**
@@ -61,7 +77,10 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
     set expand(value) {
         if (this._expand !== value) {
             this._expand = value;
-            $(document).trigger(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, value);
+            $(document).trigger(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
+                id: $(this._element).attr("id") || null,
+                value: value
+            });
             this.render();
         }
     }
@@ -105,24 +124,9 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
      * Updates the DOM based on the current properties.
      */
     render() {
-        $(this._element).empty(); // Clear existing content
-
-        // Create the header
-        const expander = this._createExpander();
-        const icon = this._createIcon();
-        const img = this._createImage();
-        const header = this._createHeader();
-
-        // Create the content container
-        const contentContainer = $("<div/>")
-            .html(this._contentHtml)
-            .toggleClass("hide", !this._expand);
-
-        // Append elements to the DOM container
-        $(this._element).append(expander, img, icon, header, contentContainer);
-
-        // Update internal content reference
-        this._content = contentContainer;
+        this._expander.removeClass("wx-expand-angle-down");
+        this._expander.toggleClass("wx-expand-angle-down-animation", this._expand);
+        this._content.toggleClass("hide", !this._expand);
     }
 
     /**

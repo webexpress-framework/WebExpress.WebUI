@@ -1,32 +1,53 @@
-﻿using WebExpress.WebCore.WebIcon;
-using WebExpress.WebUI.Test.Fixture;
+﻿using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
-using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.Test.WebControl
 {
     /// <summary>
-    /// Tests the icon control.
+    /// Tests the modal page control.
     /// </summary>
     [Collection("NonParallelTests")]
-    public class UnitTestControlIcon
+    public class UnitTestControlModalRemotePage
     {
         /// <summary>
-        /// Tests the id property of the icon control.
+        /// Tests the id property of the modal page control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<i class=""fas fa-star""></i>")]
-        [InlineData("id", @"<i id=""id"" class=""fas fa-star""></i>")]
+        [InlineData(null, @"<div class=""wx-webui-modalpage"" *></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-modalpage"" *></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlIcon(id)
+            var control = new ControlModalRemotePage(id)
             {
-                Icon = new IconStar()
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the header property of the modal page control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-webui-modalpage"" data-close-label=""Close""></div>")]
+        [InlineData("abc", @"<div class=""wx-webui-modalpage"" data-title=""abc"" data-close-label=""Close""></div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-modalpage"" data-title=""WebExpress.WebUI"" data-close-label=""Close""></div>")]
+        public void Header(string header, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlModalRemotePage(null)
+            {
+                Header = header
             };
 
             // test execution
@@ -36,21 +57,23 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the title property of the icon control.
+        /// Tests the size property of the modal page control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<i class=""fas fa-star""></i>")]
-        [InlineData("abc", @"<i class=""fas fa-star"" title=""abc""></i>")]
-        public void Title(string title, string expected)
+        [InlineData(TypeModalSize.Default, @"<div class=""wx-webui-modalpage"" data-close-label=""Close""></div>")]
+        [InlineData(TypeModalSize.Small, @"<div class=""wx-webui-modalpage"" data-size=""modal-sm"" *></div>")]
+        [InlineData(TypeModalSize.Large, @"<div class=""wx-webui-modalpage"" data-size=""modal-lg"" *></div>")]
+        [InlineData(TypeModalSize.ExtraLarge, @"<div class=""wx-webui-modalpage"" data-size=""modal-xl"" *></div>")]
+        [InlineData(TypeModalSize.Fullscreen, @"<div class=""wx-webui-modalpage"" data-size=""modal-fullscreen"" *></div>")]
+        public void Size(TypeModalSize size, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlIcon()
+            var control = new ControlModalRemotePage(null)
             {
-                Icon = new IconStar(),
-                Title = title
+                Size = size
             };
 
             // test execution
@@ -60,20 +83,20 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the icon property of the icon control.
+        /// Tests the uri property of the modal page control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"")]
-        [InlineData(typeof(IconStar), @"<i class=""fas fa-star""></i>")]
-        public void Icon(Type icon, string expected)
+        [InlineData(null, @"<div class=""wx-webui-modalpage"" *></div>")]
+        [InlineData("/webui/abc", @"<div class=""wx-webui-modalpage"" * data-uri=""/webui/abc""></div>")]
+        public void Uri(string uri, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlIcon()
+            var control = new ControlModalRemotePage(null)
             {
-                Icon = icon != null ? Activator.CreateInstance(icon) as IIcon : null
+                Uri = !string.IsNullOrWhiteSpace(uri) ? new WebExpress.WebCore.WebUri.UriEndpoint(uri) : null
             };
 
             // test execution
@@ -83,51 +106,20 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the size property of the icon control.
+        /// Tests the selector property of the modal page control.
         /// </summary>
         [Theory]
-        [InlineData(TypeSizeText.Default, @"<i class=""fas fa-star""></i>")]
-        [InlineData(TypeSizeText.ExtraSmall, @"<i class=""fas fa-star"" style=""font-size:0.55rem;""></i>")]
-        [InlineData(TypeSizeText.Small, @"<i class=""fas fa-star"" style=""font-size:0.75rem;""></i>")]
-        [InlineData(TypeSizeText.Large, @"<i class=""fas fa-star"" style=""font-size:1.5rem;""></i>")]
-        [InlineData(TypeSizeText.ExtraLarge, @"<i class=""fas fa-star"" style=""font-size:2rem;""></i>")]
-        public void Size(TypeSizeText size, string expected)
+        [InlineData(null, @"<div class=""wx-webui-modalpage"" *></div>")]
+        [InlineData("main", @"<div class=""wx-webui-modalpage"" * data-selector=""main""></div>")]
+        public void Selector(string selector, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlIcon()
+            var control = new ControlModalRemotePage(null)
             {
-                Icon = new IconStar(),
-                Size = new PropertySizeText(size)
-            };
-
-            // test execution
-            var html = control.Render(context, visualTree);
-
-            AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
-        }
-
-        /// <summary>
-        /// Tests the vertical alignment property of the icon control.
-        /// </summary>
-        [Theory]
-        [InlineData(TypeVerticalAlignment.Default, @"<i class=""fas fa-star""></i>")]
-        [InlineData(TypeVerticalAlignment.Middle, @"<i class=""fas fa-star align-middle""></i>")]
-        [InlineData(TypeVerticalAlignment.TextTop, @"<i class=""fas fa-star align-text-top""></i>")]
-        [InlineData(TypeVerticalAlignment.TextBottom, @"<i class=""fas fa-star align-text-bottom""></i>")]
-        [InlineData(TypeVerticalAlignment.Bottom, @"<i class=""fas fa-star align-bottom""></i>")]
-        public void VerticalAlignment(TypeVerticalAlignment verticalAlignment, string expected)
-        {
-            // preconditions
-            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlIcon()
-            {
-                Icon = new IconStar(),
-                VerticalAlignment = verticalAlignment
+                Selector = selector
             };
 
             // test execution

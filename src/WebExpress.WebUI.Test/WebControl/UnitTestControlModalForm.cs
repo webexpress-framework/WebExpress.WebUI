@@ -15,7 +15,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData("id", @"<form id=""id"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData("id", @"<form id=""form_id"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -37,7 +37,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData("abc", @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*<h4 class=""modal-title"">abc</h4>*</form>")]
+        [InlineData("abc", @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*<div class=""wx-webui-modal"" role=""dialog"" data-title=""abc"" data-close-label=""Close"">*</form>")]
 
         public void Header(string header, string expected)
         {
@@ -45,7 +45,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlModalForm()
+            var control = new ControlModalForm(null)
             {
                 Header = header
             };
@@ -66,8 +66,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlModalForm();
-            var form = new ControlModalForm();
+            var form = new ControlModalForm(null);
 
             // test execution
             form.Add(new ControlFormItemInputTextBox());

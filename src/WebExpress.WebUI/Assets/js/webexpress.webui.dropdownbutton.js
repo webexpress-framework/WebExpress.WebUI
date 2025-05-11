@@ -1,30 +1,32 @@
 /**
  * A dropdown button offering advanced features such as dynamically generated menu items.
  * The following events are triggered:
- *   - webexpress.webui.click Event triggered when an element is clicked
+ * - webexpress.webui.Event.CLICK_EVENT
  */
 webexpress.webui.DropdownButtonCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Constructor for creating a dropdown button instance.
-     * @param {HTMLElement} elem - The DOM element associated with the instance.
+     * @param {HTMLElement} element - The DOM element associated with the instance.
      */
-    constructor(elem) {
-        super(elem);
+    constructor(element) {
+        super(element);
 
         // Initialize properties
-        this._label = $(elem).data("label") || null;
-        this._icon = $(elem).data("icon") || null;
-        this._image = $(elem).data("image") || null;
-        this._color = $(elem).data("color") || null;
-        this._menuCSS = $(elem).data("menucss") || null;
+        this._label = $(element).data("label") || null;
+        this._icon = $(element).data("icon") || null;
+        this._image = $(element).data("image") || null;
+        this._color = $(element).data("color") || null;
+        this._menuCSS = $(element).data("menucss") || null;
 
         // Parse items from child elements
         this._parseItemsFromElements(
-            $(elem).find(".wx-dropdownbutton-header, .wx-dropdownbutton-divider, .wx-dropdownbutton-item")
+            $(element).find(".wx-dropdownbutton-header, .wx-dropdownbutton-divider, .wx-dropdownbutton-item")
         );
 
         // Clean up the DOM element
-        $(elem).removeAttr("icon color menucss").empty().addClass("wx-dropdownbutton");
+        $(element).empty()
+            .removeAttr("data-label data-icon data-image data-color data-menucss")
+            .addClass("wx-dropdownbutton");
 
         // Render the dropdown button
         this.render();
@@ -96,7 +98,10 @@ webexpress.webui.DropdownButtonCtrl = class extends webexpress.webui.Ctrl {
                 link.append($("<span/>").text(item.content));
 
                 link.click(() => {
-                    $(document).trigger(webexpress.webui.Event.CLICK_EVENT, item.id);
+                    $(document).trigger(webexpress.webui.Event.CLICK_EVENT, {
+                        id: $(this._element).attr("id") || null,
+                        item: item
+                    });
                 });
 
                 li.append(link);

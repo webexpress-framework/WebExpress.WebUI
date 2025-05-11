@@ -7,10 +7,6 @@ pre {
     color: var(--bs-code-color);
 }
 
-.drag-over {
-    border: dashed 1px red;
-}
-
 .link {
     text-decoration: none;
     cursor: pointer;
@@ -213,3 +209,14 @@ pre {
         cursor: ns-resize;
         background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFCAYAAABSIVz6AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAhSURBVChTYzxz5kw/AxCYmJgUgmh68ZlAxIgCIy2oGRgAUTM97WZuFTcAAAAASUVORK5CYII');
     }
+    
+.wx-dragging {
+    opacity: 0.5;
+}
+    
+.wx-drag-over {
+    background-color: var(--bs-success-bg-subtle); /* Highlights the drop target with a green shade */
+    outline: 2px dashed var(--bs-success); /* Adds a dashed border for visual emphasis */
+    border-radius: 0;
+    z-index: 1000; 
+}    

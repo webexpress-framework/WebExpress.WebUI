@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -12,19 +13,24 @@ namespace WebExpress.WebUI.WebControl
     /// <remarks>
     /// This control allows users to select an item from a dropdown list.
     /// </remarks>
-    public class ControlFormItemInputCombobox : ControlFormItemInput
+    public class ControlFormItemInputComboBox : ControlFormItemInput, IControlFormItemInputComboBox
     {
-        private readonly List<ControlFormItemInputComboboxItem> _items = [];
+        private readonly List<ControlFormItemInputComboBoxItem> _items = [];
 
         /// <summary>
         /// Returns the combobox items.
         /// </summary>
-        public IEnumerable<ControlFormItemInputComboboxItem> Items => _items;
+        public IEnumerable<ControlFormItemInputComboBoxItem> Items => _items;
 
         ///// <summary>
         ///// Returns or sets the selected item.
         ///// </summary>
         //public string Selected { get; set; }
+
+        /// <summary>
+        /// Returns or sets a placeholder text.
+        /// </summary>
+        public string Placeholder { get; set; }
 
         /// <summary>
         /// Returns or sets the OnChange attribute.
@@ -37,14 +43,50 @@ namespace WebExpress.WebUI.WebControl
         //public string SelectedValue { get; set; }
 
         /// <summary>
+        /// Initializes a new instance of the class with an automatically assigned ID.
+        /// </summary>
+        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
+        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
+        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
+        /// <param name="items">The ComboBox entries.</param>
+        public ControlFormItemInputComboBox([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null, params ControlFormItemInputComboBoxItem[] items)
+            : this($"checkbox_{instance}_{file}_{line}".GetHashCode().ToString("X"), items)
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
         /// <param name="items">The ComboBox entries.</param>
-        public ControlFormItemInputCombobox(string id = null, params ControlFormItemInputComboboxItem[] items)
+        public ControlFormItemInputComboBox(string id, params ControlFormItemInputComboBoxItem[] items)
             : base(id)
         {
             _items.AddRange(items);
+        }
+
+        /// <summary>
+        /// Adds one or more items to the options.
+        /// </summary>
+        /// <param name="items">The items to add to the selection options.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlFormItemInputComboBox Add(params ControlFormItemInputComboBoxItem[] items)
+        {
+            _items.AddRange(items);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Removes an item from the options.
+        /// </summary>
+        /// <param name="item">The item to remove from the selection options.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlFormItemInputComboBox Remove(ControlFormItemInputComboBoxItem item)
+        {
+            _items.Remove(item);
+
+            return this;
         }
 
         /// <summary>
@@ -67,6 +109,16 @@ namespace WebExpress.WebUI.WebControl
                 OnChange = OnChange?.ToString()
             };
 
+            if (!string.IsNullOrWhiteSpace(Placeholder))
+            {
+                html.Add(new HtmlElementFormOption()
+                {
+                    Text = I18N.Translate(renderContext.Request, Placeholder),
+                    Disabled = true,
+                    Selected = string.IsNullOrWhiteSpace(value)
+                });
+            }
+
             foreach (var v in Items)
             {
                 if (v.SubItems.Any())
@@ -74,12 +126,22 @@ namespace WebExpress.WebUI.WebControl
                     html.Add(new HtmlElementFormOptgroup() { Label = v.Text });
                     foreach (var s in v.SubItems)
                     {
-                        html.Add(new HtmlElementFormOption() { Value = s.Value, Text = I18N.Translate(renderContext.Request?.Culture, s.Text), Selected = (s.Value == value) });
+                        html.Add(new HtmlElementFormOption()
+                        {
+                            Value = s.Value,
+                            Text = I18N.Translate(renderContext.Request?.Culture, s.Text),
+                            Selected = (s.Value == value)
+                        });
                     }
                 }
                 else
                 {
-                    html.Add(new HtmlElementFormOption() { Value = v.Value, Text = I18N.Translate(renderContext.Request?.Culture, v.Text), Selected = (v.Value == value) });
+                    html.Add(new HtmlElementFormOption()
+                    {
+                        Value = v.Value,
+                        Text = I18N.Translate(renderContext.Request?.Culture, v.Text),
+                        Selected = (v.Value == value)
+                    });
                 }
             }
 

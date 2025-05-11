@@ -99,17 +99,6 @@
     .wx-tree-label-container > span {
     }
 
-    .wx-tree-label-container.wx-dragging {
-        opacity: 0.5;
-    }
-
-    .wx-tree-label-container.wx-drop-target {
-        background-color: var(--bs-success-bg-subtle); /* Highlights the drop target with a green shade */
-        outline: 2px dashed var(--bs-success); /* Adds a dashed border for visual emphasis */
-        border-radius: 0;
-        z-index: 1000;
-    }
-
 /* Drag indicator style */
 .wx-tree-drag-indicator {
     position: absolute;

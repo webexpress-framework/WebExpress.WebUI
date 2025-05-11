@@ -36,6 +36,28 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the auto id property of the form selection control.
+        /// </summary>
+        [Theory]
+        [InlineData(@"<div id=""*"" class=""wx-webui-selection"" name=""*""></div>")]
+        public void AutoId(string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputSelection()
+            {
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests the name property of the form selection control.
         /// </summary>
         [Theory]
@@ -48,7 +70,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputSelection()
+            var control = new ControlFormItemInputSelection(null)
             {
                 Name = name
             };
@@ -73,7 +95,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputSelection()
+            var control = new ControlFormItemInputSelection(null)
             {
                 Placeholder = placeholder
             };
@@ -97,7 +119,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputSelection()
+            var control = new ControlFormItemInputSelection(null)
             {
                 MultiSelect = multiSelect
             };
@@ -267,12 +289,12 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputSelection()
+            var control = new ControlFormItemInputSelection(null)
             {
             };
 
             // test execution
-            control.Add(new ControlFormItemInputSelectionItem() { Label = "label" });
+            control.Add(new ControlFormItemInputSelectionItem(null) { Label = "label" });
             var html = control.Render(context, visualTree);
 
             Assert.NotEmpty(control.Options);

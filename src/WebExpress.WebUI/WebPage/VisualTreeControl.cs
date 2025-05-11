@@ -99,8 +99,9 @@ namespace WebExpress.WebUI.WebPage
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.expand.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.form.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.modalform.css"));
+            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.modal.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.modalpage.css"));
+            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.modalform.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.more.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.move.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.pagination.css"));
@@ -117,8 +118,9 @@ namespace WebExpress.WebUI.WebPage
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.expand.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.form.progress.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.modalform.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.modal.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.modalpage.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.modalform.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.more.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.move.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.pagination.js"));

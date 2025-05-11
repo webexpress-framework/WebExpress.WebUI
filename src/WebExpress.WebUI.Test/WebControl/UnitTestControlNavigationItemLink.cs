@@ -164,7 +164,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<a class=""link""></a>")]
-        [InlineData(typeof(IconStar), @"<a class=""link""><span class=""fas fa-star""></span></a>")]
+        [InlineData(typeof(IconStar), @"<a class=""link""><i class=""fas fa-star""></i></a>")]
         public void Icon(Type icon, string expected)
         {
             // preconditions
@@ -224,9 +224,9 @@ namespace WebExpress.WebUI.Test.WebControl
             var html2 = control2.Render(context, visualTree);
             var html3 = control3.Render(context, visualTree);
 
-            Assert.Equal(@"<a class=""link""><span class=""fas fa-star""></span></a>", html1.Trim());
-            Assert.Equal(@"<a class=""link""><span class=""fas fa-star""></span></a>", html2.Trim());
-            Assert.Equal(@"<a class=""link""><span class=""fas fa-star""></span></a>", html3.Trim());
+            Assert.Equal(@"<a class=""link""><i class=""fas fa-star""></i></a>", html1.Trim());
+            Assert.Equal(@"<a class=""link""><i class=""fas fa-star""></i></a>", html2.Trim());
+            Assert.Equal(@"<a class=""link""><i class=""fas fa-star""></i></a>", html3.Trim());
         }
     }
 }

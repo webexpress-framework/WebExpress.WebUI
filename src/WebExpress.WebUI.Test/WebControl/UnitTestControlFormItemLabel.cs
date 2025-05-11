@@ -86,7 +86,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(false, @"<label></label>")]
-        [InlineData(true, @"<label></label>")]
+        [InlineData(true, @"<label for=""*""></label>")]
         public void FormItem(bool formItem, string expected)
         {
             // preconditions
@@ -94,7 +94,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemLabel()
+            var control = new ControlFormItemLabel(null)
             {
                 FormItem = formItem ? new ControlFormItemInputTextBox() : null
             };

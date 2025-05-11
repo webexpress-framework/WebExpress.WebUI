@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.WebIcon
         /// <returns>An HTML node representing the rendered icon.</returns>
         public IHtmlNode Render(IRenderContext renderContext, IVisualTree visualTree, string id = null, string description = null, string css = null, string style = null, string role = null)
         {
-            var html = new HtmlElementTextSemanticsSpan()
+            var html = new HtmlElementTextSemanticsI()
             {
                 Id = id,
                 Class = Css.Concatenate([Class, css]),

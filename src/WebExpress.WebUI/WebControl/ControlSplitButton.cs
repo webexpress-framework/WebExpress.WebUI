@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.WebPage;
@@ -10,7 +9,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a split button control that can contain multiple items.
     /// </summary>
-    public class ControlSplitButton : Control, IControlButton
+    public class ControlSplitButton : Control, IControlSplitButton
     {
         private readonly List<IControlSplitButtonItem> _items = [];
 
@@ -71,9 +70,9 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets a modal dialogue.
+        /// Returns or sets the id of a modal dialogue.
         /// </summary>
-        public PropertyModal Modal { get; set; } = new PropertyModal();
+        public string Modal { get; set; }
 
         /// <summary>
         /// Returns or sets the content.
@@ -95,35 +94,59 @@ namespace WebExpress.WebUI.WebControl
         /// Adds one or more items to the split button.
         /// </summary>
         /// <param name="items">The items to add to the split button.</param>
-        public void Add(params IControlSplitButtonItem[] items)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlSplitButton Add(params IControlSplitButtonItem[] items)
         {
             _items.AddRange(items);
+
+            return this;
         }
 
         /// <summary>
         /// Adds one or more items to the split button.
         /// </summary>
         /// <param name="items">The items to add to the split button.</param>
-        public void Add(IEnumerable<IControlSplitButtonItem> items)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlSplitButton Add(IEnumerable<IControlSplitButtonItem> items)
         {
             _items.AddRange(items);
+
+            return this;
         }
 
         /// <summary>
         /// Adds a divider to the split button.
         /// </summary>
-        public void AddDivider()
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlSplitButton AddDivider()
         {
             _items.Add(null);
+
+            return this;
         }
 
         /// <summary>
         /// Adds a header item to the split button.
         /// </summary>
         /// <param name="text">The text of the header item.</param>
-        public void AddHeader(string text)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlSplitButton AddHeader(string text)
         {
             _items.Add(new ControlSplitButtonItemHeader() { Text = text });
+
+            return this;
+        }
+
+        /// <summary>
+        /// Removes a item from the content of the split button.
+        /// </summary>
+        /// <param name="items">The items to remove.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlSplitButton Remove(IControlSplitButtonItem items)
+        {
+            _items.Remove(items);
+
+            return this;
         }
 
         /// <summary>
@@ -162,22 +185,10 @@ namespace WebExpress.WebUI.WebControl
                 button.Add(new HtmlText(Text));
             }
 
-            if (Modal == null || Modal.Type == TypeModal.None)
+            if (!string.IsNullOrWhiteSpace(Modal))
             {
-
-            }
-            else if (Modal.Type == TypeModal.Form)
-            {
-                button.OnClick = $"new webexpress.webui.modalFormCtrl({{ close: '{I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.cancel.label")}', uri: '{Modal.Uri}', size: '{Modal.Size.ToString().ToLower()}', redirect: '{Modal.RedirectUri}'}});";
-            }
-            else if (Modal.Type == TypeModal.Brwoser)
-            {
-                button.OnClick = $"new webexpress.webui.modalPageCtrl({{ close: '{I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.cancel.label")}', uri: '{Modal.Uri}', size: '{Modal.Size.ToString().ToLower()}', redirect: '{Modal.RedirectUri}'}});";
-            }
-            else if (Modal.Type == TypeModal.Modal)
-            {
-                button.AddUserAttribute("data-bs-toggle", "modal");
-                button.AddUserAttribute("data-bs-target", "#" + Modal.Modal.Id);
+                button.AddUserAttribute("data-wx-toggle", "modal");
+                button.AddUserAttribute("data-wx-target", $"#{Modal}");
             }
 
             var dropdownButton = new HtmlElementFieldButton(new HtmlElementTextSemanticsSpan() { Class = "caret" })
@@ -208,7 +219,7 @@ namespace WebExpress.WebUI.WebControl
 
             var html = new HtmlElementTextContentDiv
             (
-                Modal != null && Modal.Type == TypeModal.Modal ? new HtmlList(button, Modal.Modal.Render(renderContext, visualTree)) : button,
+                button,
                 dropdownButton,
                 dropdownElements
             )

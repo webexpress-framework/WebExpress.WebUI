@@ -34,6 +34,28 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the auto id property of the form file input control.
+        /// </summary>
+        [Theory]
+        [InlineData(@"<input id=""*"" name=""*"" type=""file"" class=""form-control-file me-2"">")]
+        public void AutoId(string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputFile()
+            {
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests the name property of the form file input control.
         /// </summary>
         [Theory]
@@ -46,7 +68,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputFile()
+            var control = new ControlFormItemInputFile(null)
             {
                 Name = name
             };
@@ -70,7 +92,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputFile()
+            var control = new ControlFormItemInputFile(null)
             {
                 Required = required
             };
@@ -94,7 +116,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputFile();
+            var control = new ControlFormItemInputFile(null);
 
             // test execution
             control.AddAcceptFile(accept);

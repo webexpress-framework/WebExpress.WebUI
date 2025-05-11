@@ -1,136 +1,121 @@
 /**
  * A modular form.
- * The following events are triggered:
- * - webexpress.webui.close
+* The following events are triggered:
+ * - webexpress.webui.Event.MODAL_SHOW_EVENT
+ * - webexpress.webui.Event.MODAL_HIDE_EVENT
  */
-webexpress.webui.modalFormCtrl = class extends webexpress.webui.events {
+webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalCtrl {
     _uri = null;
-    _container = $("<div class='modal modalform fade' data-bs-backdrop='static' data-bs-keyboard='false' tabindex='-1' aria-hidden='true'></div>");
+    _selector = null;
 
     /**
      * Constructor
-     * @param settings Options for styling the control:
-     *        - id Sets the id of the control.
-     *        - close The name of the close button.
-     *        - uri The uri of the form.
-     *        - size The size of the modal (small, default, large, extralarge).
-     *        - redirect The redirect uri.
+     * @param {HTMLElement} element - The DOM element associated with the modal control.
      */
-    constructor(settings) {
-        super();
+    constructor(element) {
+        super(element);
         
-        let id = settings.id;
-        let close = settings.close ?? "Close";
-        let uri = settings.uri ?? "";
-        let size = settings.size ?? "";
-        let dialog = $("<div class='modal-dialog modal-dialog-scrollable'></div>");
-        let redirect = settings.redirect ?? '#';
+        this._uri = $(element).data("uri") ?? ""; // Retrieve the URI for loading content
+        this._selector = $(element).data("selector") ?? "form"; // Retrieve the selector for the content area
         
-        this._container.attr("id", id ?? "");
-        this._uri = uri;
-        
-        this._container.append(dialog);
-
-        if (uri == "") {
-            console.error("The target uri was not specified.");
-            return;
-        }
-
-        if (size == "small") {
-            dialog.addClass("modal-sm");
-        } else if (size == "large") {
-            dialog.addClass("modal-lg");
-        } else if (size == "extralarge") {
-            dialog.addClass("modal-xl");
-        } else if (size == "fullscreen") {
-            dialog.addClass("modal-fullscreen");
-        }
-
-        let modal = bootstrap.Modal.getOrCreateInstance(this._container);
-
-        let update = function (response) {
-            let parser = new DOMParser();
-            let doc = parser.parseFromString(response, 'text/html');
-
-            let title = $("title", doc).text();
-            let main = $("#webexpress\\.webapp\\.content\\.main\\.primary", doc);
-            let form = $("form", main);
-            let formContent = form?.children(":not('footer')");
-            let formFooter = $('footer', form);
-            let header = $("<div class='modal-header'><h5 class='modal-title'>" + title + "</h5><button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='" + close + "'></button></div>");
-            let body = $("<div class='modal-body'></div>");
-            let footer = $("<div class='modal-footer'></div>");
-            let content = $("<div class='modal-content'></div>");
-
-            if (form.length > 0) {
-                let method = form.attr("method") ?? "POST";
-                let action = form.attr("action") ?? uri;
-
-                form.submit(function (event) {
-                    event.preventDefault();
-                    $.ajax({
-                        type: method,
-                        url: action,
-                        data: form.serialize(),
-                        success: function (response) {
-                            update(response);
-                            $('script', dialog).each(function (index, script) {
-                                $.globalEval(script.text || script.textContent || script.innerHTML || '');
-                            });
-                        }.bind(this),
-                        error: function (response) {
-                            body.append(response);
-                        }.bind(this)
-                    });
-                }.bind(this));
-
-                body.append(formContent);
-                footer.append(formFooter.children());
-                footer.append($("<a class='btn' data-bs-dismiss='modal'>" + close + "</a>"));
-
-                form.children().remove();
-                dialog.children().remove();
-                content.append(header);
-                content.append(body);
-                content.append(footer);
-                form.append(content);
-                dialog.append(form);
-                modal.handleUpdate();
-            } else if (modal != null) { 
-                modal.hide();
-                location.replace(redirect); 
-            }
-        }.bind(this);
-
-        $(document).ready(function () {
-            $.get(this._uri, function (response) {
-                update(response);
-            }.bind(this))
-                .fail(function (e) {
-                    modal.dispose();
-                    this._container.remove();
-                });
-        }.bind(this));
-
-        this._container.on('shown.bs.modal', function (event) {
-            $('script', dialog).each(function (index, script) {
-                $.globalEval(script.text || script.textContent || script.innerHTML || '');
-            });
-            modal.handleUpdate();
-        });
-
-        this._container.on('hidden.bs.modal', function (event) {
-            modal.dispose();
-            this._container.remove();
-        }.bind(this));
-
-        modal.show();
+        // Cleanup the DOM element
+        $(this._element)
+            .removeAttr("data-uri data-selector") // Remove attributes that are no longer needed
     }
 
     /**
-     * Returns the control.
+     * Updates the modal content with fetched data from the URI.
+     * @param {string} response - The HTML response retrieved from the server.
      */
-    get getCtrl() {
-        return this._container;
+    _update(response) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(response, 'text/html');
+        
+        const title = $("title", doc).text() || ""; // Extract the document title
+        const header = $("<div class='modal-header'>")
+            .append($("<h1 class='modal-title fs-5'>").text(this._title || title))
+            .append($("<button type='button' class='btn-close' data-wx-dismiss='modal'>").attr("aria-label", this._close));
+        const body = $("<div class='modal-body'>");
+        const footer = $("<div class='modal-footer'>")
+            .append($("<button type='button' class='btn btn-secondary' data-wx-dismiss='modal'>").text(this._close));
+        const content = $("<div class='modal-content'>");
+        const form = $(this._selector, doc);
+        const formContent = form?.children(":not('footer')");
+
+        // Remove previous modal content before appending new content
+        $(this._element).empty();
+        this._dialog.empty();
+   
+        if (form.length > 0) {
+            let method = form.attr("method") ?? "POST";
+            let action = form.attr("action") ?? uri;
+
+            form.submit(function (event) {
+                event.preventDefault();
+                $.ajax({
+                    type: method,
+                    url: action,
+                    data: form.serialize(),
+                    success: function (response) {
+                        update(response);
+                        $('script', dialog).each(function (index, script) {
+                            $.globalEval(script.text || script.textContent || script.innerHTML || '');
+                        });
+                    }.bind(this),
+                    error: function (response) {
+                        body.append(response);
+                    }.bind(this)
+                });
+            }.bind(this));
+
+            body.append(formContent);
+
+            form.children().remove();
+            this._dialog.children().remove();
+            content.append(header);
+            content.append(body);
+            content.append(footer);
+            form.append(content);
+            this._dialog.append(form);
+        }
+        
+        // Remove previous modal content before appending new content
+        $(this._element).empty(); 
+
+        //body.append(main); // Append retrieved content to the modal body
+
+        content.append(header);
+        content.append(body);
+        content.append(footer);
+        this._dialog.append(content);
+        
+        $(this._element).append(this._dialog); 
+        
+        // Close modal when clicking any element with data-wx-dismiss="modal" inside this specific dialog
+        this._dialog.find("[data-wx-dismiss='modal']").click(function() {
+            this.hide(); // Hide only this modal dialog
+        }.bind(this));
     }
-}
+    
+    /**
+     * Displays the modal by retrieving or creating its Bootstrap instance.
+     * Ensures the modal is properly initialized before showing it.
+     */
+    show() {
+        // Load content dynamically when the document is ready
+        $(document).ready(function () {
+            $.get(this._uri, function (response) { 
+                this._update(response); 
+                const modalInstance = bootstrap.Modal.getOrCreateInstance(this._element);
+                modalInstance.show(); // Opens the modal
+                
+                $(document).trigger(webexpress.webui.Event.MODAL_SHOW_EVENT, {
+                    id: $(this._element).attr("id")
+                });
+            }.bind(this));
+        }.bind(this));
+    }
+};
+
+// Register the class in the controller
+webexpress.webui.Controller.registerClass("wx-webui-modalform", webexpress.webui.ModalFormCtrl);

@@ -17,12 +17,29 @@ webexpress.webui.Controller = new class {
         this.observer = new MutationObserver(this.handleMutations.bind(this));
         this.observer.observe(document, { childList: true, subtree: true });
         this.overrideCreateElement();
+        this.initModalHandler();
+    }
+    
+    /**
+     * Initializes modal handling using custom attributes
+     */
+    initModalHandler() {
+        const controller = this; // Preserve reference to Controller instance
+        
+        $(document).ready(() => {
+            // Open modal when clicking an element with data-wx-toggle="modal"
+            $("[data-wx-toggle='modal']").click(function() {
+                const target = $(this).attr("data-wx-target"); // Get the target modal ID
+                const instance = controller.getInstance(target);
+                instance?.show(); // Show modal
+            });
+        });
     }
 
     /**
-    * Handler for DOM mutations.
-    * @param {MutationRecord[]} mutationsList - List of MutationRecords representing the changes in the DOM.
-    */
+     * Handler for DOM mutations.
+     * @param {MutationRecord[]} mutationsList - List of MutationRecords representing the changes in the DOM.
+     */
     handleMutations(mutationsList) {
         for (const mutation of mutationsList) {
             // Handle added nodes
@@ -42,12 +59,12 @@ webexpress.webui.Controller = new class {
     }
 
     /**
-    * Creates instances for new DOM elements.
-    * @param {Element} element - The DOM element for which instances should be created.
-    */
+     * Creates instances for new DOM elements.
+     * @param {Element} element - The DOM element for which instances should be created.
+     */
     createInstances(element) {
         for (const [selector, ClassConstructor] of this.classRegistry.entries()) {
-            if ($(element).is("." + selector)) {
+            if ($(element).hasClass(selector)) {
                 $(element).removeClass(selector);
                 const instance = new ClassConstructor(element);
                 this.instanceMap.set(element, instance);
@@ -61,9 +78,9 @@ webexpress.webui.Controller = new class {
     }
 
     /**
-    * Removes instances for removed DOM elements.
-    * @param {Element} element - The DOM element whose instances should be removed.
-    */
+     * Removes instances for removed DOM elements.
+     * @param {Element} element - The DOM element whose instances should be removed.
+     */
     removeInstances(element) {
         if (this.instanceMap.has(element)) {
             this.instanceMap.delete(element);
@@ -76,17 +93,17 @@ webexpress.webui.Controller = new class {
     }
 
     /**
-    * Registers a class with a selector.
-    * @param {string} selector - The CSS selector to identify the DOM elements.
-    * @param {Function} ClassConstructor - The constructor of the class to be created for the DOM elements.
-    */
+     * Registers a class with a selector.
+     * @param {string} selector - The CSS selector to identify the DOM elements.
+     * @param {Function} ClassConstructor - The constructor of the class to be created for the DOM elements.
+     */
     registerClass(selector, ClassConstructor) {
         this.classRegistry.set(selector, ClassConstructor);
     }
 
     /**
-    * Overrides document.createElement to track newly created elements.
-    */
+     * Overrides document.createElement to track newly created elements.
+     */
     overrideCreateElement() {
         const originalCreateElement = document.createElement.bind(document);
         document.createElement = (tagName, options) => {
@@ -96,20 +113,25 @@ webexpress.webui.Controller = new class {
             return element;
         };
     }
-
+    
     /**
-    * Retrieves an instance based on element ID and class.
-    * @param {string} id - The ID of the DOM element.
-    * @param {Function} ClassConstructor - The constructor of the class to be retrieved.
-    * @returns {Object|null} - The instance of the specified class associated with the element, or null if not found.
-    */
-    getInstance(id, ClassConstructor) {
-        const element = document.getElementById(id);
-        if (element && this.instanceMap.has(element)) {
-            const instance = this.instanceMap.get(element);
-            if (instance instanceof ClassConstructor) {
-                return instance;
+     * Retrieves an instance based on a CSS selector (ID or class).
+     * @param {string} selector - The CSS selector for the DOM element (e.g., "#elementId" or ".className").
+     * @param {Function} [ClassConstructor] - (Optional) The constructor of the expected class instance.
+     * @returns {Object|null} - The instance associated with the element, or null if not found or type mismatch.
+     */
+    getInstance(selector, ClassConstructor) {
+        const $element = $(selector); // Use jQuery to select either an ID or class
+        
+        if ($element.length > 0 && this.instanceMap.has($element[0])) {
+            const instance = this.instanceMap.get($element[0]);
+
+            // If ClassConstructor is provided, check type; otherwise, return the instance
+            if (ClassConstructor) {
+                return instance instanceof ClassConstructor ? instance : null;
             }
+
+            return instance;
         }
         return null;
     }
@@ -132,16 +154,6 @@ webexpress.webui.Ctrl = class {
             throw new Error("Parameter 'element' must be an instance of HTMLElement.");
         }
         this._element = elem;
-        this.initialize();
-    }
-
-    /**
-     * Initializes the control.
-     * Derived classes can override this method to perform additional initialization tasks.
-     */
-    initialize() {
-        console.log("Control initialized.");
-        // Additional initialization code here
     }
 
     /**
@@ -158,7 +170,6 @@ webexpress.webui.Ctrl = class {
      * Derived classes can override this method to implement specific behavior.
      */
     update() {
-        console.log("Control is updating.");
         this.render();
     }
 
@@ -167,7 +178,6 @@ webexpress.webui.Ctrl = class {
      * This method should be overridden to remove event listeners or perform other cleanup tasks.
      */
     destroy() {
-        console.log("Control is being destroyed.");
         // Cleanup code, e.g., for event listeners
     }
 }
@@ -281,4 +291,10 @@ webexpress.webui.Event = class {
     static CHANGE_VALUE_EVENT = "webexpress.webui.change.value";
     // Event triggered when a node is moved in a tree control
     static MOVE_EVENT = "webexpress.webui.tree.node.move";
+    // Event triggered when the page changes in a pagination control
+    static CHANGE_PAGE_EVENT = "webexpress.webui.change.page";
+    // Event triggered when a modal is shown
+    static MODAL_SHOW_EVENT = "webexpress.webui.modal.show";
+    // Event triggered when a modal is hidden
+    static MODAL_HIDE_EVENT = "webexpress.webui.modal.hide";
 }

@@ -64,9 +64,9 @@ namespace WebExpress.WebUI.WebControl
         public TypeTarget Target { get; set; }
 
         /// <summary>
-        /// Returns or sets a modal dialogue.
+        /// Returns or sets the id of a modal dialogue.
         /// </summary>
-        public PropertyModal Modal { get; set; } = new PropertyModal();
+        public string Modal { get; set; }
 
         /// <summary>
         /// Returns or sets the icon.
@@ -234,26 +234,10 @@ namespace WebExpress.WebUI.WebControl
                 html.AddUserAttribute("data-bs-toggle", "tooltip");
             }
 
-            if (Modal == null || Modal.Type == TypeModal.None)
+            if (!string.IsNullOrWhiteSpace(Modal))
             {
-
-            }
-            else if (Modal.Type == TypeModal.Form)
-            {
-                html.OnClick = $"new webexpress.webui.modalFormCtrl({{ close: '{I18N.Translate(renderContext.Request, "webexpress.webui:form.cancel.label")}', uri: '{Modal.Uri?.ToString() ?? html.Href}', size: '{Modal.Size.ToString().ToLower()}', redirect: '{Modal.RedirectUri}'}});";
-                html.Href = "#";
-            }
-            else if (Modal.Type == TypeModal.Brwoser)
-            {
-                html.OnClick = $"new webexpress.webui.modalPageCtrl({{ close: '{I18N.Translate(renderContext.Request, "webexpress.webui:form.cancel.label")}', uri: '{Modal.Uri?.ToString() ?? html.Href}', size: '{Modal.Size.ToString().ToLower()}', redirect: '{Modal.RedirectUri}'}});";
-                html.Href = "#";
-            }
-            else if (Modal.Type == TypeModal.Modal)
-            {
-                html.AddUserAttribute("data-bs-toggle", "modal");
-                html.AddUserAttribute("data-bs-target", "#" + Modal.Modal.Id);
-
-                return new HtmlElementTextContentDiv(html, Modal.Modal.Render(renderContext, visualTree));
+                html.AddUserAttribute("data-wx-toggle", "modal");
+                html.AddUserAttribute("data-wx-target", $"#{Modal}");
             }
 
             return html;

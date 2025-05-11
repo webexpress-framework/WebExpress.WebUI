@@ -85,12 +85,12 @@ namespace WebExpress.WebUI.Test.WebControl
             var html5 = control5.Render(context, visualTree);
             var html6 = control6.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><span class=""fas fa-star""></span></button>", html1);
-            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><span class=""fas fa-star""></span></button>", html2);
-            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><span class=""fas fa-star""></span></button>", html3);
-            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><span class=""fas fa-star""></span></button>", html4);
-            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><span class=""fas fa-star""></span></button>", html5);
-            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><span class=""fas fa-star""></span></button>", html6);
+            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><i class=""fas fa-star""></i></button>", html1);
+            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><i class=""fas fa-star""></i></button>", html2);
+            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><i class=""fas fa-star""></i></button>", html3);
+            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><i class=""fas fa-star""></i></button>", html4);
+            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><i class=""fas fa-star""></i></button>", html5);
+            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><i class=""fas fa-star""></i></button>", html6);
         }
     }
 }

@@ -88,13 +88,14 @@ namespace WebExpress.WebUI.WebControl
                     help.Text = I18N.Translate(renderGroupContext.Request?.Culture, input?.Help);
                     help.Classes = ["ms-2"];
 
-                    if (icon.Icon != null && !string.IsNullOrWhiteSpace(label.Text))
+                    if (icon.Icon != null)
                     {
                         icon.Classes = ["me-2", "pt-1"];
 
-                        row.Add(new HtmlElementTextContentDiv(icon.Render(renderContext, visualTree), label.Render(renderContext, visualTree)) { });
+                        row.Add(new HtmlElementTextContentDiv(icon.Render(renderContext, visualTree)));
                     }
-                    else if (!string.IsNullOrWhiteSpace(label.Text))
+
+                    if (!string.IsNullOrWhiteSpace(label.Text))
                     {
                         row.Add(new HtmlElementTextContentDiv(label.Render(renderContext, visualTree)));
                     }

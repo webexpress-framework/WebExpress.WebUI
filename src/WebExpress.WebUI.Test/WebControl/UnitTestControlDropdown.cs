@@ -234,7 +234,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""dropdown""><button class=""btn"" data-bs-toggle=""dropdown"" aria-expanded=""false""></button><ul class=""dropdown-menu""></ul></div>")]
-        [InlineData(typeof(IconStar), @"<div class=""dropdown""><button class=""btn"" data-bs-toggle=""dropdown"" aria-expanded=""false""><span class=""fas fa-star""></span></button><ul class=""dropdown-menu""></ul></div>")]
+        [InlineData(typeof(IconStar), @"<div class=""dropdown""><button class=""btn"" data-bs-toggle=""dropdown"" aria-expanded=""false""><i class=""fas fa-star""></i></button><ul class=""dropdown-menu""></ul></div>")]
         public void Icon(Type icon, string expected)
         {
             // preconditions

@@ -1,135 +1,125 @@
 /**
  * Page navigation control.
  * The following events are triggered:
- * - webexpress.webui.change.page with parameter page.
+ * - webexpress.webui.Event.CHANGE_PAGE_EVENT
+ * - webexpress.webui.Event.CLICK_EVENT
  */
-webexpress.webui.paginationCtrl = class extends webexpress.webui.events {
-    _container = $("<ul class='pagination'/>");
-    _currentpage = 0;
-    _pagecount = 0;
-    _css = "";
+webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
+    _currentpage = 1;
+    _pagecount = 10;
 
     /**
-     * Constructor
-     * @param settings Options for styling the control:
-     *                - id Sets the id of the control.
-     *                - css The CSS classes used to design the control.
+     * Constructor for initializing the pagination control.
+     * @param {HTMLElement} element - The DOM element for the pagination control.
      */
-    constructor(settings) {
-        super();
-        
-        let id = settings.id;
-        this._css = settings.css;
+    constructor(element) {
+        super(element);
 
-        this._container.attr("id", id ?? "");
+        // Initialize properties
+        this._currentpage = $(element).data("page") || this._currentpage;
+        this._pagecount = $(element).data("pagecount") || this._pagecount;
+
+        // Clean up the DOM element
+        $(element)
+            .empty()
+            .removeAttr("data-page data-pagecount")
+            .addClass("pagination wx-pagination");
+
+        // Render the control
+        this.render();
     }
 
     /**
-     * Sets the page.
-     * @param currentpage The page number of the current page.
-     * @param pagecount The number of pages.
+     * Renders the pagination control.
+     * Updates the DOM element based on the current properties.
      */
-    page(currentpage, pagecount) {
-        this._currentpage = currentpage;
-        this._pagecount = pagecount;
-        
-        let predecessor = $("<li class='page-item'><a class='page-link' href='#'><span class='fas fa-angle-left'/></a></li>");
-        let successor = $("<li class='page-item'><a class='page-link' href='#'><span class='fas fa-angle-right'/></a></li>");
-        function onclick(page) { 
-            this.trigger('webexpress.webui.change.page', page);
-        };
+    render() {
+        $(this._element).children().remove();
 
-        this._container.addClass(this._css);
-        predecessor.click(function () { this.trigger('webexpress.webui.change.page', Math.max(currentpage - 1, 0)); }.bind(this));
-        successor.click(function () { this.trigger('webexpress.webui.change.page', Math.min(currentpage + 1, pagecount - 1)); }.bind(this));
-
-        this._container.children().remove();
-
-        if (pagecount <= 0) {
+        if (this._pagecount <= 0) {
             return;
         }
 
-        this._container.append(predecessor);
+        // Add predecessor button
+        const predecessor = this._createPageItem("<span class='fas fa-angle-left'></span>", Math.max(this._currentpage - 1, 0));
+        $(this._element).append(predecessor);
 
-        if (pagecount < 10) {
-            for (let i = 0; i < pagecount; i++) {
-                let page = $("<li class='page-item'><a class='page-link' href='#'>" + (i + 1) + "</a></li>");
-                page.click(function () { this.trigger('webexpress.webui.change.page', i); }.bind(this));
+        // Add page items
+        this._addPageItems();
 
-                if (i == currentpage) {
-                    page.toggleClass("active");
-                }
+        // Add successor button
+        const successor = this._createPageItem("<span class='fas fa-angle-right'></span>", Math.min(this._currentpage + 1, this._pagecount - 1));
+        $(this._element).append(successor);
+    }
 
-                this._container.append(page);
+    /**
+     * Helper to create a page item.
+     * @param {string} content - The HTML content of the item.
+     * @param {number} page - The page number associated with the item.
+     * @returns {jQuery} The page item element.
+     */
+    _createPageItem(content, page) {
+        const item = $("<li class='page-item'><a class='page-link' href='#'>" + content + "</a></li>");
+        item.click(() => {
+            this.currentpage = page;
+            $(document).trigger(webexpress.webui.Event.CLICK_EVENT, {
+                id: $(this._element).attr("id"),
+                index: page
+            });
+        });
+        return item;
+    }
+
+    /**
+     * Helper to add page items based on the current page and page count.
+     */
+    _addPageItems() {
+        if (this._pagecount <= 10) {
+            for (let i = 0; i < this._pagecount; i++) {
+                this._appendPageItem(i, i === this._currentpage);
+            }
+        } else if (this._currentpage <= 3) {
+            for (let i = 0; i < 7; i++) {
+                this._appendPageItem(i, i === this._currentpage);
+            }
+            this._appendEllipsis();
+            this._appendPageItem(this._pagecount - 1, false);
+        } else if (this._pagecount - this._currentpage <= 3) {
+            this._appendPageItem(0, false);
+            this._appendEllipsis();
+            for (let i = this._pagecount - 7; i < this._pagecount; i++) {
+                this._appendPageItem(i, i === this._currentpage);
             }
         } else {
-            if (currentpage <= 3) {
-                for (let i = 0; i < 7; i++) {
-                    let page = $("<li class='page-item'><a class='page-link' href='#'>" + (i + 1) + "</a></li>");
-                    page.click(function () { this.trigger('webexpress.webui.change.page', i); }.bind(this));
-
-                    if (i == currentpage) {
-                        page.toggleClass("active");
-                    }
-
-                    this._container.append(page);
-                }
-
-                let placeholder = $("<li class='page-item disabled'><a class='page-link' href='#'>..</a></li>");
-                this._container.append(placeholder);
-
-                let lastpage = $("<li class='page-item'><a class='page-link' href='#'>" + pagecount + "</a></li>");
-                lastpage.click(function () { this.trigger('webexpress.webui.change.page', pagecount - 1); }.bind(this));
-                this._container.append(lastpage);
-
-            } else if (pagecount - currentpage < 6) {
-                let firstpage = $("<li class='page-item'><a class='page-link' href='#'>1</a></li>");
-                firstpage.click(function () { this.trigger('webexpress.webui.change.page', 0); }.bind(this));
-                this._container.append(firstpage);
-
-                let placeholder = $("<li class='page-item disabled'><a class='page-link' href='#'>..</a></li>");
-                this._container.append(placeholder);
-
-                for (let i = pagecount - 7; i < pagecount; i++) {
-                    let page = $("<li class='page-item'><a class='page-link' href='#'>" + (i + 1) + "</a></li>");
-                    page.click(function () { this.trigger('webexpress.webui.change.page', i); }.bind(this));
-
-                    if (i == currentpage) {
-                        page.toggleClass("active");
-                    }
-
-                    this._container.append(page);
-                }
-
-            } else {
-                let firstpage = $("<li class='page-item'><a class='page-link' href='#'>1</a></li>");
-                firstpage.click(function () { this.trigger('webexpress.webui.change.page', 0); }.bind(this));
-                this._container.append(firstpage);
-
-                let placeholder = $("<li class='page-item disabled'><a class='page-link' href='#'>..</a></li>");
-                this._container.append(placeholder);
-
-                for (let i = Math.max(currentpage - 2, 0); i < Math.min(currentpage + 3, pagecount); i++) {
-                    let page = $("<li class='page-item'><a class='page-link' href='#'>" + (i + 1) + "</a></li>");
-                    page.click(function () { this.trigger('webexpress.webui.change.page', i); }.bind(this));
-
-                    if (i == currentpage) {
-                        page.toggleClass("active");
-                    }
-
-                    this._container.append(page);
-                }
-
-                placeholder = $("<li class='page-item disabled'><a class='page-link' href='#'>..</a></li>");
-                this._container.append(placeholder);
-
-                let lastpage = $("<li class='page-item'><a class='page-link' href='#'>" + pagecount + "</a></li>");
-                lastpage.click(function () { this.trigger('webexpress.webui.change.page', pagecount - 1); }.bind(this));
-                this._container.append(lastpage);
+            this._appendPageItem(0, false);
+            this._appendEllipsis();
+            for (let i = this._currentpage - 2; i <= this._currentpage + 2; i++) {
+                this._appendPageItem(i, i === this._currentpage);
             }
+            this._appendEllipsis();
+            this._appendPageItem(this._pagecount - 1, false);
         }
-        
-        this._container.append(successor);
+    }
+
+    /**
+     * Helper to append a page item.
+     * @param {number} page - The page number to append.
+     * @param {boolean} isActive - Whether the page item is active.
+     */
+    _appendPageItem(page, isActive) {
+        const pageItem = this._createPageItem(page + 1, page);
+        if (isActive) {
+            pageItem.addClass("active");
+        }
+        $(this._element).append(pageItem);
+    }
+
+    /**
+     * Helper to append an ellipsis item.
+     */
+    _appendEllipsis() {
+        const ellipsis = $("<li class='page-item disabled'><a class='page-link' href='#'>…</a></li>");
+        $(this._element).append(ellipsis);
     }
 
     /**
@@ -140,6 +130,27 @@ webexpress.webui.paginationCtrl = class extends webexpress.webui.events {
     }
 
     /**
+     * Sets the page number of the current page.
+     * @param {number} value - The new page number to set.
+     */
+    set currentpage(value) {
+        if (value < 0 || value >= this._pagecount) {
+            throw new Error("Invalid page number. It must be between 0 and the total number of pages - 1.");
+        }
+
+        this._currentpage = value;
+
+        // Trigger a page change event
+        $(document).trigger(webexpress.webui.Event.CHANGE_PAGE_EVENT, {
+            id: $(this._element).attr("id"),
+            currentpage: this._currentpage
+        });
+
+        // Re-render the control
+        this.render();
+    }
+
+    /**
      * Returns the number of pages.
      */
     get pagecount() {
@@ -147,9 +158,25 @@ webexpress.webui.paginationCtrl = class extends webexpress.webui.events {
     }
 
     /**
-     * Returns the control.
+     * Sets the number of pages.
+     * @param {number} value - The new number of pages to set.
      */
-    get getCtrl() {
-        return this._container;
+    set pagecount(value) {
+        if (value < 1) {
+            throw new Error("Page count must be at least 1.");
+        }
+
+        this._pagecount = value;
+
+        // Adjust the current page if it exceeds the new page count
+        if (this._currentpage >= this._pagecount) {
+            this._currentpage = this._pagecount - 1;
+        }
+
+        // Re-render the control
+        this.render();
     }
-}
+};
+
+// Register the class in the controller
+webexpress.webui.Controller.registerClass("wx-webui-pagination", webexpress.webui.PaginationCtrl);

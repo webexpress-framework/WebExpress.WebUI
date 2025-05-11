@@ -112,7 +112,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<span class=""card-counter""><div><h4></h4><span class=""text-muted""></span></div></span>")]
-        [InlineData(typeof(IconStar), @"<span class=""card-counter""><span class=""fas fa-star float-right""></span><div><h4></h4><span class=""text-muted""></span></div></span>")]
+        [InlineData(typeof(IconStar), @"<span class=""card-counter""><i class=""fas fa-star float-right""></i><div><h4></h4><span class=""text-muted""></span></div></span>")]
         public void Icon(Type icon, string expected)
         {
             // preconditions

@@ -24,7 +24,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
         this._movable = $(element).data("movable") || false;
         this._container = $("<ul>").addClass(this._getLayoutClasses());
 
-        // Clean up the DOM
+        // Clean up the DOM element
         $(element).empty().addClass("wx-tree").append(this._container);
 
         // Create the drag indicator element
@@ -93,12 +93,12 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                         width: element.outerWidth(),
                     })
                     .show();
-                element.removeClass("wx-drop-target");
+                element.removeClass("wx-drag-over");
                 this._dragoverPosition = "above";
             } else if (relativeY < height * 0.75) {
                 // Middle 50% of the element
                 this._dragIndicator.hide();
-                element.addClass("wx-drop-target");
+                element.addClass("wx-drag-over");
                 this._dragoverPosition = "child";
             } else {
                 // Bottom 25% of the element
@@ -109,7 +109,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                         width: element.outerWidth(),
                     })
                     .show();
-                element.removeClass("wx-drop-target");
+                element.removeClass("wx-drag-over");
                 this._dragoverPosition = "below";
             }
         });
@@ -117,7 +117,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
         // Handle drag leave
         element.on("dragleave", () => {
             // Hide the drag indicator when leaving the target area
-            element.removeClass("wx-drop-target");
+            element.removeClass("wx-drag-over");
             // Hide the drag indicator when leaving the target area
             this._dragIndicator.hide();
         });
@@ -132,7 +132,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             // Prevent moving a parent node into one of its children
             if (this._isChildNode(draggedNode, targetNode)) {
                 this._dragIndicator.hide();
-                element.removeClass("wx-drop-target");
+                element.removeClass("wx-drag-over");
                 return;
             }
 
@@ -154,7 +154,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             this._dragover = null;
             this._dragIndicator.hide(); // Hide the indicator when dragging ends
             // Remove the dragging class from all columns
-            element.removeClass("wx-dragging wx-drop-target");
+            element.removeClass("wx-dragging wx-drag-over");
         });
     }
 
@@ -353,11 +353,10 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             }
 
             labelContainer.click(() => {
-                $(document).trigger(webexpress.webui.Event.CLICK_EVENT,
-                    {
-                        id: $(this._element).attr("id"),
-                        node: node.id
-                    });
+                $(document).trigger(webexpress.webui.Event.CLICK_EVENT, {
+                    id: $(this._element).attr("id"),
+                    item: node
+                });
             });
 
             // Handle expandable nodes
