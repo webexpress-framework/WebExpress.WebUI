@@ -57,6 +57,21 @@ namespace WebExpress.WebUI.WebControl
         IControl Conformation { get; set; }
 
         /// <summary>
+        /// Returns or sets the form layout.
+        /// </summary>
+        TypeLayoutForm FormLayout { get; set; }
+
+        /// <summary>
+        /// Returns or sets the item layout.
+        /// </summary>
+        TypeLayoutFormItem ItemLayout { get; set; }
+
+        /// <summary>
+        /// Return the current state of the form.
+        /// </summary>
+        TypeFormState State { get; }
+
+        /// <summary>
         /// Initialize the form with data using the specified action.
         /// </summary>
         /// <param name="handler">The action to execute for filling the form.</param>

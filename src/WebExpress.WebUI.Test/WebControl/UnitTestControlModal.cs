@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the modal control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-modal"" data-close-label=""Close""></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-webui-modal"" data-close-label=""Close""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-modal"" data-close-label=""Close"">*</div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-modal"" data-close-label=""Close"">*</div>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -36,9 +36,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the header property of the modal control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-modal"" data-close-label=""Close""></div>")]
-        [InlineData("abc", @"<div class=""wx-webui-modal"" data-title=""abc"" data-close-label=""Close""></div>")]
-        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-modal"" data-title=""WebExpress.WebUI"" data-close-label=""Close""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-modal"" *>*</div>")]
+        [InlineData("abc", @"<div class=""wx-webui-modal"" *><div class=""wx-modal-header"">abc</div>*</div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-modal"" *><div class=""wx-modal-header"">WebExpress.WebUI</div>*</div>")]
         public void Header(string header, string expected)
         {
             // preconditions
@@ -60,11 +60,11 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the size property of the modal control.
         /// </summary>
         [Theory]
-        [InlineData(TypeModalSize.Default, @"<div class=""wx-webui-modal"" data-close-label=""Close""></div>")]
-        [InlineData(TypeModalSize.Small, @"<div class=""wx-webui-modal"" data-size=""modal-sm"" *></div>")]
-        [InlineData(TypeModalSize.Large, @"<div class=""wx-webui-modal"" data-size=""modal-lg"" *></div>")]
-        [InlineData(TypeModalSize.ExtraLarge, @"<div class=""wx-webui-modal"" data-size=""modal-xl"" *></div>")]
-        [InlineData(TypeModalSize.Fullscreen, @"<div class=""wx-webui-modal"" data-size=""modal-fullscreen"" *></div>")]
+        [InlineData(TypeModalSize.Default, @"<div class=""wx-webui-modal"" data-close-label=""Close"">*</div>")]
+        [InlineData(TypeModalSize.Small, @"<div class=""wx-webui-modal"" data-size=""modal-sm"" *>*</div>")]
+        [InlineData(TypeModalSize.Large, @"<div class=""wx-webui-modal"" data-size=""modal-lg"" *>*</div>")]
+        [InlineData(TypeModalSize.ExtraLarge, @"<div class=""wx-webui-modal"" data-size=""modal-xl"" *>*</div>")]
+        [InlineData(TypeModalSize.Fullscreen, @"<div class=""wx-webui-modal"" data-size=""modal-fullscreen"" *>*</div>")]
         public void Size(TypeModalSize size, string expected)
         {
             // preconditions

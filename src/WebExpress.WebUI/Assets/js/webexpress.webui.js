@@ -297,4 +297,8 @@ webexpress.webui.Event = class {
     static MODAL_SHOW_EVENT = "webexpress.webui.modal.show";
     // Event triggered when a modal is hidden
     static MODAL_HIDE_EVENT = "webexpress.webui.modal.hide";
+    // Event triggered when data is requested
+    static DATA_REQUESTED_EVENT = "webexpress.webui.data.requested";
+    // Event triggered when data has arrived
+    static DATA_ARRIVED_EVENT = "webexpress.webui.data.arrived";
 }

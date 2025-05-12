@@ -45,12 +45,26 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var html = new HtmlElementTextContentDiv([.. Content.Select(x => x.Render(renderContext, visualTree))])
+            var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(Header)))
+            {
+                Class = "wx-modal-header"
+            };
+
+            var content = new HtmlElementTextContentDiv([.. Content.Select(x => x.Render(renderContext, visualTree))])
+            {
+                Class = "wx-modal-content"
+            };
+
+            var footer = new HtmlElementTextContentDiv()
+            {
+                Class = "wx-modal-footer"
+            };
+
+            var html = new HtmlElementTextContentDiv(header, content, footer)
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-modalform", GetClasses())
             }
-            .AddUserAttribute("data-title", I18N.Translate(Header))
             .AddUserAttribute("data-size", Size.ToClass())
             .AddUserAttribute("data-close-label", I18N.Translate(CloseLabel))
             .AddUserAttribute("data-uri", Uri?.ToString())

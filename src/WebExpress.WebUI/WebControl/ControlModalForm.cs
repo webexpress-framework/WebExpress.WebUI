@@ -64,6 +64,21 @@ namespace WebExpress.WebUI.WebControl
         public IControl Conformation { get => _form.Conformation; set => _form.Conformation = value; }
 
         /// <summary>
+        /// Returns or sets the form layout.
+        /// </summary>
+        public TypeLayoutForm FormLayout { get => _form.FormLayout; set => _form.FormLayout = value; }
+
+        /// <summary>
+        /// Returns or sets the item layout.
+        /// </summary>
+        public TypeLayoutFormItem ItemLayout { get => _form.ItemLayout; set => _form.ItemLayout = value; }
+
+        /// <summary>
+        /// Return the current state of the form.
+        /// </summary>
+        public TypeFormState State => _form.State;
+
+        /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
         /// </summary>
         /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
@@ -296,26 +311,66 @@ namespace WebExpress.WebUI.WebControl
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlFormItem> items)
         {
             var classes = Classes.ToList();
-
-            var form = _form.Render(renderContext, visualTree, items) as HtmlElementFormForm;
-            var formElements = form.Elements.Where(x => x is not HtmlElementSectionFooter && x is not HtmlElementTextContentDiv);
-            var buttons = _form.Buttons.Select(x => x.Render(new RenderControlFormContext(renderContext, _form), visualTree));
-
-            var html = new HtmlElementTextContentDiv([.. formElements])
+            var formElement = _form.Render(renderContext, visualTree, items);
+            var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(Header)))
+            {
+                Class = "wx-modal-header"
+            };
+            var content = new HtmlElementTextContentDiv()
+            {
+                Class = "wx-modal-content"
+            };
+            var footer = new HtmlElementTextContentDiv()
+            {
+                Class = "wx-modal-footer"
+            };
+            var modal = new HtmlElementTextContentDiv(header, content, footer)
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-modal", classes),
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
                 Role = "dialog"
             }
-            .AddUserAttribute("data-title", I18N.Translate(Header))
             .AddUserAttribute("data-size", Size.ToClass())
             .AddUserAttribute("data-close-label", I18N.Translate(CloseLabel));
 
-            form.Clear();
-            form.Add(html);
+            if (formElement is HtmlElementFormForm form && _form.State != TypeFormState.Success)
+            {
+                var elements = form.Elements.Where(x => x is not HtmlElementSectionFooter && x is not HtmlElementTextContentDiv);
+                var buttons = form.Elements.Find(x => x is HtmlElementFieldButton).Select(x => x as HtmlElementFieldButton)
+                    .Where(x => x.Type == TypeButton.Submit.ToTypeString() || x.Type == TypeButton.Reset.ToTypeString());
+                var autoShow = State switch
+                {
+                    TypeFormState.Default => null,
+                    TypeFormState.Error => "true",
+                    TypeFormState.Success => _form.Conformation != null ? "true" : null,
+                    _ => null
+                };
 
-            return form;
+                content.Add(elements);
+                footer.Add(buttons);
+
+                modal.AddUserAttribute("data-auto-show", State != TypeFormState.Default ? "true" : null);
+
+                var html = new HtmlElementFormForm()
+                {
+                    Id = !string.IsNullOrWhiteSpace(Id) ? $"{Id}_form" : null,
+                    Class = _form.FormLayout == TypeLayoutForm.Inline ? Css.Concatenate("wx-form-inline", GetClasses()) : GetClasses(),
+                    Role = _form.Role,
+                    Action = Uri?.ToString() ?? renderContext.Request.Uri?.ToString(),
+                    Method = (Method == RequestMethod.NONE ? RequestMethod.POST : Method).ToString(),
+                    Enctype = TypeEnctype.None,
+                    Name = Name
+                }
+                .Add(modal);
+
+                return html;
+            }
+
+            content.Add(_form.Conformation?.Render(renderContext, visualTree));
+            modal.AddUserAttribute("data-auto-show", _form.Conformation != null ? "true" : null);
+
+            return modal;
         }
     }
 }

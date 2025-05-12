@@ -67,12 +67,17 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the form layout.
         /// </summary>
-        public virtual TypeLayoutForm FormLayout { get; set; } = TypeLayoutForm.Default;
+        public TypeLayoutForm FormLayout { get; set; } = TypeLayoutForm.Default;
 
         /// <summary>
         /// Returns or sets the item layout.
         /// </summary>
-        public virtual TypeLayoutFormItem ItemLayout { get; set; } = TypeLayoutFormItem.Vertical;
+        public TypeLayoutFormItem ItemLayout { get; set; } = TypeLayoutFormItem.Vertical;
+
+        /// <summary>
+        /// Return the current state of the form.
+        /// </summary>
+        public TypeFormState State { get; protected set; } = TypeFormState.Default;
 
         /// <summary>
         /// Returns or sets the hidden field that contains the session id.
@@ -236,8 +241,10 @@ namespace WebExpress.WebUI.WebControl
             var validationResults = new List<ValidationResult>();
 
             // check if and how the form was submitted
-            if (!renderContext.Request.HasParameter(FormId.Name))
+            if (!renderContext.Request.HasParameter(FormId.Name) || State == TypeFormState.Success)
             {
+                State = TypeFormState.Default;
+
                 // uninizialized form
                 // fill the form with data
                 foreach (var item in items)
@@ -253,6 +260,8 @@ namespace WebExpress.WebUI.WebControl
             }
             else
             {
+                State = TypeFormState.Error;
+
                 foreach (var item in items.Where(x => x is IControlFormItemInput).Select(x => x as IControlFormItemInput))
                 {
                     renderFormContext.SetValue(item, renderFormContext.Request.GetParameter(item.Name)?.Value);
@@ -271,6 +280,8 @@ namespace WebExpress.WebUI.WebControl
 
                 if (validationResults.Count == 0)
                 {
+                    State = TypeFormState.Success;
+
                     foreach (var item in items.Where(x => x is IControlFormProcess).Select(x => x as IControlFormProcess))
                     {
                         item.Process(renderFormContext);

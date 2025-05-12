@@ -1,0 +1,3 @@
+[data-bs-theme=dark] .modal {
+    --bs-modal-color: var(--bs-body-color);
+}
