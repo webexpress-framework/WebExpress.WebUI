@@ -84,10 +84,10 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the format property of the form text control.
         /// </summary>
         [Theory]
-        [InlineData(TypesEditTextFormat.Default, @"<input type=""text"" class=""form-control"">")]
-        [InlineData(TypesEditTextFormat.Multiline, @"<textarea class=""form-control"" rows=""8""></textarea>")]
-        [InlineData(TypesEditTextFormat.Wysiwyg, @"<textarea id=""*"" class=""form-control"" rows=""8""></textarea>")]
-        public void Format(TypesEditTextFormat format, string expected)
+        [InlineData(TypeEditTextFormat.Default, @"<input type=""text"" class=""form-control"">")]
+        [InlineData(TypeEditTextFormat.Multiline, @"<textarea class=""form-control"" rows=""8""></textarea>")]
+        [InlineData(TypeEditTextFormat.Wysiwyg, @"<textarea id=""*"" class=""form-control"" rows=""8""></textarea>")]
+        public void Format(TypeEditTextFormat format, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -268,7 +268,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFormItemInputTextBox(null)
             {
                 Rows = rows,
-                Format = TypesEditTextFormat.Multiline
+                Format = TypeEditTextFormat.Multiline
             };
 
             // test execution
@@ -357,7 +357,7 @@ namespace WebExpress.WebUI.Test.WebControl
                     x =>
                     {
                         x
-                        .Add(true, "validation1", TypesInputValidity.Warning)
+                        .Add(true, "validation1", TypeInputValidity.Warning)
                         .Add(true, "validation2")
                         .Add(false, "validation3");
                         validated = true;
@@ -393,7 +393,7 @@ namespace WebExpress.WebUI.Test.WebControl
                     x =>
                     {
                         x
-                        .Add(x.Value != null, "validation1", TypesInputValidity.Warning)
+                        .Add(x.Value != null, "validation1", TypeInputValidity.Warning)
                         .Add(x.Value?.Length > 3, "validation2")
                         .Add(false, "validation3");
                         validated = true;

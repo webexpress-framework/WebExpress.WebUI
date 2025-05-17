@@ -1,4 +1,6 @@
-﻿namespace WebExpress.WebUI.WebControl
+﻿using System.Collections.Generic;
+
+namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// Represents a dropdown control that provides methods to add items, separators, and headers.
@@ -26,6 +28,13 @@
         IControlDropdown Add(params IControlDropdownItem[] items);
 
         /// <summary>
+        /// Adds one or more items to the dropdown.
+        /// </summary>
+        /// <param name="items">The items to add to the dropdown.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        IControlDropdown Add(IEnumerable<IControlDropdownItem> items);
+
+        /// <summary>
         /// Adds a new separator to the dropdown.
         /// </summary>
         /// <returns>The current instance for method chaining.</returns>
@@ -43,5 +52,12 @@
         /// A header is a non-selectable item used to label or group dropdown items.
         /// </remarks>
         IControlDropdown AddHeader(string text);
+
+        /// <summary>
+        /// Removes the specified item from the dropdown control.
+        /// </summary>
+        /// <param name="item">The dropdown item to remove.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        IControlDropdown Remove(IControlDropdownItem item);
     }
 }

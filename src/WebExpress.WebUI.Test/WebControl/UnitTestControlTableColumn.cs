@@ -7,17 +7,17 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.Test.WebControl
 {
     /// <summary>
-    /// Tests the table column control.
+    /// Tests the table column.
     /// </summary>
     [Collection("NonParallelTests")]
     public class UnitTestControlTableColumn
     {
         /// <summary>
-        /// Tests the id property of the table column control.
+        /// Tests the id property of the table column.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<th><div></div></th>")]
-        [InlineData("id", @"<th id=""id""><div id=""id""></div></th>")]
+        [InlineData(null, @"<div></div>")]
+        [InlineData("id", @"<div id=""id""></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -35,13 +35,13 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the text property of the table column control.
+        /// Tests the title property of the table column.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<th><div></div></th>")]
-        [InlineData("abc", @"<th><div>abc</div></th>")]
-        [InlineData("webexpress.webui:plugin.name", @"<th><div>WebExpress.WebUI</div></th>")]
-        public void Text(string text, string expected)
+        [InlineData(null, @"<div></div>")]
+        [InlineData("abc", @"<div>abc</div>")]
+        [InlineData("webexpress.WebUI:plugin.name", @"<div>WebExpress.WebUI</div>")]
+        public void Title(string text, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableColumn()
             {
-                Text = text
+                Title = text
             };
 
             // test execution
@@ -59,19 +59,12 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the layout property of the table column control.
+        /// Tests the render script property of the table column.
         /// </summary>
         [Theory]
-        [InlineData(TypesLayoutTableRow.Default, @"<th><div></div></th>")]
-        [InlineData(TypesLayoutTableRow.Primary, @"<th class=""table-primary""><div class=""table-primary""></div></th>")]
-        [InlineData(TypesLayoutTableRow.Secondary, @"<th class=""table-secondary""><div class=""table-secondary""></div></th>")]
-        [InlineData(TypesLayoutTableRow.Info, @"<th class=""table-info""><div class=""table-info""></div></th>")]
-        [InlineData(TypesLayoutTableRow.Success, @"<th class=""table-success""><div class=""table-success""></div></th>")]
-        [InlineData(TypesLayoutTableRow.Warning, @"<th class=""table-warning""><div class=""table-warning""></div></th>")]
-        [InlineData(TypesLayoutTableRow.Danger, @"<th class=""table-danger""><div class=""table-danger""></div></th>")]
-        [InlineData(TypesLayoutTableRow.Light, @"<th class=""table-light""><div class=""table-light""></div></th>")]
-        [InlineData(TypesLayoutTableRow.Dark, @"<th class=""table-dark""><div class=""table-dark""></div></th>")]
-        public void Layout(TypesLayoutTableRow layout, string expected)
+        [InlineData(null, @"<div></div>")]
+        [InlineData("abc", @"<div data-render=""abc""></div>")]
+        public void RenderScript(string text, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -79,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableColumn()
             {
-                Layout = layout
+                RenderScript = text
             };
 
             // test execution
@@ -89,11 +82,11 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the icon property of the table column control.
+        /// Tests the icon property of the table column.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<th><div></div></th>")]
-        [InlineData(typeof(IconStar), @"<th><div><i class=""fas fa-star""></i></div></th>")]
+        [InlineData(null, @"<div></div>")]
+        [InlineData(typeof(IconStar), @"<div data-icon=""fas fa-star""></div>")]
         public void Icon(Type icon, string expected)
         {
             // preconditions
@@ -103,6 +96,36 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlTableColumn()
             {
                 Icon = icon != null ? Activator.CreateInstance(icon) as IIcon : null
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the color property of the table column.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeTableColor.Default, @"<div></div>")]
+        [InlineData(TypeTableColor.Primary, @"<div data-color=""table-primary""></div>")]
+        [InlineData(TypeTableColor.Secondary, @"<div data-color=""table-secondary""></div>")]
+        [InlineData(TypeTableColor.Info, @"<div data-color=""table-info""></div>")]
+        [InlineData(TypeTableColor.Success, @"<div data-color=""table-success""></div>")]
+        [InlineData(TypeTableColor.Warning, @"<div data-color=""table-warning""></div>")]
+        [InlineData(TypeTableColor.Danger, @"<div data-color=""table-danger""></div>")]
+        [InlineData(TypeTableColor.Light, @"<div data-color=""table-light""></div>")]
+        [InlineData(TypeTableColor.Dark, @"<div data-color=""table-dark""></div>")]
+        public void Color(TypeTableColor color, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTableColumn()
+            {
+                Color = color
             };
 
             // test execution

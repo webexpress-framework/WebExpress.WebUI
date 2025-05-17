@@ -3,7 +3,7 @@
     /// <summary>
     /// Specifies the text formats available for editing.
     /// </summary>
-    public enum TypesEditTextFormat
+    public enum TypeEditTextFormat
     {
         /// <summary>
         /// The default text format.

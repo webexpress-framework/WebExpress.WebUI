@@ -152,6 +152,18 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Adds one or more items to the dropdown.
+        /// </summary>
+        /// <param name="items">The items to add to the dropdown.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlDropdown Add(IEnumerable<IControlDropdownItem> items)
+        {
+            _items.AddRange(items);
+
+            return this;
+        }
+
+        /// <summary>
         /// Adds a new separator.
         /// </summary>
         /// <returns>The current instance for method chaining.</returns>
@@ -170,6 +182,18 @@ namespace WebExpress.WebUI.WebControl
         public IControlDropdown AddHeader(string text)
         {
             _items.Add(new ControlDropdownItemHeader() { Text = text });
+
+            return this;
+        }
+
+        /// <summary>
+        /// Removes the specified item from the dropdown control.
+        /// </summary>
+        /// <param name="item">The dropdown item to remove.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlDropdown Remove(IControlDropdownItem item)
+        {
+            _items.Remove(item);
 
             return this;
         }

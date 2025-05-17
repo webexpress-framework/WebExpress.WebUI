@@ -344,10 +344,10 @@ namespace WebExpress.WebUI.WebControl
 
                 switch (v.Type)
                 {
-                    case TypesInputValidity.Error:
+                    case TypeInputValidity.Error:
                         bgColor = new PropertyColorBackgroundAlert(TypeColorBackground.Danger);
                         break;
-                    case TypesInputValidity.Warning:
+                    case TypeInputValidity.Warning:
                         bgColor = new PropertyColorBackgroundAlert(TypeColorBackground.Warning);
                         break;
                 }

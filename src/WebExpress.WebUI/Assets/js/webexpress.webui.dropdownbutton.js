@@ -16,6 +16,8 @@ webexpress.webui.DropdownButtonCtrl = class extends webexpress.webui.Ctrl {
         this._icon = $(element).data("icon") || null;
         this._image = $(element).data("image") || null;
         this._color = $(element).data("color") || null;
+        this._size = $(element).data("size") || null;
+        this._border = $(element).data("border") || false;
         this._menuCSS = $(element).data("menucss") || null;
 
         // Parse items from child elements
@@ -124,7 +126,12 @@ webexpress.webui.DropdownButtonCtrl = class extends webexpress.webui.Ctrl {
         $(this._element).empty();
 
         // Create the button
-        const button = $("<button class='btn' type='button' data-bs-toggle='dropdown' aria-expanded='false'/>");
+        const button = $("<button class='btn' type='button' data-bs-toggle='dropdown' aria-expanded='false'/>")
+            .addClass(this._size);
+            
+        if (!this._border) {
+            button.css("border",  "0");
+        }
         if (this._color) button.addClass(this._color);
         if (this._image) button.append($("<img class='me-2'/>").attr("src", this._image));
         if (this._icon) button.append($("<i class='me-2'/>").addClass(this._icon));

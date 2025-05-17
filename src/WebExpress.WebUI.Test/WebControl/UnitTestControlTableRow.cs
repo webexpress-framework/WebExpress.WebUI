@@ -5,17 +5,17 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.Test.WebControl
 {
     /// <summary>
-    /// Tests the table row control.
+    /// Tests the table row.
     /// </summary>
     [Collection("NonParallelTests")]
     public class UnitTestControlTableRow
     {
         /// <summary>
-        /// Tests the id property of the table row control.
+        /// Tests the id property of the table row.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<tr></tr>")]
-        [InlineData("id", @"<tr id=""id""></tr>")]
+        [InlineData(null, @"<div class=""wx-table-row""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-table-row""></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -33,19 +33,19 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the layout property of the table row control.
+        /// Tests the color property of the table row.
         /// </summary>
         [Theory]
-        [InlineData(TypesLayoutTableRow.Default, @"<tr></tr>")]
-        [InlineData(TypesLayoutTableRow.Primary, @"<tr class=""table-primary""></tr>")]
-        [InlineData(TypesLayoutTableRow.Secondary, @"<tr class=""table-secondary""></tr>")]
-        [InlineData(TypesLayoutTableRow.Info, @"<tr class=""table-info""></tr>")]
-        [InlineData(TypesLayoutTableRow.Success, @"<tr class=""table-success""></tr>")]
-        [InlineData(TypesLayoutTableRow.Warning, @"<tr class=""table-warning""></tr>")]
-        [InlineData(TypesLayoutTableRow.Danger, @"<tr class=""table-danger""></tr>")]
-        [InlineData(TypesLayoutTableRow.Light, @"<tr class=""table-light""></tr>")]
-        [InlineData(TypesLayoutTableRow.Dark, @"<tr class=""table-dark""></tr>")]
-        public void Layout(TypesLayoutTableRow layout, string expected)
+        [InlineData(TypeTableColor.Default, @"<div class=""wx-table-row""></div>")]
+        [InlineData(TypeTableColor.Primary, @"<div class=""wx-table-row"" data-color=""table-primary""></div>")]
+        [InlineData(TypeTableColor.Secondary, @"<div class=""wx-table-row"" data-color=""table-secondary""></div>")]
+        [InlineData(TypeTableColor.Info, @"<div class=""wx-table-row"" data-color=""table-info""></div>")]
+        [InlineData(TypeTableColor.Success, @"<div class=""wx-table-row"" data-color=""table-success""></div>")]
+        [InlineData(TypeTableColor.Warning, @"<div class=""wx-table-row"" data-color=""table-warning""></div>")]
+        [InlineData(TypeTableColor.Danger, @"<div class=""wx-table-row"" data-color=""table-danger""></div>")]
+        [InlineData(TypeTableColor.Light, @"<div class=""wx-table-row"" data-color=""table-light""></div>")]
+        [InlineData(TypeTableColor.Dark, @"<div class=""wx-table-row"" data-color=""table-dark""></div>")]
+        public void Color(TypeTableColor color, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -53,7 +53,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableRow()
             {
-                Layout = layout
+                Color = color
             };
 
             // test execution
@@ -63,27 +63,23 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the add function of the table row control.
+        /// Tests the add function of the table row.
         /// </summary>
-        [Theory]
-        [InlineData(typeof(ControlText), @"<tr><td><div></div></td></tr>")]
-        [InlineData(typeof(ControlLink), @"<tr><td><a class=""link""></a></td></tr>")]
-        [InlineData(typeof(ControlImage), @"<tr><td><img></td></tr>")]
-        public void Add(Type cell, string expected)
+        [Fact]
+        public void Add()
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var childInstance = Activator.CreateInstance(cell, [null]) as IControl;
             var control = new ControlTableRow();
 
             // test execution
-            control.Add(childInstance);
+            control.Add(new ControlTableCell() { Text = "abc" });
 
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(expected, html);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-table-row""><div>abc</div></div>", html);
         }
     }
 }

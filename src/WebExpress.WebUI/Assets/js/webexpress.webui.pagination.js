@@ -5,8 +5,8 @@
  * - webexpress.webui.Event.CLICK_EVENT
  */
 webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
-    _currentpage = 1;
-    _pagecount = 10;
+    _page = 1;
+    _count = 10;
 
     /**
      * Constructor for initializing the pagination control.
@@ -16,8 +16,8 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         // Initialize properties
-        this._currentpage = $(element).data("page") || this._currentpage;
-        this._pagecount = $(element).data("pagecount") || this._pagecount;
+        this._page = $(element).data("page") || this._page;
+        this._count = $(element).data("total") || this._count;
 
         // Clean up the DOM element
         $(element)
@@ -36,19 +36,19 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
     render() {
         $(this._element).children().remove();
 
-        if (this._pagecount <= 0) {
+        if (this._count <= 0) {
             return;
         }
 
         // Add predecessor button
-        const predecessor = this._createPageItem("<span class='fas fa-angle-left'></span>", Math.max(this._currentpage - 1, 0));
+        const predecessor = this._createPageItem("<span class='fas fa-angle-left'></span>", Math.max(this._page - 1, 0));
         $(this._element).append(predecessor);
 
         // Add page items
         this._addPageItems();
 
         // Add successor button
-        const successor = this._createPageItem("<span class='fas fa-angle-right'></span>", Math.min(this._currentpage + 1, this._pagecount - 1));
+        const successor = this._createPageItem("<span class='fas fa-angle-right'></span>", Math.min(this._page + 1, this._count - 1));
         $(this._element).append(successor);
     }
 
@@ -61,7 +61,7 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
     _createPageItem(content, page) {
         const item = $("<li class='page-item'><a class='page-link' href='#'>" + content + "</a></li>");
         item.click(() => {
-            this.currentpage = page;
+            this.page = page;
             $(document).trigger(webexpress.webui.Event.CLICK_EVENT, {
                 id: $(this._element).attr("id"),
                 index: page
@@ -74,30 +74,30 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
      * Helper to add page items based on the current page and page count.
      */
     _addPageItems() {
-        if (this._pagecount <= 10) {
-            for (let i = 0; i < this._pagecount; i++) {
-                this._appendPageItem(i, i === this._currentpage);
+        if (this._count <= 10) {
+            for (let i = 0; i < this._count; i++) {
+                this._appendPageItem(i, i === this._page);
             }
-        } else if (this._currentpage <= 3) {
+        } else if (this._page <= 3) {
             for (let i = 0; i < 7; i++) {
-                this._appendPageItem(i, i === this._currentpage);
+                this._appendPageItem(i, i === this._page);
             }
             this._appendEllipsis();
-            this._appendPageItem(this._pagecount - 1, false);
-        } else if (this._pagecount - this._currentpage <= 3) {
+            this._appendPageItem(this._count - 1, false);
+        } else if (this._count - this._page <= 3) {
             this._appendPageItem(0, false);
             this._appendEllipsis();
-            for (let i = this._pagecount - 7; i < this._pagecount; i++) {
-                this._appendPageItem(i, i === this._currentpage);
+            for (let i = this._count - 7; i < this._count; i++) {
+                this._appendPageItem(i, i === this._page);
             }
         } else {
             this._appendPageItem(0, false);
             this._appendEllipsis();
-            for (let i = this._currentpage - 2; i <= this._currentpage + 2; i++) {
-                this._appendPageItem(i, i === this._currentpage);
+            for (let i = this._page - 2; i <= this._page + 2; i++) {
+                this._appendPageItem(i, i === this._page);
             }
             this._appendEllipsis();
-            this._appendPageItem(this._pagecount - 1, false);
+            this._appendPageItem(this._count - 1, false);
         }
     }
 
@@ -125,36 +125,38 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Returns the page number of the current page.
      */
-    get currentpage() {
-        return this._currentpage;
+    get page() {
+        return this._page;
     }
 
     /**
      * Sets the page number of the current page.
      * @param {number} value - The new page number to set.
      */
-    set currentpage(value) {
-        if (value < 0 || value >= this._pagecount) {
+    set page(value) {
+        if (value < 0 || value >= this._count) {
             throw new Error("Invalid page number. It must be between 0 and the total number of pages - 1.");
         }
 
-        this._currentpage = value;
+        if (this._page !== value) {
+            this._page = value;
 
-        // Trigger a page change event
-        $(document).trigger(webexpress.webui.Event.CHANGE_PAGE_EVENT, {
-            id: $(this._element).attr("id"),
-            currentpage: this._currentpage
-        });
+            // Trigger a page change event
+            $(document).trigger(webexpress.webui.Event.CHANGE_PAGE_EVENT, {
+                id: $(this._element).attr("id"),
+                page: this._page
+            });
 
-        // Re-render the control
-        this.render();
+            // Re-render the control
+            this.render();
+        }
     }
 
     /**
      * Returns the number of pages.
      */
     get pagecount() {
-        return this._pagecount;
+        return this._count;
     }
 
     /**
@@ -166,11 +168,11 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
             throw new Error("Page count must be at least 1.");
         }
 
-        this._pagecount = value;
+        this._count = value;
 
         // Adjust the current page if it exceeds the new page count
-        if (this._currentpage >= this._pagecount) {
-            this._currentpage = this._pagecount - 1;
+        if (this._page >= this._count) {
+            this._page = this._count - 1;
         }
 
         // Re-render the control

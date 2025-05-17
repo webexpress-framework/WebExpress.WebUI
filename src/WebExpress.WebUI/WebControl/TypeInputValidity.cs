@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents the validity state of an input control.
     /// </summary>
-    public enum TypesInputValidity
+    public enum TypeInputValidity
     {
         /// <summary>
         /// The default state of the input control.

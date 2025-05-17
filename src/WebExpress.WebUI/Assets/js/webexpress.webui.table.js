@@ -6,16 +6,18 @@
  */
 webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     // Define table-related DOM elements and data
+    _table = $("<table>").addClass("wx-table table table-hover table-sm");
     _col = $("<colgroup/>");
     _head = $("<thead/>");
     _body = $("<tbody/>");
     _foot = $("<tfoot/>");
-    _columns = [];
-    _rows = [];
-    _footer = [];
+    _columns = []; // Array to hold column definitions
+    _rows = []; // Array to hold row data
+    _footer = []; // Array to hold footer data
     _draggedColumn = null; // Track the column being dragged
     _draggedRow = null; // Track the row being dragged
     _dragColumnIndicator = null; // Indicator for columns
+    _hasOptions = false; // Flag to check if options are present
 
     /**
      * Constructor to initialize the table control.
@@ -25,20 +27,21 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         // Initialize table structure and parse existing data
+        const tableColor = $(element).data("color") || null;
+        const tableBorder = $(element).data("border") || null;
+        const tableStriped = $(element).data("striped") || null;
         this._movableRow = $(element).data("movable-row") || false;
-        this._options = this._parseOptions($(element).find(".wx-table-options"));
-        this._columns = this._parseColumns($(element).find(".wx-table-columns"));
-        this._rows = this._parseRows($(element).find(".wx-table-row"));
-        this._footer = this._parseFooter($(element).find(".wx-table-footer"));
-        
-        const table = $("<table>")
-            .append(this._col, this._head, this._body, this._foot)
-            .addClass("wx-table table table-hover"); // Klassen für Styling hinzufügen
+        this._options = this._parseOptions($(element).children(".wx-table-options"));
+        this._columns = this._parseColumns($(element).children(".wx-table-columns"));
+        this._rows = this._parseRows($(element).children(".wx-table-row"));
+        this._footer = this._parseFooter($(element).children(".wx-table-footer"));
+        this._table.append(this._col, this._head, this._body, this._foot);
 
         // Set up the table structure
         $(element)
             .empty()
-            .append(table);
+            .removeAttr("data-color data-border data-striped data-movable-row")
+            .append(this._table);
             
         // Create visual indicators for column and row dragging
         this._dragColumnIndicator = $("<div>")
@@ -47,6 +50,9 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
         // Append indicators to the document body
         $(element).append(this._dragColumnIndicator);
+
+        this._table.addClass(tableColor, tableBorder, tableStriped);
+        
         this.render(); // Render the initial state of the table
     }
     
@@ -159,17 +165,21 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             const movedColumn = this._columns.splice(sourceIndex, 1)[0];
             this._columns.splice(adjustedTargetIndex, 0, movedColumn);
 
-            // Reorder rows
-            this._rows = this._rows.map(row => {
-                const rowArray = Object.entries(row).sort((a, b) => a[0] - b[0]).map(entry => entry[1]);
-                const movedCell = rowArray.splice(sourceIndex, 1)[0];
-                rowArray.splice(adjustedTargetIndex, 0, movedCell);
-                return rowArray.reduce((acc, cellData, index) => {
-                    acc[index] = cellData;
-                    return acc;
-                }, {});
+            // Update the order of cells in each row based on the new column order
+            this._rows = this._rows.map((row) => {
+                const { cells, options } = row; // Preserve the row structure
+
+                // Convert cells to an array (if not already an array-like structure)
+                const cellArray = Array.isArray(cells) ? [...cells] : Object.values(cells);
+
+                // Rearrange the cells based on the new column order
+                const movedCell = cellArray.splice(sourceIndex, 1)[0];
+                cellArray.splice(adjustedTargetIndex, 0, movedCell);
+
+                // Return the updated row with reordered cells (as an array) and intact options
+                return { cells: cellArray, options };
             });
-           
+
             // Cancel drag
             this._dragColumnIndicator.hide();
             this._draggedColumn = null;
@@ -179,6 +189,41 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             
             // Re-render the table
             this.render();
+        });
+    }
+    
+    /**
+     * Attaches click event handlers to the column headers for sorting.
+     * @param {HTMLElement} element - The DOM element representing the column header.
+     * @param {Object} column - The column object associated with the header.
+     */
+    _enableSortColumns(element, column) {
+        const $th = $(element); // Get the jQuery object for the header element
+        
+        $th.on("click", () => {
+
+            // Determine the new sort direction
+            const currentDirection = column.sort || "asc";
+
+            // Resets the sort direction for all columns
+            this._columns.forEach((column) => {
+                column.sort = null; // Set the sort property to null
+            });
+            
+            // Update the sort direction in the DOM
+            this._head.find("th").removeClass("wx-sort-asc wx-sort-desc");
+            $th.addClass(column.sort === "asc" ? "wx-sort-asc" : "wx-sort-desc");
+
+            // Sort rows based on the column and direction
+            column.sort = currentDirection === "asc" ? "desc" : "asc";
+            this.orderRows(column);
+
+            // Trigger a custom sort event
+            $(document).trigger(webexpress.webui.Event.TABLE_SORT_EVENT, {
+                columnId: column.id,
+                sortDirection: column.sort,
+                columnLabel: $th.text().trim()
+            });
         });
     }
 
@@ -360,14 +405,19 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
      * @returns {Array} Parsed column definitions.
      */
     _parseColumns(columnsDiv) {
+        const headerColor = columnsDiv.data("color") || null;
+
+        this._head.addClass(headerColor);
+
         return columnsDiv.children("div").map((_, div) => {
             const $div = $(div);
             return {
                 label: $div.text().trim(),
                 icon: $div.data("icon") || null,
                 image: $div.data("image") || null,
-                width: null,
-                sort: null,
+                color: $div.data("color") || null,
+                width: $div.attr("width") || null,
+                sort: $div.data("sort") || null,
             };
         }).get();
     }
@@ -381,7 +431,14 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         const rows = [];
         rowsDiv.each((_, div) => {
             const $div = $(div);
-            const row = { cells: [], options: null }; // Initialize row structure with cells and options
+            const row = {
+                id: $div.attr("id") || null,
+                class: $div.attr("class") || null,
+                style: $div.attr("style") || null,
+                color: $div.data("color") || null,
+                cells: [],
+                options: null
+            }; // Initialize row structure with cells and options
 
             $div.children("div").each((index, cellDiv) => {
                 const $cell = $(cellDiv);
@@ -390,12 +447,20 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 if ($cell.hasClass("wx-table-options")) {
                     // Reuse the existing _parseOptions method to handle options parsing
                     row.options = this._parseOptions($cell);
+                    this._hasOptions = true;
                 } else {
                     // Parse regular cell data
                     row.cells.push({
+                        id: $cell.attr("id") || null,
+                        class: $cell.attr("class") || null,
+                        style: $cell.attr("style") || null,
+                        color: $cell.data("color") || null,
                         text: $cell.text().trim(),
                         image: $cell.data("image") || null,
                         icon: $cell.data("icon") || null,
+                        uri: $cell.data("uri") || null,
+                        target: $cell.data("target") || null,
+                        modal: $cell.data("modal") || null
                     });
                 }
             });
@@ -417,9 +482,11 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Clears all rows and footers from the table.
+     * Clears all columns, rows and footers from the table.
      */
     clear() {
+        this._col.empty();
+        this._head.empty();
         this._body.empty();
         this._foot.empty();
     }
@@ -440,9 +507,15 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
         // Sort the rows based on the specified column
         this._rows.sort((a, b) => {
-            const cellA = a[columnIndex]?.text || "";
-            const cellB = b[columnIndex]?.text || "";
+            // Extract the cells array from the row structure
+            const cellsA = Array.isArray(a.cells) ? a.cells : Object.values(a.cells);
+            const cellsB = Array.isArray(b.cells) ? b.cells : Object.values(b.cells);
 
+            // Get the cell values for the specified column index
+            const cellA = cellsA[columnIndex]?.text || "";
+            const cellB = cellsB[columnIndex]?.text || "";
+
+            // Perform sorting based on the column's sort direction
             if (column.sort === "asc") {
                 return cellA.localeCompare(cellB, undefined, { numeric: true });
             } else if (column.sort === "desc") {
@@ -460,7 +533,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Renders the table structure including columns, rows, and footer.
      */
-    render() {
+    render() {  
         this._renderColumns(); // Render table header
         this._renderRows();    // Render table body
         this._renderFooter();  // Render table footer
@@ -471,15 +544,18 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
      */
     _renderColumns() {
         const headRow = $("<tr>");
+        this._col.empty();
         this._head.empty().append(headRow);
 
         if (this._movableRow) {
             headRow.append($("<th>"));
-            this._col.empty().append($("<col>").attr("style", "width: 1em;"));
+            this._col.append($("<col>").attr("style", "width: 1ch; max-width: 1ch; padding: 0;"));
         }
 
         this._columns.forEach((column) => {
-            const th = $("<th>").attr("draggable", true);
+            const th = $("<th>")
+                .attr("draggable", true)
+                .addClass(column.color);
             headRow.append(th);
 
             if (column.icon) {
@@ -495,11 +571,23 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 col.attr("style", `width: ${column.width}px;`);
             }
             this._col.append(col);
+            
+            this._enableDragAndDropColumn(th, column);
+            this._enableResizableColumns(th, column);
+            this._enableSortColumns(th, column);
         });
         
+        // If options are present, add them as a dropdown cell
         if (this._options?.length > 0) {
+            const div = $("<div class='' data-icon='fas fa-cog' data-size='btn-sm' data-border='false'>");
+            const dropdownContainer = new webexpress.webui.DropdownButtonCtrl(div[0]);
+            dropdownContainer.items = this._options;
+                
+            headRow.append($("<th style='overflow: visible;'>").append(div));
+            this._col.append($("<col>").attr("style", "width: 1em;"));
+        } else if (this._hasOptions) {
             headRow.append($("<th>"));
-            this._col.empty().append($("<col>").attr("style", "width: 1em;"));
+            this._col.append($("<col>").attr("style", "width: 1em;"));
         }
     }
 
@@ -515,44 +603,59 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
      * Adds a row to the table body.
      * @param {Object} row - The row data containing cells and options.
      */
-    _addRow(row) {
-        const tr = $("<tr/>");
-        
-        if (this._movableRow) {
-            // Create a draggable handle at the beginning of each row
-            const dragHandle = $("<td/>")
-                .addClass("wx-table-drag-handle")
-                .text("☰");
-            tr.append(dragHandle);
-            this._enableDragAndDropRow(dragHandle, row);
-        }
+     _addRow(row) {
+         const tr = $("<tr>")
+             .addClass(row.color);
 
-        // Iterate over the cells array within the row object
-        row.cells.forEach((cellData) => {
-            const td = $("<td/>");
-            if (cellData.image) {
-                td.append($("<img/>").attr("src", cellData.image));
-            }
-            if (cellData.icon) {
-                td.append($("<i/>").addClass(cellData.icon));
-            }
-            td.append(cellData.text || "");
-            tr.append(td);
-        });
+         // Check if the number of columns and cells matches
+         const cellCount = row.cells.length;
+         const colCount = this._columns.length;
 
-        // If options are present, add them as a dropdown cell
-        if (row.options?.length > 0) {
-            const div = $("<div class='wx-webui-dropdownbutton' data-icon='fas fa-cog'>");
-            const dropdownContainer = new webexpress.webui.DropdownButtonCtrl(div[0]);
-            dropdownContainer.items = row.options;
-                
-            tr.append($("<td>").append(div));
-        } else {
-            tr.append($("<td>"));
-        }
-        
-        this._body.append(tr);
-    }
+         if (this._movableRow) {
+             // Create a draggable handle at the beginning of each row
+             const dragHandle = $("<td>")
+                 .addClass("wx-table-drag-handle")
+                 .text("☰");
+             tr.append(dragHandle);
+             this._enableDragAndDropRow(dragHandle, row);
+         }
+
+         // Iterate over the cells array within the row object
+         row.cells.forEach((cellData) => {
+             const td = $("<td>")
+                 .addClass(cellData.color, cellData.class)
+                 .attr("style", cellData.style);
+
+             if (cellData.image) {
+                 td.append($("<img/>").attr("src", cellData.image));
+             }
+             if (cellData.icon) {
+                 td.append($("<i>").addClass(cellData.icon));
+             }
+             td.append(cellData.text || "");
+             tr.append(td);
+         });
+
+         // Fill missing cells with empty cells
+         if (cellCount < colCount) {
+             for (let i = cellCount; i < colCount; i++) {
+                 tr.append($("<td>"));
+             }
+         }
+
+         // If options are present, add them as a dropdown cell
+         if (row.options?.length > 0) {
+             const div = $("<div data-icon='fas fa-cog' data-size='btn-sm' data-border='false'>");
+             const dropdownContainer = new webexpress.webui.DropdownButtonCtrl(div[0]);
+             dropdownContainer.items = row.options;
+
+             tr.append($("<td>").append(div));
+         } else if (this._hasOptions) {
+             tr.append($("<td>"));
+         }
+
+         this._body.append(tr);
+     }
 
     /**
      * Renders the table footer.
@@ -560,45 +663,20 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     _renderFooter() {
         this._foot.empty();
         const tr = $("<tr>");
+        
+        if (this._movableRow) {
+            tr.append($("<td>"));
+        }
+        
         this._footer.forEach(rowData => {
             tr.append($("<td>").html(rowData));
         });
-        this._foot.append(tr);
-    }
-
-    /**
-     * Attaches click event handlers to the column headers for sorting.
-     * @param {HTMLElement} element - The DOM element representing the column header.
-     * @param {Object} column - The column object associated with the header.
-     */
-    _attachSortHandlers(element, column) {
-        const $th = $(element); // Get the jQuery object for the header element
         
-        $th.on("click", () => {
-
-            // Determine the new sort direction
-            const currentDirection = column.sort || "asc";
-
-            // Resets the sort direction for all columns
-            this._columns.forEach((column) => {
-                column.sort = null; // Set the sort property to null
-            });
-            
-            // Update the sort direction in the DOM
-            this._head.find("th").removeClass("wx-sort-asc wx-sort-desc");
-            $th.addClass(column.sort === "asc" ? "wx-sort-asc" : "wx-sort-desc");
-
-            // Sort rows based on the column and direction
-            column.sort = currentDirection === "asc" ? "desc" : "asc";
-            this.orderRows(column);
-
-            // Trigger a custom sort event
-            $(document).trigger(webexpress.webui.Event.TABLE_SORT_EVENT, {
-                columnId: column.id,
-                sortDirection: column.sort,
-                columnLabel: $th.text().trim()
-            });
-        });
+        if (this._hasOptions) {
+            tr.append($("<td>"));
+        }
+        
+        this._foot.append(tr);
     }
 
     /**

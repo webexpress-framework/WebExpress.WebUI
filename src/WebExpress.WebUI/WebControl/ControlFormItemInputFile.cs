@@ -121,7 +121,7 @@ namespace WebExpress.WebUI.WebControl
 
             if (Required && string.IsNullOrWhiteSpace(value))
             {
-                validationResults.Add(new ValidationResult(TypesInputValidity.Error, "webexpress.webui:form.inputfile.validation.required"));
+                validationResults.Add(new ValidationResult(TypeInputValidity.Error, "webexpress.webui:form.inputfile.validation.required"));
             }
 
             validationResults.AddRange(base.Validate(renderContext));

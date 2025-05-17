@@ -126,11 +126,31 @@ webexpress.webui.Controller = new class {
         if ($element.length > 0 && this.instanceMap.has($element[0])) {
             const instance = this.instanceMap.get($element[0]);
 
-            // If ClassConstructor is provided, check type; otherwise, return the instance
+            // If ClassConstructor is provided, verify the instance type.
             if (ClassConstructor) {
                 return instance instanceof ClassConstructor ? instance : null;
             }
 
+            return instance;
+        }
+        return null;
+    }
+    
+    /**
+     * Retrieves an instance based on a DOM element.
+     * @param {HTMLElement} element - The DOM element.
+     * @param {Function} [ClassConstructor] - (Optional) The constructor of the expected class instance.
+     * @returns {Object|null} - The instance associated with the element, or null if not found or type mismatch.
+     */
+    getInstanceByElement(element, ClassConstructor) {
+        // Check if the element exists in the instanceMap
+        if (this.instanceMap.has(element)) {
+            const instance = this.instanceMap.get(element);
+
+            // If ClassConstructor is provided, verify the instance type.
+            if (ClassConstructor) {
+                return instance instanceof ClassConstructor ? instance : null;
+            }
             return instance;
         }
         return null;
@@ -144,16 +164,16 @@ webexpress.webui.Controller = new class {
 webexpress.webui.Ctrl = class {
     /**
      * Creates a new instance of the Control class.
-     * @param {HTMLElement} elem - The DOM element associated with this control.
+     * @param {HTMLElement} element - The DOM element associated with this control.
      */
-    constructor(elem) {
+    constructor(element) {
         if (new.target === webexpress.webui.Ctrl) {
             throw new Error("Control is an abstract class and cannot be instantiated directly.");
         }
-        if (!(elem instanceof HTMLElement)) {
+        if (!(element instanceof HTMLElement)) {
             throw new Error("Parameter 'element' must be an instance of HTMLElement.");
         }
-        this._element = elem;
+        this._element = element;
     }
 
     /**
@@ -289,8 +309,8 @@ webexpress.webui.Event = class {
     static TABLE_SORT_EVENT = "webexpress.webui.table.sorted";
     // Event triggered when the value of an input or control changes
     static CHANGE_VALUE_EVENT = "webexpress.webui.change.value";
-    // Event triggered when a node is moved in a tree control
-    static MOVE_EVENT = "webexpress.webui.tree.node.move";
+    // Event triggered when a item is moved
+    static MOVE_EVENT = "webexpress.webui.move";
     // Event triggered when the page changes in a pagination control
     static CHANGE_PAGE_EVENT = "webexpress.webui.change.page";
     // Event triggered when a modal is shown
@@ -301,4 +321,10 @@ webexpress.webui.Event = class {
     static DATA_REQUESTED_EVENT = "webexpress.webui.data.requested";
     // Event triggered when data has arrived
     static DATA_ARRIVED_EVENT = "webexpress.webui.data.arrived";
+    // Event triggered when a task starts
+    static TASK_START_EVENT = "webexpress.webapp.task.start";
+    // Event triggered when a task is updated
+    static TASK_UPDATE_EVENT = "webexpress.webapp.task.update";
+    // Event triggered when a task is finished
+    static TASK_FINISH_EVENT = "webexpress.webapp.task.finish";
 }

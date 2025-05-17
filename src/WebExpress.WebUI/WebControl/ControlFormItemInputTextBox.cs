@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Determines whether it is a multi-line text box.
         /// </summary>
-        public TypesEditTextFormat Format { get; set; }
+        public TypeEditTextFormat Format { get; set; }
 
         /// <summary>
         /// Returns or sets the description.
@@ -87,7 +87,7 @@ namespace WebExpress.WebUI.WebControl
         {
             base.Initialize(renderContext);
 
-            if (Format == TypesEditTextFormat.Wysiwyg)
+            if (Format == TypeEditTextFormat.Wysiwyg)
             {
                 var contextPath = renderContext?.PageContext?.ApplicationContext?.Route;
                 //renderContext.AddCssLinks(UriResource.Combine(contextPath, "/assets/css/summernote-bs5.min.css"));
@@ -115,7 +115,7 @@ namespace WebExpress.WebUI.WebControl
                 classes.Add("disabled");
             }
 
-            if (AutoInitialize && Format == TypesEditTextFormat.Wysiwyg && !string.IsNullOrWhiteSpace(Id))
+            if (AutoInitialize && Format == TypeEditTextFormat.Wysiwyg && !string.IsNullOrWhiteSpace(Id))
             {
                 var initializeCode = $"$(document).ready(function() {{ $('#{id}').summernote({{ tabsize: 2, height: '{Rows}rem', lang: 'de-DE' }}); }});";
 
@@ -126,7 +126,7 @@ namespace WebExpress.WebUI.WebControl
 
             return Format switch
             {
-                TypesEditTextFormat.Multiline => new HtmlElementFormTextarea()
+                TypeEditTextFormat.Multiline => new HtmlElementFormTextarea()
                 {
                     Id = Id,
                     Value = value,
@@ -137,7 +137,7 @@ namespace WebExpress.WebUI.WebControl
                     Placeholder = I18N.Translate(renderContext.Request?.Culture, Placeholder),
                     Rows = Rows.ToString()
                 },
-                TypesEditTextFormat.Wysiwyg => new HtmlElementFormTextarea()
+                TypeEditTextFormat.Wysiwyg => new HtmlElementFormTextarea()
                 {
                     Id = id,
                     Value = value,
@@ -186,19 +186,19 @@ namespace WebExpress.WebUI.WebControl
 
             if (Required && string.IsNullOrWhiteSpace(value))
             {
-                validationResults.AddRange(new ValidationResult(TypesInputValidity.Error, "webexpress.webui:form.inputtextbox.validation.required"));
+                validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, "webexpress.webui:form.inputtextbox.validation.required"));
 
                 return validationResults;
             }
 
             if (!string.IsNullOrWhiteSpace(MinLength?.ToString()) && Convert.ToInt32(MinLength) > value?.Length)
             {
-                validationResults.AddRange(new ValidationResult(TypesInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputtextbox.validation.min"), MinLength)));
+                validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputtextbox.validation.min"), MinLength)));
             }
 
             if (!string.IsNullOrWhiteSpace(MaxLength?.ToString()) && Convert.ToInt32(MaxLength) < value?.Length)
             {
-                validationResults.AddRange(new ValidationResult(TypesInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputtextbox.validation.max"), MaxLength)));
+                validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputtextbox.validation.max"), MaxLength)));
             }
 
             return validationResults;

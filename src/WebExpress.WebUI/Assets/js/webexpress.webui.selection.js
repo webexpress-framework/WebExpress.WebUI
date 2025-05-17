@@ -284,5 +284,5 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
     }
 };
 
-// Register the class
+// Register the class in the controller
 webexpress.webui.Controller.registerClass("wx-webui-selection", webexpress.webui.SelectionCtrl);

@@ -1,7 +1,7 @@
-﻿using System.Linq;
-using WebExpress.WebCore.Internationalization;
+﻿using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -9,17 +9,17 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a table column control.
     /// </summary>
-    public class ControlTableColumn : Control
+    public class ControlTableColumn : IControlTableColumn
     {
         /// <summary>
-        /// Returns or sets the layout.
+        /// Returns or sets the unique identifier for the entity.
         /// </summary>
-        public TypesLayoutTableRow Layout { get; set; }
+        public string Id { get; set; }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Returns or sets the header text.
         /// </summary>
-        public string Text { get; set; }
+        public string Title { get; set; }
 
         /// <summary>
         /// Returns or sets the icon.
@@ -27,89 +27,42 @@ namespace WebExpress.WebUI.WebControl
         public IIcon Icon { get; set; }
 
         /// <summary>
+        /// Returns or sets the render function used for rendering the cells in the column.
+        /// </summary>
+        public string RenderScript { get; set; }
+
+        /// <summary>
+        /// Returns or sets the color scheme used for the column.
+        /// </summary>
+        public TypeTableColor Color { get; set; } = TypeTableColor.Default;
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
         public ControlTableColumn(string id = null)
-            : base(id)
         {
-
+            Id = id;
         }
 
         /// <summary>
-        /// Converts the control to an HTML representation.
+        /// Converts the column to an HTML representation.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <param name="visualTree">The visual tree representing the control's structure.</param>
         /// <returns>An HTML node representing the rendered control.</returns>
-        public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
+        public IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var classes = Classes.ToList();
-
-            switch (Layout)
+            var html = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Title)))
             {
-                case TypesLayoutTableRow.Primary:
-                    classes.Add("table-primary");
-                    break;
-                case TypesLayoutTableRow.Secondary:
-                    classes.Add("table-secondary");
-                    break;
-                case TypesLayoutTableRow.Success:
-                    classes.Add("table-success");
-                    break;
-                case TypesLayoutTableRow.Info:
-                    classes.Add("table-info");
-                    break;
-                case TypesLayoutTableRow.Warning:
-                    classes.Add("table-warning");
-                    break;
-                case TypesLayoutTableRow.Danger:
-                    classes.Add("table-danger");
-                    break;
-                case TypesLayoutTableRow.Light:
-                    classes.Add("table-light");
-                    break;
-                case TypesLayoutTableRow.Dark:
-                    classes.Add("table-dark");
-                    break;
+                Id = Id
             }
+                .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
+                .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-color", Color.ToClass())
+                .AddUserAttribute("data-render", RenderScript);
 
-            var html = new HtmlElementTextContentDiv()
-            {
-                Id = Id,
-                Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
-                Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
-                Role = Role
-            };
-
-            if (Icon != null)
-            {
-                html.Add(new ControlIcon()
-                {
-                    Icon = Icon,
-                    Margin = !string.IsNullOrWhiteSpace(Text) ? new PropertySpacingMargin
-                   (
-                       PropertySpacing.Space.None,
-                       PropertySpacing.Space.Two,
-                       PropertySpacing.Space.None,
-                       PropertySpacing.Space.None
-                   ) : new PropertySpacingMargin(PropertySpacing.Space.None),
-                    VerticalAlignment = TypeVerticalAlignment.Default
-                }.Render(renderContext, visualTree));
-            }
-
-            if (!string.IsNullOrWhiteSpace(Text))
-            {
-                html.Add(new HtmlText(I18N.Translate(renderContext.Request?.Culture, Text)));
-            }
-
-            return new HtmlElementTableTh(html)
-            {
-                Id = Id,
-                Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
-                Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
-                Role = Role
-            };
+            return html;
         }
     }
 }
