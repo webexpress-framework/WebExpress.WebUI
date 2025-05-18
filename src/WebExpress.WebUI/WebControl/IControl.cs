@@ -10,11 +10,6 @@ namespace WebExpress.WebUI.WebControl
     public interface IControl : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns or sets the id.
-        /// </summary>
-        string Id { get; }
-
-        /// <summary>
         /// Returns or sets the horizontal alignment.
         /// </summary>
         TypeHorizontalAlignment HorizontalAlignment { get; set; }
