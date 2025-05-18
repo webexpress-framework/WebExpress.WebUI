@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -7,7 +7,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a row in a control table, containing a collection of cells and a unique identifier.
     /// </summary>
-    public interface IControlTableRow
+    public interface IControlTableRow : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
         /// Returns the unique identifier for the entity.
@@ -83,13 +83,5 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="item">The item to remove.</param>
         /// <returns>The current instance for method chaining.</returns>
         IControlTableRow Remove(IControlDropdownItem item);
-
-        /// <summary>
-        /// Converts the row to an HTML representation.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        /// <param name="visualTree">The visual tree representing the control's structure.</param>
-        /// <returns>An HTML node representing the rendered control.</returns>
-        IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree);
     }
 }

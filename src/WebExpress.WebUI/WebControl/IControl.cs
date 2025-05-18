@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -7,7 +7,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Interface for a control.
     /// </summary>
-    public interface IControl
+    public interface IControl : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
         /// Returns or sets the id.
@@ -92,13 +92,5 @@ namespace WebExpress.WebUI.WebControl
         /// Determines whether the control is active and rendering.
         /// </summary>
         bool Enable { get; set; }
-
-        /// <summary>
-        /// Converts the control to an HTML representation.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        /// <param name="visualTree">The visual tree representing the control's structure.</param>
-        /// <returns>An HTML node representing the rendered control.</returns>
-        IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree);
     }
 }

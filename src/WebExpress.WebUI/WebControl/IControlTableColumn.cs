@@ -1,5 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
-using WebExpress.WebCore.WebIcon;
+﻿using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -7,7 +7,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a column in a control table.
     /// </summary>
-    public interface IControlTableColumn
+    public interface IControlTableColumn : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
         /// Returns the unique identifier for the entity.
@@ -33,13 +33,5 @@ namespace WebExpress.WebUI.WebControl
         /// Returns the color scheme used for the column.
         /// </summary>
         TypeTableColor Color { get; }
-
-        /// <summary>
-        /// Converts the column to an HTML representation.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        /// <param name="visualTree">The visual tree representing the control's structure.</param>
-        /// <returns>An HTML node representing the rendered control.</returns>
-        IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree);
     }
 }
