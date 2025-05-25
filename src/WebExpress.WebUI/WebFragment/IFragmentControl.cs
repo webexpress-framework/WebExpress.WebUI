@@ -7,7 +7,7 @@ namespace WebExpress.WebUI.WebFragment
     /// <summary>
     /// Represents a fragment control interface.
     /// </summary>
-    public interface IFragmentControl : IFragment<IRenderControlContext, IVisualTreeControl>, IControl
+    public interface IFragmentControl : IFragmentWebUIElement<IRenderControlContext, IVisualTreeControl>, IControl
     {
     }
 

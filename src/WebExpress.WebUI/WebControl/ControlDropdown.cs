@@ -3,6 +3,7 @@ using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -20,22 +21,14 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlDropdownItem> Items => _items;
 
         /// <summary>
-        /// Returns or sets the background color. 
+        /// Returns or sets the color. 
         /// </summary>
-        public new PropertyColorButton BackgroundColor
-        {
-            get => (PropertyColorButton)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(Outline), () => value?.ToStyle(Outline));
-        }
+        public PropertyColorButton Color { get; set; }
 
         /// <summary>
         /// Returns or sets the size.
         /// </summary>
-        public TypeSizeButton Size
-        {
-            get => (TypeSizeButton)GetProperty(TypeSizeButton.Default);
-            set => SetProperty(value, () => value.ToClass());
-        }
+        public TypeSizeButton Size { get; set; }
 
         /// <summary>
         /// Returns or sets the outline property.
@@ -45,20 +38,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets whether the button should take up the full width.
         /// </summary>
-        public TypeBlockButton Block
-        {
-            get => (TypeBlockButton)GetProperty(TypeBlockButton.None);
-            set => SetProperty(value, () => value.ToClass());
-        }
+        public TypeBlockButton Block { get; set; }
 
         /// <summary>
         /// Returns or sets an indicator that indicates that a menu is present.
         /// </summary>
-        public TypeToggleDropdown Toggle
-        {
-            get => (TypeToggleDropdown)GetProperty(TypeToggleDropdown.None);
-            set => SetProperty(value, () => value.ToClass());
-        }
+        public TypeToggleDropdown Toggle { get; set; }
 
         /// <summary>
         /// Returns or sets the text.
@@ -71,11 +56,6 @@ namespace WebExpress.WebUI.WebControl
         public string Tooltip { get; set; }
 
         /// <summary>
-        /// Returns or sets the value.
-        /// </summary>
-        public string Value { get; set; }
-
-        /// <summary>
         /// Returns or sets the icon.
         /// </summary>
         public IIcon Icon { get; set; }
@@ -83,20 +63,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the activation status of the button.
         /// </summary>
-        public TypeActive Active
-        {
-            get => (TypeActive)GetProperty(TypeActive.None);
-            set => SetProperty(value, () => value.ToClass());
-        }
+        public TypeActive Active { get; set; }
 
         /// <summary>
         /// Returns or sets the orientation of the menu.
         /// </summary>
-        public TypeAlignmentDropdownMenu AlignmentMenu
-        {
-            get => (TypeAlignmentDropdownMenu)GetProperty(TypeAlignmentDropdownMenu.Default);
-            set => SetProperty(value, () => value.ToClass());
-        }
+        public TypeAlignmentDropdownMenu AlignmentMenu { get; set; }
 
         /// <summary>
         /// Returns or sets the image.
@@ -218,95 +190,49 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlDropdownItem> items)
         {
+            var buttonCss = "";
+            var buttonStyle = "";
+
+            if (Color != null)
+            {
+                buttonCss = Css.Concatenate(Color?.ToClass(Outline), buttonCss);
+                buttonStyle = Style.Concatenate(Color?.ToStyle(), buttonStyle);
+            }
+
+            if (Size != TypeSizeButton.Default)
+            {
+                buttonCss = Css.Concatenate(Size.ToClass(), buttonCss);
+            }
+
+            if (Block != TypeBlockButton.None)
+            {
+                buttonCss = Css.Concatenate(Block.ToClass(), buttonCss);
+            }
+
+            if (Toggle != TypeToggleDropdown.None)
+            {
+                buttonCss = Css.Concatenate(Toggle.ToClass(), buttonCss);
+            }
+
+            if (AlignmentMenu != TypeAlignmentDropdownMenu.Default)
+            {
+                buttonCss = Css.Concatenate(AlignmentMenu.ToClass(), buttonCss);
+            }
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("dropdown", Margin.ToClass()),
-                Role = Role
-            };
-
-            if (Image == null)
-            {
-                var button = new HtmlElementFieldButton()
-                {
-                    Id = string.IsNullOrWhiteSpace(Id) ? "" : Id + "_btn",
-                    Class = Css.Concatenate("btn", Css.Remove(GetClasses(), Margin.ToClass())),
-                    Style = GetStyles(),
-                    Title = I18N.Translate(Tooltip)
-                };
-                button.AddUserAttribute("data-bs-toggle", "dropdown");
-                button.AddUserAttribute("aria-expanded", "false");
-
-                if (Icon != null)
-                {
-                    button.Add(new ControlIcon()
-                    {
-                        Icon = Icon,
-                        Margin = !string.IsNullOrWhiteSpace(Text) ? new PropertySpacingMargin
-                    (
-                        PropertySpacing.Space.None,
-                        PropertySpacing.Space.Two,
-                        PropertySpacing.Space.None,
-                        PropertySpacing.Space.None
-                    ) : new PropertySpacingMargin(PropertySpacing.Space.None),
-                        VerticalAlignment = TypeVerticalAlignment.Default
-                    }.Render(renderContext, visualTree));
-                }
-
-                if (!string.IsNullOrWhiteSpace(Text))
-                {
-                    button.Add(new HtmlText(I18N.Translate(renderContext.Request.Culture, Text)));
-                }
-
-                html.Add(button);
+                Class = Css.Concatenate("wx-webui-dropdownbutton", GetClasses()),
+                Role = Role ?? "button"
             }
-            else
-            {
-                var button = new HtmlElementMultimediaImg()
-                {
-                    Id = string.IsNullOrWhiteSpace(Id) ? "" : Id + "_btn",
-                    Class = Css.Concatenate("btn", Css.Remove(GetClasses(), Margin.ToClass())),
-                    Style = GetStyles(),
-                    Src = Image.ToString()
-                };
-                button.AddUserAttribute("data-bs-toggle", "dropdown");
-                button.AddUserAttribute("aria-expanded", "false");
-
-                if (Height > 0)
-                {
-                    button.Height = Height;
-                }
-
-                if (Width > 0)
-                {
-                    button.Width = Width;
-                }
-
-                html.Add(button);
-            }
-
-            html.Add
-            (
-                new HtmlElementTextContentUl
-                (
-                    items.Select
-                    (
-                        x =>
-                        x == null || x is ControlDropdownItemDivider || x is ControlLine ?
-                        new HtmlElementTextContentLi() { Class = "dropdown-divider", Inline = true } :
-                        x is ControlDropdownItemHeader ?
-                        x.Render(renderContext, visualTree) :
-                        new HtmlElementTextContentLi(x.Render(renderContext, visualTree)) { Class = "dropdown-item " + ((x as ControlDropdownItemLink).Active == TypeActive.Disabled ? "disabled" : "") }
-                    ).ToArray()
-                )
-                {
-                    Class = Css.Concatenate
-                    (
-                        "dropdown-menu",
-                        AlignmentMenu.ToClass()
-                    )
-                }
-            );
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, Text))
+                .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
+                .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-buttonCss", buttonCss)
+                .AddUserAttribute("data-buttonStyle", buttonStyle)
+                .AddUserAttribute(Active == TypeActive.Active ? "active" : null)
+                .AddUserAttribute(Active == TypeActive.Disabled ? "disabled" : null)
+                .Add(_items.Select(x => x.Render(renderContext, visualTree)));
 
             return html;
         }

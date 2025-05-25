@@ -16,11 +16,13 @@ webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
         this._icon = $(element).data("icon") || null;
         this._image = $(element).data("image") || null;
         this._color = $(element).data("color") || null;
+        this._size = $(element).data("size") || null;
 
         // Clean up the DOM element
         $(element).empty()
             .removeAttr("data-icon data-image data-color")
-            .addClass("btn wx-button");
+            .addClass("btn wx-button")
+            .addClass(this._size);
 
         // Render the button
         this.render();

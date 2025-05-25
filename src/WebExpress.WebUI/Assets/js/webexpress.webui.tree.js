@@ -278,7 +278,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 active: $elem.data("active") || false,
                 color: $elem.data("color") || "",
                 expand: $elem.data("expand") === true,
-                url: $elem.data("url") || null,
+                url: $elem.data("uri") || null,
                 target: $elem.data("target") || null,
                 tooltip: $elem.data("tooltip") || null,
                 render: $elem.data("render") || null,

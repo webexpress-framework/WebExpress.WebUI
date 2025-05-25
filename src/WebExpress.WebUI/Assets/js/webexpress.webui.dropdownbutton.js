@@ -15,10 +15,11 @@ webexpress.webui.DropdownButtonCtrl = class extends webexpress.webui.Ctrl {
         this._label = $(element).data("label") || null;
         this._icon = $(element).data("icon") || null;
         this._image = $(element).data("image") || null;
-        this._color = $(element).data("color") || null;
-        this._size = $(element).data("size") || null;
-        this._border = $(element).data("border") || false;
-        this._menuCSS = $(element).data("menucss") || null;
+        this._menuCss = $(element).data("menucss") || null;
+        this._buttonCss = $(element).data("buttoncss") || null;
+        this._buttonStyle = $(element).data("buttonstyle") || null;
+        this._active = $(element).attr("active") ? "active" : null;
+        this._disabled = $(element).attr("disabled") ? "disabled" : null;
 
         // Parse items from child elements
         this._parseItemsFromElements(
@@ -28,6 +29,7 @@ webexpress.webui.DropdownButtonCtrl = class extends webexpress.webui.Ctrl {
         // Clean up the DOM element
         $(element).empty()
             .removeAttr("data-label data-icon data-image data-color data-menucss")
+            .removeAttr("data-block data-toggle data-size data-border disabled active")
             .addClass("wx-dropdownbutton");
 
         // Render the dropdown button
@@ -127,19 +129,27 @@ webexpress.webui.DropdownButtonCtrl = class extends webexpress.webui.Ctrl {
 
         // Create the button
         const button = $("<button class='btn' type='button' data-bs-toggle='dropdown' aria-expanded='false'/>")
-            .addClass(this._size);
-            
-        if (!this._border) {
-            button.css("border",  "0");
+            .addClass(this._buttonCss);
+
+        if (this._active) {
+            button.prop("active", true);
         }
-        if (this._color) button.addClass(this._color);
+
+        if (this._disabled) {
+            button.prop("disabled", true);
+        }
+            
+        if (this._buttonStyle) {
+            button.attr("style", this._buttonStyle);
+        }
+
         if (this._image) button.append($("<img class='me-2'/>").attr("src", this._image));
         if (this._icon) button.append($("<i class='me-2'/>").addClass(this._icon));
         button.append($("<span>").text(this._label));
 
         // Create the dropdown menu
         const ul = $("<ul class='dropdown-menu'/>");
-        if (this._menuCSS) ul.addClass(this._menuCSS);
+        if (this._menuCss) ul.addClass(this._menuCss);
 
         // Generate menu items
         this._items.forEach((item) => {
@@ -183,11 +193,11 @@ webexpress.webui.DropdownButtonCtrl = class extends webexpress.webui.Ctrl {
 
     // Getter and setter for menuCSS
     get menuCSS() {
-        return this._menuCSS;
+        return this._menuCss;
     }
 
     set menuCSS(value) {
-        this._menuCSS = value;
+        this._menuCss = value;
         this.render();
     }
 

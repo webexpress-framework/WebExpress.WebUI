@@ -134,14 +134,14 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-tree""><div class=""wx-tree-node""></div></div>")]
-        [InlineData("/home", @"<div class=""wx-webui-tree""><div class=""wx-tree-node"" data-url=""/home""></div></div>")]
+        [InlineData("/home", @"<div class=""wx-webui-tree""><div class=""wx-tree-node"" data-uri=""/home""></div></div>")]
         public void Uri(string uri, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlTree(null, new ControlTreeItemLink() { Uri = uri != null ? new UriEndpoint(uri) : null })
+            var control = new ControlTree(null, new ControlTreeItem() { Uri = uri != null ? new UriEndpoint(uri) : null })
             {
             };
 
@@ -163,7 +163,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlTree(null, new ControlTreeItemLink() { Tooltip = tooltip })
+            var control = new ControlTree(null, new ControlTreeItem() { Tooltip = tooltip })
             {
             };
 
@@ -178,17 +178,17 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeTarget.None, @"<div class=""wx-webui-tree""><div class=""wx-tree-node""></div></div>")]
-        [InlineData(TypeTarget.Blank, @"<div class=""wx-webui-tree""><div class=""wx-tree-node"" data-target=""blank""></div></div>")]
-        [InlineData(TypeTarget.Self, @"<div class=""wx-webui-tree""><div class=""wx-tree-node"" data-target=""self""></div></div>")]
-        [InlineData(TypeTarget.Parent, @"<div class=""wx-webui-tree""><div class=""wx-tree-node"" data-target=""parent""></div></div>")]
-        [InlineData(TypeTarget.Framename, @"<div class=""wx-webui-tree""><div class=""wx-tree-node"" data-target=""framename""></div></div>")]
+        [InlineData(TypeTarget.Blank, @"<div class=""wx-webui-tree""><div class=""wx-tree-node"" data-target=""_blank""></div></div>")]
+        [InlineData(TypeTarget.Self, @"<div class=""wx-webui-tree""><div class=""wx-tree-node"" data-target=""_self""></div></div>")]
+        [InlineData(TypeTarget.Parent, @"<div class=""wx-webui-tree""><div class=""wx-tree-node"" data-target=""_parent""></div></div>")]
+        [InlineData(TypeTarget.Framename, @"<div class=""wx-webui-tree""><div class=""wx-tree-node"" data-target=""_framename""></div></div>")]
         public void Target(TypeTarget target, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlTree(null, new ControlTreeItemLink() { Target = target })
+            var control = new ControlTree(null, new ControlTreeItem() { Target = target })
             {
             };
 
@@ -323,7 +323,7 @@ namespace WebExpress.WebUI.Test.WebControl
                     [
                         new ControlTreeItem("1",
                         [
-                            new ControlTreeItemLink("1.1")
+                            new ControlTreeItem("1.1")
                             {
                                 Label = "Node 1.1", Uri = new UriEndpoint("/home")
                             },
@@ -339,11 +339,11 @@ namespace WebExpress.WebUI.Test.WebControl
                         },
                         new ControlTreeItem("2",
                         [
-                            new ControlTreeItemLink("2.1")
+                            new ControlTreeItem("2.1")
                             {
                                 Label = "Node 2.1",
                                 Uri = new UriEndpoint("/info"),
-                                Target = WebCore.WebHtml.TypeTarget.Blank,
+                                Target = TypeTarget.Blank,
                                 Tooltip = "Tooltip"
                             },
                             new ControlTreeItem("2.2")
@@ -356,7 +356,7 @@ namespace WebExpress.WebUI.Test.WebControl
                             Icon = new IconCog()
                         }
                     ],
-                    @"<div class=""wx-webui-tree""><div id=""1"" class=""wx-tree-node"" data-label=""Node 1"" data-expand=""true"" data-icon=""fas fa-home""><div id=""1.1"" class=""wx-tree-node"" data-label=""Node 1.1"" data-url=""/home""></div><div id=""1.2"" class=""wx-tree-node"" data-label=""Node 1.2""></div></div><div id=""2"" class=""wx-tree-node"" data-label=""Node 2"" data-icon=""fas fa-cog""><div id=""2.1"" class=""wx-tree-node"" data-label=""Node 2.1"" data-url=""/info"" data-target=""blank"" data-tooltip=""Tooltip""></div><div id=""2.2"" class=""wx-tree-node"" data-label=""Node 2.2""></div></div></div>"
+                    @"<div class=""wx-webui-tree""><div id=""1"" class=""wx-tree-node"" data-label=""Node 1"" data-expand=""true"" data-icon=""fas fa-home""><div id=""1.1"" class=""wx-tree-node"" data-label=""Node 1.1"" data-uri=""/home""></div><div id=""1.2"" class=""wx-tree-node"" data-label=""Node 1.2""></div></div><div id=""2"" class=""wx-tree-node"" data-label=""Node 2"" data-icon=""fas fa-cog""><div id=""2.1"" class=""wx-tree-node"" data-label=""Node 2.1"" data-tooltip=""Tooltip"" data-uri=""/info"" data-target=""_blank""></div><div id=""2.2"" class=""wx-tree-node"" data-label=""Node 2.2""></div></div></div>"
                 }
             };
         }

@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
-using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -104,7 +102,7 @@ namespace WebExpress.WebUI.WebControl
             var classes = new List<string>(["wx-webui-tree"]);
             classes.AddRange(Classes);
 
-            var html = new HtmlElementTextContentDiv([.. GetHtml(nodes)])
+            var html = new HtmlElementTextContentDiv([.. RenderChildren(renderContext, visualTree, nodes)])
             {
                 Id = Id,
                 Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
@@ -132,76 +130,18 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Recursively generates HTML elements for the given tree nodes.
         /// </summary>
-        /// <param name="nodes">The collection of tree nodes to process.</param>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="children">The collection of tree nodes to process.</param>
         /// <returns>A collection of HTML div elements representing the tree nodes.</returns>
-        private static IEnumerable<HtmlElementTextContentDiv> GetHtml(IEnumerable<ControlTreeItem> nodes)
+        private static IEnumerable<IHtmlElement> RenderChildren(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlTreeItem> children)
         {
-            return nodes.Select(x =>
+            return children.Select(x =>
             {
-                var div = new HtmlElementTextContentDiv([.. GetHtml(x.Children)])
-                {
-                    Id = x.Id,
-                    Class = Css.Concatenate("wx-tree-node"),
-                };
+                var html = x.Render(renderContext, visualTree) as IHtmlElement;
+                html.Add(RenderChildren(renderContext, visualTree, x.Children));
 
-                div.AddUserAttribute("data-label", I18N.Translate(x.Label));
-
-                if (x.Expand)
-                {
-                    div.AddUserAttribute("data-expand", "true");
-                }
-
-                if (x.IconOpen == x.IconClose && x.Icon is Icon icon)
-                {
-                    div.AddUserAttribute("data-icon", icon.Class);
-                }
-
-                if (x.IconOpen != x.IconClose && x.IconOpen is Icon iconOpen)
-                {
-                    div.AddUserAttribute("data-icon-opened", iconOpen.Class);
-                }
-
-                if (x.IconOpen != x.IconClose && x.IconClose is Icon iconClose)
-                {
-                    div.AddUserAttribute("data-icon-closed", iconClose.Class);
-                }
-
-                if (x.IconOpen == x.IconClose && x.Icon is ImageIcon image)
-                {
-                    div.AddUserAttribute("data-image", image.Uri?.ToString());
-                }
-
-                if (x.IconOpen != x.IconClose && x.IconOpen is ImageIcon imageOpen)
-                {
-                    div.AddUserAttribute("data-image-opened", imageOpen.Uri?.ToString());
-                }
-
-                if (x.IconOpen != x.IconClose && x.IconClose is ImageIcon imageClose)
-                {
-                    div.AddUserAttribute("data-image-closed", imageClose.Uri?.ToString());
-                }
-
-                if (x.Active)
-                {
-                    div.AddUserAttribute("data-active", "true");
-                }
-
-                if (x is ControlTreeItemLink linkNode)
-                {
-                    div.AddUserAttribute("data-url", linkNode.Uri?.ToString());
-
-                    if (linkNode.Target != TypeTarget.None)
-                    {
-                        div.AddUserAttribute("data-target", linkNode.Target.ToString().ToLower());
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(linkNode.Tooltip))
-                    {
-                        div.AddUserAttribute("data-tooltip", linkNode.Tooltip);
-                    }
-                }
-
-                return div;
+                return html;
             });
         }
     }

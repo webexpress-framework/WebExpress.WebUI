@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the dropdown item header control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<li class=""dropdown-header""></li>")]
-        [InlineData("id", @"<li id=""id"" class=""dropdown-header""></li>")]
+        [InlineData(null, @"<div class=""wx-dropdownbutton-header"" role=""heading""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-dropdownbutton-header"" role=""heading""></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -36,9 +36,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the text property of the dropdown item header control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<li class=""dropdown-header""></li>")]
-        [InlineData("abc", @"<li class=""dropdown-header"">abc</li>")]
-        [InlineData("webexpress.WebUI:plugin.name", @"<li class=""dropdown-header"">WebExpress.WebUI</li>")]
+        [InlineData(null, @"<div class=""wx-dropdownbutton-header"" role=""heading""></div>")]
+        [InlineData("abc", @"<div class=""wx-dropdownbutton-header"" role=""heading"">abc</div>")]
+        [InlineData("webexpress.WebUI:plugin.name", @"<div class=""wx-dropdownbutton-header"" role=""heading"">WebExpress.WebUI</div>")]
         public void Text(string text, string expected)
         {
             // preconditions

@@ -390,6 +390,11 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                     id: $elem.attr("id") || null,
                     image: $elem.data("image") || null,
                     icon: $elem.data("icon") || null,
+                    linkColor: $elem.data("linkcolor") || null,
+                    uri: $elem.data("uri") || null,
+                    target: $elem.data("target") || null,
+                    tooltip: $elem.data("tooltip") || null,
+                    modal: $elem.data("modal") || null,
                     content: $elem.text().trim() || null,
                     disabled: $elem.is("[disabled]"),
                 });

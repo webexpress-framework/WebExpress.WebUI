@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<span class=""badge rounded-pill""></span>")]
-        [InlineData("id", @"<span id=""id"" class=""badge rounded-pill""></span>")]
+        [InlineData(null, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -36,9 +36,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the text property of the tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<span class=""badge rounded-pill""></span>")]
-        [InlineData("abc", @"<span class=""badge rounded-pill"">abc</span>")]
-        [InlineData("webexpress.webui:plugin.name", @"<span class=""badge rounded-pill"">WebExpress.WebUI</span>")]
+        [InlineData(null, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
+        [InlineData("abc", @"<div class=""wx-tag wx-tag-pill"" role=""tag"">abc</div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-tag wx-tag-pill"" role=""tag"">WebExpress.WebUI</div>")]
         public void Text(string text, string expected)
         {
             // preconditions
@@ -60,8 +60,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the pill property of the tag control.
         /// </summary>
         [Theory]
-        [InlineData(false, @"<span class=""badge""></span>")]
-        [InlineData(true, @"<span class=""badge rounded-pill""></span>")]
+        [InlineData(false, @"<div class=""wx-tag"" role=""tag""></div>")]
+        [InlineData(true, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
         public void Pill(bool pill, string expected)
         {
             // preconditions
@@ -83,15 +83,15 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the layout property of the tag control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorBackgroundBadge.Default, @"<span class=""badge rounded-pill""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Primary, @"<span class=""badge rounded-pill text-bg-primary""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Secondary, @"<span class=""badge rounded-pill text-bg-secondary""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Info, @"<span class=""badge rounded-pill text-bg-info""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Success, @"<span class=""badge rounded-pill text-bg-success""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Warning, @"<span class=""badge rounded-pill text-bg-warning""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Danger, @"<span class=""badge rounded-pill text-bg-danger""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Light, @"<span class=""badge rounded-pill text-bg-light""></span>")]
-        [InlineData(TypeColorBackgroundBadge.Dark, @"<span class=""badge rounded-pill text-bg-dark""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Default, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
+        [InlineData(TypeColorBackgroundBadge.Primary, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
+        [InlineData(TypeColorBackgroundBadge.Secondary, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
+        [InlineData(TypeColorBackgroundBadge.Info, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
+        [InlineData(TypeColorBackgroundBadge.Success, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
+        [InlineData(TypeColorBackgroundBadge.Warning, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
+        [InlineData(TypeColorBackgroundBadge.Danger, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
+        [InlineData(TypeColorBackgroundBadge.Light, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
+        [InlineData(TypeColorBackgroundBadge.Dark, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
         public void Layout(TypeColorBackgroundBadge layout, string expected)
         {
             // preconditions

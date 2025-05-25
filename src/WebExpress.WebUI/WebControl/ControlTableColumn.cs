@@ -51,7 +51,7 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <param name="visualTree">The visual tree representing the control's structure.</param>
         /// <returns>An HTML node representing the rendered control.</returns>
-        public IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var html = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Title)))
             {

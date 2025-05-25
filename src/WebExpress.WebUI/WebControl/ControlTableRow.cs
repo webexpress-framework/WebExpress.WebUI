@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
-using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -147,7 +145,7 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <param name="visualTree">The visual tree representing the control's structure.</param>
         /// <returns>An HTML node representing the rendered control.</returns>
-        public IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var html = new HtmlElementTextContentDiv()
             {
@@ -172,53 +170,13 @@ namespace WebExpress.WebUI.WebControl
                         (
                             Options.Select
                             (
-                                option => ConvertOption(renderContext, option)
+                                option => option.Render(renderContext, visualTree)
                             )
                         )
                         : null
                 );
 
             return html;
-        }
-
-        /// <summary>
-        /// Converts a dropdown item into an HTML element representation for rendering.
-        /// </summary>
-        /// <param name="renderContext">The rendering context used for localization and other rendering-related operations.</param>
-        /// <param name="option">The dropdown item to be converted.</param>
-        /// <returns>An representing the rendered HTML element for the dropdown item.</returns>
-        private HtmlElement ConvertOption(IRenderControlContext renderContext, IControlDropdownItem option)
-        {
-            if (option is ControlDropdownItemHeader header)
-            {
-                return new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, header.Text)))
-                {
-                    Class = "wx-dropdownbutton-header"
-                };
-            }
-            else if (option is ControlDropdownItemDivider divider)
-            {
-                return new HtmlElementTextContentDiv()
-                {
-                    Class = "wx-dropdownbutton-divider"
-                };
-            }
-            else if (option is ControlDropdownItemLink link)
-            {
-                return new HtmlElementTextContentDiv(new HtmlText(link.Text))
-                {
-                    Class = "wx-dropdownbutton-item"
-                }
-                    .AddUserAttribute("id", link.Id)
-                    .AddUserAttribute("data-icon", (link.Icon as Icon)?.Class)
-                    .AddUserAttribute("data-image", (link.Icon as ImageIcon)?.Uri?.ToString())
-                    .AddUserAttribute("data-uri", link.Uri?.ToString())
-                    .AddUserAttribute("data-target", link.Target.ToStringValue())
-                    .AddUserAttribute("data-modal", link.Modal)
-                    .AddUserAttribute("data-textcolor", link.TextColor?.ToClass());
-            }
-
-            return null;
         }
     }
 }
