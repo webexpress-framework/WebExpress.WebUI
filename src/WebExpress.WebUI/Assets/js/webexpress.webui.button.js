@@ -30,6 +30,7 @@ webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
         // Attach the click event listener
         $(element).click(() => {
             $(document).trigger(webexpress.webui.Event.CLICK_EVENT, {
+                sender: this._element,
                 id: $(this._element).attr("id") || null
             });
         });

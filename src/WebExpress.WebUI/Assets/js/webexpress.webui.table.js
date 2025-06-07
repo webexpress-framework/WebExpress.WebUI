@@ -220,6 +220,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
             // Trigger a custom sort event
             $(document).trigger(webexpress.webui.Event.TABLE_SORT_EVENT, {
+                sender: this._element,
                 columnId: column.id,
                 sortDirection: column.sort,
                 columnLabel: $th.text().trim()
@@ -692,6 +693,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     _triggerColumnReorderEvent(sourceIndex, targetIndex) {
         // Trigger a global event using $(document).trigger
         $(document).trigger(webexpress.webui.Event.COLUMN_REORDER_EVENT, {
+            sender: this._element,
             sourceIndex: sourceIndex,
             targetIndex: targetIndex,
             columns: this._columns, // Provide the updated column structure

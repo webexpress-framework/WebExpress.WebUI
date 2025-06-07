@@ -354,6 +354,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
 
             labelContainer.click(() => {
                 $(document).trigger(webexpress.webui.Event.CLICK_EVENT, {
+                    sender: this._element,
                     id: $(this._element).attr("id"),
                     item: node
                 });
@@ -462,6 +463,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
     _toggleNode(node, ul, icon, img, indicator) {
         $(document).trigger(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT,
             {
+                sender: this._element,
                 id: $(this._element).attr("id"),
                 node: node?.id
             });

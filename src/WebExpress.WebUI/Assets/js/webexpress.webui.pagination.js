@@ -5,7 +5,7 @@
  * - webexpress.webui.Event.CLICK_EVENT
  */
 webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
-    _page = 1;
+    _page = 0;
     _count = 10;
 
     /**
@@ -59,10 +59,11 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
      * @returns {jQuery} The page item element.
      */
     _createPageItem(content, page) {
-        const item = $("<li class='page-item'><a class='page-link' href='#'>" + content + "</a></li>");
+        const item = $("<li class='page-item'><a class='page-link' href='javascript:void(0)'>" + content + "</a></li>");
         item.click(() => {
             this.page = page;
             $(document).trigger(webexpress.webui.Event.CLICK_EVENT, {
+                sender: this._element,
                 id: $(this._element).attr("id"),
                 index: page
             });
@@ -118,7 +119,7 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
      * Helper to append an ellipsis item.
      */
     _appendEllipsis() {
-        const ellipsis = $("<li class='page-item disabled'><a class='page-link' href='#'>…</a></li>");
+        const ellipsis = $("<li class='page-item disabled'><a class='page-link' href='javascript:void(0)'>…</a></li>");
         $(this._element).append(ellipsis);
     }
 
@@ -143,6 +144,7 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
 
             // Trigger a page change event
             $(document).trigger(webexpress.webui.Event.CHANGE_PAGE_EVENT, {
+                sender: this._element,
                 id: $(this._element).attr("id"),
                 page: this._page
             });
@@ -155,7 +157,7 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Returns the number of pages.
      */
-    get pagecount() {
+    get total() {
         return this._count;
     }
 
@@ -163,7 +165,7 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
      * Sets the number of pages.
      * @param {number} value - The new number of pages to set.
      */
-    set pagecount(value) {
+    set total(value) {
         if (value < 1) {
             throw new Error("Page count must be at least 1.");
         }

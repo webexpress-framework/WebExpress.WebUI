@@ -1,0 +1,174 @@
+.wx-editor {
+    background-color: var(--bs-body-bg); 
+    color: var(--bs-body-color);
+}
+
+.wx-editor-toolbar {
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.wx-editor-content {
+    min-height: 200px;
+    padding: 5px; 
+    white-space: normal;
+    overflow: auto;
+}
+
+.wx-editor-content:focus {
+    outline: none;
+}
+
+.wx-editor-format-dropdown {
+    background: transparent;
+    border: none;
+    padding: 0.5em;
+    font-size: 16px;
+    color: var(--bs-body-color); 
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+}
+
+.wx-editor-format-dropdown:hover {
+    background-color: var(--bs-secondary-bg); 
+    border-radius: 4px;
+}
+
+.wx-editor-format-dropdown:focus {
+    outline: none;
+    background-color: var(--bs-secondary-bg);
+}
+
+.wx-editor-btn-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.wx-editor-btn {
+    background: transparent;
+    border: none;
+    padding: 0.5em;
+    color: var(--bs-body-color);
+    transition: all 0.3s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wx-editor-btn i {
+    margin-right: 4px;
+}
+
+.wx-editor-btn:hover {
+    background-color: var(--bs-secondary-bg);
+    border-radius: 4px; 
+}
+
+.wx-editor-btn.active {
+    background-color: var(--bs-primary);
+    color: #ffffff; /* White text for better contrast */
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.wx-editor-color-picker {
+    display: grid; 
+    grid-template-columns: repeat(5, 24px); 
+    gap: 5px; 
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    list-style: none;
+    margin: 0;
+}
+
+.wx-editor-color-picker button {
+    width: 24px;
+    height: 24px;
+    border: none;
+    cursor: pointer;
+    display: inline-block;
+    border-radius: 4px; 
+}
+
+.wx-editor-color-picker button:hover {
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); 
+}
+
+.wx-editor-insertable-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 24px);
+  grid-template-rows: repeat(5, 24px);
+  gap: 2px;
+  margin-bottom: 6px;
+}
+
+.wx-editor-insertable-cell {
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  background: var(--bs-body-bg, #fff); 
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.wx-editor-insertable-cell.selected {
+  background: var(--bs-info, #337ab7);
+  border-color: var(--bs-info-border-subtle, #23527c); 
+}
+
+.wx-editor-table-size-display {
+  margin-top: 8px;
+  font-size: smaller;
+  text-align: center;
+  color: var(--bs-secondary-color, #495057);
+}
+
+.wx-editor-separator {
+    display: inline-block;
+    width: 1px; 
+    height: 1em; 
+    background-color: var(--bs-border-color); 
+    margin: 0 0.5em;
+}
+
+.wx-editor-table,
+.wx-editor-table th,
+.wx-editor-table td {
+  border: 1px solid var(--bs-border-color, #dee2e6);
+  border-collapse: collapse;
+}
+
+.wx-editor-table {
+  width: 80%;
+  margin-bottom: 1rem;
+}
+
+.wx-editor-table th {
+  background-color: var(--bs-secondary-bg, #e9ecef); 
+  color: var(--bs-secondary-color, #495057);
+  font-weight: bold;
+  text-align: left;
+  padding: 0.5rem;
+  min-height: 1em;
+}
+
+.wx-editor-table td {
+  padding: 0.5rem;
+  background-color: var(--bs-table-bg, #fff); 
+  min-height: 1em;
+}
+
+.wx-icon {
+    display: flex;
+    align-items: center;
+      justify-content: center;
+}
+
+.wx-icon.add-row-above::before {
+  content: url('data:image/svg+xml;utf8,<svg width="18" viewBox="0 0 21 16" xmlns="http://www.w3.org/2000/svg"><path d="M 4.3417969 1.3925781 C 4.1201969 1.3925781 3.9414062 1.5713687 3.9414062 1.7929688 L 3.9414062 3.7871094 L 1.9472656 3.7773438 C 1.7256681 3.7762837 1.5479308 3.9522306 1.546875 4.1738281 L 1.5390625 5.5117188 C 1.5380025 5.7333158 1.7159025 5.9110544 1.9375 5.9121094 L 3.9414062 5.921875 L 3.9414062 7.9257812 C 3.9414062 8.1473813 4.1201969 8.3261719 4.3417969 8.3261719 L 5.6777344 8.3261719 C 5.8993344 8.3261719 6.078125 8.1473812 6.078125 7.9257812 L 6.078125 5.9316406 L 8.0722656 5.9414062 C 8.2938626 5.9424662 8.4716003 5.7665189 8.4726562 5.5449219 L 8.4804688 4.2070312 C 8.4815687 3.9854339 8.3036282 3.8076964 8.0820312 3.8066406 L 6.078125 3.796875 L 6.078125 1.7929688 C 6.078125 1.5713686 5.8993344 1.3925781 5.6777344 1.3925781 L 4.3417969 1.3925781 z M 10.037109 5.8847656 L 10.037109 7.71875 L 17.511719 7.71875 C 17.759429 7.71875 17.957031 7.9183062 17.957031 8.1660156 L 17.957031 12.833984 C 17.957031 13.081694 17.759429 13.28125 17.511719 13.28125 L 3.4882812 13.28125 C 3.2405715 13.28125 3.0429685 13.081694 3.0429688 12.833984 L 3.0429688 10.037109 L 1.0058594 10.037109 L 1.0058594 14.716797 C 1.0058594 14.938397 1.18465 15.115234 1.40625 15.115234 L 19.59375 15.115234 C 19.81535 15.115234 19.994141 14.938398 19.994141 14.716797 L 19.994141 6.2832031 C 19.994141 6.0616031 19.81535 5.8847656 19.59375 5.8847656 L 10.037109 5.8847656 z"/></svg>');
+}
+
+.wx-icon.add-row-below::before {
+  content: url('data:image/svg+xml;utf8,<svg width="18" viewBox="0 0 18 15" xmlns="http://www.w3.org/2000/svg"><path d="M 0.4003906,0 C 0.1787906,0 0,0.1768375 0,0.3984375 V 5.0781254 H 2.0371094 V 2.28125 c -2e-7,-0.24771 0.1976027,-0.4472656 0.4453124,-0.4472656 H 16.50586 c 0.24771,0 0.445312,0.1995556 0.445312,0.4472656 v 4.6679684 c 0,0.247709 -0.197602,0.447266 -0.445312,0.447266 H 9.0312496 v 1.833984 h 9.5566414 c 0.2216,0 0.400391,-0.176836 0.400391,-0.398437 V 0.3984375 C 18.988282,0.1768365 18.809491,0 18.587891,0 Z m 2.9355469,7.5078124 c -0.2216,0 -0.4003907,0.17879 -0.4003907,0.400391 v 1.99414 l -1.9941406,-0.0098 C 0.7198087,9.8914784 0.5420714,10.067464 0.5410156,10.289062 l -0.00781,1.337891 c -0.00106,0.221597 0.17684,0.399336 0.3984375,0.40039 l 2.0039062,0.0098 v 2.003906 c 0,0.2216 0.1787907,0.400391 0.4003907,0.400391 h 1.3359375 c 0.2216,0 0.4003906,-0.178791 0.4003906,-0.400391 v -1.99414 l 1.9941406,0.0098 c 0.221597,0.0011 0.3993347,-0.174888 0.4003906,-0.396484 l 0.00781,-1.337891 C 7.4757093,10.100736 7.2977687,9.9230004 7.0761717,9.9219444 l -2.0039062,-0.0098 v -2.003906 c 0,-0.2216 -0.1787906,-0.400391 -0.4003906,-0.400391 z"/></svg>');
+}

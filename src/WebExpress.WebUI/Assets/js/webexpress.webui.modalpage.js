@@ -77,6 +77,7 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
 
         // Trigger custom event for showing the modal
         $(document).trigger(webexpress.webui.Event.MODAL_SHOW_EVENT, {
+            sender: this._element,
             id: $(this._element).attr("id")
         });
 
@@ -84,6 +85,7 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
         $(this._element).on("shown.bs.modal", () => {
             // Trigger event when data is requested
             $(document).trigger(webexpress.webui.Event.DATA_REQUESTED_EVENT, {
+                sender: this._element,
                 id: $(this._element).attr("id")
             });
             
@@ -93,6 +95,7 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
                     
                     // Trigger event when data has successfully arrived
                     $(this._element).trigger(webexpress.webui.Event.DATA_ARRIVED_EVENT, {
+                        sender: this._element,
                         id: $(this._element).attr("id"),
                         response: response
                     });

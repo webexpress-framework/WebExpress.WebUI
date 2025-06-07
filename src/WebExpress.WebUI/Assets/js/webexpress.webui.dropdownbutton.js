@@ -95,7 +95,7 @@ webexpress.webui.DropdownButtonCtrl = class extends webexpress.webui.Ctrl {
             if (!item.disabled) {
                 const link = $("<a class='link dropdown-item'/>")
                     .addClass(item.color)
-                    .attr("href", "#");
+                    .attr("href", "javascript:void(0);");
 
                 if (item.image) link.append($("<img/>").attr("src", item.image).attr("alt", item.content));
                 if (item.icon) link.append($("<i/>").addClass(item.icon));
@@ -103,6 +103,7 @@ webexpress.webui.DropdownButtonCtrl = class extends webexpress.webui.Ctrl {
 
                 link.click(() => {
                     $(document).trigger(webexpress.webui.Event.CLICK_EVENT, {
+                        sender: this._element,
                         id: $(this._element).attr("id") || null,
                         item: item
                     });

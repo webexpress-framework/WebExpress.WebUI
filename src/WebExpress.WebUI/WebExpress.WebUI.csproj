@@ -52,10 +52,10 @@
 		<None Remove="Assets\css\simpletags.css" />
 		<None Remove="Assets\css\solid.css" />
 		<None Remove="Assets\css\summernote-bs4.css" />
-		<None Remove="Assets\css\summernote-bs5.min.css" />
 		<None Remove="Assets\css\webexpress.webui.button.css" />
 		<None Remove="Assets\css\webexpress.webui.css" />
 		<None Remove="Assets\css\webexpress.webui.dropdownbutton.css" />
+		<None Remove="Assets\css\webexpress.webui.editor.css" />
 		<None Remove="Assets\css\webexpress.webui.expand.css" />
 		<None Remove="Assets\css\webexpress.webui.form.css" />
 		<None Remove="Assets\css\webexpress.webui.modal.css" />
@@ -190,10 +190,10 @@
 		<None Remove="Assets\js\popper.min.js.map" />
 		<None Remove="Assets\js\simpletags.js" />
 		<None Remove="Assets\js\split.min.js" />
-		<None Remove="Assets\js\summernote-bs5.min.js" />
 		<None Remove="Assets\js\summernote-de-DE.js" />
 		<None Remove="Assets\js\webexpress.webui.button.js" />
 		<None Remove="Assets\js\webexpress.webui.dropdownbutton.js" />
+		<None Remove="Assets\js\webexpress.webui.editor.js" />
 		<None Remove="Assets\js\webexpress.webui.form.progress.js" />
 		<None Remove="Assets\js\webexpress.webui.modal.js" />
 		<None Remove="Assets\js\webexpress.webui.modalform.js" />
@@ -225,6 +225,7 @@
 		<EmbeddedResource Include="Assets\css\Chart.min.css" />
 		<EmbeddedResource Include="Assets\css\webexpress.webui.button.css" />
 		<EmbeddedResource Include="Assets\css\webexpress.webui.dropdownbutton.css" />
+		<EmbeddedResource Include="Assets\css\webexpress.webui.editor.css" />
 		<EmbeddedResource Include="Assets\css\webexpress.webui.modal.css" />
 		<EmbeddedResource Include="Assets\css\webexpress.webui.toolpanel.css" />
 		<EmbeddedResource Include="Assets\css\webexpress.webui.expand.css" />
@@ -247,7 +248,6 @@
 		<EmbeddedResource Include="Assets\css\solid.css">
 			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
 		</EmbeddedResource>
-		<EmbeddedResource Include="Assets\css\summernote-bs5.min.css" />
 		<EmbeddedResource Include="Assets\css\webexpress.webui.table.css" />
 		<EmbeddedResource Include="Assets\css\webexpress.webui.tree.css" />
 		<EmbeddedResource Include="Assets\fonts\fa-brands-400.ttf" />
@@ -383,14 +383,12 @@
 			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
 		</EmbeddedResource>
 		<EmbeddedResource Include="Assets\js\split.min.js" />
-		<EmbeddedResource Include="Assets\js\summernote-bs5.min.js">
-			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
-		</EmbeddedResource>
 		<EmbeddedResource Include="Assets\js\lang\summernote-de-DE.min.js">
 			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
 		</EmbeddedResource>
 		<EmbeddedResource Include="Assets\js\webexpress.webui.button.js" />
 		<EmbeddedResource Include="Assets\js\webexpress.webui.dropdownbutton.js" />
+		<EmbeddedResource Include="Assets\js\webexpress.webui.editor.js" />
 		<EmbeddedResource Include="Assets\js\webexpress.webui.form.progress.js" />
 		<EmbeddedResource Include="Assets\js\webexpress.webui.modal.js" />
 		<EmbeddedResource Include="Assets\js\webexpress.webui.modalform.js" />

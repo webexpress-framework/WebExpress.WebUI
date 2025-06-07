@@ -78,6 +78,7 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
         if (this._expand !== value) {
             this._expand = value;
             $(document).trigger(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
+                sender: this._element,
                 id: $(this._element).attr("id") || null,
                 value: value
             });
@@ -134,7 +135,7 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
      * @returns {jQuery} The expander element.
      */
     _createExpander() {
-        const expander = $("<a class='wx-expand-angle me-2' href='#'></a>");
+        const expander = $("<a class='wx-expand-angle me-2' href='javascript:void(0);'></a>");
         expander.toggleClass("wx-expand-angle-down", this._expand);
         expander.click(() => this.toggleExpand());
         return expander;

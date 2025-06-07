@@ -67,7 +67,7 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
     _createDropdown() {
         const dropdown = $("<div>").addClass("form-control");
         const selection = $("<ul>");
-        const expandIcon = $("<a>").addClass("fas fa-angle-down").attr("href", "#");
+        const expandIcon = $("<a>").addClass("fas fa-angle-down").attr("href", "javascript:void(0);");
 
         dropdown.append(selection, expandIcon);
         this._selection = selection;
@@ -118,14 +118,20 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
 
         filterInput.on("input", () => {
             const filter = filterInput.val();
-            $(document).trigger(webexpress.webui.Event.CHANGE_FILTER_EVENT, filter || "");
+            $(document).trigger(webexpress.webui.Event.CHANGE_FILTER_EVENT, {
+                sender: this._element,
+                filter: filter
+            });
             this.render();
         });
 
         clearButton.click((e) => {
             e.stopPropagation();
             filterInput.val("");
-            $(document).trigger(webexpress.webui.Event.CHANGE_FILTER_EVENT, "");
+            $(document).trigger(webexpress.webui.Event.CHANGE_FILTER_EVENT, {
+                sender: this._element,
+                filter: ""
+            });
             this.render();
         });
 
@@ -277,6 +283,7 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
             this.render();
             this._hidden.val(this._values.join(";"));
             $(document).trigger(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
+                sender: this._element,
                 id: $(this._element).attr("id"),
                 value: values
             });

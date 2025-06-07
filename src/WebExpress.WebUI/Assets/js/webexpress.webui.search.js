@@ -186,6 +186,7 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
 
                             // Trigger the CHANGE_FAVORITE_EVENT
                             $(document).trigger(webexpress.webui.Event.CHANGE_FAVORITE_EVENT, {
+                                sender: this._element,
                                 id: suggestion.id,
                                 label: suggestion.label,
                                 favorited: suggestion.favorited,
@@ -257,6 +258,7 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
             // Trigger a custom event to notify about the value change, passing the new value
             $(document).trigger(webexpress.webui.Event.CHANGE_FILTER_EVENT,
                 {
+                    sender: this._element,
                     id: $(this._element).attr("id"),
                     value: value
                 });

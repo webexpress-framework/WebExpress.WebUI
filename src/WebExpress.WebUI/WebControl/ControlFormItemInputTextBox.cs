@@ -86,13 +86,6 @@ namespace WebExpress.WebUI.WebControl
         public override void Initialize(IRenderControlFormContext renderContext)
         {
             base.Initialize(renderContext);
-
-            if (Format == TypeEditTextFormat.Wysiwyg)
-            {
-                var contextPath = renderContext?.PageContext?.ApplicationContext?.Route;
-                //renderContext.AddCssLinks(UriResource.Combine(contextPath, "/assets/css/summernote-bs5.min.css"));
-                //renderContext.AddHeaderScriptLinks(UriResource.Combine(contextPath, "/assets/js/summernote-bs5.min.js"));
-            }
         }
 
         /// <summary>
@@ -103,7 +96,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
-            var id = Id ?? Guid.NewGuid().ToString();
+            var id = Id;
             var value = renderContext.GetValue(this);
             var classes = new List<string>(Classes)
             {
@@ -113,15 +106,6 @@ namespace WebExpress.WebUI.WebControl
             if (Disabled)
             {
                 classes.Add("disabled");
-            }
-
-            if (AutoInitialize && Format == TypeEditTextFormat.Wysiwyg && !string.IsNullOrWhiteSpace(Id))
-            {
-                var initializeCode = $"$(document).ready(function() {{ $('#{id}').summernote({{ tabsize: 2, height: '{Rows}rem', lang: 'de-DE' }}); }});";
-
-                visualTree.AddScript(id, initializeCode);
-
-                AutoInitialize = false;
             }
 
             return Format switch
@@ -137,17 +121,17 @@ namespace WebExpress.WebUI.WebControl
                     Placeholder = I18N.Translate(renderContext.Request?.Culture, Placeholder),
                     Rows = Rows.ToString()
                 },
-                TypeEditTextFormat.Wysiwyg => new HtmlElementFormTextarea()
+                TypeEditTextFormat.Wysiwyg => new HtmlElementTextContentDiv()
                 {
                     Id = id,
-                    Value = value,
-                    Name = Name,
-                    Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
-                    Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
+                    //Value = value,
+                    //Name = Name,
+                    Class = Css.Concatenate("wx-webui-editor", classes),
+                    Style = GetStyles(),
                     Role = Role,
-                    Placeholder = I18N.Translate(renderContext.Request?.Culture, Placeholder),
-                    Rows = Rows.ToString()
-                },
+                    //Placeholder = I18N.Translate(renderContext.Request?.Culture, Placeholder),
+                    //Rows = Rows.ToString()
+                }.AddUserAttribute("name", Name),
                 _ => new HtmlElementFieldInput()
                 {
                     Id = Id,

@@ -64,13 +64,13 @@ webexpress.webui.Controller = new class {
      */
     createInstances(element) {
         for (const [selector, ClassConstructor] of this.classRegistry.entries()) {
-            if ($(element).hasClass(selector)) {
-                $(element).removeClass(selector);
+            if (element.classList.contains(selector)) {
+                element.classList.remove(selector);
                 const instance = new ClassConstructor(element);
                 this.instanceMap.set(element, instance);
             }
-            $(element).find("." + selector).each((_, child) => {
-                $(child).removeClass(selector);
+            element.querySelectorAll("." + selector).forEach(child => {
+                child.classList.remove(selector);
                 const instance = new ClassConstructor(child);
                 this.instanceMap.set(child, instance);
             });
@@ -240,6 +240,7 @@ webexpress.webui.PopperCtrl = class extends webexpress.webui.Ctrl {
                     this._menuVisibilityMap.delete(dropdownmenu);
                     // Trigger the DROPDOWN_HIDDEN_EVENT when the suggestion box is hidden
                     $(document).trigger(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
+                        sender: this._element,
                         id: $(this._element).attr("id")
                     });
                 }
@@ -254,6 +255,7 @@ webexpress.webui.PopperCtrl = class extends webexpress.webui.Ctrl {
                     this._menuVisibilityMap.delete(dropdownmenu);
                     // Trigger the DROPDOWN_HIDDEN_EVENT when the suggestion box is hidden
                     $(document).trigger(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
+                        sender: this._element,
                         id: $(this._element).attr("id")
                     });
                 }
@@ -271,6 +273,7 @@ webexpress.webui.PopperCtrl = class extends webexpress.webui.Ctrl {
 
             // Trigger the DROPDOWN_SHOW_EVENT to signal that the suggestion box is shown
             $(document).trigger(webexpress.webui.Event.DROPDOWN_SHOW_EVENT, {
+                sender: this._element,
                 id: $(this._element).attr("id")
             });
         });
@@ -279,6 +282,7 @@ webexpress.webui.PopperCtrl = class extends webexpress.webui.Ctrl {
         dropdownmenu.on("hide", () => {
             if (this._menuVisibilityMap.get(dropdownmenu)) {
                 $(document).trigger(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
+                    sender: this._element,
                     id: $(this._element).attr("id")
                 });
             }

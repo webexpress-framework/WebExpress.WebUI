@@ -292,6 +292,7 @@ webexpress.webui.MoveCtrl = class extends webexpress.webui.Ctrl {
                 }
                 updateselection();
                 $(document).trigger(webexpress.webui.Event.CLICK_EVENT, {
+                    sender: this._element,
                     id: $(this._element).attr("id"),
                     item: currentValue
                 });
@@ -356,6 +357,7 @@ webexpress.webui.MoveCtrl = class extends webexpress.webui.Ctrl {
                                 
                 updateselection();
                 $(document).trigger(webexpress.webui.Event.CLICK_EVENT, {
+                    sender: this._element,
                     id: $(this._element).attr("id"),
                     item: currentValue
                 });
@@ -441,6 +443,7 @@ webexpress.webui.MoveCtrl = class extends webexpress.webui.Ctrl {
             this._hidden.val(this._values.join(';'));
             this.render();
             $(document).trigger(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
+                sender: this._element,
                 id: $(this._element).attr("id"),
                 value: values
             });

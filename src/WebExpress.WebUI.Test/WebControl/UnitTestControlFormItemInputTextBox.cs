@@ -86,7 +86,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Theory]
         [InlineData(TypeEditTextFormat.Default, @"<input type=""text"" class=""form-control"">")]
         [InlineData(TypeEditTextFormat.Multiline, @"<textarea class=""form-control"" rows=""8""></textarea>")]
-        [InlineData(TypeEditTextFormat.Wysiwyg, @"<textarea id=""*"" class=""form-control"" rows=""8""></textarea>")]
+        [InlineData(TypeEditTextFormat.Wysiwyg, @"<div class=""wx-webui-editor form-control""></div>")]
         public void Format(TypeEditTextFormat format, string expected)
         {
             // preconditions

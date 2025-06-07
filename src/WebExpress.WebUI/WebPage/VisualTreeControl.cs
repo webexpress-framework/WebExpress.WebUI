@@ -87,18 +87,20 @@ namespace WebExpress.WebUI.WebPage
         /// <param name="pageContext">The page context.</param>
         public VisualTreeControl(IComponentHub componentHub, IPageContext pageContext)
         {
+            var contextPath = pageContext.ApplicationContext?.Route;
+
             _componentHub = componentHub;
 
             Title = pageContext?.PageTitle;
+            _favicons.Add(new Favicon(RouteEndpoint.Combine(contextPath, "/assets/img/rocket.png")));
 
-            var contextPath = pageContext.ApplicationContext?.Route;
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/fontawesome.min.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/bootstrap.min.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/solid.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/summernote-bs5.min.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.button.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.dropdownbutton.css"));
+            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.editor.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.expand.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.form.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.modal.css"));
@@ -116,10 +118,10 @@ namespace WebExpress.WebUI.WebPage
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/jquery-3.7.1.min.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/popper.min.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/bootstrap.min.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/summernote-bs5.min.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.button.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.dropdownbutton.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.editor.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.expand.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.form.progress.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.modal.js"));

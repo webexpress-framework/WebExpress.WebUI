@@ -100,6 +100,7 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
 
         // Trigger custom event for showing the modal
         $(document).trigger(webexpress.webui.Event.MODAL_SHOW_EVENT, {
+            sender: this._element,
             id: $(this._element).attr("id"),
         });
     }
@@ -117,6 +118,7 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         $(this._element).on("hidden.bs.modal", () => {
             $(this._element).empty(); // Clear modal content
             $(document).trigger(webexpress.webui.Event.MODAL_HIDE_EVENT, {
+                sender: this._element,
                 id: $(this._element).attr("id"),
             });
             
