@@ -102,6 +102,11 @@ webexpress.webui.DropdownButtonCtrl = class extends webexpress.webui.Ctrl {
                 link.append($("<span/>").text(item.content));
 
                 link.click(() => {
+                    // execute the action associated with the item, if it exists
+                    if (typeof item.action === "function") {
+                        item.action();
+                    }
+
                     $(document).trigger(webexpress.webui.Event.CLICK_EVENT, {
                         sender: this._element,
                         id: $(this._element).attr("id") || null,

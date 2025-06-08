@@ -7,7 +7,7 @@
  * - webexpress.webui.DATA_ARRIVED_EVENT 
  */
 webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
-    _form = "";
+    _form = document.createElement("form");
     
     /**
      * Constructor
@@ -15,10 +15,8 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
      */
     constructor(element) {
         super(element);
-        
-        this._selector = this._selector == "body" ? "form" : this._selector; // Retrieve the selector for the form area
-        
-        this._form = $("<form>");
+
+        this._selector = this._selector === "body" ? "form" : this._selector; // Set selector for the form area
     }
 
     /**
@@ -29,47 +27,57 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
         const parser = new DOMParser();
         const doc = parser.parseFromString(response, "text/html");
 
-        const form = $(this._selector, doc);
-        const buttons = form.find("button[type='submit'], button[type='reset']").detach();
+        const form = doc.querySelector(this._selector);
+        if (form) {
+            this._form = document.createElement("form");
 
-        if (form.length > 0) {
-            const method = form.attr("method") || "POST";
-            const action = form.attr("action") || this._uri;
+            const buttons = Array.from(form.querySelectorAll("button[type='submit'], button[type='reset']"))
+                .map(btn => this._detachElement(btn));
 
+            const method = form.getAttribute("method") || "POST";
+            const action = form.getAttribute("action") || this._uri;
+            
             // Bind form submission logic
-            this._form.submit((event) => {
+            this._form.addEventListener("submit", (event) => {
                 event.preventDefault();
-                $.ajax({
-                    type: method,
-                    url: action,
-                    data: form.serialize(),
-                    success: (response) => {
-                        this._update(response); // Update modal content on success
-                    },
-                    error: (response) => {
-                        this._bodyDiv.empty().append(response.responseText || "An error occurred.");
-                    },
-                });
+
+                const formData = new FormData(this._form);
+                
+                fetch(action, {
+                    method: method,
+                    body: formData
+                })
+                    .then(response => response.text())
+                    .then(data => this._update(data))
+                    .catch(error => {
+                        this._bodyDiv.innerHTML = error.message || "An error occurred.";
+                    });
             });
 
             // Extract the form content for the modal body
-            const formContent = form.children(":not('footer')");
-            
-            form.empty(); // Clear form content to avoid duplication
-            
-            // Add the form buttons 
-            this._footerDiv.empty().append(buttons);
-            
+            const formContent = [...form.children].filter(el => !el.matches("footer"));
+
+            form.innerHTML = ""; // Clear form content to avoid duplication
+
+            // Add the form buttons
+            this._footerDiv.innerHTML = "";
+            buttons.forEach(btn => this._footerDiv.appendChild(btn));
+            this._footerDiv.appendChild(this._cancelButton);
+
             // Clear existing content in body and append the new content
-            this._bodyDiv.empty().append(formContent);
-            this._form.empty().append(this._dialogDiv);
-            
+            this._bodyDiv.innerHTML = "";
+            formContent.forEach(el => this._bodyDiv.appendChild(el));
+
+            this._form.innerHTML = "";
+            this._form.appendChild(this._dialogDiv);
+
             // Clear the DOM element and append the dialog structure
-            $(this._element).empty().append(this._form);
+            this._element.innerHTML = "";
+            this._element.appendChild(this._form);
 
             // Bind click event to close the modal when dismiss button is clicked
-            this._dialogDiv.find("[data-wx-dismiss='modal']").click(() => {
-                this.hide(); // Hide only this modal dialog
+            this._dialogDiv.querySelectorAll("[data-wx-dismiss='modal']").forEach(button => {
+                button.addEventListener("click", () => this.hide());
             });
         }
     }

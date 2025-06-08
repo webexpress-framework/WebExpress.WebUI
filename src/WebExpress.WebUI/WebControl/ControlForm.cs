@@ -297,7 +297,10 @@ namespace WebExpress.WebUI.WebControl
 
                     if (Conformation != null)
                     {
-                        return Conformation.Render(renderContext, visualTree);
+                        return new HtmlElementFormForm(Conformation.Render(renderContext, visualTree))
+                        {
+                            Id = Id
+                        };
                     }
                 }
             }

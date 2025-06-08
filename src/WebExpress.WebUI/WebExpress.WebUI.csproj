@@ -386,6 +386,8 @@
 		<EmbeddedResource Include="Assets\js\lang\summernote-de-DE.min.js">
 			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
 		</EmbeddedResource>
+		<EmbeddedResource Include="Assets\js\webexpress.webui.modalconfirmdelete.js" />
+		<EmbeddedResource Include="Assets\js\webexpress.webui.modalconfirm.js" />
 		<EmbeddedResource Include="Assets\js\webexpress.webui.button.js" />
 		<EmbeddedResource Include="Assets\js\webexpress.webui.dropdownbutton.js" />
 		<EmbeddedResource Include="Assets\js\webexpress.webui.editor.js" />

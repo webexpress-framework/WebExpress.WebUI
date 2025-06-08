@@ -200,6 +200,19 @@ webexpress.webui.Ctrl = class {
     destroy() {
         // Cleanup code, e.g., for event listeners
     }
+
+    /**
+     * Detaches an element from the DOM while preserving its event listeners.
+     * @param {HTMLElement} element - The element to be detached.
+     * @returns {HTMLElement} - The detached element.
+     */
+    _detachElement(element) {
+        if (!element) return null;
+
+        // Remove the element from the DOM, keeping its event listeners intact
+        element.remove();
+        return element;
+    }
 }
 
 /**

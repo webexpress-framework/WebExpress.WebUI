@@ -5,14 +5,16 @@
  * - webexpress.webui.Event.MODAL_HIDE_EVENT
  */
 webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
-    _close = null;
+    _closeLabel = null;
     _size = null;
     _autoShow = null;
-    _contentDiv = null;
-    _dialogDiv = $("<div class='modal-dialog modal-dialog-scrollable'>");
-    _headerDiv = null;
-    _footerDiv = null;
-    _bodyDiv = null;
+    _dialogDiv = document.createElement("div");
+    _contentDiv = document.createElement("div");
+    _headerDiv = document.createElement("div");
+    _titleH1 = document.createElement("h1");
+    _bodyDiv = document.createElement("div");
+    _footerDiv = document.createElement("div");
+    _cancelButton = document.createElement("button");
 
     /**
      * Constructor
@@ -22,51 +24,75 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         // Retrieve custom attributes or use default values
-        this._close = $(element).data("close-label") || this._close;
-        this._size = $(element).data("size") || null;
-        this._autoShow = $(element).data("auto-show") || null;
-
-        // Extract header, content, and footer from the provided HTML structure
-        this._headerDiv = $("<div>").append($(".wx-modal-header", this._element).detach());
-        this._contentDiv = $("<div>").append($(".wx-modal-content", this._element).children().detach());
-        this._footerDiv = $("<div>").append($(".wx-modal-footer", this._element).children().detach());
+        this._closeLabel = element.getAttribute("data-close-label") || "Close";
+        this._size = element.getAttribute("data-size") || "";
+        this._autoShow = element.getAttribute("data-auto-show") === "true";
 
         // Cleanup the DOM element
-        $(this._element)
-            .removeAttr("data-close-label data-size data-auto-show") // Remove unnecessary attributes
-            .empty() // Clear existing content
-            .addClass("modal fade") // Add modal-specific classes
-            .attr("tabindex", "-1")
-            .attr("aria-hidden", "true");
+        element.removeAttribute("data-close-label");
+        element.removeAttribute("data-size");
+        element.removeAttribute("data-auto-show");
+        element.classList.add("modal", "fade");
 
-        // Create modal header
-        const header = $("<div class='modal-header'>")
-            .append($("<h1 class='modal-title fs-5'>").append(this._headerDiv))
-            .append(
-                $("<button type='button' class='btn-close' data-wx-dismiss='modal'>")
-                    .attr("aria-label", this._close)
-            );
+        // Create modal elements
+        this._bodyDiv.className = "modal-body";
+        this._headerDiv.className = "modal-header";
+        this._titleH1.className = "modal-title fs-5";
+        this._footerDiv.className = "modal-footer";
 
-        // Create modal footer
-        const footer = $("<div class='modal-footer'>")
-            .append(this._footerDiv)
-            .append(
-                $("<button type='button' class='btn btn-secondary' data-wx-dismiss='modal'>")
-                    .text(this._close).prepend($("<i class='fas fa-times me-2'>"))
-                    
-            );
-            
-        // Create modal body
-        this._bodyDiv = $("<div class='modal-body'>");
+        // Extract and append children from .wx-modal-header
+        const headers = this._element.querySelectorAll(".wx-modal-header");
+        headers.forEach(header => {
+            this._titleH1.appendChild(this._detachElement(header));
+        });
 
-        // Combine header, body, and footer into modal content
-        const modalContent = $("<div class='modal-content'>").append(header, this._bodyDiv, footer);
+        // Extract and append all .wx-modal-content elements
+        const contents = this._element.querySelectorAll(".wx-modal-content");
+        contents.forEach(content => {
+            this._contentDiv.appendChild(this._detachElement(content));
+        });
 
-        // Add size class to dialog and append modal content
-        this._dialogDiv.addClass(this._size).append(modalContent);
+        // Extract and append all .wx-modal-footer elements
+        const footers = this._element.querySelectorAll(".wx-modal-footer");
+        footers.forEach(footer => {
+            this._footerDiv.appendChild(this._detachElement(footer));
+        });
 
-        if (this._autoShow === true) {
-            this.show(); // Automatically show the modal if specified
+        // Create header content
+        this._headerDiv.appendChild(this._titleH1);
+        this._bodyDiv.appendChild(this._contentDiv);
+
+        const closeButton = document.createElement("button");
+        closeButton.type = "button";
+        closeButton.className = "btn-close";
+        closeButton.setAttribute("data-wx-dismiss", "modal");
+        closeButton.setAttribute("aria-label", this._closeLabel);
+        closeButton.addEventListener("click", () => this.hide());
+        this._headerDiv.appendChild(closeButton);
+
+        // Create footer content
+        this._cancelButton.type = "button";
+        this._cancelButton.className = "btn btn-secondary";
+        this._cancelButton.setAttribute("data-wx-dismiss", "modal");
+        this._cancelButton.innerHTML = `<i class='fas fa-times me-2'></i>${this._closeLabel}`;
+        this._cancelButton.addEventListener("click", () => this.hide());
+        this._footerDiv.appendChild(this._cancelButton);
+
+        // Create modal content structure
+        this._dialogDiv.className = `modal-dialog modal-dialog-scrollable ${this._size}`;
+
+        const modalContentDiv = document.createElement("div");
+        modalContentDiv.className = "modal-content";
+        modalContentDiv.appendChild(this._headerDiv);
+        modalContentDiv.appendChild(this._bodyDiv);
+        modalContentDiv.appendChild(this._footerDiv);
+
+        this._dialogDiv.appendChild(modalContentDiv);
+        this._element.appendChild(this._dialogDiv);
+
+        // Auto-show if specified
+        if (this._autoShow) {
+            this.show();
         }
     }
     
@@ -74,16 +100,16 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
      * Updates the modal content with fetched data from the URI.
      */
     update() {
-        // Clear existing content in body and append the new content
-        this._bodyDiv.empty().append(this._contentDiv);
-
-        // Clear the DOM element and append the dialog structure
-        $(this._element).empty().append(this._dialogDiv);
+        if (!this._element.hasChildNodes()) {
+            this._element.appendChild(this._dialogDiv);
+        }
 
         // Bind click event to close the modal when dismiss button is clicked
-        this._dialogDiv.find("[data-wx-dismiss='modal']").click(() => {
-            this.hide(); // Hide only this modal dialog
-        });
+        const closeButton = this._dialogDiv.querySelector("[data-wx-dismiss='modal']");
+        if (closeButton) {
+            closeButton.removeEventListener("click", this.hide);
+            closeButton.addEventListener("click", () => this.hide()); // Bind click event
+        }
     }
 
     /**
@@ -91,18 +117,17 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
      * Ensures the modal is properly initialized before showing it.
      */
     show() {
-        this.update(); // Ensure modal content is up to date
-        const modalInstance = bootstrap.Modal.getOrCreateInstance(this._element, {
-            backdrop: 'static',
-            keyboard: true
+        this.update(); // Ensure modal content is refreshed
+        const modalInstance = new bootstrap.Modal(this._element, {
+            backdrop: "static",
+            keyboard: true,
         });
-        modalInstance.show(); // Open the modal
+        modalInstance.show();
 
-        // Trigger custom event for showing the modal
-        $(document).trigger(webexpress.webui.Event.MODAL_SHOW_EVENT, {
-            sender: this._element,
-            id: $(this._element).attr("id"),
-        });
+        // Trigger event for showing the modal
+        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.MODAL_SHOW_EVENT, {
+            detail: { sender: this._element, id: this._element.id }
+        }));
     }
 
     /**
@@ -111,22 +136,23 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
      */
     hide() {
         const modalInstance = bootstrap.Modal.getInstance(this._element);
-        modalInstance?.hide(); // Close the modal
         
+        this._element.addEventListener("hidden.bs.modal", () => {
+            this._element.removeAttribute("style");
+            this._element.removeAttribute("aria-hidden");
 
-        // Cleanup content after the modal is fully hidden
-        $(this._element).on("hidden.bs.modal", () => {
-            $(this._element).empty(); // Clear modal content
-            $(document).trigger(webexpress.webui.Event.MODAL_HIDE_EVENT, {
+            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.MODAL_HIDE_EVENT, {
                 sender: this._element,
-                id: $(this._element).attr("id"),
-            });
-            
-            modalInstance?.dispose(); // Free memory
+                id: this._element.id 
+            }));
         });
-        
-        // Ensure event listeners are properly removed
-        $(this._element).off("hidden.bs.modal");
+
+        this._element.innerHTML = "";
+        this._element.removeAttribute("style");
+        this._element.removeAttribute("aria-hidden");
+        document.body.focus();
+
+        modalInstance?.hide();
     }
 };
 
