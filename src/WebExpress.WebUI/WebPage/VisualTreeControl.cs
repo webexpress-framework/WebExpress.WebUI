@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebComponent;
 using WebExpress.WebCore.WebEndpoint;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebMessage;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebControl;
 
@@ -14,6 +16,8 @@ namespace WebExpress.WebUI.WebPage
     /// </summary>
     public class VisualTreeControl : IVisualTreeControl
     {
+        private int _statusCode = 200;
+        private IRoute _base;
         private readonly IComponentHub _componentHub;
         private readonly List<Favicon> _favicons = [];
         private readonly List<string> _styles = [];
@@ -29,6 +33,15 @@ namespace WebExpress.WebUI.WebPage
         /// Returns the component hub.
         /// </summary>
         protected IComponentHub ComponentHub => _componentHub;
+
+        /// <summary>
+        /// Returns or sets the HTTP status code associated with the response.
+        /// </summary>
+        public int StatusCode
+        {
+            get { return _statusCode; }
+            set { _statusCode = Math.Max(_statusCode, value); }
+        }
 
         /// <summary>
         /// Returns the title of the html document.
@@ -136,6 +149,8 @@ namespace WebExpress.WebUI.WebPage
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.selection.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.table.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.tree.js"));
+
+            _base = contextPath;
 
             _meta.Add("charset", "UTF-8");
             _meta.Add("viewport", "width=device-width, initial-scale=1");
@@ -322,6 +337,7 @@ namespace WebExpress.WebUI.WebPage
             html.Head.Styles = Styles;
             html.Head.Meta = Meta;
             html.Head.Scripts = HeaderScripts;
+            html.Head.Base = _base?.ToString();
             //html.Body.Elements.AddRange(Content?.Where(x => x.Enable).Select(x => x.Render(context)));
             html.Body.Scripts = [.. Scripts.Values];
 
@@ -329,6 +345,29 @@ namespace WebExpress.WebUI.WebPage
             html.Head.ScriptLinks = HeaderScriptLinks?.Where(x => x != null).Select(x => x.ToString());
 
             return html;
+        }
+
+        /// <summary>
+        /// Retrieves a response based on the provided visual tree context.
+        /// </summary>
+        /// <param name="context">The visual tree context used to generate the response. Cannot be null.</param>
+        /// <returns>A object representing the generated response.</returns>
+        public Response GetResponse(IVisualTreeContext context)
+        {
+            return StatusCode switch
+            {
+                200 => new ResponseOK() { Content = Render(context) },
+                201 => new ResponseCreated() { Content = Render(context) },
+                204 => new ResponseNoContent() { Content = Render(context) },
+                301 => new ResponseMovedPermanently() { Content = Render(context) },
+                //302 => new ResponseMovedTemporarily() { Content = Render(context) },
+                400 => new ResponseBadRequest() { Content = Render(context) },
+                401 => new ResponseUnauthorized() { Content = Render(context) },
+                404 => new ResponseNotFound() { Content = Render(context) },
+                422 => new ResponseUnprocessableEntity() { Content = Render(context) },
+                500 => new ResponseInternalServerError() { Content = Render(context) },
+                _ => new ResponseOK() { Content = Render(context) }
+            };
         }
     }
 }

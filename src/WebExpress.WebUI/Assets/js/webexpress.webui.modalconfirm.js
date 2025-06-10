@@ -47,7 +47,4 @@ webexpress.webui.ModalConfirm = class extends webexpress.webui.ModalCtrl {
 
         this.update();
     }
-};
-
-// Register the class in the controller
-webexpress.webui.Controller.registerClass("wx-webui-modalconfirm", webexpress.webui.ModalConfirm);
+}

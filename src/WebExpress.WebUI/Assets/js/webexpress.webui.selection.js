@@ -8,43 +8,49 @@
  */
 webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
     /**
-     * Constructor
+     * Constructor for initializing the selection control.
      * @param {HTMLElement} element - The DOM element for the selection control.
      */
     constructor(element) {
         super(element);
 
-        // Initialize properties
-        const name = $(element).attr("name");
-        const value = $(element).data("value") || null;
-        this._placeholder = $(element).attr("placeholder") || "Select an option";
-        this._multiselect = $(element).data("multiselection") || false;
+        // Initialize properties from attributes and dataset
+        const name = element.getAttribute("name");
+        const value = element.dataset.value || null;
+        this._placeholder = element.getAttribute("placeholder") || "Select an option";
+        this._multiselect = element.dataset.multiselection === "true";
         this._values = [];
         this._items = [];
         this._optionfilter = (x, y) => x?.toLowerCase().startsWith(y?.toLowerCase());
 
-        // Build and append components
+        // Create and append UI components
         const hiddenInput = this._createHiddenInput(name);
         const dropdown = this._createDropdown();
         const dropdownMenu = this._createDropdownMenu();
 
+        // Parse options and structural items from child elements
         this._parseItemsFromElements(
-            $(element).find(".wx-selection-header, .wx-selection-divider, .wx-selection-item, .wx-selection-footer")
+            element.querySelectorAll(
+                ".wx-selection-header, .wx-selection-divider, .wx-selection-item, .wx-selection-footer"
+            )
         );
 
         if (value) {
             this.value = String(value).split(";");
         }
 
-        // Clean up the DOM element
-        $(element)
-            .removeAttr("name placeholder data-multiselection")
-            .empty()
-            .addClass("wx-selection")
-            .append(hiddenInput, dropdown, dropdownMenu);
+        // Clean up the element before adding new structure
+        element.removeAttribute("name");
+        element.removeAttribute("placeholder");
+        element.removeAttribute("data-multiselection");
+        element.innerHTML = "";
+        element.classList.add("wx-selection");
+        element.appendChild(hiddenInput);
+        element.appendChild(dropdown);
+        element.appendChild(dropdownMenu);
 
-        // Attach the suggestion box using Popper.js
-        this._initializePopper(dropdown[0], dropdownMenu);
+        // Attach Popper.js positioning for the dropdown menu
+        this._initializePopper(dropdown, dropdownMenu);
 
         this.render();
     }
@@ -52,38 +58,51 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
     /**
      * Creates a hidden input for form submission.
      * @param {string} name - The name attribute for the hidden input.
-     * @returns {jQuery} The hidden input element.
+     * @returns {HTMLInputElement} The hidden input element.
      */
     _createHiddenInput(name) {
-        const hiddenInput = $("<input>").attr({ type: "hidden", name: name || "" });
+        const hiddenInput = document.createElement("input");
+        hiddenInput.type = "hidden";
+        hiddenInput.name = name || "";
         this._hidden = hiddenInput;
         return hiddenInput;
     }
 
     /**
-     * Creates the dropdown container.
-     * @returns {jQuery} The dropdown element.
+     * Creates the dropdown clickable area (visible selection field).
+     * @returns {HTMLDivElement} The dropdown element.
      */
     _createDropdown() {
-        const dropdown = $("<div>").addClass("form-control");
-        const selection = $("<ul>");
-        const expandIcon = $("<a>").addClass("fas fa-angle-down").attr("href", "javascript:void(0);");
+        const dropdown = document.createElement("div");
+        dropdown.classList.add("form-control");
 
-        dropdown.append(selection, expandIcon);
+        const selection = document.createElement("ul");
+        const expandIcon = document.createElement("a");
+        expandIcon.className = "fas fa-angle-down";
+        expandIcon.href = "javascript:void(0);";
+
+        dropdown.appendChild(selection);
+        dropdown.appendChild(expandIcon);
         this._selection = selection;
 
-        dropdown.click((e) => {
-            if (this._dropdownmenu.is(":visible")) {
-                this._dropdownmenu.trigger("hide").hide();
+        // Toggle the dropdown menu on click
+        dropdown.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (this._dropdownmenu.style.display === "flex") {
+                this._dropdownmenu.dispatchEvent(new Event("hide"));
+                this._dropdownmenu.style.display = "none";
             } else {
-                this._dropdownmenu.css("display", "flex").trigger("show").show();
+                this._dropdownmenu.style.display = "flex";
+                this._dropdownmenu.dispatchEvent(new Event("show"));
                 this._filter.focus();
             }
         });
 
-        $(document).click((e) => {
-            if (!dropdown[0].contains(e.target) && !this._dropdownmenu[0].contains(e.target)) {
-                this._dropdownmenu.trigger("hide").hide();
+        // Hide the dropdown menu when clicking outside
+        document.addEventListener("click", (e) => {
+            if (!dropdown.contains(e.target) && !this._dropdownmenu.contains(e.target)) {
+                this._dropdownmenu.dispatchEvent(new Event("hide"));
+                this._dropdownmenu.style.display = "none";
             }
         });
 
@@ -92,46 +111,62 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
 
     /**
      * Creates the dropdown menu container.
-     * @returns {jQuery} The dropdown menu element.
+     * @returns {HTMLDivElement} The dropdown menu element.
      */
     _createDropdownMenu() {
-        const dropdownMenu = $("<div>").addClass("dropdown-menu");
-        const dropdownOptions = $("<ul>");
+        const dropdownMenu = document.createElement("div");
+        dropdownMenu.classList.add("dropdown-menu");
+
+        const dropdownOptions = document.createElement("ul");
         this._dropdownoptions = dropdownOptions;
-        dropdownMenu.append(this._createFilterContainer(), dropdownOptions);
+
+        dropdownMenu.appendChild(this._createFilterContainer());
+        dropdownMenu.appendChild(dropdownOptions);
         this._dropdownmenu = dropdownMenu;
         return dropdownMenu;
     }
 
     /**
      * Creates the filter container with input and clear button.
-     * @returns {jQuery} The filter container element.
+     * @returns {HTMLDivElement} The filter container element.
      */
     _createFilterContainer() {
-        const filterContainer = $("<div>");
-        const filterInput = $("<input>").attr({ type: "text", "aria-label": "Filter" });
-        const clearButton = $("<a>")
-            .addClass("fas fa-times")
-            .attr({ "aria-label": "Clear Filter", role: "button" });
+        const filterContainer = document.createElement("div");
+        const filterInput = document.createElement("input");
+        filterInput.type = "text";
+        filterInput.setAttribute("aria-label", "Filter");
 
-        filterContainer.append(filterInput, clearButton);
+        const clearButton = document.createElement("a");
+        clearButton.className = "fas fa-times";
+        clearButton.setAttribute("aria-label", "Clear Filter");
+        clearButton.setAttribute("role", "button");
+        clearButton.style.cursor = "pointer";
 
-        filterInput.on("input", () => {
-            const filter = filterInput.val();
-            $(document).trigger(webexpress.webui.Event.CHANGE_FILTER_EVENT, {
-                sender: this._element,
-                filter: filter
-            });
+        filterContainer.appendChild(filterInput);
+        filterContainer.appendChild(clearButton);
+
+        // Update filter and re-render on input
+        filterInput.addEventListener("input", () => {
+            const filter = filterInput.value;
+            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_FILTER_EVENT, {
+                detail: {
+                    sender: this._element,
+                    filter: filter
+                }
+            }));
             this.render();
         });
 
-        clearButton.click((e) => {
+        // Clear filter and re-render when clear button is clicked
+        clearButton.addEventListener("click", (e) => {
             e.stopPropagation();
-            filterInput.val("");
-            $(document).trigger(webexpress.webui.Event.CHANGE_FILTER_EVENT, {
-                sender: this._element,
-                filter: ""
-            });
+            filterInput.value = "";
+            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_FILTER_EVENT, {
+                detail: {
+                    sender: this._element,
+                    filter: ""
+                }
+            }));
             this.render();
         });
 
@@ -142,36 +177,38 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * Parses items from child elements in the selection control.
-     * @param {jQuery} elements - The child elements to parse.
+     * Parses options and structural items from child elements in the selection control.
+     * @param {NodeListOf<Element>} elements - Elements to parse.
      */
     _parseItemsFromElements(elements) {
         const items = [];
         const value = [...this.value];
 
-        elements.each((_, elem) => {
-            const $elem = $(elem);
-
-            if ($elem.hasClass("wx-selection-divider")) {
+        elements.forEach((elem) => {
+            if (elem.classList.contains("wx-selection-divider")) {
+                // Divider item
                 items.push({ type: "divider" });
-            } else if ($elem.hasClass("wx-selection-header")) {
-                items.push({ type: "header", content: $elem.html() });
-            } else if ($elem.hasClass("wx-selection-footer")) {
-                const footer = $("<footer>").html($elem.html());
-                this._dropdownmenu.append(footer);
+            } else if (elem.classList.contains("wx-selection-header")) {
+                // Header item
+                items.push({ type: "header", content: elem.innerHTML });
+            } else if (elem.classList.contains("wx-selection-footer")) {
+                // Footer is appended to the dropdown menu
+                const footer = document.createElement("footer");
+                footer.innerHTML = elem.innerHTML;
+                this._dropdownmenu.appendChild(footer);
             } else {
-                const id = $elem.attr("id") || null;
-
+                // Regular selection item
+                const id = elem.getAttribute("id") || null;
                 items.push({
                     id,
-                    label: $elem.data("label") || $elem.text(),
-                    labelColor: $elem.data("label-color"),
-                    icon: $elem.data("icon"),
-                    image: $elem.data("image"),
-                    content: $elem.html() || $elem.data("label"),
-                    disabled: $elem.is("[disabled]"),
-                    renderFunction: $elem.data("render")
-                        ? new Function("item", `return (${$elem.data("render")})(item);`)
+                    label: elem.dataset.label || elem.textContent,
+                    labelColor: elem.dataset.labelColor,
+                    icon: elem.dataset.icon,
+                    image: elem.dataset.image,
+                    content: elem.innerHTML || elem.dataset.label,
+                    disabled: elem.hasAttribute("disabled"),
+                    renderFunction: elem.dataset.render
+                        ? new Function("item", `return (${elem.dataset.render})(item);`)
                         : null,
                 });
             }
@@ -182,111 +219,185 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * Render the selection control.
+     * Renders the selection control options and current selection.
      */
     render() {
-        this._dropdownoptions.empty();
+        // Clear dropdown options
+        this._dropdownoptions.innerHTML = "";
 
+        // Render each selection item or structural item
         this._items.forEach((item) => {
             if (item.type === "divider") {
-                this._dropdownoptions.append($("<li>").addClass("dropdown-divider"));
+                const li = document.createElement("li");
+                li.className = "dropdown-divider";
+                this._dropdownoptions.appendChild(li);
             } else if (item.type === "header") {
-                this._dropdownoptions.append($("<li>").addClass("dropdown-header").html(item.content));
+                const li = document.createElement("li");
+                li.className = "dropdown-header";
+                li.innerHTML = item.content;
+                this._dropdownoptions.appendChild(li);
             } else if (!this._values.includes(item.id)) {
-                const li = $("<li>")
-                    .addClass("dropdown-item")
-                    .toggleClass("disabled", item.disabled);
+                const li = document.createElement("li");
+                li.className = "dropdown-item";
+                if (item.disabled) li.classList.add("disabled");
 
+                // Custom render function or default rendering
                 if (item.renderFunction) {
-                    li.html(item.renderFunction(item));
+                    li.innerHTML = item.renderFunction(item);
                 } else {
                     if (item.disabled) {
-                        const span = $("<button disabled>").html(item.content);
-                        if (item.icon) span.prepend($("<i>").addClass(item.icon));
-                        if (item.image) span.prepend($("<img>").attr("src", item.image));
-                        li.append(span);
+                        const span = document.createElement("button");
+                        span.disabled = true;
+                        span.innerHTML = item.content;
+                        if (item.icon) {
+                            const icon = document.createElement("i");
+                            icon.className = item.icon;
+                            span.prepend(icon);
+                        }
+                        if (item.image) {
+                            const img = document.createElement("img");
+                            img.src = item.image;
+                            span.prepend(img);
+                        }
+                        li.appendChild(span);
                     } else {
-                        const a = $("<button>").html(item.content);
-                        if (item.icon) a.prepend($("<i>").addClass(item.icon));
-                        if (item.image) a.prepend($("<img>").attr("src", item.image));
-                        li.append(a);
+                        const a = document.createElement("button");
+                        a.innerHTML = item.content;
+                        if (item.icon) {
+                            const icon = document.createElement("i");
+                            icon.className = item.icon;
+                            a.prepend(icon);
+                        }
+                        if (item.image) {
+                            const img = document.createElement("img");
+                            img.src = item.image;
+                            a.prepend(img);
+                        }
+                        li.appendChild(a);
                     }
                 }
 
-                li.click(() => {
-                    if (!this._multiselect) this.value = [];
-                    if (!this._values.includes(item.id)) this.value = [...this.value, item.id];
-                    this.render();
+                // Add click event for selection
+                li.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    if (!item.disabled) {
+                        if (!this._multiselect) this.value = [];
+                        if (!this._values.includes(item.id)) this.value = [...this.value, item.id];
+                        this.render();
+                        
+                        // Close the dropdown after selection
+                        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
+                            detail: {
+                                sender: this._element,
+                                id: this._element.id
+                            }
+                        }));
+                        this._dropdownmenu.style.display = "none";
+                    }
                 });
 
-                if (!item.label || item.label.toLowerCase().includes(this._filter.val().toLowerCase())) {
-                    this._dropdownoptions.append(li);
+                // Filter items based on filter input
+                if (!item.label || item.label.toLowerCase().includes(this._filter.value.toLowerCase())) {
+                    this._dropdownoptions.appendChild(li);
                 }
             }
         });
 
-        this._selection.empty();
+        // Render selected values in the selection field
+        this._selection.innerHTML = "";
         this._values.forEach((value) => {
             const item = this._items.find((i) => i.id === value);
             if (item) {
-                const li = $("<li>").addClass(item.labelColor);
-                const span = $("<span>");
-                const closeButton = $("<a>").addClass("fas fa-times").click(() => {
+                const li = document.createElement("li");
+                if (item.labelColor) li.className = item.labelColor;
+                const span = document.createElement("span");
+                const closeButton = document.createElement("a");
+                closeButton.className = "fas fa-times";
+                closeButton.style.cursor = "pointer";
+                closeButton.addEventListener("click", (e) => {
+                    e.stopPropagation();
                     this.value = this._values.filter((v) => v !== value);
                     this.render();
                 });
 
-                if (item.image) span.append($("<img>").attr("src", item.image));
-                if (item.icon) span.append($("<i>").addClass(`${item.icon} me-2`));
-                span.append($("<span>").text(item.label));
-                li.append(span);
-                li.append(closeButton);
-                this._selection.append(li);
+                if (item.image) {
+                    const img = document.createElement("img");
+                    img.src = item.image;
+                    span.appendChild(img);
+                }
+                if (item.icon) {
+                    const icon = document.createElement("i");
+                    icon.className = item.icon + " me-2";
+                    span.appendChild(icon);
+                }
+                const labelSpan = document.createElement("span");
+                labelSpan.textContent = item.label;
+                span.appendChild(labelSpan);
+
+                li.appendChild(span);
+                li.appendChild(closeButton);
+                this._selection.appendChild(li);
             }
         });
 
+        // Show placeholder if nothing is selected
         if (this._values.length === 0) {
-            this._selection.html($("<span>").text(this._placeholder));
+            const span = document.createElement("span");
+            span.textContent = this._placeholder;
+            this._selection.innerHTML = "";
+            this._selection.appendChild(span);
+        }
+
+        // Update the value of the hidden input
+        if (this._hidden) {
+            this._hidden.value = this._values.join(";");
         }
     }
 
-    /** 
-     * Getters for options. 
-     * @returns {Array} The current options as a list.
+    /**
+     * Returns the current options array.
+     * @returns {Array} The array of options.
      */
     get options() {
         return this._items;
     }
 
     /**
-     * Updates the options and triggers a re-render of the component.
+     * Updates the list of options and triggers rendering.
+     * @param {Array} items - Array of new option items.
      */
     set options(items) {
         this._items = items || [];
         this.render();
     }
 
-    /** 
-     * Getter for the value.
-     * @returns {Array} The current value as a list.
+    /**
+     * Gets the current value(s) of the selection.
+     * @returns {Array} The currently selected values.
      */
     get value() {
         return this._values;
     }
 
     /**
-     * Updates value and triggers events.
+     * Sets the value(s) of the selection and triggers events and rendering.
+     * @param {Array} values - Array of selected values.
      */
     set value(values) {
-        if (this._values !== values) {
+        // Only set value if it has changed
+        const old = typeof this._values === "object" ? this._values.join(";") : this._values;
+        const neu = typeof values === "object" ? values.join(";") : values;
+        if (old !== neu) {
             this._values = values;
             this.render();
-            this._hidden.val(this._values.join(";"));
-            $(document).trigger(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
-                sender: this._element,
-                id: $(this._element).attr("id"),
-                value: values
-            });
+            if (this._hidden) this._hidden.value = (this._values || []).join(";");
+            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
+                detail: {
+                    sender: this._element,
+                    id: this._element.id,
+                    value: values
+                }
+            }));
         }
     }
 };

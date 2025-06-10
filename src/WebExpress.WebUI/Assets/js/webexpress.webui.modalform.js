@@ -29,8 +29,6 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
 
         const form = doc.querySelector(this._selector);
         if (form) {
-            this._form = document.createElement("form");
-
             const buttons = Array.from(form.querySelectorAll("button[type='submit'], button[type='reset']"))
                 .map(btn => this._detachElement(btn));
 

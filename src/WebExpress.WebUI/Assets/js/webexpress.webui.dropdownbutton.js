@@ -2,71 +2,75 @@
  * A dropdown button offering advanced features such as dynamically generated menu items.
  * The following events are triggered:
  * - webexpress.webui.Event.CLICK_EVENT
+ * - webexpress.webui.Event.CHANGE_VISIBILITY_EVENT
  */
 webexpress.webui.DropdownButtonCtrl = class extends webexpress.webui.Ctrl {
     /**
-     * Constructor for creating a dropdown button instance.
+     * Creates a new dropdown button controller instance.
+     * Reads configuration from the HTML element's data attributes and child elements, 
+     * cleans up the DOM, and triggers initial rendering.
      * @param {HTMLElement} element - The DOM element associated with the instance.
      */
     constructor(element) {
         super(element);
 
-        // Initialize properties
-        this._label = $(element).data("label") || null;
-        this._icon = $(element).data("icon") || null;
-        this._image = $(element).data("image") || null;
-        this._menuCss = $(element).data("menucss") || null;
-        this._buttonCss = $(element).data("buttoncss") || null;
-        this._buttonStyle = $(element).data("buttonstyle") || null;
-        this._active = $(element).attr("active") ? "active" : null;
-        this._disabled = $(element).attr("disabled") ? "disabled" : null;
+        // Read properties from data-attributes or attributes, fallback to null if missing
+        this._label = element.dataset.label || null;
+        this._icon = element.dataset.icon || null;
+        this._image = element.dataset.image || null;
+        this._menuCss = element.dataset.menucss || null;
+        this._buttonCss = element.dataset.buttoncss || null;
+        this._buttonStyle = element.dataset.buttonstyle || null;
+        this._buttonColor = element.dataset.color || null;
+        this._active = element.hasAttribute("active") ? "active" : null;
+        this._disabled = element.hasAttribute("disabled") ? "disabled" : null;
 
-        // Parse items from child elements
+        // Parse dropdown items from descendant elements
         this._parseItemsFromElements(
-            $(element).find(".wx-dropdownbutton-header, .wx-dropdownbutton-divider, .wx-dropdownbutton-item")
+            Array.from(element.querySelectorAll(".wx-dropdownbutton-header, .wx-dropdownbutton-divider, .wx-dropdownbutton-item"))
         );
 
         // Clean up the DOM element
-        $(element).empty()
-            .removeAttr("data-label data-icon data-image data-color data-menucss")
-            .removeAttr("data-block data-toggle data-size data-border disabled active")
-            .addClass("wx-dropdownbutton");
+        element.innerHTML = "";
+        [
+            "data-label", "data-icon", "data-image", "data-color", "data-menucss",
+            "data-block", "data-toggle", "data-size", "data-border", "disabled", "active"
+        ].forEach(attr => element.removeAttribute(attr));
+        element.classList.add("wx-dropdownbutton");
 
-        // Render the dropdown button
+        // Initial rendering of button and menu
         this.render();
     }
 
     /**
-     * Parses items from child elements in the dropdown control.
-     * @param {jQuery} elements - The child elements to parse.
+     * Parses child elements of the dropdown container and extracts menu item data.
+     * Stores the result as a structured items array.
+     * @param {HTMLElement[]} elements - Elements to parse.
      */
     _parseItemsFromElements(elements) {
         const items = [];
 
-        elements.each((_, elem) => {
-            const $elem = $(elem);
-
-            if ($elem.hasClass("wx-dropdownbutton-divider")) {
+        elements.forEach(elem => {
+            if (elem.classList.contains("wx-dropdownbutton-divider")) {
                 items.push({ type: "divider" });
-            } else if ($elem.hasClass("wx-dropdownbutton-header")) {
+            } else if (elem.classList.contains("wx-dropdownbutton-header")) {
                 items.push({
                     type: "header",
-                    content: $elem.text(),
-                    icon: $elem.data("icon") || null,
+                    content: elem.textContent,
+                    icon: elem.dataset.icon || null,
                 });
             } else {
+                const itemClasses = Array.from(elem.classList);
                 items.push({
-                    id: $elem.attr("id") || null,
-                    image: $elem.data("image") || null,
-                    icon: $elem.data("icon") || null,
-                    content: $elem.text() || null,
-                    color: $elem.attr("class").split(" ").find((cls) => cls.startsWith("text-")) || "",
-                    backgroundColor: $elem
-                        .attr("class")
-                        .split(" ")
-                        .filter((cls) => cls !== "wx-dropdownbutton-item")
-                        .find((cls) => cls.startsWith("wx-")) || "",
-                    disabled: $elem.is("[disabled]"),
+                    id: elem.id || null,
+                    image: elem.dataset.image || null,
+                    icon: elem.dataset.icon || null,
+                    content: elem.textContent || null,
+                    color: itemClasses.find(cls => cls.startsWith("text-")) || "",
+                    backgroundColor: itemClasses
+                        .filter(cls => cls !== "wx-dropdownbutton-item")
+                        .find(cls => cls.startsWith("wx-")) || "",
+                    disabled: elem.hasAttribute("disabled"),
                 });
             }
         });
@@ -75,51 +79,75 @@ webexpress.webui.DropdownButtonCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Creates a single dropdown menu item based on the provided option data.
-     * @param {Object} item - The data object for the menu item.
-     * @returns {jQuery} The created menu item.
+     * Creates a single dropdown menu item element based on the provided item data.
+     * Handles headers, dividers, enabled and disabled items, including icons and images.
+     * @param {Object} item - Menu item configuration object.
+     * @returns {HTMLElement} The created list item element.
      */
     _createMenuItem(item) {
-        const li = $("<li/>");
+        const li = document.createElement("li");
 
         if (item.type === "header") {
-            // Create a header item
-            if (item.icon) li.append($("<span class='me-2'/>").addClass(item.icon));
-            li.append($("<span/>").text(item.content));
-            li.addClass("dropdown-header");
+            // Create a header item with optional icon
+            if (item.icon) {
+                const iconSpan = document.createElement("span");
+                iconSpan.className = "me-2 " + item.icon;
+                li.appendChild(iconSpan);
+            }
+            const contentSpan = document.createElement("span");
+            contentSpan.textContent = item.content;
+            li.appendChild(contentSpan);
+            li.classList.add("dropdown-header");
         } else if (item.type === "divider") {
-            // Create a divider item
-            li.addClass("dropdown-divider");
+            // Create a divider element
+            li.classList.add("dropdown-divider");
         } else {
-            // Create a regular menu item
+            // Create a regular menu item (enabled or disabled)
             if (!item.disabled) {
-                const link = $("<a class='link dropdown-item'/>")
-                    .addClass(item.color)
-                    .attr("href", "javascript:void(0);");
+                const link = document.createElement("a");
+                link.className = "link dropdown-item";
+                if (item.color) link.classList.add(item.color);
+                link.href = "javascript:void(0);";
 
-                if (item.image) link.append($("<img/>").attr("src", item.image).attr("alt", item.content));
-                if (item.icon) link.append($("<i/>").addClass(item.icon));
-                link.append($("<span/>").text(item.content));
+                if (item.image) {
+                    const img = document.createElement("img");
+                    img.src = item.image;
+                    img.alt = item.content;
+                    img.classList.add("me-2");
+                    link.appendChild(img);
+                }
+                if (item.icon) {
+                    const icon = document.createElement("i");
+                    icon.className = "me-2 " + item.icon;
+                    link.appendChild(icon);
+                }
+                const span = document.createElement("span");
+                span.textContent = item.content;
+                link.appendChild(span);
 
-                link.click(() => {
-                    // execute the action associated with the item, if it exists
+                // Register click handler for the menu item
+                link.addEventListener("click", () => {
                     if (typeof item.action === "function") {
                         item.action();
                     }
-
-                    $(document).trigger(webexpress.webui.Event.CLICK_EVENT, {
-                        sender: this._element,
-                        id: $(this._element).attr("id") || null,
-                        item: item
+                    const event = new CustomEvent(webexpress.webui.Event.CLICK_EVENT, {
+                        detail: {
+                            sender: this._element,
+                            id: this._element.id || null,
+                            item: item
+                        }
                     });
+                    document.dispatchEvent(event);
                 });
 
-                li.append(link);
+                li.appendChild(link);
             } else {
                 // Create a disabled menu item
-                const disabledItem = $("<span class='dropdown-item text-muted disabled' aria-disabled='true'/>")
-                    .html(`${item.icon ? `<i class='me-2 ${item.icon}'></i>` : ""}${item.content}`);
-                li.append(disabledItem);
+                const disabledItem = document.createElement("span");
+                disabledItem.className = "dropdown-item text-muted disabled";
+                disabledItem.setAttribute("aria-disabled", "true");
+                disabledItem.innerHTML = (item.icon ? `<i class='me-2 ${item.icon}'></i>` : "") + (item.content || "");
+                li.appendChild(disabledItem);
             }
         }
 
@@ -128,90 +156,126 @@ webexpress.webui.DropdownButtonCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Renders the dropdown button and menu based on the current properties.
+     * Clears the container, creates the button, generates the menu and attaches all to the DOM.
+     * Fires CHANGE_VISIBILITY_EVENT if the menu becomes visible or hidden.
      */
     render() {
-        // Clear existing content
-        $(this._element).empty();
+        this._element.innerHTML = "";
 
-        // Create the button
-        const button = $("<button class='btn' type='button' data-bs-toggle='dropdown' aria-expanded='false'/>")
-            .addClass(this._buttonCss);
+        // Create the main dropdown button
+        const button = document.createElement("button");
+        button.className = "btn";
+        button.type = "button";
+        button.setAttribute("data-bs-toggle", "dropdown");
+        button.setAttribute("aria-expanded", "false");
+        if (this._buttonCss) button.classList.add(...this._buttonCss.split(" "));
+        if (this._buttonColor) button.classList.add(this._buttonColor);
+        if (this._active) button.setAttribute("active", "true");
+        if (this._disabled) button.disabled = true;
+        if (this._buttonStyle) button.setAttribute("style", this._buttonStyle);
 
-        if (this._active) {
-            button.prop("active", true);
+        if (this._image) {
+            const img = document.createElement("img");
+            img.src = this._image;
+            img.classList.add("me-2");
+            button.appendChild(img);
         }
-
-        if (this._disabled) {
-            button.prop("disabled", true);
+        if (this._icon) {
+            const icon = document.createElement("i");
+            icon.className = "me-2 " + this._icon;
+            button.appendChild(icon);
         }
-            
-        if (this._buttonStyle) {
-            button.attr("style", this._buttonStyle);
-        }
+        const span = document.createElement("span");
+        span.textContent = this._label || "";
+        button.appendChild(span);
 
-        if (this._image) button.append($("<img class='me-2'/>").attr("src", this._image));
-        if (this._icon) button.append($("<i class='me-2'/>").addClass(this._icon));
-        button.append($("<span>").text(this._label));
+        // Create the dropdown menu list
+        const ul = document.createElement("ul");
+        ul.className = "dropdown-menu";
+        if (this._menuCss) ul.classList.add(...this._menuCss.split(" "));
 
-        // Create the dropdown menu
-        const ul = $("<ul class='dropdown-menu'/>");
-        if (this._menuCss) ul.addClass(this._menuCss);
-
-        // Generate menu items
-        this._items.forEach((item) => {
+        // Add all menu items
+        this._items.forEach(item => {
             const li = this._createMenuItem(item);
-            ul.append(li);
+            ul.appendChild(li);
         });
 
-        // Append button and menu to the element
-        $(this._element).append(button, ul);
+        // Append button and menu to the container
+        this._element.appendChild(button);
+        this._element.appendChild(ul);
+
+        // Handle visibility change event
+        // Fires CHANGE_VISIBILITY_EVENT when the menu is shown or hidden
+        button.addEventListener('show.bs.dropdown', () => {
+            const visEvent = new CustomEvent(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
+                detail: {
+                    sender: this._element,
+                    visible: true
+                }
+            });
+            document.dispatchEvent(visEvent);
+        });
+        button.addEventListener('hide.bs.dropdown', () => {
+            const visEvent = new CustomEvent(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
+                detail: {
+                    sender: this._element,
+                    visible: false
+                }
+            });
+            document.dispatchEvent(visEvent);
+        });
     }
 
-    // Getter and setter for label
+    /**
+     * Gets or sets the button label.
+     */
     get label() {
         return this._label;
     }
-
     set label(value) {
         this._label = value;
         this.render();
     }
 
-    // Getter and setter for icon
+    /**
+     * Gets or sets the button icon.
+     */
     get icon() {
         return this._icon;
     }
-
     set icon(value) {
         this._icon = value;
         this.render();
     }
 
-    // Getter and setter for color
+    /**
+     * Gets or sets the button color class.
+     */
     get color() {
         return this._color;
     }
-
     set color(value) {
         this._color = value;
         this.render();
     }
 
-    // Getter and setter for menuCSS
+    /**
+     * Gets or sets the menu CSS classes.
+     */
     get menuCSS() {
         return this._menuCss;
     }
-
     set menuCSS(value) {
         this._menuCss = value;
         this.render();
     }
 
-    // Getter and setter for items
+    /**
+     * Gets or sets the array of menu items.
+     */
     get items() {
         return this._items;
     }
-
     set items(value) {
         this._items = value;
         this.render();

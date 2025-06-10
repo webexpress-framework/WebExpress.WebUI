@@ -5,19 +5,19 @@
  * - webexpress.webui.Event.COLUMN_REORDER_EVENT
  */
 webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
-    // Define table-related DOM elements and data
-    _table = $("<table>").addClass("wx-table table table-hover table-sm");
-    _col = $("<colgroup/>");
-    _head = $("<thead/>");
-    _body = $("<tbody/>");
-    _foot = $("<tfoot/>");
-    _columns = []; // Array to hold column definitions
-    _rows = []; // Array to hold row data
-    _footer = []; // Array to hold footer data
-    _draggedColumn = null; // Track the column being dragged
-    _draggedRow = null; // Track the row being dragged
-    _dragColumnIndicator = null; // Indicator for columns
-    _hasOptions = false; // Flag to check if options are present
+    // Table parts and state variables
+    _table = document.createElement("table");
+    _col = document.createElement("colgroup");
+    _head = document.createElement("thead");
+    _body = document.createElement("tbody");
+    _foot = document.createElement("tfoot");
+    _columns = [];
+    _rows = [];
+    _footer = [];
+    _draggedColumn = null;
+    _draggedRow = null;
+    _dragColumnIndicator = null;
+    _hasOptions = false;
 
     /**
      * Constructor to initialize the table control.
@@ -26,475 +26,395 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     constructor(element) {
         super(element);
 
-        // Initialize table structure and parse existing data
-        const tableColor = $(element).data("color") || null;
-        const tableBorder = $(element).data("border") || null;
-        const tableStriped = $(element).data("striped") || null;
-        this._movableRow = $(element).data("movable-row") || false;
-        this._options = this._parseOptions($(element).children(".wx-table-options"));
-        this._columns = this._parseColumns($(element).children(".wx-table-columns"));
-        this._rows = this._parseRows($(element).children(".wx-table-row"));
-        this._footer = this._parseFooter($(element).children(".wx-table-footer"));
-        this._table.append(this._col, this._head, this._body, this._foot);
+        // Set base classes
+        this._table.className = "wx-table table table-hover table-sm";
 
-        // Set up the table structure
-        $(element)
-            .empty()
-            .removeAttr("data-color data-border data-striped data-movable-row")
-            .append(this._table);
-            
-        // Create visual indicators for column and row dragging
-        this._dragColumnIndicator = $("<div>")
-            .addClass("wx-table-drag-indicator")
-            .hide(); // Initially hidden
+        // Read table configuration from data attributes
+        const tableColor = element.dataset.color || null;
+        const tableBorder = element.dataset.border || null;
+        const tableStriped = element.dataset.striped || null;
+        this._movableRow = element.dataset.movableRow === "true" || false;
 
-        // Append indicators to the document body
-        $(element).append(this._dragColumnIndicator);
+        // Parse child options, columns, rows, footer
+        this._options = this._parseOptions(element.querySelector(".wx-table-options"));
+        this._columns = this._parseColumns(element.querySelector(".wx-table-columns"));
+        this._rows = this._parseRows(element.querySelectorAll(".wx-table-row"));
+        this._footer = this._parseFooter(element.querySelector(".wx-table-footer"));
 
-        this._table.addClass(tableColor, tableBorder, tableStriped);
-        
-        this.render(); // Render the initial state of the table
+        // Compose table structure
+        this._table.appendChild(this._col);
+        this._table.appendChild(this._head);
+        this._table.appendChild(this._body);
+        this._table.appendChild(this._foot);
+
+        // Remove all children and attributes, then append table
+        element.innerHTML = "";
+        element.removeAttribute("data-color");
+        element.removeAttribute("data-border");
+        element.removeAttribute("data-striped");
+        element.removeAttribute("data-movable-row");
+        element.appendChild(this._table);
+
+        // Add drag indicator for columns
+        this._dragColumnIndicator = document.createElement("div");
+        this._dragColumnIndicator.className = "wx-table-drag-indicator";
+        this._dragColumnIndicator.style.display = "none";
+        element.appendChild(this._dragColumnIndicator);
+
+        if (tableColor) this._table.classList.add(tableColor);
+        if (tableBorder) this._table.classList.add(tableBorder);
+        if (tableStriped) this._table.classList.add(tableStriped);
+
+        this.render();
     }
-    
+
     /**
      * Enables drag and drop functionality for columns.
-     * @param {HTMLElement} element - The DOM element representing the column header.
-     * @param {Object} column - The column object associated with the header.
+     * @param {HTMLElement} th - The table header cell.
+     * @param {Object} column - The column definition.
      */
-    _enableDragAndDropColumn(element, column) {
-        const $th = $(element);
-        $th.attr("draggable", true);
+    _enableDragAndDropColumn(th, column) {
+        th.draggable = true;
 
-        $th.on("dragstart", (event) => {
+        th.addEventListener("dragstart", (event) => {
             if (!event.ctrlKey) {
-                event.preventDefault(); // Prevent drag if Ctrl is not pressed
+                event.preventDefault();
                 return;
             }
-
-            const resizerArea = $(event.target).closest(".wx-table-column-resizer");
-            if (resizerArea.length > 0) {
-                event.preventDefault(); // Prevent drag if the drag starts from the resizer area
+            // Prevent drag from resizer area
+            if (event.target.closest(".wx-table-column-resizer")) {
+                event.preventDefault();
                 return;
             }
-
             this._draggedColumn = column;
-            $th.addClass("wx-table-dragging");
+            th.classList.add("wx-table-dragging");
         });
 
-        $th.on("dragend", () => {
-            $th.removeClass("wx-table-dragging");
-            this._dragColumnIndicator.removeClass().hide();
+        th.addEventListener("dragend", () => {
+            th.classList.remove("wx-table-dragging");
+            this._dragColumnIndicator.className = "wx-table-drag-indicator";
+            this._dragColumnIndicator.style.display = "none";
             this._draggedColumn = null;
         });
 
-        $th.on("dragover", (event) => {
-            if (!this._draggedColumn || !event.ctrlKey) {
-                return; // Prevent dragover if no column is being dragged or Ctrl is not pressed
-            }
-
-            event.preventDefault(); // Allow dropping
-
-            // Calculate the position of the mouse relative to the column
-            const offset = $th.offset();
-            const mouseX = event.originalEvent.pageX; // Mouse's X position
-            const width = $th.outerWidth();
-            const isLeft = mouseX < offset.left + width / 2; // Check if in the left half
-
-            const height = $th.outerHeight();
-
-            // Position the column indicator
-            this._dragColumnIndicator
-                .css({
-                    top: offset.top,
-                    left: isLeft ? offset.left - 2 : offset.left + width - 2, // Show indicator on the left or right
-                    height: height,
-                })
-                .show();
-        });
-
-        $th.on("dragleave", () => {
-            this._dragColumnIndicator.hide();
-        });
-
-        $th.on("drop", (event) => {
-            if (!event.ctrlKey) {
-                return; // Prevent dropping if Ctrl is not pressed
-            }
-
+        th.addEventListener("dragover", (event) => {
+            if (!this._draggedColumn || !event.ctrlKey) return;
             event.preventDefault();
 
-            // Prevent invalid operations where draggedColumn or targetColumn are null
-            if (this._draggedColumn === null || column === null || this._draggedColumn === column) {
-                return;
-            }
+            // Find out where the mouse is (left or right half)
+            const rect = th.getBoundingClientRect();
+            const mouseX = event.pageX || event.clientX;
+            const isLeft = mouseX < rect.left + th.offsetWidth / 2;
+            this._dragColumnIndicator.style.top = rect.top + "px";
+            this._dragColumnIndicator.style.left = (isLeft ? rect.left - 2 : rect.left + th.offsetWidth - 2) + "px";
+            this._dragColumnIndicator.style.height = th.offsetHeight + "px";
+            this._dragColumnIndicator.style.display = "block";
+        });
 
-            // Find the indices of the dragged column and the target column
+        th.addEventListener("dragleave", () => {
+            this._dragColumnIndicator.style.display = "none";
+        });
+
+        th.addEventListener("drop", (event) => {
+            if (!event.ctrlKey) return;
+            event.preventDefault();
+
+            // Do nothing if invalid or same column
+            if (this._draggedColumn === null || column === null || this._draggedColumn === column) return;
+
             const sourceIndex = this._columns.indexOf(this._draggedColumn);
             const targetIndex = this._columns.indexOf(column);
+            if (sourceIndex === -1 || targetIndex === -1) return;
 
-            // Ensure both columns exist in the array
-            if (sourceIndex === -1 || targetIndex === -1) {
-                return;
-            }
+            // Find out if the column should be inserted before or after
+            const rect = th.getBoundingClientRect();
+            const mouseX = event.pageX || event.clientX;
+            const insertBefore = mouseX < rect.left + th.offsetWidth / 2;
 
-            // Calculate the position of the mouse relative to the target column
-            const $th = $(event.currentTarget);
-            const offset = $th.offset();
-            const mouseX = event.originalEvent.pageX; // Mouse's X position
-            const width = $th.outerWidth();
-            const insertBefore = mouseX < offset.left + width / 2; // Determine if insertion should happen before
-
-            // Adjust the target index based on the relative position
             let adjustedTargetIndex = targetIndex;
             if (insertBefore) {
-                if (sourceIndex < targetIndex) {
-                    adjustedTargetIndex -= 1; // Move leftward if the source is before the target
-                }
+                if (sourceIndex < targetIndex) adjustedTargetIndex -= 1;
             } else {
-                if (sourceIndex > targetIndex) {
-                    adjustedTargetIndex += 1; // Move rightward if the source is after the target
-                }
+                if (sourceIndex > targetIndex) adjustedTargetIndex += 1;
             }
+            if (sourceIndex === adjustedTargetIndex) return;
 
-            // Edge cases: Prevent unnecessary shifts if the source is already correctly placed
-            if (sourceIndex === adjustedTargetIndex) {
-                return;
-            }
-
-            // Reorder columns
+            // Move column in array
             const movedColumn = this._columns.splice(sourceIndex, 1)[0];
             this._columns.splice(adjustedTargetIndex, 0, movedColumn);
 
-            // Update the order of cells in each row based on the new column order
+            // Move cell data in each row to match new column order
             this._rows = this._rows.map((row) => {
-                const { cells, options } = row; // Preserve the row structure
-
-                // Convert cells to an array (if not already an array-like structure)
+                const { cells, options } = row;
                 const cellArray = Array.isArray(cells) ? [...cells] : Object.values(cells);
-
-                // Rearrange the cells based on the new column order
                 const movedCell = cellArray.splice(sourceIndex, 1)[0];
                 cellArray.splice(adjustedTargetIndex, 0, movedCell);
-
-                // Return the updated row with reordered cells (as an array) and intact options
                 return { cells: cellArray, options };
             });
 
-            // Cancel drag
-            this._dragColumnIndicator.hide();
+            this._dragColumnIndicator.style.display = "none";
             this._draggedColumn = null;
 
-            // Trigger a custom event for column reorder
             this._triggerColumnReorderEvent(sourceIndex, adjustedTargetIndex);
-            
-            // Re-render the table
             this.render();
         });
     }
-    
+
     /**
      * Attaches click event handlers to the column headers for sorting.
-     * @param {HTMLElement} element - The DOM element representing the column header.
-     * @param {Object} column - The column object associated with the header.
+     * @param {HTMLElement} th - The header cell.
+     * @param {Object} column - The column object.
      */
-    _enableSortColumns(element, column) {
-        const $th = $(element); // Get the jQuery object for the header element
-        
-        $th.on("click", () => {
-
-            // Determine the new sort direction
+    _enableSortColumns(th, column) {
+        th.addEventListener("click", () => {
             const currentDirection = column.sort || "asc";
-
-            // Resets the sort direction for all columns
-            this._columns.forEach((column) => {
-                column.sort = null; // Set the sort property to null
-            });
-            
-            // Update the sort direction in the DOM
-            this._head.find("th").removeClass("wx-sort-asc wx-sort-desc");
-            $th.addClass(column.sort === "asc" ? "wx-sort-asc" : "wx-sort-desc");
-
-            // Sort rows based on the column and direction
+            // Reset all columns
+            this._columns.forEach((col) => { col.sort = null; });
+            // Remove old sort classes
+            Array.from(this._head.querySelectorAll("th")).forEach(thEl =>
+                thEl.classList.remove("wx-sort-asc", "wx-sort-desc")
+            );
+            th.classList.add(column.sort === "asc" ? "wx-sort-asc" : "wx-sort-desc");
+            // Set new direction
             column.sort = currentDirection === "asc" ? "desc" : "asc";
             this.orderRows(column);
 
-            // Trigger a custom sort event
-            $(document).trigger(webexpress.webui.Event.TABLE_SORT_EVENT, {
-                sender: this._element,
-                columnId: column.id,
-                sortDirection: column.sort,
-                columnLabel: $th.text().trim()
-            });
+            // Dispatch sort event
+            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.TABLE_SORT_EVENT, {
+                detail: {
+                    sender: this._element,
+                    columnId: column.id,
+                    sortDirection: column.sort,
+                    columnLabel: th.textContent.trim()
+                }
+            }));
         });
     }
 
     /**
-     * Enables drag and drop functionality for rows.
-     * @param {HTMLElement} element - The DOM element representing the column header.
+     * Enables drag and drop for table rows.
+     * @param {HTMLElement} handle - The drag handle cell.
      * @param {Object} row - The row object.
      */
-    _enableDragAndDropRow(element, row) {
-        const $handle = $(element);
-        const $tr = $handle.closest("tr");
-        $handle.attr("draggable", true); // Make the row handle draggable
+    _enableDragAndDropRow(handle, row) {
+        handle.draggable = true;
+        const tr = handle.closest("tr");
 
-        // Event listener for the start of the drag operation
-        $handle.on("dragstart", (event) => {
-            this._draggedRow = row; // Set the currently dragged row
-            $handle.closest("tr").addClass("wx-table-dragging"); // Add a CSS class for visual feedback
+        let placeholder = null;
 
-            // Create a placeholder to show the position during dragging
-            this._placeholder = $("<tr/>")
-                .addClass("wx-drag-over")
-                .height($handle.closest("tr").height());
-            $handle.closest("tr").after(this._placeholder);
+        handle.addEventListener("dragstart", () => {
+            this._draggedRow = row;
+            tr.classList.add("wx-table-dragging");
+            placeholder = document.createElement("tr");
+            placeholder.className = "wx-drag-over";
+            placeholder.style.height = tr.offsetHeight + "px";
+            tr.parentNode.insertBefore(placeholder, tr.nextSibling);
         });
 
-        // Event listener for the end of the drag operation
-        $handle.on("dragend", (event) => {
-            $tr.removeClass("wx-table-dragging"); // Remove the visual feedback class
-            this._placeholder.replaceWith($tr); // Replace placeholder with the dragged row
-            this._placeholder = null; // Clear the placeholder reference
-            this._draggedRow = null; // Clear the reference to the dragged row
+        handle.addEventListener("dragend", () => {
+            tr.classList.remove("wx-table-dragging");
+            if (placeholder && placeholder.parentNode) placeholder.parentNode.replaceChild(tr, placeholder);
+            placeholder = null;
+            this._draggedRow = null;
         });
 
-        // Event listener for when the dragged row is over another row
-        $tr.on("dragover", (event) => {
-            if (!this._draggedRow) {
-                return;
-            }
-            
-            event.preventDefault(); // Allow the drop action
-
-            const targetRow = $(event.currentTarget);
-            const offset = targetRow.offset();
-            const mouseY = event.originalEvent.pageY; // Y position of the mouse
-            const halfHeight = targetRow.outerHeight() / 2; // Calculate the midpoint of the row
-
-            if (mouseY < offset.top + halfHeight) {
-                // If the mouse is in the top half of the row, show the indicator above
-                this._placeholder.insertBefore(targetRow);
+        tr.addEventListener("dragover", (event) => {
+            if (!this._draggedRow) return;
+            event.preventDefault();
+            const targetRow = event.currentTarget;
+            const rect = targetRow.getBoundingClientRect();
+            const mouseY = event.pageY || event.clientY;
+            const halfHeight = targetRow.offsetHeight / 2;
+            if (mouseY < rect.top + halfHeight) {
+                targetRow.parentNode.insertBefore(placeholder, targetRow);
             } else {
-                // If the mouse is in the bottom half of the row, show the indicator below
-                this._placeholder.insertAfter(targetRow);
+                targetRow.parentNode.insertBefore(placeholder, targetRow.nextSibling);
             }
         });
 
-        // Event listener for when the dragged row leaves another row
-        $tr.on("dragleave", (event) => {
-        });
-
-        // Event listener for when the dragged row is dropped
-        $tr.on("drop", (event) => {
-            event.preventDefault(); // Prevent the default drop behavior
-
-            // Update the internal row order based on the new position
-            const newIndex = this._body.find("tr").index(this._placeholder);
+        tr.addEventListener("drop", (event) => {
+            event.preventDefault();
+            const newIndex = Array.from(this._body.children).indexOf(placeholder);
             const oldIndex = this._rows.indexOf(this._draggedRow);
-
             if (newIndex !== oldIndex && newIndex >= 0 && newIndex < this._rows.length) {
-                // Remove the dragged row from its old position and insert it at the new position
                 this._rows.splice(oldIndex, 1);
                 this._rows.splice(newIndex, 0, this._draggedRow);
             }
-
-            // Re-render the table to reflect the new row order
             this.render();
         });
     }
-    
+
     /**
      * Enables resizable columns by adding resizer handles to each header element.
-     * @param {HTMLElement} element - The DOM element representing the column header.
-     * @param {Object} column - The column object associated with the header.
+     * @param {HTMLElement} th - The column header cell.
+     * @param {Object} column - The column object.
      */
-    _enableResizableColumns(element, column) {
-        const $th = $(element);
+    _enableResizableColumns(th, column) {
+        // Create handle for resizing columns
+        const resizer = document.createElement("div");
+        resizer.className = "wx-table-column-resizer";
+        resizer.addEventListener("click", (e) => e.stopPropagation());
+        resizer.addEventListener("mousedown", (e) => this._onResizeStart(e, th));
+        th.style.position = "relative";
+        th.appendChild(resizer);
 
-        // Create and configure the resizer element
-        const resizer = $("<div>")
-            .addClass("wx-table-column-resizer")
-            .on("click", (event) => event.stopPropagation())
-            .on("mousedown", (event) => this._onResizeStart(event, $th));
-
-        // Append the resizer to the right side of the header
-        $th.css("position", "relative").append(resizer);
-
-        // Attach mousemove and mouseup handlers to the document for resizing
-        $(document)
-            .on("mousemove", (event) => this._onResize(event, $th, column))
-            .on("mouseup", () => this._onResizeEnd($th));
+        // Mousemove/mouseup handlers
+        document.addEventListener("mousemove", (event) => this._onResize(event, th, column));
+        document.addEventListener("mouseup", () => this._onResizeEnd(th));
     }
 
     /**
      * Handler for the start of the resizing process.
      * @param {MouseEvent} event - The mousedown event.
-     * @param {jQuery} $th - The header element being resized.
+     * @param {HTMLElement} th - The header being resized.
      */
-    _onResizeStart(event, $th) {
-        this._resizingColumn = $th; // Store the column being resized
-        this._resizeStartX = event.pageX; // Record the initial mouse position
-        this._resizeStartWidth = $th.outerWidth(); // Record the initial column width
-        $("body").addClass("wx-table-resizing"); // Add a visual cue for resizing
+    _onResizeStart(event, th) {
+        this._resizingColumn = th;
+        this._resizeStartX = event.pageX;
+        this._resizeStartWidth = th.offsetWidth;
+        document.body.classList.add("wx-table-resizing");
     }
 
     /**
      * Handler for mouse movement during resizing.
      * @param {MouseEvent} event - The mousemove event.
-     * @param {jQuery} $th - The header element being resized.
+     * @param {HTMLElement} th - The header being resized.
      * @param {Object} column - The column object.
      */
-    _onResize(event, $th, column) {
-        if (!this._resizingColumn && this._resizingColumn != $th) return; // Exit if no column is being resized
-
-        // Calculate the new width based on mouse movement
+    _onResize(event, th, column) {
+        if (!this._resizingColumn || this._resizingColumn !== th) return;
         const deltaX = event.pageX - this._resizeStartX;
-        const newWidth = Math.max(this._resizeStartWidth + deltaX, 30); // Minimum width
-
-        // Apply the new width to the header and associated column
-        this._resizingColumn.css("width", `${newWidth}px`);
+        const newWidth = Math.max(this._resizeStartWidth + deltaX, 30);
+        this._resizingColumn.style.width = newWidth + "px";
         column.width = newWidth;
     }
 
     /**
      * Handler for the end of the resizing process.
-     * @param {jQuery} $th - The header element being resized.
+     * @param {HTMLElement} th - The header being resized.
      */
-    _onResizeEnd($th) {
-        if (!this._resizingColumn && this._resizingColumn != $th) return; // Exit if no column is being resized
-
-        this._resizingColumn = null; // Clear the reference to the resizing column
-        this._resizeStartX = null; 
+    _onResizeEnd(th) {
+        if (!this._resizingColumn || this._resizingColumn !== th) return;
+        this._resizingColumn = null;
+        this._resizeStartX = null;
         this._resizeStartWidth = null;
-        $("body").removeClass("wx-table-resizing"); // Remove the resizing visual cue
+        document.body.classList.remove("wx-table-resizing");
     }
 
     /**
      * Parses the options within the wx-table-options container.
-     * @param {jQuery} optionsDiv - The <div> element containing the dropdown options.
-     * @returns {Array} An array of parsed option objects.
+     * @param {HTMLElement} optionsDiv - The <div> containing the dropdown options.
+     * @returns {Array} Array of parsed option objects.
      */
     _parseOptions(optionsDiv) {
+        if (!optionsDiv) return [];
         const options = [];
-        optionsDiv.children("div").each((_, div) => {
-            const $elem = $(div);
-            if ($elem.hasClass("wx-dropdownbutton-divider")) {
+        for (const div of optionsDiv.children) {
+            const elem = div;
+            if (elem.classList.contains("wx-dropdownbutton-divider")) {
                 options.push({ type: "divider" });
-            } else if ($elem.hasClass("wx-dropdownbutton-header")) {
+            } else if (elem.classList.contains("wx-dropdownbutton-header")) {
                 options.push({
                     type: "header",
-                    content: $elem.text().trim(),
-                    icon: $elem.data("icon") || null,
+                    content: elem.textContent.trim(),
+                    icon: elem.dataset.icon || null,
                 });
             } else {
                 options.push({
-                    id: $elem.attr("id") || null,
-                    image: $elem.data("image") || null,
-                    icon: $elem.data("icon") || null,
-                    linkColor: $elem.data("linkcolor") || null,
-                    uri: $elem.data("uri") || null,
-                    target: $elem.data("target") || null,
-                    tooltip: $elem.data("tooltip") || null,
-                    modal: $elem.data("modal") || null,
-                    content: $elem.text().trim() || null,
-                    disabled: $elem.is("[disabled]"),
+                    id: elem.id || null,
+                    image: elem.dataset.image || null,
+                    icon: elem.dataset.icon || null,
+                    linkColor: elem.dataset.linkcolor || null,
+                    uri: elem.dataset.uri || null,
+                    target: elem.dataset.target || null,
+                    tooltip: elem.dataset.tooltip || null,
+                    modal: elem.dataset.modal || null,
+                    content: elem.textContent.trim() || null,
+                    disabled: elem.hasAttribute("disabled"),
                 });
             }
-        });
-        
+        }
         return options;
     }
 
     /**
      * Parses column definitions from <div> elements with class 'wx-table-columns'.
-     * @param {jQuery} columnsDiv - The <div> elements inside 'wx-table-columns'.
+     * @param {HTMLElement} columnsDiv - The <div> with columns.
      * @returns {Array} Parsed column definitions.
      */
     _parseColumns(columnsDiv) {
-        const headerColor = columnsDiv.data("color") || null;
-
-        this._head.addClass(headerColor);
-
-        return columnsDiv.children("div").map((_, div) => {
-            const $div = $(div);
-            return {
-                label: $div.text().trim(),
-                icon: $div.data("icon") || null,
-                image: $div.data("image") || null,
-                color: $div.data("color") || null,
-                width: $div.attr("width") || null,
-                sort: $div.data("sort") || null,
-            };
-        }).get();
+        if (!columnsDiv) return [];
+        const headerColor = columnsDiv.dataset.color || null;
+        if (headerColor) this._head.classList.add(headerColor);
+        return Array.from(columnsDiv.children).map(div => ({
+            label: div.textContent.trim(),
+            icon: div.dataset.icon || null,
+            image: div.dataset.image || null,
+            color: div.dataset.color || null,
+            width: div.getAttribute("width") || null,
+            sort: div.dataset.sort || null,
+        }));
     }
 
     /**
      * Parses row data from <div> elements with class 'wx-table-row'.
-     * @param {jQuery} rowsDiv - The <div> elements inside 'wx-table-row'.
-     * @returns {Array} Parsed row data.
+     * @param {NodeList} rowsDivs - The NodeList of row divs.
+     * @returns {Array} Array of row data objects.
      */
-    _parseRows(rowsDiv) {
+    _parseRows(rowsDivs) {
         const rows = [];
-        rowsDiv.each((_, div) => {
-            const $div = $(div);
+        for (const div of rowsDivs) {
             const row = {
-                id: $div.attr("id") || null,
-                class: $div.attr("class") || null,
-                style: $div.attr("style") || null,
-                color: $div.data("color") || null,
+                id: div.id || null,
+                class: div.className || null,
+                style: div.getAttribute("style") || null,
+                color: div.dataset.color || null,
                 cells: [],
                 options: null
-            }; // Initialize row structure with cells and options
-
-            $div.children("div").each((index, cellDiv) => {
-                const $cell = $(cellDiv);
-
-                // Check if the current element contains options
-                if ($cell.hasClass("wx-table-options")) {
-                    // Reuse the existing _parseOptions method to handle options parsing
-                    row.options = this._parseOptions($cell);
+            };
+            for (const cellDiv of div.children) {
+                const cell = cellDiv;
+                if (cell.classList.contains("wx-table-options")) {
+                    row.options = this._parseOptions(cell);
                     this._hasOptions = true;
                 } else {
-                    // Parse regular cell data
                     row.cells.push({
-                        id: $cell.attr("id") || null,
-                        class: $cell.attr("class") || null,
-                        style: $cell.attr("style") || null,
-                        color: $cell.data("color") || null,
-                        text: $cell.text().trim(),
-                        image: $cell.data("image") || null,
-                        icon: $cell.data("icon") || null,
-                        uri: $cell.data("uri") || null,
-                        target: $cell.data("target") || null,
-                        modal: $cell.data("modal") || null
+                        id: cell.id || null,
+                        class: cell.className || null,
+                        style: cell.getAttribute("style") || null,
+                        color: cell.dataset.color || null,
+                        text: cell.textContent.trim(),
+                        image: cell.dataset.image || null,
+                        icon: cell.dataset.icon || null,
+                        uri: cell.dataset.uri || null,
+                        target: cell.dataset.target || null,
+                        modal: cell.dataset.modal || null
                     });
                 }
-            });
-
-            rows.push(row); // Add the processed row to the rows array
-        });
+            }
+            rows.push(row);
+        }
         return rows;
     }
 
     /**
      * Parses footer data from <div> elements with class 'wx-table-footer'.
-     * @param {jQuery} footerDiv - The <div> elements inside 'wx-table-footer'.
-     * @returns {Array} Parsed footer data.
+     * @param {HTMLElement} footerDiv - The <div> with footer rows.
+     * @returns {Array} Array of HTML for footer cells.
      */
     _parseFooter(footerDiv) {
-        return footerDiv.children("div").map((_, div) => {
-            return $(div).html().trim();
-        }).get();
+        if (!footerDiv) return [];
+        return Array.from(footerDiv.children).map(div => div.innerHTML.trim());
     }
 
     /**
      * Clears all columns, rows and footers from the table.
      */
     clear() {
-        this._col.empty();
-        this._head.empty();
-        this._body.empty();
-        this._foot.empty();
+        this._col.innerHTML = "";
+        this._head.innerHTML = "";
+        this._body.innerHTML = "";
+        this._foot.innerHTML = "";
     }
 
     /**
@@ -502,98 +422,95 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
      * @param {Object} column - The column object to sort by.
      */
     orderRows(column) {
-        // Find the index of the column object in the columns array
         const columnIndex = this._columns.indexOf(column);
-
-        // Validate the column index
-        if (columnIndex === -1) {
-            console.error(`Column not found: ${JSON.stringify(column)}`);
-            return;
-        }
-
-        // Sort the rows based on the specified column
+        if (columnIndex === -1) return;
         this._rows.sort((a, b) => {
-            // Extract the cells array from the row structure
             const cellsA = Array.isArray(a.cells) ? a.cells : Object.values(a.cells);
             const cellsB = Array.isArray(b.cells) ? b.cells : Object.values(b.cells);
-
-            // Get the cell values for the specified column index
             const cellA = cellsA[columnIndex]?.text || "";
             const cellB = cellsB[columnIndex]?.text || "";
-
-            // Perform sorting based on the column's sort direction
             if (column.sort === "asc") {
                 return cellA.localeCompare(cellB, undefined, { numeric: true });
             } else if (column.sort === "desc") {
                 return cellB.localeCompare(cellA, undefined, { numeric: true });
             } else {
-                console.error(`Invalid sort direction: ${column.sort}`);
                 return 0;
             }
         });
-
-        // Re-render the table to reflect the new row order
         this.render();
     }
 
     /**
      * Renders the table structure including columns, rows, and footer.
      */
-    render() {  
-        this._renderColumns(); // Render table header
-        this._renderRows();    // Render table body
-        this._renderFooter();  // Render table footer
+    render() {
+        this._renderColumns();
+        this._renderRows();
+        this._renderFooter();
     }
 
     /**
      * Renders the table headers (columns) including sort indicators.
      */
     _renderColumns() {
-        const headRow = $("<tr>");
-        this._col.empty();
-        this._head.empty().append(headRow);
+        const headRow = document.createElement("tr");
+        this._col.innerHTML = "";
+        this._head.innerHTML = "";
+        this._head.appendChild(headRow);
 
         if (this._movableRow) {
-            headRow.append($("<th>"));
-            this._col.append($("<col>").attr("style", "width: 1ch; max-width: 1ch; padding: 0;"));
+            headRow.appendChild(document.createElement("th"));
+            const col = document.createElement("col");
+            col.setAttribute("style", "width: 1ch; max-width: 1ch; padding: 0;");
+            this._col.appendChild(col);
         }
 
         this._columns.forEach((column) => {
-            const th = $("<th>")
-                .attr("draggable", true)
-                .addClass(column.color);
-            headRow.append(th);
+            const th = document.createElement("th");
+            th.draggable = true;
+            if (column.color) th.classList.add(column.color);
+            headRow.appendChild(th);
 
             if (column.icon) {
-                th.append($("<i>").addClass(column.icon));
+                const i = document.createElement("i");
+                i.className = column.icon;
+                th.appendChild(i);
             }
             if (column.image) {
-                th.append($("<img>").attr("src", column.image));
+                const img = document.createElement("img");
+                img.src = column.image;
+                th.appendChild(img);
             }
-            th.append(column.label);
+            th.appendChild(document.createTextNode(column.label));
 
-            const col = $("<col>");
-            if (column.width) {
-                col.attr("style", `width: ${column.width}px;`);
-            }
-            this._col.append(col);
-            
+            const col = document.createElement("col");
+            if (column.width) col.setAttribute("style", `width: ${column.width}px;`);
+            this._col.appendChild(col);
+
             this._enableDragAndDropColumn(th, column);
             this._enableResizableColumns(th, column);
             this._enableSortColumns(th, column);
         });
-        
-        // If options are present, add them as a dropdown cell
-        if (this._options?.length > 0) {
-            const div = $("<div class='' data-icon='fas fa-cog' data-size='btn-sm' data-border='false'>");
-            const dropdownContainer = new webexpress.webui.DropdownButtonCtrl(div[0]);
-            dropdownContainer.items = this._options;
-                
-            headRow.append($("<th style='overflow: visible;'>").append(div));
-            this._col.append($("<col>").attr("style", "width: 1em;"));
+
+        if (this._options && this._options.length > 0) {
+            const div = document.createElement("div");
+            div.className = "";
+            div.dataset.icon = "fas fa-cog";
+            div.dataset.size = "btn-sm";
+            div.dataset.border = "false";
+            new webexpress.webui.DropdownButtonCtrl(div).items = this._options;
+            const th = document.createElement("th");
+            th.style.overflow = "visible";
+            th.appendChild(div);
+            headRow.appendChild(th);
+            const col = document.createElement("col");
+            col.setAttribute("style", "width: 1em;");
+            this._col.appendChild(col);
         } else if (this._hasOptions) {
-            headRow.append($("<th>"));
-            this._col.append($("<col>").attr("style", "width: 1em;"));
+            headRow.appendChild(document.createElement("th"));
+            const col = document.createElement("col");
+            col.setAttribute("style", "width: 1em;");
+            this._col.appendChild(col);
         }
     }
 
@@ -601,88 +518,86 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
      * Renders the table rows (body).
      */
     _renderRows() {
-        this._body.empty();
+        this._body.innerHTML = "";
         this._rows.forEach(row => this._addRow(row));
     }
 
     /**
      * Adds a row to the table body.
-     * @param {Object} row - The row data containing cells and options.
+     * @param {Object} row - The row data.
      */
-     _addRow(row) {
-         const tr = $("<tr>")
-             .addClass(row.color);
+    _addRow(row) {
+        const tr = document.createElement("tr");
+        if (row.color) tr.classList.add(row.color);
 
-         // Check if the number of columns and cells matches
-         const cellCount = row.cells.length;
-         const colCount = this._columns.length;
+        const cellCount = row.cells.length;
+        const colCount = this._columns.length;
 
-         if (this._movableRow) {
-             // Create a draggable handle at the beginning of each row
-             const dragHandle = $("<td>")
-                 .addClass("wx-table-drag-handle")
-                 .text("☰");
-             tr.append(dragHandle);
-             this._enableDragAndDropRow(dragHandle, row);
-         }
+        if (this._movableRow) {
+            const dragHandle = document.createElement("td");
+            dragHandle.className = "wx-table-drag-handle";
+            dragHandle.textContent = "☰";
+            tr.appendChild(dragHandle);
+            this._enableDragAndDropRow(dragHandle, row);
+        }
 
-         // Iterate over the cells array within the row object
-         row.cells.forEach((cellData) => {
-             const td = $("<td>")
-                 .addClass(cellData.color, cellData.class)
-                 .attr("style", cellData.style);
+        row.cells.forEach((cellData) => {
+            const td = document.createElement("td");
+            if (cellData.color) td.classList.add(cellData.color);
+            if (cellData.class) td.classList.add(cellData.class);
+            if (cellData.style) td.setAttribute("style", cellData.style);
 
-             if (cellData.image) {
-                 td.append($("<img/>").attr("src", cellData.image));
-             }
-             if (cellData.icon) {
-                 td.append($("<i>").addClass(cellData.icon));
-             }
-             td.append(cellData.text || "");
-             tr.append(td);
-         });
+            if (cellData.image) {
+                const img = document.createElement("img");
+                img.src = cellData.image;
+                td.appendChild(img);
+            }
+            if (cellData.icon) {
+                const i = document.createElement("i");
+                i.className = cellData.icon;
+                td.appendChild(i);
+            }
+            td.appendChild(document.createTextNode(cellData.text || ""));
+            tr.appendChild(td);
+        });
 
-         // Fill missing cells with empty cells
-         if (cellCount < colCount) {
-             for (let i = cellCount; i < colCount; i++) {
-                 tr.append($("<td>"));
-             }
-         }
+        for (let i = cellCount; i < colCount; i++) {
+            tr.appendChild(document.createElement("td"));
+        }
 
-         // If options are present, add them as a dropdown cell
-         if (row.options?.length > 0) {
-             const div = $("<div data-icon='fas fa-cog' data-size='btn-sm' data-border='false'>");
-             const dropdownContainer = new webexpress.webui.DropdownButtonCtrl(div[0]);
-             dropdownContainer.items = row.options;
-
-             tr.append($("<td>").append(div));
-         } else if (this._hasOptions) {
-             tr.append($("<td>"));
-         }
-
-         this._body.append(tr);
-     }
+        if (row.options && row.options.length > 0) {
+            const div = document.createElement("div");
+            div.dataset.icon = "fas fa-cog";
+            div.dataset.size = "btn-sm";
+            div.dataset.border = "false";
+            new webexpress.webui.DropdownButtonCtrl(div).items = row.options;
+            const td = document.createElement("td");
+            td.appendChild(div);
+            tr.appendChild(td);
+        } else if (this._hasOptions) {
+            tr.appendChild(document.createElement("td"));
+        }
+        this._body.appendChild(tr);
+    }
 
     /**
      * Renders the table footer.
      */
     _renderFooter() {
-        this._foot.empty();
-        const tr = $("<tr>");
-        
+        this._foot.innerHTML = "";
+        const tr = document.createElement("tr");
         if (this._movableRow) {
-            tr.append($("<td>"));
+            tr.appendChild(document.createElement("td"));
         }
-        
         this._footer.forEach(rowData => {
-            tr.append($("<td>").html(rowData));
+            const td = document.createElement("td");
+            td.innerHTML = rowData;
+            tr.appendChild(td);
         });
-        
         if (this._hasOptions) {
-            tr.append($("<td>"));
+            tr.appendChild(document.createElement("td"));
         }
-        
-        this._foot.append(tr);
+        this._foot.appendChild(tr);
     }
 
     /**
@@ -691,13 +606,14 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
      * @param {number} targetIndex - The new index of the column.
      */
     _triggerColumnReorderEvent(sourceIndex, targetIndex) {
-        // Trigger a global event using $(document).trigger
-        $(document).trigger(webexpress.webui.Event.COLUMN_REORDER_EVENT, {
-            sender: this._element,
-            sourceIndex: sourceIndex,
-            targetIndex: targetIndex,
-            columns: this._columns, // Provide the updated column structure
-        });
+        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.COLUMN_REORDER_EVENT, {
+            detail: {
+                sender: this._element,
+                sourceIndex,
+                targetIndex,
+                columns: this._columns,
+            }
+        }));
     }
 };
 

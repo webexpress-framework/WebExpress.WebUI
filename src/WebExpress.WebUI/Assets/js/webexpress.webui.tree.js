@@ -6,9 +6,10 @@
  * - webexpress.webui.Event.MOVE_EVENT
  */
 webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
-    _dragover = null; // store the currently dragged node
-    _dragIndicator = null; // store the drag indicator element
-    _dragoverPosition = null; // store the current drag position (above, child, below)
+    // Store the currently dragged node, the drag indicator element, and the current drag position
+    _dragover = null;
+    _dragIndicator = null;
+    _dragoverPosition = null;
 
     /**
      * Constructor for initializing the tree control.
@@ -17,126 +18,114 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
     constructor(element) {
         super(element);
 
-        // Initialize properties
-        this._nodes = this._parseNodes($(element).children(".wx-tree-node"));
-        this._layout = $(element).data("layout") || null;
-        this._showIndicator = $(element).data("indicator") == false ? false : true;
-        this._movable = $(element).data("movable") || false;
-        this._container = $("<ul>").addClass(this._getLayoutClasses());
+        // Parse initial nodes and configuration from data attributes
+        this._nodes = this._parseNodes(Array.from(element.children).filter(e => e.classList.contains("wx-tree-node")));
+        this._layout = element.dataset.layout || null;
+        this._showIndicator = element.dataset.indicator === "false" ? false : true;
+        this._movable = element.dataset.movable === "true";
+        this._container = document.createElement("ul");
+        const layoutClasses = this._getLayoutClasses();
+        if (layoutClasses) this._container.className = layoutClasses;
 
         // Clean up the DOM element
-        $(element).empty().addClass("wx-tree").append(this._container);
+        element.innerHTML = "";
+        element.classList.add("wx-tree");
+        element.appendChild(this._container);
 
-        // Create the drag indicator element
-        this._dragIndicator = $("<div>")
-            .addClass("wx-tree-drag-indicator")
-            .hide(); // Initially hidden
-        $(element).append(this._dragIndicator);
+        // Create the drag indicator element (hidden initially)
+        this._dragIndicator = document.createElement("div");
+        this._dragIndicator.className = "wx-tree-drag-indicator";
+        this._dragIndicator.style.display = "none";
+        element.appendChild(this._dragIndicator);
 
-        // Render the tree
+        // Render the tree structure
         this.render();
     }
 
     /**
      * Enables drag and drop functionality for the tree.
      * @private
-     * @param {jQuery} element - The node element.
+     * @param {HTMLElement} element - The label container element.
      * @param {Object} node - The node object.
      */
     _enableDragAndDrop(element, node) {
-        // Attach dragstart, dragover, and drop handlers to tree nodes
-        element.attr("draggable", true);
+        // Make the element draggable
+        element.setAttribute("draggable", "true");
 
         // Handle drag start
-        element.on("dragstart", (event) => {
+        element.addEventListener("dragstart", (event) => {
             if (!event.ctrlKey) {
-                event.preventDefault(); // Prevent drag if Ctrl is not pressed
+                event.preventDefault(); // Only allow drag if Ctrl is pressed
                 return;
             }
-
             this._dragover = node;
-            event.originalEvent.dataTransfer.setData("text/plain", JSON.stringify(
-                {
-                    element: element,
-                    node: node.id,
-                }));
-
-            element.addClass("wx-dragging");
+            event.dataTransfer.setData("text/plain", JSON.stringify({
+                node: node.id,
+            }));
+            element.classList.add("wx-dragging");
         });
 
         // Handle drag over
-        element.on("dragover", (event) => {
+        element.addEventListener("dragover", (event) => {
             event.preventDefault(); // Allow dropping by preventing default behavior
 
             if (this._isChildNode(this._dragover, node)) {
                 // Prevent showing the indicator if the target node is a child of the dragged node
-                this._dragIndicator.hide();
+                this._dragIndicator.style.display = "none";
                 return;
             }
 
-            // Each node is divided into three areas: the top 25% for moving above the 
-            // element, the middle 50% for moving as a child, and the bottom 25% for 
-            // moving below the element.
-            const offset = element.offset();
-            const height = element.outerHeight();
-            const mouseY = event.originalEvent.pageY;
-
-            // Calculate the mouse position relative to the element
-            const relativeY = mouseY - offset.top;
+            // Each node is divided into three areas: top 25% (above), middle 50% (child), bottom 25% (below)
+            const rect = element.getBoundingClientRect();
+            const height = rect.height;
+            const mouseY = event.clientY;
+            const relativeY = mouseY - rect.top;
 
             if (relativeY < height * 0.25) {
                 // Top 25% of the element
-                this._dragIndicator
-                    .css({
-                        top: offset.top - 2, // Slightly above the top
-                        left: offset.left,
-                        width: element.outerWidth(),
-                    })
-                    .show();
-                element.removeClass("wx-drag-over");
+                this._dragIndicator.style.top = `${rect.top - 2 + window.scrollY}px`;
+                this._dragIndicator.style.left = `${rect.left + window.scrollX}px`;
+                this._dragIndicator.style.width = `${rect.width}px`;
+                this._dragIndicator.style.display = "block";
+                element.classList.remove("wx-drag-over");
                 this._dragoverPosition = "above";
             } else if (relativeY < height * 0.75) {
                 // Middle 50% of the element
-                this._dragIndicator.hide();
-                element.addClass("wx-drag-over");
+                this._dragIndicator.style.display = "none";
+                element.classList.add("wx-drag-over");
                 this._dragoverPosition = "child";
             } else {
                 // Bottom 25% of the element
-                this._dragIndicator
-                    .css({
-                        top: offset.top + height - 2, // Slightly below the bottom
-                        left: offset.left,
-                        width: element.outerWidth(),
-                    })
-                    .show();
-                element.removeClass("wx-drag-over");
+                this._dragIndicator.style.top = `${rect.top + height - 2 + window.scrollY}px`;
+                this._dragIndicator.style.left = `${rect.left + window.scrollX}px`;
+                this._dragIndicator.style.width = `${rect.width}px`;
+                this._dragIndicator.style.display = "block";
+                element.classList.remove("wx-drag-over");
                 this._dragoverPosition = "below";
             }
         });
 
         // Handle drag leave
-        element.on("dragleave", () => {
-            // Hide the drag indicator when leaving the target area
-            element.removeClass("wx-drag-over");
-            // Hide the drag indicator when leaving the target area
-            this._dragIndicator.hide();
+        element.addEventListener("dragleave", () => {
+            element.classList.remove("wx-drag-over");
+            this._dragIndicator.style.display = "none";
         });
 
         // Handle drop
-        element.on("drop", (event) => {
+        element.addEventListener("drop", (event) => {
             event.preventDefault();
-            const draggedData = JSON.parse(event.originalEvent.dataTransfer.getData("text/plain"));
+            const draggedData = JSON.parse(event.dataTransfer.getData("text/plain"));
             const draggedNode = this._findNodeById(draggedData.node);
             const targetNode = node;
 
             // Prevent moving a parent node into one of its children
             if (this._isChildNode(draggedNode, targetNode)) {
-                this._dragIndicator.hide();
-                element.removeClass("wx-drag-over");
+                this._dragIndicator.style.display = "none";
+                element.classList.remove("wx-drag-over");
                 return;
             }
 
-            if (draggedNode && targetNode && draggedNode != targetNode) {
+            if (draggedNode && targetNode && draggedNode !== targetNode) {
                 if (this._dragoverPosition === "above") {
                     this._insertNodeAbove(draggedNode, targetNode);
                 } else if (this._dragoverPosition === "child") {
@@ -146,15 +135,14 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 }
             }
 
-            this._dragIndicator.hide(); // Hide the drag indicator after dropping
+            this._dragIndicator.style.display = "none";
         });
 
         // Handle drag end
-        element.on("dragend", () => {
+        element.addEventListener("dragend", () => {
             this._dragover = null;
-            this._dragIndicator.hide(); // Hide the indicator when dragging ends
-            // Remove the dragging class from all columns
-            element.removeClass("wx-dragging wx-drag-over");
+            this._dragIndicator.style.display = "none";
+            element.classList.remove("wx-dragging", "wx-drag-over");
         });
     }
 
@@ -167,7 +155,6 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
      */
     _isChildNode(draggedNode, targetNode) {
         let currentNode = targetNode;
-
         // Traverse up the tree to check if the targetNode is a child of draggedNode
         while (currentNode) {
             if (currentNode === draggedNode) {
@@ -175,7 +162,6 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             }
             currentNode = currentNode.parent;
         }
-
         return false;
     }
 
@@ -187,7 +173,6 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
      */
     _insertNodeAbove(draggedNode, targetNode) {
         this._removeNodeFromCurrentPosition(draggedNode);
-
         const parent = targetNode.parent;
         if (parent) {
             const index = parent.children.indexOf(targetNode);
@@ -198,8 +183,18 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             this._nodes.splice(index, 0, draggedNode);
             draggedNode.parent = null;
         }
-
-        this.render(); // Re-render the tree
+        
+        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.MOVE_EVENT, {
+            detail: {
+                sender: this._element,
+                id: this._element.id,
+                node: draggedNode.id,
+                target: targetNode.id,
+                position: "above"
+            }
+        }));
+        
+        this.render();
     }
 
     /**
@@ -210,12 +205,21 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
      */
     _insertNodeAsChild(draggedNode, targetNode) {
         this._removeNodeFromCurrentPosition(draggedNode);
-
         targetNode.children = targetNode.children || [];
         targetNode.children.push(draggedNode);
         draggedNode.parent = targetNode;
-
-        this.render(); // Re-render the tree
+        
+        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.MOVE_EVENT, {
+            detail: {
+                sender: this._element,
+                id: this._element.id,
+                node: draggedNode.id,
+                target: targetNode.id,
+                position: "child"
+            }
+        }));
+        
+        this.render();
     }
 
     /**
@@ -226,7 +230,6 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
      */
     _insertNodeBelow(draggedNode, targetNode) {
         this._removeNodeFromCurrentPosition(draggedNode);
-
         const parent = targetNode.parent;
         if (parent) {
             const index = parent.children.indexOf(targetNode);
@@ -237,8 +240,18 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             this._nodes.splice(index + 1, 0, draggedNode);
             draggedNode.parent = null;
         }
-
-        this.render(); // Re-render the tree
+        
+        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.MOVE_EVENT, {
+            detail: {
+                sender: this._element,
+                id: this._element.id,
+                node: draggedNode.id,
+                target: targetNode.id,
+                position: "below"
+            }
+        }));
+        
+        this.render();
     }
 
     /**
@@ -248,188 +261,182 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
      */
     _removeNodeFromCurrentPosition(node) {
         if (node.parent) {
-            node.parent.children = node.parent.children.filter(
-                (child) => child !== node
-            );
+            node.parent.children = node.parent.children.filter(child => child !== node);
         } else {
-            this._nodes = this._nodes.filter((n) => n !== node);
+            this._nodes = this._nodes.filter(n => n !== node);
         }
     }
 
     /**
      * Parses child elements as tree nodes.
      * @private
-     * @param {jQuery} elements - The child elements to parse.
+     * @param {Array} elements - The child elements to parse.
      * @param {Object} [parentNode] - The parent node, optional for the root level.
      * @returns {Array} An array of parsed tree nodes.
      */
     _parseNodes(elements, parent = null) {
         const nodes = [];
-
-        elements.each((_, elem) => {
-            const $elem = $(elem);
+        elements.forEach(elem => {
             const node = {
-                id: $elem.attr("id") || null,
-                label: $elem.data("label") || "Unnamed",
-                iconOpen: $elem.data("icon-opened") || $elem.data("icon") || null,
-                iconClose: $elem.data("icon-closed") || $elem.data("icon") || null,
-                imageOpen: $elem.data("image-opened") || $elem.data("image") || null,
-                imageClose: $elem.data("image-closed") || $elem.data("image") || null,
-                active: $elem.data("active") || false,
-                color: $elem.data("color") || "",
-                expand: $elem.data("expand") === true,
-                url: $elem.data("uri") || null,
-                target: $elem.data("target") || null,
-                tooltip: $elem.data("tooltip") || null,
-                render: $elem.data("render") || null,
+                id: elem.id || null,
+                label: elem.dataset.label || "Unnamed",
+                iconOpen: elem.dataset.iconOpened || elem.dataset.icon || null,
+                iconClose: elem.dataset.iconClosed || elem.dataset.icon || null,
+                imageOpen: elem.dataset.imageOpened || elem.dataset.image || null,
+                imageClose: elem.dataset.imageClosed || elem.dataset.image || null,
+                active: elem.dataset.active === "true",
+                color: elem.dataset.color || "",
+                expand: elem.dataset.expand === "true",
+                url: elem.dataset.uri || null,
+                target: elem.dataset.target || null,
+                tooltip: elem.dataset.tooltip || null,
+                render: elem.dataset.render || null,
                 parent: parent
             };
-
             // Recursively parse children
-            node.children = this._parseNodes($elem.children(".wx-tree-node"), node);
-
+            node.children = this._parseNodes(Array.from(elem.children).filter(e => e.classList.contains("wx-tree-node")), node);
             nodes.push(node);
         });
-
         return nodes;
     }
 
     /**
      * Renders the tree structure with ARIA attributes.
      * @private
-     * @param {jQuery} container - The container for appending tree nodes.
+     * @param {HTMLElement} container - The container for appending tree nodes.
      * @param {Array} nodes - The tree node data to render.
      */
     _renderTree(container, nodes) {
-        container.empty(); // Clear existing content
-        container.attr("role", "tree"); // Set ARIA role for the container
+        
+        
+        // Clear existing content
+        container.innerHTML = "";
+        container.setAttribute("role", "tree");
 
-        nodes.forEach((node) => {
-            // Create the tree item
-            const li = $("<li>").attr("id", node.id)
-                .attr("role", "treeitem") // ARIA role for tree item
-                .attr("aria-expanded", node.expand || false) // Indicate expanded/collapsed state
-                .attr("aria-level", this._getNodeLevel(node)); // Indicate the nesting level
-            const div = $("<div>");
-            const ul = $("<ul>") // children
-                .addClass(this._getLayoutClasses())
-                .attr("role", "group"); // ARIA role for the group of children
+        nodes.forEach(node => {
+            const img = document.createElement("img");
+            const icon = document.createElement("i");
+            const li = document.createElement("li");
+            li.id = node.id || "";
+            li.setAttribute("role", "treeitem");
+            li.setAttribute("aria-expanded", node.expand ? "true" : "false");
+            li.setAttribute("aria-level", this._getNodeLevel(node));
 
+            // Add layout-specific classes
             switch (this._layout) {
                 case "wx-tree-group":
-                    li.addClass("list-group-item");
-                    break;
                 case "wx-tree-flush":
-                    li.addClass("list-group-item");
-                    break;
                 case "wx-tree-horizontal":
-                    li.addClass("list-group-item");
+                    li.classList.add("list-group-item");
                     break;
                 case "wx-tree-flat":
                     break;
                 default:
-                    li.addClass("wx-tree-node");
-                    break;
+                    li.classList.add("wx-tree-node");
             }
 
-            // If the node is selectable, add aria-selected
+            // Add aria-selected if selectable
             if (node.selectable) {
-                li.attr("aria-selected", node.selected || false);
+                li.setAttribute("aria-selected", node.selected ? "true" : "false");
             }
 
-            const labelContainer = node.url ? $("<a>") : $("<button>");
-            const img = $("<img/>");
-            const icon = $("<i>");
-
-            labelContainer
-                .addClass(node.color)
-                .addClass("wx-tree-label-container");
-
-            // Add image, icon, or label
+            // Create the label container (button or link)
+            const labelContainer = node.url ? document.createElement("a") : document.createElement("button");
+            labelContainer.className = `${node.color} wx-tree-label-container`;
             if (node.active) {
-                labelContainer
-                    .removeClass(node.color)
-                    .addClass("active");
+                labelContainer.className = "wx-tree-label-container active";
             }
 
-            labelContainer.click(() => {
-                $(document).trigger(webexpress.webui.Event.CLICK_EVENT, {
-                    sender: this._element,
-                    id: $(this._element).attr("id"),
-                    item: node
-                });
+            // Click handler for node selection
+            labelContainer.addEventListener("click", () => {
+                document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CLICK_EVENT, {
+                    detail: {
+                        sender: this._element,
+                        id: this._element.id,
+                        node: node.id
+                    }
+                }));
             });
 
-            // Handle expandable nodes
-            if (this._showIndicator && node.children?.length > 0) {
-                const indicator = $("<i>").addClass("wx-tree-indicator-angle");
-                div.append(indicator);
-                indicator.click(() => {
+            // Add indicator and expansion/collapse logic if necessary
+            let indicator;
+            if (this._showIndicator && node.children && node.children.length > 0) {
+                indicator = document.createElement("i");
+                indicator.className = "wx-tree-indicator-angle";
+                indicator.addEventListener("click", () => {
                     this._toggleNode(node, ul, icon, img, indicator);
                 });
-                if (!node.url) {
-                    labelContainer.click(() => {
-                        this._toggleNode(node, ul, icon, img, indicator);
-                    });
-                }
+                labelContainer.addEventListener("dblclick", () => {
+                    this._toggleNode(node, ul, icon, img, indicator);
+                });
                 if (node.expand) {
-                    indicator.addClass("wx-tree-expand");
-                    icon.removeClass(node.iconClose).addClass(node.iconOpen);
-                    img.attr("src", node.imageOpen);
+                    indicator.classList.add("wx-tree-expand");
+                    if (node.iconOpen && icon) {
+                        icon.className = ""; 
+                        icon.className = node.iconOpen;
+                    }
+                    if (node.imageOpen && img) img.src = node.imageOpen;
                 }
-            } else {
-                // Add leaf node indicator
-                if (this._showIndicator) {
-                    div.append($("<i>").addClass("wx-tree-indicator-dot"));
-                }
+            } else if (this._showIndicator) {
+                indicator = document.createElement("i");
+                indicator.className = "wx-tree-indicator-dot";
             }
 
+            // Render image and icon if present
+            if (node.imageOpen) {
+                img.src = node.expand ? node.imageOpen : node.imageClose;
+                labelContainer.appendChild(img);
+            }
+            
+            if (node.iconOpen) {
+                icon.className = node.expand ? node.iconOpen : node.iconClose;
+                labelContainer.appendChild(icon);
+            }
+
+            // Render label
             if (typeof node.render === "string") {
+                // Custom render logic
                 const render = new Function("node", node.render);
                 const renderResult = render(node);
-                if (renderResult) {
-                    labelContainer.append(renderResult);
+                if (renderResult instanceof Node) {
+                    labelContainer.appendChild(renderResult);
+                } else if (typeof renderResult === "string") {
+                    labelContainer.innerHTML += renderResult;
                 }
             } else {
-                if (node.imageOpen) {
-                    img.attr("src", node.expand ? node.imageOpen : node.imageClose);
-                    labelContainer.append(img);
-                }
-
-                if (node.iconOpen) {
-                    icon.addClass(node.expand ? node.iconOpen : node.iconClose);
-                    labelContainer.append(icon);
-                }
-
-                labelContainer.append($("<span>").text(node.label));
+                const span = document.createElement("span");
+                span.textContent = node.label;
+                labelContainer.appendChild(span);
             }
 
-            div.append(labelContainer);
-            li.append(div);
+            // Set link attributes if present
+            if (node.url) labelContainer.setAttribute("href", node.url);
+            if (node.target) labelContainer.setAttribute("target", node.target);
+            if (node.tooltip) labelContainer.setAttribute("title", node.tooltip);
 
-            // Handle expandable nodes
+            // Compose the node: indicator, label, and children
+            const div = document.createElement("div");
+            if (indicator) div.appendChild(indicator);
+            div.appendChild(labelContainer);
+            li.appendChild(div);
+
+            // Render child nodes if present and expanded
+            let ul = null;
             if (node.children && node.children.length > 0) {
-                li.append(ul);
+                ul = document.createElement("ul");
+                const layoutClasses = this._getLayoutClasses();
+                if (layoutClasses) ul.className = layoutClasses;
+                ul.setAttribute("role", "group");
                 if (node.expand) {
                     this._renderTree(ul, node.children);
                 }
+                li.appendChild(ul);
             }
 
-            if (node.url) {
-                labelContainer.attr("href", node.url);
-            }
+            // Add the node to the container
+            container.appendChild(li);
 
-            if (node.target) {
-                labelContainer.attr("target", node.target);
-            }
-
-            if (node.tooltip) {
-                labelContainer.attr("title", node.tooltip);
-            }
-
-            // Append the node to the container
-            container.append(li);
-
+            // Enable drag & drop if movable
             if (this._movable) {
                 this._enableDragAndDrop(labelContainer, node);
             }
@@ -455,31 +462,31 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
      * Toggles the expand/collapse state of a tree node.
      * @private
      * @param {Object} node - The tree node data.
-     * @param {jQuery} ul - The child container for the node's children.
-     * @param {jQuery} icon - The icon element for the node.
-     * @param {jQuery} img - The image element for the node.
-     * @param {jQuery} indicator - The indicator element for the node.
+     * @param {HTMLElement} ul - The child container for the node's children.
+     * @param {HTMLElement} icon - The icon element for the node.
+     * @param {HTMLElement} img - The image element for the node.
+     * @param {HTMLElement} indicator - The indicator element for the node.
      */
     _toggleNode(node, ul, icon, img, indicator) {
-        $(document).trigger(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT,
-            {
+        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
+            detail: {
                 sender: this._element,
-                id: $(this._element).attr("id"),
+                id: this._element.id,
                 node: node?.id
-            });
+            }
+        }));
 
         if (!node.expand) {
-            indicator.addClass("wx-tree-expand-animation");;
-            icon.removeClass(node.iconClose).addClass(node.iconOpen);
-            img.attr("src", node.imageOpen);
-            this._renderTree(ul, node.children);
+            if (indicator) indicator.classList.add("wx-tree-expand-animation");
+            if (icon && node.iconOpen) icon.className = node.iconOpen;
+            if (img && node.imageOpen) img.src = node.imageOpen;
+            if (ul) this._renderTree(ul, node.children);
         } else {
-            indicator.removeClass("wx-tree-expand wx-tree-expand-animation");
-            icon.removeClass(node.iconOpen).addClass(node.iconClose);
-            img.attr("src", node.imageClose);
-            ul.empty();
+            if (indicator) indicator.classList.remove("wx-tree-expand", "wx-tree-expand-animation");
+            if (icon && node.iconClose) icon.className = node.iconClose;
+            if (img && node.imageClose) img.src = node.imageClose;
+            if (ul) ul.innerHTML = "";
         }
-
         node.expand = !node.expand;
     }
 
@@ -491,31 +498,21 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
      * @returns {Object|null} The node with the matching ID, or null if not found.
      */
     _findNodeById(id, nodes = this._nodes) {
-        // Iterate through each node in the array
         for (const node of nodes) {
-            // Check if the current node's ID matches the target ID
-            if (node.id === id) {
-                return node; // Return the matching node
-            }
-
-            // If the node has children, search recursively
+            if (node.id === id) return node;
             if (node.children && node.children.length > 0) {
                 const result = this._findNodeById(id, node.children);
-                if (result) {
-                    return result; // Return the result if found in children
-                }
+                if (result) return result;
             }
         }
-
-        // Return null if the node with the ID is not found
         return null;
     }
 
     /**
-        * Returns the appropriate CSS classes for the tree layout.
-        * @private
-        * @returns {string|null} The CSS classes for the current layout, or null if no specific layout is set.
-        */
+     * Returns the appropriate CSS classes for the tree layout.
+     * @private
+     * @returns {string|null} The CSS classes for the current layout, or null if no specific layout is set.
+     */
     _getLayoutClasses() {
         switch (this._layout) {
             case "wx-tree-group":
@@ -530,7 +527,6 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 return null;
         }
     }
-
 
     /**
      * Refreshes the tree control by rendering the latest node structure.

@@ -5,6 +5,7 @@
  * - webexpress.webui.Event.CLICK_EVENT
  */
 webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
+    // Default values for page and count
     _page = 0;
     _count = 10;
 
@@ -15,15 +16,15 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
     constructor(element) {
         super(element);
 
-        // Initialize properties
-        this._page = $(element).data("page") || this._page;
-        this._count = $(element).data("total") || this._count;
+        // Initialize properties from data attributes or defaults
+        this._page = Number(element.dataset.page) || this._page;
+        this._count = Number(element.dataset.total) || this._count;
 
-        // Clean up the DOM element
-        $(element)
-            .empty()
-            .removeAttr("data-page data-pagecount")
-            .addClass("pagination wx-pagination");
+        // Clean up the DOM element and add base classes
+        element.innerHTML = "";
+        element.removeAttribute("data-page");
+        element.removeAttribute("data-pagecount");
+        element.classList.add("pagination", "wx-pagination");
 
         // Render the control
         this.render();
@@ -34,7 +35,10 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
      * Updates the DOM element based on the current properties.
      */
     render() {
-        $(this._element).children().remove();
+        // Remove all children from the pagination element
+        while (this._element.firstChild) {
+            this._element.removeChild(this._element.firstChild);
+        }
 
         if (this._count <= 0) {
             return;
@@ -42,33 +46,47 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
 
         // Add predecessor button
         const predecessor = this._createPageItem("<span class='fas fa-angle-left'></span>", Math.max(this._page - 1, 0));
-        $(this._element).append(predecessor);
+        this._element.appendChild(predecessor);
 
         // Add page items
         this._addPageItems();
 
         // Add successor button
         const successor = this._createPageItem("<span class='fas fa-angle-right'></span>", Math.min(this._page + 1, this._count - 1));
-        $(this._element).append(successor);
+        this._element.appendChild(successor);
     }
 
     /**
      * Helper to create a page item.
      * @param {string} content - The HTML content of the item.
      * @param {number} page - The page number associated with the item.
-     * @returns {jQuery} The page item element.
+     * @returns {HTMLElement} The page item element.
      */
     _createPageItem(content, page) {
-        const item = $("<li class='page-item'><a class='page-link' href='javascript:void(0)'>" + content + "</a></li>");
-        item.click(() => {
+        // Create list item
+        const li = document.createElement("li");
+        li.className = "page-item";
+        // Create anchor
+        const a = document.createElement("a");
+        a.className = "page-link";
+        a.href = "javascript:void(0)";
+        a.innerHTML = content;
+        li.appendChild(a);
+
+        // Add click handler
+        li.addEventListener("click", () => {
             this.page = page;
-            $(document).trigger(webexpress.webui.Event.CLICK_EVENT, {
-                sender: this._element,
-                id: $(this._element).attr("id"),
-                index: page
+            const clickEvent = new CustomEvent(webexpress.webui.Event.CLICK_EVENT, {
+                detail: {
+                    sender: this._element,
+                    id: this._element.id,
+                    index: page
+                }
             });
+            document.dispatchEvent(clickEvent);
         });
-        return item;
+
+        return li;
     }
 
     /**
@@ -108,19 +126,25 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
      * @param {boolean} isActive - Whether the page item is active.
      */
     _appendPageItem(page, isActive) {
-        const pageItem = this._createPageItem(page + 1, page);
+        const pageItem = this._createPageItem((page + 1).toString(), page);
         if (isActive) {
-            pageItem.addClass("active");
+            pageItem.classList.add("active");
         }
-        $(this._element).append(pageItem);
+        this._element.appendChild(pageItem);
     }
 
     /**
      * Helper to append an ellipsis item.
      */
     _appendEllipsis() {
-        const ellipsis = $("<li class='page-item disabled'><a class='page-link' href='javascript:void(0)'>…</a></li>");
-        $(this._element).append(ellipsis);
+        const li = document.createElement("li");
+        li.className = "page-item disabled";
+        const a = document.createElement("a");
+        a.className = "page-link";
+        a.href = "javascript:void(0)";
+        a.textContent = "…";
+        li.appendChild(a);
+        this._element.appendChild(li);
     }
 
     /**
@@ -143,11 +167,14 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
             this._page = value;
 
             // Trigger a page change event
-            $(document).trigger(webexpress.webui.Event.CHANGE_PAGE_EVENT, {
-                sender: this._element,
-                id: $(this._element).attr("id"),
-                page: this._page
+            const changeEvent = new CustomEvent(webexpress.webui.Event.CHANGE_PAGE_EVENT, {
+                detail: {
+                    sender: this._element,
+                    id: this._element.id,
+                    page: this._page
+                }
             });
+            document.dispatchEvent(changeEvent);
 
             // Re-render the control
             this.render();

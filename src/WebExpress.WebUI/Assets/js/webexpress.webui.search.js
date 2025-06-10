@@ -7,6 +7,7 @@
  * - webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT
  */
 webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
+    // holds the current search value
     _value = "";
 
     /**
@@ -16,54 +17,56 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
     constructor(element) {
         super(element);
 
-        // Extract attributes and child elements for configuration
-        const name = $(element).attr("name");
-        const placeholder = $(element).attr("placeholder") || null;
-        const icon = $(element).data("icon") || "fas fa-search";
-        const suggestions = this._extractSuggestions($(element));
-        const footer = $(element).find(".wx-search-footer").html();
-        this._favorited = $(element).data("favorited") || false;
-        this._value = $(element).data("value") || "";
+        // extract configuration from DOM attributes and children
+        const name = element.getAttribute("name");
+        const placeholder = element.getAttribute("placeholder") || null;
+        const icon = element.dataset.icon || "fas fa-search";
+        const suggestions = this._extractSuggestions(element);
+        const footerElem = element.querySelector(".wx-search-footer");
+        const footer = footerElem ? footerElem.innerHTML : null;
+        this._favorited = element.dataset.favorited === "true";
+        this._value = element.dataset.value || "";
 
-        // Build the search components
+        // Build the search UI
         this._searchBox = this._createSearchBox();
         this._searchIcon = this._createSearchIcon(icon);
         this._searchInput = this._createSearchInput(name, placeholder);
-        this._searchClear = this._createSearchClearButton(this._searchInput);
-        this._suggestionMenu = this._createSuggestionMenu(this._searchInput, suggestions, footer);
+        this._searchClear = this._createSearchClearButton();
+        this._suggestionMenu = this._createSuggestionMenu(suggestions, footer);
 
-        this._searchBox
-            .append(this._searchIcon, this._searchInput, this._searchClear)
-            .addClass("form-control");
+        this._searchBox.classList.add("form-control");
+        this._searchBox.appendChild(this._searchIcon);
+        this._searchBox.appendChild(this._searchInput);
+        this._searchBox.appendChild(this._searchClear);
 
-        // Clean up the DOM element and append components to the element
-        $(this._element)
-            .removeAttr("name placeholder data-favorited")
-            .empty()
-            .append(this._searchBox, this._suggestionMenu)
-            .addClass("wx-search");
+        // clean up DOM and add built elements
+        element.removeAttribute("name");
+        element.removeAttribute("placeholder");
+        element.removeAttribute("data-favorited");
+        element.innerHTML = "";
+        element.classList.add("wx-search");
+        element.appendChild(this._searchBox);
+        element.appendChild(this._suggestionMenu);
 
-        // Attach the suggestion box using Popper.js
-        this._initializePopper(this._searchBox[0], this._suggestionMenu);
+        // set up popper for the suggestion menu
+        this._initializePopper(this._searchBox, this._suggestionMenu);
     }
 
     /**
      * Extracts suggestions from child <div> elements with the class "wx-search-suggestion".
-     * @param {jQuery} container - The container element to extract suggestions from.
+     * @param {HTMLElement} container - The container element to extract suggestions from.
      * @returns {Array<Object>} An array of suggestion objects.
      */
     _extractSuggestions(container) {
         const suggestions = [];
-        container.children("div.wx-search-suggestion").each((_, child) => {
-            const $child = $(child);
-
+        container.querySelectorAll("div.wx-search-suggestion").forEach(child => {
             suggestions.push({
-                id: $child.attr("id") || null,
-                label: $child.text().trim(),
-                icon: $child.data("icon") || null,
-                image: $child.data("image") || null,
-                color: $child.data("color") || null,
-                favorited: $child.data("favorited") === true,
+                id: child.id || null,
+                label: child.textContent.trim(),
+                icon: child.dataset.icon || null,
+                image: child.dataset.image || null,
+                color: child.dataset.color || null,
+                favorited: child.dataset.favorited === "true"
             });
         });
         return suggestions;
@@ -71,48 +74,55 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
 
     /**
      * Creates the search box element.
-     * @returns {jQuery} The search box element.
+     * @returns {HTMLElement} The search box element.
      */
     _createSearchBox() {
-        const searchBox = $("<div>");
-
-        $(document).click((e) => {
-            if (!searchBox[0].contains(e.target) && !this._suggestionMenu[0].contains(e.target)) {
-                this._suggestionMenu.trigger("hide").hide();
+        const searchBox = document.createElement("div");
+        // close suggestion menu if clicked outside
+        document.addEventListener("click", (e) => {
+            if (!searchBox.contains(e.target) && !this._suggestionMenu.contains(e.target)) {
+                this._suggestionMenu.style.display = "none";
+                this._triggerDropdownHidden();
             }
         });
-
         return searchBox;
     }
 
     /**
      * Creates the search icon element.
      * @param {string} iconClass - The CSS class for the icon.
-     * @returns {jQuery} The search icon element.
+     * @returns {HTMLElement} The search icon element.
      */
     _createSearchIcon(iconClass) {
-        return $("<label>").append($("<i>").addClass(iconClass));
+        const label = document.createElement("label");
+        const icon = document.createElement("i");
+        icon.className = iconClass;
+        label.appendChild(icon);
+        return label;
     }
 
     /**
      * Creates the search input field.
      * @param {string} name - The name for the input field.
      * @param {string} placeholder - The placeholder text for the input field.
-     * @returns {jQuery} The search input element.
+     * @returns {HTMLElement} The search input element.
      */
     _createSearchInput(name, placeholder) {
-        const searchInput = $("<input>")
-            .attr({
-                type: "text",
-                name: name,
-                placeholder: placeholder,
-                "aria-label": placeholder,
-            })
-            .val(this._value);
+        const searchInput = document.createElement("input");
+        searchInput.type = "text";
+        if (name) searchInput.name = name;
+        if (placeholder) {
+            searchInput.placeholder = placeholder;
+            searchInput.setAttribute("aria-label", placeholder);
+        }
+        searchInput.value = this._value;
 
-        // Trigger the filter change event on keyup
-        searchInput.keyup(() => {
-            this.value = searchInput.val();
+        // update value on input
+        searchInput.addEventListener("keyup", () => {
+            this.value = searchInput.value;
+        });
+        searchInput.addEventListener("input", () => {
+            this._refreshSuggestions();
         });
 
         return searchInput;
@@ -120,148 +130,199 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
 
     /**
      * Creates the clear button for the search field.
-     * @param {jQuery} searchInput - The input element to clear.
-     * @returns {jQuery} The clear button element.
+     * @returns {HTMLElement} The clear button element.
      */
-    _createSearchClearButton(searchInput) {
-        const searchClear = $("<span>").append($("<i>").addClass("fas fa-times"));
-
-        // Clear the input and trigger the filter change event on click
-        searchClear.click(() => {
+    _createSearchClearButton() {
+        const searchClear = document.createElement("span");
+        const icon = document.createElement("i");
+        icon.className = "fas fa-times";
+        searchClear.appendChild(icon);
+        searchClear.style.cursor = "pointer";
+        searchClear.addEventListener("click", () => {
             this.value = "";
+            this._searchInput.focus();
+            this._refreshSuggestions();
         });
-
         return searchClear;
     }
 
     /**
      * Creates the suggestion dropdown box with a separator for favorited suggestions.
-     * @param {jQuery} searchInput - The input element to bind suggestions to.
      * @param {Array<Object>} suggestions - An array of suggestion objects.
-     * @param {jQuery} footer - Footer element to display additional information.
-     * @returns {jQuery} The suggestion container element.
+     * @param {string|null} footer - Footer HTML to display additional information.
+     * @returns {HTMLElement} The suggestion container element.
      */
-    _createSuggestionMenu(searchInput, suggestions, footer) {
-        const suggestionBox = $("<ul>");
-        const suggestionMenu = $("<div class='dropdown-menu'>").append(suggestionBox);
+    _createSuggestionMenu(suggestions, footer) {
+        const suggestionMenu = document.createElement("div");
+        suggestionMenu.className = "dropdown-menu";
+        suggestionMenu.style.display = "none";
 
-        // Event listener for input changes in the search field
-        searchInput.on("input", () => {
-            const query = searchInput.val().toLowerCase();
-            suggestionBox.empty();
+        const suggestionBox = document.createElement("ul");
+        suggestionMenu.appendChild(suggestionBox);
 
-            // Separate suggestions into favorited and non-favorited
-            const favoritedSuggestions = suggestions.filter((item) => item.favorited);
-            const nonFavoritedSuggestions = suggestions.filter((item) => !item.favorited);
+        // store for use in _refreshSuggestions
+        this._suggestions = suggestions;
+        this._suggestionBox = suggestionBox;
 
-            // Function to create a suggestion item
-            const createSuggestionItem = (suggestion) => {
-                const suggestionItem = $("<li class='dropdown-item'>");
-                const suggestionContainer = $("<a href='#'>");
-                const suggestionLabel = $("<span>")
-                    .text(suggestion.label)
-                    .addClass(suggestion.color || ""); // Apply color if specified
-
-                // Add icon or image if available
-                if (suggestion.icon) {
-                    suggestionContainer.append($("<i>").addClass(suggestion.icon));
-                }
-                if (suggestion.image) {
-                    suggestionContainer.append($("<img>").attr("src", suggestion.image));
-                }
-
-                // Add label
-                suggestionContainer.append(suggestionLabel);
-
-                // Append the suggestionContainer
-                suggestionItem.append(suggestionContainer);
-
-                if (this._favorited) {
-                    // Add a star icon for favoriting
-                    const favoriteIcon = $("<i>")
-                        .addClass(suggestion.favorited ? "fas fa-star text-warning" : "far fa-star text-muted")
-                        .click((event) => {
-                            event.stopPropagation(); // Prevent triggering the suggestion selection
-                            suggestion.favorited = !suggestion.favorited; // Toggle favorite status
-
-                            // Trigger the CHANGE_FAVORITE_EVENT
-                            $(document).trigger(webexpress.webui.Event.CHANGE_FAVORITE_EVENT, {
-                                sender: this._element,
-                                id: suggestion.id,
-                                label: suggestion.label,
-                                favorited: suggestion.favorited,
-                            });
-
-                            searchInput.trigger("input"); // Refresh the suggestion list
-                        });
-
-                    // Append the star icon to the suggestion item
-                    suggestionItem.append(favoriteIcon);
-                }
-
-                // Handle click on the suggestion item
-                suggestionItem.click(() => {
-                    this.value = suggestion.label; // Set the selected suggestion as the input value
-                    suggestionMenu.trigger("hide").hide(); // Hide the suggestion box
-                    searchInput.focus(); // Refocus the input field
-                });
-
-                return suggestionItem;
-            };
-
-            // Always render favorited suggestions
-            favoritedSuggestions.forEach((suggestion) => {
-                suggestionBox.append(createSuggestionItem(suggestion));
-            });
-
-            // Add a horizontal separator if there are non-favorited suggestions
-            if (nonFavoritedSuggestions.length > 0) {
-                suggestionBox.append($("<li>").addClass("dropdown-divider"));
-            }
-
-            // Render non-favorited suggestions that match the query
-            nonFavoritedSuggestions
-                .filter((item) => item.label.toLowerCase().includes(query))
-                .forEach((suggestion) => {
-                    suggestionBox.append(createSuggestionItem(suggestion));
-                });
-
-            // Show the suggestion box if there are any suggestions, otherwise hide it
-            if (suggestionBox.children().length > 0) {
-                suggestionMenu.css("display", "flex").trigger("show");
-            }
-        });
-
-        // Append footer if present
         if (footer) {
-            suggestionMenu.append($("<footer>").html(footer));
+            const footerElem = document.createElement("footer");
+            footerElem.innerHTML = footer;
+            suggestionMenu.appendChild(footerElem);
         }
+
+        // open on focus
+        this._searchInput.addEventListener("focus", () => {
+            this._refreshSuggestions();
+        });
 
         return suggestionMenu;
     }
 
-    /** 
-     * Getter method for retrieving the current value of the search input.
-     * @returns {string} Returns the value of the search input field
+    /**
+     * Updates the suggestion box based on the current input value.
+     */
+    _refreshSuggestions() {
+        const query = (this._searchInput.value || "").toLowerCase();
+        const suggestionBox = this._suggestionBox;
+        suggestionBox.innerHTML = "";
+
+        // split suggestions into favorited and non-favorited
+        const favoritedSuggestions = this._suggestions.filter(item => item.favorited);
+        const nonFavoritedSuggestions = this._suggestions.filter(item => !item.favorited);
+
+        // helper to create a suggestion item
+        const createSuggestionItem = (suggestion) => {
+            const suggestionItem = document.createElement("li");
+            suggestionItem.className = "dropdown-item";
+            const container = document.createElement("a");
+            container.href = "#";
+            // icon or image
+            if (suggestion.icon) {
+                const icon = document.createElement("i");
+                icon.className = suggestion.icon;
+                container.appendChild(icon);
+            }
+            if (suggestion.image) {
+                const img = document.createElement("img");
+                img.src = suggestion.image;
+                container.appendChild(img);
+            }
+            // label
+            const label = document.createElement("span");
+            label.textContent = suggestion.label;
+            if (suggestion.color) label.className = suggestion.color;
+            container.appendChild(label);
+
+            suggestionItem.appendChild(container);
+
+            // star for favoriting
+            if (this._favorited) {
+                const favoriteIcon = document.createElement("i");
+                favoriteIcon.className = suggestion.favorited ? "fas fa-star text-warning" : "far fa-star text-muted";
+                favoriteIcon.style.cursor = "pointer";
+                favoriteIcon.addEventListener("click", (event) => {
+                    event.stopPropagation();
+                    suggestion.favorited = !suggestion.favorited;
+
+                    // fire CHANGE_FAVORITE_EVENT
+                    document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_FAVORITE_EVENT, {
+                        detail: {
+                            sender: this._element,
+                            id: suggestion.id,
+                            label: suggestion.label,
+                            favorited: suggestion.favorited
+                        }
+                    }));
+                    this._refreshSuggestions();
+                });
+                suggestionItem.appendChild(favoriteIcon);
+            }
+
+            suggestionItem.addEventListener("click", (event) => {
+                event.preventDefault();
+                this.value = suggestion.label;
+                this._suggestionMenu.style.display = "none";
+                this._triggerDropdownHidden();
+                this._searchInput.focus();
+            });
+            return suggestionItem;
+        };
+
+        // render favorited suggestions always
+        favoritedSuggestions.forEach(suggestion => {
+            suggestionBox.appendChild(createSuggestionItem(suggestion));
+        });
+
+        // separator if both types exist
+        if (favoritedSuggestions.length > 0 && nonFavoritedSuggestions.length > 0) {
+            const divider = document.createElement("li");
+            divider.className = "dropdown-divider";
+            suggestionBox.appendChild(divider);
+        }
+
+        // render non-favorited suggestions that match query
+        nonFavoritedSuggestions
+            .filter(item => item.label.toLowerCase().includes(query))
+            .forEach(suggestion => {
+                suggestionBox.appendChild(createSuggestionItem(suggestion));
+            });
+
+        if (suggestionBox.children.length > 0) {
+            this._suggestionMenu.style.display = "flex";
+            this._triggerDropdownShow();
+        } else {
+            this._suggestionMenu.style.display = "none";
+            this._triggerDropdownHidden();
+        }
+    }
+
+    /**
+     * Triggers the DROPDOWN_SHOW_EVENT.
+     */
+    _triggerDropdownShow() {
+        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_SHOW_EVENT, {
+            detail: {
+                sender: this._element,
+                id: this._element.id
+            }
+        }));
+    }
+
+    /**
+     * Triggers the DROPDOWN_HIDDEN_EVENT.
+     */
+    _triggerDropdownHidden() {
+        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
+            detail: {
+                sender: this._element,
+                id: this._element.id
+            }
+        }));
+    }
+
+    /**
+     * Gets the current value of the search input.
+     * @returns {string} The value of the search input field.
      */
     get value() {
         return this._value;
     }
 
     /**
-     * Setter method for updating the value of the search input and triggers events.
+     * Sets the value of the search input and triggers a filter change event.
+     * @param {string} value - The new value to set.
      */
     set value(value) {
         if (this._value !== value) {
             this._value = value;
-            this._searchInput.val(value); // Update the search input field with the new value
-            // Trigger a custom event to notify about the value change, passing the new value
-            $(document).trigger(webexpress.webui.Event.CHANGE_FILTER_EVENT,
-                {
+            this._searchInput.value = value;
+            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_FILTER_EVENT, {
+                detail: {
                     sender: this._element,
-                    id: $(this._element).attr("id"),
+                    id: this._element.id,
                     value: value
-                });
+                }
+            }));
         }
     }
 };

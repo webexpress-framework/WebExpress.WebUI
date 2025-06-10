@@ -26,7 +26,4 @@ webexpress.webui.ModalConfirmDelete = class extends webexpress.webui.ModalConfir
             this._confirmButton.textContent = "Delete";
         }
     }
-};
-
-// Register the class in the controller
-webexpress.webui.Controller.registerClass("wx-webui-modalconfirmdelete", webexpress.webui.ModalConfirmDelete);
+}

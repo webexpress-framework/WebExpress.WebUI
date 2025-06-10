@@ -11,28 +11,34 @@ webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
     constructor(element) {
         super(element);
 
-        // Initialize properties
-        this._label = $(element).text() || "";
-        this._icon = $(element).data("icon") || null;
-        this._image = $(element).data("image") || null;
-        this._color = $(element).data("color") || null;
-        this._size = $(element).data("size") || null;
+        // Initialize properties from data attributes or element content
+        this._label = element.textContent || "";
+        this._icon = element.dataset.icon || null;
+        this._image = element.dataset.image || null;
+        this._color = element.dataset.color || null;
+        this._size = element.dataset.size || null;
 
-        // Clean up the DOM element
-        $(element).empty()
-            .removeAttr("data-icon data-image data-color")
-            .addClass("btn wx-button")
-            .addClass(this._size);
+        // Clean up the DOM element and set base classes for styling
+        element.innerHTML = "";
+        element.removeAttribute("data-icon");
+        element.removeAttribute("data-image");
+        element.removeAttribute("data-color");
+        element.classList.add("btn", "wx-button");
+        if (this._size) {
+            element.classList.add(this._size);
+        }
 
-        // Render the button
+        // Render the button UI
         this.render();
 
         // Attach the click event listener
-        $(element).click(() => {
-            $(document).trigger(webexpress.webui.Event.CLICK_EVENT, {
-                sender: this._element,
-                id: $(this._element).attr("id") || null
-            });
+        element.addEventListener("click", () => {
+            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CLICK_EVENT, {
+                detail: {
+                    sender: this._element,
+                    id: this._element.id || null
+                }
+            }));
         });
     }
 
@@ -96,23 +102,29 @@ webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
      */
     render() {
         // Clear existing content
-        $(this._element).empty();
+        this._element.innerHTML = "";
 
         // Append image if defined
         if (this._image) {
-            const img = $("<img>").attr("src", this._image);
-            $(this._element).append(img);
+            const img = document.createElement("img");
+            img.src = this._image;
+            this._element.appendChild(img);
         }
 
         // Append icon if defined
         if (this._icon) {
-            const icon = $("<i>").addClass(this._icon);
-            $(this._element).append(icon);
+            const icon = document.createElement("i");
+            // Add all icon classes (supporting multiple)
+            this._icon.split(" ").forEach(cls => {
+                if (cls.trim()) icon.classList.add(cls.trim());
+            });
+            this._element.appendChild(icon);
         }
 
         // Append label
-        const buttonText = $("<span>").text(this._label);
-        $(this._element).append(buttonText);
+        const buttonText = document.createElement("span");
+        buttonText.textContent = this._label;
+        this._element.appendChild(buttonText);
 
         // Update color classes
         this._updateColorClass();
@@ -123,12 +135,14 @@ webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
      * Removes any existing color classes and applies the new color.
      */
     _updateColorClass() {
-        $(this._element).removeClass((_, className) => {
-            return (className.match(/(^|\s)btn-\S+/g) || []).join(" ");
-        });
-
+        // Remove all classes starting with 'btn-' (such as Bootstrap classes)
+        this._element.className = this._element.className
+            .split(" ")
+            .filter(cls => !/^btn-\S+/.test(cls))
+            .join(" ");
+        // Add new color class if specified
         if (this._color) {
-            $(this._element).addClass(this._color);
+            this._element.classList.add(this._color);
         }
     }
 };

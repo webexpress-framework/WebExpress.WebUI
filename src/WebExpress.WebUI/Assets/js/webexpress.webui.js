@@ -19,19 +19,22 @@ webexpress.webui.Controller = new class {
         this.overrideCreateElement();
         this.initModalHandler();
     }
-    
+
     /**
-     * Initializes modal handling using custom attributes
+     * Initializes modal handling using custom attributes (Vanilla JS version)
      */
     initModalHandler() {
-        const controller = this; // Preserve reference to Controller instance
-        
-        $(document).ready(() => {
-            // Open modal when clicking an element with data-wx-toggle="modal"
-            $("[data-wx-toggle='modal']").click(function() {
-                const target = $(this).attr("data-wx-target"); // Get the target modal ID
-                const instance = controller.getInstance(target);
-                instance?.show(); // Show modal
+        // wait for DOMContentLoaded event to ensure DOM is ready
+        document.addEventListener("DOMContentLoaded", () => {
+            // open modal when clicking an element with data-wx-toggle="modal"
+            document.querySelectorAll("[data-wx-toggle='modal']").forEach(el => {
+                el.addEventListener("click", () => {
+                    const target = el.getAttribute("data-wx-target");
+                    const instance = this.getInstance(target);
+                    if (instance && typeof instance.show === "function") {
+                        instance.show();
+                    }
+                });
             });
         });
     }
@@ -42,14 +45,13 @@ webexpress.webui.Controller = new class {
      */
     handleMutations(mutationsList) {
         for (const mutation of mutationsList) {
-            // Handle added nodes
+            // handle added nodes
             for (const node of mutation.addedNodes) {
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     this.createInstances(node);
                 }
             }
-
-            // Handle removed nodes
+            // handle removed nodes
             for (const node of mutation.removedNodes) {
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     this.removeInstances(node);
@@ -85,7 +87,8 @@ webexpress.webui.Controller = new class {
         if (this.instanceMap.has(element)) {
             this.instanceMap.delete(element);
         }
-        $(element).find('*').each((_, child) => {
+        // remove instances for all descendants
+        element.querySelectorAll('*').forEach(child => {
             if (this.instanceMap.has(child)) {
                 this.instanceMap.delete(child);
             }
@@ -108,12 +111,12 @@ webexpress.webui.Controller = new class {
         const originalCreateElement = document.createElement.bind(document);
         document.createElement = (tagName, options) => {
             const element = originalCreateElement(tagName, options);
-            // Create instances for the newly created element
+            // create instances for the newly created element
             this.createInstances(element);
             return element;
         };
     }
-    
+
     /**
      * Retrieves an instance based on a CSS selector (ID or class).
      * @param {string} selector - The CSS selector for the DOM element (e.g., "#elementId" or ".className").
@@ -121,21 +124,17 @@ webexpress.webui.Controller = new class {
      * @returns {Object|null} - The instance associated with the element, or null if not found or type mismatch.
      */
     getInstance(selector, ClassConstructor) {
-        const $element = $(selector); // Use jQuery to select either an ID or class
-        
-        if ($element.length > 0 && this.instanceMap.has($element[0])) {
-            const instance = this.instanceMap.get($element[0]);
-
-            // If ClassConstructor is provided, verify the instance type.
+        const element = document.querySelector(selector);
+        if (element && this.instanceMap.has(element)) {
+            const instance = this.instanceMap.get(element);
             if (ClassConstructor) {
                 return instance instanceof ClassConstructor ? instance : null;
             }
-
             return instance;
         }
         return null;
     }
-    
+
     /**
      * Retrieves an instance based on a DOM element.
      * @param {HTMLElement} element - The DOM element.
@@ -143,17 +142,119 @@ webexpress.webui.Controller = new class {
      * @returns {Object|null} - The instance associated with the element, or null if not found or type mismatch.
      */
     getInstanceByElement(element, ClassConstructor) {
-        // Check if the element exists in the instanceMap
         if (this.instanceMap.has(element)) {
             const instance = this.instanceMap.get(element);
-
-            // If ClassConstructor is provided, verify the instance type.
             if (ClassConstructor) {
                 return instance instanceof ClassConstructor ? instance : null;
             }
             return instance;
         }
         return null;
+    }
+}
+
+/**
+ * Internationalization (i18n) helper class supporting key=value files.
+ */
+webexpress.webui.I18N = new class {
+    /**
+     * Creates an instance of the I18N class.
+     * The language is automatically determined from the browser, but can be overridden.
+     * @param {string} [language] - Optional language code (e.g., "en" or "de").
+     */
+    constructor(language) {
+        // Determine language from browser if not provided
+        this.language = language || this._detectBrowserLanguage();
+        this.translations = {};
+        // Load translations immediately
+        this._loadTranslations(this.language);
+    }
+
+    /**
+     * Detects the user's preferred language from the browser.
+     * Only the primary language code is used (e.g., "en" from "en-US").
+     * @returns {string} The detected language code, defaults to "en" if not available.
+     */
+    _detectBrowserLanguage() {
+        if (navigator.language) {
+            return navigator.language.split('-')[0].toLowerCase();
+        }
+        if (navigator.languages && navigator.languages.length > 0) {
+            return navigator.languages[0].split('-')[0].toLowerCase();
+        }
+        return "en";
+    }
+
+    /**
+     * Loads translations for supported languages.
+     * For each language, tries to load a key=value (.properties) file and parses it.
+     * Populates the internal translations object.
+     * @returns {Promise<void>}
+     */
+    _loadTranslations() {
+        const langs = ["en", "de"];
+        for (const lang of langs) {
+            try {
+                const response = fetch(`${window.location.origin}/assets/js/i18n/${lang}`);
+                if (!response.ok) throw new Error("Not found");
+                const text = response.text();
+                this.translations[lang] = this._parseProperties(text);
+            } catch (err) {
+                this.translations[lang] = {};
+            }
+        }
+    }
+
+    /**
+     * Parses a .properties file (key=value) string into an object.
+     * Ignores comments (# or !) and empty lines.
+     * @param {string} text - The contents of the .properties file.
+     * @returns {Object} An object containing key-value pairs.
+     */
+    _parseProperties(text) {
+        const result = {};
+        text.split(/\r?\n/).forEach(line => {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith("#") || trimmed.startsWith("!")) return;
+            const eq = trimmed.indexOf("=");
+            if (eq > -1) {
+                const key = trimmed.substring(0, eq).trim();
+                const value = trimmed.substring(eq + 1).trim();
+                result[key] = value;
+            }
+        });
+        return result;
+    }
+
+    /**
+     * Sets the current language for translations.
+     * @param {string} language - The language code (e.g., "en" or "de").
+     */
+    setLanguage(language) {
+        this.language = language;
+    }
+
+    /**
+     * Returns the translation for the given key in the current language.
+     * Falls back to English if the key does not exist in the selected language.
+     * Returns the key itself if no translation is found.
+     * @param {string} key - The translation key.
+     * @returns {string} The translated string or the key if not found.
+     */
+    translate(key) {
+        if (
+            this.translations[this.language] &&
+            Object.prototype.hasOwnProperty.call(this.translations[this.language], key)
+        ) {
+            return this.translations[this.language][key];
+        }
+        if (
+            this.translations["en"] &&
+            Object.prototype.hasOwnProperty.call(this.translations["en"], key)
+        ) {
+            return this.translations["en"][key];
+        }
+        return key;
     }
 }
 
@@ -208,9 +309,10 @@ webexpress.webui.Ctrl = class {
      */
     _detachElement(element) {
         if (!element) return null;
-
         // Remove the element from the DOM, keeping its event listeners intact
-        element.remove();
+        if (element.parentNode) {
+            element.parentNode.removeChild(element);
+        }
         return element;
     }
 }
@@ -222,13 +324,14 @@ webexpress.webui.PopperCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Initializes Popper.js for managing the menu box positioning.
      * @param {HTMLElement} container - The container element (searchBox) to position the suggestion box relative to.
-     * @param {jQuery} dropdownmenu - The menu box element.
+     * @param {HTMLElement} dropdownmenu - The menu box element (as HTMLElement, not jQuery).
      */
     _initializePopper(container, dropdownmenu) {
         // Map to track the visibility state of each menu
         this._menuVisibilityMap = this._menuVisibilityMap || new Map();
 
-        const popperInstance = Popper.createPopper(container, dropdownmenu[0], {
+        // Popper.js instance for positioning
+        const popperInstance = Popper.createPopper(container, dropdownmenu, {
             placement: "bottom-start",
             modifiers: [
                 {
@@ -247,59 +350,74 @@ webexpress.webui.PopperCtrl = class extends webexpress.webui.Ctrl {
         });
 
         // Hide the suggestion box when clicking outside of it
-        $(document).on("click", (event) => {
-            if (!$(event.target).closest(this._element).length) {
+        document.addEventListener("click", (event) => {
+            if (!this._element.contains(event.target)) {
                 if (this._menuVisibilityMap.get(dropdownmenu)) {
                     this._menuVisibilityMap.delete(dropdownmenu);
                     // Trigger the DROPDOWN_HIDDEN_EVENT when the suggestion box is hidden
-                    $(document).trigger(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
-                        sender: this._element,
-                        id: $(this._element).attr("id")
-                    });
+                    document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
+                        detail: {
+                            sender: this._element,
+                            id: this._element.id
+                        }
+                    }));
                 }
+                // hide menu
+                dropdownmenu.style.display = "none";
             }
         });
 
         // Register the ESC key to close the suggestion menu
-        $(document).on("keydown", (event) => {
+        document.addEventListener("keydown", (event) => {
             if (event.key === "Escape") {
-                dropdownmenu.trigger("hide").hide();
+                dropdownmenu.style.display = "none";
                 if (this._menuVisibilityMap.get(dropdownmenu)) {
                     this._menuVisibilityMap.delete(dropdownmenu);
                     // Trigger the DROPDOWN_HIDDEN_EVENT when the suggestion box is hidden
-                    $(document).trigger(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
-                        sender: this._element,
-                        id: $(this._element).attr("id")
-                    });
+                    document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
+                        detail: {
+                            sender: this._element,
+                            id: this._element.id
+                        }
+                    }));
                 }
             }
         });
 
-        // Update Popper instance when the suggestion box is shown
-        dropdownmenu.on("show", () => {
-            // Update Popper instance and adjust width
+        // Show and hide methods for the dropdownmenu (simulate .on('show')/.on('hide'))
+        dropdownmenu.show = () => {
+            dropdownmenu.style.display = "flex";
+            // Set width to match the element, if needed
+            dropdownmenu.style.width = this._element.offsetWidth + "px";
             popperInstance.update();
-            dropdownmenu.width($(this._element).width());
-
-            // Set the visibility of the current menu to true
             this._menuVisibilityMap.set(dropdownmenu, true);
-
-            // Trigger the DROPDOWN_SHOW_EVENT to signal that the suggestion box is shown
-            $(document).trigger(webexpress.webui.Event.DROPDOWN_SHOW_EVENT, {
-                sender: this._element,
-                id: $(this._element).attr("id")
-            });
-        });
-
-        // Optional: Trigger DROPDOWN_HIDDEN_EVENT on manual hide
-        dropdownmenu.on("hide", () => {
-            if (this._menuVisibilityMap.get(dropdownmenu)) {
-                $(document).trigger(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
+            // Trigger show event
+            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_SHOW_EVENT, {
+                detail: {
                     sender: this._element,
-                    id: $(this._element).attr("id")
-                });
+                    id: this._element.id
+                }
+            }));
+        };
+        dropdownmenu.hide = () => {
+            dropdownmenu.style.display = "none";
+            if (this._menuVisibilityMap.get(dropdownmenu)) {
+                this._menuVisibilityMap.delete(dropdownmenu);
+                document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
+                    detail: {
+                        sender: this._element,
+                        id: this._element.id
+                    }
+                }));
             }
-            this._menuVisibilityMap.delete(dropdownmenu);
+        };
+
+        // Listen for custom 'show' and 'hide' events
+        dropdownmenu.addEventListener("show", () => {
+            dropdownmenu.show();
+        });
+        dropdownmenu.addEventListener("hide", () => {
+            dropdownmenu.hide();
         });
     }
 }
