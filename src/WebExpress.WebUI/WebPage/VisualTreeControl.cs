@@ -84,6 +84,11 @@ namespace WebExpress.WebUI.WebPage
         public IEnumerable<string> CssLinks => _cssLinks;
 
         /// <summary>
+        /// Returns the base route for the current page.
+        /// </summary>
+        public IRoute Base => _base;
+
+        /// <summary>
         /// Returns the meta information.
         /// </summary>
         public IReadOnlyDictionary<string, string> Meta => _meta;
@@ -124,6 +129,7 @@ namespace WebExpress.WebUI.WebPage
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.pagination.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.search.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.selection.css"));
+            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.split.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.table.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.toolpanel.css"));
             _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.tree.css"));
@@ -147,6 +153,7 @@ namespace WebExpress.WebUI.WebPage
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.pagination.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.search.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.selection.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.split.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.table.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.tree.js"));
 
@@ -354,19 +361,21 @@ namespace WebExpress.WebUI.WebPage
         /// <returns>A object representing the generated response.</returns>
         public Response GetResponse(IVisualTreeContext context)
         {
+            var content = Render(context);
+
             return StatusCode switch
             {
-                200 => new ResponseOK() { Content = Render(context) },
-                201 => new ResponseCreated() { Content = Render(context) },
-                204 => new ResponseNoContent() { Content = Render(context) },
-                301 => new ResponseMovedPermanently() { Content = Render(context) },
-                //302 => new ResponseMovedTemporarily() { Content = Render(context) },
-                400 => new ResponseBadRequest() { Content = Render(context) },
-                401 => new ResponseUnauthorized() { Content = Render(context) },
-                404 => new ResponseNotFound() { Content = Render(context) },
-                422 => new ResponseUnprocessableEntity() { Content = Render(context) },
-                500 => new ResponseInternalServerError() { Content = Render(context) },
-                _ => new ResponseOK() { Content = Render(context) }
+                200 => new ResponseOK() { Content = content },
+                201 => new ResponseCreated() { Content = content },
+                204 => new ResponseNoContent() { Content = content },
+                301 => new ResponseMovedPermanently() { Content = content },
+                302 => new ResponseMovedTemporarily() { Content = content },
+                400 => new ResponseBadRequest() { Content = content },
+                401 => new ResponseUnauthorized() { Content = content },
+                404 => new ResponseNotFound() { Content = content },
+                422 => new ResponseUnprocessableEntity() { Content = content },
+                500 => new ResponseInternalServerError() { Content = content },
+                _ => new ResponseOK() { Content = content }
             };
         }
     }

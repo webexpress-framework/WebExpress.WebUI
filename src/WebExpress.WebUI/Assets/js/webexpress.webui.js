@@ -195,7 +195,8 @@ webexpress.webui.I18N = new class {
         const langs = ["en", "de"];
         for (const lang of langs) {
             try {
-                const response = fetch(`${window.location.origin}/assets/js/i18n/${lang}`);
+                const baseUrl = document.querySelector('base')?.getAttribute('href') || '/';
+                const response = fetch(`${window.location.origin}${baseUrl}/assets/js/i18n/${lang}`);
                 if (!response.ok) throw new Error("Not found");
                 const text = response.text();
                 this.translations[lang] = this._parseProperties(text);
@@ -462,4 +463,10 @@ webexpress.webui.Event = class {
     static TASK_UPDATE_EVENT = "webexpress.webapp.task.update";
     // Event triggered when a task is finished
     static TASK_FINISH_EVENT = "webexpress.webapp.task.finish";
+    // Event triggered when the split size changes
+    static SIZE_CHANGE_EVENT = "webexpress.webui.size.change";
+    // Event triggered when an element is hidden
+    static HIDE_EVENT = "webexpress.webui.hide";
+    // Event triggered when an element is shown
+    static SHOW_EVENT = "webexpress.webui.show";
 }

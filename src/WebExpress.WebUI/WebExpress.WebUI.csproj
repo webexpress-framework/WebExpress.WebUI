@@ -66,6 +66,7 @@
 		<None Remove="Assets\css\webexpress.webui.pagination.css" />
 		<None Remove="Assets\css\webexpress.webui.search.css" />
 		<None Remove="Assets\css\webexpress.webui.selection.css" />
+		<None Remove="Assets\css\webexpress.webui.split.css" />
 		<None Remove="Assets\css\webexpress.webui.table.css" />
 		<None Remove="Assets\css\webexpress.webui.toolpanel.css" />
 		<None Remove="Assets\css\webexpress.webui.tree.css" />
@@ -208,6 +209,7 @@
 		<None Remove="Assets\js\webexpress.webui.pagination.js" />
 		<None Remove="Assets\js\webexpress.webui.search.js" />
 		<None Remove="Assets\js\webexpress.webui.selection.js" />
+		<None Remove="Assets\js\webexpress.webui.split.js" />
 		<None Remove="Assets\js\webexpress.webui.table.js" />
 		<None Remove="Assets\js\webexpress.webui.tree.js" />
 		<None Remove="Internationalization\de" />
@@ -229,6 +231,7 @@
 		<EmbeddedResource Include="Assets\css\webexpress.webui.dropdownbutton.css" />
 		<EmbeddedResource Include="Assets\css\webexpress.webui.editor.css" />
 		<EmbeddedResource Include="Assets\css\webexpress.webui.modal.css" />
+		<EmbeddedResource Include="Assets\css\webexpress.webui.split.css" />
 		<EmbeddedResource Include="Assets\css\webexpress.webui.toolpanel.css" />
 		<EmbeddedResource Include="Assets\css\webexpress.webui.expand.css" />
 		<EmbeddedResource Include="Assets\css\webexpress.webui.modalform.css" />
@@ -405,6 +408,7 @@
 		<EmbeddedResource Include="Assets\js\webexpress.webui.search.js" />
 		<EmbeddedResource Include="Assets\js\webexpress.webui.expand.js" />
 		<EmbeddedResource Include="Assets\js\webexpress.webui.pagination.js" />
+		<EmbeddedResource Include="Assets\js\webexpress.webui.split.js" />
 		<EmbeddedResource Include="Assets\js\webexpress.webui.table.js" />
 		<EmbeddedResource Include="Assets\js\webexpress.webui.js" />
 		<EmbeddedResource Include="Assets\js\webexpress.webui.tree.js" />
