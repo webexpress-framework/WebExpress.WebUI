@@ -427,46 +427,48 @@ webexpress.webui.PopperCtrl = class extends webexpress.webui.Ctrl {
  * A utility class for defining and managing event names within the WebExpress UI framework.
  */
 webexpress.webui.Event = class {
-    // Event triggered when the visibility of an element changes
+    // Event triggered when the visibility of an element changes.
     static CHANGE_VISIBILITY_EVENT = "webexpress.webui.change.visibility";
-    // Event triggered when an element is clicked
+    // Event triggered when an element is clicked.
     static CLICK_EVENT = "webexpress.webui.click";
-    // Event triggered when a filter changes, typically in search or filter controls
+    // Event triggered when a filter changes, typically in search or filter controls.
     static CHANGE_FILTER_EVENT = "webexpress.webui.change.filter";
-    // Event triggered when a dropdown menu is shown
+    // Event triggered when a dropdown menu is shown.
     static DROPDOWN_SHOW_EVENT = "webexpress.webui.dropdown.show";
-    // Event triggered when a dropdown menu is hidden
+    // Event triggered when a dropdown menu is hidden.
     static DROPDOWN_HIDDEN_EVENT = "webexpress.webui.dropdown.hidden";
-    // Event triggered when a favorite changes
+    // Event triggered when a favorite changes.
     static CHANGE_FAVORITE_EVENT = "webexpress.webui.change.favorite";
-    // Event triggered when columns are reordered in a table control
+    // Event triggered when columns are reordered in a table control.
     static COLUMN_REORDER_EVENT = "webexpress.webui.table.column.reorder";
-    // Event triggered when a table is sorted
+    // Event triggered when a table is sorted.
     static TABLE_SORT_EVENT = "webexpress.webui.table.sorted";
-    // Event triggered when the value of an input or control changes
+    // Event triggered when the value of an input or control changes.
     static CHANGE_VALUE_EVENT = "webexpress.webui.change.value";
-    // Event triggered when a item is moved
+    // Event triggered when a item is moved.
     static MOVE_EVENT = "webexpress.webui.move";
-    // Event triggered when the page changes in a pagination control
+    // Event triggered when the page changes in a pagination control.
     static CHANGE_PAGE_EVENT = "webexpress.webui.change.page";
-    // Event triggered when a modal is shown
+    // Event triggered when a modal is shown.
     static MODAL_SHOW_EVENT = "webexpress.webui.modal.show";
-    // Event triggered when a modal is hidden
+    // Event triggered when a modal is hidden.
     static MODAL_HIDE_EVENT = "webexpress.webui.modal.hide";
-    // Event triggered when data is requested
+    // Event triggered when data is requested.
     static DATA_REQUESTED_EVENT = "webexpress.webui.data.requested";
-    // Event triggered when data has arrived
+    // Event triggered when data has arrived.
     static DATA_ARRIVED_EVENT = "webexpress.webui.data.arrived";
-    // Event triggered when a task starts
-    static TASK_START_EVENT = "webexpress.webapp.task.start";
-    // Event triggered when a task is updated
-    static TASK_UPDATE_EVENT = "webexpress.webapp.task.update";
-    // Event triggered when a task is finished
-    static TASK_FINISH_EVENT = "webexpress.webapp.task.finish";
-    // Event triggered when the split size changes
+    // Event triggered when a task starts.
+    static TASK_START_EVENT = "webexpress.webui.task.start";
+    // Event triggered when a task is updated.
+    static TASK_UPDATE_EVENT = "webexpress.webui.task.update";
+    // Event triggered when a task is finished.
+    static TASK_FINISH_EVENT = "webexpress.webui.task.finish";
+    // Event triggered when the size changes.
     static SIZE_CHANGE_EVENT = "webexpress.webui.size.change";
-    // Event triggered when an element is hidden
+    // Event triggered when an element is hidden.
     static HIDE_EVENT = "webexpress.webui.hide";
-    // Event triggered when an element is shown
+    // Event triggered when an element is shown.
     static SHOW_EVENT = "webexpress.webui.show";
+    // Event triggered when an element is updated.
+    static UPDATED_EVENT = "webexpress.webui.updated";
 }

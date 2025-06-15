@@ -5,6 +5,7 @@
  * - webexpress.webui.Event.MODAL_HIDE_EVENT
  * - webexpress.webui.DATA_REQUESTED_EVENT
  * - webexpress.webui.DATA_ARRIVED_EVENT 
+ * - webexpress.webui.UPDATED_EVENT 
  */
 webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
     _form = document.createElement("form");
@@ -77,6 +78,13 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
             this._dialogDiv.querySelectorAll("[data-wx-dismiss='modal']").forEach(button => {
                 button.addEventListener("click", () => this.hide());
             });
+
+            // Send the UPDATED_EVENT after updating the modal content
+            this._element.dispatchEvent(new CustomEvent(webexpress.webui.Event.UPDATED_EVENT, {
+                detail: {
+                    form: this._form
+                }
+            }));
         }
     }
 }

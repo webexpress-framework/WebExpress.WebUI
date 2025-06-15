@@ -36,7 +36,6 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         
         // Editor options, e.g. form name
         this._formFieldName = element.getAttribute('name') || null;
-        this._formInput = null;
 
         // Clean up the DOM
         element.removeAttribute('name');
@@ -54,7 +53,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         if (this._formFieldName) {
             this._ensureFormInput();
         }
-        
+
         const toolbar = element.querySelector('.wx-editor-toolbar');
         if (toolbar) {
             toolbar.addEventListener('mousedown', (e) => {
@@ -194,11 +193,18 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         // Function to update the dropdown text only if selection is inside the editor
         const updateDropdownText = () => {
             const selection = window.getSelection();
-            if (!selection.rangeCount) return;
+            if (!selection || !selection.rangeCount) return;
 
             const range = selection.getRangeAt(0);
 
-            if (this._editorElement.contains(range.startContainer)) {
+            // Ensure startContainer exists and is an Element, otherwise use parentElement
+            let container = range.startContainer;
+            if (container && container.nodeType !== Node.ELEMENT_NODE) {
+                container = container.parentElement;
+            }
+
+            // Only continue if both container and _editorElement exist
+            if (container && this._editorElement && this._editorElement.contains(container)) {
                 const currentFormat = document.queryCommandValue("formatBlock") || "p";
                 const foundOption = formatOptions.find(opt => opt.command === currentFormat);
                 buttonText.textContent = foundOption ? foundOption.label : "Paragraph";
@@ -306,11 +312,18 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         // Function to update icon color only if the selection is inside the editor
         const updateIconColor = () => {
             const selection = window.getSelection();
-            if (!selection.rangeCount) return;
+            if (!selection || !selection.rangeCount) return;
 
             const range = selection.getRangeAt(0);
 
-            if (this._editorElement.contains(range.startContainer)) {
+            // Get the element; if startContainer is not an ELEMENT_NODE, use its parentElement
+            let container = range.startContainer;
+            if (container && container.nodeType !== Node.ELEMENT_NODE) {
+                container = container.parentElement;
+            }
+
+            // Only continue if both container and _editorElement exist and container is inside the editor
+            if (container && this._editorElement && this._editorElement.contains(container)) {
                 const color = document.queryCommandValue("foreColor") || "#000000";
                 icon.style.color = color;
             }
@@ -1290,6 +1303,27 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                 }
             });
         }
+    }
+
+    /**
+     * Sets the content of the editor and synchronizes the hidden input value.
+     * @param {string} html - The HTML string to set as the editor content.
+     */
+    setValue(html) {
+        if (this._editorElement) {
+            this._editorElement.innerHTML = html;
+        }
+        if (this._formInput) {
+            this._formInput.value = html;
+        }
+    }
+
+    /**
+     * Returns the current content of the editor.
+     * @returns {string} The HTML content of the editor.
+     */
+    getValue() {
+        return this._editorElement ? this._editorElement.innerHTML : "";
     }
 };
 
