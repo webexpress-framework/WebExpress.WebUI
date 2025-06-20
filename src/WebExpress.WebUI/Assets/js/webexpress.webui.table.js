@@ -481,7 +481,11 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 img.src = column.image;
                 th.appendChild(img);
             }
-            th.appendChild(document.createTextNode(column.label));
+            if (column.content) {
+                th.innerHTML = column.content;
+            } else {
+                th.appendChild(document.createTextNode(column.label));
+            }
 
             const col = document.createElement("col");
             if (column.width) col.setAttribute("style", `width: ${column.width}px;`);
@@ -557,7 +561,12 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 i.className = cellData.icon;
                 td.appendChild(i);
             }
-            td.appendChild(document.createTextNode(cellData.text || ""));
+            if (cellData.content) {
+                td.innerHTML = cellData.content;
+            }
+            else {
+                td.appendChild(document.createTextNode(cellData.text || ""));
+            }
             tr.appendChild(td);
         });
 
