@@ -1,0 +1,34 @@
+/**
+ * German translation for WebExpress
+ */
+var webexpress = webexpress || {}
+webexpress.webui = webexpress.webui || {}
+webexpress.webui.i18n_data = webexpress.webui.i18n_data || {};
+
+webexpress.webui.i18n_data["de"] = {
+    "webexpress.webui": {
+        "calendar.select_date": "Datum auswählen",
+        "calendar.calendar_week": "KW",
+        "calendar.january": "Januar",
+        "calendar.february": "Februar",
+        "calendar.march": "März",
+        "calendar.april": "April",
+        "calendar.may": "Mai",
+        "calendar.june": "Juni",
+        "calendar.july": "Juli",
+        "calendar.august": "August",
+        "calendar.september": "September",
+        "calendar.october": "Oktober",
+        "calendar.november": "November",
+        "calendar.december": "Dezember",
+        "calendar.mon": "Mo",
+        "calendar.tue": "Di",
+        "calendar.wed": "Mi",
+        "calendar.thu": "Do",
+        "calendar.fri": "Fr",
+        "calendar.sat": "Sa",
+        "calendar.sun": "So",
+
+        "modal.close": "Schließen"
+    }
+}

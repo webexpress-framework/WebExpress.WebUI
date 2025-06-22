@@ -357,6 +357,7 @@ namespace WebExpress.WebUI.WebControl
 
                 header.Add(new ControlAlert()
                 {
+                    Classes = ["wx-validation-alert"],
                     BackgroundColor = bgColor,
                     Text = I18N.Translate(renderContext.Request?.Culture, v.Text),
                     Dismissible = TypeDismissibleAlert.Dismissible,
@@ -370,7 +371,6 @@ namespace WebExpress.WebUI.WebControl
             }
 
             var main = new HtmlElementSectionMain();
-
             var group = default(ControlFormItemGroup);
 
             group = ItemLayout switch

@@ -38,6 +38,9 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
             
             // Bind form submission logic
             this._form.addEventListener("submit", (event) => {
+
+                if (event.defaultPrevented) return; // Prevent double submission
+
                 event.preventDefault();
 
                 const formData = new FormData(this._form);
@@ -87,6 +90,43 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
             }));
         }
     }
+
+    /**
+     * Displays validation errors inside a Bootstrap alert with plain paragraph formatting.
+     *
+     * @param {Array<{ code: string, message: string, field: string }>} errors - List of validation error objects.
+     */
+    showValidationErrors(errors) {
+        if (!Array.isArray(errors)) return;
+
+        // Clean up previous errors
+        this._form.querySelectorAll(".is-invalid").forEach(el => el.classList.remove("is-invalid"));
+        this._form.querySelector(".wx-validation-alert")?.remove();
+
+        // Create formatted alert
+        const alert = document.createElement("div");
+        alert.className = "alert alert-danger wx-validation-alert";
+        alert.role = "alert";
+
+        // Combine messages as paragraph block
+        const text = errors.map(err => err.message).join("<br>");
+        alert.innerHTML = `<strong>Please correct the following:</strong><br>${text}`;
+
+        // Mark fields as invalid
+        errors.forEach(error => {
+            const input = this._form.querySelector(`[name="${error.field}"]`);
+            if (input) input.classList.add("is-invalid");
+        });
+
+        // Insert at top of modal body
+        const modalBody = this._form.querySelector(".modal-body");
+        if (modalBody) {
+            modalBody.prepend(alert);
+        } else {
+            this._form.prepend(alert);
+        }
+    }
+
 }
 
 // Register the class in the controller

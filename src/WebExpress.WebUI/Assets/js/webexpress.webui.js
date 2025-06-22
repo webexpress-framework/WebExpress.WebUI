@@ -1,5 +1,5 @@
-var webexpress = webexpress || {}
-webexpress.webui = {}
+﻿var webexpress = webexpress || {}
+webexpress.webui = webexpress.webui || {}
 
 /**
  * Namespace webexpress.webui
@@ -167,7 +167,7 @@ webexpress.webui.I18N = new class {
         this.language = language || this._detectBrowserLanguage();
         this.translations = {};
         // Load translations immediately
-        this._loadTranslations(this.language);
+        this._loadTranslations();
     }
 
     /**
@@ -186,45 +186,17 @@ webexpress.webui.I18N = new class {
     }
 
     /**
-     * Loads translations for supported languages.
-     * For each language, tries to load a key=value (.properties) file and parses it.
-     * Populates the internal translations object.
-     * @returns {Promise<void>}
-     */
+      * Loads all available translations from webexpress.webui.i18n_data, 
+      * if sie bereits im globalen Kontext geladen wurden (z. B. via <script src="...">).
+      */
     _loadTranslations() {
-        const langs = ["en", "de"];
-        for (const lang of langs) {
-            try {
-                const baseUrl = document.querySelector('base')?.getAttribute('href') || '/';
-                const response = fetch(`${window.location.origin}${baseUrl}/assets/js/i18n/${lang}`);
-                if (!response.ok) throw new Error("Not found");
-                const text = response.text();
-                this.translations[lang] = this._parseProperties(text);
-            } catch (err) {
-                this.translations[lang] = {};
-            }
-        }
-    }
+        const i18nGlobal = webexpress?.webui?.i18n_data;
+        if (!i18nGlobal) return;
 
-    /**
-     * Parses a .properties file (key=value) string into an object.
-     * Ignores comments (# or !) and empty lines.
-     * @param {string} text - The contents of the .properties file.
-     * @returns {Object} An object containing key-value pairs.
-     */
-    _parseProperties(text) {
-        const result = {};
-        text.split(/\r?\n/).forEach(line => {
-            const trimmed = line.trim();
-            if (!trimmed || trimmed.startsWith("#") || trimmed.startsWith("!")) return;
-            const eq = trimmed.indexOf("=");
-            if (eq > -1) {
-                const key = trimmed.substring(0, eq).trim();
-                const value = trimmed.substring(eq + 1).trim();
-                result[key] = value;
-            }
-        });
-        return result;
+        for (const lang in i18nGlobal) {
+            if (!Object.prototype.hasOwnProperty.call(i18nGlobal, lang)) continue;
+            this.translations[lang] = Object.assign({}, i18nGlobal[lang]);
+        }
     }
 
     /**
@@ -236,25 +208,44 @@ webexpress.webui.I18N = new class {
     }
 
     /**
-     * Returns the translation for the given key in the current language.
-     * Falls back to English if the key does not exist in the selected language.
-     * Returns the key itself if no translation is found.
-     * @param {string} key - The translation key.
-     * @returns {string} The translated string or the key if not found.
+     * Retrieves the translation for the specified key.
+     * Supports optional module prefix (e.g. 'webexpress.webui:calendar.may').
+     * Falls back to English if the key is not found in the current language.
+     * Returns the key itself if no translation is available.
+     *
+     * @param {string} key - The translation key to look up.
+     * @returns {string}
      */
     translate(key) {
-        if (
-            this.translations[this.language] &&
-            Object.prototype.hasOwnProperty.call(this.translations[this.language], key)
-        ) {
-            return this.translations[this.language][key];
+        const lang = this.language;
+        const fallback = "en";
+        let module = null;
+        let localKey = key;
+
+        // Extract namespace prefix if present
+        if (key.includes(":")) {
+            const split = key.split(":");
+            module = split[0];
+            localKey = split[1];
         }
-        if (
-            this.translations["en"] &&
-            Object.prototype.hasOwnProperty.call(this.translations["en"], key)
-        ) {
-            return this.translations["en"][key];
+
+        // Attempt module-prefixed lookup
+        if (module && this.translations[lang]?.[module]?.[localKey]) {
+            return this.translations[lang][module][localKey];
         }
+
+        if (this.translations[lang]?.[key]) {
+            return this.translations[lang][key];
+        }
+
+        if (module && this.translations[fallback]?.[module]?.[localKey]) {
+            return this.translations[fallback][module][localKey];
+        }
+
+        if (this.translations[fallback]?.[key]) {
+            return this.translations[fallback][key];
+        }
+
         return key;
     }
 }

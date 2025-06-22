@@ -24,7 +24,8 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         // Retrieve custom attributes or use default values
-        this._closeLabel = element.getAttribute("data-close-label") || "Close";
+        this._closeLabel = element.getAttribute("data-close-label") ||
+            webexpress.webui.I18N.translate("webexpress.webui:modal.close");
         this._size = element.getAttribute("data-size") || "";
         this._autoShow = element.getAttribute("data-auto-show") === "true";
 
