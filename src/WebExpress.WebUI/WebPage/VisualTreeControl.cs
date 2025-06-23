@@ -112,7 +112,7 @@ namespace WebExpress.WebUI.WebPage
         public VisualTreeControl(IComponentHub componentHub, IPageContext pageContext)
         {
             var contextPath = pageContext.ApplicationContext?.Route;
-            var baseUri = RouteEndpoint.Combine(contextPath, "/assets");
+            var baseUri = RouteEndpoint.Combine(contextPath, "webexpress.webui/assets");
 
             _componentHub = componentHub;
 
