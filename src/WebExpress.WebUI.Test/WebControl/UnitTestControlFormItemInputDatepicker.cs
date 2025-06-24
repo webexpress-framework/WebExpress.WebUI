@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the form datepicker control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<input id=""datepicker"" name=""datepicker"" type=""text"" class=""form-control"">")]
-        [InlineData("id", @"<input id=""id"" name=""id"" type=""text"" class=""form-control"">")]
+        [InlineData(null, @"<div class=""wx-webui-date""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-date"" name=""id""></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -37,8 +37,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the name property of the form datepicker control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<input id=""datepicker"" type=""text"" class=""form-control"">")]
-        [InlineData("abc", @"<input id=""datepicker"" name=""abc"" type=""text"" class=""form-control"">")]
+        [InlineData(null, @"<div class=""wx-webui-date""></div>")]
+        [InlineData("abc", @"<div class=""wx-webui-date"" name=""abc""></div>")]
         public void Name(string name, string expected)
         {
             // preconditions
@@ -46,7 +46,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputDatepicker()
+            var control = new ControlFormItemInputDatepicker(null)
             {
                 Name = name
             };
@@ -61,15 +61,15 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form datepicker control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<input id=""datepicker"" name=""datepicker"" type=""text"" class=""form-control"">*")]
-        [InlineData("2023-10-10", @"*<input id=""datepicker"" name=""datepicker"" type=""text"" class=""form-control"" value=""2023-10-10"">*")]
+        [InlineData(null, @"*<div class=""wx-webui-date""></div>*")]
+        [InlineData("2023-10-10", @"*<div class=""wx-webui-date"" data-value=""2023-10-10""></div>*")]
         public void Value(string value, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputDatepicker();
+            var control = new ControlFormItemInputDatepicker(null);
             var form = new ControlForm().Add(control).Initialize(renderContext =>
             {
                 renderContext.SetValue(control, value);
@@ -85,8 +85,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the required property of the form datepicker control.
         /// </summary>
         [Theory]
-        [InlineData(false, @"<input id=""datepicker"" name=""datepicker"" type=""text"" class=""form-control"">")]
-        [InlineData(true, @"<input id=""datepicker"" name=""datepicker"" type=""text"" class=""form-control"">")]
+        [InlineData(false, @"<div class=""wx-webui-date""></div>")]
+        [InlineData(true, @"<div class=""wx-webui-date""></div>")]
         public void Required(bool required, string expected)
         {
             // preconditions
@@ -94,7 +94,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputDatepicker()
+            var control = new ControlFormItemInputDatepicker(null)
             {
                 Required = required
             };

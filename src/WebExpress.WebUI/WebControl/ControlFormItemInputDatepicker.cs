@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+﻿using System.Runtime.CompilerServices;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -9,24 +10,9 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormItemInputDatepicker : ControlFormItemInput
     {
         /// <summary>
-        /// Determines whether the control is automatically initialized.
-        /// </summary>
-        public bool AutoInitialize { get; set; }
-
-        /// <summary>
         /// Returns or sets the description.
         /// </summary>
         public string Description { get; set; }
-
-        /// <summary>
-        /// Returns or sets the minimum length.
-        /// </summary>
-        public string MinLength { get; set; }
-
-        /// <summary>
-        /// Returns or sets the maximum length.
-        /// </summary>
-        public string MaxLength { get; set; }
 
         /// <summary>
         /// Returns or sets whether inputs are enforced.
@@ -34,46 +20,24 @@ namespace WebExpress.WebUI.WebControl
         public bool Required { get; set; }
 
         /// <summary>
-        /// Returns or sets a search pattern that checks the content.
+        /// Initializes a new instance of the class with an automatically assigned ID.
         /// </summary>
-        public string Pattern { get; set; }
-
-        ///// <summary>
-        ///// Returns the initialization code (JQuerry).
-        ///// </summary>
-        //public string InitializeCode => "$('#" + Id + " input').datepicker({ startDate: -3 });";
+        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
+        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
+        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
+        /// <param name="items">The entries.</param>
+        public ControlFormItemInputDatepicker([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null, params ControlFormItemInputSelectionItem[] items)
+            : this($"datepicker{instance}_{file}_{line}".GetHashCode().ToString("X"))
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        public ControlFormItemInputDatepicker(string id = null)
-            : base(!string.IsNullOrWhiteSpace(id) ? id : "datepicker")
+        public ControlFormItemInputDatepicker(string id)
+            : base(id)
         {
-        }
-
-        /// <summary>
-        /// Initializes the form element.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        public override void Initialize(IRenderControlFormContext renderContext)
-        {
-            AutoInitialize = true;
-
-            var contextPath = renderContext.PageContext?.ApplicationContext?.Route;
-
-            //if (state == ControlFormState.New)
-            //{
-            //    return;
-            //}
-
-            //Value = renderContext?.Request.GetParameter(Name)?.Value;
-
-            //renderContext.AddHeaderScriptLinks(UriResource.Combine(contextPath, "/assets/js/bootstrap-datepicker.min.js"));
-            //renderContext.AddHeaderScriptLinks(UriResource.Combine(contextPath, "/assets/js/locales_datepicker/bootstrap-datepicker." + context.Culture.TwoLetterISOLanguageName.ToLower() + ".min.js"));
-            //renderContext.AddCssLinks(UriResource.Combine(contextPath, "/assets/css/bootstrap-datepicker3.min.css"));
-
-            //renderContext.AddScript(Id, @"$('#" + Id + @"').datepicker({format: ""dd.mm.yyyy"", todayBtn: true, language: ""de"", zIndexOffset: 999});");
         }
 
         /// <summary>
@@ -85,44 +49,16 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var value = renderContext.GetValue(this);
-            //if (Disabled)
-            //{
-            //    Classes.Add("disabled");
-            //}
 
-            //if (AutoInitialize)
-            //{
-            //    context.Page.AddScript(Id, InitializeCode);
-            //    AutoInitialize = false;
-            //}
-
-            var input = new HtmlElementFieldInput()
+            var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Name = Name,
-                Type = "text",
-                Class = "form-control",
-                Value = value
-            };
+                Class = "wx-webui-date"
+            }
+                .AddUserAttribute("name", Name)
+                .AddUserAttribute("data-value", value);
 
-            //var span = new HtmlElementTextSemanticsSpan()
-            //{
-            //    Class = TypeIcon.Calendar.ToClass()
-            //};
-
-            //var div = new HtmlElementTextContentDiv(span)
-            //{
-            //    Class = "input-group-text"
-            //};
-
-            //var html = new HtmlElementTextContentDiv(input, div)
-            //{
-            //    Id = Id,
-            //    Class = "input-group",
-            //    //DataProvide = "datepicker"
-            //};
-
-            return input;
+            return html;
         }
     }
 }

@@ -7,7 +7,7 @@ webexpress.webui.i18n_data = webexpress.webui.i18n_data || {};
 
 webexpress.webui.i18n_data["en"] = {
     "webexpress.webui": {
-        "calendar.select_date = Select date",
+        "calendar.select_date": "Select date",
         "calendar.calendar_week": "CW",
         "calendar.january": "January",
         "calendar.february": "February",

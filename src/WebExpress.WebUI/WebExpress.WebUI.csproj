@@ -41,8 +41,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Remove="Assets\css\bootstrap-datepicker3.css.map" />
-		<None Remove="Assets\css\bootstrap-datepicker3.min.css" />
 		<None Remove="Assets\css\bootstrap.css.map" />
 		<None Remove="Assets\css\bootstrap.min.css" />
 		<None Remove="Assets\css\bootstrap.min.css.map" />
@@ -78,18 +76,12 @@
 		<None Remove="Assets\fonts\fa-solid-900.woff2" />
 		<None Remove="Assets\fonts\fa-v4compatibility.ttf" />
 		<None Remove="Assets\fonts\fa-v4compatibility.woff2" />
-		<None Remove="Assets\fonts\summernote.eot" />
-		<None Remove="Assets\fonts\summernote.ttf" />
-		<None Remove="Assets\fonts\summernote.woff" />
-		<None Remove="Assets\fonts\summernote.woff2" />
 		<None Remove="Assets\img\Banner.png" />
 		<None Remove="Assets\img\Favicon.png" />
 		<None Remove="Assets\img\Icon16.png" />
 		<None Remove="Assets\img\Logo.png" />
 		<None Remove="Assets\img\Rocket.png" />
 		<None Remove="Assets\js\bootstrap-datepicker.de.min.js" />
-		<None Remove="Assets\js\bootstrap-datepicker.js" />
-		<None Remove="Assets\js\bootstrap-datepicker.min.js" />
 		<None Remove="Assets\js\bootstrap.js.map" />
 		<None Remove="Assets\js\bootstrap.min.js" />
 		<None Remove="Assets\js\bootstrap.min.js.map" />
