@@ -3,7 +3,7 @@ name: Generate and Deploy Documentation
 on:
   push:
     branches:
-      - main
+      - develop
 
 permissions:
   actions: read
