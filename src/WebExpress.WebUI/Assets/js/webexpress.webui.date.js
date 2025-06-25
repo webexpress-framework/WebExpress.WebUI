@@ -18,7 +18,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
         // Initialize properties
         const name = element.getAttribute("name");
         const value = element.dataset.value || null;
-        this._placeholder = element.getAttribute("placeholder") || webexpress.webui.I18N.translate("calendar.select_date");
+        this._placeholder = element.getAttribute("placeholder") || webexpress.webui.I18N.translate("webexpress.webui:calendar.select_date");
         const holidaysAttr = element.getAttribute("data-holidays");
         
         if (holidaysAttr) {
@@ -148,7 +148,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
         const btnNextMonth = this._createNavButton("›", () => this._changeView(1, "month"));
         const btnNextYear = this._createNavButton("»", () => this._changeView(1, "year"));
         const monthYear = document.createElement("span");
-        monthYear.textContent = this._viewDate.getFullYear() + " – " + webexpress.webui.I18N.translate("calendar." + this._getMonthKey(this._viewDate.getMonth()));
+        monthYear.textContent = this._viewDate.getFullYear() + " – " + webexpress.webui.I18N.translate(`webexpress.webui:calendar.${this._getMonthKey(this._viewDate.getMonth())}`);
         monthYear.classList.add("wx-calendar-monthyear");
 
         header.appendChild(btnPrevYear);
@@ -163,13 +163,13 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
         const thead = document.createElement("thead");
         const trHead = document.createElement("tr");
         const thKW = document.createElement("th");
-        thKW.textContent = webexpress.webui.I18N.translate("calendar.calendar_week");
+        thKW.textContent = webexpress.webui.I18N.translate("webexpress.webui:calendar.calendar_week");
         trHead.appendChild(thKW);
 
         // Weekdays (Mo-Su) with i18n
         for (let i = 1; i <= 7; i++) {
             const th = document.createElement("th");
-            th.textContent = webexpress.webui.I18N.translate("calendar." + this._getWeekdayKey(i % 7));
+            th.textContent = webexpress.webui.I18N.translate(`webexpress.webui:calendar.${this._getWeekdayKey(i % 7)}`);
             trHead.appendChild(th);
         }
         thead.appendChild(trHead);

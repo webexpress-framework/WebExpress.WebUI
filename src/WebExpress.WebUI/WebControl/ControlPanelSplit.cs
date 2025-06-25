@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using WebExpress.WebCore.WebEndpoint;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -136,7 +135,6 @@ namespace WebExpress.WebUI.WebControl
         protected virtual void Initialize(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var contextPath = renderContext?.PageContext?.ApplicationContext?.Route;
-            visualTree.AddHeaderScriptLink(RouteEndpoint.Combine(contextPath, "/assets/js/split.min.js"));
 
             var init1 = 0;
             var init2 = 0;

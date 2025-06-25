@@ -166,8 +166,6 @@ webexpress.webui.I18N = new class {
         // Determine language from browser if not provided
         this.language = language || this._detectBrowserLanguage();
         this.translations = {};
-        // Load translations immediately
-        this._loadTranslations();
     }
 
     /**
@@ -186,17 +184,20 @@ webexpress.webui.I18N = new class {
     }
 
     /**
-      * Loads all available translations from webexpress.webui.i18n_data, 
-      * if sie bereits im globalen Kontext geladen wurden (z. B. via <script src="...">).
-      */
-    _loadTranslations() {
-        const i18nGlobal = webexpress?.webui?.i18n_data;
-        if (!i18nGlobal) return;
-
-        for (const lang in i18nGlobal) {
-            if (!Object.prototype.hasOwnProperty.call(i18nGlobal, lang)) continue;
-            this.translations[lang] = Object.assign({}, i18nGlobal[lang]);
-        }
+     * Registers translation values for a specific language and module.
+     * Ensures existing translations are preserved and extended.
+     *
+     * @param {string} lang - Language code (e.g. "en")
+     * @param {string} module - Namespace/module name (e.g. "webexpress.webui")
+     * @param {object} values - Key-value map of translations
+     */
+    register(lang, module, values) {
+        this.translations[lang] = this.translations[lang] || {};
+        this.translations[lang][module] = Object.assign(
+            {},
+            this.translations[lang][module] || {},
+            values
+        );
     }
 
     /**

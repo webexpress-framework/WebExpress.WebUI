@@ -22,7 +22,6 @@ namespace WebExpress.WebUI.WebPage
         private readonly List<Favicon> _favicons = [];
         private readonly List<string> _styles = [];
         private readonly List<string> _headerScriptLinks = [];
-        private readonly List<string> _headerLanguageLinks = [];
         private readonly List<string> _scriptLinks = [];
         private readonly List<string> _headerScripts = [];
         private readonly Dictionary<string, string> _scripts = [];
@@ -63,11 +62,6 @@ namespace WebExpress.WebUI.WebPage
         /// Returns the links to the java script files to be used, which are inserted in the header.
         /// </summary>
         public IEnumerable<string> HeaderScriptLinks => _headerScriptLinks;
-
-        /// <summary>
-        /// Returns the links to the java language files to be used, which are inserted in the header.
-        /// </summary>
-        public IEnumerable<string> HeaderLanguageLinks => _headerLanguageLinks;
 
         /// <summary>
         /// Returns the links to the java script files to be used.
@@ -142,12 +136,10 @@ namespace WebExpress.WebUI.WebPage
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.toolpanel.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.tree.css"));
 
-            _headerLanguageLinks.Add(RouteEndpoint.Combine(baseUri, "js/i18n/en.js"));
-            _headerLanguageLinks.Add(RouteEndpoint.Combine(baseUri, "js/i18n/de.js"));
-
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/jquery-3.7.1.min.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/popper.min.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/bootstrap.min.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/split.min.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.button.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.date.js"));
@@ -168,6 +160,8 @@ namespace WebExpress.WebUI.WebPage
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.split.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.table.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.tree.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/i18n/en.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/i18n/de.js"));
 
             _base = contextPath;
 
@@ -210,24 +204,6 @@ namespace WebExpress.WebUI.WebPage
         public virtual void RemoveStyle(string style)
         {
             _styles.RemoveAll(x => x.Equals(style));
-        }
-
-        /// <summary>
-        /// Adds one or more URLs to the list of header language links.
-        /// </summary>
-        /// <param name="urls">The URLs of the language to add.</param>
-        public virtual void AddHeaderLanguageLink(params string[] urls)
-        {
-            _headerLanguageLinks.AddRange(urls);
-        }
-
-        /// <summary>
-        /// Removes a URL from the list of header language links.
-        /// </summary>
-        /// <param name="url">The URL of the language to remove.</param>
-        public virtual void RemoveHeaderLanguageLink(string url)
-        {
-            _headerLanguageLinks.RemoveAll(x => x.Equals(url));
         }
 
         /// <summary>
@@ -378,8 +354,7 @@ namespace WebExpress.WebUI.WebPage
             html.Body.Scripts = [.. Scripts.Values];
 
             html.Head.CssLinks = CssLinks.Where(x => x != null).Select(x => x.ToString());
-            html.Head.ScriptLinks = HeaderLanguageLinks?.Where(x => x != null).Select(x => x.ToString())
-                .Union(HeaderScriptLinks?.Where(x => x != null).Select(x => x.ToString()));
+            html.Head.ScriptLinks = HeaderScriptLinks?.Where(x => x != null).Select(x => x.ToString());
 
             return html;
         }
