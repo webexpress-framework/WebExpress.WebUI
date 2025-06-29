@@ -18,16 +18,17 @@
     flex-direction: column;
 }
 
-/* Pane containers */
-.wx-split .container1,
-.wx-split .container2 {
+/* Main and side pane containers */
+.wx-split .wx-main-pane,
+.wx-split .wx-side-pane {
     min-width: 20px;
     min-height: 20px;
-    padding: 0.5em;
+    overflow: auto; /* Show scrollbars only when content does not fit */
+    box-sizing: border-box;
 }
 
 /* Splitter styles */
-.wx-split .splitter {
+.wx-split .wx-splitter {
     background: #ddd;
     z-index: 10;
     flex: 0 0 auto;
@@ -39,40 +40,42 @@
     position: relative;
 }
 
-.wx-split-horizontal .splitter {
-    width: 6px;
-    cursor: col-resize;
-}
-.wx-split-vertical .splitter {
-    height: 6px;
-    cursor: row-resize;
-}
-.wx-split .splitter:active,
-.wx-split .splitter:focus {
+.wx-split .wx-splitter:active,
+.wx-split .wx-splitter:focus {
     background: #bbb;
 }
 
-/* Splitter indicator */
-.wx-split .splitter-indicator {
-    display: block;
-    background: #aaa;
-    border-radius: 3px;
-    opacity: 0.7;
+.wx-split .wx-splitter-horizontal {
+    width: 6px;
+    cursor: col-resize;
 }
 
-.wx-split-horizontal .splitter-indicator {
-    width: 2px;
+.wx-split .wx-splitter-vertical {
+    height: 6px;
+    cursor: row-resize;
+}
+
+/* Splitter indicator */
+.wx-split .wx-splitter-indicator {
+    display: block;
+    background-color: var(--bs-secondary);
+    border-radius: 3px;
+    opacity: 0.4;
+}
+
+.wx-split .wx-splitter-indicator-horizontal {
     height: 36px;
+    width: 2px;
     min-height: 24px;
     max-height: 60px;
-    margin: auto;
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAkSURBVChTYzxz5kw/AxCYmJgUwthMIIJ8MGomEIyaidNMBgYANc83sUCD+ssAAAAASUVORK5CYII');
 }
-.wx-split-vertical .splitter-indicator {
+.wx-split .wx-splitter-indicator-vertical {
     height: 2px;
     width: 36px;
     min-width: 24px;
     max-width: 60px;
-    margin: auto;
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFCAYAAABSIVz6AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAhSURBVChTYzxz5kw/AxCYmJgUgmh68ZlAxIgCIy2oGRgAUTM97WZuFTcAAAAASUVORK5CYII');
 }
 
 /* Prevent text selection during drag */

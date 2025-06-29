@@ -10,11 +10,6 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlTableRow : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the unique identifier for the entity.
-        /// </summary>
-        string Id { get; }
-
-        /// <summary>
         /// Returns the color scheme used for the row.
         /// </summary>
         TypeTableColor Color { get; }

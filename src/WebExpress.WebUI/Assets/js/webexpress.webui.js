@@ -51,12 +51,6 @@ webexpress.webui.Controller = new class {
                     this.createInstances(node);
                 }
             }
-            // handle removed nodes
-            for (const node of mutation.removedNodes) {
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                    this.removeInstances(node);
-                }
-            }
         }
     }
 
@@ -297,15 +291,15 @@ webexpress.webui.Ctrl = class {
 
     /**
      * Detaches an element from the DOM while preserving its event listeners.
+     * Suppresses MutationObserver callbacks during the removal.
      * @param {HTMLElement} element - The element to be detached.
      * @returns {HTMLElement} - The detached element.
      */
     _detachElement(element) {
-        if (!element) return null;
-        // Remove the element from the DOM, keeping its event listeners intact
-        if (element.parentNode) {
-            element.parentNode.removeChild(element);
-        }
+        if (!element || !element.parentNode) return null;
+
+        element.parentNode.removeChild(element);
+        
         return element;
     }
 }

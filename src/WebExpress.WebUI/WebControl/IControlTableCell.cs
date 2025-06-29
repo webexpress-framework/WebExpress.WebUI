@@ -13,11 +13,6 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlTableCell : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the unique identifier for the entity.
-        /// </summary>
-        string Id { get; }
-
-        /// <summary>
         /// Returns the class or category associated with the current object.
         /// </summary>
         string Class { get; }

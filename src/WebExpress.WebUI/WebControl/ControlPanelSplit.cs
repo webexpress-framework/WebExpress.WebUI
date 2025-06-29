@@ -10,18 +10,18 @@ namespace WebExpress.WebUI.WebControl
     /// </summary>
     public class ControlPanelSplit : Control, IControlPanelSplit
     {
-        private readonly List<IControl> _panel1 = [];
-        private readonly List<IControl> _panel2 = [];
+        private readonly List<IControl> _sidePanel = [];
+        private readonly List<IControl> _mainPanel = [];
 
         /// <summary>
         /// Returns the left or top panel in the ControlPanelSplit.
         /// </summary>
-        public IEnumerable<IControl> Panel1 => _panel1;
+        public IEnumerable<IControl> SidePanel => _sidePanel;
 
         /// <summary>
         /// Returns the right or bottom pane in the ControlPanelSplit.
         /// </summary>
-        public IEnumerable<IControl> Panel2 => _panel2;
+        public IEnumerable<IControl> MainPanel => _mainPanel;
 
         /// <summary>
         /// Returns or sets whether the splitter is horziontal or vertically oriented.
@@ -31,32 +31,37 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the color of the splitter.
         /// </summary>
-        public PropertyColorBackground SplitterColor { get; set; } = new PropertyColorBackground(TypeColorBackground.Light);
+        public PropertyColorBackground SplitterColor { get; set; } = new PropertyColorBackground(TypeColorBackground.Default);
 
         /// <summary>
         /// Returns or sets the width of the splitter.
         /// </summary>
-        public int SplitterSize { get; set; } = 6;
+        public int SplitterSize { get; set; } = -1;
 
         /// <summary>
         /// Returns or sets the minimum size of the left or top area in the ControlPanelSplit.
         /// </summary>
-        public int Panel1MinSize { get; set; }
+        public int SidePanelMinSize { get; set; } = -1;
 
         /// <summary>
         /// Returns or sets the initial size of the left or top area in the ControlPanelSplit in %.
         /// </summary>
-        public int Panel1InitialSize { get; set; } = -1;
+        public int SidePanelInitialSize { get; set; } = -1;
 
         /// <summary>
-        /// Returns or sets the minimum size of the right or bottom area in the ControlPanelSplit.
+        /// Returns or sets the maximum size of the left or top area in the ControlPanelSplit.
         /// </summary>
-        public int Panel2MinSize { get; set; }
+        public int SidePanelMaxSize { get; set; } = -1;
 
         /// <summary>
-        /// Returns or sets the initial size of the right or bottom area in the ControlPanelSplit in %.
+        /// Return or sets the order in which the main and side components are arranged.
         /// </summary>
-        public int Panel2InitialSize { get; set; } = -1;
+        public TypeSplitOrder Order { get; set; } = TypeSplitOrder.Default;
+
+        /// <summary>
+        /// Returns or sets the unit of measurement for the type size.
+        /// </summary>
+        public TypeSizeUnit Unit { get; set; } = TypeSizeUnit.Default;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -71,13 +76,13 @@ namespace WebExpress.WebUI.WebControl
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        /// <param name="panel1">Left or top panel controls.</param>
-        /// <param name="panel2">Right or bottom panel controls.</param>
-        public ControlPanelSplit(string id, IControl[] panel1, IControl[] panel2)
+        /// <param name="sidePanel">Left or top panel controls.</param>
+        /// <param name="mainPanel">Right or bottom panel controls.</param>
+        public ControlPanelSplit(string id, IControl[] sidePanel, IControl[] mainPanel)
             : base(id)
         {
-            _panel1.AddRange(panel1);
-            _panel2.AddRange(panel2);
+            _sidePanel.AddRange(sidePanel);
+            _mainPanel.AddRange(mainPanel);
         }
 
         /// <summary>
@@ -85,9 +90,9 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="controls">The controls to add.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlPanelSplit AddPanel1(params IControl[] controls)
+        public IControlPanelSplit AddSidePanel(params IControl[] controls)
         {
-            _panel1.AddRange(controls);
+            _sidePanel.AddRange(controls);
 
             return this;
         }
@@ -97,9 +102,9 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="control">The control to remove.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlPanelSplit RemovePanel1(IControl control)
+        public IControlPanelSplit RemoveSidePanel(IControl control)
         {
-            _panel1.Remove(control);
+            _sidePanel.Remove(control);
 
             return this;
         }
@@ -109,9 +114,9 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="controls">The controls to add.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlPanelSplit AddPanel2(params IControl[] controls)
+        public IControlPanelSplit AddMainPanel(params IControl[] controls)
         {
-            _panel2.AddRange(controls);
+            _mainPanel.AddRange(controls);
 
             return this;
         }
@@ -121,56 +126,11 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="control">The control to remove.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlPanelSplit RemovePanel2(IControl control)
+        public IControlPanelSplit RemoveMainPanel(IControl control)
         {
-            _panel2.Remove(control);
+            _mainPanel.Remove(control);
 
             return this;
-        }
-
-        /// <summary>
-        /// Initializes the form element.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        protected virtual void Initialize(IRenderControlContext renderContext, IVisualTreeControl visualTree)
-        {
-            var contextPath = renderContext?.PageContext?.ApplicationContext?.Route;
-
-            var init1 = 0;
-            var init2 = 0;
-
-            if (Panel1InitialSize < 0 && Panel2InitialSize < 0)
-            {
-                init1 = init2 = 50;
-            }
-            else if (Panel1InitialSize < 0)
-            {
-                init1 = 100 - Panel2InitialSize;
-                init2 = Panel2InitialSize;
-            }
-            else if (Panel2InitialSize < 0)
-            {
-                init1 = Panel1InitialSize;
-                init2 = 100 - Panel1InitialSize;
-            }
-
-            visualTree.AddScript
-            (
-                Id, @"$(document).ready(function() { Split(['#" + Id + "-p1', '#" + Id + @"-p2'], {
-                    sizes: [" + init1 + "," + init2 + @"],
-                    minSize: [" + Panel1MinSize + "," + Panel2MinSize + @"],
-                    direction: '" + Orientation.ToString().ToLower() + @"',
-                    gutter: function (index, direction) 
-                    {
-                        var gutter = document.createElement('div');
-                        gutter.id = '" + Id + @"-gutter';
-                        gutter.className = 'wx-splitter wx-splitter-' + direction + ' " + SplitterColor.ToClass() + @"';
-                        gutter.style = '" + SplitterColor.ToStyle() + @"';
-                        return gutter;
-                    },
-                    gutterSize: " + SplitterSize + @",
-                })});"
-            );
         }
 
         /// <summary>
@@ -181,11 +141,11 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var p1 = Panel1
+            var p1 = SidePanel
                 .Select(x => x.Render(renderContext, visualTree))
                 .Where(x => x != null)
                 .ToList();
-            var p2 = Panel2
+            var p2 = MainPanel
                 .Select(x => x.Render(renderContext, visualTree))
                 .Where(x => x != null)
                 .ToList();
@@ -203,18 +163,38 @@ namespace WebExpress.WebUI.WebControl
                 return null;
             }
 
-            Initialize(renderContext, visualTree);
-
-            var html = new HtmlElementTextContentDiv()
+            var container1 = new HtmlElementTextContentDiv(p1)
             {
-                Id = Id,
-                Class = Css.Concatenate(Orientation == TypeOrientationSplit.Horizontal ? "wx-split-horizontal" : "wx-split-vertical", GetClasses()),
-                Style = GetStyles(),
-                Role = Role
+                Id = $"{Id}-p1",
+                Class = "wx-side-pane"
             };
 
-            html.Add(new HtmlElementTextContentDiv([.. p1]) { Id = $"{Id}-p1" });
-            html.Add(new HtmlElementTextContentDiv([.. p2]) { Id = $"{Id}-p2" });
+            var container2 = new HtmlElementTextContentDiv(p2)
+            {
+                Id = $"{Id}-p2",
+                Class = "wx-main-pane"
+            };
+
+            var html = new HtmlElementTextContentDiv(container1, container2)
+            {
+                Id = Id,
+                Class = Css.Concatenate("wx-webui-split", GetClasses()),
+                Style = GetStyles(),
+                Role = Role
+            }
+                .AddUserAttribute
+                (
+                    "data-orientation",
+                    Orientation == TypeOrientationSplit.Horizontal ? "horizontal" : "vertical"
+                )
+                .AddUserAttribute("data-min-side", SidePanelMinSize >= 0 ? SidePanelMinSize.ToString() : null)
+                .AddUserAttribute("data-size", SidePanelInitialSize >= 0 ? SidePanelInitialSize.ToString() : null)
+                .AddUserAttribute("data-max-side", SidePanelMaxSize >= 0 ? SidePanelMaxSize.ToString() : null)
+                .AddUserAttribute("data-splitter-size", SplitterSize >= 0 ? SplitterSize.ToString() : null)
+                .AddUserAttribute("data-splitter-class", SplitterColor.ToClass())
+                .AddUserAttribute("data-splitter-style", SplitterColor.ToStyle())
+                .AddUserAttribute("data-order", Order.ToValue())
+                .AddUserAttribute("data-unit", Unit.ToValue());
 
             return html;
         }

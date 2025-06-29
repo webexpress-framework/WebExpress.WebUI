@@ -139,7 +139,6 @@ namespace WebExpress.WebUI.WebPage
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/jquery-3.7.1.min.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/popper.min.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/bootstrap.min.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/split.min.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.button.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.date.js"));

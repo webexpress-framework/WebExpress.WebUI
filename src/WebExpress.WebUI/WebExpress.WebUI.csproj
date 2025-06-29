@@ -95,7 +95,6 @@
 		<None Remove="Assets\js\popper.min.js" />
 		<None Remove="Assets\js\popper.min.js.map" />
 		<None Remove="Assets\js\simpletags.js" />
-		<None Remove="Assets\js\split.min.js" />
 		<None Remove="Assets\js\summernote-de-DE.js" />
 		<None Remove="Assets\js\webexpress.webui.button.js" />
 		<None Remove="Assets\js\webexpress.webui.dropdownbutton.js" />
