@@ -2,7 +2,11 @@
  * English translations for WebExpress
  */
 webexpress.webui.I18N.register("en", "webexpress.webui", {
+    "copy": "Copy",
+
     "calendar.select_date": "Select date",
+    "calendar.select_range": "Select range",
+    "calendar.clear_range": "Clear selection",
     "calendar.calendar_week": "CW",
     "calendar.january": "January",
     "calendar.february": "February",
@@ -23,6 +27,8 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "calendar.fri": "Fri",
     "calendar.sat": "Sat",
     "calendar.sun": "Sun",
+    "calendar.today": "Today",
+    "calendar.format": "M/D/YYYY",
 
     "modal.close": "Close"
 

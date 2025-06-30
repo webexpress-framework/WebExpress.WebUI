@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.WebControl
     /// </summary>
     public class RenderControlFormContext : RenderControlContext, IRenderControlFormContext
     {
-        private readonly Dictionary<IControlFormItemInput, string> _values = new();
+        private readonly Dictionary<IControlFormItemInput, string> _values = [];
 
         /// <summary>
         /// Returns the form in which the control is rendered.

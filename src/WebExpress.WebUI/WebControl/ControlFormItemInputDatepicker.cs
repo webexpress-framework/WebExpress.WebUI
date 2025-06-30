@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -18,6 +19,16 @@ namespace WebExpress.WebUI.WebControl
         /// Returns or sets whether inputs are enforced.
         /// </summary>
         public bool Required { get; set; }
+
+        /// <summary>
+        /// Gets or sets the placeholder text displayed when no date is selected.
+        /// </summary>
+        public string Placeholder { get; set; }
+
+        /// <summary>
+        /// Returns or sets the date format string used for formatting date values.
+        /// </summary>
+        public string Format { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
@@ -56,7 +67,12 @@ namespace WebExpress.WebUI.WebControl
                 Class = "wx-webui-date"
             }
                 .AddUserAttribute("name", Name)
-                .AddUserAttribute("data-value", value);
+                .AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder))
+                .AddUserAttribute("data-value", value)
+                .AddUserAttribute("data-format", !string.IsNullOrWhiteSpace(Format)
+                    ? Format
+                    : renderContext.Request.Culture.DateTimeFormat.ShortDatePattern
+                );
 
             return html;
         }

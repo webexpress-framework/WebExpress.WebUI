@@ -118,6 +118,7 @@ namespace WebExpress.WebUI.WebPage
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/solid.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.button.css"));
+            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.calendar.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.date.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.dropdownbutton.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.editor.css"));
@@ -141,6 +142,7 @@ namespace WebExpress.WebUI.WebPage
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/bootstrap.min.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.button.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.calendar.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.date.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.dropdownbutton.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.editor.js"));

@@ -2,7 +2,11 @@
  * German translation for WebExpress
  */
 webexpress.webui.I18N.register("de", "webexpress.webui", {
+    "copy": "Kopieren",
+
     "calendar.select_date": "Datum auswählen",
+    "calendar.select_range": "Zeitraum auswählen",
+    "calendar.clear_range": "Auswahl löschen",
     "calendar.calendar_week": "KW",
     "calendar.january": "Januar",
     "calendar.february": "Februar",
@@ -23,6 +27,8 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "calendar.fri": "Fr",
     "calendar.sat": "Sa",
     "calendar.sun": "So",
+    "calendar.today": "Heute",
+    "calendar.format": "DD.MM.YYYY",
 
     "modal.close": "Schließen"
 });
