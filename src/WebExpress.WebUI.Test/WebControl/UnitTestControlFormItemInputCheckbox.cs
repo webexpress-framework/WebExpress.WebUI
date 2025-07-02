@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the form item input checkbox control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""checkbox""><label><input type=""checkbox""></label></div>")]
-        [InlineData("id", @"<div id=""id"" class=""checkbox""><label><input name=""id"" type=""checkbox""></label></div>")]
+        [InlineData(null, @"<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
+        [InlineData("id", @"<div id=""id"" class=""form-check""><input name=""id"" type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -37,7 +37,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the auto id property of the form check box control.
         /// </summary>
         [Theory]
-        [InlineData(@"<div id=""*"" class=""checkbox""><label><input name=""*"" type=""checkbox""></label></div>")]
+        [InlineData(@"<div id=""*"" class=""form-check""><input name=""*"" type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
         public void AutoId(string expected)
         {
             // preconditions
@@ -59,8 +59,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the Inline property of the form item input checkbox control.
         /// </summary>
         [Theory]
-        [InlineData(false, @"<div class=""checkbox""><label><input type=""checkbox""></label></div>")]
-        [InlineData(true, @"<div class=""checkbox""><label><input type=""checkbox""></label></div>")]
+        [InlineData(false, @"<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
+        [InlineData(true, @"<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
         public void Inline(bool inline, string expected)
         {
             // preconditions
@@ -83,8 +83,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the Description property of the form item input checkbox control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""checkbox""><label><input type=""checkbox""></label></div>")]
-        [InlineData("description", @"<div class=""checkbox""><label><input type=""checkbox"">&nbsp;description </label></div>")]
+        [InlineData(null, @"<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
+        [InlineData("description", @"<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label"">description</label></div>")]
+        [InlineData("webexpress.WebUI:plugin.name", @"<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label"">WebExpress.WebUI</label></div>")]
         public void Description(string description, string expected)
         {
             // preconditions
@@ -104,12 +105,12 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the Pattern property of the form item input checkbox control.
+        /// Tests the Layout property of the form item input checkbox control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""checkbox""><label><input type=""checkbox""></label></div>")]
-        [InlineData("pattern", @"<div class=""checkbox""><label><input pattern=""pattern"" type=""checkbox""></label></div>")]
-        public void Pattern(string pattern, string expected)
+        [InlineData(TypeLayoutCheckbox.Default, @"<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
+        [InlineData(TypeLayoutCheckbox.Switch, @"<div class=""form-check form-switch""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
+        public void Layout(TypeLayoutCheckbox layout, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -118,7 +119,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCheckBox(null)
             {
-                Pattern = pattern
+                Layout = layout
             };
 
             // test execution
@@ -131,9 +132,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form text control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<input type=""checkbox"">*")]
-        [InlineData(false, @"*<input type=""checkbox"">*")]
-        [InlineData(true, @"*<input type=""checkbox"" checked>*")]
+        [InlineData(null, @"*<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>*")]
+        [InlineData(false, @"*<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>*")]
+        [InlineData(true, @"*<div class=""form-check""><input type=""checkbox"" class=""form-check-input"" checked><label class=""form-check-label""></label></div>*")]
         public void ValueForm(bool? value, string expected)
         {
             // preconditions
@@ -156,9 +157,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form text control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<input type=""checkbox"">*")]
-        [InlineData(false, @"*<input type=""checkbox"">*")]
-        [InlineData(true, @"*<input type=""checkbox"" checked>*")]
+        [InlineData(null, @"*<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>*")]
+        [InlineData(false, @"*<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>*")]
+        [InlineData(true, @"*<div class=""form-check""><input type=""checkbox"" class=""form-check-input"" checked><label class=""form-check-label""></label></div>*")]
         public void ValueItem(bool? value, string expected)
         {
             // preconditions

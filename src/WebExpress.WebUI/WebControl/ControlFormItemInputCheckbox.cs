@@ -22,9 +22,9 @@ namespace WebExpress.WebUI.WebControl
         public string Description { get; set; }
 
         /// <summary>
-        /// Returns or sets a search pattern that checks the content.
+        /// Returns or sets the layout configuration for the type.
         /// </summary>
-        public string Pattern { get; set; }
+        public TypeLayoutCheckbox Layout { get; set; } = TypeLayoutCheckbox.Default;
 
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
@@ -60,33 +60,28 @@ namespace WebExpress.WebUI.WebControl
                         ? "true"
                         : "false";
 
-            var html = new HtmlElementTextContentDiv
-            (
-                new HtmlElementFieldLabel
-                (
-                    new HtmlElementFieldInput()
-                    {
-                        Name = Name,
-                        Pattern = Pattern,
-                        Type = "checkbox",
-                        Disabled = Disabled,
-                        Checked = value?.Equals("true") ?? false
-                    },
-                    new HtmlText
-                    (
-                        string.IsNullOrWhiteSpace(Description) ?
-                        string.Empty :
-                        "&nbsp;" + I18N.Translate(renderContext.Request?.Culture, Description)
-                    )
-                )
-                {
-                }
-            )
+            var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("checkbox", GetClasses()),
+                Class = Css.Concatenate(Layout.ToClass(), GetClasses()),
                 Style = GetStyles(),
-            };
+            }
+                .Add(new HtmlElementFieldInput()
+                {
+                    Name = Name,
+                    Type = "checkbox",
+                    Disabled = Disabled,
+                    Class = Css.Concatenate("form-check-input"),
+                    Checked = value?.Equals("true") ?? false
+                })
+                .Add(new HtmlElementFieldLabel()
+                {
+                    Class = Css.Concatenate("form-check-label"),
+                }
+                    .Add(new HtmlText(string.IsNullOrWhiteSpace(Description) ?
+                        string.Empty :
+                        I18N.Translate(renderContext.Request?.Culture, Description)
+                    )));
 
             return html;
         }
