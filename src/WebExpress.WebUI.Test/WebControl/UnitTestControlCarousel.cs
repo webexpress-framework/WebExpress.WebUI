@@ -15,7 +15,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div id=""carousel"" class=""carousel slide"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData("id", @"<div id=""id"" class=""carousel slide"" data-bs-ride=""carousel""><ul class=""carousel-indicators"">*</div>")]
+        [InlineData("id", @"<div id=""id"" class=""carousel slide"" data-bs-ride=""carousel""><div class=""carousel-indicators"">*</div>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -37,15 +37,15 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeColorText.Default, @"<div id=""carousel"" class=""carousel slide"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData(TypeColorText.Primary, @"<div id=""carousel"" class=""carousel slide text-primary"" data-bs-ride=""carousel""><ul class=""carousel-indicators"">*</div>")]
-        [InlineData(TypeColorText.Secondary, @"<div id=""carousel"" class=""carousel slide text-secondary"" data-bs-ride=""carousel""><ul class=""carousel-indicators"">*</div>")]
-        [InlineData(TypeColorText.Info, @"<div id=""carousel"" class=""carousel slide text-info"" data-bs-ride=""carousel""><ul class=""carousel-indicators"">*</div>")]
-        [InlineData(TypeColorText.Success, @"<div id=""carousel"" class=""carousel slide text-success"" data-bs-ride=""carousel""><ul class=""carousel-indicators"">*</div>")]
-        [InlineData(TypeColorText.Warning, @"<div id=""carousel"" class=""carousel slide text-warning"" data-bs-ride=""carousel""><ul class=""carousel-indicators"">*</div>")]
-        [InlineData(TypeColorText.Danger, @"<div id=""carousel"" class=""carousel slide text-danger"" data-bs-ride=""carousel""><ul class=""carousel-indicators"">*</div>")]
-        [InlineData(TypeColorText.Light, @"<div id=""carousel"" class=""carousel slide text-light"" data-bs-ride=""carousel""><ul class=""carousel-indicators"">*</div>")]
-        [InlineData(TypeColorText.Dark, @"<div id=""carousel"" class=""carousel slide text-dark"" data-bs-ride=""carousel""><ul class=""carousel-indicators"">*</div>")]
-        [InlineData(TypeColorText.Muted, @"<div id=""carousel"" class=""carousel slide text-muted"" data-bs-ride=""carousel""><ul class=""carousel-indicators"">*</div>")]
+        [InlineData(TypeColorText.Primary, @"<div id=""carousel"" class=""carousel slide text-primary"" data-bs-ride=""carousel"">*</div>")]
+        [InlineData(TypeColorText.Secondary, @"<div id=""carousel"" class=""carousel slide text-secondary"" data-bs-ride=""carousel"">*</div>")]
+        [InlineData(TypeColorText.Info, @"<div id=""carousel"" class=""carousel slide text-info"" data-bs-ride=""carousel"">*</div>")]
+        [InlineData(TypeColorText.Success, @"<div id=""carousel"" class=""carousel slide text-success"" data-bs-ride=""carousel"">*</div>")]
+        [InlineData(TypeColorText.Warning, @"<div id=""carousel"" class=""carousel slide text-warning"" data-bs-ride=""carousel"">*</div>")]
+        [InlineData(TypeColorText.Danger, @"<div id=""carousel"" class=""carousel slide text-danger"" data-bs-ride=""carousel"">*</div>")]
+        [InlineData(TypeColorText.Light, @"<div id=""carousel"" class=""carousel slide text-light"" data-bs-ride=""carousel"">*</div>")]
+        [InlineData(TypeColorText.Dark, @"<div id=""carousel"" class=""carousel slide text-dark"" data-bs-ride=""carousel"">*</div>")]
+        [InlineData(TypeColorText.Muted, @"<div id=""carousel"" class=""carousel slide text-muted"" data-bs-ride=""carousel"">*</div>")]
         public void TextColor(TypeColorText color, string expected)
         {
             // preconditions

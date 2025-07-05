@@ -74,12 +74,12 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             // indicators 
-            var indicators = new HtmlElementTextContentUl() { Class = "carousel-indicators" };
+            var indicators = new HtmlElementTextContentDiv() { Class = "carousel-indicators" };
             var index = 0;
 
             foreach (var v in Items)
             {
-                var i = new HtmlElementTextContentLi() { Class = index == 0 ? "active" : string.Empty };
+                var i = new HtmlElementTextContentDiv() { Class = index == 0 ? "active" : string.Empty };
                 i.AddUserAttribute("data-bs-target", "#" + Id);
                 i.AddUserAttribute("data-bs-slide-to", index.ToString());
 
