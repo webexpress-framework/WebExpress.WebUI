@@ -10,20 +10,20 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns the collection of items in the combobox.
         /// </summary>
-        IEnumerable<ControlFormItemInputComboBoxItem> Items { get; }
+        IEnumerable<ControlFormItemInputComboItem> Items { get; }
 
         /// <summary>
         /// Adds one or more items to the combobox.
         /// </summary>
         /// <param name="items">The items to add to the combobox.</param>
         /// <returns>The current instance of the combobox for method chaining.</returns>
-        IControlFormItemInputComboBox Add(params ControlFormItemInputComboBoxItem[] items);
+        IControlFormItemInputComboBox Add(params ControlFormItemInputComboItem[] items);
 
         /// <summary>
         /// Removes a specific item from the combobox.
         /// </summary>
         /// <param name="item">The item to remove from the combobox.</param>
         /// <returns>The current instance of the combobox for method chaining.</returns>
-        IControlFormItemInputComboBox Remove(ControlFormItemInputComboBoxItem item);
+        IControlFormItemInputComboBox Remove(ControlFormItemInputComboItem item);
     }
 }

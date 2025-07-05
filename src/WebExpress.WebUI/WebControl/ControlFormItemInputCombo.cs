@@ -13,14 +13,14 @@ namespace WebExpress.WebUI.WebControl
     /// <remarks>
     /// This control allows users to select an item from a dropdown list.
     /// </remarks>
-    public class ControlFormItemInputComboBox : ControlFormItemInput, IControlFormItemInputComboBox
+    public class ControlFormItemInputCombo : ControlFormItemInput, IControlFormItemInputComboBox
     {
-        private readonly List<ControlFormItemInputComboBoxItem> _items = [];
+        private readonly List<ControlFormItemInputComboItem> _items = [];
 
         /// <summary>
         /// Returns the combobox items.
         /// </summary>
-        public IEnumerable<ControlFormItemInputComboBoxItem> Items => _items;
+        public IEnumerable<ControlFormItemInputComboItem> Items => _items;
 
         ///// <summary>
         ///// Returns or sets the selected item.
@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
         /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
         /// <param name="items">The ComboBox entries.</param>
-        public ControlFormItemInputComboBox([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null, params ControlFormItemInputComboBoxItem[] items)
+        public ControlFormItemInputCombo([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null, params ControlFormItemInputComboItem[] items)
             : this($"checkbox_{instance}_{file}_{line}".GetHashCode().ToString("X"), items)
         {
         }
@@ -59,7 +59,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="id">The id of the control.</param>
         /// <param name="items">The ComboBox entries.</param>
-        public ControlFormItemInputComboBox(string id, params ControlFormItemInputComboBoxItem[] items)
+        public ControlFormItemInputCombo(string id, params ControlFormItemInputComboItem[] items)
             : base(id)
         {
             _items.AddRange(items);
@@ -70,7 +70,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="items">The items to add to the selection options.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlFormItemInputComboBox Add(params ControlFormItemInputComboBoxItem[] items)
+        public IControlFormItemInputComboBox Add(params ControlFormItemInputComboItem[] items)
         {
             _items.AddRange(items);
 
@@ -82,7 +82,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="item">The item to remove from the selection options.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlFormItemInputComboBox Remove(ControlFormItemInputComboBoxItem item)
+        public IControlFormItemInputComboBox Remove(ControlFormItemInputComboItem item)
         {
             _items.Remove(item);
 

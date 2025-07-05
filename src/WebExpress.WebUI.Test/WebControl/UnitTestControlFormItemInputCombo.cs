@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.Test.WebControl
     /// Tests the form item input combobox control.
     /// </summary>
     [Collection("NonParallelTests")]
-    public class UnitTestControlFormItemInputCombobox
+    public class UnitTestControlFormItemInputCombo
     {
         /// <summary>
         /// Tests the id property of the form item input combobox control.
@@ -25,7 +25,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputComboBox(id)
+            var control = new ControlFormItemInputCombo(id)
             {
             };
 
@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputComboBox()
+            var control = new ControlFormItemInputCombo()
             {
             };
 
@@ -70,7 +70,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputComboBox(null)
+            var control = new ControlFormItemInputCombo(null)
             {
                 Icon = icon != null ? Activator.CreateInstance(icon) as IIcon : null
             };
@@ -94,7 +94,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputComboBox(null)
+            var control = new ControlFormItemInputCombo(null)
             {
                 Label = label
             };
@@ -118,7 +118,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputComboBox(null)
+            var control = new ControlFormItemInputCombo(null)
             {
                 Help = help
             };
@@ -142,7 +142,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputComboBox(null)
+            var control = new ControlFormItemInputCombo(null)
             {
                 Disabled = disabled
             };
@@ -164,7 +164,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputComboBox(null);
+            var control = new ControlFormItemInputCombo(null);
             control.AddPrepend(new ControlText { Text = "prepend" });
 
             // test execution
@@ -185,7 +185,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputComboBox(null);
+            var control = new ControlFormItemInputCombo(null);
             control.AddPrepend(new ControlText { Text = "append" });
 
             // test execution
@@ -208,7 +208,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputComboBox(null)
+            var control = new ControlFormItemInputCombo(null)
             {
                 Tag = tag
             };

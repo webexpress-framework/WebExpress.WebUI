@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a text box input form item control.
     /// </summary>
-    public class ControlFormItemInputTextBox : ControlFormItemInput
+    public class ControlFormItemInputText : ControlFormItemInput
     {
         /// <summary>
         /// Determines whether the control is automatically initialized.
@@ -64,7 +64,7 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
         /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
         /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
-        public ControlFormItemInputTextBox([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null)
+        public ControlFormItemInputText([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null)
             : this($"textbox_{instance}_{file}_{line}".GetHashCode().ToString("X"))
         {
         }
@@ -73,7 +73,7 @@ namespace WebExpress.WebUI.WebControl
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        public ControlFormItemInputTextBox(string id)
+        public ControlFormItemInputText(string id)
             : base(id)
         {
             Margin = new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.Two, PropertySpacing.Space.None, PropertySpacing.Space.None);

@@ -5,14 +5,14 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents an item in a combobox control within a form.
     /// </summary>
-    public class ControlFormItemInputComboBoxItem
+    public class ControlFormItemInputComboItem
     {
-        private readonly List<ControlFormItemInputComboBoxItem> _subItems = [];
+        private readonly List<ControlFormItemInputComboItem> _subItems = [];
 
         /// <summary>
         /// Returns the sub-items of the combobox item.
         /// </summary>
-        public IEnumerable<ControlFormItemInputComboBoxItem> SubItems => _subItems;
+        public IEnumerable<ControlFormItemInputComboItem> SubItems => _subItems;
 
         /// <summary>
         /// Returns or sets the text.
@@ -33,7 +33,7 @@ namespace WebExpress.WebUI.WebControl
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="subitems">The child entries.</param>
-        public ControlFormItemInputComboBoxItem(params ControlFormItemInputComboBoxItem[] subitems)
+        public ControlFormItemInputComboItem(params ControlFormItemInputComboItem[] subitems)
         {
             _subItems.AddRange(subitems);
         }
@@ -42,7 +42,7 @@ namespace WebExpress.WebUI.WebControl
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="subitems">The child entries.</param>
-        public ControlFormItemInputComboBoxItem(IEnumerable<ControlFormItemInputComboBoxItem> subitems)
+        public ControlFormItemInputComboItem(IEnumerable<ControlFormItemInputComboItem> subitems)
             : this()
         {
             _subItems.AddRange(subitems);

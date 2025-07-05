@@ -238,7 +238,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputTextBox(null);
+            var control = new ControlFormItemInputText(null);
             var form = new ControlForm().Add(control).Initialize(renderContext =>
             {
                 renderContext.SetValue(control, value);

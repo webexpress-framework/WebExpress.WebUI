@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Runtime.CompilerServices;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -29,20 +29,26 @@ namespace WebExpress.WebUI.WebControl
         public string Description { get; set; }
 
         /// <summary>
-        /// Returns or sets a search pattern that checks the content.
-        /// </summary>
-        public string Pattern { get; set; }
-
-        /// <summary>
         /// Returns or sets whether the radio button is selected
         /// </summary>
         public bool Checked { get; set; }
 
         /// <summary>
+        /// Initializes a new instance of the class with an automatically assigned ID.
+        /// </summary>
+        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
+        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
+        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
+        public ControlFormItemInputRadio([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null)
+            : this($"radio_{instance}_{file}_{line}".GetHashCode().ToString("X"))
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        public ControlFormItemInputRadio(string id = null)
+        public ControlFormItemInputRadio(string id)
             : base(id)
         {
 
@@ -63,46 +69,30 @@ namespace WebExpress.WebUI.WebControl
                 Checked = value == Option;
             }
 
-            var c = new List<string>
+            var html = new HtmlElementTextContentDiv()
             {
-                "radio"
-            };
-
-            if (Inline)
-            {
-                c.Add("form-check-inline");
+                Id = Id,
+                Class = Css.Concatenate("form-check", Inline ? "form-check-inline" : null, GetClasses()),
+                Style = GetStyles(),
             }
-
-            if (Disabled)
-            {
-                c.Add("disabled");
-            }
-
-            var html = new HtmlElementTextContentDiv
-            (
-                new HtmlElementFieldLabel
-                (
-                    new HtmlElementFieldInput()
-                    {
-                        Id = Id,
-                        Name = Name,
-                        Pattern = Pattern,
-                        Type = "radio",
-                        Disabled = Disabled,
-                        Checked = Checked,
-                        Class = string.Join(" ", Classes.Where(x => !string.IsNullOrWhiteSpace(x))),
-                        Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
-                        Role = Role,
-                        Value = Option
-                    },
-                    new HtmlText(string.IsNullOrWhiteSpace(Description) ? string.Empty : "&nbsp;" + Description)
-                )
+                .Add(new HtmlElementFieldInput()
                 {
+                    Name = Name,
+                    Type = "radio",
+                    Value = Option,
+                    Disabled = Disabled,
+                    Class = Css.Concatenate("form-check-input"),
+                    Checked = Checked
+                })
+                .Add(new HtmlElementFieldLabel()
+                {
+                    Class = Css.Concatenate("form-check-label"),
+                    For = Id
                 }
-            )
-            {
-                Class = string.Join(" ", c.Where(x => !string.IsNullOrWhiteSpace(x)))
-            };
+                    .Add(new HtmlText(string.IsNullOrWhiteSpace(Description) ?
+                        string.Empty :
+                        I18N.Translate(renderContext.Request?.Culture, Description)
+                    )));
 
             return html;
         }

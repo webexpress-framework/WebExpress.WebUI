@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a date picker input form item control.
     /// </summary>
-    public class ControlFormItemInputDatepicker : ControlFormItemInput
+    public class ControlFormItemInputDate : ControlFormItemInput
     {
         /// <summary>
         /// Returns or sets the description.
@@ -37,7 +37,7 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
         /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
         /// <param name="items">The entries.</param>
-        public ControlFormItemInputDatepicker([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null, params ControlFormItemInputSelectionItem[] items)
+        public ControlFormItemInputDate([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null, params ControlFormItemInputSelectionItem[] items)
             : this($"datepicker{instance}_{file}_{line}".GetHashCode().ToString("X"))
         {
         }
@@ -46,7 +46,7 @@ namespace WebExpress.WebUI.WebControl
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        public ControlFormItemInputDatepicker(string id)
+        public ControlFormItemInputDate(string id)
             : base(id)
         {
         }

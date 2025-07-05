@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a checkbox input form item control.
     /// </summary>
-    public class ControlFormItemInputCheckBox : ControlFormItemInput
+    public class ControlFormItemInputCheck : ControlFormItemInput
     {
         /// <summary>
         /// Returns or sets whether the checkbox should be displayed on a new line.
@@ -32,7 +32,7 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
         /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
         /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
-        public ControlFormItemInputCheckBox([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null)
+        public ControlFormItemInputCheck([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null)
             : this($"checkbox_{instance}_{file}_{line}".GetHashCode().ToString("X"))
         {
         }
@@ -41,7 +41,7 @@ namespace WebExpress.WebUI.WebControl
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id.</param>
-        public ControlFormItemInputCheckBox(string id)
+        public ControlFormItemInputCheck(string id)
             : base(id)
         {
         }
@@ -63,7 +63,7 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate(Layout.ToClass(), GetClasses()),
+                Class = Css.Concatenate(Layout.ToClass(), Inline ? "form-check-inline" : null, GetClasses()),
                 Style = GetStyles(),
             }
                 .Add(new HtmlElementFieldInput()
@@ -77,6 +77,7 @@ namespace WebExpress.WebUI.WebControl
                 .Add(new HtmlElementFieldLabel()
                 {
                     Class = Css.Concatenate("form-check-label"),
+                    For = Id
                 }
                     .Add(new HtmlText(string.IsNullOrWhiteSpace(Description) ?
                         string.Empty :

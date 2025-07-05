@@ -96,7 +96,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemLabel(null)
             {
-                FormItem = formItem ? new ControlFormItemInputTextBox() : null
+                FormItem = formItem ? new ControlFormItemInputText() : null
             };
 
             // test execution

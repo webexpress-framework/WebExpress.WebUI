@@ -8,14 +8,14 @@ namespace WebExpress.WebUI.Test.WebControl
     /// Tests the form item input checkbox control.
     /// </summary>
     [Collection("NonParallelTests")]
-    public class UnitTestControlFormItemInputCheckbox
+    public class UnitTestControlFormItemInputCheck
     {
         /// <summary>
         /// Tests the id property of the form item input checkbox control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
-        [InlineData("id", @"<div id=""id"" class=""form-check""><input name=""id"" type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
+        [InlineData("id", @"<div id=""id"" class=""form-check""><input name=""id"" type=""checkbox"" class=""form-check-input""><label class=""form-check-label"" for=""id""></label></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -23,7 +23,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputCheckBox(id)
+            var control = new ControlFormItemInputCheck(id)
             {
             };
 
@@ -37,7 +37,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the auto id property of the form check box control.
         /// </summary>
         [Theory]
-        [InlineData(@"<div id=""*"" class=""form-check""><input name=""*"" type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
+        [InlineData(@"<div id=""*"" class=""form-check""><input name=""*"" type=""checkbox"" class=""form-check-input""><label class=""form-check-label"" for=""*""></label></div>")]
         public void AutoId(string expected)
         {
             // preconditions
@@ -45,7 +45,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputCheckBox()
+            var control = new ControlFormItemInputCheck()
             {
             };
 
@@ -60,7 +60,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(false, @"<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
-        [InlineData(true, @"<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
+        [InlineData(true, @"<div class=""form-check form-check-inline""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
         public void Inline(bool inline, string expected)
         {
             // preconditions
@@ -68,7 +68,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputCheckBox(null)
+            var control = new ControlFormItemInputCheck(null)
             {
                 Inline = inline
             };
@@ -93,7 +93,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputCheckBox(null)
+            var control = new ControlFormItemInputCheck(null)
             {
                 Description = description
             };
@@ -117,7 +117,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputCheckBox(null)
+            var control = new ControlFormItemInputCheck(null)
             {
                 Layout = layout
             };
@@ -141,7 +141,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputCheckBox(null);
+            var control = new ControlFormItemInputCheck(null);
             var form = new ControlForm().Add(control).Initialize(renderContext =>
             {
                 renderContext.SetValue(control, value?.ToString());
@@ -166,7 +166,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputCheckBox(null).Initialize(args =>
+            var control = new ControlFormItemInputCheck(null).Initialize(args =>
             {
                 args.Value = value?.ToString();
             });

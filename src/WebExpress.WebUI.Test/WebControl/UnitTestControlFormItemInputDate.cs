@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.Test.WebControl
     /// Tests the form datepicker control.
     /// </summary>
     [Collection("NonParallelTests")]
-    public class UnitTestControlFormItemInputDatepicker
+    public class UnitTestControlFormItemInputDate
     {
         /// <summary>
         /// Tests the id property of the form datepicker control.
@@ -23,7 +23,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputDatepicker(id)
+            var control = new ControlFormItemInputDate(id)
             {
             };
 
@@ -46,7 +46,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputDatepicker(null)
+            var control = new ControlFormItemInputDate(null)
             {
                 Name = name
             };
@@ -69,7 +69,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputDatepicker(null);
+            var control = new ControlFormItemInputDate(null);
             var form = new ControlForm().Add(control).Initialize(renderContext =>
             {
                 renderContext.SetValue(control, value);
@@ -95,7 +95,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputDatepicker(null)
+            var control = new ControlFormItemInputDate(null)
             {
                 Placeholder = placeholder
             };
@@ -119,7 +119,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputDatepicker(null)
+            var control = new ControlFormItemInputDate(null)
             {
                 Format = format
             };
@@ -143,7 +143,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputDatepicker(null)
+            var control = new ControlFormItemInputDate(null)
             {
                 Required = required
             };

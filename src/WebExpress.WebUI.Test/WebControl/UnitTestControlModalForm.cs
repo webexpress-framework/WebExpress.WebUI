@@ -70,7 +70,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlModalForm(null);
 
             // test execution
-            form.Add(new ControlFormItemInputTextBox());
+            form.Add(new ControlFormItemInputText());
             var html = form.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(@"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*<input * type=""text"" class=""form-control"">*</form>", html);
