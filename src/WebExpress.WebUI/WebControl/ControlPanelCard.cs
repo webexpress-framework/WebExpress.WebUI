@@ -2,6 +2,7 @@
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -19,7 +20,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the header image.
         /// </summary>
-        public string HeaderImage { get; set; }
+        public IUri HeaderImage { get; set; }
 
         /// <summary>
         /// Returns or sets the headline.
@@ -34,7 +35,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the footer image.
         /// </summary>
-        public string FooterImage { get; set; }
+        public IUri FooterImage { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -70,11 +71,11 @@ namespace WebExpress.WebUI.WebControl
                 html.Add(new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(Header))) { Class = "card-header" });
             }
 
-            if (!string.IsNullOrWhiteSpace(HeaderImage))
+            if (HeaderImage != null)
             {
                 html.Add(new HtmlElementMultimediaImg()
                 {
-                    Src = HeaderImage,
+                    Src = HeaderImage?.ToString(),
                     Class = "card-img-top"
                 });
             }
@@ -91,7 +92,7 @@ namespace WebExpress.WebUI.WebControl
                 content = headContent.Concat(Content);
             }
 
-            html.Add(new HtmlElementTextContentDiv(new HtmlElementTextContentDiv(content.Select(x => x.Render(renderContext, visualTree)).ToArray())
+            html.Add(new HtmlElementTextContentDiv(new HtmlElementTextContentDiv([.. content.Select(x => x.Render(renderContext, visualTree))])
             {
                 Class = "card-text"
             })
@@ -99,11 +100,11 @@ namespace WebExpress.WebUI.WebControl
                 Class = "card-body"
             });
 
-            if (!string.IsNullOrWhiteSpace(FooterImage))
+            if (FooterImage != null)
             {
                 html.Add(new HtmlElementMultimediaImg()
                 {
-                    Src = FooterImage,
+                    Src = FooterImage?.ToString(),
                     Class = "card-img-top"
                 });
             }
