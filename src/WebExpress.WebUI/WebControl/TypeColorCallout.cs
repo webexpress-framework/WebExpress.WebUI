@@ -65,14 +65,14 @@
         {
             return layout switch
             {
-                TypeColorCallout.Primary => "callout-primary",
-                TypeColorCallout.Secondary => "callout-secondary",
-                TypeColorCallout.Success => "callout-success",
-                TypeColorCallout.Info => "callout-info",
-                TypeColorCallout.Warning => "callout-warning",
-                TypeColorCallout.Danger => "callout-danger",
-                TypeColorCallout.Light => "callout-light",
-                TypeColorCallout.Dark => "callout-dark",
+                TypeColorCallout.Primary => "wx-callout-primary",
+                TypeColorCallout.Secondary => "wx-callout-secondary",
+                TypeColorCallout.Success => "wx-callout-success",
+                TypeColorCallout.Info => "wx-callout-info",
+                TypeColorCallout.Warning => "wx-callout-warning",
+                TypeColorCallout.Danger => "wx-callout-danger",
+                TypeColorCallout.Light => "wx-callout-light",
+                TypeColorCallout.Dark => "wx-callout-dark",
                 _ => string.Empty,
             };
         }
