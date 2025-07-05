@@ -311,9 +311,9 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         const options = [];
         for (const div of optionsDiv.children) {
             const elem = div;
-            if (elem.classList.contains("wx-dropdownbutton-divider")) {
+            if (elem.classList.contains("wx-dropdown-divider")) {
                 options.push({ type: "divider" });
-            } else if (elem.classList.contains("wx-dropdownbutton-header")) {
+            } else if (elem.classList.contains("wx-dropdown-header")) {
                 options.push({
                     type: "header",
                     content: elem.textContent.trim(),
@@ -502,7 +502,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             div.dataset.icon = "fas fa-cog";
             div.dataset.size = "btn-sm";
             div.dataset.border = "false";
-            new webexpress.webui.DropdownButtonCtrl(div).items = this._options;
+            new webexpress.webui.DropdownCtrl(div).items = this._options;
             const th = document.createElement("th");
             th.style.overflow = "visible";
             th.appendChild(div);
@@ -579,7 +579,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             div.dataset.icon = "fas fa-cog";
             div.dataset.size = "btn-sm";
             div.dataset.border = "false";
-            new webexpress.webui.DropdownButtonCtrl(div).items = row.options;
+            new webexpress.webui.DropdownCtrl(div).items = row.options;
             const td = document.createElement("td");
             td.appendChild(div);
             tr.appendChild(td);

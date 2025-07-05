@@ -36,7 +36,7 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = "wx-dropdownbutton-divider",
+                Class = "wx-dropdown-divider",
                 Role = "separator"
             };
 

@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the dropdown item divider control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-dropdownbutton-divider"" role=""separator""></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-dropdownbutton-divider"" role=""separator""></div>")]
+        [InlineData(null, @"<div class=""wx-dropdown-divider"" role=""separator""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-dropdown-divider"" role=""separator""></div>")]
         public void Id(string id, string expected)
         {
             // preconditions

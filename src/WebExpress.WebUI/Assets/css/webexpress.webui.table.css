@@ -68,7 +68,7 @@
     margin-right: 0.5em;
 }
 
-.wx-table > thead > tr > th.wx-dropdownbutton > button {
+.wx-table > thead > tr > th.wx-dropdown > button {
     padding: 0;
     border: 0;
 }

@@ -1,0 +1,186 @@
+/* Base styles for the toolbar */
+.wx-toolbar {
+    display: flex; /* Use Flexbox for horizontal alignment */
+    flex-wrap: nowrap; 
+    align-items: center;
+    gap: 8px; /* Add spacing between items */
+    padding: 8px;
+    background-color: var(--bs-body-bg); /* Light background for toolbar */
+    border: none; 
+    border-radius: 0; 
+}
+
+/* Styles for left-aligned items */
+.wx-toolbar-left {
+    display: flex; /* Ensure left-aligned items are on one line */
+    flex: 1; /* Allow left-aligned items to take up available space */
+    justify-content: flex-start; /* Align items to the start */
+    gap: 8px; /* Add spacing between items */
+    align-items: center;
+    text-wrap: nowrap;
+}
+
+/* Styles for right-aligned items */
+.wx-toolbar-right {
+    display: flex; /* Ensure right-aligned items are on one line */
+    flex: 1; /* Allow right-aligned items to take up available space */
+    justify-content: flex-end; /* Align items to the end */
+    gap: 8px; /* Add spacing between items */
+    align-items: center;
+    text-wrap: nowrap;
+}
+
+/* Styles for toolbar buttons */
+.wx-toolbar-button {
+    background: transparent;
+    border: none;
+    padding: 0.5em;
+    color: var(--bs-body-color);
+    transition: all 0.3s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 2em;
+}
+
+.wx-toolbar-button i {
+}
+
+.wx-toolbar-button span {
+    
+    text-overflow: ellipsis; /* Add ellipsis for text overflow */
+}
+
+.wx-toolbar-button i + span {
+    margin-left: 0.5em; /* Add spacing between icon and text */
+}
+
+.wx-toolbar-button:focus {
+    background-color: var(--bs-secondary-bg);
+    border-radius: 4px; 
+}
+
+/* Hover effect for buttons */
+.wx-toolbar-button:hover {
+    background-color: var(--bs-secondary-bg);
+    border-radius: 4px; 
+}
+
+/* Disabled state for buttons */
+.wx-toolbar-button.disabled {
+    cursor: not-allowed; /* Prevent interaction */
+    opacity: 0.5; /* Reduce opacity for disabled items */
+}
+
+/* Active state for buttons */
+.wx-toolbar-button.active {
+    background-color: var(--bs-primary); /* Highlight active items */
+    color: var(--bs-white); /* Change text color for active items */
+}
+
+/* Styles for dropdown buttons */
+.wx-toolbar-dropdown {
+    background: transparent;
+    border: none;
+    padding: 0.5em;
+    color: var(--bs-body-color);
+    transition: all 0.3s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 2em;
+}
+
+.wx-toolbar-dropdown:focus {
+    background-color: var(--bs-secondary-bg);
+    border-radius: 4px; 
+}
+
+.wx-toolbar-dropdown:hover {
+    background-color: var(--bs-secondary-bg);
+    border-radius: 4px; 
+}
+
+/* Styles for toolbar separators */
+.wx-toolbar-separator {
+    width: 1px; /* Set width */
+    height: 1.6em;
+    background-color: var(--bs-secondary); /* Use secondary color for separator */
+}
+
+/* Styles for comboboxes */
+.wx-toolbar-combobox {
+    display: flex; /* Align combobox horizontally */
+    align-items: center; /* Center align items vertically */
+    gap: 8px; /* Add spacing between label and combobox */
+    height: 2em;
+}
+
+.wx-toolbar-combobox label {
+    font-size: 1em; /* Set font size */
+    color: var(--bs-dark); /* Use dark text color */
+}
+
+.wx-toolbar-combobox .form-select {
+    font-size: 14px; /* Set font size */
+    background-color: var(--bs-light); /* Use light background for combobox */
+    border: none; /* Remove border for a flat design */
+    cursor: pointer; /* Change cursor to pointer */
+    transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out; /* Add transition effects */
+}
+
+.wx-toolbar-combobox .form-select:focus {
+    background-color: var(--bs-secondary-bg);
+    border-radius: 4px; 
+}
+
+.wx-toolbar-combobox .form-select:hover {
+    background-color: var(--bs-light-hover); /* Use a lighter Bootstrap color on hover */
+}
+
+.wx-toolbar-combobox .form-select:disabled {
+    cursor: not-allowed; /* Prevent interaction */
+    opacity: 0.5; /* Reduce opacity for disabled combobox */
+}
+
+/* Styles for text items */
+.wx-toolbar-text {
+    font-size: 1em; /* Set font size */
+    color: var(--bs-dark); /* Use dark text color */
+    display: flex; /* Ensure text items align horizontally */
+    align-items: center; /* Center align items vertically */
+    white-space: nowrap; /* Prevent text wrapping */
+    opacity: 1; /* Full opacity */
+    transition: opacity 0.2s ease-in-out; /* Add transition effects */
+}
+
+.wx-toolbar-text.disabled {
+    cursor: not-allowed; /* Prevent interaction */
+    opacity: 0.5; /* Reduce opacity for disabled text */
+}
+
+/* Support for dark mode */
+[data-bs-theme="dark"] .wx-toolbar {
+    background-color: var(--bs-dark); /* Dark background */
+}
+
+[data-bs-theme="dark"] .wx-toolbar-button,
+[data-bs-theme="dark"] .wx-toolbar-dropdown,
+[data-bs-theme="dark"] .wx-toolbar-combobox .form-select,
+[data-bs-theme="dark"] .wx-toolbar-text {
+    color: var(--bs-light); /* Light text color */
+}
+
+[data-bs-theme="dark"] .wx-toolbar-button.active,
+[data-bs-theme="dark"] .wx-toolbar-dropdown .dropdown-item.active {
+    background-color: var(--bs-light); /* Light background for active items */
+    color: var(--bs-dark); /* Dark text color for active items */
+}
+
+[data-bs-theme="dark"] .wx-toolbar-dropdown .dropdown-menu {
+    background-color: var(--bs-dark); /* Dark background for dropdown menu */
+}
+
+[data-bs-theme="dark"] .wx-toolbar-separator {
+    background-color: var(--bs-light); /* Light separator in dark mode */
+}

@@ -37,7 +37,7 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
         element.removeAttribute("data-header");
         element.removeAttribute("data-headercss");
         element.removeAttribute("data-expanded");
-        element.classList.add("wx-expand");
+        element.classList.add("wx-expandableable");
 
         // Create UI elements
         this._expander = this._createExpander();
@@ -137,8 +137,8 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
      */
     render() {
         // Update expander arrow classes
-        this._expander.classList.toggle("wx-expand-angle-down", this._expand);
-        this._expander.classList.toggle("wx-expand-angle-down-animation", this._expand);
+        this._expander.classList.toggle("wx-expandableable-angle-down", this._expand);
+        this._expander.classList.toggle("wx-expandableable-angle-down-animation", this._expand);
 
         // Update icon classes
         if (this._icon) {
@@ -179,10 +179,10 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
      */
     _createExpander() {
         const expander = document.createElement("a");
-        expander.className = "wx-expand-angle me-2";
+        expander.className = "wx-expandableable-angle me-2";
         expander.href = "javascript:void(0);";
         if (this._expand) {
-            expander.classList.add("wx-expand-angle-down");
+            expander.classList.add("wx-expandableable-angle-down");
         }
         expander.addEventListener("click", () => {
             this.toggleExpand();
@@ -264,4 +264,4 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
 };
 
 // Register the class in the controller
-webexpress.webui.Controller.registerClass("wx-webui-expand", webexpress.webui.ExpandableCtrl);
+webexpress.webui.Controller.registerClass("wx-webui-expandable", webexpress.webui.ExpandableCtrl);

@@ -18,8 +18,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the dropdown item link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-dropdownbutton-item""></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-dropdownbutton-item""></div>")]
+        [InlineData(null, @"<div class=""wx-dropdown-item""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-dropdown-item""></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -40,9 +40,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the text property of the dropdown item link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-dropdownbutton-item""></div>")]
-        [InlineData("abc", @"<div class=""wx-dropdownbutton-item"">abc</div>")]
-        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-dropdownbutton-item"">webexpress.webui:plugin.name</div>")]
+        [InlineData(null, @"<div class=""wx-dropdown-item""></div>")]
+        [InlineData("abc", @"<div class=""wx-dropdown-item"">abc</div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-dropdown-item"">webexpress.webui:plugin.name</div>")]
         public void Text(string text, string expected)
         {
             // preconditions
@@ -64,9 +64,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the uri property of the dropdown item link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-dropdownbutton-item""></div>")]
-        [InlineData("/a", @"<div class=""wx-dropdownbutton-item"" data-uri=""/a""></div>")]
-        [InlineData("/a/b", @"<div class=""wx-dropdownbutton-item"" data-uri=""/a/b""></div>")]
+        [InlineData(null, @"<div class=""wx-dropdown-item""></div>")]
+        [InlineData("/a", @"<div class=""wx-dropdown-item"" data-uri=""/a""></div>")]
+        [InlineData("/a/b", @"<div class=""wx-dropdown-item"" data-uri=""/a/b""></div>")]
         public void Uri(string uri, string expected)
         {
             // preconditions
@@ -88,11 +88,11 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the target property of the dropdown item link control.
         /// </summary>
         [Theory]
-        [InlineData(TypeTarget.None, @"<div class=""wx-dropdownbutton-item""></div>")]
-        [InlineData(TypeTarget.Blank, @"<div class=""wx-dropdownbutton-item"" data-target=""_blank""></div>")]
-        [InlineData(TypeTarget.Self, @"<div class=""wx-dropdownbutton-item"" data-target=""_self""></div>")]
-        [InlineData(TypeTarget.Parent, @"<div class=""wx-dropdownbutton-item"" data-target=""_parent""></div>")]
-        [InlineData(TypeTarget.Framename, @"<div class=""wx-dropdownbutton-item"" data-target=""_framename""></div>")]
+        [InlineData(TypeTarget.None, @"<div class=""wx-dropdown-item""></div>")]
+        [InlineData(TypeTarget.Blank, @"<div class=""wx-dropdown-item"" data-target=""_blank""></div>")]
+        [InlineData(TypeTarget.Self, @"<div class=""wx-dropdown-item"" data-target=""_self""></div>")]
+        [InlineData(TypeTarget.Parent, @"<div class=""wx-dropdown-item"" data-target=""_parent""></div>")]
+        [InlineData(TypeTarget.Framename, @"<div class=""wx-dropdown-item"" data-target=""_framename""></div>")]
         public void Target(TypeTarget target, string expected)
         {
             // preconditions
@@ -114,10 +114,10 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the tooltip property of the dropdown item link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-dropdownbutton-item""></div>")]
-        [InlineData("a", @"<div class=""wx-dropdownbutton-item"" data-tooltip=""a""></div>")]
-        [InlineData("b", @"<div class=""wx-dropdownbutton-item"" data-tooltip=""b""></div>")]
-        [InlineData("a<br/>b", @"<div class=""wx-dropdownbutton-item"" data-tooltip=""a<br/>b""></div>")]
+        [InlineData(null, @"<div class=""wx-dropdown-item""></div>")]
+        [InlineData("a", @"<div class=""wx-dropdown-item"" data-tooltip=""a""></div>")]
+        [InlineData("b", @"<div class=""wx-dropdown-item"" data-tooltip=""b""></div>")]
+        [InlineData("a<br/>b", @"<div class=""wx-dropdown-item"" data-tooltip=""a<br/>b""></div>")]
         public void Tooltip(string tooltip, string expected)
         {
             // preconditions
@@ -139,8 +139,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the icon property of the dropdown item link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-dropdownbutton-item""></div>")]
-        [InlineData(typeof(IconStar), @"<div class=""wx-dropdownbutton-item"" data-icon=""fas fa-star""></div>")]
+        [InlineData(null, @"<div class=""wx-dropdown-item""></div>")]
+        [InlineData(typeof(IconStar), @"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>")]
         public void Icon(Type icon, string expected)
         {
             // preconditions
@@ -190,12 +190,12 @@ namespace WebExpress.WebUI.Test.WebControl
             var html5 = control5.Render(context, visualTree);
             var html6 = control6.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdownbutton-item"" data-icon=""fas fa-star""></div>", html1.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdownbutton-item"" data-icon=""fas fa-star""></div>", html2.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdownbutton-item"" data-icon=""fas fa-star""></div>", html3.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdownbutton-item"" data-icon=""fas fa-star""></div>", html4.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdownbutton-item"" data-icon=""fas fa-star""></div>", html5.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdownbutton-item"" data-icon=""fas fa-star""></div>", html6.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>", html1.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>", html2.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>", html3.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>", html4.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>", html5.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>", html6.Trim());
         }
     }
 }

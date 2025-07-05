@@ -39,7 +39,7 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Text)))
             {
                 Id = Id,
-                Class = "wx-dropdownbutton-header",
+                Class = "wx-dropdown-header",
                 Role = "heading"
             };
         }

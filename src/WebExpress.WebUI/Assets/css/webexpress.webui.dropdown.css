@@ -1,0 +1,40 @@
+.wx-dropdown {
+}
+
+.wx-dropdown > button {
+}  
+
+.wx-dropdown > button > img {
+    margin-right: 0.5em;
+    height: 1em;
+    min-width: 1em;
+    vertical-align: middle; 
+}  
+
+.wx-dropdown > button > i {
+    margin-right: 0.5em;
+}  
+
+.wx-dropdown > ul {
+}
+
+.wx-dropdown > ul > li {
+}
+
+.wx-dropdown > ul > li > a {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.wx-dropdown > ul > li > a > img {
+    height: 16px;
+    margin-right: 0.5em;
+}
+
+.wx-dropdown > ul > li > a > i {
+    margin-right: 0.5em;
+}
+
+.wx-dropdown > ul > li > a > span {
+}

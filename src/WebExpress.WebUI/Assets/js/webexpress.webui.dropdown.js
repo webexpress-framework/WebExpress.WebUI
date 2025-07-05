@@ -1,10 +1,11 @@
 /**
- * A dropdown button offering advanced features such as dynamically generated menu items.
+ * DropdownCtrl is a control for dropdown buttons offering advanced features such as dynamically generated menu items.
+ * 
  * The following events are triggered:
  * - webexpress.webui.Event.CLICK_EVENT
  * - webexpress.webui.Event.CHANGE_VISIBILITY_EVENT
  */
-webexpress.webui.DropdownButtonCtrl = class extends webexpress.webui.Ctrl {
+webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Creates a new dropdown button controller instance.
      * Reads configuration from the HTML element's data attributes and child elements, 
@@ -27,7 +28,7 @@ webexpress.webui.DropdownButtonCtrl = class extends webexpress.webui.Ctrl {
 
         // Parse dropdown items from descendant elements
         this._parseItemsFromElements(
-            Array.from(element.querySelectorAll(".wx-dropdownbutton-header, .wx-dropdownbutton-divider, .wx-dropdownbutton-item"))
+            Array.from(element.querySelectorAll(".wx-dropdown-header, .wx-dropdown-divider, .wx-dropdown-item"))
         );
 
         // Clean up the DOM element
@@ -36,7 +37,7 @@ webexpress.webui.DropdownButtonCtrl = class extends webexpress.webui.Ctrl {
             "data-label", "data-icon", "data-image", "data-color", "data-menucss",
             "data-block", "data-toggle", "data-size", "data-border", "disabled", "active"
         ].forEach(attr => element.removeAttribute(attr));
-        element.classList.add("wx-dropdownbutton");
+        element.classList.add("wx-dropdown");
 
         // Initial rendering of button and menu
         this.render();
@@ -51,9 +52,9 @@ webexpress.webui.DropdownButtonCtrl = class extends webexpress.webui.Ctrl {
         const items = [];
 
         elements.forEach(elem => {
-            if (elem.classList.contains("wx-dropdownbutton-divider")) {
+            if (elem.classList.contains("wx-dropdown-divider")) {
                 items.push({ type: "divider" });
-            } else if (elem.classList.contains("wx-dropdownbutton-header")) {
+            } else if (elem.classList.contains("wx-dropdown-header")) {
                 items.push({
                     type: "header",
                     content: elem.textContent,
@@ -68,7 +69,7 @@ webexpress.webui.DropdownButtonCtrl = class extends webexpress.webui.Ctrl {
                     content: elem.textContent || null,
                     color: itemClasses.find(cls => cls.startsWith("text-")) || "",
                     backgroundColor: itemClasses
-                        .filter(cls => cls !== "wx-dropdownbutton-item")
+                        .filter(cls => cls !== "wx-dropdown-item")
                         .find(cls => cls.startsWith("wx-")) || "",
                     disabled: elem.hasAttribute("disabled"),
                 });
@@ -283,4 +284,4 @@ webexpress.webui.DropdownButtonCtrl = class extends webexpress.webui.Ctrl {
 };
 
 // Register the class in the controller
-webexpress.webui.Controller.registerClass("wx-webui-dropdownbutton", webexpress.webui.DropdownButtonCtrl);
+webexpress.webui.Controller.registerClass("wx-webui-dropdown", webexpress.webui.DropdownCtrl);

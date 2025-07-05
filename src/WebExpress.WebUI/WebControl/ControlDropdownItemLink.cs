@@ -76,7 +76,7 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementTextContentDiv(new HtmlText(Text))
             {
                 Id = Id,
-                Class = "wx-dropdownbutton-item"
+                Class = "wx-dropdown-item"
             }
                 .AddUserAttribute("id", Id)
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
