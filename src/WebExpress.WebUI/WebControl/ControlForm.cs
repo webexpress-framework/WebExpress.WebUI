@@ -42,7 +42,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Event is raised when the form is about to be processed.
         /// </summary>
-        public event Action<ControlFormEventFormProzess> ProcessForm;
+        public event Action<ControlFormEventFormProcess> ProcessForm;
 
         /// <summary>
         /// Returns the form items.
@@ -210,7 +210,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="handler">The action to execute for processing the form.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public virtual IControlForm Process(Action<ControlFormEventFormProzess> handler)
+        public virtual IControlForm Process(Action<ControlFormEventFormProcess> handler)
         {
             ProcessForm += handler;
 
@@ -288,7 +288,7 @@ namespace WebExpress.WebUI.WebControl
                     }
 
                     // valid form
-                    OnProcess(new ControlFormEventFormProzess() { Context = renderFormContext });
+                    OnProcess(new ControlFormEventFormProcess() { Context = renderFormContext });
 
                     if (RedirectUri?.Empty == false)
                     {
@@ -617,7 +617,7 @@ namespace WebExpress.WebUI.WebControl
         /// Raises the process event.
         /// </summary>
         /// <param name="eventArgument">The context in which the control is rendered.</param>
-        protected virtual void OnProcess(ControlFormEventFormProzess eventArgument)
+        protected virtual void OnProcess(ControlFormEventFormProcess eventArgument)
         {
             ProcessForm?.Invoke(eventArgument);
         }

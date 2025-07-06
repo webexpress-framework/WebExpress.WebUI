@@ -30,7 +30,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Event is raised when the form is about to be processed.
         /// </summary>
-        public event Action<ControlFormEventFormProzess> ProcessForm;
+        public event Action<ControlFormEventFormProcess> ProcessForm;
 
         /// <summary>
         /// Returns or sets the name of the form.
@@ -134,7 +134,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="handler">The action to execute for processing the form.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public virtual IControlForm Process(Action<ControlFormEventFormProzess> handler)
+        public virtual IControlForm Process(Action<ControlFormEventFormProcess> handler)
         {
             _form.ProcessForm += handler;
 

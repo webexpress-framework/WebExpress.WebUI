@@ -3,7 +3,7 @@
     /// <summary>
     /// Event argument for processing form item inputs.
     /// </summary>
-    public class ControlFormEventItemProzess : ControlFormEvent
+    public class ControlFormEventItemProcess : ControlFormEvent
     {
         /// <summary>
         /// Gets or sets the value to be checked during validation.
@@ -13,7 +13,7 @@
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
-        public ControlFormEventItemProzess()
+        public ControlFormEventItemProcess()
         {
         }
     }

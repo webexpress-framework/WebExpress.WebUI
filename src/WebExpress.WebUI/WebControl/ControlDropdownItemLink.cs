@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+﻿using WebExpress.WebCore.Internationalization;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
@@ -73,7 +74,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return new HtmlElementTextContentDiv(new HtmlText(Text))
+            return new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Text)))
             {
                 Id = Id,
                 Class = "wx-dropdown-item"
@@ -85,7 +86,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-target", Target.ToStringValue())
                 .AddUserAttribute("data-modal", Modal)
                 .AddUserAttribute("data-tooltip", Tooltip)
-                .AddUserAttribute("data-linkcolor", Color.ToClass());
+                .AddUserAttribute("data-color", Color.ToClass());
         }
     }
 }

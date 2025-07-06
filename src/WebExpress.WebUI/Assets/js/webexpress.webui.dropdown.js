@@ -35,7 +35,8 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
         element.innerHTML = "";
         [
             "data-label", "data-icon", "data-image", "data-color", "data-menucss",
-            "data-block", "data-toggle", "data-size", "data-border", "disabled", "active"
+            "data-block", "data-toggle", "data-size", "data-border", "data-buttoncss",
+            "data-buttonstyle", "disabled", "active"
         ].forEach(attr => element.removeAttribute(attr));
         element.classList.add("wx-dropdown");
 
@@ -64,10 +65,11 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                 const itemClasses = Array.from(elem.classList);
                 items.push({
                     id: elem.id || null,
+                    uri: elem.dataset.uri || "javascript:void(0);",
                     image: elem.dataset.image || null,
                     icon: elem.dataset.icon || null,
                     content: elem.textContent || null,
-                    color: itemClasses.find(cls => cls.startsWith("text-")) || "",
+                    color: elem.dataset.color || null,
                     backgroundColor: itemClasses
                         .filter(cls => cls !== "wx-dropdown-item")
                         .find(cls => cls.startsWith("wx-")) || "",
@@ -108,7 +110,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                 const link = document.createElement("a");
                 link.className = "link dropdown-item";
                 if (item.color) link.classList.add(item.color);
-                link.href = "javascript:void(0);";
+                link.href = item.uri;
 
                 if (item.image) {
                     const img = document.createElement("img");

@@ -3,12 +3,12 @@
     /// <summary>
     /// Event argument for processing form inputs.
     /// </summary>
-    public class ControlFormEventFormProzess : ControlFormEvent
+    public class ControlFormEventFormProcess : ControlFormEvent
     {
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
-        public ControlFormEventFormProzess()
+        public ControlFormEventFormProcess()
         {
         }
 

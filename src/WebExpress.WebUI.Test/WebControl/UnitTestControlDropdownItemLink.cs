@@ -42,7 +42,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Theory]
         [InlineData(null, @"<div class=""wx-dropdown-item""></div>")]
         [InlineData("abc", @"<div class=""wx-dropdown-item"">abc</div>")]
-        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-dropdown-item"">webexpress.webui:plugin.name</div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-dropdown-item"">WebExpress.WebUI</div>")]
         public void Text(string text, string expected)
         {
             // preconditions

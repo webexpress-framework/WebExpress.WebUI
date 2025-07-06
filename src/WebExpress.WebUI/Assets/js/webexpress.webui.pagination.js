@@ -194,7 +194,7 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
      */
     set total(value) {
         if (value < 1) {
-            throw new Error("Page count must be at least 1.");
+            value = 1; // Ensure at least one page exists
         }
 
         this._count = value;

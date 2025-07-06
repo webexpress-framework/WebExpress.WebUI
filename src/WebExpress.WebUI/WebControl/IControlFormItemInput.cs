@@ -23,7 +23,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Event is raised when the item's data needs to be processed.
         /// </summary>
-        event Action<ControlFormEventItemProzess> ProcessItem;
+        event Action<ControlFormEventItemProcess> ProcessItem;
 
         /// <summary>
         /// Gets or sets the icon associated with the input control.
@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="handler">The action to execute for processing the form item.</param>
         /// <returns>The current instance for method chaining.</returns>
-        IControlFormItemInput Process(Action<ControlFormEventItemProzess> handler);
+        IControlFormItemInput Process(Action<ControlFormEventItemProcess> handler);
 
         /// <summary>
         /// Adds one or more controls to the prepend list.

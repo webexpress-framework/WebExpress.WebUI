@@ -28,7 +28,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Event is raised when the items's data needs to be determined.
         /// </summary>
-        public event Action<ControlFormEventItemProzess> ProcessItem;
+        public event Action<ControlFormEventItemProcess> ProcessItem;
 
         /// <summary>
         /// Returns or sets the icon.
@@ -144,7 +144,7 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="renderContext">The context in which the control is rendered.</param>
         public virtual void Process(IRenderControlFormContext renderContext)
         {
-            var eventArgument = new ControlFormEventItemProzess()
+            var eventArgument = new ControlFormEventItemProcess()
             {
                 Context = renderContext,
                 Value = renderContext.GetValue(this)
@@ -158,7 +158,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="handler">The action to execute for processing the form.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public virtual IControlFormItemInput Process(Action<ControlFormEventItemProzess> handler)
+        public virtual IControlFormItemInput Process(Action<ControlFormEventItemProcess> handler)
         {
             ProcessItem += handler;
 
@@ -235,7 +235,7 @@ namespace WebExpress.WebUI.WebControl
         /// Raises the process event.
         /// </summary>
         /// <param name="eventArgument">The event argument.</param>
-        protected virtual void OnProcess(ControlFormEventItemProzess eventArgument)
+        protected virtual void OnProcess(ControlFormEventItemProcess eventArgument)
         {
             ProcessItem?.Invoke(eventArgument);
         }

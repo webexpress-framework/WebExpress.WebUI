@@ -88,7 +88,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Theory]
         [InlineData(null, @"<div class=""toolpanel border""><div class=""wx-webui-dropdown"" role=""button""><div class=""wx-dropdown-item""></div></div><div></div></div>")]
         [InlineData("abc", @"<div class=""toolpanel border""><div class=""wx-webui-dropdown"" role=""button""><div class=""wx-dropdown-item"">abc</div></div><div></div></div>")]
-        [InlineData("webexpress.webui:plugin.name", @"<div class=""toolpanel border""><div class=""wx-webui-dropdown"" role=""button""><div class=""wx-dropdown-item"">webexpress.webui:plugin.name</div></div><div></div></div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""toolpanel border""><div class=""wx-webui-dropdown"" role=""button""><div class=""wx-dropdown-item"">WebExpress.WebUI</div></div><div></div></div>")]
         public void Tools(string text, string expected)
         {
             // preconditions
