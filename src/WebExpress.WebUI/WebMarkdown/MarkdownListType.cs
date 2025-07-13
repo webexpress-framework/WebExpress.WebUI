@@ -90,7 +90,7 @@ namespace WebExpress.WebUI.WebMarkdown
             }
 
             // alphabetic (single letter)
-            if (input.Length == 1 && char.IsLetter(input[0]))
+            if (TryAlphaIndexToInt(input, out _))
             {
                 if (char.IsUpper(input[0]))
                 {
@@ -167,6 +167,33 @@ namespace WebExpress.WebUI.WebMarkdown
             result = total;
 
             return true;
+        }
+
+        /// <summary>
+        /// Converts a single alphabetic character (e.g. "a", "B.", "c)") into its position in the alphabet.
+        /// Returns true if successful; false if input is invalid.
+        /// </summary>
+        /// <param name="input">The string to evaluate (e.g. "a", "B.", "c)").</param>
+        /// <param name="result">The numeric position in the alphabet (1–26).</param>
+        /// <returns><c>true</c> if conversion succeeds; otherwise <c>false</c>.</returns>
+        public static bool TryAlphaIndexToInt(string input, out int result)
+        {
+            result = 0;
+
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return false;
+            }
+
+            input = input.TrimEnd('.');
+
+            if (input.Length == 1 && char.IsLetter(input[0]))
+            {
+                result = char.ToLower(input[0]) - 'a' + 1;
+                return true;
+            }
+
+            return false;
         }
     }
 }

@@ -52,7 +52,7 @@ namespace WebExpress.WebUI.WebMarkdown
                 }
                 else
                 {
-                    tokenStream.Skip(); // Fallback: skip
+                    tokenStream.Skip(); // fallback: skip
                 }
             }
 
@@ -437,6 +437,10 @@ namespace WebExpress.WebUI.WebMarkdown
                     {
                         return true;
                     }
+                    else if (MarkdownListTypeExtensions.TryAlphaIndexToInt(label, out _))
+                    {
+                        return true;
+                    }
                 }
             }
 
@@ -469,15 +473,35 @@ namespace WebExpress.WebUI.WebMarkdown
 
                 if (currrentToken?.Type == MarkdownTokenType.Text)
                 {
-                    // ordered list item
-                    MarkdownListTypeExtensions.TryRomanOrDecimalToInt
-                    (
-                        currrentToken?.Value.TrimEnd('.'),
-                        out int orderedNumber
-                    );
-
+                    var orderedNumber = 1;
                     var type = MarkdownListTypeExtensions.ToListType(currrentToken?.Value);
 
+                    switch (type)
+                    {
+                        case MarkdownListType.UpperAlpha:
+                            MarkdownListTypeExtensions.TryAlphaIndexToInt
+                            (
+                                currrentToken?.Value,
+                                out orderedNumber
+                            );
+                            break;
+                        case MarkdownListType.LowerAlpha:
+                            MarkdownListTypeExtensions.TryAlphaIndexToInt
+                            (
+                                currrentToken?.Value,
+                                out orderedNumber
+                            );
+                            break;
+                        default:
+                            MarkdownListTypeExtensions.TryRomanOrDecimalToInt
+                            (
+                                currrentToken?.Value,
+                                out orderedNumber
+                            );
+                            break;
+                    }
+
+                    // ordered list item
                     lines.Add((indent, orderedNumber, type, currentLine.Preview()));
                 }
                 else

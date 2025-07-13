@@ -237,6 +237,9 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("2. Second", @"<ol start=""2""><li><p>Second</p></li></ol>")]
         [InlineData("1. First\n  1. Sub", @"<ol><li><p>First</p></li><ol><li><p>Sub</p></li></ol></ol>")]
         [InlineData("I. First\n  - Sub", @"<ol type=""I""><li><p>First</p></li><ul><li><p>Sub</p></li></ul></ol>")]
+        [InlineData("i. First\n  - Sub", @"<ol type=""i""><li><p>First</p></li><ul><li><p>Sub</p></li></ul></ol>")]
+        [InlineData("A. First\n  - Sub", @"<ol type=""A""><li><p>First</p></li><ul><li><p>Sub</p></li></ul></ol>")]
+        [InlineData("a. First\n  - Sub", @"<ol type=""a""><li><p>First</p></li><ul><li><p>Sub</p></li></ul></ol>")]
         public void ConvertList(string markdown, string expectedHtml)
         {
             // preconditions

@@ -14,7 +14,7 @@ A block can span one or more lines and represents a structural unit within the d
 ### Paragraph
 A normal text section without special formatting. It represents the basic form of running text. Paragraphs are separated from the previous or next paragraph by at least one blank line.
 
-```
+```markdown
 Markdown is a simple markup language that allows text to be formatted quickly and legibly.
 
 It is often used in documentation, blogs, or readme files because it remains easily readable even without special tools.
@@ -23,7 +23,7 @@ It is often used in documentation, blogs, or readme files because it remains eas
 ### Header
 Headings structure a document hierarchically. Markdown offers six levels (# to ######), with # being the highest level. They are essential for structuring and facilitate navigation as well as the automatic creation of tables of contents.
 
-```
+```markdown
 # Title 1
 ## Title 2
 ### Title 3
@@ -32,28 +32,70 @@ Headings structure a document hierarchically. Markdown offers six levels (# to #
 ### Horizontal Line
 A horizontal line serves as a visual separator between content, e.g., between two topic blocks or as the end of a section. It consists of three or more dashes.
 
-```
+```markdown
 ---
 ```
 
 ### Quote
 Block quotes start with a > sign and indicate inserted or referenced text. Multiple > signs can represent nested quotes.
 
-```
+```markdown
 > This is a simple quote.
 > > This is a nested quote.
 ```
 
 ### List
-Lists are a structured way to present several related items. Unordered lists use -, * or +, ordered lists use numeric prefixes.
+Lists are a structured way to organize multiple related items clearly and efficiently. They make information easier to digest and are ideal for workflows, enumerations, or grouped content.
 
-```
+Markdown supports two primary types of lists:  
+- **Unordered lists**: no specific sequence  
+- **Ordered lists**: items are arranged in a defined 
+
+#### Unordered Lists
+These are used when the sequence of items doesn't matter. They use simple symbols:
+
+```markdown
 - Point A
-- Point B
-
-1. First
-2. Second
+* Point B
++ Point B
 ```
+All variations produce the same output. The choice of symbol is stylistic.
+
+#### Ordered Lists
+Used for processes or prioritized content. Various list types are possible depending on formatting:
+
+|Type                     Syntax |Example  |Output
+|-------------------------|------|---------|----------------
+|Decimal numbers          |1.    |Step one |1. Step one
+|Lowercase letters        |a.    |Option A |a. Option A
+|Uppercase letters        |A.    |Option A |A. Option A
+|Lowercase Roman numerals |i.    |Detail i |i. Detail i
+|Uppercase Roman numerals |I.    |Detail I |I. Detail I
+
+#### Nested Lists
+Sub-lists enable hierarchical structures within a main list. Indentation is done using spaces or tabs.
+
+```markdown
+- Main item
+  - Sub-item
+    - Deeper sub-item
+```
+
+#### Continuing Numbering
+When creating ordered lists in Markdown, items are usually prefixed with numbers (e.g., `1.`, `2.`, `3.`) to establish a clear sequence. In simple cases, Markdown can automatically increment the numbering regardless of the numeric values written—making it easy to reorder items or add new ones without manually updating each line.
+
+However, this automatic behavior only works when list items appear directly one after another, without interruptions.
+
+Once a list is broken by another block element—such as a paragraph, image, or code snippet—Markdown no longer tracks or continues the sequence. In such cases, numbering must be maintained manually to preserve clarity and logical progression:
+
+```markdown
+1. Start point
+
+This paragraph provides more context before continuing.
+
+2. Follow-up point
+```
+The numbering must be written accurately by hand to appear in the correct order.
 
 ### Table
 Tables provide a structured representation of tabular data. Cells are separated by |. The separator line of dashes under the header defines the column alignment:
@@ -75,14 +117,14 @@ Markdown uses indentation for certain block elements such as code blocks or list
 - A tab or four spaces correspond to one indentation level.
 - Multiple indentations create nested content or structure multi-level lists.
 
-```
+```markdown
     One tab or four spaces equals one indentation.
 ```
 
 ### Callout
 Callouts are extended block elements for displaying contextual information. Depending on the prefix, they convey different meanings.
 
-```
+```markdown
 >? This is a helpful hint.
 >! Attention: This is a warning!
 >!! Error: Something went wrong.
