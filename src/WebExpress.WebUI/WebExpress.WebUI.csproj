@@ -47,10 +47,6 @@
 	  </None>
 	</ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Markdig" Version="0.41.3" />
-	</ItemGroup>
-
 	<ItemGroup Condition="'$(Configuration)' != 'DebugLocal'">
 		<PackageReference Include="WebExpress.WebCore" Version="0.0.9-alpha" />
 	</ItemGroup>

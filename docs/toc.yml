@@ -2,6 +2,8 @@
   href: index.md
 - name: User Guide
   href: user-guide.md
+- name: MarkDown Guide
+  href: md-guide.md
 - name: API Documentation
   href: api/WebExpress.WebUI.html
 - name: JavaScript UI Documentation

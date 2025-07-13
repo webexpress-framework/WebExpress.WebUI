@@ -1,5 +1,6 @@
 ﻿using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebUI.WebMarkdown;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -320,7 +321,7 @@ namespace WebExpress.WebUI.WebControl
                     };
                     break;
                 case TypeFormatText.Markdown:
-                    return new HtmlRaw(Markdig.Markdown.ToHtml(text));
+                    return MarkdownParser.Parse(text).ConvertToHtml(renderContext);
                 default:
                     html = new HtmlElementTextContentDiv(new HtmlText(text))
                     {

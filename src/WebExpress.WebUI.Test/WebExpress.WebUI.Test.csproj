@@ -10,7 +10,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Data\ComplexExample1.md" />
+    <None Remove="Data\ComplexExample2.md" />
+    <None Remove="Data\ComplexExample3.md" />
     <None Remove="Data\ComplexForm.txt" />
+    <None Remove="Data\TableExample1.md" />
+    <None Remove="Data\TableExample2.md" />
+    <None Remove="Data\TableExample3.md" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,7 +34,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Data\ComplexExample1.md" />
+    <EmbeddedResource Include="Data\ComplexExample2.md" />
+    <EmbeddedResource Include="Data\ComplexExample3.md" />
     <EmbeddedResource Include="Data\ComplexForm.txt" />
+    <EmbeddedResource Include="Data\TableExample1.md" />
+    <EmbeddedResource Include="Data\TableExample2.md" />
+    <EmbeddedResource Include="Data\TableExample3.md" />
   </ItemGroup>
 
 </Project>
