@@ -246,6 +246,48 @@ webexpress.webui.I18N = new class {
 }
 
 /**
+ * This class handles the registration and retrieval of syntax configurations for different programming languages.
+ * Each language can have its own set of keywords, types, operators, and regex rules for syntax highlighting.
+ */
+webexpress.webui.Syntax = new class {
+    constructor() {
+        // Initialize the syntax object to store language-specific configurations
+        this.syntax = {};
+    }
+
+    /**
+     * Registers syntax values for a specific language and module.
+     *
+     * @param {string} language - Language code (e.g., "csharp").
+     * @param {object} regex - Object containing regular expression for syntax rules.
+     */
+    register(language, regex) {
+        if (!language || !regex) {
+            retrurn; // Ensure both language and regex are provided
+        }
+
+        // Store language-specific syntax configurations in syntax object
+        this.syntax[language] = regex || {};
+    }
+
+    /**
+     * Retrieves the syntax configuration for a specific language.
+     *
+     * @param {string} language - The language code (e.g., "csharp").
+     * @returns {object|null} The syntax configuration for the language, or null if not registered.
+     */
+    get(language) {
+        if (!language) {
+            // Ensure language parameter is provided
+            return null;
+        }
+
+        // Return the syntax configuration for the given language or null if not found
+        return this.syntax[language] || null;
+    }
+};
+
+/**
  * Base class for Controls.
  * This abstract class provides fundamental functionalities such as initialization, rendering, updating, and destruction.
  */

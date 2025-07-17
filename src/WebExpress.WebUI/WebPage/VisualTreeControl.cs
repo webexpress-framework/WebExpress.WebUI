@@ -119,6 +119,7 @@ namespace WebExpress.WebUI.WebPage
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.button.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.calendar.css"));
+            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.code.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.date.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.dropdown.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.editor.css"));
@@ -143,6 +144,7 @@ namespace WebExpress.WebUI.WebPage
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.button.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.calendar.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.code.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.date.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.dropdown.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.editor.js"));
@@ -163,6 +165,22 @@ namespace WebExpress.WebUI.WebPage
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.tree.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/i18n/en.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/i18n/de.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/bash.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/basic.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/cmd.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/cobol.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/cpp.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/csharp.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/groovy.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/java.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/javascript.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/markdown.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/php.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/powershell.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/property.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/python.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/visualbasic.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/xml.js"));
 
             _base = contextPath;
 

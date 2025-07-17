@@ -1,0 +1,251 @@
+/**
+ * Styles for the Code Control.
+ */
+.wx-code {
+    border: 1px solid var(--bs-secondary-border-subtle); /* Border color using Bootstrap primary color */
+    border-radius: 4px; /* Rounded corners */
+    background-color: var(--bs-light); /* Background color using Bootstrap body background */
+    margin-bottom: 1.5rem; /* Spacing below the code block */
+    overflow: hidden; /* Ensures content stays within the boundaries */
+    color: var(--bs-body-color); /* Text color using Bootstrap body color */
+}
+
+.wx-code-header {
+    font-size: 16px; /* Adjust header font size */
+    font-weight: bold; /* Make header text bold */
+    padding: 0.2em 0.5em; /* Adjust padding for header */
+    color: var(--bs-body-color); /* Header text color using Bootstrap white */
+    border-bottom: 1px solid var(--bs-gray-200); /* Add separation border using secondary color */
+    display: flex; /* Use flexbox for alignment */
+    justify-content: space-between; /* Space between elements */
+    align-items: center; /* Align elements vertically */
+}
+
+.wx-code .wx-code-line {
+    padding-left: 0.2em; /* Add space for line numbers */
+}
+
+.wx-code .wx-code-line > span {
+    display: block; /* Display lines as block elements */
+    position: relative; /* Required for line number positioning */
+    padding-left: 2rem; /* Add padding for line numbers */
+    color: var(--bs-body-color);
+}
+
+.wx-code .wx-code-line-numbers {
+    counter-reset: line; /* Reset line counter */
+}
+
+.wx-code .wx-code-line-numbers > span {
+    counter-increment: line; /* Increment line counter */
+    display: block; /* Display lines as block elements */
+    position: relative; /* Required for line number positioning */
+    padding-left: 2rem; /* Add padding for line numbers */
+    color: var(--bs-body-color);
+}
+
+.wx-code .wx-code-line-numbers > span::before {
+    content: counter(line); /* Display line counter */
+    position: absolute; /* Position line numbers */
+    left: 0; /* Align to the left */
+    top: 0; /* Align to the top */
+    width: 1.5rem; /* Width for line numbers */
+    text-align: right; /* Align text to the right */
+    color: var(--bs-secondary);
+}
+
+.wx-code code {
+    display: block; /* Block display for code */
+    overflow-x: auto; /* Enable horizontal scrolling */
+    padding: 1em; /* Add padding to code block */
+    color: var(--bs-body-color);
+}
+
+/* Style for keywords (e.g., if, for, class) */
+.wx-code .keyword {
+    color: #c586c0; /* A shade of purple/magenta for keywords */
+}
+
+/* Style for strings (e.g., "hello world") */
+.wx-code .string {
+    color: #ce9178; /* A shade of orange for strings */
+}
+
+/* Style for comments (e.g., // comment) */
+.wx-code .comment {
+    color: #6A9955;
+    font-style: italic;
+}
+
+/* Style for numbers (e.g., 123, 45.6) */
+.wx-code .number {
+    color: #b5cea8; /* A light green/olive for numbers */
+}
+
+/* Style for operators (e.g., +, =, ==) */
+.wx-code .operator {
+    color: #d4d4d4; /* Default color, as operators are often not heavily colored */
+}
+
+/* Style for brackets, parentheses, and braces */
+.wx-code .bracket {
+    color: #A99A86;
+    font-weight: bold;
+}
+
+/* Style for variables (e.g., $var in PHP, %VAR% in CMD) */
+.wx-code .variable {
+    color: #9cdcfe; /* A light blue for variables */
+}
+
+/* Style for constants (e.g., true, false, __FILE__) */
+.wx-code .constant {
+    color: #4fc1ff; /* A different shade of blue for constants */
+}
+
+/* Style for built-in functions or commands (e.g., echo, print) */
+.wx-code .builtin,
+.wx-code .command {
+    color: #dcdcaa; /* A yellowish color for built-in functions */
+}
+
+/* C++/C# specific: Preprocessor directives (e.g., #include) */
+.wx-code .preprocessor {
+    color: #808080; /* Gray for preprocessor directives */
+}
+
+/* C++/C# specific: Access modifiers (e.g., public, private) */
+.wx-code .access {
+    color: #569cd6; /* Blue for access modifiers, similar to keywords */
+}
+
+/* C++/C#/PowerShell specific: Type names (e.g., int, string) */
+.wx-code .type {
+    color: #4ec9b0; /* A teal color for type names */
+}
+
+/* C# specific: Annotations/Attributes (e.g., [Serializable]) */
+.wx-code .annotation {
+    color: #ddd;
+    background-color: #444;
+}
+
+/* Python specific: Decorators (e.g., @mydecorator) */
+.wx-code .decorator {
+    color: #dcdcaa; /* Same as built-ins */
+}
+
+/* Bash specific: Shebang (e.g., #!/bin/bash) */
+.wx-code .shebang {
+    color: #808080; /* Gray, similar to comments or preprocessor */
+}
+
+/* CMD/BASIC specific: Labels or line numbers */
+.wx-code .label,
+.wx-code .linenumber {
+    color: #c586c0; /* Same as keywords */
+}
+
+/* .properties specific: Key */
+.wx-code .key {
+    color: #9cdcfe; /* Light blue, similar to variables */
+}
+
+/* .properties specific: Separator (= or :) */
+.wx-code .separator {
+    color: #ffd700; /* Gold, same as brackets */
+}
+
+/* .properties specific: Value */
+.wx-code .value {
+    color: #ce9178; /* Orange, same as strings */
+}
+
+/* XML specific: Tag names (e.g., <tag>) */
+.wx-code .tag {
+    color: #569cd6; /* Blue for tag names */
+}
+
+/* XML specific: Attribute names (e.g., attr="value") */
+.wx-code .attribute {
+    color: #9cdcfe; /* Light blue for attribute names */
+}
+
+/* XML specific: CDATA sections */
+.wx-code .cdata {
+    color: #c0c0c0; /* A light gray for CDATA content */
+}
+
+/* XML specific: DOCTYPE and Processing Instructions */
+.wx-code .doctype,
+.wx-code .pi {
+    color: #808080; /* Gray, similar to comments */
+}
+
+/* Style for headings (e.g., # Heading, ## Heading) */
+.wx-code .heading {
+    color: #569cd6; /* Blue for headings */
+    font-weight: bold; /* Bold text for emphasis */
+}
+
+/* Style for lists (e.g., - Item, 1. Item) */
+.wx-code .list {
+    color: #4ec9b0; /* Teal for list items */
+}
+
+/* Style for links (e.g., [text](url)) */
+.wx-code .link {
+    color: #9cdcfe; /* Light blue for links */
+    text-decoration: underline; /* Underline links */
+}
+
+/* Style for images (e.g., ![alt text](url)) */
+.wx-code .image {
+    color: #ce9178; /* Orange for images */
+    font-style: italic; /* Italic text for alt text */
+}
+
+/* Style for inline code (e.g., `code`) */
+.wx-code .inlineCode {
+    color: #dcdcaa; /* Yellow for inline code */
+    background-color: #333333; /* Dark background for code blocks */
+    font-family: monospace; /* Monospaced font for code */
+}
+
+/* Style for block code (e.g., ```code```) */
+.wx-code .blockCode {
+    color: #dcdcaa; /* Yellow for block code */
+    background-color: #333333; /* Dark background for code blocks */
+    padding: 10px; /* Add padding for better readability */
+    font-family: monospace; /* Monospaced font for code */
+    border-radius: 4px; /* Rounded corners */
+}
+
+/* Style for blockquotes (e.g., > Quote) */
+.wx-code .blockquote {
+    color: #6a9955; /* Green for blockquotes */
+    font-style: italic; /* Italic text for quotes */
+    border-left: 4px solid #6a9955; /* Add a green border on the left */
+    padding-left: 10px; /* Indent the text */
+}
+
+/* Style for bold text (e.g., **bold**) */
+.wx-code .formatting-bold {
+    color: #c586c0; /* Purple for bold text */
+    font-weight: bold; /* Bold text for emphasis */
+}
+
+/* Style for italic text (e.g., *italic* or _italic_) */
+.wx-code .formatting-italic {
+    color: #c586c0; /* Purple for italic text */
+    font-style: italic; /* Italic text for emphasis */
+}
+
+/* Support for dark mode */
+[data-bs-theme="dark"] .wx-code {
+    background-color: var(--bs-dark); /* Dark background */
+}
+
+[data-bs-theme="dark"] .wx-code-header {
+    border-bottom: 1px solid var(--bs-dark); /* Add separation border using secondary color */
+}

@@ -64,6 +64,15 @@ namespace WebExpress.WebUI.WebMarkdown
                         Style = "text-indent: 2em;"
                     });
                 }
+                else if (element is MarkdownBlockElementCode code)
+                {
+                    list.Add(new HtmlElementTextContentPre(new HtmlText(code.Content))
+                    {
+                        Class = "wx-webui-code"
+                    }
+                        .AddUserAttribute("data-line-numbers", "true")
+                        .AddUserAttribute("data-language", code.Language));
+                }
                 else if (element is MarkdownBlockElementQuote quote)
                 {
                     list.Add(new HtmlElementTextContentBlockquote(ConvertElement(quote.Content, renderContext)));
@@ -203,9 +212,9 @@ namespace WebExpress.WebUI.WebMarkdown
                 {
                     list.Add(new HtmlElementTextSemanticsMark(ConvertElement(marked.Content, renderContext)));
                 }
-                else if (element is MarkdownInlineElementCode code)
+                else if (element is MarkdownInlineElementCode inlineCode)
                 {
-                    list.Add(new HtmlElementTextSemanticsCode(new HtmlText(code.Code)));
+                    list.Add(new HtmlElementTextSemanticsCode(new HtmlText(inlineCode.Code)));
                 }
                 else if (element is MarkdownInlineElementUrl url)
                 {
