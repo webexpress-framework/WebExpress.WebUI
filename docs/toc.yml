@@ -37,6 +37,8 @@
       href: js/split.md
     - name: Table
       href: js/table.md
+    - name: Tag
+      href: js/tag.md
     - name: Toolbar
       href: js/toolbar.md
     - name: Tree

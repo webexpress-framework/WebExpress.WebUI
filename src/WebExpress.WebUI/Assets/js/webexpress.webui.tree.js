@@ -6,7 +6,7 @@
  * - webexpress.webui.Event.MOVE_EVENT
  */
 webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
-    // Store the currently dragged node, the drag indicator element, and the current drag position
+    // store the currently dragged node, the drag indicator element, and the current drag position
     _dragover = null;
     _dragIndicator = null;
     _dragoverPosition = null;
@@ -18,7 +18,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
     constructor(element) {
         super(element);
 
-        // Parse initial nodes and configuration from data attributes
+        // parse initial nodes and configuration from data attributes
         this._nodes = this._parseNodes(Array.from(element.children).filter(e => e.classList.contains("wx-tree-node")));
         this._layout = element.dataset.layout || null;
         this._showIndicator = element.dataset.indicator === "false" ? false : true;
@@ -27,18 +27,18 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
         const layoutClasses = this._getLayoutClasses();
         if (layoutClasses) this._container.className = layoutClasses;
 
-        // Clean up the DOM element
+        // clean up the DOM element
         element.innerHTML = "";
         element.classList.add("wx-tree");
         element.appendChild(this._container);
 
-        // Create the drag indicator element (hidden initially)
+        // create the drag indicator element (hidden initially)
         this._dragIndicator = document.createElement("div");
         this._dragIndicator.className = "wx-tree-drag-indicator";
         this._dragIndicator.style.display = "none";
         element.appendChild(this._dragIndicator);
 
-        // Render the tree structure
+        // render the tree structure
         this.render();
     }
 
@@ -49,10 +49,10 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
      * @param {Object} node - The node object.
      */
     _enableDragAndDrop(element, node) {
-        // Make the element draggable
+        // make the element draggable
         element.setAttribute("draggable", "true");
 
-        // Handle drag start
+        // handle drag start
         element.addEventListener("dragstart", (event) => {
             if (!event.ctrlKey) {
                 event.preventDefault(); // Only allow drag if Ctrl is pressed
@@ -65,24 +65,24 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             element.classList.add("wx-dragging");
         });
 
-        // Handle drag over
+        // handle drag over
         element.addEventListener("dragover", (event) => {
             event.preventDefault(); // Allow dropping by preventing default behavior
 
             if (this._isChildNode(this._dragover, node)) {
-                // Prevent showing the indicator if the target node is a child of the dragged node
+                // prevent showing the indicator if the target node is a child of the dragged node
                 this._dragIndicator.style.display = "none";
                 return;
             }
 
-            // Each node is divided into three areas: top 25% (above), middle 50% (child), bottom 25% (below)
+            // each node is divided into three areas: top 25% (above), middle 50% (child), bottom 25% (below)
             const rect = element.getBoundingClientRect();
             const height = rect.height;
             const mouseY = event.clientY;
             const relativeY = mouseY - rect.top;
 
             if (relativeY < height * 0.25) {
-                // Top 25% of the element
+                // top 25% of the element
                 this._dragIndicator.style.top = `${rect.top - 2 + window.scrollY}px`;
                 this._dragIndicator.style.left = `${rect.left + window.scrollX}px`;
                 this._dragIndicator.style.width = `${rect.width}px`;
@@ -90,12 +90,12 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 element.classList.remove("wx-drag-over");
                 this._dragoverPosition = "above";
             } else if (relativeY < height * 0.75) {
-                // Middle 50% of the element
+                // middle 50% of the element
                 this._dragIndicator.style.display = "none";
                 element.classList.add("wx-drag-over");
                 this._dragoverPosition = "child";
             } else {
-                // Bottom 25% of the element
+                // bottom 25% of the element
                 this._dragIndicator.style.top = `${rect.top + height - 2 + window.scrollY}px`;
                 this._dragIndicator.style.left = `${rect.left + window.scrollX}px`;
                 this._dragIndicator.style.width = `${rect.width}px`;
@@ -105,20 +105,20 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             }
         });
 
-        // Handle drag leave
+        // handle drag leave
         element.addEventListener("dragleave", () => {
             element.classList.remove("wx-drag-over");
             this._dragIndicator.style.display = "none";
         });
 
-        // Handle drop
+        // handle drop
         element.addEventListener("drop", (event) => {
             event.preventDefault();
             const draggedData = JSON.parse(event.dataTransfer.getData("text/plain"));
             const draggedNode = this._findNodeById(draggedData.node);
             const targetNode = node;
 
-            // Prevent moving a parent node into one of its children
+            // prevent moving a parent node into one of its children
             if (this._isChildNode(draggedNode, targetNode)) {
                 this._dragIndicator.style.display = "none";
                 element.classList.remove("wx-drag-over");
@@ -138,7 +138,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             this._dragIndicator.style.display = "none";
         });
 
-        // Handle drag end
+        // handle drag end
         element.addEventListener("dragend", () => {
             this._dragover = null;
             this._dragIndicator.style.display = "none";
@@ -155,7 +155,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
      */
     _isChildNode(draggedNode, targetNode) {
         let currentNode = targetNode;
-        // Traverse up the tree to check if the targetNode is a child of draggedNode
+        // traverse up the tree to check if the targetNode is a child of draggedNode
         while (currentNode) {
             if (currentNode === draggedNode) {
                 return true;
@@ -293,7 +293,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 render: elem.dataset.render || null,
                 parent: parent
             };
-            // Recursively parse children
+            // recursively parse children
             node.children = this._parseNodes(Array.from(elem.children).filter(e => e.classList.contains("wx-tree-node")), node);
             nodes.push(node);
         });
@@ -307,9 +307,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
      * @param {Array} nodes - The tree node data to render.
      */
     _renderTree(container, nodes) {
-        
-        
-        // Clear existing content
+        // clear existing content
         container.innerHTML = "";
         container.setAttribute("role", "tree");
 
@@ -322,7 +320,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             li.setAttribute("aria-expanded", node.expand ? "true" : "false");
             li.setAttribute("aria-level", this._getNodeLevel(node));
 
-            // Add layout-specific classes
+            // add layout-specific classes
             switch (this._layout) {
                 case "wx-tree-group":
                 case "wx-tree-flush":
@@ -335,19 +333,19 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                     li.classList.add("wx-tree-node");
             }
 
-            // Add aria-selected if selectable
+            // add aria-selected if selectable
             if (node.selectable) {
                 li.setAttribute("aria-selected", node.selected ? "true" : "false");
             }
 
-            // Create the label container (button or link)
+            // create the label container (button or link)
             const labelContainer = node.url ? document.createElement("a") : document.createElement("button");
             labelContainer.className = `${node.color} wx-tree-label-container`;
             if (node.active) {
                 labelContainer.className = "wx-tree-label-container active";
             }
 
-            // Click handler for node selection
+            // click handler for node selection
             labelContainer.addEventListener("click", () => {
                 document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CLICK_EVENT, {
                     detail: {
@@ -358,7 +356,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 }));
             });
 
-            // Add indicator and expansion/collapse logic if necessary
+            // add indicator and expansion/collapse logic if necessary
             let indicator;
             if (this._showIndicator && node.children && node.children.length > 0) {
                 indicator = document.createElement("i");
@@ -382,7 +380,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 indicator.className = "wx-tree-indicator-dot";
             }
 
-            // Render image and icon if present
+            // render image and icon if present
             if (node.imageOpen) {
                 img.src = node.expand ? node.imageOpen : node.imageClose;
                 labelContainer.appendChild(img);
@@ -393,9 +391,9 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 labelContainer.appendChild(icon);
             }
 
-            // Render label
+            // render label
             if (typeof node.render === "string") {
-                // Custom render logic
+                // custom render logic
                 const render = new Function("node", node.render);
                 const renderResult = render(node);
                 if (renderResult instanceof Node) {
@@ -409,18 +407,18 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 labelContainer.appendChild(span);
             }
 
-            // Set link attributes if present
+            // set link attributes if present
             if (node.url) labelContainer.setAttribute("href", node.url);
             if (node.target) labelContainer.setAttribute("target", node.target);
             if (node.tooltip) labelContainer.setAttribute("title", node.tooltip);
 
-            // Compose the node: indicator, label, and children
+            // compose the node: indicator, label, and children
             const div = document.createElement("div");
             if (indicator) div.appendChild(indicator);
             div.appendChild(labelContainer);
             li.appendChild(div);
 
-            // Render child nodes if present and expanded
+            // render child nodes if present and expanded
             let ul = null;
             if (node.children && node.children.length > 0) {
                 ul = document.createElement("ul");
@@ -433,10 +431,10 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 li.appendChild(ul);
             }
 
-            // Add the node to the container
+            // add the node to the container
             container.appendChild(li);
 
-            // Enable drag & drop if movable
+            // enable drag & drop if movable
             if (this._movable) {
                 this._enableDragAndDrop(labelContainer, node);
             }

@@ -1,0 +1,86 @@
+/* Styles for the Tag Control */
+.wx-tag {
+    box-sizing:border-box;
+	padding:0.5em;
+	display:flex;
+	flex-wrap:wrap;
+	height:auto;
+    background:var(--bs-body-bg);
+}
+
+.wx-tag ul {
+    list-style:none;
+	padding:0;
+	margin:0;
+	display:-webkit-box;
+	display:flex;
+	flex-wrap:wrap;
+}
+
+.wx-tag ul li {
+    margin:0 0.2em;
+	padding:0.1em 0.3em;
+	border-radius:5px
+}
+
+.wx-tag a {
+    margin:.5em .2em;
+	text-decoration:none;
+	cursor: pointer;
+	color:inherit;
+}
+
+.wx-tag a:hover {
+    color: var(--bs-body-color);
+}
+
+.wx-tag input {
+    box-sizing:border-box;
+	flex-grow:1;
+	border:none;
+	outline:none;
+	font-size:inherit;
+	font-family:inherit;
+	color:inherit;
+    background:var(--bs-body-bg);
+}
+
+.wx-tag-primary {
+    color: var(--bs-white);
+    background-color: var(--bs-primary);
+}
+
+.wx-tag-secondary {
+    color: var(--bs-light);
+    background-color: var(--bs-secondary);
+}
+
+.wx-tag-success {
+    color: var(--bs-light);
+    background-color: var(--bs-success);
+}
+
+.wx-tag-info {
+    color: var(--bs-dark);
+    background-color: var(--bs-info);
+}
+
+.wx-tag-warning {
+    color: var(--bs-dark);
+    background-color: var(--bs-warning);
+}
+
+.wx-tag-danger {
+    color: var(--bs-light);
+    background-color: var(--bs-danger);
+}
+
+.wx-tag-light {
+    color: var(--bs-dark);
+    background-color: var(--bs-light);
+}
+
+.wx-tag-dark {
+    color: var(--bs-light);
+    background-color: var(--bs-dark);
+}

@@ -9,14 +9,14 @@ namespace WebExpress.WebUI.Test.WebControl
     /// Tests the form text control.
     /// </summary>
     [Collection("NonParallelTests")]
-    public class UnitTestControlFormItemInputText
+    public class UnitTestControlFormItemInputTag
     {
         /// <summary>
-        /// Tests the id property of the form text control.
+        /// Tests the id property of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<input type=""text"" class=""form-control"">")]
-        [InlineData("id", @"<input id=""id"" name=""id"" type=""text"" class=""form-control"">")]
+        [InlineData(null, @"<div class=""wx-webui-tag""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-tag"" name=""id""></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -24,7 +24,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputText(id)
+            var control = new ControlFormItemInputTag(id)
             {
             };
 
@@ -35,10 +35,10 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the auto id property of the form text control.
+        /// Tests the auto id property of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(@"<input id=""*"" name=""*"" type=""text"" class=""form-control"">")]
+        [InlineData(@"<div id=""*"" class=""wx-webui-tag"" name=""*""></div>")]
         public void AutoId(string expected)
         {
             // preconditions
@@ -46,7 +46,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputText()
+            var control = new ControlFormItemInputTag()
             {
             };
 
@@ -57,11 +57,11 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the name property of the form text control.
+        /// Tests the name property of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<input type=""text"" class=""form-control"">")]
-        [InlineData("abc", @"<input name=""abc"" type=""text"" class=""form-control"">")]
+        [InlineData(null, @"<div class=""wx-webui-tag""></div>")]
+        [InlineData("abc", @"<div class=""wx-webui-tag"" name=""abc""></div>")]
         public void Name(string name, string expected)
         {
             // preconditions
@@ -69,7 +69,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputText(null)
+            var control = new ControlFormItemInputTag(null)
             {
                 Name = name
             };
@@ -81,61 +81,12 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the format property of the form text control.
+        /// Tests the placeholder property of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(TypeEditTextFormat.Default, @"<input type=""text"" class=""form-control"">")]
-        [InlineData(TypeEditTextFormat.Multiline, @"<textarea class=""form-control"" rows=""8""></textarea>")]
-        [InlineData(TypeEditTextFormat.Wysiwyg, @"<div class=""wx-webui-editor form-control""></div>")]
-        public void Format(TypeEditTextFormat format, string expected)
-        {
-            // preconditions
-            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputText(null)
-            {
-                Format = format
-            };
-
-            // test execution
-            var html = control.Render(context, visualTree);
-
-            AssertExtensions.EqualWithPlaceholders(expected, html);
-        }
-
-        /// <summary>
-        /// Tests the description property of the form text control.
-        /// </summary>
-        [Theory]
-        [InlineData(null, @"<input type=""text"" class=""form-control"">")]
-        [InlineData("abc", @"<input type=""text"" class=""form-control"">")]
-        public void Description(string description, string expected)
-        {
-            // preconditions
-            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputText(null)
-            {
-                Description = description
-            };
-
-            // test execution
-            var html = control.Render(context, visualTree);
-
-            AssertExtensions.EqualWithPlaceholders(expected, html);
-        }
-
-        /// <summary>
-        /// Tests the placeholder property of the form text control.
-        /// </summary>
-        [Theory]
-        [InlineData(null, @"<input type=""text"" class=""form-control"">")]
-        [InlineData("abc", @"<input type=""text"" class=""form-control"" placeholder=""abc"">")]
-        [InlineData("webexpress.webui:plugin.name", @"<input type=""text"" class=""form-control"" placeholder=""WebExpress.WebUI"">")]
+        [InlineData(null, @"<div class=""wx-webui-tag""></div>")]
+        [InlineData("abc", @"<div class=""wx-webui-tag"" placeholder=""abc""></div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-tag"" placeholder=""WebExpress.WebUI""></div>")]
         public void Placeholder(string placeholder, string expected)
         {
             // preconditions
@@ -143,7 +94,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputText(null)
+            var control = new ControlFormItemInputTag(null)
             {
                 Placeholder = placeholder
             };
@@ -155,22 +106,28 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the min length property of the form text control.
+        /// Tests the color property of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<input type=""text"" class=""form-control"">")]
-        [InlineData(0u, @"<input minlength=""0"" type=""text"" class=""form-control"">")]
-        [InlineData(10u, @"<input minlength=""10"" type=""text"" class=""form-control"">")]
-        public void MinLength(uint? minLength, string expected)
+        [InlineData(TypeColorTag.Default, @"<div class=""wx-webui-tag""></div>")]
+        [InlineData(TypeColorTag.Primary, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-primary""></div>")]
+        [InlineData(TypeColorTag.Secondary, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-secondary""></div>")]
+        [InlineData(TypeColorTag.Info, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-info""></div>")]
+        [InlineData(TypeColorTag.Success, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-success""></div>")]
+        [InlineData(TypeColorTag.Warning, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-warning""></div>")]
+        [InlineData(TypeColorTag.Danger, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-danger""></div>")]
+        [InlineData(TypeColorTag.Light, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-light""></div>")]
+        [InlineData(TypeColorTag.Dark, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-dark""></div>")]
+        public void Color(TypeColorTag color, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputText(null)
+            var control = new ControlFormItemInputTag(null)
             {
-                MinLength = minLength
+                Color = new PropertyColorTag(color)
             };
 
             // test execution
@@ -180,22 +137,21 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the max length property of the form text control.
+        /// Tests the color property of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<input type=""text"" class=""form-control"">")]
-        [InlineData(0u, @"<input maxlength=""0"" type=""text"" class=""form-control"">")]
-        [InlineData(10u, @"<input maxlength=""10"" type=""text"" class=""form-control"">")]
-        public void MaxLength(uint? maxLength, string expected)
+        [InlineData(null, @"<div class=""wx-webui-tag""></div>")]
+        [InlineData("gold", @"<div class=""wx-webui-tag"" data-color-style=""background: gold;""></div>")]
+        public void UserColor(string color, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputText(null)
+            var control = new ControlFormItemInputTag(null)
             {
-                MaxLength = maxLength
+                Color = new PropertyColorTag(color)
             };
 
             // test execution
@@ -205,85 +161,11 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the required property of the form text control.
+        /// Tests the value method of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(false, @"<input type=""text"" class=""form-control"">")]
-        [InlineData(true, @"<input required type=""text"" class=""form-control"">")]
-        public void Required(bool required, string expected)
-        {
-            // preconditions
-            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputText(null)
-            {
-                Required = required
-            };
-
-            // test execution
-            var html = control.Render(context, visualTree);
-
-            AssertExtensions.EqualWithPlaceholders(expected, html);
-        }
-
-        /// <summary>
-        /// Tests the pattern property of the form text control.
-        /// </summary>
-        [Theory]
-        [InlineData(null, @"<input type=""text"" class=""form-control"">")]
-        [InlineData("abc.*", @"<input pattern=""abc.*"" type=""text"" class=""form-control"">")]
-        public void Pattern(string pattern, string expected)
-        {
-            // preconditions
-            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputText(null)
-            {
-                Pattern = pattern
-            };
-
-            // test execution
-            var html = control.Render(context, visualTree);
-
-            AssertExtensions.EqualWithPlaceholders(expected, html);
-        }
-
-        /// <summary>
-        /// Tests the rows property of the form text control.
-        /// </summary>
-        [Theory]
-        [InlineData(null, @"<textarea class=""form-control""></textarea>")]
-        [InlineData(0u, @"<textarea class=""form-control"" rows=""0""></textarea>")]
-        [InlineData(10u, @"<textarea class=""form-control"" rows=""10""></textarea>")]
-        public void Rows(uint? rows, string expected)
-        {
-            // preconditions
-            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputText(null)
-            {
-                Rows = rows,
-                Format = TypeEditTextFormat.Multiline
-            };
-
-            // test execution
-            var html = control.Render(context, visualTree);
-
-            AssertExtensions.EqualWithPlaceholders(expected, html);
-        }
-
-        /// <summary>
-        /// Tests the value method of the form text control.
-        /// </summary>
-        [Theory]
-        [InlineData(null, @"*<input type=""text"" class=""form-control"">*")]
-        [InlineData("abc", @"*<input value=""abc"" type=""text"" class=""form-control"">*")]
+        [InlineData(null, @"*<div class=""wx-webui-tag""></div>*")]
+        [InlineData("abc", @"*<div class=""wx-webui-tag"" data-tags=""abc""></div>*")]
         public void ValueForm(string value, string expected)
         {
             // preconditions
@@ -291,7 +173,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputText(null);
+            var control = new ControlFormItemInputTag(null);
             var form = new ControlForm().Add(control)
                 .Initialize(renderContext =>
                 {
@@ -307,11 +189,11 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the value method of the form text control.
+        /// Tests the value method of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<input type=""text"" class=""form-control"">*")]
-        [InlineData("abc", @"*<input value=""abc"" type=""text"" class=""form-control"">*")]
+        [InlineData(null, @"*<div class=""wx-webui-tag""></div>*")]
+        [InlineData("abc", @"*<div class=""wx-webui-tag"" data-tags=""abc""></div>*")]
         public void ValueItem(string value, string expected)
         {
             // preconditions
@@ -319,7 +201,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputText(null)
+            var control = new ControlFormItemInputTag(null)
                 .Initialize(arg =>
                 {
                     arg.Value = value;
@@ -335,11 +217,11 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the validate method of the form text control.
+        /// Tests the validate method of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<input id=""text-box"" name=""text-box"" type=""text"" class=""form-control"">*")]
-        [InlineData("abc", @"*<input id=""text-box"" value=""abc"" name=""text-box"" type=""text"" class=""form-control"">*")]
+        [InlineData(null, @"*<div id=""tag"" class=""wx-webui-tag"" name=""tag""></div>*")]
+        [InlineData("abc", @"*<div id=""tag"" class=""wx-webui-tag"" name=""tag""></div>*")]
         public void ValidateForm(string value, string expected)
         {
             // preconditions
@@ -347,7 +229,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputText("text-box").Initialize(args =>
+            var control = new ControlFormItemInputTag("tag").Initialize(args =>
             {
                 args.Value = value;
             });
@@ -376,11 +258,11 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the validate method of the form text control.
+        /// Tests the validate method of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<input id=""text-box"" name=""text-box"" type=""text"" class=""form-control"">*")]
-        [InlineData("abc", @"*<input id=""text-box"" value=""abc"" name=""text-box"" type=""text"" class=""form-control"">*")]
+        [InlineData(null, @"*<div id=""tag"" class=""wx-webui-tag"" name=""tag""></div>*")]
+        [InlineData("abc", @"*<div id=""tag"" class=""wx-webui-tag"" name=""tag"" data-tags=""abc""></div>*")]
         public void ValidateItem(string value, string expected)
         {
             // preconditions
@@ -388,7 +270,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputText("text-box")
+            var control = new ControlFormItemInputTag("tag")
                 .Validate
                 (
                     x =>
@@ -404,7 +286,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 .Add(control);
 
             context.Request.AddParameter(new Parameter(form.Id, context.Request?.Session.Id.ToString(), ParameterScope.Parameter));
-            context.Request.AddParameter(new Parameter("text-box", value, ParameterScope.Parameter));
+            context.Request.AddParameter(new Parameter("tag", value, ParameterScope.Parameter));
 
             // test execution
             var html = form.Render(context, visualTree);
@@ -414,11 +296,11 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the process method of the form text control.
+        /// Tests the process method of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<input id=""text-box"" name=""text-box"" type=""text"" class=""form-control"">*")]
-        [InlineData("abc", @"*<input id=""text-box"" value=""abc"" name=""text-box"" type=""text"" class=""form-control"">*")]
+        [InlineData(null, @"*<div id=""tag"" class=""wx-webui-tag"" name=""tag""></div>*")]
+        [InlineData("abc", @"*<div id=""tag"" class=""wx-webui-tag"" name=""tag"" data-tags=""abc""></div>*")]
         public void ProcessForm(string value, string expected)
         {
             // preconditions
@@ -426,7 +308,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputText("text-box")
+            var control = new ControlFormItemInputTag("tag")
                 .Initialize(args =>
                 {
                     args.Value = value;
@@ -442,7 +324,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 );
 
             context.Request.AddParameter(new Parameter(form.Id, context.Request?.Session.Id.ToString(), ParameterScope.Parameter));
-            context.Request.AddParameter(new Parameter("text-box", value, ParameterScope.Parameter));
+            context.Request.AddParameter(new Parameter("tag", value, ParameterScope.Parameter));
 
             // test execution
             var html = form.Render(context, visualTree);
@@ -452,11 +334,11 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the process method of the form text control.
+        /// Tests the process method of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<input id=""text-box"" name=""text-box"" type=""text"" class=""form-control"">*")]
-        [InlineData("abc", @"*<input id=""text-box"" value=""abc"" name=""text-box"" type=""text"" class=""form-control"">*")]
+        [InlineData(null, @"*<div id=""tag"" class=""wx-webui-tag"" name=""tag""></div>*")]
+        [InlineData("abc", @"*<div id=""tag"" class=""wx-webui-tag"" name=""tag"" data-tags=""abc""></div>*")]
         public void ProcessItem(string value, string expected)
         {
             // preconditions
@@ -464,7 +346,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputText("text-box")
+            var control = new ControlFormItemInputTag("tag")
                 .Initialize(arg =>
                 {
                     arg.Value = value;
@@ -480,7 +362,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 .Add(control);
 
             context.Request.AddParameter(new Parameter(form.Id, context.Request?.Session.Id.ToString(), ParameterScope.Parameter));
-            context.Request.AddParameter(new Parameter("text-box", value, ParameterScope.Parameter));
+            context.Request.AddParameter(new Parameter("tag", value, ParameterScope.Parameter));
 
             // test execution
             var html = form.Render(context, visualTree);

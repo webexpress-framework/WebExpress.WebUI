@@ -499,4 +499,8 @@ webexpress.webui.Event = class {
     static SHOW_EVENT = "webexpress.webui.show";
     // Event triggered when an element is updated.
     static UPDATED_EVENT = "webexpress.webui.updated";
+    // Event triggered when an item is added.
+    static ADD_EVENT = "webexpress.webui.add";
+    // Event triggered when an item is removed.
+    static REMOVE_EVENT = "webexpress.webui.remove";
 }
