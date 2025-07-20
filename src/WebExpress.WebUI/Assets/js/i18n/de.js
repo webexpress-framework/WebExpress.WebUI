@@ -3,6 +3,7 @@
  */
 webexpress.webui.I18N.register("de", "webexpress.webui", {
     "copy": "Kopieren",
+    "remove": "Entfernen",
 
     "calendar.select_date": "Datum auswählen",
     "calendar.select_range": "Zeitraum auswählen",

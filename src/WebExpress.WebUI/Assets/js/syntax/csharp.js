@@ -1,15 +1,9 @@
-/**
- * Syntax Highlighting Module for C#
- */
-(function() {
-    // Define the syntax components for C#
-
-    // Access modifiers are separated for distinct highlighting.
+// Syntax highlighting for C# as a class implementation
+webexpress.webui.Syntax.register("csharp", "c#", (code) => {
+    // define c# syntax components
     const accessModifiers = [
         "public", "private", "protected", "internal"
     ];
-
-    // All other C# keywords.
     const keywords = [
         "abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class",
         "const", "continue", "decimal", "default", "delegate", "do", "double", "else", "enum", "event",
@@ -20,50 +14,77 @@
         "throw", "true", "try", "typeof", "uint", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual",
         "void", "volatile", "while"
     ];
-
-    // C# specific types.
     const types = [
         "int", "string", "bool", "double", "float", "char", "long", "short", "decimal", "byte", "sbyte", "uint", "ulong", "ushort", "object"
     ];
-
-    // Common C# operators.
     const operators = [
         "=", "==", "!=", "<", ">", "<=", ">=", "+", "-", "*", "/", "%", "&&", "||", "!", "&", "|", "^", "<<", ">>", "??"
     ];
-
-    // Brackets, parentheses, and braces are captured for styling.
     const brackets = [
         "(", ")", "{", "}", "[", "]"
     ];
 
-    // Fallback registration logic if not already defined.
-    if (!webexpress.webui.Syntax) {
-        webexpress.webui.Syntax = {};
-    }
-
-    if (!webexpress.webui.Syntax.register) {
-        webexpress.webui.Syntax.register = function(language, regex) {
-            if (!this.syntax) {
-                this.syntax = {};
-            }
-            // Store the provided regex under the specified language.
-            this.syntax[language] = { regex };
-        };
-    }
-
-    // Register the syntax configuration for C# with a combined regex.
-    webexpress.webui.Syntax.register("csharp", new RegExp(
+    // compile combined regex for c# syntax
+    const regex = new RegExp(
         [
-            `(?<comment>\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)`,       // Captures single-line and multi-line comments.
-            `(?<string>@"(?:""|[^"])*"|"(?:\\\\.|[^"\\\\])*")`,  // Captures verbatim and regular string literals.
-            `(?<annotation>\\[[^\\]]*\\])`,                      // Captures attributes (annotations).
-            `(?<access>\\b(?:${accessModifiers.join("|")})\\b)`, // Captures access modifiers.
-            `(?<keyword>\\b(?:${keywords.join("|")})\\b)`,       // Captures other keywords.
-            `(?<type>\\b(?:${types.join("|")})\\b)`,             // Captures predefined type names.
-            `(?<number>\\b\\d+(?:\\.\\d+)?[fLd]?\\b)`,           // Captures integer, float, long, and double numbers.
-            `(?<operator>${operators.map(op => `\\${op.split('').join('\\')}`).join("|")})`, // Captures operators, properly escaping them.
-            `(?<bracket>${brackets.map(b => `\\${b}`).join("|")})` // Captures brackets, parentheses, and braces.
+            // comments (single-line and multi-line)
+            `(?<comment>\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)`,
+            // strings (verbatim and regular)
+            `(?<string>@"(?:""|[^"])*"|"(?:\\\\.|[^"\\\\])*")`,
+            // annotations
+            `(?<annotation>\\[[^\\]]*\\])`,
+            // method calls like .WriteLine
+            `(?<method>\\.\\s*[a-zA-Z_][a-zA-Z0-9_]*)`,
+            // property/field access like Console.
+            `(?<property>\\b[a-zA-Z_][a-zA-Z0-9_]*\\.)`,
+            // access modifiers
+            `(?<access>\\b(?:${accessModifiers.join("|")})\\b)`,
+            // keywords
+            `(?<keyword>\\b(?:${keywords.join("|")})\\b)`,
+            // types
+            `(?<type>\\b(?:${types.join("|")})\\b)`,
+            // numbers
+            `(?<number>\\b\\d+(?:\\.\\d+)?[fLd]?\\b)`,
+            // operators
+            `(?<operator>${operators.map(op => `\\${op.split('').join('\\')}`).join("|")})`,
+            // brackets
+            `(?<bracket>${brackets.map(b => `\\${b}`).join("|")})`
         ].join("|"),
-        "g" // The 'g' flag ensures that all occurrences are matched, not just the first one.
-    ));
-})();
+        "g"
+    );
+
+    /**
+     * converts a matched token to an html span element for syntax highlighting.
+     *
+     * @param {string} token - the type of token (e.g., keyword, comment).
+     * @param {string} value - the matched value to be highlighted.
+     * @returns {string} the html span element with corresponding class.
+     */
+    function tokenToSpan(token, value) {
+        return `<span class="${token}">${value}</span>`;
+    }
+
+    // process each line for highlighting
+    return code.split('\n').map(line => {
+        let result = '';
+        let lastIndex = 0;
+        let matches = [...line.matchAll(regex)];
+
+        for (const match of matches) {
+            const index = match.index;
+            result += line.slice(lastIndex, index);
+
+            for (const key in match.groups) {
+                if (match.groups[key] !== undefined) {
+                    result += tokenToSpan(key, match.groups[key]);
+                    break;
+                }
+            }
+            lastIndex = index + match[0].length;
+        }
+
+        result += line.slice(lastIndex);
+
+        return `<span>${result}</span>`;
+    }).join('');
+});

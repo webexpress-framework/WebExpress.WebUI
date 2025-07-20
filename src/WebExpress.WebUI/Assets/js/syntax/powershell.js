@@ -1,66 +1,73 @@
-/**
- * Syntax Highlighting Module for PowerShell scripts
- */
-(function() {
-    // Define the syntax components for PowerShell
-
-    // PowerShell keywords for control flow and declarations.
+// Syntax highlighting for PowerShell as a class implementation
+webexpress.webui.Syntax.register("powershell", "ps", (code) => {
+    // PowerShell keywords
     const keywords = [
-        'if', 'else', 'elseif', 'for', 'foreach', 'in', 'while', 'switch', 'case', 'default',
-        'function', 'class', 'enum', 'try', 'catch', 'finally', 'throw', 'trap', 'return', 'break',
-        'continue', 'do', 'until', 'begin', 'process', 'end', 'param'
+        "function", "filter", "workflow", "if", "else", "elseif", "switch", "foreach", "for", "while", "do", "until", "return", "break", "continue", "trap", "throw", "try", "catch", "finally", "in"
     ];
 
-    // Common PowerShell cmdlets.
-    const commands = [
-        'Get-ChildItem', 'Get-Content', 'Set-Content', 'Add-Content', 'Get-Process', 'Stop-Process',
-        'Get-Service', 'Start-Service', 'Stop-Service', 'Write-Host', 'Write-Output', 'Read-Host',
-        'New-Item', 'Remove-Item', 'Copy-Item', 'Move-Item', 'Rename-Item', 'Get-Location', 'Set-Location',
-        'Invoke-Command', 'Invoke-Expression', 'Invoke-RestMethod', 'Invoke-WebRequest', 'ConvertTo-Json',
-        'ConvertFrom-Json', 'Select-Object', 'Where-Object', 'ForEach-Object', 'Sort-Object', 'Measure-Object',
-        'Group-Object', 'Compare-Object', 'Import-Module', 'Export-Module', 'Get-Module'
+    // PowerShell built-ins and cmdlets (partial list)
+    const builtins = [
+        "Get-ChildItem", "Get-Content", "Get-Help", "Get-Process", "Get-Service", "Get-Command", "Get-Item", "Set-Item", "Remove-Item", "New-Item", "Copy-Item", "Move-Item", "Write-Host", "Write-Output", "Read-Host", "Start-Process", "Stop-Process", "Test-Path", "Select-Object", "Where-Object", "Sort-Object", "Format-Table", "Format-List", "Import-Module", "Export-ModuleMember"
     ];
 
-    // PowerShell operators.
+    // PowerShell operators
     const operators = [
-        '-eq', '-ne', '-gt', '-ge', '-lt', '-le', '-like', '-notlike', '-match', '-notmatch',
-        '-contains', '-notcontains', '-in', '-notin', '-replace', '-and', '-or', '-xor', '-not',
-        '=', '\\+=', '-=', '\\*=', '/=', '%=', '\\+\\+', '--', '\\+', '-', '\\*', '/', '%'
+        "-eq", "-ne", "-gt", "-lt", "-ge", "-le", "-like", "-notlike", "-match", "-notmatch", "-replace", "-contains", "-notcontains", "-in", "-notin", "-and", "-or", "-not", "-band", "-bor", "-bxor", "-bnot", "-shl", "-shr", "=", "\\+", "-", "\\*", "/", "%", "\\.", "!", "\\|", "&"
     ];
 
-    // Brackets, parentheses, and braces.
+    // Brackets
     const brackets = [
-        "\\(", "\\)", "{", "}", "\\[", "\\]"
+        "\\(", "\\)", "\\{", "\\}", "\\[", "\\]"
     ];
 
-    // Fallback registration logic if not already defined.
-    if (!webexpress.webui.Syntax) {
-        webexpress.webui.Syntax = {};
-    }
-
-    if (!webexpress.webui.Syntax.register) {
-        webexpress.webui.Syntax.register = function(language, regex) {
-            if (!this.syntax) {
-                this.syntax = {};
-            }
-            // Store the provided regex under the specified language.
-            this.syntax[language] = { regex };
-        };
-    }
-
-    // Register the syntax configuration for PowerShell with a combined regex.
-    webexpress.webui.Syntax.register("powershell", new RegExp(
+    // Compile combined regex for PowerShell syntax
+    const regex = new RegExp(
         [
-            `(?<comment><#[\\s\\S]*?#_>|#.*)`, // Captures multi-line and single-line comments.
-            `(?<string>'(?:''|[^'])*'|"(?:""|[^"])*")`, // Captures single and double quoted strings (handles escaped quotes).
-            `(?<type>\\[[a-zA-Z0-9_.]+\\])`, // Captures type accelerators like [string].
-            `(?<variable>\\$[a-zA-Z0-9_]+)`, // Captures variables.
-            `(?<keyword>\\b(?:${keywords.join("|")})\\b)`, // Captures keywords.
-            `(?<command>\\b(?:${commands.join("|")})\\b)`, // Captures common cmdlets.
-            `(?<number>\\b\\d+(?:\\.\\d+)?\\b)`, // Captures integer and floating-point numbers.
-            `(?<operator>${operators.join("|")})`, // Captures operators.
-            `(?<bracket>${brackets.join("|")})` // Captures brackets, parentheses, and braces.
+            // Single-line and multi-line comments
+            `(?<comment>#.*|<#[\\s\\S]*?#>)`,
+            // Double-quoted and single-quoted strings
+            `(?<string>"(?:\\\\.|[^"\\\\])*"|'(?:\\\\.|[^'\\\\])*')`,
+            // Variables: $var, ${var}
+            `(?<variable>\\$[A-Za-z_][A-Za-z0-9_]*|\\$\\{[^}]+\\})`,
+            // Keywords
+            `(?<keyword>\\b(?:${keywords.join("|")})\\b)`,
+            // Built-ins and cmdlets
+            `(?<builtin>\\b(?:${builtins.join("|")})\\b)`,
+            // Numbers (integer and floating point)
+            `(?<number>\\b\\d+(?:\\.\\d+)?\\b)`,
+            // Operators
+            `(?<operator>${operators.join("|")})`,
+            // Brackets
+            `(?<bracket>${brackets.join("|")})`
         ].join("|"),
-        "gi" // 'g' for global search, 'i' for case-insensitivity.
-    ));
-})();
+        "gim"
+    );
+
+    // Converts token to HTML span for syntax highlighting
+    function tokenToSpan(token, value) {
+        return `<span class="${token}">${value}</span>`;
+    }
+
+    // Processes each line for highlighting
+    return code.split('\n').map(line => {
+        let result = '';
+        let lastIndex = 0;
+        let matches = [...line.matchAll(regex)];
+
+        for (const match of matches) {
+            const index = match.index;
+            result += line.slice(lastIndex, index);
+
+            for (const key in match.groups) {
+                if (match.groups[key] !== undefined) {
+                    result += tokenToSpan(key, match.groups[key]);
+                    break;
+                }
+            }
+            lastIndex = index + match[0].length;
+        }
+
+        result += line.slice(lastIndex);
+        return `<span>${result}</span>`;
+    }).join('');
+});

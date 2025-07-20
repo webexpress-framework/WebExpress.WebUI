@@ -251,23 +251,29 @@ webexpress.webui.I18N = new class {
  */
 webexpress.webui.Syntax = new class {
     constructor() {
-        // Initialize the syntax object to store language-specific configurations
+        // initialize the syntax object to store language-specific configurations
         this.syntax = {};
     }
 
     /**
-     * Registers syntax values for a specific language and module.
+     * Registers syntax values for a specific language and alias.
      *
      * @param {string} language - Language code (e.g., "csharp").
-     * @param {object} regex - Object containing regular expression for syntax rules.
+     * @param {string} alias - Alias for the language (e.g., "c#").
+     * @param {object|function} syntax - Syntax highlighting configuration or function.
      */
-    register(language, regex) {
-        if (!language || !regex) {
-            retrurn; // Ensure both language and regex are provided
+    register(language, alias, syntax) {
+        if (!language || !syntax) {
+            return; // ensure both language and regex are provided
         }
 
-        // Store language-specific syntax configurations in syntax object
-        this.syntax[language] = regex || {};
+        // store language-specific syntax configurations in syntax object
+        this.syntax[language] = syntax || {};
+        
+        // optional: Store under alias if provided
+        if (alias) {
+            this.syntax[alias] = syntax || {};
+        }
     }
 
     /**
@@ -278,11 +284,11 @@ webexpress.webui.Syntax = new class {
      */
     get(language) {
         if (!language) {
-            // Ensure language parameter is provided
+            // ensure language parameter is provided
             return null;
         }
 
-        // Return the syntax configuration for the given language or null if not found
+        // return the syntax configuration for the given language or null if not found
         return this.syntax[language] || null;
     }
 };

@@ -2,12 +2,14 @@
  * Styles for the Code Control.
  */
 .wx-code {
-    border: 1px solid var(--bs-secondary-border-subtle); /* Border color using Bootstrap primary color */
     border-radius: 4px; /* Rounded corners */
     background-color: var(--bs-light); /* Background color using Bootstrap body background */
     margin-bottom: 1.5rem; /* Spacing below the code block */
     overflow: hidden; /* Ensures content stays within the boundaries */
     color: var(--bs-body-color); /* Text color using Bootstrap body color */
+    display: flex; /* Use flexbox for alignment */
+    justify-content: space-between; /* Space between elements */
+    align-items: flex-start;
 }
 
 .wx-code-header {
@@ -15,10 +17,6 @@
     font-weight: bold; /* Make header text bold */
     padding: 0.2em 0.5em; /* Adjust padding for header */
     color: var(--bs-body-color); /* Header text color using Bootstrap white */
-    border-bottom: 1px solid var(--bs-gray-200); /* Add separation border using secondary color */
-    display: flex; /* Use flexbox for alignment */
-    justify-content: space-between; /* Space between elements */
-    align-items: center; /* Align elements vertically */
 }
 
 .wx-code .wx-code-line {
@@ -63,23 +61,23 @@
 
 /* Style for keywords (e.g., if, for, class) */
 .wx-code .keyword {
-    color: #c586c0; /* A shade of purple/magenta for keywords */
+    color: var(--bs-primary);
 }
 
 /* Style for strings (e.g., "hello world") */
 .wx-code .string {
-    color: #ce9178; /* A shade of orange for strings */
+    color: var(--bs-danger);
 }
 
 /* Style for comments (e.g., // comment) */
 .wx-code .comment {
-    color: #6A9955;
+    color: var(--bs-success);
     font-style: italic;
 }
 
 /* Style for numbers (e.g., 123, 45.6) */
 .wx-code .number {
-    color: #b5cea8; /* A light green/olive for numbers */
+    color: var(--bs-warming);
 }
 
 /* Style for operators (e.g., +, =, ==) */
@@ -89,7 +87,7 @@
 
 /* Style for brackets, parentheses, and braces */
 .wx-code .bracket {
-    color: #A99A86;
+    color: var(--bs-dark);
     font-weight: bold;
 }
 
@@ -128,6 +126,11 @@
 .wx-code .annotation {
     color: #ddd;
     background-color: #444;
+}
+
+/* C# specific: Methods */
+.wx-code .method {
+    color: #ddd;
 }
 
 /* Python specific: Decorators (e.g., @mydecorator) */
@@ -243,9 +246,5 @@
 
 /* Support for dark mode */
 [data-bs-theme="dark"] .wx-code {
-    background-color: var(--bs-dark); /* Dark background */
-}
-
-[data-bs-theme="dark"] .wx-code-header {
-    border-bottom: 1px solid var(--bs-dark); /* Add separation border using secondary color */
+    background-color: var(--bs-gray-800); /* Dark background */
 }

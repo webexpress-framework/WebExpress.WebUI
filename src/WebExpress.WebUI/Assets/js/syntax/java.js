@@ -1,74 +1,77 @@
-/**
- * Syntax Highlighting Module for Java
- */
-(function() {
-    // Define the syntax components for Java
-
-    // Access modifiers are separated for distinct highlighting.
-    const accessModifiers = [
-        "public", "private", "protected"
-    ];
-
-    // All other Java keywords.
+// Syntax highlighting for Java as a class implementation
+webexpress.webui.Syntax.register("java", null, (code) => {
+    // Java keywords
     const keywords = [
-        "abstract", "assert", "break", "case", "catch", "class", "const", "continue",
-        "default", "do", "else", "enum", "extends", "final", "finally", "for", "goto",
-        "if", "implements", "import", "instanceof", "interface", "native", "new", "package",
-        "return", "static", "strictfp", "super", "switch", "synchronized", "this", "throw",
-        "throws", "transient", "try", "void", "volatile", "while"
+        "abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class", "const", "continue",
+        "default", "do", "double", "else", "enum", "extends", "final", "finally", "float", "for", "goto", "if",
+        "implements", "import", "instanceof", "int", "interface", "long", "native", "new", "null", "package",
+        "private", "protected", "public", "return", "short", "static", "strictfp", "super", "switch", "synchronized",
+        "this", "throw", "throws", "transient", "try", "void", "volatile", "while"
     ];
 
-    // Primitive data types and common classes.
+    // Java types
     const types = [
-        "boolean", "byte", "char", "double", "float", "int", "long", "short", "String", "Object"
+        "int", "float", "double", "char", "long", "short", "boolean", "byte", "void", "String", "Object"
     ];
 
-    // Built-in constants.
-    const constants = [
-        "true", "false", "null"
-    ];
-
-    // Common Java operators.
+    // Java operators
     const operators = [
-        "=", "==", "!=", "<", ">", "<=", ">=", "+", "-", "*", "/", "%", "&&", "||", "!", "&", "|",
-        "^", "<<", ">>", ">>>", "++", "--", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=",
-        "<<=", ">>=", ">>>=", "->"
+        "=", "==", "!=", "<", ">", "<=", ">=", "\\+", "-", "\\*", "/", "%", "&&", "\\|\\|", "!", "&", "\\|", "\\^", "<<", ">>", ">>>", "\\?", ":", "\\.", "\\+", "-", "\\*", "/", "%", "\\+=", "-=", "\\*=", "/=", "%="
     ];
 
-    // Brackets, parentheses, and braces are captured for styling.
+    // Brackets
     const brackets = [
-        "(", ")", "{", "}", "[", "]"
+        "\\(", "\\)", "\\{", "\\}", "\\[", "\\]"
     ];
 
-    // Fallback registration logic if not already defined.
-    if (!webexpress.webui.Syntax) {
-        webexpress.webui.Syntax = {};
-    }
-
-    if (!webexpress.webui.Syntax.register) {
-        webexpress.webui.Syntax.register = function(language, regex) {
-            if (!this.syntax) {
-                this.syntax = {};
-            }
-            // Store the provided regex under the specified language.
-            this.syntax[language] = { regex };
-        };
-    }
-
-    // Register the syntax configuration for Java with a combined regex.
-    webexpress.webui.Syntax.register("java", new RegExp(
+    // Compile combined regex for Java syntax
+    const regex = new RegExp(
         [
-            `(?<comment>\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)`, // Captures single-line and multi-line comments.
-            `(?<string>"(?:\\\\.|[^"\\\\])*")`, // Captures string literals, handling escaped quotes.
-            `(?<annotation>@\\w+)`, // Captures annotations like @Override.
-            `(?<accessModifier>\\b(?:${accessModifiers.join("|")})\\b)`, // Captures access modifiers.
-            `(?<keyword>\\b(?:${keywords.join("|")})\\b)`, // Captures other keywords.
-            `(?<type>\\b(?:${types.join("|")})\\b)`, // Captures predefined type names.
-            `(?<constant>\\b(?:${constants.join("|")})\\b)`, // Captures built-in constants.
-            `(?<number>\\b\\d+(?:\\.\\d+)?[fLd]?\\b)`, // Captures integer, float, long, and double numbers.
-            `(?<operator>${operators.map(op => `\\${op.split('').join('\\')}`).join("|")})`, // Captures operators, properly escaping them.
-            `(?<bracket>${brackets.map(b => `\\${b}`).join("|")})` // Captures brackets, parentheses, and braces.
+            // Single-line and multi-line comments
+            `(?<comment>\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)`,
+            // Double-quoted and single-quoted strings
+            `(?<string>"(?:\\\\.|[^"\\\\])*"|'(?:\\\\.|[^'\\\\])*')`,
+            // Annotations
+            `(?<annotation>@[A-Za-z_][A-Za-z0-9_]*)`,
+            // Keywords
+            `(?<keyword>\\b(?:${keywords.join("|")})\\b)`,
+            // Types
+            `(?<type>\\b(?:${types.join("|")})\\b)`,
+            // Numbers (integer, floating point, hex, octal)
+            `(?<number>\\b0[xX][0-9a-fA-F]+\\b|\\b0[0-7]+\\b|\\b\\d+(?:\\.\\d+)?([eE][+-]?\\d+)?[fFdD]?\\b)`,
+            // Operators
+            `(?<operator>${operators.join("|")})`,
+            // Brackets
+            `(?<bracket>${brackets.join("|")})`
         ].join("|"),
-        "g" // The 'g' flag ensures that all occurrences are matched, not just the first one.
-    ));
-})();
+        "gim"
+    );
+
+    // Converts token to HTML span for syntax highlighting
+    function tokenToSpan(token, value) {
+        return `<span class="${token}">${value}</span>`;
+    }
+
+    // Process each line for highlighting
+    return code.split('\n').map(line => {
+        let result = '';
+        let lastIndex = 0;
+        let matches = [...line.matchAll(regex)];
+
+        for (const match of matches) {
+            const index = match.index;
+            result += line.slice(lastIndex, index);
+
+            for (const key in match.groups) {
+                if (match.groups[key] !== undefined) {
+                    result += tokenToSpan(key, match.groups[key]);
+                    break;
+                }
+            }
+            lastIndex = index + match[0].length;
+        }
+
+        result += line.slice(lastIndex);
+        return `<span>${result}</span>`;
+    }).join('');
+});

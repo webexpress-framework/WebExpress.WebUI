@@ -1,66 +1,78 @@
-/**
- * Syntax Highlighting Module for PHP
- */
-(function() {
-    // Define the syntax components for PHP
-
-    // PHP keywords, including control flow, declarations, and access modifiers.
+// Syntax highlighting for PHP as a class implementation
+webexpress.webui.Syntax.register("php", null, (code) => {
+    // PHP keywords
     const keywords = [
-        '__halt_compiler', 'abstract', 'and', 'array', 'as', 'break', 'callable', 'case', 'catch', 'class',
-        'clone', 'const', 'continue', 'declare', 'default', 'die', 'do', 'echo', 'else', 'elseif',
-        'empty', 'enddeclare', 'endfor', 'endforeach', 'endif', 'endswitch', 'endwhile', 'eval', 'exit',
-        'extends', 'final', 'finally', 'fn', 'for', 'foreach', 'function', 'global', 'goto', 'if',
-        'implements', 'include', 'include_once', 'instanceof', 'insteadof', 'interface', 'isset', 'list',
-        'match', 'namespace', 'new', 'or', 'print', 'private', 'protected', 'public', 'readonly',
-        'require', 'require_once', 'return', 'static', 'switch', 'throw', 'trait', 'try', 'unset',
-        'use', 'var', 'while', 'xor', 'yield', 'from'
+        "abstract", "and", "array", "as", "break", "callable", "case", "catch", "class", "clone", "const", "continue", "declare",
+        "default", "do", "echo", "else", "elseif", "empty", "enddeclare", "endfor", "endforeach", "endif", "endswitch", "endwhile",
+        "eval", "exit", "extends", "final", "finally", "for", "foreach", "function", "global", "goto", "if", "implements", "include",
+        "include_once", "instanceof", "insteadof", "interface", "isset", "list", "namespace", "new", "or", "print", "private",
+        "protected", "public", "require", "require_once", "return", "static", "switch", "throw", "trait", "try", "unset", "use",
+        "var", "while", "xor", "yield"
     ];
 
-    // Built-in constants and magic constants.
-    const constants = [
-        'true', 'false', 'null', '__CLASS__', '__DIR__', '__FILE__', '__FUNCTION__',
-        '__LINE__', '__METHOD__', '__NAMESPACE__', '__TRAIT__'
+    // PHP types and built-ins
+    const types = [
+        "int", "float", "bool", "string", "array", "object", "resource", "mixed", "void", "iterable", "callable", "self", "parent"
     ];
 
-    // Common PHP operators.
+    // PHP operators
     const operators = [
-        '\\+=', '-=', '\\*=', '/=', '\\.=', '%=', '&=', '\\|=', '\\^=', '<<=', '>>=', '\\*\\*=',
-        '\\+\\+', '--', '=>', '===', '!==', '==', '!=', '<>', '<=', '>=', '<=>', '&&', '\\|\\|',
-        '\\?\\?', '\\.\\.\\.', '->', '&', '\\+', '-', '\\*', '/', '%', '!', '\\.', '\\|', '\\^', '~', '<<', '>>', '<', '>'
+        "=", "==", "===", "!==", "!=", "<", ">", "<=", ">=", "\\+", "-", "\\*", "/", "%", "\\^", "&&", "\\|\\|", "\\|", "!", "\\.", "\\+=", "-=", "\\*=", "/=", "%=", "\\^=", "&=", "\\|=", "<<", ">>", "->", "::", "=>"
     ];
 
-    // Brackets, parentheses, and braces are captured for styling.
+    // Brackets
     const brackets = [
-        "\\(", "\\)", "{", "}", "\\[", "\\]"
+        "\\(", "\\)", "\\{", "\\}", "\\[", "\\]"
     ];
 
-    // Fallback registration logic if not already defined.
-    if (!webexpress.webui.Syntax) {
-        webexpress.webui.Syntax = {};
-    }
-
-    if (!webexpress.webui.Syntax.register) {
-        webexpress.webui.Syntax.register = function(language, regex) {
-            if (!this.syntax) {
-                this.syntax = {};
-            }
-            // Store the provided regex under the specified language.
-            this.syntax[language] = { regex };
-        };
-    }
-
-    // Register the syntax configuration for PHP with a combined regex.
-    webexpress.webui.Syntax.register("php", new RegExp(
+    // Compile combined regex for PHP syntax
+    const regex = new RegExp(
         [
-            `(?<comment>\\/\\/.*|#.*|\\/\\*[\\s\\S]*?\\*\\/)`, // Captures single-line (// and #) and multi-line comments.
-            `(?<string>'(?:\\\\.|[^'\\\\])*'|"(?:\\\\.|[^"\\\\])*")`, // Captures single and double quoted strings.
-            `(?<variable>\\$[a-zA-Z_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]*)`, // Captures variables.
-            `(?<keyword>\\b(?:${keywords.join("|")})\\b)`, // Captures keywords.
-            `(?<constant>\\b(?:${constants.join("|")})\\b)`, // Captures built-in constants.
-            `(?<number>\\b\\d+(?:\\.\\d+)?\\b)`, // Captures integer and floating-point numbers.
-            `(?<operator>${operators.join("|")})`, // Captures operators.
-            `(?<bracket>${brackets.join("|")})` // Captures brackets, parentheses, and braces.
+            // Single-line and multi-line comments
+            `(?<comment>\\/\\/.*|#.*|\\/\\*[\\s\\S]*?\\*\\/)`,
+            // Double-quoted and single-quoted strings
+            `(?<string>"(?:\\\\.|[^"\\\\])*"|'(?:\\\\.|[^'\\\\])*')`,
+            // PHP variables
+            `(?<variable>\\$[A-Za-z_][A-Za-z0-9_]*)`,
+            // Keywords
+            `(?<keyword>\\b(?:${keywords.join("|")})\\b)`,
+            // Types and built-ins
+            `(?<type>\\b(?:${types.join("|")})\\b)`,
+            // Numbers (integer, floating point, hex, octal)
+            `(?<number>\\b0[xX][0-9a-fA-F]+\\b|\\b0[0-7]+\\b|\\b\\d+(?:\\.\\d+)?([eE][+-]?\\d+)?\\b)`,
+            // Operators
+            `(?<operator>${operators.join("|")})`,
+            // Brackets
+            `(?<bracket>${brackets.join("|")})`
         ].join("|"),
-        "gi" // The 'g' flag for global search, 'i' for case-insensitivity (common for PHP keywords).
-    ));
-})();
+        "gim"
+    );
+
+    // Converts token to HTML span for syntax highlighting
+    function tokenToSpan(token, value) {
+        return `<span class="${token}">${value}</span>`;
+    }
+
+    // Processes each line for highlighting
+    return code.split('\n').map(line => {
+        let result = '';
+        let lastIndex = 0;
+        let matches = [...line.matchAll(regex)];
+
+        for (const match of matches) {
+            const index = match.index;
+            result += line.slice(lastIndex, index);
+
+            for (const key in match.groups) {
+                if (match.groups[key] !== undefined) {
+                    result += tokenToSpan(key, match.groups[key]);
+                    break;
+                }
+            }
+            lastIndex = index + match[0].length;
+        }
+
+        result += line.slice(lastIndex);
+        return `<span>${result}</span>`;
+    }).join('');
+});

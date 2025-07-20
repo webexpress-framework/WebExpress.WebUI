@@ -1,10 +1,6 @@
-/**
- * Syntax Highlighting Module for BASIC
- */
-(function() {
-    // Define the syntax components for BASIC
-
-    // BASIC keywords and common statements.
+// Syntax highlighting for BASIC as a class implementation
+webexpress.webui.Syntax.register("basic", "bas", (code) => {
+    // define BASIC syntax components
     const keywords = [
         'ABS', 'AND', 'ASC', 'ATN', 'CALL', 'CHR$', 'CLEAR', 'CLOSE', 'CLS', 'COLOR',
         'CONT', 'COS', 'CSNG', 'CVD', 'CVI', 'CVS', 'DATA', 'DATE$', 'DEF', 'DEFDBL',
@@ -25,49 +21,60 @@
         'WRITE', 'XOR'
     ];
 
-    // BASIC operators.
     const operators = [
         '=', '<>', '>', '<', '<=', '>=', '\\+', '-', '\\*', '/', '\\^'
     ];
 
-    // Brackets and parentheses.
     const brackets = [
-        "\\(", "\\)"
+        '\\(', '\\)'
     ];
 
-    // Fallback registration logic if not already defined.
-    if (!webexpress.webui.Syntax) {
-        webexpress.webui.Syntax = {};
-    }
-
-    if (!webexpress.webui.Syntax.register) {
-        webexpress.webui.Syntax.register = function(language, regex) {
-            if (!this.syntax) {
-                this.syntax = {};
-            }
-            // Store the provided regex under the specified language.
-            this.syntax[language] = { regex };
-        };
-    }
-
-    // Register the syntax configuration for BASIC with a combined regex.
-    webexpress.webui.Syntax.register("basic", new RegExp(
+    // compile combined regex for BASIC syntax
+    const regex = new RegExp(
         [
-            // Captures line numbers at the start of a line.
+            // line numbers at the start of a line
             `(?<linenumber>^[0-9]+)`,
-            // Captures comments, which start with REM or a single quote.
+            // comments: REM or '
             `(?<comment>(?:\\bREM\\b|').*$)`,
-            // Captures double-quoted strings.
+            // double-quoted strings
             `(?<string>"(?:""|[^"])*")`,
-            // Captures keywords.
+            // keywords
             `(?<keyword>\\b(?:${keywords.join("|")})\\b)`,
-            // Captures numbers.
+            // numbers
             `(?<number>\\b\\d+(?:\\.\\d+)?\\b)`,
-            // Captures operators.
+            // operators
             `(?<operator>${operators.join("|")})`,
-            // Captures brackets and parentheses.
+            // brackets
             `(?<bracket>${brackets.join("|")})`
         ].join("|"),
-        "gim" // 'g' for global, 'i' for case-insensitive, 'm' for multiline anchors.
-    ));
-})();
+        "gim"
+    );
+
+    // convert a matched token to an HTML span element for syntax highlighting
+    function tokenToSpan(token, value) {
+        return `<span class="${token}">${value}</span>`;
+    }
+
+    return code.split('\n').map(line => {
+        let result = '';
+        let lastIndex = 0;
+        let matches = [...line.matchAll(regex)];
+
+        for (const match of matches) {
+            const index = match.index;
+            result += line.slice(lastIndex, index);
+
+            for (const key in match.groups) {
+                if (match.groups[key] !== undefined) {
+                    result += tokenToSpan(key, match.groups[key]);
+                    break;
+                }
+            }
+            lastIndex = index + match[0].length;
+        }
+
+        result += line.slice(lastIndex);
+
+        return `<span>${result}</span>`;
+    }).join('');
+});

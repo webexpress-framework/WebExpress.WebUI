@@ -1,61 +1,75 @@
-/**
- * Syntax Highlighting Module for Groovy
- */
-(function() {
-    // Define the syntax components for Groovy
-
+// Syntax highlighting for Groovy as a class implementation
+webexpress.webui.Syntax.register("groovy", null, (code) => {
     // Groovy keywords
     const keywords = [
-        "abstract", "as", "assert", "break", "case", "catch", "class", "const", "continue", "def", "default",
-        "do", "else", "enum", "extends", "final", "finally", "for", "goto", "if", "implements", "import",
-        "in", "instanceof", "interface", "native", "new", "null", "package", "private", "protected", "public",
-        "return", "static", "super", "switch", "synchronized", "this", "throw", "throws", "trait", "transient",
-        "try", "void", "volatile", "while", "yield"
+        "as", "assert", "break", "case", "catch", "class", "continue", "def", "default", "do", "else", "enum", "extends", "false", "finally",
+        "for", "goto", "if", "implements", "import", "in", "instanceof", "interface", "new", "null", "package", "return", "super", "switch",
+        "this", "throw", "throws", "trait", "true", "try", "while"
     ];
 
     // Groovy types
     const types = [
-        "boolean", "byte", "char", "double", "float", "int", "long", "short", "void"
+        "boolean", "byte", "char", "double", "float", "int", "long", "short", "void", "String", "Object", "List", "Map", "Set", "Range", "Closure"
     ];
 
-    // Common Groovy operators
+    // Groovy operators
     const operators = [
-        "\\+", "-", "\\*", "/", "%", "\\^", "=", "==", "!=", "<", ">", "<=", ">=", "&&", "\\|\\|", "!", "\\?", ":",
-        "\\+=", "-=", "\\*=", "/=", "%=", "\\^=", "<<", ">>", ">>>", "&", "\\|", "~"
+        "=", "==", "!=", "<", ">", "<=", ">=", "\\+", "-", "\\*", "/", "%", "&&", "\\|\\|", "!", "&", "\\|", "\\^", "<<", ">>", "~", "\\?", ":", "\\.", "\\->", "\\+=", "\\-=", "\\*=", "/=", "%="
     ];
 
-    // Brackets, parentheses, and braces
+    // Brackets
     const brackets = [
         "\\(", "\\)", "\\{", "\\}", "\\[", "\\]"
     ];
 
-    // Fallback registration logic if not already defined
-    if (!webexpress.webui.Syntax) {
-        webexpress.webui.Syntax = {};
-    }
-
-    if (!webexpress.webui.Syntax.register) {
-        webexpress.webui.Syntax.register = function(language, regex) {
-            if (!this.syntax) {
-                this.syntax = {};
-            }
-            // Store the provided regex under the specified language
-            this.syntax[language] = { regex };
-        };
-    }
-
-    // Register the syntax configuration for Groovy with a combined regex
-    webexpress.webui.Syntax.register("groovy", new RegExp(
+    // The following regular expression pattern detects comments, strings, annotations, keywords, types, numbers, operators, and brackets in Groovy source code.
+    const regex = new RegExp(
         [
-            `(?<comment>\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)`,  // Captures single-line and multi-line comments
-            `(?<string>"(?:\\\\.|[^"\\\\])*"|'(?:\\\\.|[^'\\\\])*')`, // Captures double and single quoted strings
-            `(?<annotation>@[a-zA-Z_]\\w*)`,               // Captures annotations
-            `(?<keyword>\\b(?:${keywords.join("|")})\\b)`, // Captures keywords
-            `(?<type>\\b(?:${types.join("|")})\\b)`,       // Captures predefined types
-            `(?<number>\\b\\d+(?:\\.\\d+)?[fFdD]?\\b)`,    // Captures numbers
-            `(?<operator>${operators.join("|")})`,         // Captures operators
-            `(?<bracket>${brackets.join("|")})`            // Captures brackets, parentheses, and braces
+            // Single-line and multi-line comments as well as lines with # are detected
+            `(?<comment>\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/|\\#.*$)`,
+            // Strings are detected as double-quoted, single-quoted, and slashy strings, including multi-line
+            `(?<string>"(?:\\\\.|[^"\\\\])*"|'(?:\\\\.|[^'\\\\])*'|\\/(?:\\\\.|[^\\/\\\\])*\\/|"""[\\s\\S]*?"""|'''[\\s\\S]*?''')`,
+            // Annotations are detected when they start with @
+            `(?<annotation>@[A-Za-z_][A-Za-z0-9_]*)`,
+            // Keywords are detected
+            `(?<keyword>\\b(?:${keywords.join("|")})\\b)`,
+            // Types are detected
+            `(?<type>\\b(?:${types.join("|")})\\b)`,
+            // Numbers are detected, including hexadecimal and octal formats
+            `(?<number>\\b0[xX][0-9a-fA-F]+\\b|\\b0[0-7]+\\b|\\b\\d+(?:\\.\\d+)?([eE][+-]?\\d+)?[fFdD]?\\b)`,
+            // Operators are detected
+            `(?<operator>${operators.join("|")})`,
+            // Brackets are detected
+            `(?<bracket>${brackets.join("|")})`
         ].join("|"),
-        "g" // 'g' flag ensures all matches are found
-    ));
-})();
+        "gim"
+    );
+
+    // The function converts detected syntax elements into HTML span tags for highlighting
+    function tokenToSpan(token, value) {
+        return `<span class="${token}">${value}</span>`;
+    }
+
+    // The Groovy code is processed line by line and returned with highlighting
+    return code.split('\n').map(line => {
+        let result = '';
+        let lastIndex = 0;
+        let matches = [...line.matchAll(regex)];
+
+        for (const match of matches) {
+            const index = match.index;
+            result += line.slice(lastIndex, index);
+
+            for (const key in match.groups) {
+                if (match.groups[key] !== undefined) {
+                    result += tokenToSpan(key, match.groups[key]);
+                    break;
+                }
+            }
+            lastIndex = index + match[0].length;
+        }
+
+        result += line.slice(lastIndex);
+        return `<span>${result}</span>`;
+    }).join('');
+});

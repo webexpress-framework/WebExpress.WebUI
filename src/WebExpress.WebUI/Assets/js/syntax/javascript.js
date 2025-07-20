@@ -1,60 +1,75 @@
-/**
- * Syntax Highlighting Module for JavaScript
- */
-(function() {
-    // Define the syntax components for JavaScript
-
-    // JavaScript keywords, including control flow, declarations, and classes.
+// Syntax highlighting for JavaScript as a class implementation
+webexpress.webui.Syntax.register("javascript", "js", (code) => {
+    // JavaScript keywords
     const keywords = [
-        "abstract", "arguments", "await", "break", "case", "catch", "class", "const", "continue",
-        "debugger", "default", "delete", "do", "else", "enum", "export", "extends", "finally",
-        "for", "function", "if", "implements", "import", "in", "instanceof", "interface", "let",
-        "new", "package", "private", "protected", "public", "return", "static", "super",
-        "switch", "this", "throw", "try", "typeof", "var", "void", "while", "with", "yield"
+        "break", "case", "catch", "class", "const", "continue", "debugger", "default", "delete", "do", "else", "export", "extends",
+        "finally", "for", "function", "if", "import", "in", "instanceof", "let", "new", "return", "super", "switch", "this", "throw",
+        "try", "typeof", "var", "void", "while", "with", "yield"
     ];
 
-    // Built-in constants and special values.
-    const constants = [
-        "true", "false", "null", "undefined", "NaN", "Infinity"
+    // JavaScript types and built-ins
+    const types = [
+        "Array", "Boolean", "Date", "Error", "Function", "JSON", "Math", "Number", "Object", "RegExp", "Set", "String", "Symbol", "Map", "WeakMap", "WeakSet", "BigInt", "Promise"
     ];
 
-    // Common JavaScript operators.
+    // JavaScript operators
     const operators = [
-        "=", "==", "===", "!=", "!==", ">", "<", ">=", "<=", "+", "-", "*", "/", "%", "&&", "||", "!",
-        "&", "|", "^", "<<", ">>", ">>>", "=>", "...", "++", "--"
+        "=", "==", "===", "!=", "!==", "<", ">", "<=", ">=", "\\+", "-", "\\*", "/", "%", "&&", "\\|\\|", "!", "&", "\\|", "\\^", "<<", ">>", ">>>", "~", "\\?", ":", "\\.", "\\+=", "-=", "\\*=", "/=", "%=", "&=", "\\|=", "\\^=", "<<=", ">>=", ">>>="
     ];
 
-    // Brackets, parentheses, and braces are captured for styling.
+    // Brackets
     const brackets = [
-        "(", ")", "{", "}", "[", "]"
+        "\\(", "\\)", "\\{", "\\}", "\\[", "\\]"
     ];
 
-    // Fallback registration logic if not already defined.
-    if (!webexpress.webui.Syntax) {
-        webexpress.webui.Syntax = {};
-    }
-
-    if (!webexpress.webui.Syntax.register) {
-        webexpress.webui.Syntax.register = function(language, regex) {
-            if (!this.syntax) {
-                this.syntax = {};
-            }
-            // Store the provided regex under the specified language.
-            this.syntax[language] = { regex };
-        };
-    }
-
-    // Register the syntax configuration for JavaScript with a combined regex.
-    webexpress.webui.Syntax.register("javascript", new RegExp(
+    // Compile combined regex for JavaScript syntax
+    const regex = new RegExp(
         [
-            `(?<comment>\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)`, // Captures single-line and multi-line comments.
-            `(?<string>'(?:\\\\.|[^'\\\\])*'|"(?:\\\\.|[^"\\\\])*"|\`(?:\\\\.|[^\`\\\\])*\`)`, // Captures single, double, and template literal strings.
-            `(?<keyword>\\b(?:${keywords.join("|")})\\b)`, // Captures keywords.
-            `(?<constant>\\b(?:${constants.join("|")})\\b)`, // Captures built-in constants.
-            `(?<number>\\b\\d+(?:\\.\\d+)?\\b)`, // Captures integer and floating-point numbers.
-            `(?<operator>${operators.map(op => `\\${op.split('').join('\\')}`).join("|")})`, // Captures operators, properly escaping them.
-            `(?<bracket>${brackets.map(b => `\\${b}`).join("|")})` // Captures brackets, parentheses, and braces.
+            // Single-line and multi-line comments
+            `(?<comment>\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)`,
+            // Double-quoted, single-quoted, backtick strings
+            `(?<string>"(?:\\\\.|[^"\\\\])*"|'(?:\\\\.|[^'\\\\])*'|\`(?:\\\\.|[^\`\\\\])*\`)`,
+            // Annotations (decorators with @)
+            `(?<annotation>@[A-Za-z_][A-Za-z0-9_]*)`,
+            // Keywords
+            `(?<keyword>\\b(?:${keywords.join("|")})\\b)`,
+            // Types and built-ins
+            `(?<type>\\b(?:${types.join("|")})\\b)`,
+            // Numbers (integer, floating point, hex, octal)
+            `(?<number>\\b0[xX][0-9a-fA-F]+\\b|\\b0[0-7]+\\b|\\b\\d+(?:\\.\\d+)?([eE][+-]?\\d+)?\\b)`,
+            // Operators
+            `(?<operator>${operators.join("|")})`,
+            // Brackets
+            `(?<bracket>${brackets.join("|")})`
         ].join("|"),
-        "g" // The 'g' flag ensures that all occurrences are matched, not just the first one.
-    ));
-})();
+        "gim"
+    );
+
+    // Converts token to HTML span for syntax highlighting
+    function tokenToSpan(token, value) {
+        return `<span class="${token}">${value}</span>`;
+    }
+
+    // Process each line for highlighting
+    return code.split('\n').map(line => {
+        let result = '';
+        let lastIndex = 0;
+        let matches = [...line.matchAll(regex)];
+
+        for (const match of matches) {
+            const index = match.index;
+            result += line.slice(lastIndex, index);
+
+            for (const key in match.groups) {
+                if (match.groups[key] !== undefined) {
+                    result += tokenToSpan(key, match.groups[key]);
+                    break;
+                }
+            }
+            lastIndex = index + match[0].length;
+        }
+
+        result += line.slice(lastIndex);
+        return `<span>${result}</span>`;
+    }).join('');
+});

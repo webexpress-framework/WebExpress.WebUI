@@ -1,75 +1,84 @@
-/**
- * Syntax Highlighting Module for Python
- */
-(function() {
-    // Define the syntax components for Python
-
-    // Python keywords.
+// Syntax highlighting for Python as a class implementation
+webexpress.webui.Syntax.register("python", "py", (code) => {
+    // python keywords
     const keywords = [
-        'and', 'as', 'assert', 'async', 'await', 'break', 'class', 'continue', 'def', 'del',
-        'elif', 'else', 'except', 'finally', 'for', 'from', 'global', 'if', 'import',
-        'in', 'is', 'lambda', 'nonlocal', 'not', 'or', 'pass', 'raise', 'return',
-        'try', 'while', 'with', 'yield'
+        "False", "await", "else", "import", "pass", "None", "break", "except", "in", "raise", "True", "class", "finally",
+        "is", "return", "and", "continue", "for", "lambda", "try", "as", "def", "from", "nonlocal", "while",
+        "assert", "del", "global", "not", "with", "async", "elif", "if", "or", "yield"
     ];
 
-    // Built-in constants.
-    const constants = [
-        'True', 'False', 'None'
+    // python built-in types
+    const types = [
+        "int", "float", "bool", "str", "list", "tuple", "dict", "set", "frozenset", "complex", "bytes", "bytearray", "memoryview", "object"
     ];
 
-    // Common built-in functions and types.
+    // python built-in functions and common modules
     const builtins = [
-        'abs', 'all', 'any', 'ascii', 'bin', 'bool', 'bytearray', 'bytes', 'callable',
-        'chr', 'classmethod', 'compile', 'complex', 'delattr', 'dict', 'dir', 'divmod',
-        'enumerate', 'eval', 'exec', 'filter', 'float', 'format', 'frozenset', 'getattr',
-        'globals', 'hasattr', 'hash', 'help', 'hex', 'id', 'input', 'int', 'isinstance',
-        'issubclass', 'iter', 'len', 'list', 'locals', 'map', 'max', 'memoryview', 'min',
-        'next', 'object', 'oct', 'open', 'ord', 'pow', 'print', 'property', 'range',
-        'repr', 'reversed', 'round', 'set', 'setattr', 'slice', 'sorted', 'staticmethod',
-        'str', 'sum', 'super', 'tuple', 'type', 'vars', 'zip'
+        "abs", "all", "any", "ascii", "bin", "callable", "chr", "classmethod", "compile", "delattr", "dir", "divmod",
+        "enumerate", "eval", "exec", "filter", "format", "getattr", "globals", "hasattr", "hash", "help", "hex",
+        "id", "input", "isinstance", "issubclass", "iter", "len", "locals", "map", "max", "min", "next", "oct",
+        "open", "ord", "pow", "print", "property", "range", "repr", "reversed", "round", "setattr", "slice",
+        "sorted", "staticmethod", "sum", "super", "type", "vars", "zip", "__import__"
     ];
 
-
-    // Common Python operators.
+    // python operators
     const operators = [
-        '\\+', '-', '\\*\\*', '\\*', '/', '//', '%', '@', '<<', '>>', '&', '\\|', '\\^', '~',
-        ':=', '<', '>', '<=', '>=', '==', '!='
+        "=", "==", "!=", "<", ">", "<=", ">=", "\\+", "-", "\\*", "/", "%", "//", "\\*\\*", "and", "or", "not", "is", "in"
     ];
 
-    // Brackets, parentheses, and braces.
+    // brackets
     const brackets = [
-        "\\(", "\\)", "\\[", "\\]", "{", "}"
+        "\\(", "\\)", "\\{", "\\}", "\\[", "\\]"
     ];
 
-    // Fallback registration logic if not already defined.
-    if (!webexpress.webui.Syntax) {
-        webexpress.webui.Syntax = {};
-    }
-
-    if (!webexpress.webui.Syntax.register) {
-        webexpress.webui.Syntax.register = function(language, regex) {
-            if (!this.syntax) {
-                this.syntax = {};
-            }
-            // Store the provided regex under the specified language.
-            this.syntax[language] = { regex };
-        };
-    }
-
-    // Register the syntax configuration for Python with a combined regex.
-    webexpress.webui.Syntax.register("python", new RegExp(
+    // compile combined regex for Python syntax
+    const regex = new RegExp(
         [
-            `(?<comment>#.*)`, // Captures single-line comments.
-            // Captures all string variations: f, r, u, b prefixes and triple quotes.
-            `(?<string>(?:[rfubRFUB]?)'''(?:\\\\.|[^(?:''')])*'''|(?:[rfubRFUB]?)"""(?:\\\\.|[^(?:""")]|)*"""|(?:[rfubRFUB]?)'(?:\\\\.|[^'\\\\])*'|(?:[rfubRFUB]?)"(?:\\\\.|[^"\\\\])*")`,
-            `(?<decorator>^\\s*@\\w+)`, // Captures decorators.
-            `(?<keyword>\\b(?:${keywords.join("|")})\\b)`, // Captures keywords.
-            `(?<constant>\\b(?:${constants.join("|")})\\b)`, // Captures built-in constants.
-            `(?<builtin>\\b(?:${builtins.join("|")})\\b)`, // Captures common built-in functions.
-            `(?<number>\\b\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?\\b)`, // Captures integer, float, and scientific notation numbers.
-            `(?<operator>${operators.join("|")})`, // Captures operators.
-            `(?<bracket>${brackets.join("|")})` // Captures brackets, parentheses, and braces.
+            // single-line and multi-line comments
+            `(?<comment>#.*|'''[\\s\\S]*?'''|"""[\\s\\S]*?""")`,
+            // double-quoted and single-quoted strings
+            `(?<string>"(?:\\\\.|[^"\\\\])*"|'(?:\\\\.|[^'\\\\])*')`,
+            // keywords
+            `(?<keyword>\\b(?:${keywords.join("|")})\\b)`,
+            // built-in functions
+            `(?<builtin>\\b(?:${builtins.join("|")})\\b)`,
+            // types
+            `(?<type>\\b(?:${types.join("|")})\\b)`,
+            // numbers (integer, floating point, hex, octal)
+            `(?<number>\\b0[xX][0-9a-fA-F]+\\b|\\b0[oO][0-7]+\\b|\\b\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?\\b)`,
+            // operators
+            `(?<operator>${operators.join("|")})`,
+            // brackets
+            `(?<bracket>${brackets.join("|")})`
         ].join("|"),
-        "gm" // 'g' for global, 'm' for multiline to handle start-of-line decorators.
-    ));
-})();
+        "gim"
+    );
+
+    // Converts token to HTML span for syntax highlighting
+    function tokenToSpan(token, value) {
+        return `<span class="${token}">${value}</span>`;
+    }
+
+    // Processes each line for highlighting
+    return code.split('\n').map(line => {
+        let result = '';
+        let lastIndex = 0;
+        let matches = [...line.matchAll(regex)];
+
+        for (const match of matches) {
+            const index = match.index;
+            result += line.slice(lastIndex, index);
+
+            for (const key in match.groups) {
+                if (match.groups[key] !== undefined) {
+                    result += tokenToSpan(key, match.groups[key]);
+                    break;
+                }
+            }
+            lastIndex = index + match[0].length;
+        }
+
+        result += line.slice(lastIndex);
+        return `<span>${result}</span>`;
+    }).join('');
+});

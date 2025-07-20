@@ -1,48 +1,31 @@
-/**
- * Syntax Highlighting Module for XML
- */
-(function () {
-    // Define the syntax components for XML
+// Syntax highlighting for XML as a class implementation
+webexpress.webui.Syntax.register("xml", "html", (code) => {
+    // 1. escape HTML special characters to display them as text
+    let highlightedCode = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-    // Fallback registration logic if not already defined.
-    if (!webexpress.webui.Syntax) {
-        webexpress.webui.Syntax = {};
-    }
+    // 2. define patterns for different syntax elements
+    const patterns = {
+        // pattern for comments: <!-- ... -->
+        comment: /(&lt;!--[\s\S]*?--&gt;)/g,
+        // pattern for tags, including attributes: <tag attr="value"> or </tag>
+        tag: /(&lt;\/?([a-zA-Z0-9\-\._]+)((?:\s+[a-zA-Z0-9\-\._]+(?:\s*=\s*(?:"[^"]*"|'[^']*'))?)*)\s*&gt;)/g,
+        // pattern for attributes within a matched tag: attr="value"
+        attribute: /\s+([a-zA-Z0-9\-\._]+)(\s*=\s*)("[^"]*"|'[^']*')/g
+    };
 
-    if (!webexpress.webui.Syntax.register) {
-        webexpress.webui.Syntax.register = function (language, regex) {
-            if (!this.syntax) {
-                this.syntax = {};
-            }
-            // Store the provided regex under the specified language.
-            this.syntax[language] = { regex };
-        };
-    }
+    // 3. apply highlighting for comments
+    highlightedCode = highlightedCode.replace(patterns.comment, '<span class="comment">$1</span>');
 
-    // Register the syntax configuration for XML with a combined regex.
-    // The regex is structured to first find the most specific tokens like comments and CDATA,
-    // then tags and their components like attributes and strings.
-    webexpress.webui.Syntax.register("xml", new RegExp(
-        [
-            // Captures comments.
-            `(?<comment><!--[\\s\\S]*?-->)`,
-            // Captures CDATA sections.
-            `(?<cdata><!\\[CDATA\\[[\\s\\S]*?\\]\\]>)`,
-            // Captures processing instructions, e.g., <?xml ... ?>.
-            `(?<pi><\\?.*?\\?>)`,
-            // Captures DOCTYPE declarations.
-            `(?<doctype><!DOCTYPE[^>]*>)`,
-            // Captures closing tags, e.g., </tag>. The bracket and tag name are captured separately.
-            `(?<closeBracket><\\/)(?<closingTag>[a-zA-Z0-9_\\.-]+)(?<closeBracketEnd>\\s*>)`,
-            // Captures opening and self-closing tags.
-            `(?<openBracket><)(?<openingTag>[a-zA-Z0-9_\\.-]+)`,
-            // Captures attributes within a tag.
-            `(?<attribute>\\s+[a-zA-Z0-9_\\.-]+)=`,
-            // Captures attribute values in quotes.
-            `(?<string>"(?:\\\\.|[^"\\\\])*"|'(?:\\\\.|[^'\\\\])*')`,
-            // Captures the closing brackets of tags.
-            `(?<selfClosingBracket>\\s*\\/?>)`
-        ].join("|"),
-        "g" // 'g' for global search to find all matches.
-    ));
-})();
+    // 4. apply highlighting for tags and their attributes
+    highlightedCode = highlightedCode.replace(patterns.tag, (match, fullTag, tagName, attributes) => {
+        // highlight attributes and their values within the tag
+        const highlightedAttributes = attributes.replace(patterns.attribute, (attrMatch, name, equals, value) => {
+            return ` <span class="attr">${name}</span>${equals}<span class="value">${value}</span>`;
+        });
+        // reconstruct the tag with highlighted attributes
+        return `<span class="tag">${'&lt;/' + tagName}${highlightedAttributes}&gt;</span>`;
+    });
+
+    // 5. return the fully highlighted code wrapped in a span
+    return `<span>${highlightedCode}</span>`;
+});

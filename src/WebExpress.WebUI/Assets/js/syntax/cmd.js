@@ -1,60 +1,70 @@
-/**
- * Syntax Highlighting Module for Windows Command Prompt (CMD) batch scripts
- */
-(function() {
-    // Define the syntax components for CMD
-
-    // CMD keywords for control flow.
+// Syntax highlighting for Windows CMD (Batch) as a class implementation
+webexpress.webui.Syntax.register("cmd", null, (code) => {
+    // Define CMD keywords and builtins
     const keywords = [
-        'if', 'else', 'for', 'in', 'do', 'goto', 'call', 'exit', 'pause', 'defined', 'errorlevel', 'exist', 'not', 'cmdextversion'
+        "if", "else", "goto", "call", "exit", "for", "in", "do", "set", "shift", "pause", "echo", "rem", "goto", "choice", "copy", "del", "dir", "move", "ren", "replace", "type", "start", "title", "color", "attrib"
     ];
 
-    // Common internal CMD commands.
-    const commands = [
-        'assoc', 'break', 'cd', 'chdir', 'cls', 'color', 'copy', 'date', 'del', 'dir', 'echo',
-        'endlocal', 'erase', 'ftype', 'md', 'mkdir', 'mklink', 'move', 'path', 'popd', 'prompt',
-        'pushd', 'rd', 'ren', 'rename', 'rmdir', 'set', 'setlocal', 'shift', 'start', 'time',
-        'title', 'type', 'ver', 'verify', 'vol'
+    const builtins = [
+        "echo", "pause", "set", "shift", "cd", "chdir", "cls", "copy", "del", "dir", "erase", "md", "mkdir", "move", "rd", "ren", "rename", "rmdir", "type", "ver", "vol", "start", "title", "color", "attrib", "assoc", "call", "choice", "exit"
     ];
 
-    // CMD comparison and redirection operators.
     const operators = [
-        'EQU', 'NEQ', 'LSS', 'LEQ', 'GTR', 'GEQ',
-        '==', '>', '<', '>>', '&', '\\|', '&&', '\\|\\|'
+        "=", "==", ">", "<", "\\|", "\\&", "\\+", "-", "\\*", "/", "%"
     ];
 
-    // Brackets and parentheses.
     const brackets = [
-        "\\(", "\\)"
+        "\\(", "\\)", "\\[", "\\]"
     ];
 
-    // Fallback registration logic if not already defined.
-    if (!webexpress.webui.Syntax) {
-        webexpress.webui.Syntax = {};
-    }
-
-    if (!webexpress.webui.Syntax.register) {
-        webexpress.webui.Syntax.register = function(language, regex) {
-            if (!this.syntax) {
-                this.syntax = {};
-            }
-            // Store the provided regex under the specified language.
-            this.syntax[language] = { regex };
-        };
-    }
-
-    // Register the syntax configuration for CMD with a combined regex.
-    webexpress.webui.Syntax.register("cmd", new RegExp(
+    // Regex for CMD syntax
+    const regex = new RegExp(
         [
-            `(?<comment>^(?:REM|::).*$)`, // Captures comments (REM or :: at the start of a line).
-            `(?<label>^:[a-zA-Z0-9_]+)`, // Captures labels (e.g., :myLabel).
-            `(?<string>"(?:""|[^"])*")`, // Captures double-quoted strings (handles escaped quotes via "").
-            `(?<variable>%[^%]+%|%%[a-zA-Z0-9#\\$\\~])`, // Captures environment variables (%VAR%) and FOR loop variables (%%A).
-            `(?<keyword>\\b(?:${keywords.join("|")})\\b)`, // Captures keywords.
-            `(?<command>\\b(?:${commands.join("|")})\\b)`, // Captures common commands.
-            `(?<operator>${operators.join("|")})`, // Captures operators.
-            `(?<bracket>${brackets.join("|")})` // Captures brackets and parentheses.
+            // REM comments or :: comments
+            `(?<comment>(?:^|\\s)(?:REM|::).*?$)`,
+            // double-quoted and single-quoted strings
+            `(?<string>"(?:\\\\.|[^"\\\\])*"|'(?:\\\\.|[^'\\\\])*')`,
+            // variables: %VAR% or !VAR!
+            `(?<variable>%[A-Za-z0-9_]+%|![A-Za-z0-9_]+!)`,
+            // keywords
+            `(?<keyword>\\b(?:${keywords.join("|")})\\b)`,
+            // builtins
+            `(?<builtin>\\b(?:${builtins.join("|")})\\b)`,
+            // numbers (integer and floating point)
+            `(?<number>\\b\\d+(?:\\.\\d+)?\\b)`,
+            // operators
+            `(?<operator>${operators.join("|")})`,
+            // brackets
+            `(?<bracket>${brackets.join("|")})`
         ].join("|"),
-        "gim" // 'g' for global, 'i' for case-insensitive, 'm' for multiline to handle start-of-line anchors (^).
-    ));
-})();
+        "gim"
+    );
+
+    // Converts a matched token to an HTML span element for syntax highlighting
+    function tokenToSpan(token, value) {
+        return `<span class="${token}">${value}</span>`;
+    }
+
+    // Process each line for highlighting
+    return code.split('\n').map(line => {
+        let result = '';
+        let lastIndex = 0;
+        let matches = [...line.matchAll(regex)];
+
+        for (const match of matches) {
+            const index = match.index;
+            result += line.slice(lastIndex, index);
+
+            for (const key in match.groups) {
+                if (match.groups[key] !== undefined) {
+                    result += tokenToSpan(key, match.groups[key]);
+                    break;
+                }
+            }
+            lastIndex = index + match[0].length;
+        }
+
+        result += line.slice(lastIndex);
+        return `<span>${result}</span>`;
+    }).join('');
+});

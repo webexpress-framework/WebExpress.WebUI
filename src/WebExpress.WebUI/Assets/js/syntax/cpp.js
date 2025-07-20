@@ -1,84 +1,90 @@
-/**
- * Syntax Highlighting Module for C++
- */
-(function() {
-    // Define the syntax components for C++
-
-    // Access modifiers are separated for distinct highlighting.
-    const accessModifiers = [
-        "public", "private", "protected"
-    ];
-
-    // Common C++ keywords.
-    const keywords = [
-        'alignas', 'alignof', 'and', 'and_eq', 'asm', 'auto', 'bitand', 'bitor', 'break', 'case',
-        'catch', 'class', 'compl', 'concept', 'const', 'consteval', 'constexpr', 'constinit',
-        'const_cast', 'continue', 'co_await', 'co_return', 'co_yield', 'decltype', 'default',
-        'delete', 'do', 'dynamic_cast', 'else', 'enum', 'explicit', 'export', 'extern', 'for',
-        'friend', 'goto', 'if', 'inline', 'mutable', 'namespace', 'new', 'noexcept', 'not',
-        'not_eq', 'operator', 'or', 'or_eq', 'register', 'reinterpret_cast', 'requires',
-        'return', 'sizeof', 'static', 'static_assert', 'static_cast', 'struct', 'switch',
-        'template', 'this', 'thread_local', 'throw', 'try', 'typedef', 'typeid', 'typename',
-        'union', 'using', 'virtual', 'volatile', 'while', 'xor', 'xor_eq'
-    ];
-
-    // C++ fundamental types.
-    const types = [
-        'bool', 'char', 'char8_t', 'char16_t', 'char32_t', 'double', 'float', 'int', 'long',
-        'short', 'signed', 'unsigned', 'void', 'wchar_t'
-    ];
-
-    // C++ literals.
-    const constants = [
-        'true', 'false', 'nullptr'
-    ];
-
-    // Common C++ operators.
-    const operators = [
-        '::', '\\+\\+', '--', '->', '\\.',
-        '\\+', '-', '\\*', '/', '%',
-        '\\&', '\\|', '\\^', '!', '~',
-        '=', '\\+=', '-=', '\\*=', '/=', '%=', '\\&=', '\\|=', '\\^=', '<<=', '>>=',
-        '==', '!=', '<', '>', '<=', '>=', '<=>',
-        '&&', '\\|\\|',
-        '<<', '>>',
-        '\\?', ':'
-    ];
-
-    // Brackets, parentheses, and braces.
-    const brackets = [
-        "\\(", "\\)", "{", "}", "\\[", "\\]"
-    ];
-
-    // Fallback registration logic if not already defined.
-    if (!webexpress.webui.Syntax) {
-        webexpress.webui.Syntax = {};
+// syntax highlighting for c++
+webexpress.webui.Syntax.register("cpp", "c++", (code) => {
+    /**
+     * escapes html special characters to prevent rendering issues
+     * @param {string} str - input string to escape
+     * @returns {string} escaped string
+     */
+    function escapeHtml(str) {
+        if (typeof str !== 'string') return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
-    if (!webexpress.webui.Syntax.register) {
-        webexpress.webui.Syntax.register = function(language, regex) {
-            if (!this.syntax) {
-                this.syntax = {};
-            }
-            // Store the provided regex under the specified language.
-            this.syntax[language] = { regex };
-        };
+    /**
+     * creates span element with syntax highlighting class
+     * @param {string} className - css class for syntax type
+     * @param {string} text - content to wrap
+     * @returns {string} html span element
+     */
+    function wrapInSpan(className, text) {
+        return `<span class="${className}">${escapeHtml(text)}</span>`;
     }
 
-    // Register the syntax configuration for C++ with a combined regex.
-    webexpress.webui.Syntax.register("cpp", new RegExp(
-        [
-            `(?<preprocessor>^\\s*#.*)`, // Captures preprocessor directives.
-            `(?<comment>\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)`, // Captures single-line and multi-line comments.
-            `(?<string>R"([^()\\\\]*\\([^()\\\\]*\\)[^()\\\\]*)"|"(?:\\\\.|[^"\\\\])*"|'(?:\\\\.|[^'\\\\])*')`, // Captures raw, double, and single quoted strings.
-            `(?<access>\\b(?:${accessModifiers.join("|")})\\b)`, // Captures access modifiers.
-            `(?<keyword>\\b(?:${keywords.join("|")})\\b)`, // Captures other keywords.
-            `(?<type>\\b(?:${types.join("|")})\\b)`, // Captures fundamental type names.
-            `(?<constant>\\b(?:${constants.join("|")})\\b)`, // Captures literals.
-            `(?<number>\\b(?:0[xX][a-fA-F0-9]+|0[0-7]+|\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?)[ULf]*\\b)`, // Captures hex, octal, decimal, float, and scientific numbers.
-            `(?<operator>${operators.join("|")})`, // Captures operators.
-            `(?<bracket>${brackets.join("|")})` // Captures brackets, parentheses, and braces.
-        ].join("|"),
-        "gm" // 'g' for global search, 'm' for multiline mode to handle start-of-line preprocessor directives.
-    ));
-})();
+    /**
+     * highlights syntax for a single line of code
+     * @param {string} line - source code line
+     * @returns {string} highlighted html
+     */
+    function processLine(line) {
+        // initialize with original line
+        let result = line;
+
+        // syntax patterns for highlighting
+        const patterns = [
+            // comments (single and multi-line)
+            { regex: /\/\/.*$/g, className: 'comment' },
+            { regex: /\/\*[\s\S]*?\*\//g, className: 'comment' },
+
+            // preprocessor directives
+            { regex: /^\s*#.*/g, className: 'preprocessor' },
+
+            // string literals
+            { regex: /"(?:\\.|[^"\\])*"/g, className: 'string' },
+            { regex: /'(?:\\.|[^'\\])*'/g, className: 'string' },
+
+            // numeric values
+            { regex: /\b\d+(?:\.\d+)?[fL]?\b/g, className: 'number' },
+
+            // keywords
+            { regex: /\b(?:alignas|alignof|and|and_eq|asm|auto|bitand|bitor|bool|break|case|catch|char|char16_t|char32_t|class|compl|const|constexpr|const_cast|continue|decltype|default|delete|do|double|dynamic_cast|else|enum|explicit|export|extern|false|float|for|friend|goto|if|inline|int|long|mutable|namespace|new|noexcept|not|not_eq|nullptr|operator|or|or_eq|private|protected|public|register|reinterpret_cast|return|short|signed|sizeof|static|static_assert|static_cast|struct|switch|template|this|thread_local|throw|true|try|typedef|typeid|typename|union|unsigned|using|virtual|void|volatile|wchar_t|while|xor|xor_eq)\b/g, className: 'keyword' },
+
+            // types
+            { regex: /\b(?:int|float|double|char|long|short|bool|void|wchar_t|size_t|string)\b/g, className: 'type' },
+
+            // operators (ordered by length to prevent partial matches)
+            { regex: /(?:==|!=|<=|>=|<<|>>|&&|\|\||::|->|[=+\-*\/%<>!&|^.~?:])/g, className: 'operator' },
+
+            // brackets and parentheses
+            { regex: /[\(\)\{\}\[\]]/g, className: 'bracket' }
+        ];
+
+        // store replacements with unique identifiers
+        const replacements = new Map();
+        let placeholderIndex = 0;
+
+        // first pass: replace syntax elements with placeholders
+        patterns.forEach(pattern => {
+            result = result.replace(pattern.regex, (match) => {
+                const placeholder = `__PLACEHOLDER_${placeholderIndex++}__`;
+                replacements.set(placeholder, wrapInSpan(pattern.className, match));
+                return placeholder;
+            });
+        });
+
+        // second pass: escape remaining text
+        result = escapeHtml(result);
+
+        // third pass: restore highlighted elements
+        replacements.forEach((replacement, placeholder) => {
+            result = result.replace(placeholder, replacement);
+        });
+
+        return result;
+    }
+
+    // process entire code block line by line
+    return code.split('\n').map(line => {
+        const highlightedLine = processLine(line);
+        return `<span>${highlightedLine}</span>`;
+    }).join('');
+});

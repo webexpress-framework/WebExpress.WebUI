@@ -1,75 +1,35 @@
-/**
- * Syntax Highlighting Module for Python
- */
-(function() {
-    // Define the syntax components for Python
+// syntax highlighting for properties files as a class implementation
+webexpress.webui.Syntax.register("property", "ini", (code) => {
+    // process each line of the code
+    return code.split('\n').map(line => {
+        // first, check for lines that are just comments
+        const commentMatch = line.match(/^(\s*[#!].*)$/);
+        if (commentMatch) {
+            return `<span><span class="comment">${line}</span></span>`;
+        }
 
-    // Python keywords.
-    const keywords = [
-        'and', 'as', 'assert', 'async', 'await', 'break', 'class', 'continue', 'def', 'del',
-        'elif', 'else', 'except', 'finally', 'for', 'from', 'global', 'if', 'import',
-        'in', 'is', 'lambda', 'nonlocal', 'not', 'or', 'pass', 'raise', 'return',
-        'try', 'while', 'with', 'yield'
-    ];
+        // next, check for key-value pairs, which may have an inline comment
+        const keyValueMatch = line.match(/^(\s*)([^=:\s]+)(\s*[:=]\s*)(.*?)(\s*[#!].*)?$/);
+        if (keyValueMatch) {
+            const leadingSpace = keyValueMatch[1] || '';
+            const key = keyValueMatch[2] || '';
+            const separator = keyValueMatch[3] || '';
+            const value = keyValueMatch[4] || '';
+            const inlineComment = keyValueMatch[5] || '';
 
-    // Built-in constants.
-    const constants = [
-        'True', 'False', 'None'
-    ];
-
-    // Common built-in functions and types.
-    const builtins = [
-        'abs', 'all', 'any', 'ascii', 'bin', 'bool', 'bytearray', 'bytes', 'callable',
-        'chr', 'classmethod', 'compile', 'complex', 'delattr', 'dict', 'dir', 'divmod',
-        'enumerate', 'eval', 'exec', 'filter', 'float', 'format', 'frozenset', 'getattr',
-        'globals', 'hasattr', 'hash', 'help', 'hex', 'id', 'input', 'int', 'isinstance',
-        'issubclass', 'iter', 'len', 'list', 'locals', 'map', 'max', 'memoryview', 'min',
-        'next', 'object', 'oct', 'open', 'ord', 'pow', 'print', 'property', 'range',
-        'repr', 'reversed', 'round', 'set', 'setattr', 'slice', 'sorted', 'staticmethod',
-        'str', 'sum', 'super', 'tuple', 'type', 'vars', 'zip'
-    ];
-
-
-    // Common Python operators.
-    const operators = [
-        '\\+', '-', '\\*\\*', '\\*', '/', '//', '%', '@', '<<', '>>', '&', '\\|', '\\^', '~',
-        ':=', '<', '>', '<=', '>=', '==', '!='
-    ];
-
-    // Brackets, parentheses, and braces.
-    const brackets = [
-        "\\(", "\\)", "\\[", "\\]", "{", "}"
-    ];
-
-    // Fallback registration logic if not already defined.
-    if (!webexpress.webui.Syntax) {
-        webexpress.webui.Syntax = {};
-    }
-
-    if (!webexpress.webui.Syntax.register) {
-        webexpress.webui.Syntax.register = function(language, regex) {
-            if (!this.syntax) {
-                this.syntax = {};
+            // build the highlighted html string part by part
+            let html = leadingSpace;
+            html += `<span class="key">${key}</span>`;
+            html += `<span class="separator">${separator}</span>`;
+            html += `<span class="value">${value}</span>`;
+            if (inlineComment) {
+                html += `<span class="comment">${inlineComment}</span>`;
             }
-            // Store the provided regex under the specified language.
-            this.syntax[language] = { regex };
-        };
-    }
+            return `<span>${html}</span>`;
+        }
 
-    // Register the syntax configuration for Python with a combined regex.
-    webexpress.webui.Syntax.register("python", new RegExp(
-        [
-            `(?<comment>#.*)`, // Captures single-line comments.
-            // Captures all string variations: f, r, u, b prefixes and triple quotes.
-            `(?<string>(?:[rfubRFUB]?)'''(?:\\\\.|[^(?:''')])*'''|(?:[rfubRFUB]?)"""(?:\\\\.|[^(?:""")]|)*"""|(?:[rfubRFUB]?)'(?:\\\\.|[^'\\\\])*'|(?:[rfubRFUB]?)"(?:\\\\.|[^"\\\\])*")`,
-            `(?<decorator>^\\s*@\\w+)`, // Captures decorators.
-            `(?<keyword>\\b(?:${keywords.join("|")})\\b)`, // Captures keywords.
-            `(?<constant>\\b(?:${constants.join("|")})\\b)`, // Captures built-in constants.
-            `(?<builtin>\\b(?:${builtins.join("|")})\\b)`, // Captures common built-in functions.
-            `(?<number>\\b\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?\\b)`, // Captures integer, float, and scientific notation numbers.
-            `(?<operator>${operators.join("|")})`, // Captures operators.
-            `(?<bracket>${brackets.join("|")})` // Captures brackets, parentheses, and braces.
-        ].join("|"),
-        "gm" // 'g' for global, 'm' for multiline to handle start-of-line decorators.
-    ));
-})();
+        // if the line is not a comment and not a key-value pair, return it without formatting
+        // this handles empty lines and section headers like [section] in ini files
+        return `<span>${line}</span>`;
+    }).join('\n');
+});
