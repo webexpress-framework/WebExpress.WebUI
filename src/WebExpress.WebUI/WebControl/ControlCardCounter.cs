@@ -82,7 +82,7 @@ namespace WebExpress.WebUI.WebControl
 
             if (Progress.HasValue)
             {
-                html.Add(new ControlProgressBar()
+                html.Add(new ControlProgress()
                 {
                     Value = Progress.Value,
                     Format = TypeFormatProgress.Striped,

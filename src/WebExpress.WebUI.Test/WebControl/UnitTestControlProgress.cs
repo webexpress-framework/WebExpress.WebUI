@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.Test.WebControl
     /// Tests the progress bar control.
     /// </summary>
     [Collection("NonParallelTests")]
-    public class UnitTestControlProgressBar
+    public class UnitTestControlProgress
     {
         /// <summary>
         /// Tests the id property of the progress bar control.
@@ -22,7 +22,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlProgressBar(id)
+            var control = new ControlProgress(id)
             {
             };
 
@@ -46,7 +46,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlProgressBar()
+            var control = new ControlProgress()
             {
                 Format = format
             };
@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlProgressBar()
+            var control = new ControlProgress()
             {
                 Size = size,
                 Format = TypeFormatProgress.Colored
@@ -97,7 +97,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlProgressBar()
+            var control = new ControlProgress()
             {
                 Text = text,
                 Format = TypeFormatProgress.Colored
@@ -127,7 +127,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlProgressBar()
+            var control = new ControlProgress()
             {
                 Color = new PropertyColorProgress(color),
                 Format = TypeFormatProgress.Colored
@@ -158,7 +158,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlProgressBar()
+            var control = new ControlProgress()
             {
                 TextColor = new PropertyColorText(textColor),
                 Format = TypeFormatProgress.Colored
@@ -183,7 +183,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlProgressBar()
+            var control = new ControlProgress()
             {
                 Min = min
             };
@@ -207,7 +207,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlProgressBar()
+            var control = new ControlProgress()
             {
                 Max = max
             };
@@ -231,7 +231,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlProgressBar()
+            var control = new ControlProgress()
             {
                 Value = value
             };

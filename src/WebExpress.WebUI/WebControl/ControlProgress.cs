@@ -7,7 +7,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a progress bar control.
     /// </summary>
-    public class ControlProgressBar : Control
+    public class ControlProgress : Control
     {
         /// <summary>
         /// Returns or sets the format of the progress bar.
@@ -57,7 +57,7 @@ namespace WebExpress.WebUI.WebControl
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        public ControlProgressBar(string id = null)
+        public ControlProgress(string id = null)
             : base(id)
         {
             BackgroundColor = new PropertyColorBackground(TypeColorBackground.Default);
