@@ -1,6 +1,6 @@
 /**
  * ToolbarCtrl is a toolbar control that dynamically generates menu items based on its child elements.
- * The toolbar supports various types of items including buttons with icons only, buttons with icons and text, buttons with text only, separators, dropdown buttons, comboboxes, and text-items.
+ * The toolbar supports various types of items including buttons with icons only, buttons with icons and text, buttons with text only, separators, dropdown buttons, comboboxes, and label-items.
  * It offers flexible configuration via data attributes and allows customization of styling and behavior.
  *
  * The following events are triggered:
@@ -20,7 +20,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
         // Parse toolbar items from child elements
         this._parseItemsFromElements(
             Array.from(element.querySelectorAll(
-                ".wx-toolbar-button, .wx-toolbar-separator, .wx-toolbar-dropdown, .wx-toolbar-combobox, .wx-toolbar-text"
+                ".wx-toolbar-button, .wx-toolbar-separator, .wx-toolbar-dropdown, .wx-toolbar-combo, .wx-toolbar-label"
             ))
         );
         
@@ -49,22 +49,32 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
 
             if (elem.classList.contains("wx-toolbar-separator")) {
                 items.push({ type: "separator", align });
-            } else if (elem.classList.contains("wx-toolbar-combobox")) {
-                const options = elem.dataset.options ? elem.dataset.options.split(",") : [];
+            } else if (elem.classList.contains("wx-toolbar-combo")) {
+                const options = elem.querySelectorAll("option");
                 items.push({
-                    type: "combobox",
+                    type: "combo",
                     label: elem.dataset.label || null,
+                    colorCss: elem.getAttribute("data-color-css") || null,
+                    colorStyle: elem.getAttribute("data-color-style") || null,
                     icon: elem.dataset.icon || null,
                     title: elem.dataset.title || null,
-                    options: options,
+                    options: Array.from(options).map(option => ({
+                        text: option.textContent,
+                        value: option.value
+                    })),
                     align,
                     disabled,
+                    active,
                 });
             } else if (elem.classList.contains("wx-toolbar-dropdown")) {
                 elem.classList.remove("wx-toolbar-dropdown");
                 items.push({
                     type: "dropdown",
-                    element: elem, // Pass the original element for DropdownCtrl
+                    colorCss: elem.getAttribute("data-color-css") || null,
+                    colorStyle: elem.getAttribute("data-color-style") || null,
+                    toggle: elem.getAttribute("data-toggle") === "true" || null,
+                    title: elem.dataset.title || null,
+                    element: elem, // pass the original element for DropdownCtrl
                     align,
                     disabled,
                     active,
@@ -75,15 +85,19 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                     label: elem.dataset.label || null,
                     icon: elem.dataset.icon || null,
                     title: elem.dataset.title || null,
-                    color: elem.dataset.color || null,
+                    colorCss: elem.getAttribute("data-color-css") || null,
+                    colorStyle: elem.getAttribute("data-color-style") || null,
                     align,
                     disabled,
-                    active,
+                    active
                 });
-            } else if (elem.classList.contains("wx-toolbar-text")) {
+            } else if (elem.classList.contains("wx-toolbar-label")) {
                 items.push({
-                    type: "text",
+                    type: "label",
                     content: elem.dataset.label || "",
+                    colorCss: elem.getAttribute("data-color-css") || null,
+                    colorStyle: elem.getAttribute("data-color-style") || null,
+                    title: elem.dataset.title || null,
                     align,
                     disabled,
                 });
@@ -131,8 +145,12 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             } else if (item.type === "button") {
                 renderedItem = document.createElement("button");
                 renderedItem.className = "btn wx-toolbar-button";
-                if (item.disabled) renderedItem.classList.add("disabled");
-                if (item.active) renderedItem.classList.add("active");
+                if (item.disabled) {
+                    renderedItem.classList.add("disabled");
+                }
+                if (item.active) {
+                    renderedItem.classList.add("active");
+                }
 
                 renderedItem.type = "button";
                 if (item.icon) {
@@ -145,7 +163,12 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                     span.textContent = item.label;
                     renderedItem.appendChild(span);
                 }
-
+                if (item.colorCss) {
+                    renderedItem.classList.add(item.colorCss);
+                }
+                if (item.colorStyle) {
+                    renderedItem.setAttribute("style", item.colorStyle);
+                }
                 if (item.title) {
                     renderedItem.title = item.title;
                 }
@@ -160,27 +183,67 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                     }));
                 });
             } else if (item.type === "dropdown") {
-                // Use DropdownCtrl for rendering dropdown buttons
+                // use DropdownCtrl for rendering dropdown buttons
                 const dropdownCtrl = new webexpress.webui.DropdownCtrl(item.element);
                 dropdownCtrl._buttonCss = "wx-toolbar-dropdown";
+                dropdownCtrl._buttonStyle = "";
+                if (item.toggle) {
+                    dropdownCtrl._buttonCss += " dropdown-toggle";
+                }
+                if (item.disabled) {
+                    dropdownCtrl._element.classList.add("disabled");
+                }
+                if (item.active) {
+                    dropdownCtrl._buttonCss += " active";
+                }
+                if (item.colorCss) {
+                    dropdownCtrl._buttonCss += ` ${item.colorCss}`;
+                }
+                if (item.colorStyle) {
+                    dropdownCtrl._buttonStyle += ` ${item.colorStyle}`;
+                }
+                if (item.title) {
+                    dropdownCtrl._element.title = item.title;
+                }
                 dropdownCtrl.render();
 
-                renderedItem = dropdownCtrl._element; // Use the rendered element
-            } else if (item.type === "combobox") {
+                renderedItem = dropdownCtrl._element; // use the rendered element
+            } else if (item.type === "combo") {
                 const comboboxContainer = document.createElement("div");
-                comboboxContainer.className = "wx-toolbar-combobox";
-                if (item.disabled) comboboxContainer.classList.add("disabled");
+                comboboxContainer.className = "wx-toolbar-combo";
+                if (item.disabled) {
+                    comboboxContainer.classList.add("disabled");
+                }
+                if (item.title) {
+                    comboboxContainer.title = item.title;
+                }
 
                 const label = document.createElement("label");
                 label.textContent = item.label || "";
                 comboboxContainer.appendChild(label);
 
+                if (item.disabled) {
+                    label.classList.add("disabled");
+                }
+                if (item.colorCss) {
+                    label.classList.add(item.colorCss);
+                }
+                if (item.colorStyle) {
+                    label.setAttribute("style", item.colorStyle);
+                }
+
                 const select = document.createElement("select");
                 select.className = "form-select";
-                if (item.disabled) select.setAttribute("disabled", true);
+                if (item.disabled) {
+                    select.setAttribute("disabled", true);
+                }
+                if (item.active) {
+                    select.classList.add("active");
+                }
                 item.options.forEach(option => {
                     const opt = document.createElement("option");
-                    opt.textContent = option;
+                    opt.textContent = option.text;
+                    opt.setAttribute("value", option.value);
                     select.appendChild(opt);
                 });
 
@@ -196,11 +259,20 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
 
                 comboboxContainer.appendChild(select);
                 renderedItem = comboboxContainer;
-            } else if (item.type === "text") {
+            } else if (item.type === "label") {
                 const textItem = document.createElement("span");
-                textItem.className = "wx-toolbar-text";
+                textItem.className = "wx-toolbar-label";
                 textItem.textContent = item.content;
                 if (item.disabled) textItem.classList.add("disabled");
+                if (item.colorCss) {
+                    textItem.classList.add(item.colorCss);
+                }
+                if (item.colorStyle) {
+                    textItem.setAttribute("style", item.colorStyle);
+                }
+                if (item.title) {
+                    textItem.title = item.title;
+                }
                 renderedItem = textItem;
             }
 

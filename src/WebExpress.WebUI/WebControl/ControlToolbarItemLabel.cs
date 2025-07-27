@@ -1,12 +1,13 @@
-﻿using WebExpress.WebCore.WebHtml;
+﻿using WebExpress.WebCore.Internationalization;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a separator item in a toolbar.
+    /// Represents a label item in a toolbar.
     /// </summary>
-    public class ControlToolbarItemDivider : IControlToolbarItem
+    public class ControlToolbarItemLabel : IControlToolbarItem
     {
         private readonly string _id;
 
@@ -14,6 +15,26 @@ namespace WebExpress.WebUI.WebControl
         /// Returns the unique identifier for the entity.
         /// </summary>
         public string Id => _id;
+
+        /// <summary>
+        /// Returns or sets the label.
+        /// </summary>
+        public string Label { get; set; }
+
+        /// <summary>
+        /// Returns or sets a tooltip text.
+        /// </summary>
+        public string Tooltip { get; set; }
+
+        /// <summary>
+        /// Returns or sets the link color.
+        /// </summary>
+        public PropertyColorText Color { get; set; }
+
+        /// <summary>
+        /// Returns or sets a value indicating whether the feature is disabled.
+        /// </summary>
+        public bool Disabled { get; set; } = false;
 
         /// <summary>
         /// Returns or sets the alignment of the toolbar item.
@@ -24,7 +45,7 @@ namespace WebExpress.WebUI.WebControl
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        public ControlToolbarItemDivider(string id = null)
+        public ControlToolbarItemLabel(string id = null)
         {
             _id = id;
         }
@@ -40,8 +61,13 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = "wx-toolbar-separator"
+                Class = "wx-toolbar-label"
             }
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, Label))
+                .AddUserAttribute("data-title", I18N.Translate(renderContext, Tooltip))
+                .AddUserAttribute("data-color-css", Color?.ToClass())
+                .AddUserAttribute("data-color-style", Color?.ToStyle())
+                .AddUserAttribute(Disabled ? "disabled" : null)
                 .AddUserAttribute("data-align", Alignment.ToValue());
         }
     }

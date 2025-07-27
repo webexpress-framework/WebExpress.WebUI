@@ -29,8 +29,8 @@ To structure the toolbar, various CSS classes are used for the child elements. E
 - **Buttons (`.wx-toolbar-button`)**: These are the primary interactive elements. They can be used to trigger actions and can be flexibly displayed with an icon, text, or both.
 - **Separators (`.wx-toolbar-separator`)**: These provide visual structure and help to organize related buttons into groups.
 - **Dropdown Buttons (`.wx-toolbar-dropdown`)**: These buttons open a submenu that can contain further actions or links. The `DropdownCtrl` control is used internally to implement this functionality.
-- **Comboboxes (`.wx-toolbar-combobox`)**: These create a dropdown menu from which the user can select one of several predefined options.
-- **Text Items (`.wx-toolbar-text`)**: These allow for the display of static, non-interactive text within the toolbar, for instance, for labels or status indicators.
+- **Comboboxes (`.wx-toolbar-combo`)**: These create a dropdown menu from which the user can select one of several predefined options.
+- **Text Items (`.wx-toolbar-label`)**: These allow for the display of static, non-interactive text within the toolbar, for instance, for labels or status indicators.
 - **"More" Menu (`.wx-toolbar-more`)**: A special dropdown menu that is automatically placed at the right edge of the toolbar and is identified by a "…" symbol. It is intended to hold less frequently used actions.
 
 ## Settings
@@ -42,8 +42,8 @@ The configuration of individual elements is done via `data-`attributes in the HT
 | `data-label` | Defines the visible text for buttons, comboboxes, or text items. | `data-label="Save"` |
 | `data-icon` | Assigns a CSS icon class to a button. | `data-icon="fas fa-save"` |
 | `data-title` | Adds a tooltip to a button, which is displayed on mouseover. | `data-title="Save changes"` |
-| `data-color` | Applies a predefined color class to a button. | `data-color="btn-primary"` |
-| `data-options` | Defines the selectable options for a combobox as a comma-separated list. | `data-options="View 1,View 2"` |
+| `data-color-css` | Applies a predefined color class to an element. | `data-color-css="btn-primary"` |
+| `data-color-style` | Applies a direct CSS style to an element. | `data-color-style="background-color: #ff0000;"` |
 | `data-align` | Sets the alignment of an element within the toolbar (`left` or `right`). The default is `left`. | `data-align="right"` |
 | `active` | Visually marks a button as active or selected. The attribute requires no value. | `<div class="wx-toolbar-button" active></div>` |
 | `disabled` | Disables an element and prevents interaction. The attribute requires no value. | `<div class="wx-toolbar-button" disabled></div>` |
@@ -92,7 +92,7 @@ The control triggers global events to react to user interactions. These can be c
   Triggered when a button (`.wx-toolbar-button`) is clicked. The `detail` object of the event contains information about the sender and the clicked item.
 
 - **`webexpress.webui.Event.CHANGE_VALUE_EVENT`**
-  Triggered when the user selects a new option in a combobox (`.wx-toolbar-combobox`).
+  Triggered when the user selects a new option in a combobox (`.wx-toolbar-combo`).
 
 ## Use Case Examples
 
@@ -120,10 +120,14 @@ The following HTML example demonstrates the declarative configuration of a toolb
   </div>
   
   <!-- A combobox with a label and selectable options -->
-  <div class="wx-toolbar-combobox" data-label="Select" data-options="Option A,Option B,Option C"></div>
+  <div class="wx-toolbar-combo" data-label="Select">
+      <option value="a">Option A</option>
+      <option value="b">Option B</option>
+      <option value="c">Option C</option>
+  </div>
   
   <!-- A static text item, aligned to the right -->
-  <div class="wx-toolbar-text" data-label="Static Text" data-align="right"></div>
+  <div class="wx-toolbar-label" data-label="Static Text" data-align="right"></div>
 
   <!-- A "more" dropdown for additional items that are not frequently used -->
   <div class="wx-toolbar-more">

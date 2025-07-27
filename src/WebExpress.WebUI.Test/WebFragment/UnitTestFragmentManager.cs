@@ -54,7 +54,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlTree), typeof(IScope), @"<ul id=""webexpress-webui-test-testfragmentcontroltree""><li></li></ul>")]
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlForm), typeof(IScope), @"<form id=""webexpress-webui-test-testfragmentcontrolform_form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlModalForm), typeof(IScope), @"<form id=""webexpress-webui-test-testfragmentcontrolmodalform_form"" *>*</form>")]
-        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlToolbarItemButton), typeof(IScope), @"<a id=""webexpress-webui-test-testfragmentcontroltoolbaritembutton"" class=""link nav-link"">TestFragmentControlToolbarItemButton</a>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlToolbarItemButton), typeof(IScope), @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritembutton"" class=""wx-toolbar-button"" data-label=""TestFragmentControlToolbarItemButton""></div>")]
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentHidden), typeof(IScope), null)]
         public void Render(Type applicationType, Type sectionType, Type scopeType, string expected)
         {

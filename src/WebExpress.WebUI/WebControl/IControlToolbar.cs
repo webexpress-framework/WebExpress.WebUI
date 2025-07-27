@@ -8,6 +8,19 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlToolbar : IControl
     {
         /// <summary>
+        /// Returns the list of toolbar items.
+        /// </summary>
+        /// <value>
+        /// A list of <see cref="IControlToolbarItem"/> representing the items in the toolbar.
+        /// </value>
+        IEnumerable<IControlToolbarItem> Items { get; }
+
+        /// <summary>
+        /// Returns a collection of additional dropdown items.
+        /// </summary>
+        IEnumerable<IControlDropdownItem> More { get; }
+
+        /// <summary>
         /// Adds one or more toolbar items to the toolbar.
         /// </summary>
         /// <param name="items">The toolbar items to add.</param>
@@ -65,5 +78,26 @@ namespace WebExpress.WebUI.WebControl
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
         IControlToolbar Remove(IControlToolbarItem item);
+
+        /// <summary>
+        /// Adds one or more toolbar more items to the toolbar.
+        /// </summary>
+        /// <param name="items">The toolbar more items to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        IControlToolbar AddMore(params IControlDropdownItem[] items);
+
+        /// <summary>
+        /// Adds one or more toolbar more items to the toolbar.
+        /// </summary>
+        /// <param name="items">The toolbar more items to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        IControlToolbar AddMore(IEnumerable<IControlDropdownItem> items);
+
+        /// <summary>
+        /// Removes a toolbar more item from the toolbar.
+        /// </summary>
+        /// <param name="item">The toolbar more item to remove.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        IControlToolbar RemoveMore(IControlDropdownItem item);
     }
 }

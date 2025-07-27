@@ -10,7 +10,8 @@ namespace WebExpress.WebUI.WebControl
     /// </summary>
     public class ControlToolbar : Control, IControlToolbar
     {
-        private List<IControlToolbarItem> _items = [];
+        private readonly List<IControlToolbarItem> _items = [];
+        private readonly List<IControlDropdownItem> _more = [];
 
         /// <summary>
         /// Returns the list of toolbar items.
@@ -19,6 +20,11 @@ namespace WebExpress.WebUI.WebControl
         /// A list of <see cref="IControlToolbarItem"/> representing the items in the toolbar.
         /// </value>
         public virtual IEnumerable<IControlToolbarItem> Items => _items;
+
+        /// <summary>
+        /// Returns a collection of additional dropdown items.
+        /// </summary>
+        public virtual IEnumerable<IControlDropdownItem> More => _more;
 
         /// <summary>
         /// Returns or sets the orientation of the toolbar.
@@ -136,6 +142,42 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Adds one or more toolbar more items to the toolbar.
+        /// </summary>
+        /// <param name="items">The toolbar more items to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlToolbar AddMore(params IControlDropdownItem[] items)
+        {
+            _more.AddRange(items);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds one or more toolbar more items to the toolbar.
+        /// </summary>
+        /// <param name="items">The toolbar more items to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlToolbar AddMore(IEnumerable<IControlDropdownItem> items)
+        {
+            _more.AddRange(items);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Removes a toolbar more item from the toolbar.
+        /// </summary>
+        /// <param name="item">The toolbar more item to remove.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlToolbar RemoveMore(IControlDropdownItem item)
+        {
+            _more.Remove(item);
+
+            return this;
+        }
+
+        /// <summary>
         /// Converts the control to an HTML representation.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
@@ -163,29 +205,21 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementSectionNav()
             {
                 Id = Id,
-                Class = GetClasses(),
+                Class = Css.Concatenate("wx-webui-toolbar", GetClasses()),
                 Style = GetStyles(),
                 Role = Role
-            };
-
-            html.Add
-            (
-                new HtmlElementTextContentUl
+            }
+                .Add(_items.Select(x => x.Render(renderContext, visualTree)))
+                .Add
                 (
-                    items.Select
-                    (
-                        x =>
-                        x == null || x is ControlDropdownItemDivider || x is ControlLine ?
-                        new HtmlElementTextContentLi() { Class = "divider", Inline = true } :
-                        x is ControlDropdownItemHeader ?
-                        x.Render(renderContext, visualTree) :
-                        new HtmlElementTextContentLi(x.Render(renderContext, visualTree)) { Class = "nav-item" }
-                    ).ToArray()
-                )
-                {
-                    Class = HorizontalAlignment == TypeHorizontalAlignment.Right ? "" : "navbar-nav"
-                }
-            );
+                    _more.Count != 0
+                        ? new HtmlElementTextContentDiv()
+                        {
+                            Class = "wx-toolbar-more"
+                        }
+                            .Add(_more.Select(x => x.Render(renderContext, visualTree)))
+                        : null
+                );
 
             return html;
         }

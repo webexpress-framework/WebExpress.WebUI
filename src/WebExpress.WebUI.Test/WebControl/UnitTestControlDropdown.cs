@@ -158,13 +158,13 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the text property of the dropdown control.
+        /// Tests the label property of the dropdown control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-dropdown"" role=""button""></div>")]
         [InlineData("abc", @"<div class=""wx-webui-dropdown"" role=""button"" data-label=""abc""></div>")]
         [InlineData("webexpress.WebUI:plugin.name", @"<div class=""wx-webui-dropdown"" role=""button"" data-label=""WebExpress.WebUI""></div>")]
-        public void Text(string text, string expected)
+        public void Label(string label, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -172,7 +172,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDropdown()
             {
-                Text = text,
+                Label = label,
             };
 
             // test execution
@@ -288,7 +288,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlDropdown();
 
             // test execution
-            control.Add(new ControlDropdownItemLink() { Text = "abc" });
+            control.Add(new ControlDropdownItemLink() { Label = "abc" });
 
             var html = control.Render(context, visualTree);
 

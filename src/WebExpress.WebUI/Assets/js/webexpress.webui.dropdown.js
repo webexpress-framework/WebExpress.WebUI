@@ -180,17 +180,19 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
         if (this._image) {
             const img = document.createElement("img");
             img.src = this._image;
-            img.classList.add("me-2");
             button.appendChild(img);
         }
         if (this._icon) {
             const icon = document.createElement("i");
-            icon.className = "me-2 " + this._icon;
+            icon.className = this._icon;
             button.appendChild(icon);
         }
-        const span = document.createElement("span");
-        span.textContent = this._label || "";
-        button.appendChild(span);
+
+        if (this._label) {
+            const span = document.createElement("span");
+            span.textContent = this._label || "";
+            button.appendChild(span);
+        }
 
         // Create the dropdown menu list
         const ul = document.createElement("ul");

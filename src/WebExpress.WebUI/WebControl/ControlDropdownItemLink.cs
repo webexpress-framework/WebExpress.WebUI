@@ -12,10 +12,12 @@ namespace WebExpress.WebUI.WebControl
     /// </summary>
     public class ControlDropdownItemLink : IControlDropdownItem
     {
+        private readonly string _id;
+
         /// <summary>
-        /// Returns or sets the unique identifier for the entity.
+        /// Returns the unique identifier for the entity.
         /// </summary>
-        public string Id { get; set; }
+        public string Id => _id;
 
         /// <summary>
         /// Returns or sets whether the link is active or not.
@@ -23,9 +25,9 @@ namespace WebExpress.WebUI.WebControl
         public TypeActive Active { get; set; }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Returns or sets the label.
         /// </summary>
-        public string Text { get; set; }
+        public string Label { get; set; }
 
         /// <summary>
         /// Returns or sets the target uri.
@@ -63,7 +65,7 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="id">The id of the control.</param>
         public ControlDropdownItemLink(string id = null)
         {
-            Id = id;
+            _id = id;
         }
 
         /// <summary>
@@ -74,7 +76,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Text)))
+            return new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Label)))
             {
                 Id = Id,
                 Class = "wx-dropdown-item"

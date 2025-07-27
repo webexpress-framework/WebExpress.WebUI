@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -9,10 +10,14 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a dropdown control that can contain multiple items.
+    /// Represents a toolbar item dropdown control.
     /// </summary>
-    public class ControlDropdown : Control, IControlDropdown, IControlNavigationItem
+    /// <remarks>
+    /// This class is used to create a dropdown within a toolbar.
+    /// </remarks>
+    public class ControlToolbarItemDropdown : IControlToolbarItemDropdown
     {
+        private readonly string _id;
         private readonly List<IControlDropdownItem> _items = [];
 
         /// <summary>
@@ -20,10 +25,16 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         public IEnumerable<IControlDropdownItem> Items => _items;
 
+
+        /// <summary>
+        /// Returns the unique identifier for the entity.
+        /// </summary>
+        public string Id => _id;
+
         /// <summary>
         /// Returns or sets the color. 
         /// </summary>
-        public PropertyColorButton Color { get; set; }
+        public PropertyColorText Color { get; set; }
 
         /// <summary>
         /// Returns or sets the size.
@@ -70,32 +81,19 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         public TypeAlignmentDropdownMenu AlignmentMenu { get; set; }
 
-        /// <summary>
-        /// Returns or sets the image.
-        /// </summary>
-        public string Image { get; set; }
 
         /// <summary>
-        /// Returns or sets the height.
+        /// Returns or sets the alignment of the toolbar item.
         /// </summary>
-        public new int Height { get; set; } = -1;
+        public TypeToolbarItemAlignment Alignment { get; set; } = TypeToolbarItemAlignment.Default;
 
         /// <summary>
-        /// Returns or sets the width.
-        /// </summary>
-        public new int Width { get; set; } = -1;
-
-        /// <summary>
-        /// Initializes a new instance of the class with the specified id and items.
+        /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        /// <param name="items">The items to be added to the dropdown.</param>
-        public ControlDropdown(string id = null, params IControlDropdownItem[] items)
-            : base(id)
+        public ControlToolbarItemDropdown(string id = null)
         {
-            _items.AddRange(items);
-
-            Size = TypeSizeButton.Default;
+            _id = id;
         }
 
         /// <summary>
@@ -116,7 +114,7 @@ namespace WebExpress.WebUI.WebControl
         /// This method accepts any item that implements the <see cref="IControlDropdownItem"/> interface.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlDropdown Add(params IControlDropdownItem[] items)
+        public IControlToolbarItemDropdown Add(params IControlDropdownItem[] items)
         {
             _items.AddRange(items);
 
@@ -128,7 +126,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="items">The items to add to the dropdown.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlDropdown Add(IEnumerable<IControlDropdownItem> items)
+        public IControlToolbarItemDropdown Add(IEnumerable<IControlDropdownItem> items)
         {
             _items.AddRange(items);
 
@@ -139,7 +137,7 @@ namespace WebExpress.WebUI.WebControl
         /// Adds a new separator.
         /// </summary>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlDropdown AddSeperator()
+        public IControlToolbarItemDropdown AddSeperator()
         {
             _items.Add(null);
 
@@ -151,7 +149,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="text">The headline text.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlDropdown AddHeader(string text)
+        public IControlToolbarItemDropdown AddHeader(string text)
         {
             _items.Add(new ControlDropdownItemHeader() { Text = text });
 
@@ -163,7 +161,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="item">The dropdown item to remove.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlDropdown Remove(IControlDropdownItem item)
+        public IControlToolbarItemDropdown Remove(IControlDropdownItem item)
         {
             _items.Remove(item);
 
@@ -176,28 +174,9 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <param name="visualTree">The visual tree representing the control's structure.</param>
         /// <returns>An HTML node representing the rendered control.</returns>
-        public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
-        {
-            return Render(renderContext, visualTree, Items);
-        }
-
-        /// <summary>
-        /// Converts the control to an HTML representation.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        /// <param name="visualTree">The visual tree representing the control's structure.</param>
-        /// <param name="items">The items to be included in the dropdown.</param>
-        /// <returns>An HTML node representing the rendered control.</returns>
-        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlDropdownItem> items)
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var buttonCss = "";
-            var buttonStyle = "";
-
-            if (Color != null)
-            {
-                buttonCss = Css.Concatenate(Color?.ToClass(Outline), buttonCss);
-                buttonStyle = Style.Concatenate(Color?.ToStyle(), buttonStyle);
-            }
 
             if (Size != TypeSizeButton.Default)
             {
@@ -209,11 +188,6 @@ namespace WebExpress.WebUI.WebControl
                 buttonCss = Css.Concatenate(Block.ToClass(), buttonCss);
             }
 
-            if (Toggle != TypeToggleDropdown.None)
-            {
-                buttonCss = Css.Concatenate(Toggle.ToClass(), buttonCss);
-            }
-
             if (AlignmentMenu != TypeAlignmentDropdownMenu.Default)
             {
                 buttonCss = Css.Concatenate(AlignmentMenu.ToClass(), buttonCss);
@@ -221,17 +195,19 @@ namespace WebExpress.WebUI.WebControl
 
             var html = new HtmlElementTextContentDiv()
             {
-                Id = Id,
-                Class = Css.Concatenate("wx-webui-dropdown", GetClasses()),
-                Role = Role ?? "button"
+                Id = _id,
+                Class = Css.Concatenate("wx-toolbar-dropdown", buttonCss)
             }
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, Label))
+                .AddUserAttribute("data-title", I18N.Translate(renderContext, Tooltip))
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
                 .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-buttonCss", buttonCss)
-                .AddUserAttribute("data-buttonStyle", buttonStyle)
+                .AddUserAttribute("data-color-css", Color?.ToClass())
+                .AddUserAttribute("data-color-style", Color?.ToStyle())
+                .AddUserAttribute("data-toggle", Toggle == TypeToggleDropdown.Toggle ? "true" : null)
                 .AddUserAttribute(Active == TypeActive.Active ? "active" : null)
                 .AddUserAttribute(Active == TypeActive.Disabled ? "disabled" : null)
+                .AddUserAttribute("data-align", Alignment.ToValue())
                 .Add(_items.Select(x => x.Render(renderContext, visualTree)));
 
             return html;

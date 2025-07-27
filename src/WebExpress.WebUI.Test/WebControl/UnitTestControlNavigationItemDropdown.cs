@@ -172,7 +172,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemDropdown()
             {
-                Text = text,
+                Label = text,
             };
 
             // test execution
@@ -288,7 +288,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlNavigationItemDropdown();
 
             // test execution
-            control.Add(new ControlDropdownItemLink() { Text = "abc" });
+            control.Add(new ControlDropdownItemLink() { Label = "abc" });
 
             var html = control.Render(context, visualTree);
 
