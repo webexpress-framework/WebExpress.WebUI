@@ -128,7 +128,6 @@ namespace WebExpress.WebUI.WebPage
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.modal.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.modalpage.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.modalform.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.more.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.move.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.pagination.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.search.css"));
@@ -155,7 +154,6 @@ namespace WebExpress.WebUI.WebPage
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.modalform.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.modalconfirm.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.modalconfirmdelete.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.more.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.move.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.pagination.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.search.js"));

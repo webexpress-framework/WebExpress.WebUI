@@ -1,4 +1,4 @@
-// Syntax highlighting for Bash as a class implementation
+// Syntax highlighting for bash.
 webexpress.webui.Syntax.register("bash", "sh", (code) => {
     // define Bash syntax components
     const keywords = [
