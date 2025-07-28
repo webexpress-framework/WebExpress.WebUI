@@ -11,7 +11,7 @@ webexpress.webui.Syntax.register("csharp", "c#", (code) => {
         "in", "int", "interface", "is", "lock", "long", "namespace", "new", "null", "object",
         "operator", "out", "override", "params", "readonly", "ref", "return",
         "sbyte", "sealed", "short", "sizeof", "stackalloc", "static", "string", "struct", "switch", "this",
-        "throw", "true", "try", "typeof", "uint", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual",
+        "throw", "true", "try", "typeof", "uint", "ulong", "unchecked", "unsafe", "ushort", "using", "var", "virtual",
         "void", "volatile", "while"
     ];
     const types = [
@@ -31,8 +31,6 @@ webexpress.webui.Syntax.register("csharp", "c#", (code) => {
             `(?<comment>\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/)`,
             // strings (verbatim and regular)
             `(?<string>@"(?:""|[^"])*"|"(?:\\\\.|[^"\\\\])*")`,
-            // annotations
-            `(?<annotation>\\[[^\\]]*\\])`,
             // method calls like .WriteLine
             `(?<method>\\.\\s*[a-zA-Z_][a-zA-Z0-9_]*)`,
             // property/field access like Console.

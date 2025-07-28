@@ -3,177 +3,179 @@
     padding: 0px;
 }
 
-    .wx-selection > div:nth-child(2) {
-        display: flex !important;
-        flex-direction: row;
-        flex-wrap: nowrap !important;
-        align-items: center;
-        padding: 0.2em;
-        min-height: 2.2em;
-    }
+.wx-selection > div:nth-child(2) {
+    display: flex !important;
+    flex-direction: row;
+    flex-wrap: nowrap !important;
+    align-items: center;
+    padding: 0.2em;
+    min-height: 2.2em;
+}
 
-        .wx-selection > div:nth-child(2) > ul {
-            padding-left: 0.2em;
-            margin-right: auto;
-            margin-bottom: 0;
-        }
+.wx-selection > div:nth-child(2) > ul {
+    padding-left: 0.2em;
+    margin-right: auto;
+    margin-bottom: 0;
+}
 
-            .wx-selection > div:nth-child(2) > ul > li {
-                float: left;
-                display: flex;
-                align-items: center;
-                margin-right: 0.5em;
-                margin-top: 0.2em;
-                margin-bottom: 0.2em;
-                border-radius: 0.2em;
-                padding-top: 0.1em;
-                padding-left: 0.3em;
-                padding-right: 0.3em;
-                padding-bottom: 0.1em;
-                white-space: nowrap;
-            }
+.wx-selection > div:nth-child(2) > ul > li {
+    float: left;
+    display: flex;
+    align-items: center;
+    margin-right: 0.5em;
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
+    border-radius: 0.2em;
+    padding-top: 0.1em;
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+    padding-bottom: 0.1em;
+    white-space: nowrap;
+}
 
-            .wx-selection > div:nth-child(2) > ul > span {
-                color: var(--bs-secondary);
-            }
+.wx-selection > div:nth-child(2) > ul > span {
+    color: var(--bs-secondary);
+}
 
-            .wx-selection > div:nth-child(2) > ul > li > span {
-            }
+.wx-selection > div:nth-child(2) > ul > li > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+}
 
-                .wx-selection > div:nth-child(2) > ul > li > span > i {
-                    margin-right: 0.5em;
-                }
+.wx-selection > div:nth-child(2) > ul > li > span > i {
+}
 
-                .wx-selection > div:nth-child(2) > ul > li > span > img {
-                    height: 1em;
-                    vertical-align: middle;
-                    margin-right: 0.5em;
-                }
+.wx-selection > div:nth-child(2) > ul > li > span > img {
+    height: 1.2em;
+    vertical-align: middle;
+}
 
-            .wx-selection > div:nth-child(2) > ul > li > a {
-                margin-left: 0.5em;
-                margin-right: 0.1em;
-                text-decoration: none;
-                font-size: 1em;
-                color: var(--bs-secondary);
-            }
+.wx-selection > div:nth-child(2) > ul > li > a {
+    margin-left: 0.5em;
+    margin-right: 0.1em;
+    text-decoration: none;
+    font-size: 1em;
+    color: var(--bs-secondary);
+}
 
-                .wx-selection > div:nth-child(2) > ul > li > a:hover {
-                    color: var(--bs-secondary-hover);
-                }
+.wx-selection > div:nth-child(2) > ul > li > a:hover {
+    color: var(--bs-secondary-hover);
+}
 
-        .wx-selection > div:nth-child(2) > a {
-            text-decoration: none;
-            color: var(--bs-secondary);
-            float: right;
-            margin: 0;
-            padding-right: 0.3em;
-        }
+.wx-selection > div:nth-child(2) > a {
+    text-decoration: none;
+    color: var(--bs-secondary);
+    float: right;
+    margin: 0;
+    padding-right: 0.3em;
+}
 
-            .wx-selection > div:nth-child(2) > a:hover {
-                color: var(--bs-secondary-hover);
-            }
+.wx-selection > div:nth-child(2) > a:hover {
+    color: var(--bs-secondary-hover);
+}
 
-    .wx-selection div:nth-child(3) {
-        display: none;
-        flex-direction: column;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        background-color: var(--bs-body-bg);
-        border: var(--bs-border-width) solid var(--bs-border-color);
-        border-radius: var(--bs-border-radius);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        list-style: none;
-        padding: 0;
-        margin-top: 5px;
-        overflow: hidden;
-        resize: both;
-    }
+.wx-selection div:nth-child(3) {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: var(--bs-body-bg);
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    list-style: none;
+    padding: 0;
+    margin-top: 5px;
+    overflow: hidden;
+    resize: both;
+}
 
-        .wx-selection div:nth-child(3) > div:nth-child(1) {
-            flex-direction: row;
-            display: flex;
-            align-items: center;
-            margin: 0.5em;
-            background-color: var(--bs-body-bg);
-            border: var(--bs-border-width) solid var(--bs-border-color);
-        }
+.wx-selection div:nth-child(3) > div:nth-child(1) {
+    flex-direction: row;
+    display: flex;
+    align-items: center;
+    margin: 0.5em;
+    background-color: var(--bs-body-bg);
+    border: var(--bs-border-width) solid var(--bs-border-color);
+}
 
-            .wx-selection div:nth-child(3) > div:nth-child(1) > input {
-                padding: 0.2em;
-                margin-left: 0.1em;
-                outline: none;
-                flex: 1;
-                border: 0px;
-                background-color: var(--bs-body-bg);
-                color: var(--bs-body-color);
-            }
+.wx-selection div:nth-child(3) > div:nth-child(1) > input {
+    padding: 0.2em;
+    margin-left: 0.1em;
+    outline: none;
+    flex: 1;
+    border: 0px;
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+}
 
-            .wx-selection div:nth-child(3) > div:nth-child(1) > a {
-                cursor: pointer;
-                color: var(--bs-border-color);
-                font-size: 1em;
-                text-decoration: none;
-                margin-right: 0.2em;
-            }
+.wx-selection div:nth-child(3) > div:nth-child(1) > a {
+    cursor: pointer;
+    color: var(--bs-border-color);
+    font-size: 1em;
+    text-decoration: none;
+    margin-right: 0.2em;
+}
 
-    .wx-selection > div:nth-child(3) > div:nth-child(1) > a:hover {
-        color: var(--bs-secondary);
-    }
+.wx-selection > div:nth-child(3) > div:nth-child(1) > a:hover {
+    color: var(--bs-secondary);
+}
 
-    .wx-selection div:nth-child(3) > ul {
-        overflow-x: hidden;
-        overflow-y: scroll;
-        flex: 1;
-        height: 15rem;
-        margin: 0;
-        padding: 0;
-        height: 20em;
-    }
+.wx-selection div:nth-child(3) > ul {
+    overflow-x: hidden;
+    overflow-y: scroll;
+    flex: 1;
+    height: 15rem;
+    margin: 0;
+    padding: 0;
+    height: 20em;
+}
 
-        .wx-selection div:nth-child(3) > ul > li.dropdown-item {
-            cursor: pointer;
-        }
+.wx-selection div:nth-child(3) > ul > li.dropdown-item {
+    cursor: pointer;
+}
 
-        .wx-selection div:nth-child(3) > ul > li > button {
-            background: 0, 0;
-            border: 0;
-        }
+.wx-selection div:nth-child(3) > ul > li > button {
+    background: 0, 0;
+    border: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+}
 
-            .wx-selection div:nth-child(3) > ul > li > button:not(:disabled) {
-                color: var(--bs-link-color);
-            }
+.wx-selection div:nth-child(3) > ul > li > button:not(:disabled) {
+    color: var(--bs-link-color);
+}
 
-                .wx-selection div:nth-child(3) > ul > li > button:not(:disabled):hover {
-                    color: var(--bs-link-hover-color);
-                }
+.wx-selection div:nth-child(3) > ul > li > button:not(:disabled):hover {
+    color: var(--bs-link-hover-color);
+}
 
-            .wx-selection div:nth-child(3) > ul > li > button > img {
-                height: 1em;
-                margin-right: 0.5em;
-                vertical-align: middle;
-            }
+.wx-selection div:nth-child(3) > ul > li > button > img {
+    height: 1.2em;
+    vertical-align: middle;
+}
 
-            .wx-selection div:nth-child(3) > ul > li > button > i {
-                margin-right: 0.5em;
-            }
+.wx-selection div:nth-child(3) > ul > li > button > i {
+}
 
-            .wx-selection div:nth-child(3) > ul > li > button > span {
-            }
+.wx-selection div:nth-child(3) > ul > li > button > span {
+}
 
-        .wx-selection div:nth-child(3) > ul > li > div {
-        }
+.wx-selection div:nth-child(3) > ul > li > div {
+}
 
-        .wx-selection div:nth-child(3) > ul > li > p {
-        }
+.wx-selection div:nth-child(3) > ul > li > p {
+}
 
-    .wx-selection > div:nth-child(3) > footer {
-        color: var(--bs-gray);
-        background-color: var(--bs-light);
-        flex-direction: row;
-        padding: 0.2em;
-    }
+.wx-selection > div:nth-child(3) > footer {
+    color: var(--bs-gray);
+    background-color: var(--bs-light);
+    flex-direction: row;
+    padding: 0.2em;
+}
 
 [data-bs-theme=dark] .wx-selection > div:nth-child(3) > footer {
     background-color: var(--bs-secondary-bg);

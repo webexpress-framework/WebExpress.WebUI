@@ -2,117 +2,116 @@
 .wx-search {
 }
 
-    /* Styling for the search box container */
-    .wx-search > div:nth-child(1) {
-        position: relative;
-        display: flex !important;
-        flex-direction: row;
-        flex-wrap: nowrap !important;
-        align-items: center;
-    }
+/* Styling for the search box container */
+.wx-search > div:nth-child(1) {
+    position: relative;
+    display: flex !important;
+    flex-direction: row;
+    flex-wrap: nowrap !important;
+    align-items: center;
+}
 
-        /* Styling for the search icon */
-        .wx-search > div:nth-child(1) > label {
-            margin-right: 0.5em;
-            color: var(--bs-gray-500); /* Use theme-aware gray color variable */
-        }
+/* Styling for the search icon */
+.wx-search > div:nth-child(1) > label {
+    margin-right: 0.5em;
+    color: var(--bs-gray-500); /* Use theme-aware gray color variable */
+}
 
-        /* Styling for the input field */
-        .wx-search > div:nth-child(1) > input[type="text"] {
-            border: 0px;
-            outline: none;
-            flex-grow: 1 !important;
-            color: var(--bs-body-color); /* Use theme-aware text color */
-            background-color: var(--bs-body-bg); /* Use theme-aware background color */
-        }
+/* Styling for the input field */
+.wx-search > div:nth-child(1) > input[type="text"] {
+    border: 0px;
+    outline: none;
+    flex-grow: 1 !important;
+    color: var(--bs-body-color); /* Use theme-aware text color */
+    background-color: var(--bs-body-bg); /* Use theme-aware background color */
+}
 
-        /* Styling for the clear (X) button */
-        .wx-search > div:nth-child(1) > span {
-            margin-left: 0.5em;
-            cursor: pointer;
-            color: var(--bs-gray-500); /* Use theme-aware gray color */
-        }
+/* Styling for the clear (X) button */
+.wx-search > div:nth-child(1) > span {
+    margin-left: 0.5em;
+    cursor: pointer;
+    color: var(--bs-gray-500); /* Use theme-aware gray color */
+}
 
-            /* Hover effect for the clear button */
-            .wx-search > div:nth-child(1) > span:hover {
-                color: var(--bs-secondary); /* Use theme-aware secondary color */
-            }
+/* Hover effect for the clear button */
+.wx-search > div:nth-child(1) > span:hover {
+    color: var(--bs-secondary); /* Use theme-aware secondary color */
+}
 
-    /* Styling for the suggestion container */
-    .wx-search > div:nth-child(2) {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        width: 100%;
-        max-height: 200px;
-        overflow-y: auto;
-        background-color: var(--bs-body-bg); /* Use theme-aware background color */
-        border: var(--bs-border-width) solid var(--bs-border-color); /* Use theme-aware border color */
-        border-radius: var(--bs-border-radius); /* Use theme-aware border radius */
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Slight shadow for better visibility */
-        list-style: none;
-        z-index: 1000;
-        padding: 0;
-        resize: both;
-        display: none;
-        flex-direction: column;
-        height: 25em;
-    }
+/* Styling for the suggestion container */
+.wx-search > div:nth-child(2) {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: var(--bs-body-bg); /* Use theme-aware background color */
+    border: var(--bs-border-width) solid var(--bs-border-color); /* Use theme-aware border color */
+    border-radius: var(--bs-border-radius); /* Use theme-aware border radius */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Slight shadow for better visibility */
+    list-style: none;
+    z-index: 1000;
+    padding: 0;
+    resize: both;
+    display: none;
+    flex-direction: column;
+    height: 25em;
+}
 
-        /* Styling for the suggestion list */
-        .wx-search > div:nth-child(2) > ul {
-            padding-left: 0;
-            margin-bottom: 0;
-            overflow-x: hidden;
-            overflow-y: scroll;
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            height: 20em;
-        }
+/* Styling for the suggestion list */
+.wx-search > div:nth-child(2) > ul {
+    padding-left: 0;
+    margin-bottom: 0;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    height: 20em;
+}
 
-            /* Styling for individual suggestions */
-            .wx-search > div:nth-child(2) > ul > li {
-                float: left;
-                display: flex;
-                align-items: center;
-                justify-content: space-between; /* Ensure the star icon aligns to the right */
-                padding: 0.2em 0.3em;
-                white-space: nowrap;
-                cursor: pointer;
-            }
+/* Styling for individual suggestions */
+.wx-search > div:nth-child(2) > ul > li {
+    float: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Ensure the star icon aligns to the right */
+    padding: 0.2em 0.3em;
+    white-space: nowrap;
+    cursor: pointer;
+}
 
-                /* Styling for suggestion container */
-                .wx-search > div:nth-child(2) > ul > li > a {
-                    vertical-align: middle;
-                    margin: 0.5em;
-                    text-decoration: none;
-                    cursor: pointer;
-                }
+/* Styling for suggestion container */
+.wx-search > div:nth-child(2) > ul > li > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    margin: 0.5em;
+    text-decoration: none;
+    cursor: pointer;
+}
 
-                    /* Styling for suggestion images */
-                    .wx-search > div:nth-child(2) > ul > li > a > img {
-                        height: 16px;
-                        vertical-align: middle;
-                        margin-right: 0.5em;
-                    }
+/* Styling for suggestion images */
+.wx-search > div:nth-child(2) > ul > li > a > img {
+    height: 1.2em;
+}
 
-                    /* Styling for suggestion icons */
-                    .wx-search > div:nth-child(2) > ul > li > a > i {
-                        margin-right: 0.5em;
-                    }
+/* Styling for suggestion icons */
+.wx-search > div:nth-child(2) > ul > li > a > i {
+}
 
-                    /* Styling for suggestion label */
-                    .wx-search > div:nth-child(2) > ul > li > a > span {
-                        color: var(--bs-body-color);
-                    }
+/* Styling for suggestion label */
+.wx-search > div:nth-child(2) > ul > li > a > span {
+    color: var(--bs-body-color);
+}
 
-        .wx-search > div:nth-child(2) > footer {
-            color: var(--bs-gray);
-            background-color: var(--bs-light);
-            flex-direction: row;
-            padding: 0.2em;
-        }
+.wx-search > div:nth-child(2) > footer {
+    color: var(--bs-gray);
+    background-color: var(--bs-light);
+    flex-direction: row;
+    padding: 0.2em;
+}
 
 [data-bs-theme=dark] .wx-search > div:nth-child(2) > footer {
     background-color: var(--bs-secondary-bg);

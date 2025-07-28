@@ -327,7 +327,7 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
                 }
                 if (item.icon) {
                     const icon = document.createElement("i");
-                    icon.className = item.icon + " me-2";
+                    icon.className = item.icon;
                     span.appendChild(icon);
                 }
                 const labelSpan = document.createElement("span");

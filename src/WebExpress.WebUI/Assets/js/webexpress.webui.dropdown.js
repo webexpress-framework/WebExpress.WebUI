@@ -92,15 +92,15 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
 
         if (item.type === "header") {
             // Create a header item with optional icon
+            const header = document.createElement("span");
+            header.classList.add("dropdown-header");
             if (item.icon) {
-                const iconSpan = document.createElement("span");
-                iconSpan.className = "me-2 " + item.icon;
-                li.appendChild(iconSpan);
+                const icon = document.createElement("i");
+                icon.className = item.icon;
+                header.appendChild(icon);
             }
-            const contentSpan = document.createElement("span");
-            contentSpan.textContent = item.content;
-            li.appendChild(contentSpan);
-            li.classList.add("dropdown-header");
+            header.append(item.content);
+            li.appendChild(header);
         } else if (item.type === "divider") {
             // Create a divider element
             li.classList.add("dropdown-divider");
@@ -116,12 +116,11 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                     const img = document.createElement("img");
                     img.src = item.image;
                     img.alt = item.content;
-                    img.classList.add("me-2");
                     link.appendChild(img);
                 }
                 if (item.icon) {
                     const icon = document.createElement("i");
-                    icon.className = "me-2 " + item.icon;
+                    icon.className = item.icon;
                     link.appendChild(icon);
                 }
                 const span = document.createElement("span");
@@ -149,7 +148,12 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                 const disabledItem = document.createElement("span");
                 disabledItem.className = "dropdown-item text-muted disabled";
                 disabledItem.setAttribute("aria-disabled", "true");
-                disabledItem.innerHTML = (item.icon ? `<i class='me-2 ${item.icon}'></i>` : "") + (item.content || "");
+                if (item.icon) {
+                    const icon = document.createElement("i");
+                    icon.className = item.icon;
+                    disabledItem.appendChild(icon);
+                }
+                disabledItem.append(item.content);
                 li.appendChild(disabledItem);
             }
         }

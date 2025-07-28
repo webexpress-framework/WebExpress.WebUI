@@ -144,7 +144,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Type = "button",
                 Value = Value,
-                Class = Css.Concatenate("btn", GetClasses()),
+                Class = Css.Concatenate("wx-button btn", GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
                 Disabled = Active == TypeActive.Disabled
@@ -154,15 +154,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 html.Add(new ControlIcon()
                 {
-                    Icon = Icon,
-                    Margin = !string.IsNullOrWhiteSpace(Text) ? new PropertySpacingMargin
-                    (
-                        PropertySpacing.Space.None,
-                        PropertySpacing.Space.Two,
-                        PropertySpacing.Space.None,
-                        PropertySpacing.Space.None
-                    ) : new PropertySpacingMargin(PropertySpacing.Space.None),
-                    VerticalAlignment = TypeVerticalAlignment.Default
+                    Icon = Icon
                 }.Render(renderContext, visualTree));
             }
 

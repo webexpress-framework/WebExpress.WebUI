@@ -40,6 +40,7 @@
     position: relative; /* Required for line number positioning */
     padding-left: 2rem; /* Add padding for line numbers */
     color: var(--bs-body-color);
+    height: 1.1em;
 }
 
 .wx-code .wx-code-line-numbers > span::before {
@@ -77,17 +78,17 @@
 
 /* Style for numbers (e.g., 123, 45.6) */
 .wx-code .number {
-    color: var(--bs-warming);
+    color: var(--bs-warning);
 }
 
 /* Style for operators (e.g., +, =, ==) */
 .wx-code .operator {
-    color: #d4d4d4; /* Default color, as operators are often not heavily colored */
+    color: var(--bs-info);
 }
 
 /* Style for brackets, parentheses, and braces */
 .wx-code .bracket {
-    color: var(--bs-dark);
+    color: #996515;
     font-weight: bold;
 }
 
@@ -98,7 +99,7 @@
 
 /* Style for constants (e.g., true, false, __FILE__) */
 .wx-code .constant {
-    color: #4fc1ff; /* A different shade of blue for constants */
+    color: var(--bs-info);
 }
 
 /* Style for built-in functions or commands (e.g., echo, print) */
@@ -122,15 +123,9 @@
     color: #4ec9b0; /* A teal color for type names */
 }
 
-/* C# specific: Annotations/Attributes (e.g., [Serializable]) */
-.wx-code .annotation {
-    color: #ddd;
-    background-color: #444;
-}
-
 /* C# specific: Methods */
 .wx-code .method {
-    color: #ddd;
+    color: gold;
 }
 
 /* Python specific: Decorators (e.g., @mydecorator) */
@@ -151,7 +146,7 @@
 
 /* .properties specific: Key */
 .wx-code .key {
-    color: #9cdcfe; /* Light blue, similar to variables */
+    color: purple;
 }
 
 /* .properties specific: Separator (= or :) */
@@ -161,7 +156,7 @@
 
 /* .properties specific: Value */
 .wx-code .value {
-    color: #ce9178; /* Orange, same as strings */
+    color: #ce9178;
 }
 
 /* XML specific: Tag names (e.g., <tag>) */
@@ -171,7 +166,7 @@
 
 /* XML specific: Attribute names (e.g., attr="value") */
 .wx-code .attribute {
-    color: #9cdcfe; /* Light blue for attribute names */
+    color: purple;
 }
 
 /* XML specific: CDATA sections */

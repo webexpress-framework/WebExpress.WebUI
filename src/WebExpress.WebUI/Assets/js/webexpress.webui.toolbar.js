@@ -8,7 +8,6 @@
  * - webexpress.webui.Event.CHANGE_VISIBILITY_EVENT
  * - webexpress.webui.Event.CHANGE_VALUE_EVENT
  */
-
 webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Creates a new toolbar controller instance.
@@ -57,6 +56,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                     colorCss: elem.getAttribute("data-color-css") || null,
                     colorStyle: elem.getAttribute("data-color-style") || null,
                     icon: elem.dataset.icon || null,
+                    image: elem.dataset.image || null,
                     title: elem.dataset.title || null,
                     options: Array.from(options).map(option => ({
                         text: option.textContent,
@@ -84,6 +84,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                     type: "button",
                     label: elem.dataset.label || null,
                     icon: elem.dataset.icon || null,
+                    image: elem.dataset.image || null,
                     title: elem.dataset.title || null,
                     colorCss: elem.getAttribute("data-color-css") || null,
                     colorStyle: elem.getAttribute("data-color-style") || null,
@@ -153,6 +154,11 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 }
 
                 renderedItem.type = "button";
+                if (item.image) {
+                    const image = document.createElement("img");
+                    image.src = item.image;
+                    renderedItem.appendChild(image);
+                }
                 if (item.icon) {
                     const icon = document.createElement("i");
                     icon.className = item.icon;
@@ -216,20 +222,51 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 }
                 if (item.title) {
                     comboboxContainer.title = item.title;
-                }
+                }               
+                if (item.image) {
+                    const image = document.createElement("img");
+                    image.src = item.image;
+                    comboboxContainer.appendChild(image);
 
-                const label = document.createElement("label");
-                label.textContent = item.label || "";
-                comboboxContainer.appendChild(label);
+                    if (item.disabled) {
+                        image.classList.add("disabled");
+                    }
+                    if (item.colorCss) {
+                        image.classList.add(item.colorCss);
+                    }
+                    if (item.colorStyle) {
+                        image.setAttribute("style", item.colorStyle);
+                    }
+                }
+                if (item.icon) {
+                    const icon = document.createElement("i");
+                    icon.className = item.icon;
+                    comboboxContainer.appendChild(icon);
 
-                if (item.disabled) {
-                    label.classList.add("disabled");
+                    if (item.disabled) {
+                        icon.classList.add("disabled");
+                    }
+                    if (item.colorCss) {
+                        icon.classList.add(item.colorCss);
+                    }
+                    if (item.colorStyle) {
+                        icon.setAttribute("style", item.colorStyle);
+                    }
                 }
-                if (item.colorCss) {
-                    label.classList.add(item.colorCss);
-                }
-                if (item.colorStyle) {
-                    label.setAttribute("style", item.colorStyle);
+                if (item.label) {
+                    const label = document.createElement("label");
+                    label.textContent = item.label || "";
+                    comboboxContainer.appendChild(label);
+                
+                    if (item.disabled) {
+                        label.classList.add("disabled");
+                    }
+                    if (item.colorCss) {
+                        label.classList.add(item.colorCss);
+                    }
+                    if (item.colorStyle) {
+                        label.setAttribute("style", item.colorStyle);
+                    }
                 }
 
                 const select = document.createElement("select");

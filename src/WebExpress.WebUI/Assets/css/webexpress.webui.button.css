@@ -1,13 +1,14 @@
 .wx-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
 }
 
 .wx-button > img {
-    margin-right: 0.5em;
-    height: 1em;
+    height: 1.2em;
     min-width: 1em;
     vertical-align: middle; 
 }
 
 .wx-button > i {
-    margin-right: 0.5em;
 }

@@ -1,31 +1,67 @@
-// Syntax highlighting for XML as a class implementation
+// Syntax highlighting for XML.
 webexpress.webui.Syntax.register("xml", "html", (code) => {
-    // 1. escape HTML special characters to display them as text
-    let highlightedCode = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  // HTML escaping
+  code = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-    // 2. define patterns for different syntax elements
-    const patterns = {
-        // pattern for comments: <!-- ... -->
-        comment: /(&lt;!--[\s\S]*?--&gt;)/g,
-        // pattern for tags, including attributes: <tag attr="value"> or </tag>
-        tag: /(&lt;\/?([a-zA-Z0-9\-\._]+)((?:\s+[a-zA-Z0-9\-\._]+(?:\s*=\s*(?:"[^"]*"|'[^']*'))?)*)\s*&gt;)/g,
-        // pattern for attributes within a matched tag: attr="value"
-        attribute: /\s+([a-zA-Z0-9\-\._]+)(\s*=\s*)("[^"]*"|'[^']*')/g
-    };
+  // Attribute pattern
+  const attribute = /\s+([A-Za-z0-9\-._]+)(\s*=\s*)("[^"]*"|'[^']*')/g;
 
-    // 3. apply highlighting for comments
-    highlightedCode = highlightedCode.replace(patterns.comment, '<span class="comment">$1</span>');
+  // Flags for the state machine
+  let inComment = false;
+  let inTag     = false;
 
-    // 4. apply highlighting for tags and their attributes
-    highlightedCode = highlightedCode.replace(patterns.tag, (match, fullTag, tagName, attributes) => {
-        // highlight attributes and their values within the tag
-        const highlightedAttributes = attributes.replace(patterns.attribute, (attrMatch, name, equals, value) => {
-            return ` <span class="attr">${name}</span>${equals}<span class="value">${value}</span>`;
-        });
-        // reconstruct the tag with highlighted attributes
-        return `<span class="tag">${'&lt;/' + tagName}${highlightedAttributes}&gt;</span>`;
+  // Helper function: highlight nested attributes
+  function highlightAttributes(text) {
+    return text.replace(attribute, (_, name, eq, val) => {
+      return ` <span class="attribute">${name}</span>` +
+             `<span class="operator">${eq}</span>` +
+             `<span class="string">${val}</span>`;
     });
+  }
 
-    // 5. return the fully highlighted code wrapped in a span
-    return `<span>${highlightedCode}</span>`;
+  // Wrapper for entire lines
+  function wrapLine(cls, line) {
+    return `<span class="${cls}">${line}</span>`;
+  }
+
+  return code
+    .split("\n")
+    .map(line => {
+      line = line.trimEnd();
+      
+      // 1) If we're currently inside a comment
+      if (inComment) {
+        if (/--&gt;/.test(line)) inComment = false;
+        return `<span>${wrapLine("comment", line)}</span>`;
+      }
+
+      // 2) If we're currently inside a tag
+      if (inTag) {
+        const hl = highlightAttributes(line);
+        if (/&gt;/.test(line)) inTag = false;
+        return `<span>${wrapLine("tag", hl)}</span>`;
+      }
+
+      // 3) Detect new comments
+      if (/&lt;!--/.test(line)) {
+        if (!/--&gt;/.test(line)) inComment = true;
+        return `<span>${wrapLine("comment", line)}</span>`;
+      }
+
+      // 4) Detect multi-line tags (opening '<' without a closing '>')
+      if (/&lt;[A-Za-z]/.test(line) && !/&gt;/.test(line)) {
+        inTag = true;
+        return `<span>${wrapLine("tag", highlightAttributes(line))}</span>`;
+      }
+
+      // 5) Highlight single-line tags (potentially multiple per line)
+      const singleTag = /(&lt;\/?[A-Za-z0-9\-._]+(?:\s+[A-Za-z0-9\-._]+(?:\s*=\s*"[^"]*")?)*\s*&gt;)/g;
+      const processed = line.replace(singleTag, match => {
+        return `<span>${wrapLine("tag", highlightAttributes(match))}</span>`;
+      });
+
+      // 6) Default case: normal text
+      return `<span>${processed}</span>`;
+    })
+    .join("");
 });

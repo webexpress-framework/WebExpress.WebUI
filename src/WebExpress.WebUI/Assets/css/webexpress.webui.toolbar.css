@@ -41,6 +41,11 @@
     justify-content: center;
     height: 2em;
     line-height: 1;
+    gap: 0.5em;
+}
+
+.wx-toolbar-button img {
+    height: 1.2em;
 }
 
 .wx-toolbar-button i {
@@ -49,10 +54,6 @@
 .wx-toolbar-button span {
     
     text-overflow: ellipsis; /* Add ellipsis for text overflow */
-}
-
-.wx-toolbar-button i + span {
-    margin-left: 0.5em; /* Add spacing between icon and text */
 }
 
 .wx-toolbar-button:focus {
@@ -130,7 +131,14 @@
     line-height: 1;
 }
 
+.wx-toolbar-combo img {
+    height: 1.2em;
+}
+
 .wx-toolbar-combo label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
     font-size: 1em; /* Set font size */
     color: var(--bs-dark); /* Use dark text color */
 }
