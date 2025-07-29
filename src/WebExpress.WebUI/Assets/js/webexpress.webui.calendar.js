@@ -3,42 +3,8 @@
  * date range selection functionality, depending on the configuration.
  * The calendar is always rendered as part of the control, without a popup.
  *
- * Supported data attributes:
- * - data-range="true": Enables range selection mode
- * - data-range-start: Preselects the range start date (according to the configured format)
- * - data-range-end: Preselects the range end date (according to the configured format)
- * - data-format: Date format string (e.g. "YYYY-MM-DD")
- * - data-holidays: Comma-separated list of holidays "YYYY-MM-DD,..."
- *
- * Main Features:
- * - Always-visible calendar widget
- * - Single-date or date-range selection, depending on the data-range attribute
- * - Optional holiday highlighting
- * - ISO-8601 week numbers displayed in the calendar view
- * - Mouseover displays the date or range preview; no manual text input
- * - Toolbar (right-aligned) next to the preview with buttons: Today, Clear Range, Copy
- * - Emits webexpress.webui.Event.CHANGE_VALUE_EVENT on value change
- * 
  * The following events are triggered:
  * - webexpress.webui.Event.CHANGE_VALUE_EVENT
- *
- * Usage:
- * Create an instance of the control with:
- *   const element = document.createElement("div");
- *   element.className = "wx-webui-calendar";
- *   element.setAttribute("data-range", "true");
- *   element.setAttribute("data-range-start", "2025-07-01");
- *   element.setAttribute("data-range-end", "2025-07-15");
- *   element.setAttribute("data-format", "YYYY-MM-DD");
- *   new webexpress.webui.CalendarCtrl(element);
- *
- * Example HTML:
- *   <div class="wx-webui-calendar"
- *        data-range="true"
- *        data-range-start="2025-07-01"
- *        data-range-end="2025-07-15"
- *        data-format="YYYY-MM-DD"
- *        data-holidays="2025-12-25,2025-12-26"></div>
  */
 webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
     _holidays = [];
@@ -450,6 +416,7 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
      * @private
      */
     _renderCalendar() {
+        const dateButtonMap = new Map();
         const container = document.createElement("div");
         container.classList.add("wx-calendar-view");
 
@@ -493,19 +460,7 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
         let date = new Date(firstDay);
         date.setDate(date.getDate() - ((date.getDay() + 6) % 7)); // Start at Monday
 
-        // Compute preview range (for mouse hover)
-        let previewRangeStart = null, previewRangeEnd = null;
-        if (this._rangeMode && this._previewStart && this._previewEnd) {
-            previewRangeStart = new Date(this._previewStart.getFullYear(), this._previewStart.getMonth(), this._previewStart.getDate());
-            previewRangeEnd = new Date(this._previewEnd.getFullYear(), this._previewEnd.getMonth(), this._previewEnd.getDate());
-            if (previewRangeStart > previewRangeEnd) {
-                const t = previewRangeStart;
-                previewRangeStart = previewRangeEnd;
-                previewRangeEnd = t;
-            }
-        }
-
-        // Table rows and cells for days
+        // table rows and cells for days
         while (date <= lastDay || date.getDay() !== 1) {
             const tr = document.createElement("tr");
             const tdKW = document.createElement("td");
@@ -514,124 +469,99 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
 
             for (let wd = 1; wd <= 7; wd++) {
                 const td = document.createElement("td");
-                td.textContent = date.getMonth() === month ? date.getDate() : "";
-                td.className = "wx-calendar-day";
-                // Highlight weekends
+                const button = document.createElement("button");
+                button.textContent = date.getDate();
+                td.appendChild(button);
+                dateButtonMap.set(new Date(date.getFullYear(), date.getMonth(), date.getDate()), button);
+                button.className = "wx-calendar-day";
+                // highlight weekends
                 if (date.getMonth() === month && (date.getDay() === 0 || date.getDay() === 6)) {
-                    td.classList.add("wx-calendar-red");
+                    button.classList.add("wx-calendar-red");
                 }
-                // Highlight holidays
+                // highlight holidays
                 if (date.getMonth() === month) {
                     const dateStr = date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
                     if (this._holidays.includes(dateStr)) {
-                        td.classList.add("wx-calendar-red");
+                        button.classList.add("wx-calendar-red");
                     }
                 }
-                // Grayout days not in this month
+                // grayout days not in this month
                 if (date.getMonth() !== month) {
-                    td.classList.add("wx-calendar-out");
+                    button.classList.add("wx-calendar-out");
                 }
 
-                // Highlight selected range
-                if (this._rangeMode && this._rangeStart && this._rangeEnd && date.getMonth() === month) {
+                // highlight selected range
+                if (this._rangeMode) {
                     const t = date.getTime();
-                    const s = this._rangeStart.setHours(0,0,0,0);
-                    const e = this._rangeEnd.setHours(0,0,0,0);
-                    if (t === s) {
-                        td.classList.add("selected", "range-start");
+                    const s = this._rangeStart?.setHours(0,0,0,0);
+                    const e = this._rangeEnd?.setHours(0,0,0,0);
+                    if (this._rangeStart && t === s) {
+                        button.classList.add("selected", "range-start");
                     }
-                    if (t === e) {
-                        td.classList.add("selected", "range-end");
+                    if (this._rangeEnd && t === e) {
+                        button.classList.add("selected", "range-end");
                     }
-                    if (t > s && t < e) {
-                        td.classList.add("selected", "range-middle");
+                    if (this._rangeStart && this._rangeEnd && t > s && t < e) {
+                        button.classList.add("selected", "range-middle");
                     }
                 } else if (!this._rangeMode && this._selectedDate
                     && date.getFullYear() === this._selectedDate.getFullYear()
                     && date.getMonth() === this._selectedDate.getMonth()
                     && date.getDate() === this._selectedDate.getDate()) {
-                    td.classList.add("selected");
+                    button.classList.add("selected");
                 }
-
-                // Highlight preview (hovered) range
-                if (this._rangeMode && previewRangeStart && previewRangeEnd && date.getMonth() === month) {
-                    const t = date.getTime();
-                    const s = previewRangeStart.getTime();
-                    const e = previewRangeEnd.getTime();
-                    if (t === s) {
-                        td.classList.add("preview", "range-start");
-                    }
-                    if (t === e) {
-                        td.classList.add("preview", "range-end");
-                    }
-                    if (t > s && t < e) {
-                        td.classList.add("preview", "range-middle");
-                    }
-                } else if (!this._rangeMode && this._previewStart
-                    && date.getFullYear() === this._previewStart.getFullYear()
-                    && date.getMonth() === this._previewStart.getMonth()
-                    && date.getDate() === this._previewStart.getDate()) {
-                    td.classList.add("preview");
-                }
-
-                td.style.cursor = date.getMonth() === month ? "pointer" : "default";
 
                 const currentDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
-                // Always remove preview when mouse leaves any cell, including wx-calendar-out
-                td.addEventListener("mouseleave", () => {
-                    this._previewStart = null;
-                    this._previewEnd = null;
+                button.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    if (this._rangeMode) {
+                        if (this._rangeStart && this._rangeEnd == null) {
+                            if (currentDate < this._rangeStart) {
+                                this._rangeEnd = this._rangeStart;
+                                this._rangeStart = currentDate;
+                            } else {
+                                this._rangeStart = this._rangeStart;
+                                this._rangeEnd = currentDate;
+                            }
+                        } else {
+                            this._rangeStart = currentDate;
+                            this._rangeEnd = null;
+                        }
+                    } else {
+                        this._selectedDate = currentDate;
+                    }
                     this.render();
                 });
-
-                if (date.getMonth() === month) {
-                    // Mouseenter: set preview range or date on hover
-                    td.addEventListener("mouseenter", () => {
-                        if (this._rangeMode) {
-                            if (this._selectingRange && this._rangeStart) {
-                                if (currentDate < this._rangeStart) {
-                                    this._previewStart = currentDate;
-                                    this._previewEnd = this._rangeStart;
-                                } else {
-                                    this._previewStart = this._rangeStart;
-                                    this._previewEnd = currentDate;
-                                }
-                            } else {
-                                this._previewStart = currentDate;
-                                this._previewEnd = currentDate;
-                            }
-                        } else {
-                            this._previewStart = currentDate;
-                        }
-                        this.render();
-                    });
-
-                    td.addEventListener("mousedown", (e) => {
+                
+                button.addEventListener("dblclick", (e) => {
+                    e.stopPropagation();
+                    this._rangeStart = null;
+                    this._rangeEnd = null;
+                    this._selectedDate = null;
+                    this.render();
+                });
+                
+                if (this._rangeMode && this._rangeStart && this._rangeEnd == null) {
+                    button.addEventListener("mouseenter", (e) => {
                         e.preventDefault();
-                        if (this._rangeMode) {
-                            if (!this._selectingRange) {
-                                this._rangeStart = this._rangeEnd = currentDate;
-                                this._selectingRange = true;
-                            } else {
-                                if (currentDate < this._rangeStart) {
-                                    this._rangeEnd = this._rangeStart;
-                                    this._rangeStart = currentDate;
-                                } else {
-                                    this._rangeEnd = currentDate;
-                                }
-                                this._selectingRange = false;
-                            }
-                            this._previewStart = null;
-                            this._previewEnd = null;
-                           
-                        } else {
-                            this.value = currentDate;
-                        }
+                        const start = this._rangeStart?.setHours(0,0,0,0);
+                        const end = currentDate?.setHours(0,0,0,0);
 
-                        this.render();
+                        const min = Math.min(start, end);
+                        const max = Math.max(start, end);
+
+                        for (const [d, b] of dateButtonMap.entries()) {
+                            const c = d.setHours(0,0,0,0);
+                            if (c >= min && c <= max) {
+                              b.classList.add("preview");
+                            } else {
+                              b.classList.remove("preview");
+                            }
+                        }
                     });
                 }
+
                 tr.appendChild(td);
                 date.setDate(date.getDate() + 1);
             }

@@ -1,33 +1,10 @@
 /**
  * CalendarCtrl is a calendar control for selecting a single date.
- * The calendar view appears as a popup.
- *
- * Supported data attributes:
- * - placeholder: Placeholder text for the input field
- * - data-value: The initial date to be displayed or preselected
- * - data-format: Date format string, e.g. "YYYY-MM-DD"
- * - data-holidays: Comma-separated list of holidays, e.g. "YYYY-MM-DD,..."
- *
- * Main Features:
- * - Selection of a single date via an interactive calendar popup
- * - Optional highlighting of holidays within the calendar view
- * - Display of ISO-8601 week numbers in the calendar
  *
  * The following events are triggered:
  * - webexpress.webui.Event.CHANGE_VALUE_EVENT: Fired when the selected date changes
  * - webexpress.webui.Event.DROPDOWN_SHOW_EVENT: Fired when the calendar popup is opened
  * - webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT: Fired when the calendar popup is closed
- *
- * Usage:
- * Create an instance of the control with:
- *   const element = document.createElement("div");
- *   element.setAttribute("data-format", "YYYY-MM-DD");
- *   new webexpress.webui.DateControl(element);
- *
- * Example HTML:
- *   <div class="wx-webui-date"
- *        data-format="YYYY-MM-DD"
- *        data-holidays="2025-12-25,2025-12-26"></div>
  */
 webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
     _holidays = [];
@@ -49,14 +26,15 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
         if (holidaysAttr) {
             this._holidays = holidaysAttr.split(",").map(x => x.trim()).filter(x => x.length > 0);
         }
-
+        
+        this._selectedDate = value ? this._parseDate(value, this._dateFormat) : null;
+        this._viewDate = this._selectedDate ? new Date(this._selectedDate) : new Date();
+        
         this._hidden = this._createHiddenInput(name);
         this._dropdown = this._createDropdown();
         this._dropdownmenu = this._createDropdownMenu();
-        this._selectedDate = value ? this._parseDate(value, this._dateFormat) : null;
-        this._viewDate = this._selectedDate ? new Date(this._selectedDate) : new Date();
 
-         // Clean up element attributes and prepare DOM structure
+        // clean up element attributes and prepare DOM structure
         element.removeAttribute("name");
         element.removeAttribute("placeholder");
         element.removeAttribute("data-holidays");
@@ -110,16 +88,15 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
 
         // always show popup when clicking on the icon or control, regardless of focus
         this._input.addEventListener("input", () => this._onInputLive());
-        this._input.addEventListener("blur", () => this._onInputChange());
         this._input.addEventListener("keydown", (e) => {
             if (e.key === "Enter") {
                 this._onInputChange();
-                this._input.blur();
             }
         });
-        this._input.addEventListener("focus", () => {
+        this._input.addEventListener("blur", () => {
             this._dropdownmenu.style.display = "flex";
             this._dropdownmenu.dispatchEvent(new Event("show"));
+            this._dropdownmenu.blur();
         });
 
         dropdown.appendChild(this._input);
@@ -135,7 +112,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
             e.stopPropagation();
             this._dropdownmenu.style.display = "flex";
             this._dropdownmenu.dispatchEvent(new Event("show"));
-            this._input.focus();
+            this._dropdownmenu.blur();
         });
 
         // always open popup when clicking the control (not just icon)
@@ -143,7 +120,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
             e.stopPropagation();
             this._dropdownmenu.style.display = "flex";
             this._dropdownmenu.dispatchEvent(new Event("show"));
-            this._input.focus();
+            this._dropdownmenu.blur();
         });
 
         // hide popup on outside click
@@ -151,6 +128,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
             if (!dropdown.contains(e.target) && !this._dropdownmenu.contains(e.target)) {
                 this._dropdownmenu.dispatchEvent(new Event("hide"));
                 this._dropdownmenu.style.display = "none";
+                this._input.blur();
             }
         });
 
@@ -215,10 +193,41 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
         dropdownMenu.classList.add("dropdown-menu");
         dropdownMenu.style.minWidth = "280px";
         dropdownMenu.style.display = "none";
+                        
+        // header with navigation
+        const header = document.createElement("div");
+        header.classList.add("wx-calendar-header");
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "wx-calendar-nav";
+        b.textContent = "«";
+        b.addEventListener("click", (e) => {
+            e.stopPropagation();
+            this._changeView(1, "year");
+        });
+        
+        const btnPrevYear = this._createNavButton("«", () => this._changeView(-1, "year"));
+        const btnPrevMonth = this._createNavButton("‹", () => this._changeView(-1, "month"));
+        const btnNextMonth = this._createNavButton("›", () => this._changeView(1, "month"));
+        const btnNextYear = this._createNavButton("»", () => this._changeView(1, "year"));
+        this._monthYear = document.createElement("span");
+        this._monthYear.textContent = this._viewDate.getFullYear() + " – " + webexpress.webui.I18N.translate(`webexpress.webui:calendar.${this._getMonthKey(this._viewDate.getMonth())}`);
+        this._monthYear.classList.add("wx-calendar-monthyear");
+
+        header.appendChild(btnPrevYear);
+        header.appendChild(btnPrevMonth);
+        header.appendChild(this._monthYear);
+        header.appendChild(btnNextMonth);
+        header.appendChild(btnNextYear);
+
+        dropdownMenu.appendChild(header);
+        
         this._calendarContainer = document.createElement("div");
+        this._calendarContainer.classList.add("wx-calendar");
+        this._calendarContainer.appendChild(this._renderCalendar());
         dropdownMenu.appendChild(this._calendarContainer);
 
-        // "Today" button with i18n label
+        // "today" button with i18n label
         const todayBtn = document.createElement("button");
         todayBtn.type = "button";
         todayBtn.className = "btn btn-light wx-date-today-btn";
@@ -228,8 +237,8 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
         todayBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             const now = new Date();
-            this._viewDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             this.value = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
             setTimeout(() => {
                 this._dropdownmenu.style.display = "none";
                 document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
@@ -255,6 +264,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
             this._input.value = "";
         }
         this._hidden.value = this._selectedDate ? this._formatDateString(this._selectedDate, this._dateFormat) : "";
+        this._monthYear.textContent = this._viewDate.getFullYear() + " – " + webexpress.webui.I18N.translate(`webexpress.webui:calendar.${this._getMonthKey(this._viewDate.getMonth())}`);
         this._calendarContainer.innerHTML = "";
         this._calendarContainer.appendChild(this._renderCalendar());
     }
@@ -426,6 +436,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
         } else if (mode === "year") {
             this._viewDate.setFullYear(this._viewDate.getFullYear() + step);
         }
+        
         this.render();
     }
 
@@ -434,27 +445,9 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
      * @returns {HTMLDivElement} Calendar element.
      */
     _renderCalendar() {
-        const container = document.createElement("div");
-        container.classList.add("wx-calendar");
+        const dateButtonMap = new Map();
 
-        // Header with navigation
-        const header = document.createElement("div");
-        header.classList.add("wx-calendar-header");
-        const btnPrevYear = this._createNavButton("«", () => this._changeView(-1, "year"));
-        const btnPrevMonth = this._createNavButton("‹", () => this._changeView(-1, "month"));
-        const btnNextMonth = this._createNavButton("›", () => this._changeView(1, "month"));
-        const btnNextYear = this._createNavButton("»", () => this._changeView(1, "year"));
-        const monthYear = document.createElement("span");
-        monthYear.textContent = this._viewDate.getFullYear() + " – " + webexpress.webui.I18N.translate(`webexpress.webui:calendar.${this._getMonthKey(this._viewDate.getMonth())}`);
-        monthYear.classList.add("wx-calendar-monthyear");
-
-        header.appendChild(btnPrevYear);
-        header.appendChild(btnPrevMonth);
-        header.appendChild(monthYear);
-        header.appendChild(btnNextMonth);
-        header.appendChild(btnNextYear);
-
-        // Table for calendar days
+        // table for calendar days
         const table = document.createElement("table");
         table.classList.add("wx-calendar-table");
         const thead = document.createElement("thead");
@@ -463,7 +456,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
         thKW.textContent = webexpress.webui.I18N.translate("webexpress.webui:calendar.calendar_week");
         trHead.appendChild(thKW);
 
-        // Weekdays header (Monday start)
+        // weekdays header (monday start)
         for (let i = 1; i <= 7; i++) {
             const th = document.createElement("th");
             th.textContent = webexpress.webui.I18N.translate(`webexpress.webui:calendar.${this._getWeekdayKey(i % 7)}`);
@@ -472,7 +465,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
         thead.appendChild(trHead);
         table.appendChild(thead);
 
-        // Body with days
+        // body with days
         const tbody = document.createElement("tbody");
         const year = this._viewDate.getFullYear();
         const month = this._viewDate.getMonth();
@@ -489,49 +482,54 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
 
             for (let wd = 1; wd <= 7; wd++) {
                 const td = document.createElement("td");
-                td.textContent = date.getMonth() === month ? date.getDate() : "";
-                td.className = "wx-calendar-day";
-                // Highlight weekends
+                const button = document.createElement("button");
+                button.textContent = date.getDate();
+                dateButtonMap.set(new Date(date.getFullYear(), date.getMonth(), date.getDate()), button);
+                button.className = "wx-calendar-day";
+                button.blur();
+                // highlight weekends
                 if (date.getMonth() === month && (date.getDay() === 0 || date.getDay() === 6)) {
-                    td.classList.add("wx-calendar-red");
+                    button.classList.add("wx-calendar-red");
                 }
-                // Highlight holidays
+                // highlight holidays
                 if (date.getMonth() === month) {
                     const dateStr = date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
                     if (this._holidays.includes(dateStr)) {
-                        td.classList.add("wx-calendar-red");
+                        button.classList.add("wx-calendar-red");
                     }
                 }
-                // Grayout days not in this month
+                // grayout days not in this month
                 if (date.getMonth() !== month) {
-                    td.classList.add("wx-calendar-out");
-                } else if (
-                    this._selectedDate &&
+                    button.classList.add("wx-calendar-out");
+                } 
+
+                if (this._selectedDate &&
                     date.getFullYear() === this._selectedDate.getFullYear() &&
                     date.getMonth() === this._selectedDate.getMonth() &&
                     date.getDate() === this._selectedDate.getDate()
                 ) {
-                    td.classList.add("selected");
+                    button.classList.add("selected");
                 }
-                td.style.cursor = date.getMonth() === month ? "pointer" : "default";
-                if (date.getMonth() === month) {
-                    // always set time to 00:00:00 for reliable behavior
-                    const currentDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-                    td.addEventListener("mousedown", (e) => {
-                        e.preventDefault();
-                        this.value = currentDate;
-                        setTimeout(() => {
-                            this._dropdownmenu.style.display = "none";
-                            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
-                                detail: {
-                                    sender: this._element,
-                                    id: this._element.id
-                                }
-                            }));
-                            this._input.focus();
-                        }, 0);
-                    });
-                }
+                
+                const currentDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+                
+                button.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    this._selectedDate = currentDate;
+                    this.value = currentDate;
+                    setTimeout(() => {
+                        this._dropdownmenu.style.display = "none";
+                        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
+                            detail: {
+                                sender: this._element,
+                                id: this._element.id
+                            }
+                        }));
+                        this._input.blur();
+                    }, 0);
+                });
+                
+                td.appendChild(button);
                 tr.appendChild(td);
                 date.setDate(date.getDate() + 1);
             }
@@ -539,9 +537,8 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
         }
 
         table.appendChild(tbody);
-        container.appendChild(header);
-        container.appendChild(table);
-        return container;
+
+        return table;
     }
 
     /**
