@@ -2,8 +2,11 @@
  * English translations for WebExpress
  */
 webexpress.webui.I18N.register("en", "webexpress.webui", {
+    "edit": "Edit",
     "copy": "Copy",
     "remove": "Remove",
+    "save": "Save",
+    "cancel": "Cancel",
 
     "calendar.select_date": "Select date",
     "calendar.select_range": "Select range",

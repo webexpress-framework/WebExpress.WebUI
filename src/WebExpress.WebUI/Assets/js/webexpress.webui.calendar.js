@@ -13,8 +13,6 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
     _rangeStart = null;
     _rangeEnd = null;
     _selectingRange = false;
-    _previewStart = null;
-    _previewEnd = null;
 
     /**
      * Initializes the calendar control and sets up DOM and event bindings.
@@ -40,20 +38,20 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
             this._rangeEnd = null;
         }
 
-        // Parse holidays from data attribute
+        // parse holidays from data attribute
         if (holidaysAttr) {
             this._holidays = holidaysAttr.split(",").map(x => x.trim()).filter(x => x.length > 0);
         }
 
         this._hidden = this._createHiddenInput(name);
 
-        // Parse initial value if available
+        // parse initial value if available
         this._selectedDate = value ? this._parseDate(value, this._dateFormat) : null;
 
-        // Set initial view date
+        // set initial view date
         this._viewDate = this._selectedDate ? new Date(this._selectedDate) : new Date();
 
-        // Clean up element attributes and prepare DOM structure
+        // clean up element attributes and prepare DOM structure
         element.removeAttribute("name");
         element.removeAttribute("placeholder");
         element.removeAttribute("data-holidays");
@@ -63,7 +61,7 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
         element.classList.add("wx-calendar");
         element.appendChild(this._hidden);
 
-        // Build main layout: wrapper, display, toolbar, and calendar container
+        // build main layout: wrapper, display, toolbar, and calendar container
         const wrapper = document.createElement("div");
         wrapper.className = "wx-calendar-wrapper";
         wrapper.style.display = "flex";
@@ -78,7 +76,7 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
         previewToolbarRow.style.alignItems = "center";
         wrapper.appendChild(previewToolbarRow);
 
-        // Display selected date or range
+        // display selected date or range
         this._display = document.createElement("div");
         this._display.className = "wx-calendar-display";
         this._display.style.minHeight = "2em";
@@ -88,7 +86,7 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
         this._display.style.flex = "1 1 auto";
         previewToolbarRow.appendChild(this._display);
 
-        // Toolbar with action buttons (Today, Clear, Copy, Paste)
+        // toolbar with action buttons (Today, Clear, Copy, Paste)
         this._toolbar = document.createElement("div");
         this._toolbar.className = "wx-calendar-toolbar";
         this._toolbar.style.display = "flex";
@@ -97,7 +95,7 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
         this._toolbar.style.gap = "0.25em";
         previewToolbarRow.appendChild(this._toolbar);
 
-        // Today button to select the current day
+        // today button to select the current day
         const todayBtn = document.createElement("button");
         todayBtn.type = "button";
         todayBtn.className = "btn btn-light wx-calendar-today-btn";
@@ -115,13 +113,12 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
             } else {
                 this.value = now;
             }
-            this._previewStart = null;
-            this._previewEnd = null;
+
             this.render();
         });
         this._toolbar.appendChild(todayBtn);
 
-        // Button to clear the selection
+        // button to clear the selection
         const clearBtn = document.createElement("button");
         clearBtn.type = "button";
         clearBtn.className = "btn btn-light wx-calendar-clear-btn";
@@ -138,19 +135,18 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
             } else {
                 this.value = null;
             }
-            this._previewStart = null;
-            this._previewEnd = null;
+
             this.render();
         });
         this._toolbar.appendChild(clearBtn);
 
-        // Button to copy the current value to clipboard
+        // button to copy the current value to clipboard
         const copyBtn = document.createElement("button");
         copyBtn.type = "button";
         copyBtn.className = "btn btn-light wx-calendar-copy-btn";
         copyBtn.title = webexpress.webui.I18N
             ? webexpress.webui.I18N.translate("webexpress.webui:copy") || "Copy"
-            : "Kopieren";
+            : "Copy";
         copyBtn.innerHTML = '<i class="fa-solid fa-clone"></i>';
         copyBtn.addEventListener("click", (e) => {
             e.stopPropagation();
@@ -166,7 +162,7 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
         });
         this._toolbar.appendChild(copyBtn);
 
-        // Container for the calendar view
+        // container for the calendar view
         this._calendarContainer = document.createElement("div");
         wrapper.appendChild(this._calendarContainer);
 
@@ -207,7 +203,7 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
                 ? this._formatDateString(this._selectedDate, this._dateFormat)
                 : "";
         }
-        // Disable copy button if nothing is selected
+        // disable copy button if nothing is selected
         if ((this._rangeMode && (!this._rangeStart || !this._rangeEnd)) ||
             (!this._rangeMode && !this._selectedDate)) {
             this._toolbar.querySelector('.wx-calendar-copy-btn').disabled = true;
@@ -234,7 +230,7 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
      * @param {Date|Object|null} date - Date or {start, end} object.
      */
     set value(date) {
-        if (this._rangeMode && date && typeof date === "object" && date.start && date.end) {
+        if (this._rangeMode && date && typeof date === "object") {
             this._rangeStart = date.start;
             this._rangeEnd = date.end;
             this._selectedDate = null;
@@ -243,21 +239,26 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
             this._rangeStart = null;
             this._rangeEnd = null;
         }
-        this._previewStart = null;
-        this._previewEnd = null;
-        this.render();
-        this._hidden.value = this._rangeMode
+
+        const value = this._rangeMode
             ? (this._rangeStart && this._rangeEnd
                 ? this._formatDateString(this._rangeStart, this._dateFormat) + " - " + this._formatDateString(this._rangeEnd, this._dateFormat)
-                : "")
+                : (this._rangeStart ? this._formatDateString(this._rangeStart, this._dateFormat) : ""))
             : (date ? this._formatDateString(date, this._dateFormat) : "");
-        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
-            detail: {
-                sender: this._element,
-                id: this._element.id,
-                value: this._hidden.value
-            }
-        }));
+        
+        if (this._hidden.value != value) {
+            this._hidden.value = value;
+            
+            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
+                detail: {
+                    sender: this._element,
+                    id: this._element.id,
+                    value: value
+                }
+            }));
+        }
+        
+        this.render();
     }
 
     /**
@@ -517,29 +518,23 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
                     e.stopPropagation();
                     if (this._rangeMode) {
                         if (this._rangeStart && this._rangeEnd == null) {
-                            if (currentDate < this._rangeStart) {
-                                this._rangeEnd = this._rangeStart;
-                                this._rangeStart = currentDate;
+                            if (currentDate < this._rangeStart) {                               
+                                this.value = { start: currentDate, end: this._rangeStart };
                             } else {
-                                this._rangeStart = this._rangeStart;
-                                this._rangeEnd = currentDate;
+                                this.value = { start: this._rangeStart, end: currentDate };
                             }
                         } else {
-                            this._rangeStart = currentDate;
-                            this._rangeEnd = null;
+                            this.value = { start: currentDate, end: null };
                         }
                     } else {
-                        this._selectedDate = currentDate;
+                        this.value = currentDate;
                     }
                     this.render();
                 });
                 
                 button.addEventListener("dblclick", (e) => {
                     e.stopPropagation();
-                    this._rangeStart = null;
-                    this._rangeEnd = null;
-                    this._selectedDate = null;
-                    this.render();
+                    this.value = null;
                 });
                 
                 if (this._rangeMode && this._rangeStart && this._rangeEnd == null) {
@@ -571,13 +566,6 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
         table.appendChild(tbody);
         container.appendChild(header);
         container.appendChild(table);
-
-        // Remove preview reliably when leaving the whole calendar table (e.g. fast mouse-out)
-        table.addEventListener("mouseleave", () => {
-            this._previewStart = null;
-            this._previewEnd = null;
-            this.render();
-        });
 
         return container;
     }
