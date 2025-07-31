@@ -37,8 +37,8 @@ webexpress.webui.MoveCtrl = class extends webexpress.webui.Ctrl {
 
         // Read all relevant data attributes for labels and state
         const name = element.getAttribute("name") || element.id;
-        const selectedHeaderLabel = element.dataset.headerSelected || "Selected";
-        const availableHeaderLabel = element.dataset.headerAvailable || "Available";
+        const selectedHeaderLabel = element.dataset.headerSelected || webexpress.webui.I18N.translate("webexpress.webui:selected");
+        const availableHeaderLabel = element.dataset.headerAvailable || webexpress.webui.I18N.translate("webexpress.webui:available");
         const selectedAllButtonLabel = element.dataset.buttonSelectall || "<<";
         const selectedButtonLabel = element.dataset.buttonSelected || "<";
         const availableButtonLabel = element.dataset.buttonAvailable || ">";
@@ -53,7 +53,7 @@ webexpress.webui.MoveCtrl = class extends webexpress.webui.Ctrl {
         const selectedHeader = this._createHeader(selectedHeaderLabel);
         const availableContainer = this._createDiv('wx-move-list');
         const availableHeader = this._createHeader(availableHeaderLabel);
-        const buttonContainer = this._createDiv('wx-move-button d-grid gap-2');
+        const buttonContainer = this._createDiv('wx-move-button');
 
         // Clean up the DOM and remove all data attributes
         element.innerHTML = '';

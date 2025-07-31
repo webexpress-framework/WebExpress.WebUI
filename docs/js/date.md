@@ -23,7 +23,8 @@ The initialization and behavior of the component are managed through `data-` att
 
 | Attribute | Description | Example |
 | :--- | :--- | :--- |
-| `data-value` | Sets the initial date. The value must correspond to the format defined in `data-format`. | `data-value="2025-07-01"` |
+| `data-range` | Activates the date range selection mode when set to `"true"`. | `data-range="true"` |
+| `data-value` | Sets the initial value. In range mode, a string like `"YYYY-MM-DD - YYYY-MM-DD"` is expected. | `data-value="2025-07-01"` |
 | `data-format` | Defines the date format for manual input, display in the text field, and the value in the hidden input field. | `data-format="YYYY-MM-DD"` |
 | `data-holidays`| A comma-separated list of holidays in `"YYYY-MM-DD"` format, which are visually highlighted in the calendar pop-up. | `data-holidays="2025-12-25,2025-12-26"` |
 | `placeholder` | The text displayed in the input field as long as no date is selected. | `placeholder="Select a date..."` |

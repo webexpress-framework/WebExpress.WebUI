@@ -59,17 +59,18 @@ webexpress.webui.Controller = new class {
      * @param {Element} element - The DOM element for which instances should be created.
      */
     createInstances(element) {
+        // initialize children first (depth-first)
+        Array.from(element.children).forEach(child => {
+            this.createInstances(child);
+        });
+
+        // then initialize the element itself if it matches a registered selector
         for (const [selector, ClassConstructor] of this.classRegistry.entries()) {
             if (element.classList.contains(selector)) {
                 element.classList.remove(selector);
                 const instance = new ClassConstructor(element);
                 this.instanceMap.set(element, instance);
             }
-            element.querySelectorAll("." + selector).forEach(child => {
-                child.classList.remove(selector);
-                const instance = new ClassConstructor(child);
-                this.instanceMap.set(child, instance);
-            });
         }
     }
 
@@ -509,4 +510,10 @@ webexpress.webui.Event = class {
     static ADD_EVENT = "webexpress.webui.add";
     // Event triggered when an item is removed.
     static REMOVE_EVENT = "webexpress.webui.remove";
+    // Event triggered when inline editing starts.
+    static START_INLINE_EDIT_EVENT = "webexpress.webui.inlineedit.start";
+    // Event triggered when inline editing is saved.
+    static SAVE_INLINE_EDIT_EVENT = "webexpress.webui.inlineedit.save";
+    // Event triggered when inline editing ends (regardless if saved or canceled).
+    static END_INLINE_EDIT_EVENT = "webexpress.webui.inlineedit.end";
 }

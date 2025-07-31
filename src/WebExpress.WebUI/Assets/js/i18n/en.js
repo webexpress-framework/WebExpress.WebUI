@@ -7,6 +7,9 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "remove": "Remove",
     "save": "Save",
     "cancel": "Cancel",
+    "close": "Close",
+    "selected": "Selected",
+    "available": "Available",
 
     "calendar.select_date": "Select date",
     "calendar.select_range": "Select range",
@@ -32,8 +35,5 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "calendar.sat": "Sat",
     "calendar.sun": "Sun",
     "calendar.today": "Today",
-    "calendar.format": "M/D/YYYY",
-
-    "modal.close": "Close"
-
+    "calendar.format": "M/D/YYYY"
 });

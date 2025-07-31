@@ -1,4 +1,5 @@
 ﻿using WebExpress.WebCore.WebMessage;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
@@ -21,7 +22,6 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var form = new ControlForm();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlForm(id)
@@ -73,7 +73,6 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var form = new ControlForm();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlForm()
@@ -87,18 +86,44 @@ namespace WebExpress.WebUI.Test.WebControl
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
-        // <summary>
+        /// <summary>
+        /// Tests the uri property of the form control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<form id=""*"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData("", @"<form id=""*"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData("http://localhost:8080/webui", @"<form id=""*"" action=""http://localhost:8080/webui"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        public void Uri(string uri, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlForm()
+            {
+                Uri = uri != null ? new UriEndpoint(uri) : null
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests the method property of the form control.
         /// </summary>
         [Theory]
         [InlineData(RequestMethod.NONE, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         [InlineData(RequestMethod.POST, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(RequestMethod.PUT, @"<form id=""*"" action=""http://localhost:8080/"" method=""PUT"" enctype=""multipart/form-data"">*</form>")]
         [InlineData(RequestMethod.GET, @"<form id=""*"" action=""http://localhost:8080/"" method=""GET"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(RequestMethod.PATCH, @"<form id=""*"" action=""http://localhost:8080/"" method=""PATCH"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(RequestMethod.DELETE, @"<form id=""*"" action=""http://localhost:8080/"" method=""DELETE"" enctype=""multipart/form-data"">*</form>")]
         public void Method(RequestMethod method, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var form = new ControlForm();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlForm()
@@ -122,7 +147,6 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var form = new ControlForm();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlForm()
@@ -147,7 +171,6 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var form = new ControlForm();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlForm()
@@ -195,7 +218,6 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var form = new ControlForm();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlForm();
@@ -214,7 +236,6 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var form = new ControlForm();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlForm();
