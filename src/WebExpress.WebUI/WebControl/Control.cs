@@ -165,10 +165,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The value.</returns>
         protected Enum GetProperty(Enum defaultValue, [CallerMemberName] string propertyName = "")
         {
-            if (_propertys.ContainsKey(propertyName))
+            if (_propertys.TryGetValue(propertyName, out Tuple<object, Func<string>, Func<string>> item))
             {
-                var item = _propertys[propertyName];
-
                 return (Enum)item.Item1;
             }
 
@@ -182,10 +180,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The value.</returns>
         protected Enum GetProperty([CallerMemberName] string propertyName = "")
         {
-            if (_propertys.ContainsKey(propertyName))
+            if (_propertys.TryGetValue(propertyName, out Tuple<object, Func<string>, Func<string>> item))
             {
-                var item = _propertys[propertyName];
-
                 return (Enum)item.Item1;
             }
 
@@ -199,10 +195,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The value.</returns>
         protected IProperty GetPropertyObject([CallerMemberName] string propertyName = "")
         {
-            if (_propertys.ContainsKey(propertyName))
+            if (_propertys.TryGetValue(propertyName, out Tuple<object, Func<string>, Func<string>> item))
             {
-                var item = _propertys[propertyName];
-
                 return (IProperty)item.Item1;
             }
 
@@ -216,10 +210,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The value.</returns>
         protected string GetPropertyValue([CallerMemberName] string propertyName = "")
         {
-            if (_propertys.ContainsKey(propertyName))
+            if (_propertys.TryGetValue(propertyName, out Tuple<object, Func<string>, Func<string>> item))
             {
-                var item = _propertys[propertyName];
-
                 return item.Item2();
             }
 

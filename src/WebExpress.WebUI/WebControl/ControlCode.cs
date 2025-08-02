@@ -1,4 +1,6 @@
-﻿using WebExpress.WebCore.WebHtml;
+﻿using System;
+using System.Text;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -49,14 +51,17 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var html = new HtmlElementTextContentPre(new HtmlText(Code))
+            var decode = Convert.ToBase64String(Encoding.UTF8.GetBytes(Code ?? ""));
+
+            var html = new HtmlElementTextContentPre(new HtmlText(decode))
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-code", GetClasses()),
                 Style = GetStyles()
             }
                 .AddUserAttribute("data-line-numbers", LineNumbers ? "true" : null)
-                .AddUserAttribute("data-language", Language.ToLanguage());
+                .AddUserAttribute("data-language", Language.ToLanguage())
+                .AddUserAttribute("data-base64", "true");
 
             return html;
         }
