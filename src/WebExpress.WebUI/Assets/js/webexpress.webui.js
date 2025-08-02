@@ -516,4 +516,12 @@ webexpress.webui.Event = class {
     static SAVE_INLINE_EDIT_EVENT = "webexpress.webui.inlineedit.save";
     // Event triggered when inline editing ends (regardless if saved or canceled).
     static END_INLINE_EDIT_EVENT = "webexpress.webui.inlineedit.end";
+    // Event triggered when a file is selected.
+    static FILE_SELECTED_EVENT = "webexpress.webui.file.selected";
+    // Event triggered when a file upload completes successfully.
+    static UPLOAD_SUCCESS_EVENT = "webexpress.webui.upload.success";
+    // Event triggered when a file upload fails.
+    static UPLOAD_ERROR_EVENT = "webexpress.webui.upload.error";
+    // Event triggered to indicate upload progress.
+    static UPLOAD_PROGRESS_EVENT = "webexpress.webui.upload.progress";
 }

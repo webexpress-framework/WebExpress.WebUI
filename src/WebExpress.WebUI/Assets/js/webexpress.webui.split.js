@@ -1,6 +1,6 @@
 /**
  * A split control for resizable container panels.
- * Supported events:
+ * The following events are triggered:
  * - webexpress.webui.Event.SIZE_CHANGE_EVENT
  * - webexpress.webui.Event.HIDE_EVENT
  * - webexpress.webui.Event.SHOW_EVENT

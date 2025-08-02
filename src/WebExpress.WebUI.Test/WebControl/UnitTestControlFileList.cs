@@ -13,7 +13,7 @@ namespace WebExpress.WebUI.Test.WebControl
     public class UnitTestControlFileList
     {
         /// <summary>
-        /// Tests the id property of the list control.
+        /// Tests the id property of the file list control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-file-list""></div>")]
@@ -37,7 +37,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the name property of the list item control.
+        /// Tests the name property of the file list item control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-file-list""><div class=""wx-webui-file""></div></div>")]
@@ -62,7 +62,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the icon property of the list item control.
+        /// Tests the icon property of the file list item control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-file-list""><div class=""wx-webui-file""></div></div>")]
@@ -89,7 +89,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the size property of the list item control.
+        /// Tests the size property of the file list item control.
         /// </summary>
         [Theory]
         [InlineData(-1, @"<div class=""wx-webui-file-list""><div class=""wx-webui-file""></div></div>")]
@@ -114,7 +114,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the description property of the list item control.
+        /// Tests the description property of the file list item control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-file-list""><div class=""wx-webui-file""></div></div>")]

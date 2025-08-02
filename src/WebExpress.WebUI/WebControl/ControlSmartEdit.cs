@@ -68,7 +68,7 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
         /// <param name="items">The form items to add to the form.</param>
         public ControlSmartEdit([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null, params IControlFormItemInput[] items)
-            : this($"{instance}_{file}_{line}".GetHashCode().ToString("X"), items)
+            : this($"smartedit_{instance}_{file}_{line}".GetHashCode().ToString("X"), items)
         {
         }
 

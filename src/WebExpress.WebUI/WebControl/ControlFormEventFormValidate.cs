@@ -15,7 +15,7 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<ValidationResult> Results => _results;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ControlFormEventFormValidate"/> class.
+        /// Initializes a new instance of the class.
         /// </summary>
         public ControlFormEventFormValidate()
         {
