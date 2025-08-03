@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebMessage;
 using WebExpress.WebCore.WebUri;
@@ -23,6 +24,11 @@ namespace WebExpress.WebUI.WebControl
         /// Event is raised when the form is about to be processed.
         /// </summary>
         public event Action<ControlFormEventFormProcessFile> ProcessForm;
+
+        /// <summary>
+        /// Returns or sets the placeholder text displayed in the file upload area.
+        /// </summary>
+        public string Placeholder { get; set; }
 
         /// <summary>
         /// Returns or sets the URI associated with the form.
@@ -118,6 +124,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles()
             }
                 .AddUserAttribute("data-uri", uri)
+                .AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder))
                 .AddUserAttribute("data-multiple", !Multiple ? "false" : null)
                 .AddUserAttribute("data-accept", Accept)
                 .AddUserAttribute("data-autoupload", AutoUpload ? "true" : null)

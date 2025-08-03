@@ -35,5 +35,7 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "calendar.sat": "Sat",
     "calendar.sun": "Sun",
     "calendar.today": "Today",
-    "calendar.format": "M/D/YYYY"
+    "calendar.format": "M/D/YYYY",
+
+    "upload.placeholder": "Drop file here or click to upload."
 });

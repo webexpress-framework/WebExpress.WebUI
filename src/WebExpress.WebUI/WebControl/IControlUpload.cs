@@ -9,6 +9,11 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlUpload : IControl
     {
         /// <summary>
+        /// Returns the placeholder text displayed in the file upload area.
+        /// </summary>
+        string Placeholder { get; }
+
+        /// <summary>
         /// Returns the URI associated with the form.
         /// </summary>
         IUri Uri { get; }
