@@ -19,8 +19,8 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
 
         // get options from attributes
         this._id = element.id || null;
-        this._value = this._getEditorValue(element);
         this._editor = this._detachElement(element.firstElementChild);
+        this._value = this._getEditorValue(element);
         this._objectId = element.getAttribute('data-object-id') || null;
         this._objectName = element.getAttribute('data-object-name') || null;
         this._formAction = element.getAttribute('data-form-action') || null;
@@ -292,10 +292,10 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-    * Extracts the most relevant value from the given container element.
-    * @param {HTMLElement} element - The DOM element to extract the value from
-    * @returns {string} The extracted value based on priority
-    */
+     * Extracts the most relevant value from the given container element.
+     * @param {HTMLElement} element - The DOM element to extract the value from
+     * @returns {string} The extracted value based on priority
+     */
     _getEditorValue(element) {
         // get the control instance
         const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
@@ -305,23 +305,34 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         }
 
         // 1. input field
-        let el = element.querySelector('input');
-        if (el) return el.value;
+        if (this._editor?.tagName === 'INPUT') {
+            return this._editor.value;
+        }
 
         // 2. textarea element
-        el = element.querySelector('textarea');
-        if (el) return el.value;
+        if (this._editor?.tagName === 'TEXTAREA') {
+            return this._editor.value;
+        }
 
-        // 3. hidden input field
-        el = element.querySelector('input[type="hidden"]');
-        if (el) return el.value;
+        // 3. select element
+        if (this._editor?.tagName === 'SELECT') {
+            return this._editor.options[this._editor.selectedIndex]?.value ?? '';
+        }
 
-        // 4. element with a 'data-value' attribute anywhere inside
+        // 4. hidden input field
+        let el = this._editor?.querySelector('input');
+        if (el) {
+            return el.value;
+        }
+
+        // 5. element with a 'data-value' attribute anywhere inside
         el = element.querySelector('[data-value]');
-        if (el) return el.getAttribute('data-value');
+        if (el) {
+            return el.getAttribute('data-value');
+        }
 
-        // 5. fallback: visible text content from the container itself
-        return element.textContent.trim();
+        // 6. fallback: visible text content from the container itself
+        return this._editor?.textContent.trim();
     }
 
     /**
@@ -343,21 +354,21 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
                 const item = ctrl.options.find(opt => String(opt.id) === String(id));
                 const li = document.createElement("li");
                 const span = document.createElement("span");
-                if (item.labelColor) {
+                if (item?.labelColor) {
                     li.className = item.labelColor;
                 }
-                if (item.image) {
+                if (item?.image) {
                     const img = document.createElement("img");
                     img.src = item.image;
                     span.appendChild(img);
                 }
-                if (item.icon) {
+                if (item?.icon) {
                     const icon = document.createElement("i");
                     icon.className = item.icon;
                     span.appendChild(icon);
                 }
                 const labelSpan = document.createElement("span");
-                labelSpan.textContent = item.label;
+                labelSpan.textContent = item?.label;
                 span.appendChild(labelSpan);
 
                 li.appendChild(span);
@@ -373,21 +384,21 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
                 const item = ctrl.options.find(opt => String(opt.id) === String(id));
                 const li = document.createElement("li");
                 const span = document.createElement("span");
-                if (item.labelColor) {
+                if (item?.labelColor) {
                     li.className = item.labelColor;
                 }
-                if (item.image) {
+                if (item?.image) {
                     const img = document.createElement("img");
                     img.src = item.image;
                     span.appendChild(img);
                 }
-                if (item.icon) {
+                if (item?.icon) {
                     const icon = document.createElement("i");
                     icon.className = item.icon;
                     span.appendChild(icon);
                 }
                 const labelSpan = document.createElement("span");
-                labelSpan.textContent = item.label;
+                labelSpan.textContent = item?.label;
                 span.appendChild(labelSpan);
 
                 li.appendChild(span);
@@ -404,10 +415,10 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
                 li.textContent = tag;
 
                 // set color if defined
-                if (ctrl._colorCss) {
+                if (ctrl?._colorCss) {
                     li.classList.add(this._colorCss);
                 } else if (ctrl._colorStyle) {
-                    li.style.cssText = ctrl._colorStyle;
+                    li.style.cssText = ctrl?._colorStyle;
                 } else {
                     li.classList.add("wx-tag-primary");
                 }
@@ -419,6 +430,15 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         } else if (ctrl && ctrl instanceof webexpress.webui.EditorCtrl) {
             const span = document.createElement('span');
             span.innerHTML = ctrl._editorElement?.innerHTML;
+            return span;
+        } else if (this._editor.tagName === 'SELECT') {
+            const ids = Array.isArray(value) ? value : String(value).split(';');
+            const labels = ids.map(id => {
+                const opt = Array.from(this._editor.options).find(o => o.value === id);
+                return opt?.label || opt?.text || id;
+            });
+            const span = document.createElement('span');
+            span.textContent = labels.join(', ');
             return span;
         }
 

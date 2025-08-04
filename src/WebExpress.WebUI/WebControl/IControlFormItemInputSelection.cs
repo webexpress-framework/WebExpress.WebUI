@@ -6,7 +6,7 @@ namespace WebExpress.WebUI.WebControl
     /// Represents a form item input selection control.
     /// Provides methods to manage selection options.
     /// </summary>
-    public interface IControlFormItemInputSelection : IControlFormItem
+    public interface IControlFormItemInputSelection : IControlFormItemInput
     {
         /// <summary>
         /// Returns the entries.

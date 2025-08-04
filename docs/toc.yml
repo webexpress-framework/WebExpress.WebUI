@@ -23,6 +23,8 @@
       href: js/editor.md
     - name: Expandable
       href: js/expandable.md
+    - name: FileList
+      href: js/filelist.md      
     - name: Modal
       href: js/modal.md
     - name: Move
@@ -43,5 +45,7 @@
       href: js/toolbar.md
     - name: Tree
       href: js/tree.md
+    - name: Upload
+      href: js/upload.md
 - name: Tutorials
   href: tutorials.md
