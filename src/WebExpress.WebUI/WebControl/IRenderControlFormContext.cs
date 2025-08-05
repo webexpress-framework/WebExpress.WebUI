@@ -16,14 +16,18 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns the dictionary of input controls and their associated values.
         /// </summary>
-        IReadOnlyDictionary<IControlFormItemInput, string> Values { get; }
+        IReadOnlyDictionary<IControlFormItemInput, IControlFormInputValue> Values { get; }
 
         /// <summary>
         /// Retrieves the value associated with the specified input control.
         /// </summary>
         /// <param name="input">The input control whose value is to be retrieved.</param>
-        /// <returns>The value associated with the input control, or the default value of <typeparamref name="T"/> if not found.</returns>
-        string GetValue(IControlFormItemInput input);
+        /// <returns>
+        /// The value associated with the input control, or the default value if not found.
+        /// </returns>
+        /// <typeparam name="TValue">The type of the value to be assigned to the input control.</typeparam>
+        TValue GetValue<TValue>(IControlFormItemInput input)
+            where TValue : class, IControlFormInputValue, new();
 
         /// <summary>
         /// Sets the value for the specified input control.
@@ -31,6 +35,6 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="input">The input control for which the value is to be set.</param>
         /// <param name="value">The value to set for the input control.</param>
         /// <returns>The current instance for method chaining.</returns>
-        IRenderControlFormContext SetValue(IControlFormItemInput input, string value);
+        IRenderControlFormContext SetValue(IControlFormItemInput input, IControlFormInputValue value);
     }
 }

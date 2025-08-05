@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.WebControl
     /// <remarks>
     /// This class provides the functionality for a radio button input within a form.
     /// </remarks>
-    public class ControlFormItemInputRadio : ControlFormItemInput
+    public class ControlFormItemInputRadio : ControlFormItemInput<ControlFormInputValueString>
     {
         /// <summary>
         /// Returns or sets the value of the optiopn.
@@ -62,7 +62,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
-            var value = renderContext?.GetValue(this);
+            var value = renderContext?.GetValue<ControlFormInputValueString>(this)?.Text;
 
             if (!string.IsNullOrWhiteSpace(value))
             {
@@ -95,6 +95,23 @@ namespace WebExpress.WebUI.WebControl
                     )));
 
             return html;
+        }
+
+        /// <summary>
+        /// Creates an value from the specified string representation.
+        /// </summary>
+        /// <param name="value">
+        /// The string representation of the value to be converted. Cannot be null.
+        /// </param>
+        /// <returns>
+        /// The value created from the specified string representation.
+        /// </returns>
+        protected override ControlFormInputValueString CreateValue(string value)
+        {
+            return new ControlFormInputValueString
+            {
+                Text = value
+            };
         }
     }
 }

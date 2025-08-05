@@ -262,7 +262,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFormItemInputText(null);
             var form = new ControlForm().Add(control).Initialize(renderContext =>
             {
-                renderContext.SetValue(control, value);
+                renderContext.SetValue(control, new ControlFormInputValueString(value));
             });
 
             // test execution

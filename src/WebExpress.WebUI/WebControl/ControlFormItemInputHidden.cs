@@ -6,7 +6,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a hidden input form item control.
     /// </summary>
-    public class ControlFormItemInputHidden : ControlFormItemInput
+    public class ControlFormItemInputHidden : ControlFormItemInput<ControlFormInputValueString>
     {
         /// <summary>
         /// Initializes a new instance of the class.
@@ -25,7 +25,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
-            var value = renderContext?.GetValue(this);
+            var value = renderContext?.GetValue<ControlFormInputValueString>(this)?.Text;
 
             return new HtmlElementFieldInput()
             {
@@ -34,6 +34,23 @@ namespace WebExpress.WebUI.WebControl
                 Name = Name,
                 Type = "hidden",
                 Role = Role
+            };
+        }
+
+        /// <summary>
+        /// Creates an value from the specified string representation.
+        /// </summary>
+        /// <param name="value">
+        /// The string representation of the value to be converted. Cannot be null.
+        /// </param>
+        /// <returns>
+        /// The value created from the specified string representation.
+        /// </returns>
+        protected override ControlFormInputValueString CreateValue(string value)
+        {
+            return new ControlFormInputValueString
+            {
+                Text = value
             };
         }
     }

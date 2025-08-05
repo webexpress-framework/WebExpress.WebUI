@@ -1,4 +1,5 @@
-﻿using WebExpress.WebUI.Test.Fixture;
+﻿using System.Globalization;
+using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
 
@@ -69,10 +70,27 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputDate(null);
+            var control = new ControlFormItemInputDate(null)
+            {
+                Format = "yyyy-mm-dd"
+            };
             var form = new ControlForm().Add(control).Initialize(renderContext =>
             {
-                renderContext.SetValue(control, value);
+                renderContext.SetValue
+                (
+                    control,
+                    new ControlFormInputValueDate
+                    (
+                        value != null
+                            ? DateTime.ParseExact
+                            (
+                                value,
+                                "yyyy-mm-dd",
+                                CultureInfo.InvariantCulture
+                            )
+                            : null
+                    )
+                );
             });
 
             // test execution

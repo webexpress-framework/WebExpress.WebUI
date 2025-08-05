@@ -68,8 +68,12 @@ webexpress.webui.Controller = new class {
         for (const [selector, ClassConstructor] of this.classRegistry.entries()) {
             if (element.classList.contains(selector)) {
                 element.classList.remove(selector);
-                const instance = new ClassConstructor(element);
-                this.instanceMap.set(element, instance);
+                try {
+                    const instance = new ClassConstructor(element);
+                    this.instanceMap.set(element, instance);
+                } catch (error) {
+                    console.error(`Failed to create instance for selector "${selector}"`, error);
+                }
             }
         }
     }

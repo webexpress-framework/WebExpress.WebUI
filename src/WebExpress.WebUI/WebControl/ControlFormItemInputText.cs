@@ -11,13 +11,8 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a text box input form item control.
     /// </summary>
-    public class ControlFormItemInputText : ControlFormItemInput
+    public class ControlFormItemInputText : ControlFormItemInput<ControlFormInputValueString>
     {
-        /// <summary>
-        /// Determines whether the control is automatically initialized.
-        /// </summary>
-        public bool AutoInitialize { get; set; } = true;
-
         /// <summary>
         /// Determines whether it is a multi-line text box.
         /// </summary>
@@ -97,7 +92,7 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var id = Id;
-            var value = renderContext.GetValue(this);
+            var value = renderContext.GetValue<ControlFormInputValueString>(this);
             var classes = new List<string>(Classes)
             {
                 "form-control"
@@ -113,7 +108,7 @@ namespace WebExpress.WebUI.WebControl
                 TypeEditTextFormat.Multiline => new HtmlElementFormTextarea()
                 {
                     Id = Id,
-                    Value = value,
+                    Value = value?.Text,
                     Name = Name,
                     Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
                     Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
@@ -135,7 +130,7 @@ namespace WebExpress.WebUI.WebControl
                 _ => new HtmlElementFieldInput()
                 {
                     Id = Id,
-                    Value = value,
+                    Value = value?.Text,
                     Name = Name,
                     MinLength = MinLength?.ToString(),
                     MaxLength = MaxLength?.ToString(),
@@ -161,7 +156,7 @@ namespace WebExpress.WebUI.WebControl
         public override IEnumerable<ValidationResult> Validate(IRenderControlFormContext renderContext)
         {
             var validationResults = new List<ValidationResult>(base.Validate(renderContext));
-            var value = renderContext.GetValue(this);
+            var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
 
             if (Disabled)
             {
@@ -186,6 +181,23 @@ namespace WebExpress.WebUI.WebControl
             }
 
             return validationResults;
+        }
+
+        /// <summary>
+        /// Creates an value from the specified string representation.
+        /// </summary>
+        /// <param name="value">
+        /// The string representation of the value to be converted. Cannot be null.
+        /// </param>
+        /// <returns>
+        /// The value created from the specified string representation.
+        /// </returns>
+        protected override ControlFormInputValueString CreateValue(string value)
+        {
+            return new ControlFormInputValueString
+            {
+                Text = value
+            };
         }
     }
 }

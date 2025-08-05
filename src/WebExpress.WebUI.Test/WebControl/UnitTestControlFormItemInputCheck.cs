@@ -144,7 +144,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFormItemInputCheck(null);
             var form = new ControlForm().Add(control).Initialize(renderContext =>
             {
-                renderContext.SetValue(control, value?.ToString());
+                renderContext.SetValue(control, new ControlFormInputValueString(value?.ToString()));
             });
 
             // test execution
@@ -168,7 +168,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCheck(null).Initialize(args =>
             {
-                args.Value = value?.ToString();
+                args.Value.Text = value?.ToString();
             });
             var form = new ControlForm().Add(control);
 

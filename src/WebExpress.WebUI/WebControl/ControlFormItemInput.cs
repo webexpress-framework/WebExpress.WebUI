@@ -10,7 +10,9 @@ namespace WebExpress.WebUI.WebControl
     /// <remarks>
     /// This class provides the base functionality for form input items.
     /// </remarks>
-    public abstract class ControlFormItemInput : ControlFormItem, IControlFormItemInput, IControlFormLabel, IControlFormValidation
+    /// <typeparam name="TValue">The type of the value to be assigned to the input control.</typeparam>
+    public abstract class ControlFormItemInput<TValue> : ControlFormItem, IControlFormItemInput<TValue>
+         where TValue : class, IControlFormInputValue, new()
     {
         private readonly List<IControl> _prepend = [];
         private readonly List<IControl> _append = [];
@@ -18,17 +20,17 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Event is raised when the form's data needs to be determined.
         /// </summary>
-        public event Action<ControlFormEventItemInitialize> InitializeItem;
+        public event Action<ControlFormEventItemInitialize<TValue>> InitializeItem;
 
         /// <summary>
         /// Event to validate the input values.
         /// </summary>
-        public event Action<ControlFormEventItemValidate> ValidateItem;
+        public event Action<ControlFormEventItemValidate<TValue>> ValidateItem;
 
         /// <summary>
         /// Event is raised when the items's data needs to be determined.
         /// </summary>
-        public event Action<ControlFormEventItemProcess> ProcessItem;
+        public event Action<ControlFormEventItemProcess<TValue>> ProcessItem;
 
         /// <summary>
         /// Returns or sets the icon.
@@ -82,11 +84,23 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="renderContext">The context in which the control is rendered.</param>
         public override void Initialize(IRenderControlFormContext renderContext)
         {
-            var eventArgument = new ControlFormEventItemInitialize() { Context = renderContext };
+            var value = renderContext.Request.GetParameter(Name)?.Value;
 
-            OnInitialize(eventArgument);
+            if (value == null)
+            {
+                var eventArgument = new ControlFormEventItemInitialize<TValue>()
+                {
+                    Context = renderContext
+                };
 
-            renderContext.SetValue(this, eventArgument.Value);
+                OnInitialize(eventArgument);
+
+                renderContext.SetValue(this, eventArgument.Value);
+
+                return;
+            }
+
+            renderContext.SetValue(this, CreateValue(value));
         }
 
         /// <summary>
@@ -94,7 +108,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="handler">The action to execute for filling the form.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public virtual IControlFormItemInput Initialize(Action<ControlFormEventItemInitialize> handler)
+        public virtual IControlFormItemInput<TValue> Initialize(Action<ControlFormEventItemInitialize<TValue>> handler)
         {
             InitializeItem += handler;
 
@@ -113,10 +127,12 @@ namespace WebExpress.WebUI.WebControl
             var validationResults = new List<ValidationResult>();
             if (!Disabled)
             {
-                var eventArgument = new ControlFormEventItemValidate()
+                var eventArgument = new ControlFormEventItemValidate<TValue>
+                (
+                    renderContext.GetValue<TValue>(this)
+                )
                 {
-                    Context = renderContext,
-                    Value = renderContext.GetValue(this),
+                    Context = renderContext
                 };
                 OnValidate(eventArgument);
 
@@ -131,7 +147,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="handler">The action to execute for validation the form item.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public virtual IControlFormItemInput Validate(Action<ControlFormEventItemValidate> handler)
+        public virtual IControlFormItemInput<TValue> Validate(Action<ControlFormEventItemValidate<TValue>> handler)
         {
             ValidateItem += handler;
 
@@ -144,10 +160,12 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="renderContext">The context in which the control is rendered.</param>
         public virtual void Process(IRenderControlFormContext renderContext)
         {
-            var eventArgument = new ControlFormEventItemProcess()
+            var eventArgument = new ControlFormEventItemProcess<TValue>
+            (
+                renderContext.GetValue<TValue>(this)
+            )
             {
-                Context = renderContext,
-                Value = renderContext.GetValue(this)
+                Context = renderContext
             };
 
             OnProcess(eventArgument);
@@ -158,7 +176,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="handler">The action to execute for processing the form.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public virtual IControlFormItemInput Process(Action<ControlFormEventItemProcess> handler)
+        public virtual IControlFormItemInput<TValue> Process(Action<ControlFormEventItemProcess<TValue>> handler)
         {
             ProcessItem += handler;
 
@@ -170,7 +188,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="controls">The controls to add.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlFormItemInput AddPrepend(params IControl[] controls)
+        public IControlFormItemInput<TValue> AddPrepend(params IControl[] controls)
         {
             _prepend.AddRange(controls);
 
@@ -182,7 +200,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="control">The control to remove.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlFormItemInput RemovePrepend(IControl control)
+        public IControlFormItemInput<TValue> RemovePrepend(IControl control)
         {
             _prepend.Remove(control);
 
@@ -194,7 +212,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="controls">The controls to add.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlFormItemInput AddAppend(params IControl[] controls)
+        public IControlFormItemInput<TValue> AddAppend(params IControl[] controls)
         {
             _append.AddRange(controls);
 
@@ -206,7 +224,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="control">The control to remove.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlFormItemInput RemoveAppend(IControl control)
+        public IControlFormItemInput<TValue> RemoveAppend(IControl control)
         {
             _append.Remove(control);
 
@@ -217,7 +235,7 @@ namespace WebExpress.WebUI.WebControl
         /// Raises the data delivery event.
         /// </summary>
         /// <param name="eventArgument">The event argument.</param>
-        protected virtual void OnInitialize(ControlFormEventItemInitialize eventArgument)
+        protected virtual void OnInitialize(ControlFormEventItemInitialize<TValue> eventArgument)
         {
             InitializeItem?.Invoke(eventArgument);
         }
@@ -226,7 +244,7 @@ namespace WebExpress.WebUI.WebControl
         /// Raises the validation event.
         /// </summary>
         /// <param name="eventArgument">The event argument.</param>
-        protected virtual void OnValidate(ControlFormEventItemValidate eventArgument)
+        protected virtual void OnValidate(ControlFormEventItemValidate<TValue> eventArgument)
         {
             ValidateItem?.Invoke(eventArgument);
         }
@@ -235,9 +253,21 @@ namespace WebExpress.WebUI.WebControl
         /// Raises the process event.
         /// </summary>
         /// <param name="eventArgument">The event argument.</param>
-        protected virtual void OnProcess(ControlFormEventItemProcess eventArgument)
+        protected virtual void OnProcess(ControlFormEventItemProcess<TValue> eventArgument)
         {
             ProcessItem?.Invoke(eventArgument);
         }
+
+        /// <summary>
+        /// Creates an instance of <typeparamref name="TValue"/> from the specified string representation.
+        /// </summary>
+        /// <param name="value">
+        /// The string representation of the value to be converted into an instance of 
+        /// <typeparamref name="TValue"/>. Cannot be null.
+        /// </param>
+        /// <returns>
+        /// An instance of <typeparamref name="TValue"/> created from the specified string representation.
+        /// </returns>
+        protected abstract TValue CreateValue(string value);
     }
 }

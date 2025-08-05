@@ -5,7 +5,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a combobox control within a form, providing methods to manage its items.
     /// </summary>
-    public interface IControlFormItemInputComboBox : IControlFormItemInput
+    public interface IControlFormItemInputComboBox : IControlFormItemInput<ControlFormInputValueString>
     {
         /// <summary>
         /// Returns the collection of items in the combobox.

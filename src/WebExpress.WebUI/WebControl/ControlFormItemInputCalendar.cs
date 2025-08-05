@@ -7,7 +7,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a calendar input form item that supports single or range-based date selection.
     /// </summary>
-    public class ControlFormItemInputCalendar : ControlFormItemInput
+    public class ControlFormItemInputCalendar : ControlFormItemInput<ControlFormInputValueString>
     {
         /// <summary>
         /// Returns or sets the description of the calendar input.
@@ -36,8 +36,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemInputCalendar(
             [CallerMemberName] string instance = null,
             [CallerFilePath] string file = null,
-            [CallerLineNumber] int? line = null,
-            params ControlFormItemInputSelectionItem[] items)
+            [CallerLineNumber] int? line = null)
             : this($"calendar{instance}_{file}_{line}".GetHashCode().ToString("X"))
         {
         }
@@ -59,7 +58,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the calendar control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
-            var value = renderContext.GetValue(this);
+            var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
 
             var html = new HtmlElementTextContentDiv
             {
@@ -76,6 +75,22 @@ namespace WebExpress.WebUI.WebControl
 
             return html;
         }
-    }
 
+        /// <summary>
+        /// Creates an value from the specified string representation.
+        /// </summary>
+        /// <param name="value">
+        /// The string representation of the value to be converted. Cannot be null.
+        /// </param>
+        /// <returns>
+        /// The value created from the specified string representation.
+        /// </returns>
+        protected override ControlFormInputValueString CreateValue(string value)
+        {
+            return new ControlFormInputValueString
+            {
+                Text = value
+            };
+        }
+    }
 }

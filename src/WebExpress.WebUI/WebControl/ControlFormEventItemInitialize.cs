@@ -3,12 +3,14 @@
     /// <summary>
     /// Event argument for initialize a form item.
     /// </summary>
-    public class ControlFormEventItemInitialize : ControlFormEvent
+    /// <typeparam name="TValue">The type of the value to be assigned to the input control.</typeparam>
+    public class ControlFormEventItemInitialize<TValue> : ControlFormEvent
+        where TValue : IControlFormInputValue, new()
     {
         /// <summary>
-        /// The value for the form item.
+        /// Returns the value for the form item.
         /// </summary>
-        public string Value { get; set; }
+        public TValue Value { get; } = new();
 
         /// <summary>
         /// Initializes a new instance of the class.

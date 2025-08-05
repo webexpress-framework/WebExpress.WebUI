@@ -17,9 +17,11 @@
         /// </summary>
         /// <param name="input">The input control whose value is to be retrieved.</param>
         /// <returns>The value associated with the input control, or <c>null</c> if not found.</returns>
-        public string GetValue(IControlFormItemInput input)
+        /// <typeparam name="TValue">The type of the value to be assigned to the input control.</typeparam>
+        public TValue GetValue<TValue>(IControlFormItemInput input)
+            where TValue : class, IControlFormInputValue, new()
         {
-            return Context.GetValue(input);
+            return Context.GetValue<TValue>(input);
         }
     }
 }

@@ -5,7 +5,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a control for managing a move input form item.
     /// </summary>
-    public interface IControlFormItemInputMove : IControlFormItemInput
+    public interface IControlFormItemInputMove : IControlFormItemInput<ControlFormInputValueString>
     {
         /// <summary>
         /// Returns the collection of available options for the control.

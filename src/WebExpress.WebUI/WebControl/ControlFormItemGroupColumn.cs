@@ -73,7 +73,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 var row = new HtmlElementTextContentDiv() { };
 
-                if (item is ControlFormItemInput input)
+                if (item is IControlFormItemInput input)
                 {
                     var icon = new ControlIcon() { Icon = input?.Icon };
                     var label = new ControlFormItemLabel(!string.IsNullOrEmpty(item.Id) ? item.Id + "_label" : string.Empty);

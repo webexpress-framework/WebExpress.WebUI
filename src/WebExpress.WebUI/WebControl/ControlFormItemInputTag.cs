@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a tag input control.
     /// </summary>
-    public class ControlFormItemInputTag : ControlFormItemInput
+    public class ControlFormItemInputTag : ControlFormItemInput<ControlFormInputValueString>
     {
         /// <summary>
         /// Returns or sets a placeholder text.
@@ -61,7 +61,7 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var id = Id;
-            var value = renderContext.GetValue(this);
+            var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
             var classes = new List<string>(Classes);
 
             if (Disabled)
@@ -96,7 +96,7 @@ namespace WebExpress.WebUI.WebControl
         public override IEnumerable<ValidationResult> Validate(IRenderControlFormContext renderContext)
         {
             var validationResults = new List<ValidationResult>(base.Validate(renderContext));
-            var value = renderContext.GetValue(this);
+            //var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
 
             if (Disabled)
             {
@@ -104,6 +104,23 @@ namespace WebExpress.WebUI.WebControl
             }
 
             return validationResults;
+        }
+
+        /// <summary>
+        /// Creates an value from the specified string representation.
+        /// </summary>
+        /// <param name="value">
+        /// The string representation of the value to be converted. Cannot be null.
+        /// </param>
+        /// <returns>
+        /// The value created from the specified string representation.
+        /// </returns>
+        protected override ControlFormInputValueString CreateValue(string value)
+        {
+            return new ControlFormInputValueString
+            {
+                Text = value
+            };
         }
     }
 }

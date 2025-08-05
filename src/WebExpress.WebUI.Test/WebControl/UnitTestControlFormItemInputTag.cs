@@ -177,7 +177,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm().Add(control)
                 .Initialize(renderContext =>
                 {
-                    renderContext.SetValue(control, value);
+                    renderContext.SetValue(control, new ControlFormInputValueString(value));
                     initialized = true;
                 });
 
@@ -204,7 +204,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFormItemInputTag(null)
                 .Initialize(arg =>
                 {
-                    arg.Value = value;
+                    arg.Value.Text = value;
                     initialized = true;
                 });
             var form = new ControlForm().Add(control);
@@ -221,7 +221,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"*<div id=""tag"" class=""wx-webui-tag"" name=""tag""></div>*")]
-        [InlineData("abc", @"*<div id=""tag"" class=""wx-webui-tag"" name=""tag""></div>*")]
+        [InlineData("abc", @"*<div id=""tag"" class=""wx-webui-tag"" name=""tag"" data-tags=""abc""></div>*")]
         public void ValidateForm(string value, string expected)
         {
             // preconditions
@@ -231,7 +231,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputTag("tag").Initialize(args =>
             {
-                args.Value = value;
+                args.Value.Text = value;
             });
             var form = new ControlForm()
                 .Add(control)
@@ -247,8 +247,18 @@ namespace WebExpress.WebUI.Test.WebControl
                     }
                 );
 
-            context.Request.AddParameter(new Parameter(form.Id, context.Request?.Session.Id.ToString(), ParameterScope.Parameter));
-            context.Request.AddParameter(new Parameter("text-box", value, ParameterScope.Parameter));
+            context.Request.AddParameter(new Parameter
+            (
+                form.Id,
+                context.Request?.Session.Id.ToString(),
+                ParameterScope.Parameter
+            ));
+            context.Request.AddParameter(new Parameter
+            (
+                "text-box",
+                value,
+                ParameterScope.Parameter
+            ));
 
             // test execution
             var html = form.Render(context, visualTree);
@@ -277,7 +287,7 @@ namespace WebExpress.WebUI.Test.WebControl
                     {
                         x
                         .Add(x.Value != null, "validation1", TypeInputValidity.Warning)
-                        .Add(x.Value?.Length > 3, "validation2")
+                        .Add(x.Value?.Text?.Length > 3, "validation2")
                         .Add(false, "validation3");
                         validated = true;
                     }
@@ -311,7 +321,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFormItemInputTag("tag")
                 .Initialize(args =>
                 {
-                    args.Value = value;
+                    args.Value.Text = value;
                 });
             var form = new ControlForm()
                 .Add(control)
@@ -349,7 +359,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFormItemInputTag("tag")
                 .Initialize(arg =>
                 {
-                    arg.Value = value;
+                    arg.Value.Text = value;
                 })
                 .Process
                 (

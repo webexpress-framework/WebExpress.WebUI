@@ -12,7 +12,7 @@ namespace WebExpress.WebUI.WebControl
     /// This control allows users to select files to upload. It supports setting descriptions, placeholders, 
     /// required fields, and accepted file types. It also provides validation and rendering functionalities.
     /// </remarks>
-    public class ControlFormItemInputFile : ControlFormItemInput
+    public class ControlFormItemInputFile : ControlFormItemInput<ControlFormInputValueString>
     {
         private readonly List<string> _acceptFile = [];
 
@@ -83,7 +83,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
-            var value = renderContext.GetValue(this);
+            var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
 
             var html = new HtmlElementFieldInput()
             {
@@ -112,7 +112,7 @@ namespace WebExpress.WebUI.WebControl
         public override IEnumerable<ValidationResult> Validate(IRenderControlFormContext renderContext)
         {
             var validationResults = new List<ValidationResult>();
-            var value = renderContext.GetValue(this);
+            var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
 
             if (Disabled)
             {
@@ -127,6 +127,23 @@ namespace WebExpress.WebUI.WebControl
             validationResults.AddRange(base.Validate(renderContext));
 
             return validationResults;
+        }
+
+        /// <summary>
+        /// Creates an value from the specified string representation.
+        /// </summary>
+        /// <param name="value">
+        /// The string representation of the value to be converted. Cannot be null.
+        /// </param>
+        /// <returns>
+        /// The value created from the specified string representation.
+        /// </returns>
+        protected override ControlFormInputValueString CreateValue(string value)
+        {
+            return new ControlFormInputValueString
+            {
+                Text = value
+            };
         }
     }
 }

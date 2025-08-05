@@ -3,18 +3,22 @@
     /// <summary>
     /// Event argument for validating form item inputs.
     /// </summary>
-    public class ControlFormEventItemValidate : ControlFormEventFormValidate
+    /// <typeparam name="TValue">The type of the value to be assigned to the input control.</typeparam>
+    public class ControlFormEventItemValidate<TValue> : ControlFormEventFormValidate
+        where TValue : class, IControlFormInputValue, new()
     {
         /// <summary>
-        /// Gets or sets the value to be checked during validation.
+        /// Returns the value for the form item.
         /// </summary>
-        public string Value { get; set; }
+        public TValue Value { get; } = new();
 
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
-        public ControlFormEventItemValidate()
+        /// <param name="value">The value to associate with this instance.</param>
+        public ControlFormEventItemValidate(TValue value)
         {
+            Value = value;
         }
     }
 }

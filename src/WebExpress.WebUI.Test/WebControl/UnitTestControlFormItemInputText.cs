@@ -295,7 +295,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm().Add(control)
                 .Initialize(renderContext =>
                 {
-                    renderContext.SetValue(control, value);
+                    renderContext.SetValue(control, new ControlFormInputValueString(value));
                     initialized = true;
                 });
 
@@ -322,7 +322,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFormItemInputText(null)
                 .Initialize(arg =>
                 {
-                    arg.Value = value;
+                    arg.Value.Text = value;
                     initialized = true;
                 });
             var form = new ControlForm().Add(control);
@@ -349,7 +349,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputText("text-box").Initialize(args =>
             {
-                args.Value = value;
+                args.Value.Text = value;
             });
             var form = new ControlForm()
                 .Add(control)
@@ -395,7 +395,7 @@ namespace WebExpress.WebUI.Test.WebControl
                     {
                         x
                         .Add(x.Value != null, "validation1", TypeInputValidity.Warning)
-                        .Add(x.Value?.Length > 3, "validation2")
+                        .Add(x.Value?.Text?.Length > 3, "validation2")
                         .Add(false, "validation3");
                         validated = true;
                     }
@@ -429,7 +429,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFormItemInputText("text-box")
                 .Initialize(args =>
                 {
-                    args.Value = value;
+                    args.Value.Text = value;
                 });
             var form = new ControlForm()
                 .Add(control)
@@ -465,17 +465,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputText("text-box")
-                .Initialize(arg =>
-                {
-                    arg.Value = value;
-                })
-                .Process
-                (
-                    x =>
-                    {
-                        processed = true;
-                    }
-                );
+                .Initialize(x => x.Value.Text = value)
+                .Process(x => processed = true);
             var form = new ControlForm()
                 .Add(control);
 

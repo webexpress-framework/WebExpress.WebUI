@@ -14,7 +14,7 @@ namespace WebExpress.WebUI.WebControl
     /// <remarks>
     /// This control allows users to select one or more options from a predefined list.
     /// </remarks>
-    public class ControlFormItemInputSelection : ControlFormItemInput, IControlFormItemInputSelection
+    public class ControlFormItemInputSelection : ControlFormItemInput<ControlFormInputValueString>, IControlFormItemInputSelection
     {
         private readonly List<ControlFormItemInputSelectionItem> _options = [];
 
@@ -45,8 +45,14 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
         /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
         /// <param name="items">The entries.</param>
-        public ControlFormItemInputSelection([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null, params ControlFormItemInputSelectionItem[] items)
-            : this($"selection_{instance}_{file}_{line}".GetHashCode().ToString("X"))
+        public ControlFormItemInputSelection
+        (
+            [CallerMemberName] string instance = null,
+            [CallerFilePath] string file = null,
+            [CallerLineNumber] int? line = null,
+            params ControlFormItemInputSelectionItem[] items
+        )
+            : this($"selection_{instance}_{file}_{line}".GetHashCode().ToString("X"), items)
         {
         }
 
@@ -93,7 +99,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
-            var value = renderContext.GetValue(this);
+            var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
             var classes = new List<string>(["wx-webui-selection"]);
             classes.AddRange(Classes);
 
@@ -166,6 +172,23 @@ namespace WebExpress.WebUI.WebControl
             }
 
             return html;
+        }
+
+        /// <summary>
+        /// Creates an value from the specified string representation.
+        /// </summary>
+        /// <param name="value">
+        /// The string representation of the value to be converted. Cannot be null.
+        /// </param>
+        /// <returns>
+        /// The value created from the specified string representation.
+        /// </returns>
+        protected override ControlFormInputValueString CreateValue(string value)
+        {
+            return new ControlFormInputValueString
+            {
+                Text = value
+            };
         }
     }
 }

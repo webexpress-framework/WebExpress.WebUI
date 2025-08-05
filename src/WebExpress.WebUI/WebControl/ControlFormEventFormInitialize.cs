@@ -18,7 +18,9 @@
         /// <param name="input">The input control for which the value is to be set.</param>
         /// <param name="value">The value to set for the input control.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public ControlFormEventFormInitialize SetValue(IControlFormItemInput input, string value)
+        /// <typeparam name="TValue">The type of the value to be assigned to the input control.</typeparam>
+        public ControlFormEventFormInitialize SetValue<TValue>(IControlFormItemInput input, TValue value)
+            where TValue : IControlFormInputValue
         {
             Context.SetValue(input, value);
 

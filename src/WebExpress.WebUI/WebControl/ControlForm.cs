@@ -84,7 +84,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         public ControlFormItemInputHidden FormId { get; } = new ControlFormItemInputHidden().Initialize
         (
-            x => x.Value = x.Context?.Request.Session.Id.ToString()
+            x => x.Value.Text = x.Context?.Request.Session.Id.ToString()
         ) as ControlFormItemInputHidden;
 
         /// <summary>
@@ -275,15 +275,20 @@ namespace WebExpress.WebUI.WebControl
             {
                 State = TypeFormState.Error;
 
-                foreach (var item in items.Where(x => x is IControlFormItemInput).Select(x => x as IControlFormItemInput))
+                // fill the form with data
+                foreach (var item in items
+                    .Where(x => x is IControlFormInitialize)
+                    .Select(x => x as IControlFormInitialize))
                 {
-                    renderContext.SetValue(item, renderContext.Request.GetParameter(item.Name)?.Value);
+                    item.Initialize(renderContext);
                 }
 
                 // valid the form
                 var validateEventArgument = new ControlFormEventFormValidate() { Context = renderContext };
 
-                foreach (var item in items.Where(x => x is IControlFormValidation).Select(x => x as IControlFormValidation))
+                foreach (var item in items
+                    .Where(x => x is IControlFormValidation)
+                    .Select(x => x as IControlFormValidation))
                 {
                     validationResults.AddRange(item.Validate(renderContext));
                 }
@@ -295,7 +300,9 @@ namespace WebExpress.WebUI.WebControl
                 {
                     State = TypeFormState.Success;
 
-                    foreach (var item in items.Where(x => x is IControlFormProcess).Select(x => x as IControlFormProcess))
+                    foreach (var item in items
+                        .Where(x => x is IControlFormProcess)
+                        .Select(x => x as IControlFormProcess))
                     {
                         item.Process(renderContext);
                     }
@@ -322,11 +329,15 @@ namespace WebExpress.WebUI.WebControl
             var form = new HtmlElementFormForm()
             {
                 Id = Id,
-                Class = FormLayout == TypeLayoutForm.Inline ? Css.Concatenate("wx-form-inline", GetClasses()) : GetClasses(),
+                Class = FormLayout == TypeLayoutForm.Inline
+                    ? Css.Concatenate("wx-form-inline", GetClasses())
+                    : GetClasses(),
                 Style = GetStyles(),
                 Role = Role,
                 Action = Uri?.ToString() ?? renderContext.Uri?.ToString(),
-                Method = (Method == RequestMethod.NONE ? RequestMethod.POST : Method).ToString(),
+                Method = (Method == RequestMethod.NONE
+                    ? RequestMethod.POST
+                    : Method).ToString(),
                 Enctype = TypeEnctype.None,
                 Name = Name
             };

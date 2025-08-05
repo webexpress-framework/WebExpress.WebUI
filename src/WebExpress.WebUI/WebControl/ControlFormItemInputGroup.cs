@@ -7,7 +7,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a form item input group control.
     /// </summary>
-    public class ControlFormItemInputGroup : ControlFormItemInput
+    public class ControlFormItemInputGroup : ControlFormItemInput<ControlFormInputValueString>
     {
         /// <summary>
         /// Returns the group.
@@ -61,6 +61,23 @@ namespace WebExpress.WebUI.WebControl
             }
 
             return Group.Validate(renderContext);
+        }
+
+        /// <summary>
+        /// Creates an value from the specified string representation.
+        /// </summary>
+        /// <param name="value">
+        /// The string representation of the value to be converted. Cannot be null.
+        /// </param>
+        /// <returns>
+        /// The value created from the specified string representation.
+        /// </returns>
+        protected override ControlFormInputValueString CreateValue(string value)
+        {
+            return new ControlFormInputValueString
+            {
+                Text = value
+            };
         }
     }
 }

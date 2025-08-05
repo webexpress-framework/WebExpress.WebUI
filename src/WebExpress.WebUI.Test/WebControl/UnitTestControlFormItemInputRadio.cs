@@ -147,7 +147,9 @@ namespace WebExpress.WebUI.Test.WebControl
             };
             var form = new ControlForm().Add(control).Initialize(renderContext =>
             {
-                renderContext.SetValue(control, value?.ToString() == "True" ? "option" : null);
+                renderContext.SetValue(control, new ControlFormInputValueString(value?.ToString() == "True"
+                    ? "option"
+                    : null));
             });
 
             // test execution
@@ -174,7 +176,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Option = "option"
             }.Initialize(args =>
             {
-                args.Value = value?.ToString() == "True" ? "option" : null;
+                args.Value.Text = value?.ToString() == "True" ? "option" : null;
             });
             var form = new ControlForm().Add(control);
 

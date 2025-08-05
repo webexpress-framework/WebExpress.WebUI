@@ -28,9 +28,8 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
             this._holidays = holidaysAttr.split(",").map(x => x.trim()).filter(x => x.length > 0);
         }
         
-        this._selectedDate = value ? this._parseDate(value, this._dateFormat) : null;
-        this._viewDate = this._selectedDate ? new Date(this._selectedDate) : new Date();
         
+        this._viewDate = this._selectedDate ? new Date(this._selectedDate) : new Date();
         this._hidden = this._createHiddenInput(name);
         this._dropdown = this._createDropdown();
         this._dropdownmenu = this._createDropdownMenu();
@@ -39,6 +38,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
         element.removeAttribute("name");
         element.removeAttribute("placeholder");
         element.removeAttribute("data-holidays");
+        element.removeAttribute("data-value");
         element.removeAttribute("data-format");
         element.removeAttribute("data-range");
         element.innerHTML = "";
@@ -49,7 +49,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
 
         this._initializePopper(this._dropdown, this._dropdownmenu);
 
-        this.render();
+        this.value = value ? this._parseDate(value, this._dateFormat) : null;
     }
 
     /**
@@ -266,7 +266,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
      */
     render() {
         this._input.value = this._hidden.value;
-        this._monthYear.textContent = this._viewDate.getFullYear() + " – " + webexpress.webui.I18N.translate(`webexpress.webui:calendar.${this._getMonthKey(this._viewDate.getMonth())}`);
+        this._monthYear.textContent = this._viewDate?.getFullYear() + " – " + webexpress.webui.I18N.translate(`webexpress.webui:calendar.${this._getMonthKey(this._viewDate?.getMonth())}`);
         this._calendarContainer.innerHTML = "";
         this._calendarContainer.appendChild(this._renderCalendar());
     }

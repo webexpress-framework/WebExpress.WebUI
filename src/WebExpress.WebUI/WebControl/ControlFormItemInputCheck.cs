@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a checkbox input form item control.
     /// </summary>
-    public class ControlFormItemInputCheck : ControlFormItemInput
+    public class ControlFormItemInputCheck : ControlFormItemInput<ControlFormInputValueString>
     {
         /// <summary>
         /// Returns or sets whether the checkbox should be displayed on a new line.
@@ -54,7 +54,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
-            var value = renderContext.GetValue(this);
+            var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
             value = value?.Equals("true", StringComparison.OrdinalIgnoreCase) == true ||
                     value?.Equals("on", StringComparison.OrdinalIgnoreCase) == true
                         ? "true"
@@ -85,6 +85,23 @@ namespace WebExpress.WebUI.WebControl
                     )));
 
             return html;
+        }
+
+        /// <summary>
+        /// Creates an value from the specified string representation.
+        /// </summary>
+        /// <param name="value">
+        /// The string representation of the value to be converted. Cannot be null.
+        /// </param>
+        /// <returns>
+        /// The value created from the specified string representation.
+        /// </returns>
+        protected override ControlFormInputValueString CreateValue(string value)
+        {
+            return new ControlFormInputValueString
+            {
+                Text = value
+            };
         }
     }
 }

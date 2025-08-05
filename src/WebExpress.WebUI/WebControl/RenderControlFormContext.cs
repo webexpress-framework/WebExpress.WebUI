@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.WebControl
     /// </summary>
     public class RenderControlFormContext : RenderControlContext, IRenderControlFormContext
     {
-        private readonly Dictionary<IControlFormItemInput, string> _values = [];
+        private readonly Dictionary<IControlFormItemInput, IControlFormInputValue> _values = [];
 
         /// <summary>
         /// Returns the form in which the control is rendered.
@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns the dictionary of input controls and their associated values.
         /// </summary>
-        public IReadOnlyDictionary<IControlFormItemInput, string> Values => _values;
+        public IReadOnlyDictionary<IControlFormItemInput, IControlFormInputValue> Values => _values;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -65,34 +65,36 @@ namespace WebExpress.WebUI.WebControl
             : base(renderContext)
         {
             Form = form;
-            _values = new Dictionary<IControlFormItemInput, string>(renderContext.Values);
+            _values = new Dictionary<IControlFormItemInput, IControlFormInputValue>(renderContext.Values);
         }
 
         /// <summary>
         /// Retrieves the value associated with the specified input control.
         /// </summary>
         /// <param name="input">The input control whose value is to be retrieved.</param>
-        /// <returns>The value associated with the input control, or <c>null</c> if not found.</returns>
-        public string GetValue(IControlFormItemInput input)
+        /// <returns>
+        /// The <see cref="IControlFormInputValue"/> associated with the input control,
+        /// or <c>null</c> if no value has been set.
+        /// </returns>
+        /// <typeparam name="TValue">The type of the value to be assigned to the input control.</typeparam>
+        public TValue GetValue<TValue>(IControlFormItemInput input)
+            where TValue : class, IControlFormInputValue, new()
         {
-            _values.TryGetValue(input, out var obj);
-
-            return obj;
+            _values.TryGetValue(input, out var value);
+            return value as TValue;
         }
 
         /// <summary>
         /// Sets the value for the specified input control.
         /// </summary>
         /// <param name="input">The input control for which the value is to be set.</param>
-        /// <param name="value">The value to set for the input control.</param>
-        /// <returns>The current instance for method chaining.</returns>
-        public IRenderControlFormContext SetValue(IControlFormItemInput input, string value)
+        /// <param name="value">The value to associate with the input control.</param>
+        /// <returns>
+        /// The current <see cref="IRenderControlFormContext"/> instance to allow method chaining.
+        /// </returns>
+        public IRenderControlFormContext SetValue(IControlFormItemInput input, IControlFormInputValue value)
         {
-            if (!_values.TryAdd(input, value))
-            {
-                _values[input] = value;
-            }
-
+            _values[input] = value;
             return this;
         }
     }
