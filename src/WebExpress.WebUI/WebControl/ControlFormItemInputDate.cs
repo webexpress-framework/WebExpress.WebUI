@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -22,7 +21,7 @@ namespace WebExpress.WebUI.WebControl
         public bool Required { get; set; }
 
         /// <summary>
-        /// Gets or sets the placeholder text displayed when no date is selected.
+        /// Returns or sets the placeholder text displayed when no date is selected.
         /// </summary>
         public string Placeholder { get; set; }
 
@@ -65,7 +64,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
-            var value = renderContext.GetValue<ControlFormInputValueDate>(this)?.From;
+            var value = renderContext.GetValue<ControlFormInputValueDate>(this)?.Date?
+                .ToString(Format ?? renderContext.Request.Culture.DateTimeFormat.ShortDatePattern);
 
             var html = new HtmlElementTextContentDiv()
             {
@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.WebControl
             }
                 .AddUserAttribute("name", Name)
                 .AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder))
-                .AddUserAttribute("data-value", value?.ToString(Format ?? renderContext.Request.Culture.DateTimeFormat.ShortDatePattern))
+                .AddUserAttribute("data-value", value)
                 .AddUserAttribute("data-format", !string.IsNullOrWhiteSpace(Format)
                     ? Format
                     : renderContext.Request.Culture.DateTimeFormat.ShortDatePattern
@@ -89,31 +89,13 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="value">
         /// The string representation of the value to be converted. Cannot be null.
         /// </param>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <returns>
         /// The value created from the specified string representation.
         /// </returns>
-        protected override ControlFormInputValueDate CreateValue(string value)
+        protected override ControlFormInputValueDate CreateValue(string value, IRenderControlFormContext renderContext)
         {
-            var result = new ControlFormInputValueDate();
-
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                return result;
-            }
-
-            var parts = value.Split('-', StringSplitOptions.RemoveEmptyEntries);
-
-            if (parts.Length >= 1 && DateTime.TryParse(parts[0].Trim(), out var fromDate))
-            {
-                result.From = fromDate;
-            }
-
-            if (parts.Length >= 2 && DateTime.TryParse(parts[1].Trim(), out var toDate))
-            {
-                result.To = toDate;
-            }
-
-            return result;
+            return new ControlFormInputValueDate(value, renderContext?.Request?.Culture);
         }
     }
 }

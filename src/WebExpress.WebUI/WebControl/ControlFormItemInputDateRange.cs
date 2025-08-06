@@ -6,32 +6,29 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a radio button input form item control.
+    /// Represents a date picker input form item control.
     /// </summary>
-    /// <remarks>
-    /// This class provides the functionality for a radio button input within a form.
-    /// </remarks>
-    public class ControlFormItemInputRadio : ControlFormItemInput<ControlFormInputValueString>
+    public class ControlFormItemInputDateRange : ControlFormItemInput<ControlFormInputValueDateRange>
     {
-        /// <summary>
-        /// Returns or sets the value of the optiopn.
-        /// </summary>
-        public string Option { get; set; }
-
-        /// <summary>
-        /// Liefert oder setzt ob die Checkbox in einer neuen Zeile angezeigt werden soll
-        /// </summary>
-        public bool Inline { get; set; }
-
         /// <summary>
         /// Returns or sets the description.
         /// </summary>
         public string Description { get; set; }
 
         /// <summary>
-        /// Returns or sets whether the radio button is selected
+        /// Returns or sets whether inputs are enforced.
         /// </summary>
-        public bool Checked { get; set; }
+        public bool Required { get; set; }
+
+        /// <summary>
+        /// Gets or sets the placeholder text displayed when no date is selected.
+        /// </summary>
+        public string Placeholder { get; set; }
+
+        /// <summary>
+        /// Returns or sets the date format string used for formatting date values.
+        /// </summary>
+        public string Format { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
@@ -39,8 +36,14 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
         /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
         /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
-        public ControlFormItemInputRadio([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null)
-            : this($"radio_{instance}_{file}_{line}".GetHashCode().ToString("X"))
+        /// <param name="items">The entries.</param>
+        public ControlFormItemInputDateRange
+        (
+            [CallerMemberName] string instance = null,
+            [CallerFilePath] string file = null,
+            [CallerLineNumber] int? line = null
+        )
+            : this($"datepicker_range{instance}_{file}_{line}".GetHashCode().ToString("X"))
         {
         }
 
@@ -48,10 +51,9 @@ namespace WebExpress.WebUI.WebControl
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        public ControlFormItemInputRadio(string id)
+        public ControlFormItemInputDateRange(string id)
             : base(id)
         {
-
         }
 
         /// <summary>
@@ -62,37 +64,21 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
-            var value = renderContext?.GetValue<ControlFormInputValueString>(this)?.Text;
-
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                Checked = value == Option;
-            }
+            var range = renderContext.GetValue<ControlFormInputValueDateRange>(this)?.ToString();
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("form-check", Inline ? "form-check-inline" : null, GetClasses()),
-                Style = GetStyles(),
+                Class = "wx-webui-date"
             }
-                .Add(new HtmlElementFieldInput()
-                {
-                    Name = Name,
-                    Type = "radio",
-                    Value = Option,
-                    Disabled = Disabled,
-                    Class = Css.Concatenate("form-check-input"),
-                    Checked = Checked
-                })
-                .Add(new HtmlElementFieldLabel()
-                {
-                    Class = Css.Concatenate("form-check-label"),
-                    For = Id
-                }
-                    .Add(new HtmlText(string.IsNullOrWhiteSpace(Description) ?
-                        string.Empty :
-                        I18N.Translate(renderContext.Request?.Culture, Description)
-                    )));
+                .AddUserAttribute("name", Name)
+                .AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder))
+                .AddUserAttribute("data-value", range)
+                .AddUserAttribute("data-range", "true")
+                .AddUserAttribute("data-format", !string.IsNullOrWhiteSpace(Format)
+                    ? Format
+                    : renderContext.Request.Culture.DateTimeFormat.ShortDatePattern
+                );
 
             return html;
         }
@@ -107,9 +93,9 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>
         /// The value created from the specified string representation.
         /// </returns>
-        protected override ControlFormInputValueString CreateValue(string value, IRenderControlFormContext renderContext)
+        protected override ControlFormInputValueDateRange CreateValue(string value, IRenderControlFormContext renderContext)
         {
-            return new ControlFormInputValueString(value);
+            return new ControlFormInputValueDateRange(value, renderContext.Request.Culture);
         }
     }
 }

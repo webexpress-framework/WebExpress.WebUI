@@ -177,7 +177,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm().Add(control)
                 .Initialize(renderContext =>
                 {
-                    renderContext.SetValue(control, new ControlFormInputValueString(value));
+                    renderContext.SetValue(control, new ControlFormInputValueStringList(value));
                     initialized = true;
                 });
 
@@ -204,7 +204,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFormItemInputTag(null)
                 .Initialize(arg =>
                 {
-                    arg.Value.Text = value;
+                    arg.Value.Add(value);
                     initialized = true;
                 });
             var form = new ControlForm().Add(control);
@@ -231,7 +231,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputTag("tag").Initialize(args =>
             {
-                args.Value.Text = value;
+                args.Value.Add(value);
             });
             var form = new ControlForm()
                 .Add(control)
@@ -287,7 +287,7 @@ namespace WebExpress.WebUI.Test.WebControl
                     {
                         x
                         .Add(x.Value != null, "validation1", TypeInputValidity.Warning)
-                        .Add(x.Value?.Text?.Length > 3, "validation2")
+                        .Add(x.Value?.Items.Count() > 3, "validation2")
                         .Add(false, "validation3");
                         validated = true;
                     }
@@ -321,7 +321,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFormItemInputTag("tag")
                 .Initialize(args =>
                 {
-                    args.Value.Text = value;
+                    args.Value.Add(value);
                 });
             var form = new ControlForm()
                 .Add(control)
@@ -359,7 +359,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFormItemInputTag("tag")
                 .Initialize(arg =>
                 {
-                    arg.Value.Text = value;
+                    arg.Value.Add(value);
                 })
                 .Process
                 (

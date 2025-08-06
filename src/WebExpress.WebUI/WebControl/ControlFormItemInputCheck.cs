@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a checkbox input form item control.
     /// </summary>
-    public class ControlFormItemInputCheck : ControlFormItemInput<ControlFormInputValueString>
+    public class ControlFormItemInputCheck : ControlFormItemInput<ControlFormInputValueBool>
     {
         /// <summary>
         /// Returns or sets whether the checkbox should be displayed on a new line.
@@ -54,11 +54,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
-            var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
-            value = value?.Equals("true", StringComparison.OrdinalIgnoreCase) == true ||
-                    value?.Equals("on", StringComparison.OrdinalIgnoreCase) == true
-                        ? "true"
-                        : "false";
+            var value = renderContext.GetValue<ControlFormInputValueBool>(this)?.Checked;
 
             var html = new HtmlElementTextContentDiv()
             {
@@ -72,7 +68,7 @@ namespace WebExpress.WebUI.WebControl
                     Type = "checkbox",
                     Disabled = Disabled,
                     Class = Css.Concatenate("form-check-input"),
-                    Checked = value?.Equals("true") ?? false
+                    Checked = value ?? false,
                 })
                 .Add(new HtmlElementFieldLabel()
                 {
@@ -93,14 +89,18 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="value">
         /// The string representation of the value to be converted. Cannot be null.
         /// </param>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <returns>
         /// The value created from the specified string representation.
         /// </returns>
-        protected override ControlFormInputValueString CreateValue(string value)
+        protected override ControlFormInputValueBool CreateValue(string value, IRenderControlFormContext renderContext)
         {
-            return new ControlFormInputValueString
+            var @checked = value?.Equals("true", StringComparison.OrdinalIgnoreCase) == true ||
+                          value?.Equals("on", StringComparison.OrdinalIgnoreCase) == true;
+
+            return new ControlFormInputValueBool
             {
-                Text = value
+                Checked = @checked
             };
         }
     }

@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a calendar input form item that supports single or range-based date selection.
     /// </summary>
-    public class ControlFormItemInputCalendar : ControlFormItemInput<ControlFormInputValueDate>
+    public class ControlFormItemInputCalendarRange : ControlFormItemInput<ControlFormInputValueDateRange>
     {
         /// <summary>
         /// Returns or sets the description of the calendar input.
@@ -31,19 +31,16 @@ namespace WebExpress.WebUI.WebControl
         public string Format { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether date range selection is enabled.
-        /// </summary>
-        public bool Range { get; set; }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="ControlFormItemInputCalendar"/> class 
         /// with an auto-generated ID based on source location.
         /// </summary>
-        public ControlFormItemInputCalendar(
+        public ControlFormItemInputCalendarRange
+        (
             [CallerMemberName] string instance = null,
             [CallerFilePath] string file = null,
             [CallerLineNumber] int? line = null)
-            : this($"calendar{instance}_{file}_{line}".GetHashCode().ToString("X"))
+            : this($"calendar_range{instance}_{file}_{line}".GetHashCode().ToString("X")
+        )
         {
         }
 
@@ -51,7 +48,7 @@ namespace WebExpress.WebUI.WebControl
         /// Initializes a new instance of the class 
         /// with the specified control ID.
         /// </summary>
-        public ControlFormItemInputCalendar(string id)
+        public ControlFormItemInputCalendarRange(string id)
             : base(id)
         {
         }
@@ -64,12 +61,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the calendar control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
-            var value = renderContext.GetValue<ControlFormInputValueDate>(this)?
-                .ToString
-                (
-                    Format ?? renderContext.Request.Culture.DateTimeFormat.ShortDatePattern,
-                    renderContext?.Request?.Culture
-                );
+            var range = renderContext.GetValue<ControlFormInputValueDateRange>(this)?.ToString();
 
             var html = new HtmlElementTextContentDiv
             {
@@ -78,7 +70,8 @@ namespace WebExpress.WebUI.WebControl
             }
             .AddUserAttribute("name", Name)
             .AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder))
-            .AddUserAttribute("data-value", value)
+            .AddUserAttribute("data-range", "true")
+            .AddUserAttribute("data-value", range)
             .AddUserAttribute("data-format", !string.IsNullOrWhiteSpace(Format)
                 ? Format
                 : renderContext.Request.Culture.DateTimeFormat.ShortDatePattern
@@ -97,9 +90,9 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>
         /// The value created from the specified string representation.
         /// </returns>
-        protected override ControlFormInputValueDate CreateValue(string value, IRenderControlFormContext renderContext)
+        protected override ControlFormInputValueDateRange CreateValue(string value, IRenderControlFormContext renderContext)
         {
-            return new ControlFormInputValueDate(value, renderContext?.Request?.Culture);
+            return new ControlFormInputValueDateRange(value, renderContext.Request.Culture);
         }
     }
 }

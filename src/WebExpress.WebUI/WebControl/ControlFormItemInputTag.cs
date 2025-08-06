@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a tag input control.
     /// </summary>
-    public class ControlFormItemInputTag : ControlFormItemInput<ControlFormInputValueString>
+    public class ControlFormItemInputTag : ControlFormItemInput<ControlFormInputValueStringList>
     {
         /// <summary>
         /// Returns or sets a placeholder text.
@@ -61,8 +61,12 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var id = Id;
-            var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
             var classes = new List<string>(Classes);
+            var value = renderContext.GetValue<ControlFormInputValueStringList>(this)?.ToString
+            (
+                null,
+                renderContext?.Request?.Culture
+            );
 
             if (Disabled)
             {
@@ -81,7 +85,6 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-tags", value)
                 .AddUserAttribute("data-color-css", Color.ToClass())
                 .AddUserAttribute("data-color-style", Color.ToStyle());
-
 
             return html;
         }
@@ -112,15 +115,14 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="value">
         /// The string representation of the value to be converted. Cannot be null.
         /// </param>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <returns>
         /// The value created from the specified string representation.
         /// </returns>
-        protected override ControlFormInputValueString CreateValue(string value)
+        protected override ControlFormInputValueStringList CreateValue(string value, IRenderControlFormContext renderContext)
         {
-            return new ControlFormInputValueString
-            {
-                Text = value
-            };
+            // create a new instance using the semicolon separated string
+            return new ControlFormInputValueStringList(value);
         }
     }
 }

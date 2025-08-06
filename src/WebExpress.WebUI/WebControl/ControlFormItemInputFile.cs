@@ -135,15 +135,13 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="value">
         /// The string representation of the value to be converted. Cannot be null.
         /// </param>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <returns>
         /// The value created from the specified string representation.
         /// </returns>
-        protected override ControlFormInputValueString CreateValue(string value)
+        protected override ControlFormInputValueString CreateValue(string value, IRenderControlFormContext renderContext)
         {
-            return new ControlFormInputValueString
-            {
-                Text = value
-            };
+            return new ControlFormInputValueString(value);
         }
     }
 }

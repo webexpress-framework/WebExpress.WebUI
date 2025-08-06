@@ -100,7 +100,7 @@ namespace WebExpress.WebUI.WebControl
                 return;
             }
 
-            renderContext.SetValue(this, CreateValue(value));
+            renderContext.SetValue(this, CreateValue(value, renderContext));
         }
 
         /// <summary>
@@ -265,9 +265,10 @@ namespace WebExpress.WebUI.WebControl
         /// The string representation of the value to be converted into an instance of 
         /// <typeparamref name="TValue"/>. Cannot be null.
         /// </param>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <returns>
         /// An instance of <typeparamref name="TValue"/> created from the specified string representation.
         /// </returns>
-        protected abstract TValue CreateValue(string value);
+        protected abstract TValue CreateValue(string value, IRenderControlFormContext renderContext);
     }
 }

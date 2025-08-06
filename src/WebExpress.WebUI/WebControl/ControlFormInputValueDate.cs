@@ -10,24 +10,9 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormInputValueDate : IControlFormInputValue
     {
         /// <summary>
-        /// Returns the date.
+        /// Returns or sets the date.
         /// </summary>
-        public DateTime? Date => From ?? To;
-
-        /// <summary>
-        /// Returns or sets the start date of the range.
-        /// </summary>
-        public DateTime? From { get; set; }
-
-        /// <summary>
-        /// Returns or sets the end date of the range.
-        /// </summary>
-        public DateTime? To { get; set; }
-
-        /// <summary>
-        /// Returns or sets the default format string used for output.
-        /// </summary>
-        public string Format { get; set; }
+        public DateTime? Date { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -41,24 +26,35 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="value">The single date value.</param>
         /// <param name="format">Optional format string for output.</param>
-        public ControlFormInputValueDate(DateTime? value, string format = null)
+        public ControlFormInputValueDate(DateTime? value)
         {
-            From = value;
-            To = null;
-            Format = format;
+            Date = value;
         }
 
         /// <summary>
-        /// Initializes a new instance with a date range.
+        /// Initializes a new instance from a string representation.
         /// </summary>
-        /// <param name="from">Start date of the range.</param>
-        /// <param name="to">End date of the range.</param>
-        /// <param name="format">Optional format string for output.</param>
-        public ControlFormInputValueDate(DateTime? from, DateTime? to, string format = null)
+        /// <param name="value">String with either one date or two dates separated by '–'.</param>
+        /// <param name="formatProvider">The culture-specific formatting provider.</param>
+        public ControlFormInputValueDate(string value, IFormatProvider formatProvider)
         {
-            From = from;
-            To = to;
-            Format = format;
+            // parse the string, expecting either one date or a range separated by '–'
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                Date = null;
+                return;
+            }
+
+            // try parse with current culture, fallback to invariant
+            if (DateTime.TryParse(value, formatProvider, DateTimeStyles.None, out var dt))
+            {
+                Date = dt;
+            }
+
+            if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+            {
+                Date = dt;
+            }
         }
 
         /// <summary>
@@ -69,20 +65,12 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>A formatted string representation of the date.</returns>
         public virtual string ToString(string format, IFormatProvider formatProvider)
         {
-            var fmt = format ?? Format ?? "d";
+            var fmt = format ?? "d";
             var culture = formatProvider ?? CultureInfo.CurrentCulture;
 
-            if (From.HasValue && To.HasValue)
+            if (Date.HasValue)
             {
-                return $"{From.Value.ToString(fmt, culture)} – {To.Value.ToString(fmt, culture)}";
-            }
-            else if (From.HasValue)
-            {
-                return From.Value.ToString(fmt, culture);
-            }
-            else if (To.HasValue)
-            {
-                return To.Value.ToString(fmt, culture);
+                return Date.Value.ToString(fmt, culture);
             }
 
             return string.Empty;

@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a form item input control that allows moving items between available and selected lists.
     /// </summary>
-    public class ControlFormItemInputMove : ControlFormItemInput<ControlFormInputValueString>, IControlFormItemInputMove
+    public class ControlFormItemInputMove : ControlFormItemInput<ControlFormInputValueStringList>, IControlFormItemInputMove
     {
         private readonly List<ControlFormItemInputMoveItem> _options = [];
 
@@ -91,7 +91,11 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
-            var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
+            var value = renderContext.GetValue<ControlFormInputValueStringList>(this)?.ToString
+            (
+                null,
+                renderContext?.Request?.Culture
+            );
             var classes = Classes.ToList();
 
             if (Disabled)
@@ -137,15 +141,14 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="value">
         /// The string representation of the value to be converted. Cannot be null.
         /// </param>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <returns>
         /// The value created from the specified string representation.
         /// </returns>
-        protected override ControlFormInputValueString CreateValue(string value)
+        protected override ControlFormInputValueStringList CreateValue(string value, IRenderControlFormContext renderContext)
         {
-            return new ControlFormInputValueString
-            {
-                Text = value
-            };
+            // create a new instance using the semicolon separated string
+            return new ControlFormInputValueStringList(value);
         }
     }
 }
