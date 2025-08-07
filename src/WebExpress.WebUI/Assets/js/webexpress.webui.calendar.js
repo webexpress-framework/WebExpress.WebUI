@@ -33,9 +33,16 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
             const [start, end] = value.split(" - ").map(date => this._parseDate(date.trim(), this._dateFormat));
             this._rangeStart = start || null;
             this._rangeEnd = end || null;
-        } else {
+            this._viewDate = new Date(this._rangeStart);
+        } else if (this._rangeMode) {
             this._rangeStart = null;
             this._rangeEnd = null;
+            this._viewDate = new Date();
+        } else {
+            // parse initial value if available
+            this._selectedDate = value ? this._parseDate(value, this._dateFormat) : null;
+            // set initial view date
+            this._viewDate = this._selectedDate ? new Date(this._selectedDate) : new Date();
         }
 
         // parse holidays from data attribute
@@ -44,12 +51,6 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
         }
 
         this._hidden = this._createHiddenInput(name);
-
-        // parse initial value if available
-        this._selectedDate = value ? this._parseDate(value, this._dateFormat) : null;
-
-        // set initial view date
-        this._viewDate = this._selectedDate ? new Date(this._selectedDate) : new Date();
 
         // clean up element attributes and prepare DOM structure
         element.removeAttribute("name");
@@ -231,11 +232,11 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
      */
     set value(date) {
         if (this._rangeMode && date && typeof date === "object") {
-            this._rangeStart = date.start;
+            this._rangeStart = new Date(date.start);
             this._rangeEnd = date.end;
             this._selectedDate = null;
         } else {
-            this._selectedDate = date;
+            this._selectedDate = new Date(date);
             this._rangeStart = null;
             this._rangeEnd = null;
         }
@@ -418,6 +419,7 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
      */
     _renderCalendar() {
         const dateButtonMap = new Map();
+        const viewDate = this._viewDate ? this._viewDate : new Date();
         const container = document.createElement("div");
         container.classList.add("wx-calendar-view");
 
@@ -428,7 +430,9 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
         const btnNextMonth = this._createNavButton("›", () => this._changeView(1, "month"));
         const btnNextYear = this._createNavButton("»", () => this._changeView(1, "year"));
         const monthYear = document.createElement("span");
-        monthYear.textContent = this._viewDate.getFullYear() + " – " + webexpress.webui.I18N.translate(`webexpress.webui:calendar.${this._getMonthKey(this._viewDate.getMonth())}`);
+        monthYear.textContent = viewDate.getFullYear() 
+            + " – " 
+            + webexpress.webui.I18N.translate(`webexpress.webui:calendar.${this._getMonthKey(viewDate.getMonth())}`);
         monthYear.classList.add("wx-calendar-monthyear");
 
         header.appendChild(btnPrevYear);
@@ -454,12 +458,12 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
         table.appendChild(thead);
 
         const tbody = document.createElement("tbody");
-        const year = this._viewDate.getFullYear();
-        const month = this._viewDate.getMonth();
+        const year = viewDate.getFullYear();
+        const month = viewDate.getMonth();
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
         let date = new Date(firstDay);
-        date.setDate(date.getDate() - ((date.getDay() + 6) % 7)); // Start at Monday
+        date.setDate(date.getDate() - ((date.getDay() + 6) % 7)); // start at Monday
 
         // table rows and cells for days
         while (date <= lastDay || date.getDay() !== 1) {

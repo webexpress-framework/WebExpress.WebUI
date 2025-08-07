@@ -1,5 +1,5 @@
 /**
- * CalendarCtrl is a calendar control for selecting a single date.
+ * CalendarCtrl is a calendar control for selecting a single or range date.
  *
  * The following events are triggered:
  * - webexpress.webui.Event.CHANGE_VALUE_EVENT: Fired when the selected date changes
@@ -24,16 +24,6 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
         const holidaysAttr = element.getAttribute("data-holidays");
         this._rangeMode = element.getAttribute("data-range") === "true";
 
-        if (holidaysAttr) {
-            this._holidays = holidaysAttr.split(",").map(x => x.trim()).filter(x => x.length > 0);
-        }
-        
-        
-        this._viewDate = this._selectedDate ? new Date(this._selectedDate) : new Date();
-        this._hidden = this._createHiddenInput(name);
-        this._dropdown = this._createDropdown();
-        this._dropdownmenu = this._createDropdownMenu();
-
         // clean up element attributes and prepare DOM structure
         element.removeAttribute("name");
         element.removeAttribute("placeholder");
@@ -43,13 +33,32 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
         element.removeAttribute("data-range");
         element.innerHTML = "";
         element.classList.add("wx-date");
+        
+        if (this._rangeMode && value && value.includes(" - ")) {
+            const [start, end] = value.split(" - ").map(date => this._parseDate(date.trim(), this._dateFormat));
+            this._rangeStart = start || null;
+            this._rangeEnd = end || null;
+        } else {
+            this._rangeStart = null;
+            this._rangeEnd = null;
+        }
+
+        if (holidaysAttr) {
+            this._holidays = holidaysAttr.split(",").map(x => x.trim()).filter(x => x.length > 0);
+        }
+        
+        this._viewDate = value ? this._parseDate(value, this._dateFormat) : null;
+        this._hidden = this._createHiddenInput(name);
+        this._dropdown = this._createDropdown();
+        this._dropdownmenu = this._createDropdownMenu();
+        
         element.appendChild(this._hidden);
         element.appendChild(this._dropdown);
         element.appendChild(this._dropdownmenu);
-
+        
         this._initializePopper(this._dropdown, this._dropdownmenu);
-
-        this.value = value ? this._parseDate(value, this._dateFormat) : null;
+        
+        this.value = this._rangeMode ? { start: this._rangeStart, end: this._rangeEnd } : this._viewDate;
     }
 
     /**
@@ -191,6 +200,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
      * @returns {HTMLDivElement} Dropdown menu element.
      */
     _createDropdownMenu() {
+        const viewDate = this._viewDate ? this._viewDate : new Date();
         const dropdownMenu = document.createElement("div");
         dropdownMenu.classList.add("dropdown-menu");
         dropdownMenu.style.minWidth = "280px";
@@ -199,22 +209,12 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
         // header with navigation
         const header = document.createElement("div");
         header.classList.add("wx-calendar-header");
-        const b = document.createElement("button");
-        b.type = "button";
-        b.className = "wx-calendar-nav";
-        b.textContent = "«";
-        b.addEventListener("click", (e) => {
-            e.stopPropagation();
-            this._changeView(1, "year");
-        });
         
         const btnPrevYear = this._createNavButton("«", () => this._changeView(-1, "year"));
         const btnPrevMonth = this._createNavButton("‹", () => this._changeView(-1, "month"));
         const btnNextMonth = this._createNavButton("›", () => this._changeView(1, "month"));
         const btnNextYear = this._createNavButton("»", () => this._changeView(1, "year"));
         this._monthYear = document.createElement("span");
-        this._monthYear.textContent = this._viewDate.getFullYear() + " – " + webexpress.webui.I18N.translate(`webexpress.webui:calendar.${this._getMonthKey(this._viewDate.getMonth())}`);
-        this._monthYear.classList.add("wx-calendar-monthyear");
 
         header.appendChild(btnPrevYear);
         header.appendChild(btnPrevMonth);
@@ -226,7 +226,6 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
         
         this._calendarContainer = document.createElement("div");
         this._calendarContainer.classList.add("wx-calendar");
-        this._calendarContainer.appendChild(this._renderCalendar());
         dropdownMenu.appendChild(this._calendarContainer);
 
         // "today" button
@@ -265,18 +264,23 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
      * Renders the input and calendar according to state.
      */
     render() {
+        const viewDate = this._viewDate ? this._viewDate : new Date();
         this._input.value = this._hidden.value;
-        this._monthYear.textContent = this._viewDate?.getFullYear() + " – " + webexpress.webui.I18N.translate(`webexpress.webui:calendar.${this._getMonthKey(this._viewDate?.getMonth())}`);
+        this._monthYear.textContent = viewDate?.getFullYear() 
+            + " – " 
+            + webexpress.webui.I18N.translate(`webexpress.webui:calendar.${this._getMonthKey(viewDate?.getMonth())}`);
         this._calendarContainer.innerHTML = "";
         this._calendarContainer.appendChild(this._renderCalendar());
     }
 
     /**
-     * Returns the currently selected date.
-     * @returns {Date|null} Selected date or null.
+     * Gets the current value (single date or range).
+     * @returns {Date|Object|null} Single date or {start, end} object in range mode.
      */
     get value() {
-        return this._selectedDate;
+        return this._rangeMode
+            ? { start: this._rangeStart, end: this._rangeEnd }
+            : this._selectedDate;
     }
 
     /**
@@ -285,11 +289,11 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
      */
     set value(date) {
         if (this._rangeMode && date && typeof date === "object") {
-            this._rangeStart = date.start;
+            this._rangeStart = new Date(date.start);
             this._rangeEnd = date.end;
             this._selectedDate = null;
         } else {
-            this._selectedDate = date;
+            this._selectedDate = new Date(date);
             this._rangeStart = null;
             this._rangeEnd = null;
         }
@@ -467,6 +471,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
      */
     _renderCalendar() {
         const dateButtonMap = new Map();
+        const viewDate = this._viewDate ? this._viewDate : new Date();
         // table for calendar days
         const table = document.createElement("table");
         table.classList.add("wx-calendar-table");
@@ -487,12 +492,12 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
 
         // body with days
         const tbody = document.createElement("tbody");
-        const year = this._viewDate.getFullYear();
-        const month = this._viewDate.getMonth();
+        const year = viewDate.getFullYear();
+        const month = viewDate.getMonth();
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
         let date = new Date(firstDay);
-        date.setDate(date.getDate() - ((date.getDay() + 6) % 7)); // Start at Monday
+        date.setDate(date.getDate() - ((date.getDay() + 6) % 7)); // start at Monday
 
         while (date <= lastDay || date.getDay() !== 1) {
             const tr = document.createElement("tr");
@@ -565,7 +570,10 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
                                 this._input.blur();
                             }, 0);
                         } else {
-                            this.value = { start: currentDate, end: null };
+                            //this.value = { start: currentDate, end: null };
+                            this._rangeStart = currentDate;
+                            this._rangeEnd = null;
+                            this.render();
                         }
                     } else {
                         this.value = currentDate;
