@@ -49,11 +49,11 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Initializes a new instance from a string representation.
         /// </summary>
-        /// <param name="value">String with either one date or two dates separated by '–'.</param>
+        /// <param name="value">String with either one date or two dates separated by '-'.</param>
         /// <param name="formatProvider">The culture-specific formatting provider.</param>
         public ControlFormInputValueDateRange(string value, IFormatProvider formatProvider)
         {
-            // parse the string, expecting either one date or a range separated by '–'
+            // parse the string, expecting either one date or a range separated by '-'
             if (string.IsNullOrWhiteSpace(value))
             {
                 From = null;
@@ -61,7 +61,7 @@ namespace WebExpress.WebUI.WebControl
                 return;
             }
 
-            var parts = value.Split('–');
+            var parts = value.Split(" - ");
             if (parts.Length == 2)
             {
                 // try to parse both dates
@@ -89,7 +89,7 @@ namespace WebExpress.WebUI.WebControl
 
             if (From.HasValue && To.HasValue)
             {
-                return $"{From.Value.ToString(fmt, culture)} – {To.Value.ToString(fmt, culture)}";
+                return $"{From.Value.ToString(fmt, culture)} - {To.Value.ToString(fmt, culture)}";
             }
             else if (From.HasValue)
             {

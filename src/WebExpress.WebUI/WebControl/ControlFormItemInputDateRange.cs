@@ -64,7 +64,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
-            var range = renderContext.GetValue<ControlFormInputValueDateRange>(this)?.ToString();
+            var range = renderContext.GetValue<ControlFormInputValueDateRange>(this)?
+                .ToString(Format, renderContext?.Request?.Culture);
 
             var html = new HtmlElementTextContentDiv()
             {

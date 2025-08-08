@@ -34,11 +34,11 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Initializes a new instance from a string representation.
         /// </summary>
-        /// <param name="value">String with either one date or two dates separated by '–'.</param>
+        /// <param name="value">String with either one date or two dates separated by '-'.</param>
         /// <param name="formatProvider">The culture-specific formatting provider.</param>
         public ControlFormInputValueDate(string value, IFormatProvider formatProvider)
         {
-            // parse the string, expecting either one date or a range separated by '–'
+            // parse the string, expecting either one date or a range separated by '-'
             if (string.IsNullOrWhiteSpace(value))
             {
                 Date = null;

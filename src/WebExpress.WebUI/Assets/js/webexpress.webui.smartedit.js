@@ -78,7 +78,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Displays a spinner icon to indicate edit mode
-     * @param {HTMLElement} element – target element
+     * @param {HTMLElement} element - target element
      */
     _showEditSpinner(element) {
         if (!this._activeEdit) return;
@@ -104,7 +104,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Removes the spinner icon from the target element
-     * @param {HTMLElement} element – target element
+     * @param {HTMLElement} element - target element
      */
     _hideEditSpinner(element) {
         const spinnerButton = element.querySelector(":scope > button");

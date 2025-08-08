@@ -174,7 +174,7 @@ namespace WebExpress.WebUI.WebMarkdown
         /// Returns true if successful; false if input is invalid.
         /// </summary>
         /// <param name="input">The string to evaluate (e.g. "a", "B.", "c)").</param>
-        /// <param name="result">The numeric position in the alphabet (1–26).</param>
+        /// <param name="result">The numeric position in the alphabet (1-26).</param>
         /// <returns><c>true</c> if conversion succeeds; otherwise <c>false</c>.</returns>
         public static bool TryAlphaIndexToInt(string input, out int result)
         {

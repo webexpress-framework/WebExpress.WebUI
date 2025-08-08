@@ -431,7 +431,7 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
         const btnNextYear = this._createNavButton("»", () => this._changeView(1, "year"));
         const monthYear = document.createElement("span");
         monthYear.textContent = viewDate.getFullYear() 
-            + " – " 
+            + " - " 
             + webexpress.webui.I18N.translate(`webexpress.webui:calendar.${this._getMonthKey(viewDate.getMonth())}`);
         monthYear.classList.add("wx-calendar-monthyear");
 

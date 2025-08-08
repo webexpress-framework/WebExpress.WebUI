@@ -17,7 +17,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
     constructor(element) {
         super(element);
 
-        const name = element.getAttribute("name");
+        this._name = element.getAttribute("name");
         this._dateFormat = element.getAttribute("data-format") || webexpress.webui.I18N.translate("webexpress.webui:calendar.format");
         const value = element.dataset.value || null;
         this._placeholder = element.getAttribute("placeholder") || webexpress.webui.I18N.translate("webexpress.webui:calendar.select_date");
@@ -48,29 +48,15 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
         }
         
         this._viewDate = value ? this._parseDate(value, this._dateFormat) : null;
-        this._hidden = this._createHiddenInput(name);
         this._dropdown = this._createDropdown();
         this._dropdownmenu = this._createDropdownMenu();
         
-        element.appendChild(this._hidden);
         element.appendChild(this._dropdown);
         element.appendChild(this._dropdownmenu);
         
         this._initializePopper(this._dropdown, this._dropdownmenu);
         
         this.value = this._rangeMode ? { start: this._rangeStart, end: this._rangeEnd } : this._viewDate;
-    }
-
-    /**
-     * Creates a hidden input for form submission.
-     * @param {string} name - The input name attribute.
-     * @returns {HTMLInputElement} Hidden input element.
-     */
-    _createHiddenInput(name) {
-        const hiddenInput = document.createElement("input");
-        hiddenInput.type = "hidden";
-        hiddenInput.name = name || "";
-        return hiddenInput;
     }
 
     /**
@@ -86,6 +72,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
         dropdown.style.alignItems = "center";
 
         this._input = document.createElement("input");
+        this._input.name = this._name || "";
         this._input.type = "text";
         this._input.className = "wx-date-input";
         this._input.style.flex = "1 1 auto";
@@ -265,9 +252,8 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
      */
     render() {
         const viewDate = this._viewDate ? this._viewDate : new Date();
-        this._input.value = this._hidden.value;
         this._monthYear.textContent = viewDate?.getFullYear() 
-            + " – " 
+            + " - " 
             + webexpress.webui.I18N.translate(`webexpress.webui:calendar.${this._getMonthKey(viewDate?.getMonth())}`);
         this._calendarContainer.innerHTML = "";
         this._calendarContainer.appendChild(this._renderCalendar());
@@ -304,8 +290,8 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
                 : (this._rangeStart ? this._formatDateString(this._rangeStart, this._dateFormat) : ""))
             : (date ? this._formatDateString(date, this._dateFormat) : "");
         
-        if (this._hidden.value != value) {
-            this._hidden.value = value;
+        if (this._input.value != value) {
+            this._input.value = value;
             
             document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
                 detail: {
