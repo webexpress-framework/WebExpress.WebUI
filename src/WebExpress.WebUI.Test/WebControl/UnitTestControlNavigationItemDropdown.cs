@@ -257,7 +257,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeAlignmentDropdownMenu.Default, @"<div class=""wx-webui-dropdown"" role=""button""></div>")]
-        [InlineData(TypeAlignmentDropdownMenu.Right, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""dropdown-menu-lg-end""></div>")]
+        [InlineData(TypeAlignmentDropdownMenu.Right, @"<div class=""wx-webui-dropdown"" role=""button"" data-menuCss=""dropdown-menu-end""></div>")]
         public void AlignmentMenu(TypeAlignmentDropdownMenu alignmentMenu, string expected)
         {
             // preconditions

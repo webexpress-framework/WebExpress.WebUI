@@ -188,4 +188,12 @@ pre {
     outline: 2px dashed var(--bs-success); /* Adds a dashed border for visual emphasis */
     border-radius: 0;
     z-index: 1000; 
-}    
+}
+
+.list-group-item.active a {
+    color: var(--bs-light);
+}
+
+.list-group-item.active a:hover {
+    color: var(--bs-light);
+}

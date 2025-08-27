@@ -192,6 +192,7 @@ namespace WebExpress.WebUI.WebControl
         {
             var buttonCss = "";
             var buttonStyle = "";
+            var menuCss = "";
 
             if (Color != null)
             {
@@ -216,7 +217,7 @@ namespace WebExpress.WebUI.WebControl
 
             if (AlignmentMenu != TypeAlignmentDropdownMenu.Default)
             {
-                buttonCss = Css.Concatenate(AlignmentMenu.ToClass(), buttonCss);
+                menuCss = Css.Concatenate(AlignmentMenu.ToClass(), menuCss);
             }
 
             var html = new HtmlElementTextContentDiv()
@@ -230,6 +231,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-buttonCss", buttonCss)
                 .AddUserAttribute("data-buttonStyle", buttonStyle)
+                .AddUserAttribute("data-menuCss", menuCss)
                 .AddUserAttribute(Active == TypeActive.Active ? "active" : null)
                 .AddUserAttribute(Active == TypeActive.Disabled ? "disabled" : null)
                 .Add(_items.Select(x => x.Render(renderContext, visualTree)));

@@ -30,7 +30,7 @@
         {
             return direction switch
             {
-                TypeAlignmentDropdownMenu.Right => "dropdown-menu-lg-end",
+                TypeAlignmentDropdownMenu.Right => "dropdown-menu-end",
                 _ => string.Empty,
             };
         }
