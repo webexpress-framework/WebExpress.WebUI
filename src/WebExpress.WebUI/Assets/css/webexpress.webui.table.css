@@ -21,6 +21,7 @@
     outline: 0;
     overflow: hidden; 
     white-space: nowrap; 
+    align-items: center;
 }
 
 /* Sorting indicator for ascending order */
@@ -57,13 +58,13 @@
     color: var(--bs-light); /* Light text color for contrast */
 }
 
-.wx-table > thead > tr > th {
-    display: inline-flex;
+.wx-table > thead > tr > th > div {
+    display: inline-flex; /* Flexbox for content inside the <th> */
     align-items: center;
-    gap: 0.5em; 
+    gap: 0.5em; /* Adds space between the icon and text */
 }
 
-.wx-table > thead > tr > th > img {
+.wx-table > thead > tr > th > div > img {
     height: 1.2em;
     min-width: 1em;
 }
@@ -76,18 +77,21 @@
     border: 0;
 }
 
-.wx-table > tbody > tr > td  {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5em;
+.wx-table > tbody > tr > td {
 }
 
-.wx-table > tbody > tr > td > img {
+.wx-table > tbody > tr > td > div {
+    display: inline-flex; /* Flexbox for content inside the <th> */
+    align-items: center;
+    gap: 0.5em; /* Adds space between the icon and text */
+}
+
+.wx-table > tbody > tr > td > div > img {
     height: 1.2em;
     min-width: 1em;
 }
 
-.wx-table > tbody > tr > td > i {
+.wx-table > tbody > tr > td > div > i {
 }
 
 /* Styling for dragging elements */

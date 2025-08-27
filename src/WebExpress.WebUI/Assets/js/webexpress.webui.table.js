@@ -470,22 +470,26 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             th.draggable = true;
             if (column.color) th.classList.add(column.color);
             headRow.appendChild(th);
+            
+            const thdiv = document.createElement("div");
 
             if (column.icon) {
                 const i = document.createElement("i");
                 i.className = column.icon;
-                th.appendChild(i);
+                thdiv.appendChild(i);
             }
             if (column.image) {
                 const img = document.createElement("img");
                 img.src = column.image;
-                th.appendChild(img);
+                thdiv.appendChild(img);
             }
             if (column.content) {
-                th.innerHTML = column.content;
+                thdiv.innerHTML = column.content;
             } else {
-                th.appendChild(document.createTextNode(column.label));
+                thdiv.appendChild(document.createTextNode(column.label));
             }
+            
+            th.appendChild(thdiv);
 
             const col = document.createElement("col");
             if (column.width) col.setAttribute("style", `width: ${column.width}px;`);
@@ -550,23 +554,26 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             if (cellData.color) td.classList.add(cellData.color);
             if (cellData.class) td.classList.add(cellData.class);
             if (cellData.style) td.setAttribute("style", cellData.style);
+            
+            const tddiv = document.createElement("div");
 
             if (cellData.image) {
                 const img = document.createElement("img");
                 img.src = cellData.image;
-                td.appendChild(img);
+                tddiv.appendChild(img);
             }
             if (cellData.icon) {
                 const i = document.createElement("i");
                 i.className = cellData.icon;
-                td.appendChild(i);
+                tddiv.appendChild(i);
             }
             if (cellData.content) {
-                td.innerHTML = cellData.content;
+                tddiv.innerHTML = cellData.content;
             }
             else {
-                td.appendChild(document.createTextNode(cellData.text || ""));
+                tddiv.appendChild(document.createTextNode(cellData.text || ""));
             }
+            td.appendChild(tddiv);
             tr.appendChild(td);
         });
 
