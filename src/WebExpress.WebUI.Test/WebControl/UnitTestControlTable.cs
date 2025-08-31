@@ -112,6 +112,76 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the allow column remove property of the table control.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-webui-table"">*</div>")]
+        [InlineData(true, @"<div class=""wx-webui-table"" data-allow-column-remove=""true"">*</div>")]
+        public void AllowColumnRemove(bool allowColumnRemove, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTable
+            {
+                AllowColumnRemove = allowColumnRemove
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the movable row property of the table control.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-webui-table"">*</div>")]
+        [InlineData(true, @"<div class=""wx-webui-table"" data-movable-row=""true"">*</div>")]
+        public void MovableRow(bool movablerow, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTable
+            {
+                MovableRow = movablerow
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the persist-key property of the table control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-webui-table"">*</div>")]
+        [InlineData("", @"<div class=""wx-webui-table"">*</div>")]
+        [InlineData("abc", @"<div class=""wx-webui-table"" data-persist-key=""abc"">*</div>")]
+        public void PersistKey(string persistKey, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTable
+            {
+                PersistKey = persistKey
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests adding a column to the table.
         /// </summary>
         [Fact]
@@ -130,7 +200,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var html = control.Render(context, visualTree);
 
             // expected HTML
-            var expected = @"<div class=""wx-webui-table""><div class=""wx-table-columns""><div>Column 1</div></div></div>";
+            var expected = @"<div class=""wx-webui-table""><div class=""wx-table-columns""><div data-label=""Column 1""></div></div></div>";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }

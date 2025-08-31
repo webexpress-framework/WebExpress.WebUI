@@ -265,7 +265,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         /// Converts a Markdown string to its equivalent HTML representation.
         /// </summary>
         [Theory]
-        [InlineData("|Name|City\r\n|---|---|---|\r\n|Mario|Mushroom", @"<div class=""wx-webui-table""><div class=""wx-table-columns""><div>Name</div><div>City</div></div><div class=""wx-table-row""><div>Mario</div><div>Mushroom</div></div></div>")]
+        [InlineData("|Name|City\r\n|---|---|---|\r\n|Mario|Mushroom", @"<div class=""wx-webui-table""><div class=""wx-table-columns""><div data-label=""Name""></div><div data-label=""City""></div></div><div class=""wx-table-row""><div>Mario</div><div>Mushroom</div></div></div>")]
         public void ConvertTable(string markdown, string expectedHtml)
         {
             // preconditions

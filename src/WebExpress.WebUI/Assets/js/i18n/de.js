@@ -37,5 +37,9 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "calendar.today": "Heute",
     "calendar.format": "DD.MM.YYYY",
 
-    "upload.placeholder": "Datei hier ablegen oder zum Hochladen klicken."
+    "upload.placeholder": "Datei hier ablegen oder zum Hochladen klicken.",
+    
+    "table.columns.label": "Spalten",
+    "table.options.label": "Optionen",
+    "table.columns.toggle": "Spalten ein-/ausblenden"
 });

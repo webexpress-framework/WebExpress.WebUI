@@ -252,9 +252,10 @@ namespace WebExpress.WebUI.WebControl
         public virtual IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlFormItem> items)
         {
             var validationResults = new List<ValidationResult>();
+            var name = Name ?? Id;
 
             // check if and how the form was submitted
-            if (!renderContext.Request.HasParameter(FormId.Name) || State == TypeFormState.Success)
+            if (!renderContext.Request.HasParameter(name) || State == TypeFormState.Success)
             {
                 State = TypeFormState.Default;
 

@@ -37,5 +37,9 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "calendar.today": "Today",
     "calendar.format": "M/D/YYYY",
 
-    "upload.placeholder": "Drop file here or click to upload."
+    "upload.placeholder": "Drop file here or click to upload.",
+    
+    "table.columns.label": "Columns",
+    "table.options.label": "Options",
+    "table.columns.toggle": "Show/Hide columns"
 });

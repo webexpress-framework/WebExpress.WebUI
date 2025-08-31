@@ -480,6 +480,8 @@ webexpress.webui.Event = class {
     static CHANGE_FAVORITE_EVENT = "webexpress.webui.change.favorite";
     // Event triggered when columns are reordered in a table control.
     static COLUMN_REORDER_EVENT = "webexpress.webui.table.column.reorder";
+    // Event triggered when rows are reordered in a table control.
+    static ROW_REORDER_EVENT = "webexpress.webui.table.row.reorder";
     // Event triggered when a table is sorted.
     static TABLE_SORT_EVENT = "webexpress.webui.table.sorted";
     // Event triggered when the value of an input or control changes.

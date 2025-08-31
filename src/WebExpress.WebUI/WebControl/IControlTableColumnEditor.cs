@@ -4,45 +4,43 @@ using System.Collections.Generic;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a SmartEdit control for quick and intuitive value editing directly within the view, 
-    /// without opening a separate edit form. Ideal for context-sensitive modifications that preserve 
-    /// the user's workflow.
+    /// Defines methods for configuring and managing edit functionality for a table column.
     /// </summary>
-    public interface IControlSmartEdit : IControl
+    public interface IControlTableColumnEditor : IControlTableColumn
     {
         /// <summary>
-        /// Adds one or more smart edit items.
+        /// Adds one or more edit items.
         /// </summary>
-        /// <param name="formInputs">The smart edit input fields to be added.</param>
+        /// <param name="formInputs">The edit input fields to be added.</param>
         /// <returns>The current instance for method chaining.</returns>
-        IControlSmartEdit Add(params IControlFormItemInput[] formInputs);
+        IControlTableColumnEditor Add(params IControlFormItemInput[] formInputs);
 
         /// <summary>
-        /// Adds a collection of smart edit items.
+        /// Adds a collection of edit items.
         /// </summary>
-        /// <param name="formInputs">The smart edit input fields to be added.</param>
+        /// <param name="formInputs">The sma edit input fields to be added.</param>
         /// <returns>The current instance for method chaining.</returns>
-        IControlSmartEdit Add(IEnumerable<IControlFormItemInput> formInputs);
+        IControlTableColumnEditor Add(IEnumerable<IControlFormItemInput> formInputs);
 
         /// <summary>
         /// Initialize the form with data using the specified action.
         /// </summary>
         /// <param name="handler">The action to execute for filling the form.</param>
         /// <returns>The current instance for method chaining.</returns>
-        IControlSmartEdit Initialize(Action<ControlFormEventFormInitialize> handler);
+        IControlTableColumnEditor Initialize(Action<ControlFormEventFormInitialize> handler);
 
         /// <summary>
         /// Checks the form for correctness of the data.
         /// </summary>
         /// <param name="handler">The action to execute for validation the form.</param>
         /// <returns>The current instance for method chaining.</returns>
-        IControlSmartEdit Validate(Action<ControlFormEventFormValidate> handler);
+        IControlTableColumnEditor Validate(Action<ControlFormEventFormValidate> handler);
 
         /// <summary>
         /// Processes the form with the specified handler.
         /// </summary>
         /// <param name="handler">The action to execute for processing the form.</param>
         /// <returns>The current instance for method chaining.</returns>
-        IControlSmartEdit Process(Action<ControlFormEventFormProcess> handler);
+        IControlTableColumnEditor Process(Action<ControlFormEventFormProcess> handler);
     }
 }

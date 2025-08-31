@@ -53,10 +53,11 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var html = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Title)))
+            var html = new HtmlElementTextContentDiv()
             {
                 Id = Id
             }
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, Title))
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
                 .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-color", Color.ToClass())

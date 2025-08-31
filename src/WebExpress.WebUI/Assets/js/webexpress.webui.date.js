@@ -274,12 +274,19 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
      * @param {Date|null} date - Date to set as selected.
      */
     set value(date) {
-        if (this._rangeMode && date && typeof date === "object") {
-            this._rangeStart = new Date(date.start);
-            this._rangeEnd = date.end;
+        if (this._rangeMode && date && typeof date === "object" && !(date instanceof Date)) {
+            const start = typeof date.start === "string" ? this._parseDate(date.start, this._dateFormat) : date.start;
+            const end = typeof date.end === "string" ? this._parseDate(date.end, this._dateFormat) : date.end;
+            this._rangeStart = start ? new Date(start) : null;
+            this._rangeEnd = end;
             this._selectedDate = null;
+        } else if (typeof date === "string") {
+            const dt = this._parseDate(date, this._dateFormat);
+            this._selectedDate = dt ? new Date(dt) : null;
+            this._rangeStart = null;
+            this._rangeEnd = null;
         } else {
-            this._selectedDate = new Date(date);
+            this._selectedDate = date ? new Date(date) : null;
             this._rangeStart = null;
             this._rangeEnd = null;
         }
@@ -288,7 +295,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
             ? (this._rangeStart && this._rangeEnd
                 ? this._formatDateString(this._rangeStart, this._dateFormat) + " - " + this._formatDateString(this._rangeEnd, this._dateFormat)
                 : (this._rangeStart ? this._formatDateString(this._rangeStart, this._dateFormat) : ""))
-            : (date ? this._formatDateString(date, this._dateFormat) : "");
+            : (this._selectedDate ? this._formatDateString(this._selectedDate, this._dateFormat) : "");
         
         if (this._input.value != value) {
             this._input.value = value;
@@ -302,7 +309,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
             }));
         }
         
-        this._viewDate = this._rangeStart ? date.start : date;
+        this._viewDate = this._rangeStart ? (this._rangeStart) : (this._selectedDate || date);
         this.render();
     }
 

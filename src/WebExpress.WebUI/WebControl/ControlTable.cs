@@ -45,6 +45,22 @@ namespace WebExpress.WebUI.WebControl
         public TypeTableBorder TableBorder { get; set; } = TypeTableBorder.Default;
 
         /// <summary>
+        /// Returns or sets a value indicating whether columns can be removed.
+        /// </summary>
+        public bool AllowColumnRemove { get; set; }
+
+        /// <summary>
+        /// Returns or sets a value indicating whether rows in the table can be moved.
+        /// </summary>
+        public bool MovableRow { get; set; }
+
+        /// <summary>
+        /// Returns or sets the key used to persist data (column order, visibility, 
+        /// widths, active sort) across sessions.
+        /// </summary>
+        public string PersistKey { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -156,6 +172,9 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-color", Color.ToClass())
                 .AddUserAttribute("data-striped", Striped.ToClass())
                 .AddUserAttribute("data-border", TableBorder.ToClass())
+                .AddUserAttribute("data-movable-row", MovableRow ? "true" : null)
+                .AddUserAttribute("data-allow-column-remove", AllowColumnRemove ? "true" : null)
+                .AddUserAttribute("data-persist-key", PersistKey)
                 .Add
                 (
                     new HtmlElementTextContentDiv()

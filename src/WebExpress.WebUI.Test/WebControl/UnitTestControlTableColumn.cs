@@ -39,8 +39,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div></div>")]
-        [InlineData("abc", @"<div>abc</div>")]
-        [InlineData("webexpress.WebUI:plugin.name", @"<div>WebExpress.WebUI</div>")]
+        [InlineData("abc", @"<div data-label=""abc""></div>")]
+        [InlineData("webexpress.WebUI:plugin.name", @"<div data-label=""WebExpress.WebUI""></div>")]
         public void Title(string text, string expected)
         {
             // preconditions

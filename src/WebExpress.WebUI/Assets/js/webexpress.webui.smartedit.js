@@ -118,10 +118,12 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
     _startEditing(element) {
         // only one active edit at a time
         if (this._activeEdit) return;
+
+        this.value = this._value;
         this._activeEdit = element;
         this._hideEditIcon(element);
 
-        // trigger start event     
+        // trigger start event
         document.dispatchEvent(new CustomEvent(webexpress.webui.Event.START_INLINE_EDIT_EVENT, {
             detail: {
                 sender: element,
@@ -224,7 +226,6 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             e.stopPropagation();
             // check if click is outside the current element
             if (!element.contains(e.target)) {
-
                 this._finishEditing(false, element, this._value);
             }
         };
@@ -283,12 +284,51 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Gets the text value of an element
-     * @param {HTMLElement} element - target element
      * @returns {string} value
      */
-    getValue(element) {
+    get value() {
         // get text content of element
-        return element.textContent;
+        return this.element.textContent;
+    }
+
+    /**
+     * Sets the value of the editor and updates the display
+     * @param {string} value - value to set
+     */
+    set value(value) {
+        // set editor value and update visible text
+        this._value = value;
+
+        // update the editor control if possible
+        // get the control instance
+        const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
+
+        if (ctrl && ctrl instanceof webexpress.webui.DateCtrl) {
+            ctrl.value = value;
+        } else if (ctrl && ctrl instanceof webexpress.webui.CalendarCtrl) {
+            ctrl.value = value;
+        } else if (ctrl && ctrl instanceof webexpress.webui.SelectionCtrl) {
+            ctrl.value = value;
+        } else if (ctrl && ctrl instanceof webexpress.webui.MoveCtrl) {
+            ctrl.value = value;
+        } else if (ctrl && ctrl instanceof webexpress.webui.TagCtrl) {
+            
+        } else if (ctrl && ctrl instanceof webexpress.webui.EditorCtrl) {
+           
+        } else if (this._editor.tagName === 'SELECT') {
+
+        } else if (this._editor?.tagName === 'INPUT') {
+            this._editor.value = value;
+        } else if (this._editor?.tagName === 'TEXTAREA') {
+            this._editor.value = value;
+        }
+
+        // update the visible display
+        if (this._element) {
+            this._element.innerHTML = '';
+            const displayValue = this._getDisplayLabel(this._element, value);
+            this._element.appendChild(displayValue);
+        }
     }
 
     /**
@@ -339,7 +379,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
      * Returns the display label for the given value(s)
      * @param {HTMLElement} element - selection control element
      * @param {string|string[]} value - selected id(s)
-     * @returns {string} label(s) as string 
+     * @returns {string|HTMLElement} label(s) as node
      */
     _getDisplayLabel(element, value) {
         // get the control instance
@@ -410,7 +450,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             const ids = Array.isArray(value) ? value : String(value).split(';');
             const ul = document.createElement("ul");
 
-            ids.forEach((tag, index) => {
+            ids.forEach((tag) => {
                 const li = document.createElement("li");
                 li.textContent = tag;
 
@@ -446,6 +486,18 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         const span = document.createElement('span');
         span.textContent = value;
         return span;
+    }
+
+    /**
+     * Detach element (helper to preserve event handlers if any)
+     * @param {HTMLElement} el element to detach
+     * @returns {HTMLElement} detached element
+     * @private
+     */
+    _detachElement(el){
+        if (!el) return null;
+        if (el.parentNode) el.parentNode.removeChild(el);
+        return el;
     }
 }
 

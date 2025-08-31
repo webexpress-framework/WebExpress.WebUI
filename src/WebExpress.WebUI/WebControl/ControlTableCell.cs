@@ -22,42 +22,42 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the class or category associated with the current object.
         /// </summary>
-        public string Class { get; set; }
+        public virtual string Class { get; set; }
 
         /// <summary>
         /// Returns or sets the style applied to the element.
         /// </summary>
-        public string Style { get; set; }
+        public virtual string Style { get; set; }
 
         /// <summary>
         /// Returns or sets the color scheme used for the cell.
         /// </summary>
-        public TypeTableColor Color { get; set; } = TypeTableColor.Default;
+        public virtual TypeTableColor Color { get; set; } = TypeTableColor.Default;
 
         /// <summary>
         /// Returns or sets the icon associated with this instance.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public virtual IIcon Icon { get; set; }
 
         /// <summary>
         /// Returns or sets the URI associated with the current resource.
         /// </summary>
-        public IUri Uri { get; set; }
+        public virtual IUri Uri { get; set; }
 
         /// <summary>
         /// Returns or sets the target.
         /// </summary>
-        public TypeTarget Target { get; set; }
+        public virtual TypeTarget Target { get; set; }
 
         /// <summary>
         /// Returns or sets the id of a modal dialogue.
         /// </summary>
-        public string Modal { get; set; }
+        public virtual string Modal { get; set; }
 
         /// <summary>
         /// Returns or sets the content associated with this cell.
         /// </summary>
-        public string Text { get; set; }
+        public virtual string Text { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class with the specified identifier.

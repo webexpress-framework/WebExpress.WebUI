@@ -228,28 +228,41 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Sets the current value and triggers rendering and change event.
-     * @param {Date|Object|null} date - Date or {start, end} object.
+     * @param {Date|{start: Date|string, end: Date|string}|string} date - Date object, range object, or date string
      */
     set value(date) {
-        if (this._rangeMode && date && typeof date === "object") {
-            this._rangeStart = new Date(date.start);
-            this._rangeEnd = date.end;
+        // handle range mode with object input (either Date or string)
+        if (this._rangeMode && date && typeof date === "object" && !(date instanceof Date)) {
+            // parse start and end if string, otherwise use as Date
+            const start = typeof date.start === "string" ? this._parseDate(date.start, this._dateFormat) : date.start;
+            const end = typeof date.end === "string" ? this._parseDate(date.end, this._dateFormat) : date.end;
+            this._rangeStart = start ? new Date(start) : null;
+            this._rangeEnd = end ? new Date(end) : null;
             this._selectedDate = null;
+        } else if (typeof date === "string") {
+            // parse string input to Date
+            const parsed = this._parseDate(date, this._dateFormat);
+            this._selectedDate = parsed ? new Date(parsed) : null;
+            this._rangeStart = null;
+            this._rangeEnd = null;
         } else {
-            this._selectedDate = new Date(date);
+            // fallback: assume Date object
+            this._selectedDate = date ? new Date(date) : null;
             this._rangeStart = null;
             this._rangeEnd = null;
         }
 
+        // determine display value for input
         const value = this._rangeMode
             ? (this._rangeStart && this._rangeEnd
                 ? this._formatDateString(this._rangeStart, this._dateFormat) + " - " + this._formatDateString(this._rangeEnd, this._dateFormat)
                 : (this._rangeStart ? this._formatDateString(this._rangeStart, this._dateFormat) : ""))
-            : (date ? this._formatDateString(date, this._dateFormat) : "");
-        
+            : (this._selectedDate ? this._formatDateString(this._selectedDate, this._dateFormat) : "");
+
+        // update hidden/input value only if changed
         if (this._hidden.value != value) {
             this._hidden.value = value;
-            
+
             document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
                 detail: {
                     sender: this._element,
@@ -258,7 +271,7 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
                 }
             }));
         }
-        
+
         this.render();
     }
 
