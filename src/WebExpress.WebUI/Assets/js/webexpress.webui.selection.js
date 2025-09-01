@@ -381,21 +381,53 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.PopperCtrl {
 
     /**
      * Sets the value(s) of the selection and triggers events and rendering.
-     * @param {Array} values - Array of selected values.
+     * Accepts:
+     * - Array of ids
+     * - single id string
+     * - semicolon separated string "id1;id2"
+     * - null/undefined (clears selection)
+     * In single-select mode only the first value is kept.
+     * @param {Array|string|null|undefined} values - New selection value(s).
      */
     set value(values) {
-        // Only set value if it has changed
-        const old = typeof this._values === "object" ? this._values.join(";") : this._values;
-        const neu = typeof values === "object" ? values.join(";") : values;
-        if (old !== neu) {
-            this._values = values;
+        // normalize incoming values
+        let normalized = [];
+        if (values == null) {
+            normalized = [];
+        } else if (Array.isArray(values)) {
+            normalized = values;
+        } else if (typeof values === "string") {
+            const trimmed = values.trim();
+            if (trimmed.length > 0) {
+                // allow semicolon separated list
+                normalized = trimmed.includes(";")
+                    ? trimmed.split(";").map(v => v.trim()).filter(v => v.length > 0)
+                    : [trimmed];
+            }
+        } else {
+            normalized = [];
+        }
+
+        // enforce uniqueness
+        normalized = [...new Set(normalized)];
+
+        // enforce single-select restriction
+        if (!this._multiselect && normalized.length > 1) {
+            normalized = [normalized[0]];
+        }
+
+        const oldSerialized = (this._values || []).join(";");
+        const newSerialized = normalized.join(";");
+
+        if (oldSerialized !== newSerialized) {
+            this._values = normalized;
             this.render();
-            if (this._hidden) this._hidden.value = (this._values || []).join(";");
+            if (this._hidden) this._hidden.value = newSerialized;
             document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
                 detail: {
                     sender: this._element,
                     id: this._element.id,
-                    value: values
+                    value: [...this._values]
                 }
             }));
         }

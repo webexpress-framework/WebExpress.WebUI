@@ -492,19 +492,63 @@ webexpress.webui.MoveCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Sets the selected options.
-     * @param values An array with object ids.
+     * Accepts:
+     * - Array of ids
+     * - Single id string
+     * - Semicolon separated string of ids "a;b;c"
+     * - Null/undefined to clear
+     * Invalid ids (not present in options) are ignored, duplicates are removed (first occurrence kept).
+     * @param {Array|string|null|undefined} values - The new selection value(s).
      */
     set value(values) {
-        if (this._values !== values) {
-            this._values = values;
-            this._hidden.value = this._values.join(';');
+        // normalize input to array of strings
+        let normalized = [];
+        if (values == null) {
+            normalized = [];
+        } else if (Array.isArray(values)) {
+            normalized = values;
+        } else if (typeof values === 'string') {
+            const trimmed = values.trim();
+            if (trimmed.length > 0) {
+                normalized = trimmed.includes(';')
+                    ? trimmed.split(';').map(v => v.trim())
+                    : [trimmed];
+            }
+        } else {
+            normalized = [];
+        }
+
+        // trim and filter empty
+        normalized = normalized
+            .map(v => (v == null ? '' : String(v).trim()))
+            .filter(v => v.length > 0);
+
+        // restrict to available option ids
+        const optionIds = new Set(this._options.map(o => o.id));
+        normalized = normalized.filter(id => optionIds.has(id));
+
+        // remove duplicates preserving order
+        const seen = new Set();
+        normalized = normalized.filter(id => {
+            if (seen.has(id)) return false;
+            seen.add(id);
+            return true;
+        });
+
+        // serialize for change detection
+        const oldSerialized = (this._values || []).join(';');
+        const newSerialized = normalized.join(';');
+
+        if (oldSerialized !== newSerialized) {
+            this._values = normalized;
+            if (this._hidden) this._hidden.value = newSerialized;
             this.render();
-            // Fire change event for external listeners
+            // fire change event for external listeners
             document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
                 detail: {
                     sender: this._element,
                     id: this._element.id,
-                    value: values
+                    value: [...this._values]
                 }
             }));
         }

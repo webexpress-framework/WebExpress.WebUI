@@ -230,44 +230,110 @@ webexpress.webui.CalendarCtrl = class extends webexpress.webui.Ctrl {
      * Sets the current value and triggers rendering and change event.
      * @param {Date|{start: Date|string, end: Date|string}|string} date - Date object, range object, or date string
      */
-    set value(date) {
-        // handle range mode with object input (either Date or string)
-        if (this._rangeMode && date && typeof date === "object" && !(date instanceof Date)) {
-            // parse start and end if string, otherwise use as Date
-            const start = typeof date.start === "string" ? this._parseDate(date.start, this._dateFormat) : date.start;
-            const end = typeof date.end === "string" ? this._parseDate(date.end, this._dateFormat) : date.end;
-            this._rangeStart = start ? new Date(start) : null;
-            this._rangeEnd = end ? new Date(end) : null;
+    set value(input) {
+        const prevSerialized = this._hidden ? this._hidden.value : "";
+
+        if (input == null) {
+            if (this._rangeMode) {
+                this._rangeStart = null;
+                this._rangeEnd = null;
+            } else {
+                this._selectedDate = null;
+            }
+        } else if (this._rangeMode) {
+            let start = null;
+            let end = null;
+
+            if (Array.isArray(input)) {
+                [start, end] = input;
+                // if second element truly undefined (not null) treat as single-day; null means open range
+                if (typeof end === "undefined") {
+                    end = start;
+                }
+            } else if (input instanceof Date) {
+                start = input;
+                end = input;
+            } else if (typeof input === "string") {
+                if (input.includes(" - ")) {
+                    const parts = input.split(" - ");
+                    start = parts[0];
+                    end = parts[1];
+                } else {
+                    start = input;
+                    end = input;
+                }
+            } else if (typeof input === "object") {
+                // preserve explicit null; only if end key missing entirely default to single-day
+                start = Object.prototype.hasOwnProperty.call(input, "start") ? input.start : null;
+                if (Object.prototype.hasOwnProperty.call(input, "end")) {
+                    end = input.end; // may be null
+                } else if (start != null) {
+                    end = start; // implicit single-day
+                }
+            }
+
+            if (typeof start === "string") start = this._parseDate(start.trim(), this._dateFormat);
+            if (typeof end === "string") end = this._parseDate(end.trim(), this._dateFormat);
+
+            start = start instanceof Date ? new Date(start.getFullYear(), start.getMonth(), start.getDate()) : null;
+            // only normalize end if not null
+            end = end instanceof Date
+                ? new Date(end.getFullYear(), end.getMonth(), end.getDate())
+                : (end === null ? null : null);
+
+            if (start && end && end < start) {
+                const tmp = start;
+                start = end;
+                end = tmp;
+            }
+
+            this._rangeStart = start;
+            this._rangeEnd = end;
             this._selectedDate = null;
-        } else if (typeof date === "string") {
-            // parse string input to Date
-            const parsed = this._parseDate(date, this._dateFormat);
-            this._selectedDate = parsed ? new Date(parsed) : null;
-            this._rangeStart = null;
-            this._rangeEnd = null;
+
+            if (this._rangeStart) {
+                this._viewDate = new Date(this._rangeStart);
+            }
         } else {
-            // fallback: assume Date object
-            this._selectedDate = date ? new Date(date) : null;
+            let date = null;
+            if (input instanceof Date) {
+                date = input;
+            } else if (typeof input === "string") {
+                date = this._parseDate(input.trim(), this._dateFormat);
+            } else if (typeof input === "object" && input.start) {
+                date = input.start instanceof Date
+                    ? input.start
+                    : (typeof input.start === "string" ? this._parseDate(input.start.trim(), this._dateFormat) : null);
+            }
+            this._selectedDate = date instanceof Date ? new Date(date.getFullYear(), date.getMonth(), date.getDate()) : null;
             this._rangeStart = null;
             this._rangeEnd = null;
+            if (this._selectedDate) {
+                this._viewDate = new Date(this._selectedDate);
+            }
         }
 
-        // determine display value for input
-        const value = this._rangeMode
-            ? (this._rangeStart && this._rangeEnd
-                ? this._formatDateString(this._rangeStart, this._dateFormat) + " - " + this._formatDateString(this._rangeEnd, this._dateFormat)
-                : (this._rangeStart ? this._formatDateString(this._rangeStart, this._dateFormat) : ""))
-            : (this._selectedDate ? this._formatDateString(this._selectedDate, this._dateFormat) : "");
+        let newSerialized = "";
+        if (this._rangeMode) {
+            if (this._rangeStart && this._rangeEnd) {
+                newSerialized =
+                    this._formatDateString(this._rangeStart, this._dateFormat) +
+                    " - " +
+                    this._formatDateString(this._rangeEnd, this._dateFormat);
+            } else if (this._rangeStart && !this._rangeEnd) {
+                newSerialized = this._formatDateString(this._rangeStart, this._dateFormat);
+            }
+        } else if (this._selectedDate) {
+            newSerialized = this._formatDateString(this._selectedDate, this._dateFormat);
+        }
 
-        // update hidden/input value only if changed
-        if (this._hidden.value != value) {
-            this._hidden.value = value;
-
+        if (this._hidden && this._hidden.value !== newSerialized) {
+            this._hidden.value = newSerialized;
             document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
                 detail: {
                     sender: this._element,
                     id: this._element.id,
-                    value: value
+                    value: newSerialized
                 }
             }));
         }

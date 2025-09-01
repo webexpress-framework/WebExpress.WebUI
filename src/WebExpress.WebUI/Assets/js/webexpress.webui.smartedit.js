@@ -283,55 +283,6 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Gets the text value of an element
-     * @returns {string} value
-     */
-    get value() {
-        // get text content of element
-        return this.element.textContent;
-    }
-
-    /**
-     * Sets the value of the editor and updates the display
-     * @param {string} value - value to set
-     */
-    set value(value) {
-        // set editor value and update visible text
-        this._value = value;
-
-        // update the editor control if possible
-        // get the control instance
-        const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
-
-        if (ctrl && ctrl instanceof webexpress.webui.DateCtrl) {
-            ctrl.value = value;
-        } else if (ctrl && ctrl instanceof webexpress.webui.CalendarCtrl) {
-            ctrl.value = value;
-        } else if (ctrl && ctrl instanceof webexpress.webui.SelectionCtrl) {
-            ctrl.value = value;
-        } else if (ctrl && ctrl instanceof webexpress.webui.MoveCtrl) {
-            ctrl.value = value;
-        } else if (ctrl && ctrl instanceof webexpress.webui.TagCtrl) {
-            
-        } else if (ctrl && ctrl instanceof webexpress.webui.EditorCtrl) {
-           
-        } else if (this._editor.tagName === 'SELECT') {
-
-        } else if (this._editor?.tagName === 'INPUT') {
-            this._editor.value = value;
-        } else if (this._editor?.tagName === 'TEXTAREA') {
-            this._editor.value = value;
-        }
-
-        // update the visible display
-        if (this._element) {
-            this._element.innerHTML = '';
-            const displayValue = this._getDisplayLabel(this._element, value);
-            this._element.appendChild(displayValue);
-        }
-    }
-
-    /**
      * Extracts the most relevant value from the given container element.
      * @param {HTMLElement} element - The DOM element to extract the value from
      * @returns {string} The extracted value based on priority
@@ -456,9 +407,9 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
 
                 // set color if defined
                 if (ctrl?._colorCss) {
-                    li.classList.add(this._colorCss);
-                } else if (ctrl._colorStyle) {
-                    li.style.cssText = ctrl?._colorStyle;
+                    li.classList.add(ctrl._colorCss);
+                } else if (ctrl?._colorStyle) {
+                    li.style.cssText = ctrl._colorStyle;
                 } else {
                     li.classList.add("wx-tag-primary");
                 }
@@ -498,6 +449,61 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         if (!el) return null;
         if (el.parentNode) el.parentNode.removeChild(el);
         return el;
+    }
+    
+    /**
+     * Gets the text value of an element
+     * @returns {string} value
+     */
+    get value() {
+        // get text content of element
+        return this.element.textContent;
+    }
+
+    /**
+     * Sets the value of the editor and updates the display
+     * @param {string} value - value to set
+     */
+    set value(value) {
+        // set editor value and update visible text
+        this._value = value;
+
+        // update the editor control if possible
+        // get the control instance
+        const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
+
+        if (ctrl && ctrl instanceof webexpress.webui.DateCtrl) {
+            ctrl.value = value;
+        } else if (ctrl && ctrl instanceof webexpress.webui.CalendarCtrl) {
+            ctrl.value = value;
+        } else if (ctrl && ctrl instanceof webexpress.webui.SelectionCtrl) {
+            ctrl.value = value;
+        } else if (ctrl && ctrl instanceof webexpress.webui.MoveCtrl) {
+            ctrl.value = value;
+        } else if (ctrl && ctrl instanceof webexpress.webui.TagCtrl) {
+            ctrl.value = value;
+        } else if (ctrl && ctrl instanceof webexpress.webui.EditorCtrl) {
+           ctrl.value = value;
+        } else if (this._editor?.tagName === 'SELECT') {
+            // corrected: select matching option instead of overwriting current option value
+            // support semicolon separated multi values by choosing first (single select assumed here)
+            const first = Array.isArray(value) ? value[0] : String(value).split(';')[0];
+            const opt = Array.from(this._editor.options).find(o => String(o.value) === String(first));
+            if (opt) {
+                this._editor.value = opt.value;
+            }
+        } else if (this._editor?.tagName === 'INPUT') {
+            this._editor.value = value;
+        } else if (this._editor?.tagName === 'TEXTAREA') {
+            this._editor.value = value;
+        }
+
+        // update the visible display
+        if (this._element) {
+            this._element.innerHTML = '';
+            const displayValue = this._getDisplayLabel(this._element, value);
+            this._element.appendChild(displayValue);
+        }
     }
 }
 

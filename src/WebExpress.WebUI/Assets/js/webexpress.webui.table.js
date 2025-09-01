@@ -614,7 +614,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                     if (colDef.name) wrap.setAttribute("data-object-name", colDef.name);
                     if (colDef.editAction) wrap.setAttribute("data-form-action", colDef.editAction);
                     if (colDef.editMethod) wrap.setAttribute("data-form-method", colDef.editMethod);
-                    if (colDef.html?.firstElementChild) {
+                    if (colDef.html) {
                         wrap.appendChild(colDef.html);
                     } else {
                         const input = document.createElement("input");

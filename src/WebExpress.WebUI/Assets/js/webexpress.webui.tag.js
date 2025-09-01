@@ -24,8 +24,8 @@ webexpress.webui.TagCtrl = class extends webexpress.webui.Ctrl {
         this._colorCss = element.getAttribute("data-color-css") || null;
         this._colorStyle = element.getAttribute("data-color-style") || null;
 
-        // extract placeholder text from data-placeholder
-        const placeholderText = element.getAttribute("placeholder") || "";
+        // extract and store placeholder text
+        this._placeholderText = element.getAttribute("placeholder") || "";
 
         // save tag array
         this._tags = initialTags;
@@ -56,7 +56,7 @@ webexpress.webui.TagCtrl = class extends webexpress.webui.Ctrl {
         this._input = document.createElement("input");
         this._input.type = "text";
         this._input.className = "input";
-        this._input.setAttribute("placeholder", placeholderText); 
+        // placeholder will be set dynamically depending on tags present
         this._input.setAttribute("aria-label", "add Tag");
 
         // initial rendering
@@ -95,6 +95,21 @@ webexpress.webui.TagCtrl = class extends webexpress.webui.Ctrl {
         });
 
         element.appendChild(this._input);
+    }
+
+    /**
+     * Updates the placeholder visibility depending on tag presence.
+     * Placeholder is only shown when there are no tags.
+     */
+    _updatePlaceholder() {
+        // show placeholder only if no tags
+        if (this._tags.length === 0) {
+            if (this._placeholderText) {
+                this._input.setAttribute("placeholder", this._placeholderText);
+            }
+        } else {
+            this._input.removeAttribute("placeholder");
+        }
     }
 
     /**
@@ -143,6 +158,32 @@ webexpress.webui.TagCtrl = class extends webexpress.webui.Ctrl {
 
         // update hidden field
         this._hidden.value = this._tags.map(t => t.toLowerCase()).join(";");
+
+        // update placeholder visibility
+        this._updatePlaceholder();
+    }
+    
+    /**
+     * Gets the tags as a string separated by semicolons.
+     * @returns {string} Tags as semicolon-separated string.
+     */
+    get value() {
+        // returns the current tags as string, separated by semicolon
+        return this._tags.map(t => t.toLowerCase()).join(";");
+    }
+
+    /**
+     * Sets the tags from a semicolon-separated string or array.
+     * @param {string|Array} value - Tags as semicolon-separated string or array.
+     */
+    set value(value) {
+        // sets the tags, accepts array or string (semicolon-separated)
+        if (Array.isArray(value)) {
+            this._tags = value.map(t => t.trim()).filter(t => t.length > 0);
+        } else if (typeof value === "string") {
+            this._tags = value.split(";").map(t => t.trim()).filter(t => t.length > 0);
+        }
+        this.render();
     }
 };
 

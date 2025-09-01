@@ -273,43 +273,137 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.PopperCtrl {
      * Sets the selected date, triggers render and change event.
      * @param {Date|null} date - Date to set as selected.
      */
-    set value(date) {
-        if (this._rangeMode && date && typeof date === "object" && !(date instanceof Date)) {
-            const start = typeof date.start === "string" ? this._parseDate(date.start, this._dateFormat) : date.start;
-            const end = typeof date.end === "string" ? this._parseDate(date.end, this._dateFormat) : date.end;
-            this._rangeStart = start ? new Date(start) : null;
+    set value(input) {
+        const prevSerialized = this._input ? this._input.value : "";
+
+        if (input == null) {
+            if (this._rangeMode) {
+                this._rangeStart = null;
+                this._rangeEnd = null;
+            } else {
+                this._selectedDate = null;
+            }
+        } else if (this._rangeMode) {
+            // normalize range inputs
+            let start = null;
+            let end = null;
+
+            if (Array.isArray(input)) {
+                [start, end] = input;
+                if (typeof end === "undefined") {
+                    // missing (not null) means single-day
+                    end = start;
+                }
+            } else if (input instanceof Date) {
+                start = input;
+                end = input;
+            } else if (typeof input === "string") {
+                if (input.includes(" - ")) {
+                    const parts = input.split(" - ");
+                    start = parts[0];
+                    end = parts[1];
+                } else {
+                    start = input;
+                    end = input;
+                }
+            } else if (typeof input === "object") {
+                // explicit properties
+                if (Object.prototype.hasOwnProperty.call(input, "start")) {
+                    start = input.start;
+                }
+                if (Object.prototype.hasOwnProperty.call(input, "end")) {
+                    end = input.end; // may be null
+                } else if (start != null) {
+                    // implicit single day (end missing)
+                    end = start;
+                }
+            }
+
+            // parse strings
+            if (typeof start === "string") start = this._parseDate(start.trim(), this._dateFormat);
+            if (typeof end === "string") end = this._parseDate(end.trim(), this._dateFormat);
+
+            // normalize to midnight date objects
+            start = start instanceof Date ? new Date(start.getFullYear(), start.getMonth(), start.getDate()) : null;
+            if (end instanceof Date) {
+                end = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+            } else if (end !== null) {
+                end = null; // any non-date non-null fallback
+            }
+
+            // swap if reversed and closed range
+            if (start && end && end < start) {
+                const tmp = start;
+                start = end;
+                end = tmp;
+            }
+
+            this._rangeStart = start;
             this._rangeEnd = end;
             this._selectedDate = null;
-        } else if (typeof date === "string") {
-            const dt = this._parseDate(date, this._dateFormat);
-            this._selectedDate = dt ? new Date(dt) : null;
-            this._rangeStart = null;
-            this._rangeEnd = null;
+
+            if (this._rangeStart) {
+                this._viewDate = new Date(this._rangeStart);
+            }
         } else {
-            this._selectedDate = date ? new Date(date) : null;
+            // single date mode
+            let date = null;
+            if (input instanceof Date) {
+                date = input;
+            } else if (typeof input === "string") {
+                date = this._parseDate(input.trim(), this._dateFormat);
+            } else if (typeof input === "object" && input.start) {
+                date = input.start instanceof Date
+                    ? input.start
+                    : (typeof input.start === "string" ? this._parseDate(input.start.trim(), this._dateFormat) : null);
+            }
+            this._selectedDate = date instanceof Date
+                ? new Date(date.getFullYear(), date.getMonth(), date.getDate())
+                : null;
             this._rangeStart = null;
             this._rangeEnd = null;
+            if (this._selectedDate) {
+                this._viewDate = new Date(this._selectedDate);
+            }
         }
 
-        const value = this._rangeMode
-            ? (this._rangeStart && this._rangeEnd
-                ? this._formatDateString(this._rangeStart, this._dateFormat) + " - " + this._formatDateString(this._rangeEnd, this._dateFormat)
-                : (this._rangeStart ? this._formatDateString(this._rangeStart, this._dateFormat) : ""))
-            : (this._selectedDate ? this._formatDateString(this._selectedDate, this._dateFormat) : "");
-        
-        if (this._input.value != value) {
-            this._input.value = value;
-            
+        // build serialized value
+        let newSerialized = "";
+        if (this._rangeMode) {
+            if (this._rangeStart && this._rangeEnd) {
+                newSerialized =
+                    this._formatDateString(this._rangeStart, this._dateFormat) +
+                    " - " +
+                    this._formatDateString(this._rangeEnd, this._dateFormat);
+            } else if (this._rangeStart && !this._rangeEnd) {
+                // open or single start (open range)
+                newSerialized = this._formatDateString(this._rangeStart, this._dateFormat);
+            }
+        } else if (this._selectedDate) {
+            newSerialized = this._formatDateString(this._selectedDate, this._dateFormat);
+        }
+
+        // update input and dispatch change if changed
+        if (this._input && this._input.value !== newSerialized) {
+            this._input.value = newSerialized;
             document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
                 detail: {
                     sender: this._element,
                     id: this._element.id,
-                    value: value
+                    value: newSerialized
                 }
             }));
         }
-        
-        this._viewDate = this._rangeStart ? (this._rangeStart) : (this._selectedDate || date);
+
+        // update view date if available
+        if (this._rangeMode) {
+            if (this._rangeStart) {
+                this._viewDate = new Date(this._rangeStart);
+            }
+        } else if (this._selectedDate) {
+            this._viewDate = new Date(this._selectedDate);
+        }
+
         this.render();
     }
 
