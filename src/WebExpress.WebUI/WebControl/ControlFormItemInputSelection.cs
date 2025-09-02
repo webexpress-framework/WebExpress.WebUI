@@ -100,7 +100,7 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
-            var classes = new List<string>(["wx-webui-selection"]);
+            var classes = new List<string>(["wx-webui-input-selection"]);
             classes.AddRange(Classes);
 
             if (Disabled)

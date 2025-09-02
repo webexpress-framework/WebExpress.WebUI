@@ -112,7 +112,7 @@ namespace WebExpress.WebUI.WebControl
                     .AddUserAttribute("data-image", (x.Icon as ImageIcon)?.Uri.ToString()))])
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-move", classes),
+                Class = Css.Concatenate("wx-webui-input-move", classes),
                 Style = GetStyles()
             }
                 .AddUserAttribute("name", Name);

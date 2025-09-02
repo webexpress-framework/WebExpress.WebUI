@@ -1,3 +1,4 @@
+/* Base table layout */
 .wx-table {
     caption-side: bottom;
     border-collapse: collapse;
@@ -103,7 +104,7 @@
     position: relative;
 }
 
-/* optional legacy ellipsis button style (kept if externally used) */
+/* optional legacy ellipsis button style */
 .wx-table-actions .wx-table-actions-ellipsis-btn {
     background: var(--bs-body-bg);
     color: var(--bs-secondary);
@@ -127,7 +128,7 @@
     color: var(--bs-primary);
 }
 
-/* plus button (column toggle etc.) */
+/* plus button */
 .wx-table-actions-plus {
     background: var(--bs-primary-bg-subtle, #eef5ff);
     color: var(--bs-primary);
@@ -232,7 +233,6 @@
     width: 5px;
     cursor: col-resize;
     z-index: 1000;
-    /* improve hit area */
     touch-action: none;
 }
 
@@ -294,10 +294,138 @@
     border-color: var(--bs-border-color, #444);
 }
 
-/* accessibility / reduced motion (optional enhancement) */
+/* reduced motion for buttons */
 @media (prefers-reduced-motion: reduce) {
     .wx-table-actions .wx-table-actions-ellipsis-btn,
     .wx-table-actions-plus {
         transition: none;
+    }
+}
+
+/* Tree / hierarchical row support */
+
+@keyframes tree-rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(90deg); }
+}
+
+/* angle icon (default right) */
+.wx-table-tree-indicator-angle {
+    content: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+DQo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIJdmlld0JveD0iMCAwIDEzNSAxOTAiPg0KCTxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJPCFbQ0RBVEFbDQoJCS5zdDEge2ZpbGw6IzdmN2Y3ZjtzdHJva2U6bm9uZTt9DQoJXV0+DQoJPC9zdHlsZT4NCgkJPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTgsLTE4KSI+DQoJCQk8cGF0aCBkPSJNMS42NiAxNzMuMiBMMTguNyAxOTAuMjMgQTUuNjY5MjkgNS42NjkyOSAtMTgwIDAgMCAyNi43MiAxOTAuMjMgTDk4Ljg3IDExOC4wOCBBNS42NjkyOSA1LjY2OTI5IC0xODAgMCAwIDk4Ljg3DQoJCQkJCQkgMTEwLjA2IEwyNi43MiAzNy45IEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMTguNyAzNy45IEwxLjY2IDU0Ljk0IEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMS42NiA2Mi45Ng0KCQkJCQkJIEw0OC43NiAxMTAuMDYgQTUuNjY5MjkgNS42NjkyOSAwIDAgMSA0OC43NiAxMTguMDggTDEuNjYgMTY1LjE4IEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMS42NiAxNzMuMiBaIg0KCQkJCQljbGFzcz0ic3QxIi8+DQoJCTwvZz4NCjwvc3ZnPg==');
+    height: 0.8rem;
+    width: 0.8rem;
+    display: inline-block;
+    vertical-align: middle;
+    transition: transform .18s ease;
+    transform-origin: 50% 50%;
+}
+
+.wx-table-tree-expand {
+    transform: rotate(90deg);
+}
+
+.wx-table-tree-expand-animation {
+    animation: tree-rotate .2s forwards;
+    transform-origin: 50% 50%;
+}
+
+/* lead container (indent + toggle) */
+.wx-table .wx-table-tree-lead {
+    font-size: inherit;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: .25em;
+}
+
+/* indentation spacer */
+.wx-table .wx-table-tree-indent {
+    display: inline-block;
+    height: 1px;
+}
+
+/* toggle button */
+.wx-table .wx-table-tree-toggle {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--bs-body-color);
+    min-width: 0.8rem;
+    min-height: 0.8rem;
+}
+
+.wx-table .wx-table-tree-toggle:hover .wx-table-tree-indicator-angle,
+.wx-table .wx-table-tree-toggle:focus .wx-table-tree-indicator-angle {
+    filter: brightness(1.2);
+}
+
+.wx-table .wx-table-tree-toggle:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* placeholder when no toggle exists */
+.wx-table .wx-table-tree-toggle-placeholder {
+    opacity: 0;
+    width: 0.8rem;
+    display: inline-block;
+}
+
+/* keep text alignment after tree lead */
+.wx-table .wx-table-tree-lead + * {
+    flex-grow: 1;
+}
+
+/* drag handle focus synergy */
+.wx-table .wx-table-drag-handle:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: -2px;
+    border-radius: 2px;
+}
+
+/* reduce link style on toggle */
+.wx-table .wx-table-tree-toggle.btn-link {
+    color: inherit;
+    padding: 0;
+    box-shadow: none;
+}
+
+/* subtle row hover */
+.wx-table tbody tr {
+    transition: background-color .15s linear;
+}
+
+.wx-table tbody tr:hover {
+    background-color: var(--bs-table-hover-bg, rgba(0,0,0,0.04));
+}
+
+/* small screens */
+@media (max-width: 576px) {
+    .wx-table .wx-table-tree-toggle {
+        font-size: .65rem;
+    }
+}
+
+/* high contrast preference */
+@media (prefers-contrast: more) {
+    .wx-table .wx-table-tree-toggle:focus-visible {
+        outline-width: 3px;
+    }
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .wx-table-tree-indicator-angle {
+        transition: none;
+    }
+    .wx-table-tree-expand-animation {
+        animation: none;
     }
 }

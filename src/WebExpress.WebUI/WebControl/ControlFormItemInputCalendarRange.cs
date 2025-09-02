@@ -67,7 +67,7 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv
             {
                 Id = Id,
-                Class = "wx-webui-calendar"
+                Class = "wx-webui-input-calendar"
             }
             .AddUserAttribute("name", Name)
             .AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder))

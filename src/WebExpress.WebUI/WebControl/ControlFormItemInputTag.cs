@@ -76,13 +76,13 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-tag", classes),
+                Class = Css.Concatenate("wx-webui-input-tag", classes),
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
                 Role = Role
             }
                 .AddUserAttribute("name", Name)
                 .AddUserAttribute("placeholder", I18N.Translate(renderContext.Request?.Culture, Placeholder))
-                .AddUserAttribute("data-tags", value)
+                .AddUserAttribute("data-value", value)
                 .AddUserAttribute("data-color-css", Color.ToClass())
                 .AddUserAttribute("data-color-style", Color.ToStyle());
 

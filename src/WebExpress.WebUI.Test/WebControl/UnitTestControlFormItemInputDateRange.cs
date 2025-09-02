@@ -15,8 +15,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the form datepicker range control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-date"" *></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-webui-date"" name=""id"" *></div>")]
+        [InlineData(null, @"<div class=""wx-webui-input-date"" *></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-input-date"" name=""id"" *></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -38,8 +38,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the name property of the form datepicker range control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-date"" *></div>")]
-        [InlineData("abc", @"<div class=""wx-webui-date"" name=""abc"" *></div>")]
+        [InlineData(null, @"<div class=""wx-webui-input-date"" *></div>")]
+        [InlineData("abc", @"<div class=""wx-webui-input-date"" name=""abc"" *></div>")]
         public void Name(string name, string expected)
         {
             // preconditions
@@ -62,8 +62,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form datepicker range control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""wx-webui-date"" *></div>*")]
-        [InlineData("2023-10-10", @"*<div class=""wx-webui-date"" data-range=""true"" data-format=""yyyy-MM-dd""></div>*")]
+        [InlineData(null, @"*<div class=""wx-webui-input-date"" *></div>*")]
+        [InlineData("2023-10-10", @"*<div class=""wx-webui-input-date"" data-range=""true"" data-format=""yyyy-MM-dd""></div>*")]
         public void Value(string value, string expected)
         {
             // preconditions
@@ -103,9 +103,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the placeholder property of the form datepicker range control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-date"" *></div>")]
-        [InlineData("select a date", @"<div class=""wx-webui-date"" placeholder=""select a date"" *></div>")]
-        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-date"" placeholder=""WebExpress.WebUI"" *></div>")]
+        [InlineData(null, @"<div class=""wx-webui-input-date"" *></div>")]
+        [InlineData("select a date", @"<div class=""wx-webui-input-date"" placeholder=""select a date"" *></div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-input-date"" placeholder=""WebExpress.WebUI"" *></div>")]
         public void Placeholder(string placeholder, string expected)
         {
             // preconditions
@@ -128,8 +128,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the format property of the form datepicker range control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-date"" data-range=""true"" data-format=""M/d/yyyy""></div>")]
-        [InlineData("yyyy-mm-dd", @"<div class=""wx-webui-date"" data-range=""true"" data-format=""yyyy-mm-dd""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-input-date"" data-range=""true"" data-format=""M/d/yyyy""></div>")]
+        [InlineData("yyyy-mm-dd", @"<div class=""wx-webui-input-date"" data-range=""true"" data-format=""yyyy-mm-dd""></div>")]
         public void Format(string format, string expected)
         {
             // preconditions
@@ -152,8 +152,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the required property of the form datepicker range control.
         /// </summary>
         [Theory]
-        [InlineData(false, @"<div class=""wx-webui-date"" *></div>")]
-        [InlineData(true, @"<div class=""wx-webui-date"" *></div>")]
+        [InlineData(false, @"<div class=""wx-webui-input-date"" *></div>")]
+        [InlineData(true, @"<div class=""wx-webui-input-date"" *></div>")]
         public void Required(bool required, string expected)
         {
             // preconditions

@@ -3,6 +3,45 @@
     padding: 0px;
 }
 
+.wx-selection > ul {
+    padding-left: 0.2em;
+    margin-right: auto;
+    margin-bottom: 0;
+}
+
+.wx-selection > ul > li {
+    float: left;
+    display: flex;
+    align-items: center;
+    margin-right: 0.5em;
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
+    border-radius: 0.2em;
+    padding-top: 0.1em;
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+    padding-bottom: 0.1em;
+    white-space: nowrap;
+}
+
+.wx-selection > ul > span {
+    color: var(--bs-secondary);
+}
+
+.wx-selection > ul > li > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.wx-selection > ul > li > span > i {
+}
+
+.wx-selection > ul > li > span > img {
+    height: 1.2em;
+    vertical-align: middle;
+}
+
 .wx-selection > div:nth-child(2) {
     display: flex !important;
     flex-direction: row;

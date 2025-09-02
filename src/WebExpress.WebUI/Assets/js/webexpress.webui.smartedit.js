@@ -33,7 +33,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         element.removeAttribute('data-object-name');
         element.classList.add("wx-smart-edit");
 
-        const displayValue = this._getDisplayLabel(element, this._value);
+        const displayValue = this._getDisplayLabel(this._value);
         element.appendChild(displayValue);
 
         // add mouse events to the control element itself
@@ -276,7 +276,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         } else if (typeof this.onCancel === 'function') {
             this.onCancel(element, value);
         }
-        const displayValue = this._getDisplayLabel(element, value);
+        const displayValue = this._getDisplayLabel(value);
         element.appendChild(displayValue);
         this._value = value;
         this._activeEdit = null;
@@ -328,15 +328,14 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Returns the display label for the given value(s)
-     * @param {HTMLElement} element - selection control element
      * @param {string|string[]} value - selected id(s)
      * @returns {string|HTMLElement} label(s) as node
      */
-    _getDisplayLabel(element, value) {
+    _getDisplayLabel(value) {
         // get the control instance
         const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
 
-        if (ctrl && ctrl instanceof webexpress.webui.SelectionCtrl) {
+        if (ctrl && ctrl instanceof webexpress.webui.InputSelectionCtrl) {
             const ids = Array.isArray(value) ? value : String(value).split(';');
             const ul = document.createElement("ul");
 
@@ -367,7 +366,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             });
 
             return ul;
-        } else if (ctrl && ctrl instanceof webexpress.webui.MoveCtrl) {
+        } else if (ctrl && ctrl instanceof webexpress.webui.InputMoveCtrl) {
             const ids = Array.isArray(value) ? value : String(value).split(';');
             const ul = document.createElement("ul");
 
@@ -397,7 +396,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             });
 
             return ul;
-        } else if (ctrl && ctrl instanceof webexpress.webui.TagCtrl) {
+        } else if (ctrl && ctrl instanceof webexpress.webui.InputTagCtrl) {
             const ids = Array.isArray(value) ? value : String(value).split(';');
             const ul = document.createElement("ul");
 
@@ -472,15 +471,15 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         // get the control instance
         const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
 
-        if (ctrl && ctrl instanceof webexpress.webui.DateCtrl) {
+        if (ctrl && ctrl instanceof webexpress.webui.InputDateCtrl) {
             ctrl.value = value;
-        } else if (ctrl && ctrl instanceof webexpress.webui.CalendarCtrl) {
+        } else if (ctrl && ctrl instanceof webexpress.webui.InputCalendarCtrl) {
             ctrl.value = value;
-        } else if (ctrl && ctrl instanceof webexpress.webui.SelectionCtrl) {
+        } else if (ctrl && ctrl instanceof webexpress.webui.InputSelectionCtrl) {
             ctrl.value = value;
-        } else if (ctrl && ctrl instanceof webexpress.webui.MoveCtrl) {
+        } else if (ctrl && ctrl instanceof webexpress.webui.InputMoveCtrl) {
             ctrl.value = value;
-        } else if (ctrl && ctrl instanceof webexpress.webui.TagCtrl) {
+        } else if (ctrl && ctrl instanceof webexpress.webui.InputTagCtrl) {
             ctrl.value = value;
         } else if (ctrl && ctrl instanceof webexpress.webui.EditorCtrl) {
            ctrl.value = value;
@@ -501,7 +500,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         // update the visible display
         if (this._element) {
             this._element.innerHTML = '';
-            const displayValue = this._getDisplayLabel(this._element, value);
+            const displayValue = this._getDisplayLabel(value);
             this._element.appendChild(displayValue);
         }
     }

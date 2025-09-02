@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 using WebExpress.WebCore.WebIcon;
 
 namespace WebExpress.WebUI.WebControl
@@ -50,10 +51,27 @@ namespace WebExpress.WebUI.WebControl
         public IControl Content { get; set; }
 
         /// <summary>
+        /// Initializes a new instance of the class with an automatically assigned ID.
+        /// </summary>
+        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
+        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
+        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
+        /// <param name="items">The entries.</param>
+        public ControlFormItemInputSelectionItem
+        (
+            [CallerMemberName] string instance = null,
+            [CallerFilePath] string file = null,
+            [CallerLineNumber] int? line = null
+        )
+            : this($"selectionitem_{instance}_{file}_{line}".GetHashCode().ToString("X"))
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The unique identifier of the selection item. Optional.</param>
-        public ControlFormItemInputSelectionItem(string id = null)
+        public ControlFormItemInputSelectionItem(string id)
         {
             Id = id;
         }

@@ -152,6 +152,11 @@ namespace WebExpress.WebUI.WebPage
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.editor.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.expandable.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.filelist.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.input.calendar.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.input.date.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.input.move.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.input.selection.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.input.tag.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.form.progress.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.modal.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.modalpage.js"));

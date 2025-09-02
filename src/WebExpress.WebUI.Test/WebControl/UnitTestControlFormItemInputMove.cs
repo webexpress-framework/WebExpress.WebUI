@@ -16,8 +16,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the form move control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-move"" *></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-webui-move"" name=""id"" *></div>")]
+        [InlineData(null, @"<div class=""wx-webui-input-move"" *></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-input-move"" name=""id"" *></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -39,7 +39,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the auto id property of the form move control.
         /// </summary>
         [Theory]
-        [InlineData(@"<div id=""*"" class=""wx-webui-move"" name=""*"" *></div>")]
+        [InlineData(@"<div id=""*"" class=""wx-webui-input-move"" name=""*"" *></div>")]
         public void AutoId(string expected)
         {
             // preconditions
@@ -61,8 +61,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the name property of the form move control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-move"" *></div>")]
-        [InlineData("abc", @"<div class=""wx-webui-move"" name=""abc"" *></div>")]
+        [InlineData(null, @"<div class=""wx-webui-input-move"" *></div>")]
+        [InlineData("abc", @"<div class=""wx-webui-input-move"" name=""abc"" *></div>")]
         public void Name(string name, string expected)
         {
             // preconditions
@@ -85,9 +85,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the selected header property of the form move control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-move"" data-header-available=""Available options""></div>")]
-        [InlineData("abc", @"<div class=""wx-webui-move"" data-header-selected=""abc"" data-header-available=""Available options""></div>")]
-        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-move"" data-header-selected=""WebExpress.WebUI"" data-header-available=""Available options""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-input-move"" data-header-available=""Available options""></div>")]
+        [InlineData("abc", @"<div class=""wx-webui-input-move"" data-header-selected=""abc"" data-header-available=""Available options""></div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-input-move"" data-header-selected=""WebExpress.WebUI"" data-header-available=""Available options""></div>")]
         public void SelectedHeader(string header, string expected)
         {
             // preconditions
@@ -110,9 +110,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the available header property of the form move control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-move"" data-header-selected=""Selected options""></div>")]
-        [InlineData("abc", @"<div class=""wx-webui-move"" data-header-selected=""Selected options"" data-header-available=""abc""></div>")]
-        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-move"" data-header-selected=""Selected options"" data-header-available=""WebExpress.WebUI""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-input-move"" data-header-selected=""Selected options""></div>")]
+        [InlineData("abc", @"<div class=""wx-webui-input-move"" data-header-selected=""Selected options"" data-header-available=""abc""></div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-input-move"" data-header-selected=""Selected options"" data-header-available=""WebExpress.WebUI""></div>")]
         public void AvailableHeader(string header, string expected)
         {
             // preconditions
@@ -135,8 +135,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form move control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""wx-webui-move"" *></div>*")]
-        [InlineData("abc", @"*<div class=""wx-webui-move"" * data-value=""abc""></div>*")]
+        [InlineData(null, @"*<div class=""wx-webui-input-move"" *></div>*")]
+        [InlineData("abc", @"*<div class=""wx-webui-input-move"" * data-value=""abc""></div>*")]
         public void Value(string value, string expected)
         {
             // preconditions
@@ -159,9 +159,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the label property of the form move control item.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-move"" *><div class=""wx-webui-move-option""></div></div>")]
-        [InlineData("abc", @"<div class=""wx-webui-move"" *><div class=""wx-webui-move-option"">abc</div></div>")]
-        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-move"" *><div class=""wx-webui-move-option"">WebExpress.WebUI</div></div>")]
+        [InlineData(null, @"<div class=""wx-webui-input-move"" *><div class=""wx-webui-move-option""></div></div>")]
+        [InlineData("abc", @"<div class=""wx-webui-input-move"" *><div class=""wx-webui-move-option"">abc</div></div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-input-move"" *><div class=""wx-webui-move-option"">WebExpress.WebUI</div></div>")]
         public void Label(string label, string expected)
         {
             // preconditions
@@ -183,8 +183,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the icon property of the form move control item.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-move"" *><div class=""wx-webui-move-option""></div></div>")]
-        [InlineData(typeof(IconFolder), @"<div class=""wx-webui-move"" *><div class=""wx-webui-move-option"" data-icon=""fas fa-folder""></div></div>")]
+        [InlineData(null, @"<div class=""wx-webui-input-move"" *><div class=""wx-webui-move-option""></div></div>")]
+        [InlineData(typeof(IconFolder), @"<div class=""wx-webui-input-move"" *><div class=""wx-webui-move-option"" data-icon=""fas fa-folder""></div></div>")]
         public void Icon(Type iconType, string expected)
         {
             // preconditions
@@ -223,7 +223,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var html = control.Render(context, visualTree);
 
             Assert.NotEmpty(control.Options);
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-move"" data-header-selected=""Selected options"" data-header-available=""Available options""><div class=""wx-webui-move-option"">label</div></div>", html);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-input-move"" data-header-selected=""Selected options"" data-header-available=""Available options""><div class=""wx-webui-move-option"">label</div></div>", html);
         }
     }
 }

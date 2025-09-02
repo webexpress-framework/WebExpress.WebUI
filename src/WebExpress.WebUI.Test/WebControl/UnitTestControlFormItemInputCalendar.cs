@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the form calendar control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-calendar"" *></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-webui-calendar"" name=""id"" *></div>")]
+        [InlineData(null, @"<div class=""wx-webui-input-calendar"" *></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-input-calendar"" name=""id"" *></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -37,8 +37,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the name property of the form calendar control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-calendar"" *></div>")]
-        [InlineData("abc", @"<div class=""wx-webui-calendar"" name=""abc"" *></div>")]
+        [InlineData(null, @"<div class=""wx-webui-input-calendar"" *></div>")]
+        [InlineData("abc", @"<div class=""wx-webui-input-calendar"" name=""abc"" *></div>")]
         public void Name(string name, string expected)
         {
             // preconditions
@@ -61,8 +61,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form calendar control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""wx-webui-calendar"" *></div>*")]
-        [InlineData("2023-10-10", @"*<div class=""wx-webui-calendar"" data-value=""2023-10-10"" *></div>*")]
+        [InlineData(null, @"*<div class=""wx-webui-input-calendar"" *></div>*")]
+        [InlineData("2023-10-10", @"*<div class=""wx-webui-input-calendar"" data-value=""2023-10-10"" *></div>*")]
         public void Value(string value, string expected)
         {
             // preconditions
@@ -88,9 +88,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the placeholder property of the form calendar control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-calendar"" data-format=""*""></div>")]
-        [InlineData("select a date", @"<div class=""wx-webui-calendar"" placeholder=""select a date"" data-format=""*""></div>")]
-        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-calendar"" placeholder=""WebExpress.WebUI"" data-format=""*""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-input-calendar"" data-format=""*""></div>")]
+        [InlineData("select a date", @"<div class=""wx-webui-input-calendar"" placeholder=""select a date"" data-format=""*""></div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-input-calendar"" placeholder=""WebExpress.WebUI"" data-format=""*""></div>")]
         public void Placeholder(string placeholder, string expected)
         {
             // preconditions
@@ -113,8 +113,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the format property of the form calendar control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-calendar"" data-format=""M/d/yyyy""></div>")]
-        [InlineData("yyyy-mm-dd", @"<div class=""wx-webui-calendar"" data-format=""yyyy-mm-dd""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-input-calendar"" data-format=""M/d/yyyy""></div>")]
+        [InlineData("yyyy-mm-dd", @"<div class=""wx-webui-input-calendar"" data-format=""yyyy-mm-dd""></div>")]
         public void Format(string format, string expected)
         {
             // preconditions
@@ -137,8 +137,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the required property of the form calendar control.
         /// </summary>
         [Theory]
-        [InlineData(false, @"<div class=""wx-webui-calendar"" *></div>")]
-        [InlineData(true, @"<div class=""wx-webui-calendar"" *></div>")]
+        [InlineData(false, @"<div class=""wx-webui-input-calendar"" *></div>")]
+        [InlineData(true, @"<div class=""wx-webui-input-calendar"" *></div>")]
         public void Required(bool required, string expected)
         {
             // preconditions

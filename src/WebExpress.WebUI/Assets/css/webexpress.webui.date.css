@@ -9,6 +9,22 @@
     box-sizing: border-box;
 }
 
+.wx-date > span {
+    font-weight: bold;
+    color: var(--bs-body-color);
+    background-color: var(--bs-secondary-bg);
+    padding: 0.2em 0.5em;
+    border-radius: 0.2em;
+    display: inline-flex;
+    gap: 0.5em;
+    align-items: center;
+}
+
+.wx-date > span > i {
+    color: var(--bs-secondary-color, #6c757d);
+    transparent: 50%;
+}
+
 /* Make form-control take full width */
 .wx-date .form-control {
     cursor: pointer;

@@ -70,7 +70,7 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = "wx-webui-date"
+                Class = "wx-webui-input-date"
             }
                 .AddUserAttribute("name", Name)
                 .AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder))

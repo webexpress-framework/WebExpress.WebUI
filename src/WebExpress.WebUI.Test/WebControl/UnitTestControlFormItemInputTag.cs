@@ -15,8 +15,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-tag""></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-webui-tag"" name=""id""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-input-tag""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-input-tag"" name=""id""></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -38,7 +38,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the auto id property of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(@"<div id=""*"" class=""wx-webui-tag"" name=""*""></div>")]
+        [InlineData(@"<div id=""*"" class=""wx-webui-input-tag"" name=""*""></div>")]
         public void AutoId(string expected)
         {
             // preconditions
@@ -60,8 +60,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the name property of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-tag""></div>")]
-        [InlineData("abc", @"<div class=""wx-webui-tag"" name=""abc""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-input-tag""></div>")]
+        [InlineData("abc", @"<div class=""wx-webui-input-tag"" name=""abc""></div>")]
         public void Name(string name, string expected)
         {
             // preconditions
@@ -84,9 +84,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the placeholder property of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-tag""></div>")]
-        [InlineData("abc", @"<div class=""wx-webui-tag"" placeholder=""abc""></div>")]
-        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-tag"" placeholder=""WebExpress.WebUI""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-input-tag""></div>")]
+        [InlineData("abc", @"<div class=""wx-webui-input-tag"" placeholder=""abc""></div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-input-tag"" placeholder=""WebExpress.WebUI""></div>")]
         public void Placeholder(string placeholder, string expected)
         {
             // preconditions
@@ -109,15 +109,15 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the color property of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorTag.Default, @"<div class=""wx-webui-tag""></div>")]
-        [InlineData(TypeColorTag.Primary, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-primary""></div>")]
-        [InlineData(TypeColorTag.Secondary, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-secondary""></div>")]
-        [InlineData(TypeColorTag.Info, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-info""></div>")]
-        [InlineData(TypeColorTag.Success, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-success""></div>")]
-        [InlineData(TypeColorTag.Warning, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-warning""></div>")]
-        [InlineData(TypeColorTag.Danger, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-danger""></div>")]
-        [InlineData(TypeColorTag.Light, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-light""></div>")]
-        [InlineData(TypeColorTag.Dark, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-dark""></div>")]
+        [InlineData(TypeColorTag.Default, @"<div class=""wx-webui-input-tag""></div>")]
+        [InlineData(TypeColorTag.Primary, @"<div class=""wx-webui-input-tag"" data-color-css=""wx-tag-primary""></div>")]
+        [InlineData(TypeColorTag.Secondary, @"<div class=""wx-webui-input-tag"" data-color-css=""wx-tag-secondary""></div>")]
+        [InlineData(TypeColorTag.Info, @"<div class=""wx-webui-input-tag"" data-color-css=""wx-tag-info""></div>")]
+        [InlineData(TypeColorTag.Success, @"<div class=""wx-webui-input-tag"" data-color-css=""wx-tag-success""></div>")]
+        [InlineData(TypeColorTag.Warning, @"<div class=""wx-webui-input-tag"" data-color-css=""wx-tag-warning""></div>")]
+        [InlineData(TypeColorTag.Danger, @"<div class=""wx-webui-input-tag"" data-color-css=""wx-tag-danger""></div>")]
+        [InlineData(TypeColorTag.Light, @"<div class=""wx-webui-input-tag"" data-color-css=""wx-tag-light""></div>")]
+        [InlineData(TypeColorTag.Dark, @"<div class=""wx-webui-input-tag"" data-color-css=""wx-tag-dark""></div>")]
         public void Color(TypeColorTag color, string expected)
         {
             // preconditions
@@ -140,8 +140,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the color property of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-tag""></div>")]
-        [InlineData("gold", @"<div class=""wx-webui-tag"" data-color-style=""background: gold;""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-input-tag""></div>")]
+        [InlineData("gold", @"<div class=""wx-webui-input-tag"" data-color-style=""background: gold;""></div>")]
         public void UserColor(string color, string expected)
         {
             // preconditions
@@ -164,8 +164,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""wx-webui-tag""></div>*")]
-        [InlineData("abc", @"*<div class=""wx-webui-tag"" data-tags=""abc""></div>*")]
+        [InlineData(null, @"*<div class=""wx-webui-input-tag""></div>*")]
+        [InlineData("abc", @"*<div class=""wx-webui-input-tag"" data-value=""abc""></div>*")]
         public void ValueForm(string value, string expected)
         {
             // preconditions
@@ -192,8 +192,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""wx-webui-tag""></div>*")]
-        [InlineData("abc", @"*<div class=""wx-webui-tag"" data-tags=""abc""></div>*")]
+        [InlineData(null, @"*<div class=""wx-webui-input-tag""></div>*")]
+        [InlineData("abc", @"*<div class=""wx-webui-input-tag"" data-value=""abc""></div>*")]
         public void ValueItem(string value, string expected)
         {
             // preconditions
@@ -220,8 +220,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the validate method of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div id=""tag"" class=""wx-webui-tag"" name=""tag""></div>*")]
-        [InlineData("abc", @"*<div id=""tag"" class=""wx-webui-tag"" name=""tag"" data-tags=""abc""></div>*")]
+        [InlineData(null, @"*<div id=""tag"" class=""wx-webui-input-tag"" name=""tag""></div>*")]
+        [InlineData("abc", @"*<div id=""tag"" class=""wx-webui-input-tag"" name=""tag"" data-value=""abc""></div>*")]
         public void ValidateForm(string value, string expected)
         {
             // preconditions
@@ -271,8 +271,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the validate method of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div id=""tag"" class=""wx-webui-tag"" name=""tag""></div>*")]
-        [InlineData("abc", @"*<div id=""tag"" class=""wx-webui-tag"" name=""tag"" data-tags=""abc""></div>*")]
+        [InlineData(null, @"*<div id=""tag"" class=""wx-webui-input-tag"" name=""tag""></div>*")]
+        [InlineData("abc", @"*<div id=""tag"" class=""wx-webui-input-tag"" name=""tag"" data-value=""abc""></div>*")]
         public void ValidateItem(string value, string expected)
         {
             // preconditions
@@ -309,8 +309,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the process method of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div id=""tag"" class=""wx-webui-tag"" name=""tag""></div>*")]
-        [InlineData("abc", @"*<div id=""tag"" class=""wx-webui-tag"" name=""tag"" data-tags=""abc""></div>*")]
+        [InlineData(null, @"*<div id=""tag"" class=""wx-webui-input-tag"" name=""tag""></div>*")]
+        [InlineData("abc", @"*<div id=""tag"" class=""wx-webui-input-tag"" name=""tag"" data-value=""abc""></div>*")]
         public void ProcessForm(string value, string expected)
         {
             // preconditions
@@ -347,8 +347,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the process method of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div id=""tag"" class=""wx-webui-tag"" name=""tag""></div>*")]
-        [InlineData("abc", @"*<div id=""tag"" class=""wx-webui-tag"" name=""tag"" data-tags=""abc""></div>*")]
+        [InlineData(null, @"*<div id=""tag"" class=""wx-webui-input-tag"" name=""tag""></div>*")]
+        [InlineData("abc", @"*<div id=""tag"" class=""wx-webui-input-tag"" name=""tag"" data-value=""abc""></div>*")]
         public void ProcessItem(string value, string expected)
         {
             // preconditions
