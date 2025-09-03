@@ -25,6 +25,11 @@ namespace WebExpress.WebUI.WebControl
         IEnumerable<IControlDropdownItem> Options { get; }
 
         /// <summary>
+        /// Returns the collection of child rows associated with the current control table row.
+        /// </summary>
+        IEnumerable<IControlTableRow> Children { get; }
+
+        /// <summary>
         /// Adds the specified cells to the row.
         /// </summary>
         /// <param name="cells">The cells to be added to the row.</param>
@@ -37,6 +42,20 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="cells">The cells to be added to the row.</param>
         /// <returns>The current instance for method chaining.</returns>
         IControlTableRow Add(IEnumerable<IControlTableCell> cells);
+
+        /// <summary>
+        /// Adds the specified child rows to the current control table row.
+        /// </summary>
+        /// <param name="childen">A collection of child rows to add. Cannot be null.</param>
+        /// <returns>The current control table row, allowing for method chaining.</returns>
+        IControlTableRow Add(params IControlTableRow[] childen);
+
+        /// <summary>
+        /// Adds the specified child rows to the current control table row.
+        /// </summary>
+        /// <param name="childen">A collection of child rows to add. Cannot be null.</param>
+        /// <returns>The current control table row, allowing for method chaining.</returns>
+        IControlTableRow Add(IEnumerable<IControlTableRow> childen);
 
         /// <summary>
         /// Adds one or more items to the options.
@@ -71,6 +90,13 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="cell">The cell to be removed from the row.</param>
         /// <returns>The current instance for method chaining.</returns>
         IControlTableRow Remove(IControlTableCell cell);
+
+        /// <summary>
+        /// Removes the specified child row from the control table.
+        /// </summary>
+        /// <param name="child">The child row to remove.</param>
+        /// <returns>The current instance of the control table row, allowing for method chaining.</returns>
+        IControlTableRow Remove(IControlTableRow child);
 
         /// <summary>
         /// Removes the specified item from the options.

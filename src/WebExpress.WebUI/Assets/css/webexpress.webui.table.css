@@ -7,7 +7,7 @@
 .wx-table > thead {
     position: sticky;
     top: 0;
-    z-index: 0;
+    z-index: 500;
     box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
 }
 
@@ -104,28 +104,13 @@
     position: relative;
 }
 
-/* optional legacy ellipsis button style */
-.wx-table-actions .wx-table-actions-ellipsis-btn {
-    background: var(--bs-body-bg);
-    color: var(--bs-secondary);
-    border: 1px solid var(--bs-border-color, #ced4da);
-    border-radius: 4px;
-    width: 28px;
-    height: 28px;
-    font-size: 18px;
-    line-height: 1;
-    padding: 0;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: background .15s, color .15s;
+.wx-table-actions {
+    position: relative; /* ensure stacking context */
 }
 
-.wx-table-actions .wx-table-actions-ellipsis-btn:hover,
-.wx-table-actions.wx-actions-open .wx-table-actions-ellipsis-btn {
-    background: var(--bs-primary-bg-subtle, #eef5ff);
-    color: var(--bs-primary);
+.wx-table-actions .dropdown-menu {
+    overflow: auto;
+    max-height: 60vH;
 }
 
 /* plus button */
@@ -150,33 +135,6 @@
 .wx-table-actions-plus:hover {
     background: var(--bs-primary);
     color: #fff;
-}
-
-/* gear wrapper alignment */
-.wx-table-actions-gear {
-    display: inline-flex;
-    align-items: center;
-}
-
-/* actions overlay (inside header) */
-.wx-table-actions-overlay {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 4px;
-    background: var(--bs-body-bg, #fff);
-    border: 1px solid var(--bs-border-color, #ced4da);
-    border-radius: 4px;
-    box-shadow: 0 4px 12px -2px rgba(0,0,0,0.15);
-    padding: 4px 6px;
-    display: none;
-    z-index: 3000;
-    gap: 4px;
-    align-items: stretch;
-}
-
-.wx-table-actions.wx-actions-open .wx-table-actions-overlay {
-    display: inline-flex;
 }
 
 /* body cells */
@@ -303,14 +261,20 @@
 }
 
 /* Tree / hierarchical row support */
-
 @keyframes tree-rotate {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(90deg); }
 }
 
+.wx-table .wx-tree {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25em;
+    width: 100%;
+}
+
 /* angle icon (default right) */
-.wx-table-tree-indicator-angle {
+.wx-table .wx-tree-indicator-angle {
     content: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+DQo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIJdmlld0JveD0iMCAwIDEzNSAxOTAiPg0KCTxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJPCFbQ0RBVEFbDQoJCS5zdDEge2ZpbGw6IzdmN2Y3ZjtzdHJva2U6bm9uZTt9DQoJXV0+DQoJPC9zdHlsZT4NCgkJPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTgsLTE4KSI+DQoJCQk8cGF0aCBkPSJNMS42NiAxNzMuMiBMMTguNyAxOTAuMjMgQTUuNjY5MjkgNS42NjkyOSAtMTgwIDAgMCAyNi43MiAxOTAuMjMgTDk4Ljg3IDExOC4wOCBBNS42NjkyOSA1LjY2OTI5IC0xODAgMCAwIDk4Ljg3DQoJCQkJCQkgMTEwLjA2IEwyNi43MiAzNy45IEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMTguNyAzNy45IEwxLjY2IDU0Ljk0IEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMS42NiA2Mi45Ng0KCQkJCQkJIEw0OC43NiAxMTAuMDYgQTUuNjY5MjkgNS42NjkyOSAwIDAgMSA0OC43NiAxMTguMDggTDEuNjYgMTY1LjE4IEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMS42NiAxNzMuMiBaIg0KCQkJCQljbGFzcz0ic3QxIi8+DQoJCTwvZz4NCjwvc3ZnPg==');
     height: 0.8rem;
     width: 0.8rem;
@@ -320,17 +284,17 @@
     transform-origin: 50% 50%;
 }
 
-.wx-table-tree-expand {
+.wx-tree-expand {
     transform: rotate(90deg);
 }
 
-.wx-table-tree-expand-animation {
+.wx-tree-expand-animation {
     animation: tree-rotate .2s forwards;
     transform-origin: 50% 50%;
 }
 
 /* lead container (indent + toggle) */
-.wx-table .wx-table-tree-lead {
+.wx-table .wx-tree-lead {
     font-size: inherit;
     user-select: none;
     display: inline-flex;
@@ -339,13 +303,13 @@
 }
 
 /* indentation spacer */
-.wx-table .wx-table-tree-indent {
+.wx-table .wx-tree-indent {
     display: inline-block;
     height: 1px;
 }
 
 /* toggle button */
-.wx-table .wx-table-tree-toggle {
+.wx-table .wx-tree-toggle {
     background: transparent;
     border: none;
     padding: 0;
@@ -360,26 +324,26 @@
     min-height: 0.8rem;
 }
 
-.wx-table .wx-table-tree-toggle:hover .wx-table-tree-indicator-angle,
-.wx-table .wx-table-tree-toggle:focus .wx-table-tree-indicator-angle {
+.wx-table .wx-table-toggle:hover .wx-table-tree-indicator-angle,
+.wx-table .wx-table-toggle:focus .wx-table-tree-indicator-angle {
     filter: brightness(1.2);
 }
 
-.wx-table .wx-table-tree-toggle:focus-visible {
+.wx-table .wx-tree-toggle:focus-visible {
     outline: 2px solid var(--bs-primary);
     outline-offset: 2px;
     border-radius: 2px;
 }
 
 /* placeholder when no toggle exists */
-.wx-table .wx-table-tree-toggle-placeholder {
+.wx-table .wx-tree-toggle-placeholder {
     opacity: 0;
     width: 0.8rem;
     display: inline-block;
 }
 
 /* keep text alignment after tree lead */
-.wx-table .wx-table-tree-lead + * {
+.wx-table .wx-tree-lead + * {
     flex-grow: 1;
 }
 
@@ -391,7 +355,7 @@
 }
 
 /* reduce link style on toggle */
-.wx-table .wx-table-tree-toggle.btn-link {
+.wx-table .wx-table-toggle.btn-link {
     color: inherit;
     padding: 0;
     box-shadow: none;

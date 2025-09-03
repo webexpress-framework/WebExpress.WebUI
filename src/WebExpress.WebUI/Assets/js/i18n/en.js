@@ -10,6 +10,7 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "close": "Close",
     "selected": "Selected",
     "available": "Available",
+    "search": "Search",
 
     "calendar.select_date": "Select date",
     "calendar.select_range": "Select range",
@@ -41,5 +42,10 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     
     "table.columns.label": "Columns",
     "table.options.label": "Options",
-    "table.columns.toggle": "Show/Hide columns"
+    "table.columns.toggle": "Show/Hide columns",
+    "table.handle.title": "Drag the column to change its order",
+    "table.search.placeholder": "Search...",
+    "table.filter.columns.label": "Filter table columns"
+
+
 });

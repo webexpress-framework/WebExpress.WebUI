@@ -10,6 +10,7 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "close": "Schließen",
     "selected": "Ausgewählt",
     "available": "Verfügbar",
+    "search": "Suche",
 
     "calendar.select_date": "Datum auswählen",
     "calendar.select_range": "Zeitraum auswählen",
@@ -41,5 +42,8 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     
     "table.columns.label": "Spalten",
     "table.options.label": "Optionen",
-    "table.columns.toggle": "Spalten ein-/ausblenden"
+    "table.columns.toggle": "Spalten ein-/ausblenden",
+    "table.handle.title": "Spalte ziehen um Reihenfolge zu ändern",
+    "table.search.placeholder": "Suche...",
+    "table.filter.columns.label": "Spalten filtern"
 });

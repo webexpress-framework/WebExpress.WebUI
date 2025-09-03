@@ -12,6 +12,7 @@ namespace WebExpress.WebUI.WebControl
     {
         private readonly List<IControlTableCell> _cells = [];
         private readonly List<IControlDropdownItem> _options = [];
+        private readonly List<IControlTableRow> _children = [];
 
         /// <summary>
         /// Returns or sets the unique identifier for the entity.
@@ -32,6 +33,11 @@ namespace WebExpress.WebUI.WebControl
         /// Returns the options.
         /// </summary>
         public IEnumerable<IControlDropdownItem> Options => _options;
+
+        /// <summary>
+        /// Returns the collection of child rows associated with the current control table row.
+        /// </summary>
+        public IEnumerable<IControlTableRow> Children => _children;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -64,6 +70,30 @@ namespace WebExpress.WebUI.WebControl
         public IControlTableRow Add(IEnumerable<IControlTableCell> cells)
         {
             _cells.AddRange(cells);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds the specified child rows to the current control table row.
+        /// </summary>
+        /// <param name="childen">A collection of child rows to add. Cannot be null.</param>
+        /// <returns>The current control table row, allowing for method chaining.</returns>
+        public IControlTableRow Add(params IControlTableRow[] childen)
+        {
+            _children.AddRange(childen);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds the specified child rows to the current control table row.
+        /// </summary>
+        /// <param name="childen">A collection of child rows to add. Cannot be null.</param>
+        /// <returns>The current control table row, allowing for method chaining.</returns>
+        public IControlTableRow Add(IEnumerable<IControlTableRow> childen)
+        {
+            _children.AddRange(childen);
 
             return this;
         }
@@ -128,6 +158,18 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Removes the specified child row from the control table.
+        /// </summary>
+        /// <param name="child">The child row to remove.</param>
+        /// <returns>The current instance of the control table row, allowing for method chaining.</returns>
+        public IControlTableRow Remove(IControlTableRow child)
+        {
+            _children.Remove(child);
+
+            return this;
+        }
+
+        /// <summary>
         /// Removes the specified item from the options.
         /// </summary>
         /// <param name="item">The item to remove.</param>
@@ -174,6 +216,13 @@ namespace WebExpress.WebUI.WebControl
                             )
                         )
                         : null
+                )
+                .Add
+                (
+                    Children.Select
+                    (
+                        child => child.Render(renderContext, visualTree)
+                    )
                 );
 
             return html;

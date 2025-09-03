@@ -81,5 +81,25 @@ namespace WebExpress.WebUI.Test.WebControl
 
             AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-table-row""><div>abc</div></div>", html);
         }
+
+        /// <summary>
+        /// Tests the add function of the table row.
+        /// </summary>
+        [Fact]
+        public void AddChild()
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTableRow();
+
+            // test execution
+            control.Add(new ControlTableRow());
+
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-table-row""><div class=""wx-table-row""></div></div>", html);
+        }
     }
 }
