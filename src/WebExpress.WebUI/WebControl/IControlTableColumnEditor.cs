@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -9,18 +8,11 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlTableColumnEditor : IControlTableColumn
     {
         /// <summary>
-        /// Adds one or more edit items.
+        /// Adds one smart edit items to the control.
         /// </summary>
-        /// <param name="formInputs">The edit input fields to be added.</param>
+        /// <param name="formInput">The smart edit input field to be added.</param>
         /// <returns>The current instance for method chaining.</returns>
-        IControlTableColumnEditor Add(params IControlFormItemInput[] formInputs);
-
-        /// <summary>
-        /// Adds a collection of edit items.
-        /// </summary>
-        /// <param name="formInputs">The sma edit input fields to be added.</param>
-        /// <returns>The current instance for method chaining.</returns>
-        IControlTableColumnEditor Add(IEnumerable<IControlFormItemInput> formInputs);
+        IControlTableColumnEditor Add(IControlFormItemInput formInput);
 
         /// <summary>
         /// Initialize the form with data using the specified action.

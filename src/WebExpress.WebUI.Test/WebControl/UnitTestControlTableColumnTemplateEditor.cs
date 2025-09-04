@@ -12,7 +12,7 @@ namespace WebExpress.WebUI.Test.WebControl
     /// Tests the tabele column edit control.
     /// </summary>
     [Collection("NonParallelTests")]
-    public class UnitTestControlTableColumnEditor
+    public class UnitTestControlTableColumnTemplateEditor
     {
         /// <summary>
         /// Tests the id property of the tabele column edit control.
@@ -26,7 +26,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlTableColumnEditor(id)
+            var control = new ControlTableColumnTemplateEditor(id)
             {
             };
 
@@ -40,16 +40,16 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the title property of the table column.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div></div>")]
-        [InlineData("abc", @"<div data-label=""abc""></div>")]
-        [InlineData("webexpress.WebUI:plugin.name", @"<div data-label=""WebExpress.WebUI""></div>")]
+        [InlineData(null, @"<div data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
+        [InlineData("abc", @"<div data-label=""abc"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
+        [InlineData("webexpress.WebUI:plugin.name", @"<div data-label=""WebExpress.WebUI"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
         public void Title(string text, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlTableColumn()
+            var control = new ControlTableColumnTemplateEditor(null)
             {
                 Title = text
             };
@@ -64,15 +64,15 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the icon property of the table column.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div></div>")]
-        [InlineData(typeof(IconStar), @"<div data-icon=""fas fa-star""></div>")]
+        [InlineData(null, @"<div data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
+        [InlineData(typeof(IconStar), @"<div data-icon=""fas fa-star"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
         public void Icon(Type icon, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlTableColumn()
+            var control = new ControlTableColumnTemplateEditor(null)
             {
                 Icon = icon != null ? Activator.CreateInstance(icon) as IIcon : null
             };
@@ -87,22 +87,22 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the color property of the table column.
         /// </summary>
         [Theory]
-        [InlineData(TypeTableColor.Default, @"<div></div>")]
-        [InlineData(TypeTableColor.Primary, @"<div data-color=""table-primary""></div>")]
-        [InlineData(TypeTableColor.Secondary, @"<div data-color=""table-secondary""></div>")]
-        [InlineData(TypeTableColor.Info, @"<div data-color=""table-info""></div>")]
-        [InlineData(TypeTableColor.Success, @"<div data-color=""table-success""></div>")]
-        [InlineData(TypeTableColor.Warning, @"<div data-color=""table-warning""></div>")]
-        [InlineData(TypeTableColor.Danger, @"<div data-color=""table-danger""></div>")]
-        [InlineData(TypeTableColor.Light, @"<div data-color=""table-light""></div>")]
-        [InlineData(TypeTableColor.Dark, @"<div data-color=""table-dark""></div>")]
+        [InlineData(TypeTableColor.Default, @"<div data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
+        [InlineData(TypeTableColor.Primary, @"<div data-color=""table-primary"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
+        [InlineData(TypeTableColor.Secondary, @"<div data-color=""table-secondary"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
+        [InlineData(TypeTableColor.Info, @"<div data-color=""table-info"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
+        [InlineData(TypeTableColor.Success, @"<div data-color=""table-success"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
+        [InlineData(TypeTableColor.Warning, @"<div data-color=""table-warning"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
+        [InlineData(TypeTableColor.Danger, @"<div data-color=""table-danger"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
+        [InlineData(TypeTableColor.Light, @"<div data-color=""table-light"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
+        [InlineData(TypeTableColor.Dark, @"<div data-color=""table-dark"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
         public void Color(TypeTableColor color, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlTableColumn()
+            var control = new ControlTableColumnTemplateEditor(null)
             {
                 Color = color
             };
@@ -129,7 +129,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlTableColumnEditor(null)
+            var control = new ControlTableColumnTemplateEditor(null)
             {
                 Method = method
             };
@@ -153,13 +153,36 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlTableColumnEditor(null)
+            var control = new ControlTableColumnTemplateEditor(null)
             {
                 Uri = uri != null ? new UriEndpoint(uri) : null
             };
 
             // test execution
             var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests adding a column to the table.
+        /// </summary>
+        [Fact]
+        public void Add()
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTableColumnTemplateEditor(null);
+            var template = new ControlFormItemInputDate(null);
+
+            // test execution
+            control.Add(template);
+
+            // validation
+            var html = control.Render(context, visualTree);
+            var expected = @"<div data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""><div class=""wx-webui-input-date"" data-format=""M/d/yyyy""></div></div>";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }

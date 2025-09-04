@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using WebExpress.WebCore.Internationalization;
@@ -12,12 +11,9 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a table cell in a control, including its attributes and content.
+    /// Represents a table column in a control, including its attributes and content.
     /// </summary>
-    /// <remarks>This class provides properties to define the cell's identifier, CSS class, inline styles, 
-    /// and the content displayed within the cell. It is typically used to represent and manipulate  individual cells in
-    /// a table-like control.</remarks>
-    public class ControlTableColumnEditor : ControlTableColumn, IControlTableColumnEditor
+    public class ControlTableColumnTemplateEditor : ControlTableColumn, IControlTableColumnEditor
     {
         private readonly ControlForm _form;
 
@@ -52,11 +48,11 @@ namespace WebExpress.WebUI.WebControl
         public virtual RequestMethod Method { get => _form.Method; set => _form.Method = value; }
 
         /// <summary>
-        /// Returns the collection of smart edit items.
+        /// Returns the input item from the form that implements <see cref="IControlFormItemInput"/>.
         /// </summary>
-        public IEnumerable<IControlFormItemInput> Items => _form.Items
+        public IControlFormItemInput Template => _form.Items
             .Where(x => x is IControlFormItemInput)
-            .Select(x => x as IControlFormItemInput);
+            .Select(x => x as IControlFormItemInput).FirstOrDefault();
 
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned Id.
@@ -72,11 +68,11 @@ namespace WebExpress.WebUI.WebControl
         /// The line number in the source file where this instance is created. This is 
         /// automatically provided by the compiler.
         /// </param>
-        /// <param name="items">
+        /// <param name="template">
         /// The form items to add to the form.
         /// </param>
-        public ControlTableColumnEditor([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null, params IControlFormItemInput[] items)
-            : this($"columnedit_{instance}_{file}_{line}".GetHashCode().ToString("X"), items)
+        public ControlTableColumnTemplateEditor([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null, params IControlFormItemInput[] template)
+            : this($"columnedit_{instance}_{file}_{line}".GetHashCode().ToString("X"), template)
         {
         }
 
@@ -84,11 +80,12 @@ namespace WebExpress.WebUI.WebControl
         /// Initializes a new instance of the class with the specified identifier.
         /// </summary>
         /// <param name="id">The unique identifier for the table cell. Cannot be null or empty.</param>
-        public ControlTableColumnEditor(string id, params IControlFormItemInput[] formInputs)
+        public ControlTableColumnTemplateEditor(string id, params IControlFormItemInput[] template)
             : base(id)
         {
             _form = new ControlForm($"columnform_{id}".GetHashCode().ToString("X"));
-            _form.Add(formInputs);
+
+            _form.Add(template);
 
             _form.InitializeForm += OnInitialize;
             _form.ValidateForm += OnValidate;
@@ -96,25 +93,13 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Adds one or more smart edit items to the control.
+        /// Adds one smart edit items to the control.
         /// </summary>
-        /// <param name="formInputs">The smart edit input fields to be added.</param>
+        /// <param name="formInput">The smart edit input field to be added.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlTableColumnEditor Add(params IControlFormItemInput[] formInputs)
+        public IControlTableColumnEditor Add(IControlFormItemInput formInput)
         {
-            _form.Add(formInputs);
-
-            return this;
-        }
-
-        /// <summary>
-        /// Adds one or more smart edit items to the control.
-        /// </summary>
-        /// <param name="formInputs">The smart edit input fields to be added.</param>
-        /// <returns>The current instance for method chaining.</returns>
-        public IControlTableColumnEditor Add(IEnumerable<IControlFormItemInput> formInputs)
-        {
-            _form.Add(formInputs);
+            _form.Add(formInput);
 
             return this;
         }
@@ -156,7 +141,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Converts the cell to an HTML representation.
+        /// Converts the column to an HTML representation.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <param name="visualTree">The visual tree representing the control's structure.</param>
@@ -181,7 +166,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-object-name", name)
                 .AddUserAttribute("data-form-action", uri)
                 .AddUserAttribute("data-form-method", _form.Method.ToString())
-                .Add(Items.Select(x => x.Render(formRenderContext, visualTree)));
+                .Add(Template?.Render(formRenderContext, visualTree));
 
             return html;
         }
