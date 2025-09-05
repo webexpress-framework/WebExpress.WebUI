@@ -138,7 +138,7 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
             const removeBtn = document.createElement("a");
             removeBtn.innerHTML = "&times;";
             removeBtn.href = "#";
-            removeBtn.title = webexpress.webui.I18N.translate("webexpress.webui:remove");
+            removeBtn.title = this._i18n("webexpress.webui:remove");
             removeBtn.setAttribute("aria-label", `Tag "${tag}" ${removeBtn.title}`);
             removeBtn.addEventListener("click", (e) => {
                 e.preventDefault();

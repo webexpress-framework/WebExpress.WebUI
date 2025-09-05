@@ -24,7 +24,7 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
         this._fullscreenDropzone = this._element.dataset.fullscreenDropzone === "true";
         this._autoupload = this._element.dataset.autoupload === "true";
         this._showProgress = this._element.dataset.progress === "true" || true;
-        this._placeholder = this._element.getAttribute("placeholder") || webexpress.webui.I18N.translate("webexpress.webui:upload.placeholder");
+        this._placeholder = this._element.getAttribute("placeholder") || this._i18n("webexpress.webui:upload.placeholder", "");
 
         this.files = [];
 

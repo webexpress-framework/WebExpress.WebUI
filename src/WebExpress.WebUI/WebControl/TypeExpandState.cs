@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents the expansion state of a tree node.
     /// </summary>
-    public enum TypeExpandTree
+    public enum TypeExpandState
     {
         /// <summary>
         /// No expansion state.
@@ -18,24 +18,24 @@
         /// <summary>
         /// The tree node is collapsed.
         /// </summary>
-        Collapse
+        Collapsed
     }
 
     /// <summary>
-    /// Provides extension methods for the <see cref="TypeExpandTree"/> enumeration.
+    /// Provides extension methods for the <see cref="TypeExpandState"/> enumeration.
     /// </summary>
-    public static class TypeExpandTreeExtensions
+    public static class TypeExpandStateExtensions
     {
         /// <summary>
         /// Converts the expansion state to a CSS class.
         /// </summary>
         /// <param name="expand">The expansion state.</param>
         /// <returns>The CSS class corresponding to the expansion state.</returns>
-        public static string ToClass(this TypeExpandTree expand)
+        public static string ToClass(this TypeExpandState expand)
         {
             return expand switch
             {
-                TypeExpandTree.Collapse => "tree-node-hide",
+                TypeExpandState.Collapsed => "tree-node-hide",
                 _ => string.Empty,
             };
         }

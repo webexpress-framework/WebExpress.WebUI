@@ -355,6 +355,19 @@ webexpress.webui.Ctrl = class {
         
         return element;
     }
+    
+    /**
+     * Returns the translated text for the specified i18n key.
+     * If no translation is configured or the I18N module is unavailable,
+     * the fallback text is returned.
+     *
+     * @param {string} key - The i18n key of the value to translate.
+     * @param {string} fallback - Text to use if no translation is found.
+     * @returns {string} Translated text or the fallback.
+     */
+    _i18n(key, fallback) {
+        return (webexpress?.webui?.I18N?.translate(key)) ?? fallback;
+    }
 }
 
 /**
@@ -480,6 +493,8 @@ webexpress.webui.Event = class {
     static CHANGE_FAVORITE_EVENT = "webexpress.webui.change.favorite";
     // Event triggered when columns are reordered in a table control.
     static COLUMN_REORDER_EVENT = "webexpress.webui.table.column.reorder";
+    // Event triggered when a search/filter is applied to a column.
+    static COLUMN_SEARCH_EVENT = "webexpress.webui.table.column.search"
     // Event triggered when rows are reordered in a table control.
     static ROW_REORDER_EVENT = "webexpress.webui.table.row.reorder";
     // Event triggered when a table is sorted.

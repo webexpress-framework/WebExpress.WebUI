@@ -23,10 +23,10 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
 
         // Read configuration from data attributes and set initial state
         const name = element.getAttribute("name");
-        this._dateFormat = element.getAttribute("data-format") || webexpress.webui.I18N.translate("webexpress.webui:calendar.format");
+        this._dateFormat = element.getAttribute("data-format") || this._i18n("webexpress.webui:calendar.format");
         this._rangeMode = element.getAttribute("data-range") === "true";
         const value = element.dataset.value || null;
-        this._placeholder = element.getAttribute("placeholder") || webexpress.webui.I18N.translate("webexpress.webui:calendar.select_date");
+        this._placeholder = element.getAttribute("placeholder") || this._i18n("webexpress.webui:calendar.select_date");
         const holidaysAttr = element.getAttribute("data-holidays");
 
         if (this._rangeMode && value && value.includes(" - ")) {
@@ -101,7 +101,7 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
         todayBtn.type = "button";
         todayBtn.className = "btn btn-light wx-calendar-today-btn";
         todayBtn.title = webexpress.webui.I18N
-            ? webexpress.webui.I18N.translate("webexpress.webui:calendar.today")
+            ? this._i18n("webexpress.webui:calendar.today")
             : "Today";
         todayBtn.innerHTML = '<i class="fa-solid fa-calendar-day"></i>';
         todayBtn.addEventListener("click", (e) => {
@@ -124,7 +124,7 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
         clearBtn.type = "button";
         clearBtn.className = "btn btn-light wx-calendar-clear-btn";
         clearBtn.title = webexpress.webui.I18N
-            ? webexpress.webui.I18N.translate("webexpress.webui:calendar.clear_range") || "Clear range"
+            ? this._i18n("webexpress.webui:calendar.clear_range", "Clear range")
             : "Clear range";
         clearBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
         clearBtn.addEventListener("click", (e) => {
@@ -146,7 +146,7 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
         copyBtn.type = "button";
         copyBtn.className = "btn btn-light wx-calendar-copy-btn";
         copyBtn.title = webexpress.webui.I18N
-            ? webexpress.webui.I18N.translate("webexpress.webui:copy") || "Copy"
+            ? this._i18n("webexpress.webui:copy", "Copy")
             : "Copy";
         copyBtn.innerHTML = '<i class="fa-solid fa-clone"></i>';
         copyBtn.addEventListener("click", (e) => {
@@ -191,7 +191,7 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
             this._display.textContent = (this._rangeStart && this._rangeEnd)
                 ? this._formatDate(this._rangeStart) + " - " + this._formatDate(this._rangeEnd)
                 : (webexpress.webui.I18N
-                    ? webexpress.webui.I18N.translate("webexpress.webui:calendar.select_range")
+                    ? this._i18n("webexpress.webui:calendar.select_range")
                     : "Select range");
             this._hidden.value = (this._rangeStart && this._rangeEnd)
                 ? this._formatDateString(this._rangeStart, this._dateFormat) + " - " + this._formatDateString(this._rangeEnd, this._dateFormat)
@@ -511,7 +511,7 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
         const monthYear = document.createElement("span");
         monthYear.textContent = viewDate.getFullYear() 
             + " - " 
-            + webexpress.webui.I18N.translate(`webexpress.webui:calendar.${this._getMonthKey(viewDate.getMonth())}`);
+            + this._i18n(`webexpress.webui:calendar.${this._getMonthKey(viewDate.getMonth())}`);
         monthYear.classList.add("wx-calendar-monthyear");
 
         header.appendChild(btnPrevYear);
@@ -525,12 +525,12 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
         const thead = document.createElement("thead");
         const trHead = document.createElement("tr");
         const thKW = document.createElement("th");
-        thKW.textContent = webexpress.webui.I18N.translate("webexpress.webui:calendar.calendar_week");
+        thKW.textContent = this._i18n("webexpress.webui:calendar.calendar_week");
         trHead.appendChild(thKW);
 
         for (let i = 1; i <= 7; i++) {
             const th = document.createElement("th");
-            th.textContent = webexpress.webui.I18N.translate(`webexpress.webui:calendar.${this._getWeekdayKey(i % 7)}`);
+            th.textContent = this._i18n(`webexpress.webui:calendar.${this._getWeekdayKey(i % 7)}`);
             trHead.appendChild(th);
         }
         thead.appendChild(trHead);

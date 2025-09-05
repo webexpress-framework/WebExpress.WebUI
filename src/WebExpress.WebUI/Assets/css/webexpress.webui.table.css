@@ -99,28 +99,31 @@
 }
 
 /* drag & drop common */
-.wx-table-dragging {
-    opacity: .6;
-}
-
-.wx-table-drag-handle {
+.wx-table .wx-table-drag-handle {
     cursor: grab;
     color: var(--bs-secondary);
     user-select: none;
 }
 
-.wx-table-drag-handle:hover {
+.wx-table .wx-table-drag-handle:hover {
     color: var(--bs-secondary);
 }
 
-.wx-table-drag-indicator {
-    position: absolute;
-    border-left: 2px dashed var(--bs-success);
-    z-index: 2000;
-    pointer-events: none;
+.wx-table .wx-table-drag-indicator {
+  position: fixed;
+  pointer-events: none;
+  z-index: 2147483647;
+  width: 2px;
+  border-left: 2px dashed var(--bs-success);
+  opacity: .9;
 }
 
-.wx-table-drag-placeholder {
+/* header/row visual while dragging */
+.wx-table .wx-table-dragging {
+  opacity: .6;
+}
+
+.wx-table .wx-table-drag-placeholder {
     background-color: var(--bs-success-bg-subtle);
     border: 2px dashed var(--bs-success);
     z-index: 1000;
@@ -128,7 +131,7 @@
 }
 
 /* row drag placeholder cells (pattern background) */
-.wx-table-drag-placeholder td {
+.wx-table .wx-table-drag-placeholder > td {
     background: repeating-linear-gradient(
         45deg,
         #eee,
@@ -136,11 +139,13 @@
         #f8f8f8 6px,
         #f8f8f8 12px
     ) !important;
-    border: 2px dashed #bbb !important;
+    outline: 2px dashed var(--bs-success);
+    outline-offset: 1px;
+    z-index: 20000;
 }
 
 /* column resizing */
-.wx-table-column-resizer {
+.wx-table .wx-table-column-resizer {
     position: absolute;
     right: 0;
     top: 0;
@@ -151,7 +156,7 @@
     touch-action: none;
 }
 
-.wx-table-resizing {
+.wx-table .wx-table-resizing {
     cursor: col-resize !important;
 }
 
@@ -174,7 +179,7 @@
     transform-origin: 50% 50%;
 }
 
-.wx-tree-expand {
+.wx-table .wx-tree-expand {
     transform: rotate(90deg);
 }
 
@@ -272,12 +277,12 @@
 }
 
 /* Column dropdown drag & drop (reordering inside actions menu) */
-.wx-columns-list {
+.wx-table .wx-columns-list {
     position: relative;
 }
 
-.wx-columns-list .wx-col-placeholder {
-    border: 2px dashed #888;
+.wx-table .wx-columns-list .wx-col-placeholder {
+    border: 2px dashed var(--bs-success);
     margin: 2px 0;
     height: 36px;
     border-radius: 4px;
@@ -290,6 +295,25 @@
     );
 }
 
-.wx-columns-list .wx-col-item.dragging {
+.wx-table .wx-columns-list .wx-col-item.dragging {
     opacity: .4;
+}
+
+/* highlight row after content change (new or modified) */
+.wx-table .wx-row-flash > td {
+    background-color: var(--bs-warning); 
+    transition: background-color .6s ease; /* smooth fade-out transition */
+}
+
+/* stronger contrast for dark themes */
+[data-bs-theme=dark] .wx-table .wx-row-flash {
+    background-color: #806b00 !important;
+    color: #fff;
+}
+
+/* prefers-reduced-motion: reduce transition impact for accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .wx-table .wx-row-flash {
+        transition: none;
+    }
 }

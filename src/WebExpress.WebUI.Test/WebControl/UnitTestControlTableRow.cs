@@ -63,6 +63,30 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the expand state property of the table row.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeExpandState.None, @"<div class=""wx-table-row""></div>")]
+        [InlineData(TypeExpandState.Visible, @"<div class=""wx-table-row""></div>")]
+        [InlineData(TypeExpandState.Collapsed, @"<div class=""wx-table-row"" data-collapsed=""true""></div>")]
+        public void ExpandState(TypeExpandState state, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTableRow(null)
+            {
+                ExpandState = state
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests the add function of the table row.
         /// </summary>
         [Fact]

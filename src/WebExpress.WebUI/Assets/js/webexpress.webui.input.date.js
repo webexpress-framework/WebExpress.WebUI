@@ -18,9 +18,9 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         super(element);
 
         this._name = element.getAttribute("name");
-        this._dateFormat = element.getAttribute("data-format") || webexpress.webui.I18N.translate("webexpress.webui:calendar.format");
+        this._dateFormat = element.getAttribute("data-format") || this._i18n("webexpress.webui:calendar.format");
         const value = element.dataset.value || null;
-        this._placeholder = element.getAttribute("placeholder") || webexpress.webui.I18N.translate("webexpress.webui:calendar.select_date");
+        this._placeholder = element.getAttribute("placeholder") || this._i18n("webexpress.webui:calendar.select_date");
         const holidaysAttr = element.getAttribute("data-holidays");
         this._rangeMode = element.getAttribute("data-range") === "true";
 
@@ -219,9 +219,7 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         const todayBtn = document.createElement("button");
         todayBtn.type = "button";
         todayBtn.className = "btn btn-light wx-date-today-btn";
-        todayBtn.textContent = webexpress.webui.I18N
-            ? webexpress.webui.I18N.translate("webexpress.webui:calendar.today")
-            : "Today";
+        todayBtn.textContent = this._i18n("webexpress.webui:calendar.today", "Today");
         todayBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             const now = new Date();
@@ -254,7 +252,7 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         const viewDate = this._viewDate ? this._viewDate : new Date();
         this._monthYear.textContent = viewDate?.getFullYear() 
             + " - " 
-            + webexpress.webui.I18N.translate(`webexpress.webui:calendar.${this._getMonthKey(viewDate?.getMonth())}`);
+            + this._i18n(`webexpress.webui:calendar.${this._getMonthKey(viewDate?.getMonth())}`);
         this._calendarContainer.innerHTML = "";
         this._calendarContainer.appendChild(this._renderCalendar());
     }
@@ -565,13 +563,13 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         const thead = document.createElement("thead");
         const trHead = document.createElement("tr");
         const thKW = document.createElement("th");
-        thKW.textContent = webexpress.webui.I18N.translate("webexpress.webui:calendar.calendar_week");
+        thKW.textContent = this._i18n("webexpress.webui:calendar.calendar_week");
         trHead.appendChild(thKW);
 
         // weekdays header (monday start)
         for (let i = 1; i <= 7; i++) {
             const th = document.createElement("th");
-            th.textContent = webexpress.webui.I18N.translate(`webexpress.webui:calendar.${this._getWeekdayKey(i % 7)}`);
+            th.textContent = this._i18n(`webexpress.webui:calendar.${this._getWeekdayKey(i % 7)}`);
             trHead.appendChild(th);
         }
         thead.appendChild(trHead);

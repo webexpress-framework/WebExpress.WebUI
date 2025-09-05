@@ -25,6 +25,11 @@ namespace WebExpress.WebUI.WebControl
         public TypeTableColor Color { get; set; } = TypeTableColor.Default;
 
         /// <summary>
+        /// Returns or sets the expand state of the type, indicating whether it is expanded or collapsed.
+        /// </summary>
+        public TypeExpandState ExpandState { get; set; } = TypeExpandState.Collapsed;
+
+        /// <summary>
         /// Returns the cells.
         /// </summary>
         public IEnumerable<IControlTableCell> Cells => _cells;
@@ -195,6 +200,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = "wx-table-row"
             }
                 .AddUserAttribute("data-color", Color.ToClass())
+                .AddUserAttribute("data-collapsed", ExpandState == TypeExpandState.Collapsed ? "true" : null)
                 .Add
                 (
                     Cells.Select

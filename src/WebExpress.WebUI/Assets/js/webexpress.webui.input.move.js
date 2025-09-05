@@ -37,8 +37,8 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
 
         // Read all relevant data attributes for labels and state
         const name = element.getAttribute("name") || element.id;
-        const selectedHeaderLabel = element.dataset.headerSelected || webexpress.webui.I18N.translate("webexpress.webui:selected");
-        const availableHeaderLabel = element.dataset.headerAvailable || webexpress.webui.I18N.translate("webexpress.webui:available");
+        const selectedHeaderLabel = element.dataset.headerSelected || this._i18n("webexpress.webui:selected", "");
+        const availableHeaderLabel = element.dataset.headerAvailable || this._i18n("webexpress.webui:available", "");
         const selectedAllButtonLabel = element.dataset.buttonSelectall || "<<";
         const selectedButtonLabel = element.dataset.buttonSelected || "<";
         const availableButtonLabel = element.dataset.buttonAvailable || ">";

@@ -56,7 +56,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         const pencil = document.createElement('button');
         const icon = document.createElement('i');
         icon.className = 'fas fa-pencil';
-        icon.title = webexpress.webui.I18N.translate("webexpress.webui:edit") ?? "Edit";
+        icon.title = this._i18n("webexpress.webui:edit", "Edit");
         pencil.classList.add("pencil");
         pencil.appendChild(icon);
         pencil.addEventListener('click', e => {
@@ -89,7 +89,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         spinner.className = 'spinner-border spinner-border-sm';
         spinner.role = 'status';
         spinner.setAttribute('aria-hidden', 'true');
-        spinner.title = webexpress.webui.I18N.translate("webexpress.webui:edit") ?? "Edit";
+        spinner.title = this._i18n("webexpress.webui:edit", "Edit");
 
         spinnerButton.classList.add('spinner-button');
         spinnerButton.appendChild(spinner);
@@ -173,14 +173,14 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         iconOk.className = 'fas fa-check text-success';
         btnOk.type = 'submit';
         btnOk.appendChild(iconOk);
-        btnOk.title = webexpress.webui.I18N.translate("webexpress.webui:save") || "Save";
+        btnOk.title = this._i18n("webexpress.webui:save", "Save");
 
         const btnCancel = document.createElement('button');
         const iconCancel = document.createElement('i');
         iconCancel.className = 'fas fa-times text-danger';
         btnCancel.type = 'button';
         btnCancel.appendChild(iconCancel);
-        btnCancel.title = webexpress.webui.I18N.translate("webexpress.webui:cancel") || "Cancel";
+        btnCancel.title = this._i18n("webexpress.webui:cancel", "Cancel");
 
         // handle save event
         form.addEventListener('submit', async (e) => {
@@ -202,12 +202,35 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
                         detail: {
                             sender: element,
                             id: element.id,
-                            value: this._value
+                            value: this._value,
+                            status: response.status,
+                            statusText: ""
                         }
                     }));
                     return;
+                } else {
+                    // trigger error
+                    document.dispatchEvent(new CustomEvent(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
+                        detail: {
+                            sender: element,
+                            id: element.id,
+                            value: this._value,
+                            status: response.status,
+                            statusText: response.statusText
+                        }
+                    }));
                 }
             } catch (error) {
+                // trigger error
+                document.dispatchEvent(new CustomEvent(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
+                    detail: {
+                        sender: element,
+                        id: element.id,
+                        value: this._value,
+                        status: 500,
+                        statusText: ""
+                    }
+                }));
                 console.error(`Failed to edit`, error);
             } finally {
                 this._hideEditSpinner(element);

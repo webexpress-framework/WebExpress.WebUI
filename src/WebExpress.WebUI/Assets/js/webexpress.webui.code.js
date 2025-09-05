@@ -89,7 +89,7 @@ webexpress.webui.CodeCtrl = class extends webexpress.webui.Ctrl {
         icon.className = "fas fa-copy"; // FontAwesome icon for copy
 
         copyButton.classList.add("btn", "btn-sm");
-        copyButton.title = webexpress.webui.I18N.translate("webexpress.webui:copy");
+        copyButton.title = this._i18n("webexpress.webui:copy");
         
         copyButton.appendChild(icon);
         copyButton.addEventListener("click", () => {
