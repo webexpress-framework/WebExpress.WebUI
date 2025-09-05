@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the expand state of the type, indicating whether it is expanded or collapsed.
         /// </summary>
-        public TypeExpandState ExpandState { get; set; } = TypeExpandState.Collapsed;
+        public TypeExpandState ExpandState { get; set; } = TypeExpandState.None;
 
         /// <summary>
         /// Returns the cells.
