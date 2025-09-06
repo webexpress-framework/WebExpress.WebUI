@@ -368,15 +368,15 @@ namespace WebExpress.WebUI.WebControl
 
             foreach (var v in validationResults)
             {
-                var bgColor = new PropertyColorBackgroundAlert(TypeColorBackground.Default);
+                var bgColor = new PropertyColorBackgroundAlert(TypeColorBackgroundAlert.Default);
 
                 switch (v.Type)
                 {
                     case TypeInputValidity.Error:
-                        bgColor = new PropertyColorBackgroundAlert(TypeColorBackground.Danger);
+                        bgColor = new PropertyColorBackgroundAlert(TypeColorBackgroundAlert.Danger);
                         break;
                     case TypeInputValidity.Warning:
-                        bgColor = new PropertyColorBackgroundAlert(TypeColorBackground.Warning);
+                        bgColor = new PropertyColorBackgroundAlert(TypeColorBackgroundAlert.Warning);
                         break;
                 }
 

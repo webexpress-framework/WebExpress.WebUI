@@ -3,7 +3,7 @@
     /// <summary>
     /// Specifies the table styling options for a striped type table.
     /// </summary>
-    public enum TypeTableStriped
+    public enum TypeStripedTable
     {
         /// <summary>
         /// Represents the default behavior.
@@ -27,22 +27,22 @@
     }
 
     /// <summary>
-    /// Extension methods for the <see cref="TypeTableStriped"/> enum.
+    /// Extension methods for the <see cref="TypeStripedTable"/> enum.
     /// </summary>
-    public static class TypeTableStripedExtensions
+    public static class TypeStripedTableExtensions
     {
         /// <summary>
         /// Converts the layout to a CSS class.
         /// </summary>
         /// <param name="layout">The layout to be converted.</param>
         /// <returns>The CSS class corresponding to the layout.</returns>
-        public static string ToClass(this TypeTableStriped layout)
+        public static string ToClass(this TypeStripedTable layout)
         {
             return layout switch
             {
-                TypeTableStriped.Column => "table-striped-columns",
-                TypeTableStriped.Row => "table-striped",
-                TypeTableStriped.Both => "table-striped-columns table-striped",
+                TypeStripedTable.Column => "table-striped-columns",
+                TypeStripedTable.Row => "table-striped",
+                TypeStripedTable.Both => "table-striped-columns table-striped",
                 _ => string.Empty,
             };
         }

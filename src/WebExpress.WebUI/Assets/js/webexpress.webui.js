@@ -545,4 +545,8 @@ webexpress.webui.Event = class {
     static UPLOAD_ERROR_EVENT = "webexpress.webui.upload.error";
     // Event triggered to indicate upload progress.
     static UPLOAD_PROGRESS_EVENT = "webexpress.webui.upload.progress";
+    // Event triggered when a tile search operation is performed.
+    static TILE_SEARCH_EVENT = "webexpress.webui.tile.search";
+    // Event triggered when tiles are sorted by a specific criterion.
+    static TILE_SORT_EVENT = "webexpress.webui.tile.sort";
 }

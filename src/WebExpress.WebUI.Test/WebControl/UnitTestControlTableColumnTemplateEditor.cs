@@ -87,16 +87,16 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the color property of the table column.
         /// </summary>
         [Theory]
-        [InlineData(TypeTableColor.Default, @"<div data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
-        [InlineData(TypeTableColor.Primary, @"<div data-color=""table-primary"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
-        [InlineData(TypeTableColor.Secondary, @"<div data-color=""table-secondary"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
-        [InlineData(TypeTableColor.Info, @"<div data-color=""table-info"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
-        [InlineData(TypeTableColor.Success, @"<div data-color=""table-success"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
-        [InlineData(TypeTableColor.Warning, @"<div data-color=""table-warning"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
-        [InlineData(TypeTableColor.Danger, @"<div data-color=""table-danger"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
-        [InlineData(TypeTableColor.Light, @"<div data-color=""table-light"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
-        [InlineData(TypeTableColor.Dark, @"<div data-color=""table-dark"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
-        public void Color(TypeTableColor color, string expected)
+        [InlineData(TypeColorTable.Default, @"<div data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
+        [InlineData(TypeColorTable.Primary, @"<div data-color=""table-primary"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
+        [InlineData(TypeColorTable.Secondary, @"<div data-color=""table-secondary"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
+        [InlineData(TypeColorTable.Info, @"<div data-color=""table-info"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
+        [InlineData(TypeColorTable.Success, @"<div data-color=""table-success"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
+        [InlineData(TypeColorTable.Warning, @"<div data-color=""table-warning"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
+        [InlineData(TypeColorTable.Danger, @"<div data-color=""table-danger"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
+        [InlineData(TypeColorTable.Light, @"<div data-color=""table-light"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
+        [InlineData(TypeColorTable.Dark, @"<div data-color=""table-dark"" data-editable=""true"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
+        public void Color(TypeColorTable color, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();

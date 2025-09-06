@@ -22,7 +22,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the color scheme used for the row.
         /// </summary>
-        public TypeTableColor Color { get; set; } = TypeTableColor.Default;
+        public TypeColorTable Color { get; set; } = TypeColorTable.Default;
 
         /// <summary>
         /// Returns or sets the expand state of the type, indicating whether it is expanded or collapsed.

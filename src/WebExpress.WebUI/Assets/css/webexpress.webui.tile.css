@@ -1,0 +1,152 @@
+.wx-tile {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+/* base tile card */
+.wx-tile-card {
+    background: var(--bs-card-bg, #fff);
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: var(--bs-border-radius, .375rem);
+    box-shadow: 0 2px 6px rgba(0,0,0,.05);
+    width: 200px;
+    min-height: 110px;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow .2s, border-color .2s;
+    cursor: grab;
+    position: relative;
+    user-select: none;
+}
+
+.wx-tile-card .wx-tile-remove-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s ease-in-out;
+    z-index: 2;
+    background: transparent;
+    border: none;
+    font-size: 1em;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 6px;
+    color: var(--bs-secondary, #6c757d)
+}
+
+/* hover or focus-within (keyboard accessibility) shows the button */
+.wx-tile-card:hover .wx-tile-remove-btn,
+.wx-tile-card:focus-within .wx-tile-remove-btn {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.wx-tile-card .wx-tile-remove-btn:hover,
+.wx-tile-card .wx-tile-remove-btn:focus {
+    color: var(--bs-danger, #dc3545);
+    outline: none;
+}
+
+.wx-tile-card:active {
+    box-shadow: 0 4px 14px rgba(0,0,0,.10);
+    cursor: grabbing;
+}
+
+.wx-tile-card .card-body {
+    padding: .75rem .85rem;
+    flex: 1 1 auto;
+}
+
+.wx-tile-card .card-title {
+    display: inline-flex;
+    align-items: center;
+    font-size: 1em;
+    font-weight: 600;
+    margin: 0.5em;
+    gap: 0.5em;
+}
+
+.wx-tile-card .card-title > img {
+    height: 1.2em;
+}
+
+/* drag states */
+.wx-tile-card.wx-dragging {
+    opacity: .55;
+    border-color: var(--bs-secondary, #6c757d);
+}
+
+.wx-tile-card.wx-drop-target {
+    border: 2px dashed var(--bs-success, #198754);
+}
+
+/* flash highlight (optional future usage) */
+.wx-tile-card.wx-tile-flash {
+    animation: tileflash .7s linear 2;
+}
+
+@keyframes tileflash {
+    0% {
+        box-shadow: 0 0 0 0 var(--bs-warning,#ffc107);
+    }
+
+    50% {
+        box-shadow: 0 0 10px 5px var(--bs-warning,#ffc107);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 var(--bs-warning,#ffc107);
+    }
+}
+
+.wx-tile-primary {
+    background-color: color-mix(in srgb, var(--bs-primary, #0d6efd) 50%, white);
+    color: var(--bs-body-bg);
+}
+
+.wx-tile-secondary {
+    background-color: color-mix(in srgb, var(--bs-secondary, #6c757d) 50%, white);
+    color: var(--bs-body-bg);
+}
+
+.wx-tile-success {
+    background-color: color-mix(in srgb, var(--bs-success, #198754) 50%, white);
+    color: var(--bs-body-bg);
+}
+
+.wx-tile-info {
+    background-color: color-mix(in srgb, var(--bs-info, #0dcaf0) 50%, white);
+    color: var(--bs-body-color);
+}
+
+.wx-tile-warning {
+    background-color: color-mix(in srgb, var(--bs-warning, #ffc107) 50%, white);
+    color: var(--bs-body-color);
+}
+
+.wx-tile-danger {
+    background-color: color-mix(in srgb, var(--bs-danger, #dc3545) 50%, white);
+    color: var(--bs-body-color);
+}
+
+.wx-tile-light {
+    background-color: var(--bs-light, #f8f9fa);
+    color: var(--bs-body-color);
+}
+
+.wx-tile-dark {
+    background-color: var(--bs-dark, #212529);
+    color: var(--bs-body-bg);
+}
+
+.wx-tile-white {
+    background-color: #ffffff;
+    color: var(--bs-body-color);
+}
+
+.wx-tile-transparent {
+    background-color: transparent;
+}

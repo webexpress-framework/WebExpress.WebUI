@@ -3,7 +3,7 @@
     /// <summary>
     /// Specifies the border style for a table.
     /// </summary>
-    public enum TypeTableBorder
+    public enum TypeBorderTable
     {
         /// <summary>
         /// Represents the default behavior.
@@ -22,21 +22,21 @@
     }
 
     /// <summary>
-    /// Extension methods for the <see cref="TypeTableBorder"/> enum.
+    /// Extension methods for the <see cref="TypeBorderTable"/> enum.
     /// </summary>
-    public static class TypeTableBorderExtensions
+    public static class TypeBorderTableExtensions
     {
         /// <summary>
         /// Converts the layout to a CSS class.
         /// </summary>
         /// <param name="layout">The layout to be converted.</param>
         /// <returns>The CSS class corresponding to the layout.</returns>
-        public static string ToClass(this TypeTableBorder layout)
+        public static string ToClass(this TypeBorderTable layout)
         {
             return layout switch
             {
-                TypeTableBorder.Borderless => "table-borderless",
-                TypeTableBorder.Bordered => "table-bordered",
+                TypeBorderTable.Borderless => "table-borderless",
+                TypeBorderTable.Bordered => "table-bordered",
                 _ => string.Empty,
             };
         }

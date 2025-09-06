@@ -32,7 +32,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the color scheme used for the cell.
         /// </summary>
-        public virtual TypeTableColor Color { get; set; } = TypeTableColor.Default;
+        public virtual TypeColorTable Color { get; set; } = TypeColorTable.Default;
 
         /// <summary>
         /// Returns or sets the icon associated with this instance.

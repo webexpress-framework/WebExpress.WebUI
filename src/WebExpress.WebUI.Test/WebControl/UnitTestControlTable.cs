@@ -36,10 +36,10 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the table border property of the table control.
         /// </summary>
         [Theory]
-        [InlineData(TypeTableBorder.Default, @"<div class=""wx-webui-table""><div class=""wx-table-columns""></div></div>")]
-        [InlineData(TypeTableBorder.Borderless, @"<div class=""wx-webui-table"" data-border=""table-borderless""><div class=""wx-table-columns""></div></div>")]
-        [InlineData(TypeTableBorder.Bordered, @"<div class=""wx-webui-table"" data-border=""table-bordered""><div class=""wx-table-columns""></div></div>")]
-        public void TableBorder(TypeTableBorder border, string expected)
+        [InlineData(TypeBorderTable.Default, @"<div class=""wx-webui-table""><div class=""wx-table-columns""></div></div>")]
+        [InlineData(TypeBorderTable.Borderless, @"<div class=""wx-webui-table"" data-border=""table-borderless""><div class=""wx-table-columns""></div></div>")]
+        [InlineData(TypeBorderTable.Bordered, @"<div class=""wx-webui-table"" data-border=""table-bordered""><div class=""wx-table-columns""></div></div>")]
+        public void TableBorder(TypeBorderTable border, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -60,11 +60,11 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the striped property of the table control.
         /// </summary>
         [Theory]
-        [InlineData(TypeTableStriped.Default, @"<div class=""wx-webui-table""><div class=""wx-table-columns""></div></div>")]
-        [InlineData(TypeTableStriped.Column, @"<div class=""wx-webui-table"" data-striped=""table-striped-columns""><div class=""wx-table-columns""></div></div>")]
-        [InlineData(TypeTableStriped.Row, @"<div class=""wx-webui-table"" data-striped=""table-striped""><div class=""wx-table-columns""></div></div>")]
-        [InlineData(TypeTableStriped.Both, @"<div class=""wx-webui-table"" data-striped=""table-striped-columns table-striped""><div class=""wx-table-columns""></div></div>")]
-        public void Striped(TypeTableStriped striped, string expected)
+        [InlineData(TypeStripedTable.Default, @"<div class=""wx-webui-table""><div class=""wx-table-columns""></div></div>")]
+        [InlineData(TypeStripedTable.Column, @"<div class=""wx-webui-table"" data-striped=""table-striped-columns""><div class=""wx-table-columns""></div></div>")]
+        [InlineData(TypeStripedTable.Row, @"<div class=""wx-webui-table"" data-striped=""table-striped""><div class=""wx-table-columns""></div></div>")]
+        [InlineData(TypeStripedTable.Both, @"<div class=""wx-webui-table"" data-striped=""table-striped-columns table-striped""><div class=""wx-table-columns""></div></div>")]
+        public void Striped(TypeStripedTable striped, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -85,16 +85,16 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the color property of the table control.
         /// </summary>
         [Theory]
-        [InlineData(TypeTableColor.Default, @"<div class=""wx-webui-table"">*</div>")]
-        [InlineData(TypeTableColor.Primary, @"<div class=""wx-webui-table"" data-color=""table-primary"">*</div>")]
-        [InlineData(TypeTableColor.Secondary, @"<div class=""wx-webui-table"" data-color=""table-secondary"">*</div>")]
-        [InlineData(TypeTableColor.Info, @"<div class=""wx-webui-table"" data-color=""table-info"">*</div>")]
-        [InlineData(TypeTableColor.Success, @"<div class=""wx-webui-table"" data-color=""table-success"">*</div>")]
-        [InlineData(TypeTableColor.Warning, @"<div class=""wx-webui-table"" data-color=""table-warning"">*</div>")]
-        [InlineData(TypeTableColor.Danger, @"<div class=""wx-webui-table"" data-color=""table-danger"">*</div>")]
-        [InlineData(TypeTableColor.Light, @"<div class=""wx-webui-table"" data-color=""table-light"">*</div>")]
-        [InlineData(TypeTableColor.Dark, @"<div class=""wx-webui-table"" data-color=""table-dark"">*</div>")]
-        public void Color(TypeTableColor color, string expected)
+        [InlineData(TypeColorTable.Default, @"<div class=""wx-webui-table"">*</div>")]
+        [InlineData(TypeColorTable.Primary, @"<div class=""wx-webui-table"" data-color=""table-primary"">*</div>")]
+        [InlineData(TypeColorTable.Secondary, @"<div class=""wx-webui-table"" data-color=""table-secondary"">*</div>")]
+        [InlineData(TypeColorTable.Info, @"<div class=""wx-webui-table"" data-color=""table-info"">*</div>")]
+        [InlineData(TypeColorTable.Success, @"<div class=""wx-webui-table"" data-color=""table-success"">*</div>")]
+        [InlineData(TypeColorTable.Warning, @"<div class=""wx-webui-table"" data-color=""table-warning"">*</div>")]
+        [InlineData(TypeColorTable.Danger, @"<div class=""wx-webui-table"" data-color=""table-danger"">*</div>")]
+        [InlineData(TypeColorTable.Light, @"<div class=""wx-webui-table"" data-color=""table-light"">*</div>")]
+        [InlineData(TypeColorTable.Dark, @"<div class=""wx-webui-table"" data-color=""table-dark"">*</div>")]
+        public void Color(TypeColorTable color, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();

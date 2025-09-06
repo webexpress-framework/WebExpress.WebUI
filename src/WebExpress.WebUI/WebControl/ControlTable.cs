@@ -27,22 +27,22 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets a value indicating whether the table is striped.
         /// </summary>
-        public TypeTableStriped Striped { get; set; } = TypeTableStriped.Default;
+        public TypeStripedTable Striped { get; set; } = TypeStripedTable.Default;
 
         /// <summary>
         /// Returns or sets the color scheme used for the table.
         /// </summary>
-        public TypeTableColor Color { get; set; } = TypeTableColor.Default;
+        public TypeColorTable Color { get; set; } = TypeColorTable.Default;
 
         /// <summary>
         /// Returns or sets the header color scheme used for the table.
         /// </summary>
-        public TypeTableColor HeaderColor { get; set; } = TypeTableColor.Default;
+        public TypeColorTable HeaderColor { get; set; } = TypeColorTable.Default;
 
         /// <summary>
         /// Returns or sets a value indicating whether the table has a visible border.
         /// </summary>
-        public TypeTableBorder TableBorder { get; set; } = TypeTableBorder.Default;
+        public TypeBorderTable TableBorder { get; set; } = TypeBorderTable.Default;
 
         /// <summary>
         /// Returns or sets a value indicating whether columns can be removed.

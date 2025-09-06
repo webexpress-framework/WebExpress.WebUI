@@ -34,7 +34,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the color scheme used for the column.
         /// </summary>
-        public TypeTableColor Color { get; set; } = TypeTableColor.Default;
+        public TypeColorTable Color { get; set; } = TypeColorTable.Default;
 
         /// <summary>
         /// Initializes a new instance of the class.

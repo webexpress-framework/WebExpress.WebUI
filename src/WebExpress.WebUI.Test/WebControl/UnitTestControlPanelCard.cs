@@ -39,6 +39,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Theory]
         [InlineData(null, @"<div class=""card border""><div class=""card-body""><div class=""card-text""></div></div></div>")]
         [InlineData("header", @"<div class=""card border""><div class=""card-header"">header</div>*</div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""card border""><div class=""card-header"">WebExpress.WebUI</div><div class=""card-body"">*</div></div>")]
         public void Header(string header, string expected)
         {
             // preconditions

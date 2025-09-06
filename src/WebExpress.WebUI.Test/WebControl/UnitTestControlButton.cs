@@ -88,6 +88,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorButton.Default, @"<button type=""button"" class=""wx-button btn""></button>")]
         [InlineData(TypeColorButton.Primary, @"<button type=""button"" class=""wx-button btn btn-primary""></button>")]
         [InlineData(TypeColorButton.Secondary, @"<button type=""button"" class=""wx-button btn btn-secondary""></button>")]
+        [InlineData(TypeColorButton.Info, @"<button type=""button"" class=""wx-button btn btn-info""></button>")]
         [InlineData(TypeColorButton.Warning, @"<button type=""button"" class=""wx-button btn btn-warning""></button>")]
         [InlineData(TypeColorButton.Danger, @"<button type=""button"" class=""wx-button btn btn-danger""></button>")]
         [InlineData(TypeColorButton.Dark, @"<button type=""button"" class=""wx-button btn btn-dark""></button>")]

@@ -3,7 +3,7 @@
     /// <summary>
     /// Specifies the different types of color tables, table rows or cells.
     /// </summary>
-    public enum TypeTableColor
+    public enum TypeColorTable
     {
         /// <summary>
         /// The default color.
@@ -52,27 +52,27 @@
     }
 
     /// <summary>
-    /// Extension methods for the <see cref="TypeTableColor"/> enum.
+    /// Extension methods for the <see cref="TypeColorTable"/> enum.
     /// </summary>
-    public static class TypeTableColorExtensions
+    public static class TypeColorTableExtensions
     {
         /// <summary>
         /// Converts the layout to a CSS class.
         /// </summary>
         /// <param name="layout">The layout to be converted.</param>
         /// <returns>The CSS class corresponding to the layout.</returns>
-        public static string ToClass(this TypeTableColor layout)
+        public static string ToClass(this TypeColorTable layout)
         {
             return layout switch
             {
-                TypeTableColor.Primary => "table-primary",
-                TypeTableColor.Secondary => "table-secondary",
-                TypeTableColor.Success => "table-success",
-                TypeTableColor.Info => "table-info",
-                TypeTableColor.Warning => "table-warning",
-                TypeTableColor.Danger => "table-danger",
-                TypeTableColor.Light => "table-light",
-                TypeTableColor.Dark => "table-dark",
+                TypeColorTable.Primary => "table-primary",
+                TypeColorTable.Secondary => "table-secondary",
+                TypeColorTable.Success => "table-success",
+                TypeColorTable.Info => "table-info",
+                TypeColorTable.Warning => "table-warning",
+                TypeColorTable.Danger => "table-danger",
+                TypeColorTable.Light => "table-light",
+                TypeColorTable.Dark => "table-dark",
                 _ => string.Empty,
             };
         }

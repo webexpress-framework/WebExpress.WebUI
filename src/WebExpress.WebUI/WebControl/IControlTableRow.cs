@@ -12,7 +12,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns the color scheme used for the row.
         /// </summary>
-        TypeTableColor Color { get; }
+        TypeColorTable Color { get; }
 
         /// <summary>
         /// Returns the cells.

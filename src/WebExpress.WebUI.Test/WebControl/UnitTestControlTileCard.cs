@@ -7,24 +7,24 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.Test.WebControl
 {
     /// <summary>
-    /// Tests the tabele column template control.
+    /// Tests the tile card control.
     /// </summary>
     [Collection("NonParallelTests")]
-    public class UnitTestControlTableColumnTemplate
+    public class UnitTestControlTileCard
     {
         /// <summary>
-        /// Tests the id property of the tabele column edit control.
+        /// Tests the id property of the tile control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div></div>")]
-        [InlineData("id", @"<div id=""id""></div>")]
+        [InlineData(null, @"<div class=""wx-tile-card""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-tile-card""></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlTableColumnTemplate(id)
+            var control = new ControlTileCard(id)
             {
             };
 
@@ -35,21 +35,27 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the title property of the table column.
+        /// Tests the color property of the alert control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div></div>")]
-        [InlineData("abc", @"<div data-label=""abc""></div>")]
-        [InlineData("webexpress.WebUI:plugin.name", @"<div data-label=""WebExpress.WebUI""></div>")]
-        public void Title(string text, string expected)
+        [InlineData(TypeColorTile.Default, @"<div class=""wx-tile-card""></div>")]
+        [InlineData(TypeColorTile.Primary, @"<div class=""wx-tile-card"" data-color-css=""wx-tile-primary""></div>")]
+        [InlineData(TypeColorTile.Secondary, @"<div class=""wx-tile-card"" data-color-css=""wx-tile-secondary""></div>")]
+        [InlineData(TypeColorTile.Info, @"<div class=""wx-tile-card"" data-color-css=""wx-tile-info""></div>")]
+        [InlineData(TypeColorTile.Warning, @"<div class=""wx-tile-card"" data-color-css=""wx-tile-warning""></div>")]
+        [InlineData(TypeColorTile.Danger, @"<div class=""wx-tile-card"" data-color-css=""wx-tile-danger""></div>")]
+        [InlineData(TypeColorTile.Dark, @"<div class=""wx-tile-card"" data-color-css=""wx-tile-dark""></div>")]
+        [InlineData(TypeColorTile.White, @"<div class=""wx-tile-card"" data-color-css=""wx-tile-white""></div>")]
+        [InlineData(TypeColorTile.Transparent, @"<div class=""wx-tile-card"" data-color-css=""wx-tile-transparent""></div>")]
+        public void Color(TypeColorTile color, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlTableColumnTemplate()
+            var control = new ControlTileCard()
             {
-                Title = text
+                Color = new PropertyColorTile(color)
             };
 
             // test execution
@@ -59,20 +65,21 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the icon property of the table column.
+        /// Tests the header property of the panel card control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div></div>")]
-        [InlineData(typeof(IconStar), @"<div data-icon=""fas fa-star""></div>")]
-        public void Icon(Type icon, string expected)
+        [InlineData(null, @"<div class=""wx-tile-card""></div>")]
+        [InlineData("header", @"<div class=""wx-tile-card"" data-label=""header""></div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-tile-card"" data-label=""WebExpress.WebUI""></div>")]
+        public void Header(string header, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlTableColumnTemplate()
+            var control = new ControlTileCard()
             {
-                Icon = icon != null ? Activator.CreateInstance(icon) as IIcon : null
+                Header = header
             };
 
             // test execution
@@ -82,27 +89,21 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the color property of the table column.
+        /// Tests the icon property of the form tile card control item.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorTable.Default, @"<div></div>")]
-        [InlineData(TypeColorTable.Primary, @"<div data-color=""table-primary""></div>")]
-        [InlineData(TypeColorTable.Secondary, @"<div data-color=""table-secondary""></div>")]
-        [InlineData(TypeColorTable.Info, @"<div data-color=""table-info""></div>")]
-        [InlineData(TypeColorTable.Success, @"<div data-color=""table-success""></div>")]
-        [InlineData(TypeColorTable.Warning, @"<div data-color=""table-warning""></div>")]
-        [InlineData(TypeColorTable.Danger, @"<div data-color=""table-danger""></div>")]
-        [InlineData(TypeColorTable.Light, @"<div data-color=""table-light""></div>")]
-        [InlineData(TypeColorTable.Dark, @"<div data-color=""table-dark""></div>")]
-        public void Color(TypeColorTable color, string expected)
+        [InlineData(null, @"<div class=""wx-tile-card""></div>")]
+        [InlineData(typeof(IconFolder), @"<div class=""wx-tile-card"" data-icon=""fas fa-folder""></div>")]
+        public void Icon(Type iconType, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlTableColumnTemplate()
+            var icon = iconType != null ? Activator.CreateInstance(iconType) as IIcon : null;
+            var control = new ControlTileCard(null)
             {
-                Color = color
+                Icon = icon
             };
 
             // test execution
@@ -112,7 +113,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests adding a column to the table.
+        /// Tests adding a item to the tile control.
         /// </summary>
         [Fact]
         public void Add()
@@ -121,15 +122,16 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlTableColumnTemplate();
-            var template = new ControlDate();
+            var control = new ControlTileCard(null);
+
+            // add column
+            control.Add(new ControlText());
 
             // test execution
-            control.Add(template);
-
-            // validation
             var html = control.Render(context, visualTree);
-            var expected = @"<div><div class=""wx-webui-date""></div></div>";
+
+            // expected HTML
+            var expected = @"<div class=""wx-tile-card""><div></div></div>";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }

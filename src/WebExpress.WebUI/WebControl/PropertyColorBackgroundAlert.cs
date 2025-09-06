@@ -3,15 +3,15 @@
     /// <summary>
     /// Represents a property for background color alerts.
     /// </summary>
-    public class PropertyColorBackgroundAlert : PropertyColorBackground
+    public class PropertyColorBackgroundAlert : PropertyColor<TypeColorBackgroundAlert>
     {
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="color">The background color.</param>
-        public PropertyColorBackgroundAlert(TypeColorBackground color)
-            : base(color)
+        public PropertyColorBackgroundAlert(TypeColorBackgroundAlert color)
         {
+            SystemColor = color;
         }
 
         /// <summary>
@@ -19,8 +19,9 @@
         /// </summary>
         /// <param name="color">The background color.</param>
         public PropertyColorBackgroundAlert(string color)
-            : base(color)
         {
+            SystemColor = (TypeColorBackgroundAlert)TypeColor.User;
+            UserColor = color;
         }
 
         /// <summary>
@@ -43,7 +44,12 @@
         /// <returns>The CSS style corresponding to the background color.</returns>
         public override string ToStyle()
         {
-            return base.ToStyle();
+            if ((TypeColor)SystemColor == TypeColor.User)
+            {
+                return $"background-color: {UserColor};";
+            }
+
+            return null;
         }
     }
 }

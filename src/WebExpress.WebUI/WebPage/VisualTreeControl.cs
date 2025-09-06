@@ -138,6 +138,7 @@ namespace WebExpress.WebUI.WebPage
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.split.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.table.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.tag.css"));
+            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.tile.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.toolbar.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.tree.css"));
             _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.upload.css"));
@@ -173,6 +174,7 @@ namespace WebExpress.WebUI.WebPage
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.split.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.table.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.tag.js"));
+            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.tile.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.toolbar.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.tree.js"));
             _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.upload.js"));

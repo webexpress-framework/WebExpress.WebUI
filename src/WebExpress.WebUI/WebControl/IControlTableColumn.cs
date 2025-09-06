@@ -20,13 +20,8 @@ namespace WebExpress.WebUI.WebControl
         IIcon Icon { get; }
 
         /// <summary>
-        /// Returns the render function used for rendering the cells in the column.
-        /// </summary>
-        public string RenderScript { get; }
-
-        /// <summary>
         /// Returns the color scheme used for the column.
         /// </summary>
-        TypeTableColor Color { get; }
+        TypeColorTable Color { get; }
     }
 }

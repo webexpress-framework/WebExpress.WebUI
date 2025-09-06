@@ -36,16 +36,16 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the color property of the table row.
         /// </summary>
         [Theory]
-        [InlineData(TypeTableColor.Default, @"<div class=""wx-table-row""></div>")]
-        [InlineData(TypeTableColor.Primary, @"<div class=""wx-table-row"" data-color=""table-primary""></div>")]
-        [InlineData(TypeTableColor.Secondary, @"<div class=""wx-table-row"" data-color=""table-secondary""></div>")]
-        [InlineData(TypeTableColor.Info, @"<div class=""wx-table-row"" data-color=""table-info""></div>")]
-        [InlineData(TypeTableColor.Success, @"<div class=""wx-table-row"" data-color=""table-success""></div>")]
-        [InlineData(TypeTableColor.Warning, @"<div class=""wx-table-row"" data-color=""table-warning""></div>")]
-        [InlineData(TypeTableColor.Danger, @"<div class=""wx-table-row"" data-color=""table-danger""></div>")]
-        [InlineData(TypeTableColor.Light, @"<div class=""wx-table-row"" data-color=""table-light""></div>")]
-        [InlineData(TypeTableColor.Dark, @"<div class=""wx-table-row"" data-color=""table-dark""></div>")]
-        public void Color(TypeTableColor color, string expected)
+        [InlineData(TypeColorTable.Default, @"<div class=""wx-table-row""></div>")]
+        [InlineData(TypeColorTable.Primary, @"<div class=""wx-table-row"" data-color=""table-primary""></div>")]
+        [InlineData(TypeColorTable.Secondary, @"<div class=""wx-table-row"" data-color=""table-secondary""></div>")]
+        [InlineData(TypeColorTable.Info, @"<div class=""wx-table-row"" data-color=""table-info""></div>")]
+        [InlineData(TypeColorTable.Success, @"<div class=""wx-table-row"" data-color=""table-success""></div>")]
+        [InlineData(TypeColorTable.Warning, @"<div class=""wx-table-row"" data-color=""table-warning""></div>")]
+        [InlineData(TypeColorTable.Danger, @"<div class=""wx-table-row"" data-color=""table-danger""></div>")]
+        [InlineData(TypeColorTable.Light, @"<div class=""wx-table-row"" data-color=""table-light""></div>")]
+        [InlineData(TypeColorTable.Dark, @"<div class=""wx-table-row"" data-color=""table-dark""></div>")]
+        public void Color(TypeColorTable color, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
