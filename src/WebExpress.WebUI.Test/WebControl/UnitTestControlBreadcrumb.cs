@@ -15,8 +15,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the breadcrumb control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<ol class=""breadcrumb bg-light ps-2 bg-light btn-sm""></ol>")]
-        [InlineData("id", @"<ol id=""id"" class=""breadcrumb bg-light ps-2 bg-light btn-sm""></ol>")]
+        [InlineData(null, @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
+        [InlineData("id", @"<ol id=""id"" class=""wx-breadcrumb wx-sm""></ol>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -37,35 +37,18 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the uri property of the breadcrumb control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<ol class=""breadcrumb bg-light ps-2 bg-light btn-sm""></ol>")]
-        [InlineData("http://example.com", @"<ol class=""breadcrumb bg-light ps-2 bg-light btn-sm""></ol>")]
+        [InlineData(null, @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
+        [InlineData("http://example.com/a/b/c", @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
         public void Uri(string uri, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlBreadcrumb { Uri = new UriEndpoint(uri) };
-
-            // test execution
-            var html = control.Render(context, visualTree);
-
-            AssertExtensions.EqualWithPlaceholders(expected, html);
-        }
-
-        /// <summary>
-        /// Tests the empty name property of the breadcrumb control.
-        /// </summary>
-        [Theory]
-        [InlineData(null, @"<ol class=""breadcrumb bg-light ps-2 bg-light btn-sm""></ol>")]
-        [InlineData("Home", @"<ol class=""breadcrumb bg-light ps-2 bg-light btn-sm""></ol>")]
-        public void EmptyName(string emptyName, string expected)
-        {
-            // preconditions
-            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlBreadcrumb { EmptyName = emptyName, Uri = new UriEndpoint("http://example.com") };
+            var control = new ControlBreadcrumb 
+            { 
+                Uri = new UriEndpoint(uri) 
+            };
 
             // test execution
             var html = control.Render(context, visualTree);
@@ -77,16 +60,22 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the size property of the breadcrumb control.
         /// </summary>
         [Theory]
-        [InlineData(TypeSizeButton.Default, @"<ol class=""breadcrumb bg-light ps-2 bg-light""></ol>")]
-        [InlineData(TypeSizeButton.Small, @"<ol class=""breadcrumb bg-light ps-2 bg-light btn-sm""></ol>")]
-        [InlineData(TypeSizeButton.Large, @"<ol class=""breadcrumb bg-light ps-2 bg-light btn-lg""></ol>")]
-        public void Size(TypeSizeButton size, string expected)
+        [InlineData(TypeSizeText.Default, @"<ol class=""wx-breadcrumb""></ol>")]
+        [InlineData(TypeSizeText.ExtraSmall, @"<ol class=""wx-breadcrumb wx-esm""></ol>")]
+        [InlineData(TypeSizeText.Small, @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
+        [InlineData(TypeSizeText.Large, @"<ol class=""wx-breadcrumb wx-lg""></ol>")]
+        [InlineData(TypeSizeText.ExtraLarge, @"<ol class=""wx-breadcrumb wx-elg""></ol>")]
+        public void Size(TypeSizeText size, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlBreadcrumb { Size = size, Uri = new UriEndpoint("http://example.com") };
+            var control = new ControlBreadcrumb 
+            { 
+                Size = size, 
+                Uri = new UriEndpoint("http://example.com/a/b/c") 
+            };
 
             // test execution
             var html = control.Render(context, visualTree);
@@ -98,8 +87,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the prefix property of the breadcrumb control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<ol class=""breadcrumb bg-light ps-2 bg-light btn-sm""></ol>")]
-        [InlineData("Prefix", @"<ol class=""breadcrumb bg-light ps-2 bg-light btn-sm""><li><div class=""me-2 text-muted"">Prefix</div></li></ol>")]
+        [InlineData(null, @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
+        [InlineData("Prefix", @"<ol class=""wx-breadcrumb wx-sm""><li><div class=""text-muted"">Prefix</div></li></ol>")]
         public void Prefix(string prefix, string expected)
         {
             // preconditions
@@ -118,8 +107,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the take last property of the breadcrumb control.
         /// </summary>
         [Theory]
-        [InlineData((ushort)5, @"<ol class=""breadcrumb bg-light ps-2 bg-light btn-sm""></ol>")]
-        [InlineData(3, @"<ol class=""breadcrumb bg-light ps-2 bg-light btn-sm""></ol>")]
+        [InlineData((ushort)5, @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
+        [InlineData(3, @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
         public void TakeLast(ushort takeLast, string expected)
         {
             // preconditions
@@ -138,8 +127,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the render function of the breadcrumb control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<ol class=""breadcrumb bg-light ps-2 bg-light btn-sm"">*</ol>")]
-        [InlineData("http://localhost:80/app/page", @"<ol class=""breadcrumb bg-light ps-2 bg-light btn-sm""><li class=""breadcrumb-item""><a href=""http://localhost/app/page"" class=""link"">abc</a></li></ol>")]
+        [InlineData(null, @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
+        [InlineData("http://localhost:80/app/page", @"<ol class=""wx-breadcrumb wx-sm""><li><a href=""http://localhost/app/page"">abc</a></li></ol>")]
         public void Render(string uri, string expected)
         {
             // preconditions
@@ -150,7 +139,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var uriResource = new UriEndpoint(uri);
             var control = new ControlBreadcrumb()
             {
-                Uri = uriResource
+                Uri = !string.IsNullOrWhiteSpace(uri) ? uriResource : null
             };
 
             if (uriResource.PathSegments.LastOrDefault() != null)

@@ -16,6 +16,113 @@ pre {
     display: none;
 }
 
+.wx-esm {
+    font-size: 0.55em;
+}
+
+.wx-sm {
+    font-size: 0.75em;
+}
+
+.wx-lg {
+    font-size: 1.5em;
+}
+
+.wx-elg {
+    font-size: 2em;
+}
+
+.wx-breadcrumb {
+    display: inline-flex;
+    flex-wrap: wrap;
+    list-style: none;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5em;
+}
+
+.wx-breadcrumb > li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.wx-breadcrumb > li > a {
+    text-decoration: none;
+    cursor: pointer;
+    color: var(--bs-link-color);
+}
+
+.wx-breadcrumb > li > img {
+    height: 1.2em;
+}
+
+.wx-breadcrumb > li::after {
+    content: "/";
+    margin-left: 0.5em;
+    color: var(--bs-secondary-color);
+}
+
+.wx-breadcrumb > li:last-child::after {
+    content: "";
+}
+
+.wx-breadcrumb.text-primary > li > a {
+    color: var(--bs-primary);
+}
+
+.wx-breadcrumb.text-secondary > li > a {
+    color: var(--bs-secondary);
+}
+
+.wx-breadcrumb.text-success > li > a {
+    color: var(--bs-success);
+}
+
+.wx-breadcrumb.text-info > li > a {
+    color: var(--bs-info);
+}
+
+.wx-breadcrumb.text-warning > li > a {
+    color: var(--bs-warning);
+}
+
+.wx-breadcrumb.text-danger > li > a {
+    color: var(--bs-danger);
+}
+
+.wx-breadcrumb.text-light > li > a {
+    color: var(--bs-light);
+}
+
+.wx-breadcrumb.text-dark > li > a {
+    color: var(--bs-dark);
+}
+
+.wx-breadcrumb.text-white > li > a {
+    color: var(--bs-white);
+}
+
+.wx-breadcrumb.text-muted > li > a {
+    color: var(--bs-secondary);
+}
+
+/*.wx-breadcrumb.wx-esm > li > a {
+    font-size: 0.55em;
+}
+
+.wx-breadcrumb.wx-sm > li > a {
+    font-size: 0.75em;
+}
+
+.wx-breadcrumb.wx-lg > li > a {
+    font-size: 1.5em;
+}
+
+.wx-breadcrumb.wx-elg > li > a {
+    font-size: 2em;
+}*/
+
 .wx-profile {
     display: flex;
     align-items: center;

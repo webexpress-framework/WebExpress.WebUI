@@ -63,10 +63,10 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeSizeText.Default, @"<small class=""text-muted""></small>")]
-        [InlineData(TypeSizeText.ExtraSmall, @"<small class=""text-muted"" style=""font-size:0.55rem;""></small>")]
-        [InlineData(TypeSizeText.Small, @"<small class=""text-muted"" style=""font-size:0.75rem;""></small>")]
-        [InlineData(TypeSizeText.Large, @"<small class=""text-muted"" style=""font-size:1.5rem;""></small>")]
-        [InlineData(TypeSizeText.ExtraLarge, @"<small class=""text-muted"" style=""font-size:2rem;""></small>")]
+        [InlineData(TypeSizeText.ExtraSmall, @"<small class=""text-muted wx-esm""></small>")]
+        [InlineData(TypeSizeText.Small, @"<small class=""text-muted wx-sm""></small>")]
+        [InlineData(TypeSizeText.Large, @"<small class=""text-muted wx-lg""></small>")]
+        [InlineData(TypeSizeText.ExtraLarge, @"<small class=""text-muted wx-elg""></small>")]
         public void Size(TypeSizeText size, string expected)
         {
             // preconditions

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Linq;
+using WebExpress.WebCore;
 using WebExpress.WebCore.Internationalization;
+using WebExpress.WebCore.WebEndpoint;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebPage;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
@@ -19,16 +22,11 @@ namespace WebExpress.WebUI.WebControl
         public IUri Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the name to display when the breadcrumb is empty.
-        /// </summary>
-        public string EmptyName { get; set; }
-
-        /// <summary>
         /// Returns or sets the size.
         /// </summary>
-        public TypeSizeButton Size
+        public TypeSizeText Size
         {
-            get => (TypeSizeButton)GetProperty(TypeSizeButton.Default);
+            get => (TypeSizeText)GetProperty(TypeSizeText.Default);
             set => SetProperty(value, () => value.ToClass());
         }
 
@@ -49,8 +47,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlBreadcrumb(string id = null)
             : base(id)
         {
-            Size = TypeSizeButton.Small;
-            BackgroundColor = new PropertyColorBackground(TypeColorBackground.Light);
+            Size = TypeSizeText.Small;
         }
 
         /// <summary>
@@ -61,10 +58,12 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var siteManager = WebEx.ComponentHub.SitemapManager;
+            
             var html = new HtmlElementTextContentOl()
             {
                 Id = Id,
-                Class = Css.Concatenate("breadcrumb bg-light ps-2", GetClasses()),
+                Class = Css.Concatenate("wx-breadcrumb", GetClasses()),
                 Style = GetStyles(),
             };
 
@@ -79,7 +78,7 @@ namespace WebExpress.WebUI.WebControl
                             new HtmlText(I18N.Translate(renderContext.Request?.Culture, Prefix))
                         )
                         {
-                            Class = "me-2 text-muted"
+                            Class = "text-muted"
                         }
                     )
                 );
@@ -96,25 +95,43 @@ namespace WebExpress.WebUI.WebControl
             for (int i = from + 1; i < Uri.PathSegments.Count() + 1; i++)
             {
                 var path = Uri.Take(i);
+                var href = path.ToString();
+                var endpointContext = siteManager.GetEndpoint(path);
 
                 if (path.Display != null)
                 {
                     var display = I18N.Translate(renderContext.Request?.Culture, path.Display);
-                    var href = path.ToString();
 
                     html.Add
                     (
-                        new HtmlElementTextContentLi
-                        (
-                            new HtmlElementTextSemanticsA(display)
+                        new HtmlElementTextContentLi()
+                            .Add(new HtmlElementTextSemanticsA(display)
                             {
-                                Href = href,
-                                Class = "link"
-                            }
-                        )
-                        {
-                            Class = "breadcrumb-item"
-                        }
+                                Href = href
+                            })
+                    );
+                } 
+                else if (endpointContext is PageContext page)
+                {
+                    var display = I18N.Translate(renderContext.Request?.Culture, page.PageTitle);
+                    var icon = (IRoute)null; // endpointContext?.PluginContext?.Icon;
+
+                    html.Add
+                    (
+                        new HtmlElementTextContentLi()
+                            .Add
+                            (
+                                icon != null 
+                                    ? new HtmlElementMultimediaImg() 
+                                    { 
+                                        Src = RouteEndpoint.Combine(endpointContext.ApplicationContext?.Route, icon)?.ToUri()?.ToString() 
+                                    } 
+                                    : null
+                            )
+                            .Add(new HtmlElementTextSemanticsA(display)
+                            {
+                                Href = href
+                            })
                     );
                 }
             }

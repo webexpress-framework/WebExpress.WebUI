@@ -87,10 +87,10 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeSizeText.Default, @"<i class=""fas fa-star""></i>")]
-        [InlineData(TypeSizeText.ExtraSmall, @"<i class=""fas fa-star"" style=""font-size:0.55rem;""></i>")]
-        [InlineData(TypeSizeText.Small, @"<i class=""fas fa-star"" style=""font-size:0.75rem;""></i>")]
-        [InlineData(TypeSizeText.Large, @"<i class=""fas fa-star"" style=""font-size:1.5rem;""></i>")]
-        [InlineData(TypeSizeText.ExtraLarge, @"<i class=""fas fa-star"" style=""font-size:2rem;""></i>")]
+        [InlineData(TypeSizeText.ExtraSmall, @"<i class=""fas fa-star wx-esm""></i>")]
+        [InlineData(TypeSizeText.Small, @"<i class=""fas fa-star wx-sm""></i>")]
+        [InlineData(TypeSizeText.Large, @"<i class=""fas fa-star wx-lg""></i>")]
+        [InlineData(TypeSizeText.ExtraLarge, @"<i class=""fas fa-star wx-elg""></i>")]
         public void Size(TypeSizeText size, string expected)
         {
             // preconditions
