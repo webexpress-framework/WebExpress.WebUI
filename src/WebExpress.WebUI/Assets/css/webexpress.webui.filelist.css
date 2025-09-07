@@ -1,19 +1,19 @@
 /* Base FileList Control Styling */
-.wx-file-list > table {
+.wx-file-list > .wx-upload-preview > table {
 }
 
-.wx-file-list > table > tbody > tr {
+.wx-file-list > .wx-upload-preview > table > tbody > tr {
 }
 
-.wx-file-list > table > tbody > tr > td {
+.wx-file-list > .wx-upload-preview > table > tbody > tr > td {
     text-align: left;
 }
 
-.wx-file-list > table > tbody > tr > td:last-child {
+.wx-file-list > .wx-upload-preview > table > tbody > tr > td:last-child {
     text-align: right;
 }
 
-.wx-file-list > table > tbody > tr > td > div {
+.wx-file-list > .wx-upload-preview > table > tbody > tr > td > div {
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
@@ -22,11 +22,11 @@
     text-overflow: ellipsis;
 }
 
-.wx-file-list > table > tbody > tr > td > img {
+.wx-file-list > .wx-upload-preview > table > tbody > tr > td > div > img {
     height: 1.2em;
 }
 
-.wx-file-list > table > tbody > tr > td > div > span {
+.wx-file-list > .wx-upload-preview > table > tbody > tr > td > div > span {
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
