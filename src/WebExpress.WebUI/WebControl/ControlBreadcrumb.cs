@@ -59,7 +59,9 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var siteManager = WebEx.ComponentHub.SitemapManager;
-            
+            var lastEndpointContext = default(IEndpointContext);
+
+
             var html = new HtmlElementTextContentOl()
             {
                 Id = Id,
@@ -77,10 +79,10 @@ namespace WebExpress.WebUI.WebControl
                         (
                             new HtmlText(I18N.Translate(renderContext.Request?.Culture, Prefix))
                         )
-                        {
-                            Class = "text-muted"
-                        }
                     )
+                    {
+                        Class = "wx-breadcrumb-prefix"
+                    }
                 );
             }
 
@@ -98,6 +100,11 @@ namespace WebExpress.WebUI.WebControl
                 var href = path.ToString();
                 var endpointContext = siteManager.GetEndpoint(path);
 
+                if (endpointContext == lastEndpointContext)
+                {
+                    continue;
+                }
+
                 if (path.Display != null)
                 {
                     var display = I18N.Translate(renderContext.Request?.Culture, path.Display);
@@ -114,7 +121,7 @@ namespace WebExpress.WebUI.WebControl
                 else if (endpointContext is PageContext page)
                 {
                     var display = I18N.Translate(renderContext.Request?.Culture, page.PageTitle);
-                    var icon = (IRoute)null; // endpointContext?.PluginContext?.Icon;
+                    var icon = page?.PageIcon;
 
                     html.Add
                     (
@@ -122,10 +129,11 @@ namespace WebExpress.WebUI.WebControl
                             .Add
                             (
                                 icon != null 
-                                    ? new HtmlElementMultimediaImg() 
-                                    { 
-                                        Src = RouteEndpoint.Combine(endpointContext.ApplicationContext?.Route, icon)?.ToUri()?.ToString() 
-                                    } 
+                                    ? new ControlIcon()
+                                    {
+                                        Icon = icon
+                                    }
+                                        .Render(renderContext, visualTree)
                                     : null
                             )
                             .Add(new HtmlElementTextSemanticsA(display)
@@ -134,6 +142,8 @@ namespace WebExpress.WebUI.WebControl
                             })
                     );
                 }
+
+                lastEndpointContext = endpointContext;
             }
 
             return html;

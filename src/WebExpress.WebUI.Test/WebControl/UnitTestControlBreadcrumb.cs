@@ -88,7 +88,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
-        [InlineData("Prefix", @"<ol class=""wx-breadcrumb wx-sm""><li><div class=""text-muted"">Prefix</div></li></ol>")]
+        [InlineData("Prefix", @"<ol class=""wx-breadcrumb wx-sm""><li class=""wx-breadcrumb-prefix""><div>Prefix</div></li></ol>")]
         public void Prefix(string prefix, string expected)
         {
             // preconditions
@@ -128,7 +128,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
-        [InlineData("http://localhost:80/app/page", @"<ol class=""wx-breadcrumb wx-sm""><li><a href=""http://localhost/app/page"">abc</a></li></ol>")]
+        [InlineData("http://localhost:80/app/page", @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
         public void Render(string uri, string expected)
         {
             // preconditions

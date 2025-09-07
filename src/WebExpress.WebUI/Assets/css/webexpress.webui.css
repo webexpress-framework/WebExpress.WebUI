@@ -38,6 +38,7 @@ pre {
     list-style: none;
     align-items: center;
     justify-content: flex-start;
+    padding-left: 1em;
     gap: 0.5em;
 }
 
@@ -57,71 +58,70 @@ pre {
     height: 1.2em;
 }
 
-.wx-breadcrumb > li::after {
+.wx-breadcrumb > li > i {
+    color: var(--bs-primary);
+}
+
+.wx-breadcrumb-prefix {
+    color: var(--bs-muted-color);
+    opacity: 0.65;
+}
+
+.wx-breadcrumb > li:not(.wx-breadcrumb-prefix):not(:last-child)::after {
     content: "/";
     margin-left: 0.5em;
     color: var(--bs-secondary-color);
 }
 
-.wx-breadcrumb > li:last-child::after {
-    content: "";
-}
-
-.wx-breadcrumb.text-primary > li > a {
+.wx-breadcrumb.text-primary > li > a,
+.wx-breadcrumb.text-primary > li > i {
     color: var(--bs-primary);
 }
 
-.wx-breadcrumb.text-secondary > li > a {
+.wx-breadcrumb.text-secondary > li > a,
+.wx-breadcrumb.text-secondary > li > i {
     color: var(--bs-secondary);
 }
 
-.wx-breadcrumb.text-success > li > a {
+.wx-breadcrumb.text-success > li > a,
+.wx-breadcrumb.text-success > li > i{
     color: var(--bs-success);
 }
 
-.wx-breadcrumb.text-info > li > a {
+.wx-breadcrumb.text-info > li > a,
+.wx-breadcrumb.text-info > li > i {
     color: var(--bs-info);
 }
 
-.wx-breadcrumb.text-warning > li > a {
+.wx-breadcrumb.text-warning > li > a,
+.wx-breadcrumb.text-warning > li > i {
     color: var(--bs-warning);
 }
 
-.wx-breadcrumb.text-danger > li > a {
+.wx-breadcrumb.text-danger > li > a,
+.wx-breadcrumb.text-danger > li > i {
     color: var(--bs-danger);
 }
 
-.wx-breadcrumb.text-light > li > a {
+.wx-breadcrumb.text-light > li > a,
+.wx-breadcrumb.text-light > li > i {
     color: var(--bs-light);
 }
 
-.wx-breadcrumb.text-dark > li > a {
+.wx-breadcrumb.text-dark > li > a,
+.wx-breadcrumb.text-dark > li > i {
     color: var(--bs-dark);
 }
 
-.wx-breadcrumb.text-white > li > a {
+.wx-breadcrumb.text-white > li > a,
+.wx-breadcrumb.text-white > li > i {
     color: var(--bs-white);
 }
 
-.wx-breadcrumb.text-muted > li > a {
+.wx-breadcrumb.text-muted > li > a,
+.wx-breadcrumb.text-muted > li > i {
     color: var(--bs-secondary);
 }
-
-/*.wx-breadcrumb.wx-esm > li > a {
-    font-size: 0.55em;
-}
-
-.wx-breadcrumb.wx-sm > li > a {
-    font-size: 0.75em;
-}
-
-.wx-breadcrumb.wx-lg > li > a {
-    font-size: 1.5em;
-}
-
-.wx-breadcrumb.wx-elg > li > a {
-    font-size: 2em;
-}*/
 
 .wx-profile {
     display: flex;
