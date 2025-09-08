@@ -12,12 +12,12 @@ The `SmartEditCtrl` is a versatile control for in-line editing of values directl
 
 Configuration is done declaratively via `data-*` attributes on the HTML element.
 
-| Attribute | Description |
-| :--- | :--- |
-| `data-object-id` | The ID of the data object being edited. |
-| `data-object-name` | The name of the data object being edited. |
-| `data-form-action` | The URL to which the form data is sent upon saving. |
-| `data-form-method` | The HTTP method for the request (e.g., `PUT`, `POST`). Defaults to `PUT`. |
+| Attribute          | Description
+|--------------------|--------------------------------------------------------------------------
+| `data-object-id`   | The ID of the data object being edited.
+| `data-object-name` | The name of the data object being edited.
+| `data-form-action` | The URL to which the form data is sent upon saving.
+| `data-form-method` | The HTTP method for the request (e.g., `PUT`, `POST`). Defaults to `PUT`.
 
 ### Functionality
 

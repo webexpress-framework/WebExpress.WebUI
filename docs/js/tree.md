@@ -23,11 +23,11 @@ Initialization is handled entirely through `data-` attributes on the host elemen
 
 **Host Element Attributes:**
 
-| Attribute | Description |
-| :--- | :--- |
-| `data-layout` | Defines the visual layout of the tree. Possible values include `wx-tree-group`, `wx-tree-flush`, `wx-tree-flat`, `wx-tree-horizontal`. |
-| `data-indicator` | If set to `"false"`, the expand/collapse indicators (arrows/dots) are hidden. Default is `true`. |
-| `data-movable` | If set to `"true"`, drag-and-drop functionality for moving nodes is enabled. |
+| Attribute        | Description
+|------------------|-------------------------------------------------------------------------------------------------------------------
+| `data-layout`    | Defines the visual layout of the tree. Possible values include `wx-tree-group`, `wx-tree-flush`, `wx-tree-flat`, `wx-tree-horizontal`.
+| `data-indicator` | If set to `"false"`, the expand/collapse indicators (arrows/dots) are hidden. Default is `true`.
+| `data-movable`   | If set to `"true"`, drag-and-drop functionality for moving nodes is enabled.
 
 **Node Structure and Attributes:**
 

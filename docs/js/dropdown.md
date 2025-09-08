@@ -25,17 +25,17 @@ The component is configured through `data-` attributes on the main container and
 
 The appearance and behavior of the main dropdown button are controlled by the following attributes on the host element:
 
-| Attribute | Description | Example |
-| :--- | :--- | :--- |
-| `data-label` | The text label displayed on the button. | `data-label="Actions"` |
-| `data-icon` | A CSS class for an icon to be displayed on the button. | `data-icon="fas fa-cog"` |
-| `data-image` | The URL of an image to be displayed on the button. | `data-image="/path/to/image.png"` |
-| `data-color` | A color class (e.g., from a CSS framework) for styling the button. | `data-color="btn-primary"` |
-| `data-buttoncss` | Additional CSS classes to be applied to the button. | `data-buttoncss="btn-sm custom-style"` |
-| `data-buttonstyle` | Inline CSS styles for the button. | `data-buttonstyle="margin-right: 10px;"` |
-| `data-menucss` | Additional CSS classes for the dropdown menu container (`<ul>`). | `data-menucss="shadow-lg"` |
-| `active` | Indicates that the button is in an active state. | `<div active></div>` |
-| `disabled` | Disables the button, preventing user interaction. | `<div disabled></div>` |
+| Attribute          | Description                                                        | Example
+|--------------------|--------------------------------------------------------------------|-----------------------------------------
+| `data-label`       | The text label displayed on the button.                            | `data-label="Actions"`
+| `data-icon`        | A CSS class for an icon to be displayed on the button.             | `data-icon="fas fa-cog"`
+| `data-image`       | The URL of an image to be displayed on the button.                 | `data-image="/path/to/image.png"`
+| `data-color`       | A color class (e.g., from a CSS framework) for styling the button. | `data-color="btn-primary"`
+| `data-buttoncss`   | Additional CSS classes to be applied to the button.                | `data-buttoncss="btn-sm custom-style"`
+| `data-buttonstyle` | Inline CSS styles for the button.                                  | `data-buttonstyle="margin-right: 10px;"`
+| `data-menucss`     | Additional CSS classes for the dropdown menu container (`<ul>`).   | `data-menucss="shadow-lg"`
+| `active`           | Indicates that the button is in an active state.                   | `<div active></div>`
+| `disabled`         | Disables the button, preventing user interaction.                  | `<div disabled></div>`
 
 ### Menu Item Types
 

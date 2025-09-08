@@ -37,16 +37,16 @@ To structure the toolbar, various CSS classes are used for the child elements. E
 
 The configuration of individual elements is done via `data-`attributes in the HTML. These attributes allow for fine-grained control over the appearance and functionality.
 
-| Attribute | Description | Example |
-| :--- | :--- | :--- |
-| `data-label` | Defines the visible text for buttons, comboboxes, or text items. | `data-label="Save"` |
-| `data-icon` | Assigns a CSS icon class to a button. | `data-icon="fas fa-save"` |
-| `data-title` | Adds a tooltip to a button, which is displayed on mouseover. | `data-title="Save changes"` |
-| `data-color-css` | Applies a predefined color class to an element. | `data-color-css="btn-primary"` |
-| `data-color-style` | Applies a direct CSS style to an element. | `data-color-style="background-color: #ff0000;"` |
-| `data-align` | Sets the alignment of an element within the toolbar (`left` or `right`). The default is `left`. | `data-align="right"` |
-| `active` | Visually marks a button as active or selected. The attribute requires no value. | `<div class="wx-toolbar-button" active></div>` |
-| `disabled` | Disables an element and prevents interaction. The attribute requires no value. | `<div class="wx-toolbar-button" disabled></div>` |
+| Attribute          | Description                                                                                     | Example
+|--------------------|-------------------------------------------------------------------------------------------------|----------------------
+| `data-label`       | Defines the visible text for buttons, comboboxes, or text items.                                | `data-label="Save"`
+| `data-icon`        | Assigns a CSS icon class to a button.                                                           | `data-icon="fas fa-save"`
+| `data-title`       | Adds a tooltip to a button, which is displayed on mouseover.                                    | `data-title="Save changes"`
+| `data-color-css`   | Applies a predefined color class to an element.                                                 | `data-color-css="btn-primary"`
+| `data-color-style` | Applies a direct CSS style to an element.                                                       | `data-color-style="background-color: #ff0000;"`
+| `data-align`       | Sets the alignment of an element within the toolbar (`left` or `right`). The default is `left`. | `data-align="right"`
+| `active`           | Visually marks a button as active or selected. The attribute requires no value.                 | `<div class="wx-toolbar-button" active></div>`
+| `disabled`         | Disables an element and prevents interaction. The attribute requires no value.                  | `<div class="wx-toolbar-button" disabled></div>`
 
 ## Programmatic Control
 

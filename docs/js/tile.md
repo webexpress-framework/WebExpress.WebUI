@@ -1,24 +1,128 @@
+![WebExpress](https://raw.githubusercontent.com/ReneSchwarzer/WebExpress.Doc/main/assets/banner.png)
+
+# TileCtrl
+
+The `TileCtrl` is a component for managing an interactive tile collection. It facilitates parsing tiles from HTML markup, reordering them via drag-and-drop, toggling their visibility, searching, sorting, and persisting their state (order and visibility). Configuration is done declaratively using `data-` attributes, which promotes simple integration and clean code.
+
+```
+   ┌─────────────────────────────┐
+   │ ┌───────────┐ ┌───────────┐ │
+   │ │ [Tile 1]  │ │ [Tile 2]  │ │
+   │ └───────────┘ └───────────┘ │
+   │ ┌───────────┐ ┌───────────┐ │
+   │ │ [Tile 3]  │ │ [Tile 4]  │ │
+   │ └───────────┘ └───────────┘ │
+   └─────────────────────────────┘
+```
+
+## Declarative Configuration
+
+The initial state and behavior of the tile container are defined via `data-` attributes on the host element. The individual tiles are defined as direct child elements with the class `.wx-tile-card`.
+
+### Container Attributes
+
+| Attribute           | Description                                                         | Example
+|---------------------|---------------------------------------------------------------------|------------------------------------
+| `data-movable`      | Allows reordering of tiles via drag-and-drop.                       | `data-movable="true"`
+| `data-allow-remove` | Allows hiding or removing tiles.                                    | `data-allow-remove="true"`
+| `data-persist-key`  | A unique key to save the order and visibility of tiles in a cookie. | `data-persist-key="dashboard-tiles"`
+
+### Tile Attributes
+
+Each tile is defined by an element with the class `.wx-tile-card`.
+
+| Attribute | Description | Example |
+| :--- | :--- | :--- |
+| `data-id` | A unique ID for the tile. | `data-id="tile-profile"` |
+| `data-label` | The title of the tile. | `data-label="User Profile"` |
+| `data-icon` | A CSS class for an icon. | `data-icon="fas fa-user"` |
+| `data-image` | The URL of an image for the tile header. | `data-image="/path/to/icon.png"` |
+| `data-color-css` | A CSS class for color styling. | `data-color-css="bg-primary"` |
+| `data-visible` | Determines if the tile is initially visible. | `data-visible="false"` |
+| `innerHTML` | The HTML content of the tile body. | `<div>Additional details...</div>` |
+
+## Programmatic Control
+
+Once initialized, the tile collection can be programmatically controlled via its controller instance. Methods like `insertTile`, `searchTiles`, or `orderTiles` automatically trigger a redraw of the view.
+
+### Accessing an Automatically Created Instance
+
+For tile containers defined declaratively in HTML, the associated instance is retrieved via the `getInstanceByElement(element)` method of the central `webexpress.webui.Controller`.
+
+```javascript
+// find the host element in the DOM
+const tileContainer = document.getElementById('myTileContainer');
+
+// retrieve the controller instance associated with the element
+const tileCtrl = webexpress.webui.Controller.getInstanceByElement(tileContainer);
+
+// programmatically search for tiles
+if (tileCtrl) {
+    tileCtrl.searchTiles('Profile');
+}
+```
+
+### Manual Instantiation
+
+A tile collection can also be created entirely programmatically and attached to a host element.
+
+```javascript
+// find the container element for the dynamic tiles
+const container = document.getElementById('tile-container');
+
+// create a new instance of TileCtrl manually
+const dynamicTileCtrl = new webexpress.webui.TileCtrl(container);
+
+// add a new tile
+dynamicTileCtrl.insertTile({
+    id: 'new-tile',
+    label: 'Newly Added Tile',
+    html: '<p>This tile was added via code.</p>',
+    icon: 'fas fa-plus'
+});
+```
+
+## Events
+
+The component dispatches standardized events to inform the application about interactions.
+
+- **`webexpress.webui.Event.MOVE_EVENT`**: Fired after a tile has been moved.
+- **`webexpress.webui.Event.CHANGE_VISIBILITY_EVENT`**: Fired when a tile is shown or hidden.
+- **`webexpress.webui.Event.TILE_SEARCH_EVENT`**: Fired after a search, containing the search term and the found tiles.
+- **`webexpress.webui.Event.TILE_SORT_EVENT`**: Fired after a sort, containing the sort property and direction.
+
+## Use Case Examples
+
+The following example shows the declarative configuration of a tile container.
+
+```html
+<!-- Container that enables drag-and-drop and persistence -->
+<div id="dashboard" class="wx-webui-tile" data-movable="true" data-persist-key="dashboard-state" data-allow-remove="true">
+
+    <!-- A tile with an icon and title -->
+    <div class="wx-tile-card" data-id="profile" data-icon="fas fa-user" data-label="Profile">
+        View your user profile.
+    </div>
+
+    <!-- A tile that is initially hidden -->
+    <div class="wx-tile-card" data-id="settings" data-icon="fas fa-cog" data-label="Settings" data-visible="false">
+        Adjust application settings.
+    </div>
+
+    <!-- Another tile -->
+    <div class="wx-tile-card" data-id="mail" data-icon="fas fa-envelope" data-label="Messages">
+        Check your inbox.
+    </div>
+</div>
+```
+
+## Source Code
+
+```javascript
 /**
  * TileCtrl
  * Controller for interactive tile board: parsing markup, drag & drop reordering,
  * visibility toggling, searching, sorting and persistence (order + visibility).
- *
- * Public API (unchanged):
- *  - insertTile(tileData, index = null)
- *  - deleteTile(tileId)
- *  - setTileVisibility(idOrIndex, visible)
- *  - hideTile(idOrIndex)
- *  - showTile(idOrIndex)
- *  - toggleTile(idOrIndex)
- *  - getVisibleTiles()
- *  - searchTiles(term)
- *  - orderTiles(property = "label", direction = "asc")
- *  - render()
- * Events:
- *  - MOVE_EVENT
- *  - CHANGE_VISIBILITY_EVENT
- *  - TILE_SEARCH_EVENT
- *  - TILE_SORT_EVENT
  */
 webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
@@ -168,7 +272,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Hides tile.
+     * Hides a tile.
      * @param {string|number} idOrIndex Id or index.
      */
     hideTile(idOrIndex) {
@@ -176,7 +280,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Shows tile.
+     * Shows a tile.
      * @param {string|number} idOrIndex Id or index.
      */
     showTile(idOrIndex) {
@@ -269,7 +373,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
                 image: div.dataset.image || null,
                 colorCss: div.dataset.colorCss || div.dataset.color || null,
                 colorStyle: div.dataset.colorStyle || null,
-                visible: div.dataset.visible === "false" ? false : true,
+                visible: div.dataset.visible !== "false",
                 _lc_id: null,
                 _lc_label: null
             });
@@ -363,10 +467,10 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         if (typeof idOrIndex === "number") {
             return this._tiles[idOrIndex] || null;
         }
-        if (!idOrIndex) {
-            return null;
+        if (typeof idOrIndex === "string" && idOrIndex) {
+            return this._tiles.find(t => t.id === idOrIndex) || null;
         }
-        return this._tiles.find(t => t.id === idOrIndex) || null;
+        return null;
     }
 
     /**
@@ -557,8 +661,8 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
      * Clears generic drag target classes.
      */
     _clearDropTargets() {
-        this._element.querySelectorAll(".wx-drop-target, .wx-dragging, .wx-drop-target").forEach(el => {
-            el.classList.remove("wx-drop-target", "wx-dragging", "wx-drop-target");
+        this._element.querySelectorAll(".wx-drop-target, .wx-dragging").forEach(el => {
+            el.classList.remove("wx-drop-target", "wx-dragging");
         });
     }
 
@@ -700,25 +804,25 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
             if (!obj || obj.v !== 1) {
                 return;
             }
-            if (Array.isArray(obj.order) && obj.order.length) {
+            if (Array.isArray(obj.order) && obj.order.length > 0) {
                 const map = new Map(this._tiles.map(t => [t.id, t]));
                 const reordered = [];
                 for (const id of obj.order) {
                     if (map.has(id)) {
                         reordered.push(map.get(id));
+                        map.delete(id);
                     }
                 }
-                for (const t of this._tiles) {
-                    if (!reordered.includes(t)) {
-                        reordered.push(t);
-                    }
-                }
+                // append remaining tiles that were not in the persisted order
+                reordered.push(...map.values());
                 this._tiles = reordered;
             }
             if (Array.isArray(obj.visible)) {
                 const vis = new Set(obj.visible);
                 for (const t of this._tiles) {
-                    t.visible = t.id ? vis.has(t.id) : t.visible;
+                    if (t.id) {
+                        t.visible = vis.has(t.id);
+                    }
                 }
             }
             this._markSearchDirty();
@@ -748,3 +852,4 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
 // register controller class
 webexpress.webui.Controller.registerClass("wx-webui-tile", webexpress.webui.TileCtrl);
+```

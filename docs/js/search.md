@@ -27,13 +27,13 @@ The positioning of the dropdown menu is managed by the `PopperCtrl` base class t
 
 The entire configuration of the search field is done declaratively via HTML attributes and child elements of the host element.
 
-| Attribute | Description |
-| :--- | :--- |
-| `name` | The name for the `<input>` element, relevant for form submissions. |
-| `placeholder` | The placeholder text displayed in the empty search field. |
-| `data-icon` | The CSS class for the icon displayed at the beginning of the search field (e.g., `fas fa-search`). |
-| `data-favorited` | If set to `"true"`, the favorites feature (star icon) is enabled for the suggestions. |
-| `data-value` | The initial value of the search field. |
+| Attribute        | Description
+|------------------|---------------------------------------------------------------------------------------------------
+| `name`           | The name for the `<input>` element, relevant for form submissions.
+| `placeholder`    | The placeholder text displayed in the empty search field.
+| `data-icon`      | The CSS class for the icon displayed at the beginning of the search field (e.g., `fas fa-search`).
+| `data-favorited` | If set to `"true"`, the favorites feature (star icon) is enabled for the suggestions.
+| `data-value`     | The initial value of the search field.
 
 Search suggestions and an optional footer are defined as child elements:
 

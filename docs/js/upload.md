@@ -28,14 +28,14 @@ Host Element Attributes:
 
 **Host Element Attributes:**
 
-| Attribute | Description
-| :--- | :--- 
+| Attribute         | Description
+|-------------------|------------------------------------------------------------------------------------------------------
 | `data-upload-url` | The server endpoint to which files will be uploaded.
-| `data-multiple` | If set to `false`, only a single file can be selected. Default is `true`.
-| `data-accept` | A comma-separated list of accepted MIME types (e.g., `image/*,application/pdf`).
+| `data-multiple`   | If set to `false`, only a single file can be selected. Default is `true`.
+| `data-accept`     | A comma-separated list of accepted MIME types (e.g., `image/*,application/pdf`).
 | `data-autoupload` | If `true`, files are uploaded immediately after selection. If `false`, manual triggering is required.
-| `data-label` | Custom label text displayed inside the dropzone.
-| `data-progress` | If `true`, a visual progress bar is shown during upload.
+| `data-label`      | Custom label text displayed inside the dropzone.
+| `data-progress`   | If `true`, a visual progress bar is shown during upload.
 
 ### Architecture and Functionality
 

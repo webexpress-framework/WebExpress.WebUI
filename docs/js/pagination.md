@@ -18,10 +18,10 @@ The component is designed to manage its state (current page and total page count
 
 The initialization of the control is done via `data-` attributes directly on the host element. This allows for simple configuration in the HTML markup.
 
-| Attribute | Description |
-| :--- | :--- |
-| `data-page` | The initially active page. The count starts at 0. If not specified, 0 is used as the default. |
-| `data-total` | The total number of available pages. If not specified, 10 is used as the default. |
+| Attribute    | Description
+|--------------|----------------------------------------------------------------------------------------------
+| `data-page`  | The initially active page. The count starts at 0. If not specified, 0 is used as the default.
+| `data-total` | The total number of available pages. If not specified, 10 is used as the default.
 
 ## Functionality
 

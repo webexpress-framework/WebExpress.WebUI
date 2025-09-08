@@ -35,17 +35,17 @@ The component is highly configurable and supports both horizontal and vertical o
 
 The initialization and behavior of the `SplitCtrl` are controlled entirely via `data-` attributes on the host element. This allows for simple and clean integration directly within the HTML markup.
 
-| Attribute | Description |
-| :--- | :--- |
-| `data-orientation` | Defines the orientation. Possible values are `"horizontal"` (side-by-side) or `"vertical"` (one above the other). Default is `"horizontal"`. |
-| `data-order` | Determines the order of the panes. Possible values are `"side-main"` or `"main-side"`. Default is `"side-main"`. |
-| `data-size` | Sets the initial size of the side pane. Supports units like `px`, `em`, `rem`, and `%`. |
-| `data-unit` | The default unit for `data-size` if no unit is specified there. Possible values: `px`, `em`, `rem`, `%`. Default is `px`. |
-| `data-min-side` | The minimum size of the side pane in pixels, which cannot be undercut when dragging. |
-| `data-max-side` | The maximum size of the side pane in pixels, which cannot be exceeded when dragging. |
-| `data-splitter-class` | One or more CSS classes that are added to the splitter element. |
-| `data-splitter-style` | Inline CSS styles that are applied to the splitter element. |
-| `data-splitter-size` | The width (for horizontal orientation) or height (for vertical orientation) of the splitter in pixels. |
+| Attribute             | Description
+|-----------------------|-------------------------------------------------------------------------------------------------------------------------
+| `data-orientation`    | Defines the orientation. Possible values are `"horizontal"` (side-by-side) or `"vertical"` (one above the other). Default is `"horizontal"`.
+| `data-order`          | Determines the order of the panes. Possible values are `"side-main"` or `"main-side"`. Default is `"side-main"`.
+| `data-size`           | Sets the initial size of the side pane. Supports units like `px`, `em`, `rem`, and `%`.
+| `data-unit`           | The default unit for `data-size` if no unit is specified there. Possible values: `px`, `em`, `rem`, `%`. Default is `px`.
+| `data-min-side`       | The minimum size of the side pane in pixels, which cannot be undercut when dragging.
+| `data-max-side`       | The maximum size of the side pane in pixels, which cannot be exceeded when dragging.
+| `data-splitter-class` | One or more CSS classes that are added to the splitter element.
+| `data-splitter-style` | Inline CSS styles that are applied to the splitter element.
+| `data-splitter-size`  | The width (for horizontal orientation) or height (for vertical orientation) of the splitter in pixels.
 
 ## Functionality
 

@@ -8,10 +8,10 @@ The `EditorCtrl` component provides a "What You See Is What You Get" (WYSIWYG) e
 
 The editor is initialized directly in the HTML. The initial content is taken from the `innerHTML` of the host element, and the editor can be bound to a form using the `name` attribute.
 
-| Attribute | Description | Example |
-| :--- | :--- | :--- |
-| `name` | Defines the name for a hidden input field that submits the editor's content with a form submission. | `name="content"` |
-| Text Content | The initial HTML content of the editor. | `<div class="wx-webui-editor">Initial <b>text</b>.</div>` |
+| Attribute    | Description                                                                                         | Example
+|--------------|-----------------------------------------------------------------------------------------------------|-----------------
+| `name`       | Defines the name for a hidden input field that submits the editor's content with a form submission. | `name="content"`
+| Text Content | The initial HTML content of the editor.                                                             | `<div class="wx-webui-editor">Initial <b>text</b>.</div>`
 
 ## Programmatic Control
 

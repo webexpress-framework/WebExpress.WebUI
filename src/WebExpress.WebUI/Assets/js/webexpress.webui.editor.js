@@ -1,5 +1,5 @@
 /**
- * A WYSIWYG editor.
+ * A WYSIWYG editor control.
  */
 webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     _formFieldName = null;
@@ -7,6 +7,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     _tableToolbar = null;
     _editorElement = null;
     _savedRange = null;
+    _tableToolbarShownOnce = false;
     _colors = [
         // basic colors
         "#000000", "#FF0000", "#008000", "#0000FF", "#FFFF00",
@@ -21,7 +22,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         "#2F4F4F", "#696969", "#708090", "#778899", "#556B2F",
         "#483D8B", "#8B0000", "#9400D3", "#FF4500", "#DC143C"
     ];
-    
+
     /**
      * Constructor to initialize the editor.
      * @param {HTMLElement} element - The DOM element associated with the editor instance.
@@ -29,18 +30,14 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     constructor(element) {
         super(element);
         const content = element.innerHTML;
-        // editor options, e.g. form name
         this._formFieldName = element.getAttribute('name') || null;
-        // clean up the dom
         element.removeAttribute('name');
         element.innerHTML = '';
         element.classList.add('wx-editor');
         this._createToolbar(element);
         this._createEditorArea(element, content);
         this._createStatusBar(element);
-        // enable tab key navigation inside tables
         this._enableTableTabNavigation();
-        // if a form field name is set, create a hidden input in the parent form
         if (this._formFieldName) {
             this._ensureFormInput();
         }
@@ -51,13 +48,18 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                 if (sel && sel.rangeCount > 0) {
                     this._savedRange = sel.getRangeAt(0).cloneRange();
                 }
-            }, true); 
+            }, true);
         }
+        this._editorElement.addEventListener('input', () => {
+            if (this._formInput) {
+                this._formInput.value = this._editorElement.innerHTML;
+            }
+        });
     }
-    
+
     /**
      * Creates the toolbar with all sub toolbars.
-     * @param {HTMLElement} element - container element.
+     * @param {HTMLElement} element - The container element.
      */
     _createToolbar(element) {
         const toolbar = document.createElement("div");
@@ -70,8 +72,8 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Creates the format toolbar section.
-     * @param {HTMLElement} element - container element.
-     * @returns {HTMLElement} format toolbar element.
+     * @param {HTMLElement} element - The container element.
+     * @returns {HTMLElement} The format toolbar element.
      */
     _createFormatToolbar(element) {
         const toolbar = document.createElement("div");
@@ -88,13 +90,17 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         toolbar.appendChild(this._createSeparator());
         toolbar.appendChild(this._createAlignButtons());
         toolbar.appendChild(this._createSeparator());
+        // link + image buttons
+        toolbar.appendChild(this._createLinkButton());
+        toolbar.appendChild(this._createImageButton());
+        toolbar.appendChild(this._createSeparator());
         toolbar.appendChild(this._createTableInsertButton());
         return toolbar;
     }
-    
+
     /**
      * Creates the floating table toolbar.
-     * @returns {HTMLElement} table toolbar element.
+     * @returns {HTMLElement} The table toolbar element.
      */
     _createTableToolbar() {
         const tableToolbar = document.createElement("div");
@@ -118,8 +124,8 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Creates the block format dropdown.
-     * @returns {HTMLElement} dropdown container.
+     * Creates the block format dropdown (e.g., Paragraph, Heading 1).
+     * @returns {HTMLElement} The dropdown container element.
      */
     _createFormatDropdown() {
         const container = document.createElement("div");
@@ -148,7 +154,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             optionButton.dataset.command = option.command;
             optionButton.addEventListener("click", () => {
                 document.execCommand("formatBlock", false, option.command);
-                buttonText.textContent = option.label; 
+                buttonText.textContent = option.label;
             });
             item.appendChild(optionButton);
             menu.appendChild(item);
@@ -157,10 +163,14 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         container.appendChild(menu);
         const updateDropdownText = () => {
             const selection = window.getSelection();
-            if (!selection || !selection.rangeCount) return;
+            if (!selection || !selection.rangeCount) {
+                return;
+            }
             const range = selection.getRangeAt(0);
             let node = range.startContainer;
-            if (node && node.nodeType !== Node.ELEMENT_NODE) node = node.parentElement;
+            if (node && node.nodeType !== Node.ELEMENT_NODE) {
+                node = node.parentElement;
+            }
             if (node && this._editorElement && this._editorElement.contains(node)) {
                 const currentFormat = document.queryCommandValue("formatBlock") || "p";
                 const foundOption = formatOptions.find(opt => opt.command === currentFormat);
@@ -173,7 +183,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Creates basic formatting buttons (bold, italic, underline).
-     * @returns {DocumentFragment} fragment with buttons.
+     * @returns {DocumentFragment} A fragment containing the buttons.
      */
     _createFormattingButtons() {
         const fragment = document.createDocumentFragment();
@@ -183,13 +193,15 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             { command: "underline", icon: "fas fa-underline", label: "Underline" }
         ]);
         document.addEventListener("selectionchange", () => this._updateButtonStates());
-        buttons.forEach(button => fragment.appendChild(button));
+        buttons.forEach(button => {
+            fragment.appendChild(button);
+        });
         return fragment;
     }
 
     /**
-     * Creates style dropdown (strikethrough, superscript, subscript).
-     * @returns {HTMLElement} dropdown element.
+     * Creates a style dropdown for strikethrough, superscript, and subscript.
+     * @returns {HTMLElement} The dropdown element.
      */
     _createStyleDropdown() {
         const container = document.createElement("div");
@@ -223,24 +235,28 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Creates the text color dropdown.
-     * @returns {HTMLElement} dropdown group.
+     * Creates the text color dropdown with a color picker.
+     * @returns {HTMLElement} The dropdown group element.
      */
     _createColorDropdown() {
         const container = document.createElement("div");
         container.className = "wx-editor-btn-group";
         const button = document.createElement("button");
         button.className = "wx-editor-btn dropdown-toggle";
-        button.type = "button"; 
+        button.type = "button";
         button.setAttribute("data-bs-toggle", "dropdown");
         const icon = document.createElement("i");
         icon.className = "fas fa-palette";
         const updateIconColor = () => {
             const selection = window.getSelection();
-            if (!selection || !selection.rangeCount) return;
+            if (!selection || !selection.rangeCount) {
+                return;
+            }
             const range = selection.getRangeAt(0);
             let node = range.startContainer;
-            if (node && node.nodeType !== Node.ELEMENT_NODE) node = node.parentElement;
+            if (node && node.nodeType !== Node.ELEMENT_NODE) {
+                node = node.parentElement;
+            }
             if (node && this._editorElement && this._editorElement.contains(node)) {
                 const color = document.queryCommandValue("foreColor") || "#000000";
                 icon.style.color = color;
@@ -256,7 +272,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             const item = document.createElement("li");
             const colorButton = document.createElement("button");
             colorButton.className = "dropdown-item p-2";
-            colorButton.type = "button"; 
+            colorButton.type = "button";
             colorButton.style.backgroundColor = color;
             colorButton.style.width = "24px";
             colorButton.style.height = "24px";
@@ -280,7 +296,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Creates list buttons (unordered, ordered).
-     * @returns {DocumentFragment} fragment with buttons.
+     * @returns {DocumentFragment} A fragment containing the buttons.
      */
     _createListButtons() {
         const fragment = document.createDocumentFragment();
@@ -289,13 +305,15 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             { command: "insertOrderedList", icon: "fas fa-list-ol", label: "Numbered List" }
         ]);
         document.addEventListener("selectionchange", () => this._updateButtonStates());
-        buttons.forEach(button => fragment.appendChild(button));
+        buttons.forEach(button => {
+            fragment.appendChild(button);
+        });
         return fragment;
     }
 
     /**
-     * Creates indent / outdent buttons.
-     * @returns {DocumentFragment} fragment with buttons.
+     * Creates indent and outdent buttons.
+     * @returns {DocumentFragment} A fragment containing the buttons.
      */
     _createIndentButtons() {
         const fragment = document.createDocumentFragment();
@@ -304,13 +322,15 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             { command: "indent", icon: "fas fa-indent", label: "Increase Indent" }
         ]);
         document.addEventListener("selectionchange", () => this._updateButtonStates());
-        buttons.forEach(button => fragment.appendChild(button));
+        buttons.forEach(button => {
+            fragment.appendChild(button);
+        });
         return fragment;
     }
 
     /**
-     * Creates align buttons (left, center, right, justify).
-     * @returns {DocumentFragment} fragment with buttons.
+     * Creates alignment buttons (left, center, right, justify).
+     * @returns {DocumentFragment} A fragment containing the buttons.
      */
     _createAlignButtons() {
         const fragment = document.createDocumentFragment();
@@ -321,20 +341,111 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             { command: "justifyFull", icon: "fas fa-align-justify", label: "Justify Text" }
         ]);
         document.addEventListener("selectionchange", () => this._updateButtonStates());
-        buttons.forEach(button => fragment.appendChild(button));
+        buttons.forEach(button => {
+            fragment.appendChild(button);
+        });
         return fragment;
     }
 
     /**
-     * Creates the table size chooser and insertion logic.
-     * @returns {HTMLElement} button group container.
+     * Creates a button to insert a hyperlink.
+     * @returns {HTMLElement} The button element.
+     */
+    _createLinkButton() {
+        const button = document.createElement("button");
+        button.className = "wx-editor-btn";
+        button.type = "button";
+        button.title = "Insert Link";
+        button.innerHTML = '<i class="fas fa-link"></i>';
+        button.addEventListener("click", () => {
+            this._restoreSavedRange();
+            const url = window.prompt("URL:");
+            if (!url) {
+                return;
+            }
+            const safeUrl = this._sanitizeUrl(url);
+            if (!safeUrl) {
+                return;
+            }
+            const sel = window.getSelection();
+            let text = "";
+            if (sel && sel.rangeCount && !sel.isCollapsed) {
+                text = sel.toString();
+            }
+            if (!text) {
+                text = safeUrl.replace(/^https?:\/\//i, "");
+            }
+            this._insertHtmlAtCursor(`<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${this._escapeHtml(text)}</a>`);
+        });
+        return button;
+    }
+
+    /**
+     * Creates a button to insert an image.
+     * @returns {HTMLElement} The button element.
+     */
+    _createImageButton() {
+        const button = document.createElement("button");
+        button.className = "wx-editor-btn";
+        button.type = "button";
+        button.title = "Insert Image";
+        button.innerHTML = '<i class="fas fa-image"></i>';
+        button.addEventListener("click", () => {
+            this._restoreSavedRange();
+            const url = window.prompt("Image URL:");
+            if (!url) {
+                return;
+            }
+            const safeUrl = this._sanitizeUrl(url);
+            if (!safeUrl) {
+                return;
+            }
+            const alt = window.prompt("Alt text (optional):") || "";
+            this._insertHtmlAtCursor(`<img src="${safeUrl}" alt="${this._escapeHtml(alt)}">`);
+        });
+        return button;
+    }
+
+    /**
+     * Sanitizes a URL to reduce risk of XSS via javascript: schemes.
+     * @param {string} url - raw url
+     * @returns {string|null} sanitized url or null if invalid
+     */
+    _sanitizeUrl(url) {
+        const trimmed = String(url).trim();
+        if (trimmed === "") {
+            return null;
+        }
+        if (/^javascript:/i.test(trimmed)) {
+            return null;
+        }
+        return trimmed;
+    }
+
+    /**
+     * Escapes HTML special characters in text nodes.
+     * @param {string} str - raw string
+     * @returns {string} escaped string
+     */
+    _escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    /**
+     * Creates the table insertion button with a size selection grid.
+     * @returns {HTMLElement} The button group container.
      */
     _createTableInsertButton() {
         const container = document.createElement("div");
         container.className = "wx-editor-btn-group";
         const button = document.createElement("button");
         button.className = "wx-editor-btn dropdown-toggle";
-        button.type = "button"; 
+        button.type = "button";
         button.setAttribute("data-bs-toggle", "dropdown");
         button.innerHTML = '<i class="fas fa-table"></i>';
         const menu = document.createElement("div");
@@ -352,6 +463,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         let matrix = [];
         let selectedRows = 1;
         let selectedCols = 1;
+
         const highlightCells = (rows, cols, totalRows, totalCols) => {
             totalRows = totalRows || maxRows;
             totalCols = totalCols || maxCols;
@@ -367,9 +479,11 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                 }
             }
         };
+
         const updateSizeDisplay = (rows, cols) => {
             sizeDisplay.textContent = `${rows} × ${cols}`;
         };
+
         const buildGrid = (rows, cols) => {
             grid.innerHTML = "";
             matrix = [];
@@ -389,8 +503,12 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                         highlightCells(selectedRows, selectedCols, rows, cols);
                         updateSizeDisplay(selectedRows, selectedCols);
                         if ((selectedRows === maxRows || selectedCols === maxCols) && (maxRows < ABS_MAX || maxCols < ABS_MAX)) {
-                            if (maxRows < ABS_MAX && selectedRows === maxRows) maxRows = Math.min(maxRows + 1, ABS_MAX);
-                            if (maxCols < ABS_MAX && selectedCols === maxCols) maxCols = Math.min(maxCols + 1, ABS_MAX);
+                            if (maxRows < ABS_MAX && selectedRows === maxRows) {
+                                maxRows = Math.min(maxRows + 1, ABS_MAX);
+                            }
+                            if (maxCols < ABS_MAX && selectedCols === maxCols) {
+                                maxCols = Math.min(maxCols + 1, ABS_MAX);
+                            }
                             buildGrid(maxRows, maxCols);
                             highlightCells(selectedRows, selectedCols, maxRows, maxCols);
                             updateSizeDisplay(selectedRows, selectedCols);
@@ -398,7 +516,9 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                     });
                     cell.addEventListener("click", e => {
                         this._insertTable(selectedRows, selectedCols);
-                        if (menu.classList.contains("show")) menu.classList.remove("show");
+                        if (menu.classList.contains("show")) {
+                            menu.classList.remove("show");
+                        }
                         resetGrid();
                         e.preventDefault();
                         e.stopPropagation();
@@ -408,6 +528,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             }
             highlightCells(selectedRows, selectedCols, rows, cols);
         };
+
         const resetGrid = () => {
             maxRows = INITIAL_ROWS;
             maxCols = INITIAL_COLS;
@@ -416,40 +537,55 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             buildGrid(maxRows, maxCols);
             updateSizeDisplay(1, 1);
         };
+
         resetGrid();
         menu.appendChild(grid);
         menu.appendChild(sizeDisplay);
         container.appendChild(button);
         container.appendChild(menu);
+
         document.addEventListener("click", (event) => {
-            if (!container.contains(event.target)) resetGrid();
+            if (!container.contains(event.target)) {
+                resetGrid();
+            }
         });
+
         button.addEventListener('click', () => {
             setTimeout(() => {
                 resetGrid();
             }, 0);
         });
+
         const detectTableSelection = () => {
             const selection = window.getSelection();
-            if (!selection.rangeCount) return false;
+            if (!selection.rangeCount) {
+                return false;
+            }
             const range = selection.getRangeAt(0);
             let node = range.startContainer;
-            if (node.nodeType === Node.TEXT_NODE) node = node.parentElement;
+            if (node.nodeType === Node.TEXT_NODE) {
+                node = node.parentElement;
+            }
             return this._editorElement.contains(node) && node.closest("table");
         };
+
         document.addEventListener("selectionchange", () => {
             if (detectTableSelection()) {
                 this._tableToolbar.style.display = "block";
+                this._tableToolbarShownOnce = true;
             } else {
-                this._tableToolbar.style.display = "none";
+                if (!this._tableToolbarShownOnce) {
+                    this._tableToolbar.style.display = "none";
+                }
             }
         });
+
         return container;
     }
-    
+
     /**
-     * Creates button: insert row above.
-     * @returns {HTMLButtonElement} button element.
+     * Creates a button to insert a row above the current one.
+     * @returns {HTMLButtonElement} The button element.
      */
     _createInsertRowAboveButton() {
         const action = { command: "insertRowAbove", label: "Add Row Above", icon: "wx-icon add-row-above" };
@@ -457,8 +593,8 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Creates button: insert row below.
-     * @returns {HTMLButtonElement} button element.
+     * Creates a button to insert a row below the current one.
+     * @returns {HTMLButtonElement} The button element.
      */
     _createInsertRowBelowButton() {
         const action = { command: "insertRowBelow", label: "Add Row Below", icon: "wx-icon add-row-below" };
@@ -466,41 +602,41 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Creates button: delete current row.
-     * @returns {HTMLButtonElement} button element.
+     * Creates a button to delete the current row.
+     * @returns {HTMLButtonElement} The button element.
      */
     _createDeleteRowButton() {
-        const action = { command: "deleteRow", label: "Delete Row", icon: "fas fa-minus" };
+        const action = { command: "deleteRow", label: "Delete Row", icon: "wx-icon delete-row" };
         return this._createTableButton(action);
     }
 
     /**
-     * Creates button: insert column left.
-     * @returns {HTMLButtonElement} button element.
+     * Creates a button to insert a column to the left of the current one.
+     * @returns {HTMLButtonElement} The button element.
      */
     _createInsertColumnLeftButton() {
-        const action = { command: "insertColumnLeft", label: "Add Column Left", icon: "fas fa-arrow-left" };
+        const action = { command: "insertColumnLeft", label: "Add Column Left", icon: "wx-icon add-col-left" };
         return this._createTableButton(action);
     }
 
     /**
-     * Creates button: insert column right.
-     * @returns {HTMLButtonElement} button element.
+     * Creates a button to insert a column to the right of the current one.
+     * @returns {HTMLButtonElement} The button element.
      */
     _createInsertColumnRightButton() {
-        const action = { command: "insertColumnRight", label: "Add Column Right", icon: "fas fa-arrow-right" };
+        const action = { command: "insertColumnRight", label: "Add Column Right", icon: "wx-icon add-col-right" };
         return this._createTableButton(action);
     }
-    
+
     /**
-     * Creates button: merge selected cells.
-     * @returns {HTMLButtonElement} button element.
+     * Creates a button to merge selected cells.
+     * @returns {HTMLButtonElement} The button element.
      */
     _createMergeCellsButton() {
         const button = document.createElement("button");
         button.className = "wx-editor-btn";
         button.title = "Merge cells";
-        button.innerHTML = '<i class="fas fa-object-group"></i>';
+        button.innerHTML = '<i class="wx-icon merge-cells"></i>';
         button.addEventListener("click", () => {
             this._mergeCells();
             this._restoreSavedRange();
@@ -509,34 +645,34 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Creates button: split merged cell.
-     * @returns {HTMLButtonElement} button element.
+     * Creates a button to split a merged cell.
+     * @returns {HTMLButtonElement} The button element.
      */
     _createSplitCellButton() {
         const button = document.createElement("button");
         button.className = "wx-editor-btn";
         button.title = "Split cell";
-        button.innerHTML = '<i class="fas fa-object-ungroup"></i>';
+        button.innerHTML = '<i class="wx-icon split-cell"></i>';
         button.addEventListener("click", () => {
             this._splitCell();
             this._restoreSavedRange();
         });
         return button;
     }
-    
+
     /**
-     * Creates dropdown: cell background color.
-     * @returns {HTMLElement} button group.
+     * Creates a dropdown to set the background color of a table cell.
+     * @returns {HTMLElement} The button group element.
      */
     _createCellBackgroundColorButton() {
         const container = document.createElement("div");
         container.className = "wx-editor-btn-group";
         const button = document.createElement("button");
         button.className = "wx-editor-btn dropdown-toggle";
-        button.type = "button"; 
+        button.type = "button";
         button.setAttribute("data-bs-toggle", "dropdown");
         const icon = document.createElement("i");
-        icon.className = "fas fa-fill-drip";
+        icon.className = "wx-icon cell-background";
         button.appendChild(icon);
         const menu = document.createElement("div");
         menu.className = "dropdown-menu";
@@ -546,7 +682,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             const item = document.createElement("li");
             const colorButton = document.createElement("button");
             colorButton.className = "dropdown-item p-2";
-            colorButton.type = "button"; 
+            colorButton.type = "button";
             colorButton.style.backgroundColor = color;
             colorButton.style.width = "24px";
             colorButton.style.height = "24px";
@@ -555,11 +691,17 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             colorButton.style.display = "inline-block";
             colorButton.addEventListener("click", () => {
                 const selection = window.getSelection();
-                if (!selection.rangeCount) return;
+                if (!selection.rangeCount) {
+                    return;
+                }
                 let cell = selection.getRangeAt(0).startContainer;
-                if (cell.nodeType !== Node.ELEMENT_NODE) cell = cell.parentElement;
+                if (cell.nodeType !== Node.ELEMENT_NODE) {
+                    cell = cell.parentElement;
+                }
                 cell = cell.closest('td,th');
-                if (cell) cell.style.backgroundColor = color;
+                if (cell) {
+                    cell.style.backgroundColor = color;
+                }
             });
             item.appendChild(colorButton);
             colorPickerContainer.appendChild(item);
@@ -571,23 +713,23 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Creates button: delete column.
-     * @returns {HTMLButtonElement} button element.
+     * Creates a button to delete the current column.
+     * @returns {HTMLButtonElement} The button element.
      */
     _createDeleteColumnButton() {
-        const action = { command: "deleteColumn", label: "Delete Column", icon: "fas fa-eraser" };
+        const action = { command: "deleteColumn", label: "Delete Column", icon: "wx-icon delete-col" };
         return this._createTableButton(action);
     }
-    
+
     /**
-     * Creates button: delete table.
-     * @returns {HTMLButtonElement} button element.
+     * Creates a button to delete the entire table.
+     * @returns {HTMLButtonElement} The button element.
      */
     _createDeleteTableButton() {
         const button = document.createElement("button");
         button.className = "wx-editor-btn";
         button.title = "Delete Table";
-        button.innerHTML = '<i class="fas fa-trash"></i> Delete Table';
+        button.innerHTML = '<i class="wx-icon delete-table"></i> Delete Table';
         button.addEventListener("click", () => {
             this._deleteWholeTable();
             this._restoreSavedRange();
@@ -596,8 +738,8 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Creates a toolbar separator.
-     * @returns {HTMLElement} separator span.
+     * Creates a visual separator for the toolbar.
+     * @returns {HTMLElement} The separator span element.
      */
     _createSeparator() {
         const separator = document.createElement("span");
@@ -607,14 +749,14 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Creates generic command buttons.
-     * @param {Object[]} buttons - button definitions.
-     * @returns {HTMLElement[]} array of buttons.
+     * @param {Object[]} buttons - An array of button definitions.
+     * @returns {HTMLElement[]} An array of button elements.
      */
     _createButtons(buttons) {
         return buttons.map(btn => {
             const button = document.createElement("button");
             button.className = "wx-editor-btn";
-            button.type = "button"; 
+            button.type = "button";
             button.title = btn.label;
             button.dataset.command = btn.command;
             const icon = document.createElement("i");
@@ -628,16 +770,16 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             return button;
         });
     }
-    
+
     /**
-     * Creates a table command button.
-     * @param {Object} action - action definition.
-     * @returns {HTMLButtonElement} button element.
+     * Creates a button for a table-specific command.
+     * @param {Object} action - The action definition.
+     * @returns {HTMLButtonElement} The button element.
      */
     _createTableButton(action) {
         const button = document.createElement("button");
         button.className = "wx-editor-btn";
-        button.type = "button"; 
+        button.type = "button";
         button.title = action.label;
         button.innerHTML = `<i class="${action.icon}"></i>`;
         button.addEventListener("click", () => {
@@ -646,22 +788,22 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         });
         return button;
     }
-    
+
     /**
-     * Updates active states of formatting buttons.
+     * Updates the active states of formatting buttons based on the current selection.
      */
     _updateButtonStates() {
         const buttons = document.querySelectorAll(".wx-editor-btn");
         buttons.forEach(button => {
-            const isActive = document.queryCommandState(button.dataset.command);
+            const isActive = button.dataset.command ? document.queryCommandState(button.dataset.command) : false;
             button.classList.toggle("active", isActive);
         });
     }
 
     /**
-     * Creates editor area.
-     * @param {HTMLElement} element - parent element.
-     * @param {string} content - initial html.
+     * Creates the main editor area where content is edited.
+     * @param {HTMLElement} element - The parent element.
+     * @param {string} content - The initial HTML content.
      */
     _createEditorArea(element, content) {
         this.editorContainer = document.createElement("div");
@@ -678,27 +820,31 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Creates status bar.
-     * @param {HTMLElement} element - parent element.
+     * Creates the status bar at the bottom of the editor.
+     * @param {HTMLElement} element - The parent element.
      */
     _createStatusBar(element) {
         this.statusBar = document.createElement("div");
         this.statusBar.classList.add("wx-editor-status");
         element.appendChild(this.statusBar);
     }
-    
+
     /**
-     * Inserts a table at caret.
-     * @param {number} rows - row count.
-     * @param {number} cols - column count.
+     * Inserts a table at the current cursor position.
+     * @param {number} rows - The number of rows for the table.
+     * @param {number} cols - The number of columns for the table.
      */
     _insertTable(rows, cols) {
         let tableHTML = "<table class='wx-editor-table' border='1'><thead><tr>";
-        for (let c = 0; c < cols; c++) tableHTML += "<th><br></th>";
+        for (let c = 0; c < cols; c++) {
+            tableHTML += "<th><br></th>";
+        }
         tableHTML += "</tr></thead><tbody>";
         for (let r = 1; r < rows; r++) {
             tableHTML += "<tr>";
-            for (let c = 0; c < cols; c++) tableHTML += "<td><br></td>";
+            for (let c = 0; c < cols; c++) {
+                tableHTML += "<td><br></td>";
+            }
             tableHTML += "</tr>";
         }
         tableHTML += "</tbody></table>";
@@ -706,8 +852,8 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Inserts raw HTML at current caret.
-     * @param {string} html - html to insert.
+     * Inserts raw HTML at the current cursor position.
+     * @param {string} html - The HTML string to insert.
      */
     _insertHtmlAtCursor(html) {
         this._restoreSavedRange();
@@ -727,7 +873,9 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             marker.style.width = "0";
             marker.style.height = "0";
             marker.style.overflow = "hidden";
-            let frag = document.createDocumentFragment(), node, lastNode;
+            let frag = document.createDocumentFragment();
+            let node;
+            let lastNode;
             while ((node = el.firstChild)) {
                 lastNode = frag.appendChild(node);
             }
@@ -746,9 +894,9 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             this._editorElement.innerHTML += html;
         }
     }
-    
+
     /**
-     * Restores previously saved selection range.
+     * Restores the previously saved selection range.
      */
     _restoreSavedRange() {
         if (this._savedRange) {
@@ -760,100 +908,301 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Applies a block style tag to selection.
-     * @param {string} style - tag name.
+     * Applies a block style tag (e.g., 'p', 'h1') to the selection.
+     * @param {string} style - The tag name of the style to apply.
      */
     _applyTextStyle(style) {
         document.execCommand("formatBlock", false, style);
         this._restoreSavedRange();
     }
-    
+
     /**
-     * Executes a command.
-     * @param {string} command - command name.
+     * Executes a document command (e.g., 'bold', 'italic').
+     * @param {string} command - The name of the command to execute.
      */
     _execCommand(command) {
         document.execCommand(command, false, null);
         this._restoreSavedRange();
     }
-    
+
     /**
-     * Modifies table structure relative to selection.
-     * @param {string} action - action identifier.
+     * Returns the table editing context (cell, row, table) for current selection.
+     * @returns {{cell:HTMLTableCellElement,row:HTMLTableRowElement,table:HTMLTableElement}|null}
+     */
+    _getTableContext() {
+        const selection = window.getSelection();
+        if (!selection || !selection.rangeCount) {
+            return null;
+        }
+        let node = selection.getRangeAt(0).startContainer;
+        if (node.nodeType !== Node.ELEMENT_NODE) {
+            node = node.parentElement;
+        }
+        if (!node) {
+            return null;
+        }
+        const cell = node.closest('td,th');
+        if (!cell) {
+            return null;
+        }
+        const row = cell.parentElement;
+        const table = cell.closest('table');
+        if (!row || !table) {
+            return null;
+        }
+        return { cell, row, table };
+    }
+
+    /**
+     * Places the caret inside an element (start).
+     * @param {HTMLElement} el - target element
+     */
+    _placeCaret(el) {
+        if (!el) {
+            return;
+        }
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        range.collapse(true);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+
+    /**
+     * Inserts a new row above the reference row.
+     * @param {HTMLTableRowElement} row - reference row
+     * @returns {HTMLTableRowElement} new row
+     */
+    _insertRowAbove(row) {
+        const table = row.closest('table');
+        if (!table) {
+            return null;
+        }
+        const newRow = row.cloneNode(false);
+        for (let i = 0; i < row.cells.length; i++) {
+            const newCell = row.cells[i].cloneNode(false);
+            newCell.innerHTML = "<br>";
+            newRow.appendChild(newCell);
+        }
+        row.parentElement.insertBefore(newRow, row);
+        return newRow;
+    }
+
+    /**
+     * Inserts a new row below the reference row.
+     * @param {HTMLTableRowElement} row - reference row
+     * @returns {HTMLTableRowElement} new row
+     */
+    _insertRowBelow(row) {
+        const table = row.closest('table');
+        if (!table) {
+            return null;
+        }
+        const newRow = row.cloneNode(false);
+        for (let i = 0; i < row.cells.length; i++) {
+            const newCell = row.cells[i].cloneNode(false);
+            newCell.innerHTML = "<br>";
+            newRow.appendChild(newCell);
+        }
+        if (row.nextSibling) {
+            row.parentElement.insertBefore(newRow, row.nextSibling);
+        } else {
+            row.parentElement.appendChild(newRow);
+        }
+        return newRow;
+    }
+
+    /**
+     * Inserts a new column to the left of the given cell index.
+     * @param {HTMLTableCellElement} cell - reference cell
+     * @returns {number} new cell index
+     */
+    _insertColumnLeft(cell) {
+        const table = cell.closest('table');
+        if (!table) {
+            return -1;
+        }
+        const idx = cell.cellIndex;
+        for (let r = 0; r < table.rows.length; r++) {
+            const row = table.rows[r];
+            const ref = row.cells[idx];
+            const newCell = document.createElement(ref ? ref.tagName.toLowerCase() : 'td');
+            newCell.innerHTML = "<br>";
+            row.insertBefore(newCell, ref);
+        }
+        return idx;
+    }
+
+    /**
+     * Inserts a new column to the right of the given cell index.
+     * @param {HTMLTableCellElement} cell - reference cell
+     * @returns {number} new cell index
+     */
+    _insertColumnRight(cell) {
+        const table = cell.closest('table');
+        if (!table) {
+            return -1;
+        }
+        const idx = cell.cellIndex;
+        for (let r = 0; r < table.rows.length; r++) {
+            const row = table.rows[r];
+            const ref = row.cells[idx];
+            const newCell = document.createElement(ref ? ref.tagName.toLowerCase() : 'td');
+            newCell.innerHTML = "<br>";
+            if (ref && ref.nextSibling) {
+                row.insertBefore(newCell, ref.nextSibling);
+            } else {
+                row.appendChild(newCell);
+            }
+        }
+        return idx + 1;
+    }
+
+    /**
+     * Deletes a row with fallback to remove table if last row.
+     * @param {HTMLTableRowElement} row - row to delete
+     */
+    _deleteRow(row) {
+        const table = row.closest('table');
+        if (!table) {
+            return;
+        }
+        const totalRows = table.rows.length;
+        const nextFocus = row.nextElementSibling || row.previousElementSibling;
+        row.remove();
+        if (totalRows <= 1) {
+            table.remove();
+        } else {
+            if (nextFocus && nextFocus.cells && nextFocus.cells[0]) {
+                this._placeCaret(nextFocus.cells[0]);
+            }
+        }
+    }
+
+    /**
+     * Deletes a column at specified cell index with fallback to remove table.
+     * @param {HTMLTableCellElement} cell - reference cell
+     */
+    _deleteColumn(cell) {
+        const table = cell.closest('table');
+        if (!table) {
+            return;
+        }
+        const idx = cell.cellIndex;
+        let remainingCols = table.rows[0].cells.length;
+        if (remainingCols <= 1) {
+            table.remove();
+            return;
+        }
+        for (let r = 0; r < table.rows.length; r++) {
+            const row = table.rows[r];
+            if (row.cells[idx]) {
+                row.deleteCell(idx);
+            }
+        }
+        const focusRow = table.rows[0];
+        if (focusRow) {
+            const target = focusRow.cells[idx] || focusRow.cells[idx - 1];
+            if (target) {
+                this._placeCaret(target);
+            }
+        }
+    }
+
+    /**
+     * Modifies the table structure according to the given action.
+     * Supported: insertRowAbove, insertRowBelow, insertColumnLeft, insertColumnRight, deleteRow, deleteColumn,
+     * legacy: insertRow (below), insertColumn (right).
+     * @param {string} action - action identifier
      */
     _modifyTable(action) {
-        const selection = window.getSelection();
-        if (!selection.rangeCount) return;
-        let node = selection.getRangeAt(0).startContainer;
-        if (node.nodeType !== Node.ELEMENT_NODE) node = node.parentElement;
-        const cell = node.closest("td, th");
-        if (!cell) return;
-        const row = cell.parentElement;
-        const table = cell.closest("table");
-        if (!table) return;
+        const ctx = this._getTableContext();
+        if (!ctx) {
+            return;
+        }
+        const { cell, row, table } = ctx;
         switch (action) {
-            case "insertRow": {
-                const rowIndex = row.rowIndex;
-                const refRow = table.rows[rowIndex];
-                const newRow = table.insertRow(rowIndex + 1);
-                for (let i = 0; i < refRow.cells.length; i++) {
-                    const newCell = newRow.insertCell(i);
-                    newCell.innerHTML = "&nbsp;";
+            case "insertRowAbove": {
+                const newRow = this._insertRowAbove(row);
+                if (newRow && newRow.cells[0]) {
+                    this._placeCaret(newRow.cells[0]);
                 }
                 break;
             }
+            case "insertRowBelow":
+            case "insertRow": {
+                const newRow = this._insertRowBelow(row);
+                if (newRow && newRow.cells[0]) {
+                    this._placeCaret(newRow.cells[0]);
+                }
+                break;
+            }
+            case "insertColumnLeft": {
+                const newIndex = this._insertColumnLeft(cell);
+                if (row.cells[newIndex]) {
+                    this._placeCaret(row.cells[newIndex]);
+                }
+                break;
+            }
+            case "insertColumnRight":
             case "insertColumn": {
-                const cellIndex = cell.cellIndex;
-                for (let r = 0; r < table.rows.length; r++) {
-                    const currentRow = table.rows[r];
-                    const newCell = currentRow.insertCell(cellIndex + 1);
-                    newCell.innerHTML = "&nbsp;";
+                const newIndex = this._insertColumnRight(cell);
+                if (row.cells[newIndex]) {
+                    this._placeCaret(row.cells[newIndex]);
                 }
                 break;
             }
             case "deleteRow": {
-                if (table.rows.length > 1) {
-                    row.remove();
-                } else {
-                    table.remove();
-                }
+                this._deleteRow(row);
                 break;
             }
             case "deleteColumn": {
-                const cellIndex = cell.cellIndex;
-                for (let r = 0; r < table.rows.length; r++) {
-                    if (table.rows[r].cells.length > 1) {
-                        table.rows[r].deleteCell(cellIndex);
-                    } else {
-                        table.remove();
-                        break;
-                    }
-                }
+                this._deleteColumn(cell);
+                break;
+            }
+            default: {
                 break;
             }
         }
+        if (!table.isConnected && this._tableToolbar) {
+            this._tableToolbar.style.display = "none";
+            this._tableToolbarShownOnce = false;
+        }
     }
-    
+
     /**
-     * Merges horizontally adjacent selected cells in one row.
+     * Merges horizontally adjacent selected cells within the same row.
      */
     _mergeCells() {
         const selection = window.getSelection();
-        if (!selection.rangeCount) return;
+        if (!selection.rangeCount) {
+            return;
+        }
         const range = selection.getRangeAt(0);
         let startCell = range.startContainer;
         let endCell = range.endContainer;
-        while (startCell && startCell.nodeType !== 1) startCell = startCell.parentElement;
-        while (endCell && endCell.nodeType !== 1) endCell = endCell.parentElement;
+        while (startCell && startCell.nodeType !== 1) {
+            startCell = startCell.parentElement;
+        }
+        while (endCell && endCell.nodeType !== 1) {
+            endCell = endCell.parentElement;
+        }
         startCell = startCell.closest('td,th');
         endCell = endCell.closest('td,th');
-        if (!startCell || !endCell) return;
+        if (!startCell || !endCell) {
+            return;
+        }
         const row = startCell.parentElement;
-        if (row !== endCell.parentElement) return;
+        if (row !== endCell.parentElement) {
+            return;
+        }
         const cells = Array.from(row.children);
         const startIdx = cells.indexOf(startCell);
         const endIdx = cells.indexOf(endCell);
-        if (startIdx === -1 || endIdx === -1 || startIdx === endIdx) return;
+        if (startIdx === -1 || endIdx === -1 || startIdx === endIdx) {
+            return;
+        }
         const minIdx = Math.min(startIdx, endIdx);
         const maxIdx = Math.max(startIdx, endIdx);
         let mergedContent = '';
@@ -866,56 +1215,79 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         for (let i = maxIdx; i > minIdx; i--) {
             row.removeChild(cells[i]);
         }
+        this._placeCaret(cells[minIdx]);
     }
 
     /**
-     * Splits a cell with colspan > 1 into individual cells.
+     * Splits a cell with a colspan greater than 1 into individual cells.
      */
     _splitCell() {
         const selection = window.getSelection();
-        if (!selection.rangeCount) return;
+        if (!selection.rangeCount) {
+            return;
+        }
         let cell = selection.getRangeAt(0).startContainer;
-        if (cell.nodeType !== Node.ELEMENT_NODE) cell = cell.parentElement;
+        if (cell.nodeType !== Node.ELEMENT_NODE) {
+            cell = cell.parentElement;
+        }
         cell = cell.closest('td,th');
-        if (!cell) return;
+        if (!cell) {
+            return;
+        }
         let colspan = parseInt(cell.getAttribute('colspan') || 1, 10);
-        if (colspan <= 1) return;
+        if (colspan <= 1) {
+            return;
+        }
         cell.removeAttribute('colspan');
         for (let i = 1; i < colspan; i++) {
             const newCell = cell.cloneNode(false);
             newCell.innerHTML = '<br>';
             cell.parentElement.insertBefore(newCell, cell.nextSibling);
         }
+        this._placeCaret(cell);
     }
-    
+
     /**
-     * Deletes entire table containing caret.
+     * Deletes the entire table containing the current cursor position.
      */
     _deleteWholeTable() {
         const selection = window.getSelection();
-        if (!selection.rangeCount) return;
+        if (!selection.rangeCount) {
+            return;
+        }
         let node = selection.getRangeAt(0).startContainer;
-        if (node.nodeType !== Node.ELEMENT_NODE) node = node.parentElement;
+        if (node.nodeType !== Node.ELEMENT_NODE) {
+            node = node.parentElement;
+        }
         const table = node.closest("table");
         if (table) {
             table.remove();
             if (this._tableToolbar) {
-                this._tableToolbar.style.display = "none";
+                if (!this._editorElement.querySelector("table")) {
+                    this._tableToolbar.style.display = "none";
+                    this._tableToolbarShownOnce = false;
+                }
             }
         }
     }
 
     /**
-     * Enables tab navigation inside tables (tab/shift+tab).
+     * Enables Tab and Shift+Tab navigation within tables.
      */
     _enableTableTabNavigation() {
-        this._editorElement.addEventListener('keydown', function(e) {
+        this._editorElement.addEventListener('keydown', function (e) {
             if (e.key === 'Tab') {
                 const sel = window.getSelection();
-                if (!sel.rangeCount) return;
+                if (!sel.rangeCount) {
+                    return;
+                }
                 let cell = sel.anchorNode;
-                while (cell && cell.nodeType !== 1) cell = cell.parentElement;
-                while (cell && !/^TD|TH$/i.test(cell.nodeName)) cell = cell.parentElement;
+                while (cell && cell.nodeType !== 1) {
+                    cell = cell.parentElement;
+                }
+                while (cell && !/^TD|TH$/i.test(cell.nodeName)) {
+                    cell = cell.parentElement;
+                }
                 if (cell && (cell.nodeName === 'TD' || cell.nodeName === 'TH')) {
                     e.preventDefault();
                     let targetCell;
@@ -947,18 +1319,30 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             }
             function getNextCell(cell) {
                 let next = cell.nextElementSibling;
-                if (next) return next;
+                if (next) {
+                    return next;
+                }
                 let row = cell.parentElement.nextElementSibling;
-                while (row && row.nodeName !== 'TR') row = row.nextElementSibling;
-                if (row && row.children.length > 0) return row.children[0];
+                while (row && row.nodeName !== 'TR') {
+                    row = row.nextElementSibling;
+                }
+                if (row && row.children.length > 0) {
+                    return row.children[0];
+                }
                 return null;
             }
             function getPrevCell(cell) {
                 let prev = cell.previousElementSibling;
-                if (prev) return prev;
+                if (prev) {
+                    return prev;
+                }
                 let row = cell.parentElement.previousElementSibling;
-                while (row && row.nodeName !== 'TR') row = row.previousElementSibling;
-                if (row && row.children.length > 0) return row.children[row.children.length - 1];
+                while (row && row.nodeName !== 'TR') {
+                    row = row.previousElementSibling;
+                }
+                if (row && row.children.length > 0) {
+                    return row.children[row.children.length - 1];
+                }
                 return null;
             }
             function placeCaretInCell(cell) {
@@ -972,9 +1356,9 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             }
         });
     }
-    
+
     /**
-     * Ensures hidden form input exists and syncs content on submit.
+     * Ensures a hidden form input exists and syncs its content on form submission.
      */
     _ensureFormInput() {
         let parent = this._editorElement;
@@ -999,16 +1383,16 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Gets current editor HTML content.
-     * @returns {string} html content.
+     * Gets the current HTML content of the editor.
+     * @returns {string} The HTML content.
      */
     get value() {
         return this._editorElement ? this._editorElement.innerHTML : "";
     }
 
     /**
-     * Sets editor HTML content and dispatches change event if content changed.
-     * @param {string} html - new html content.
+     * Sets the HTML content of the editor and dispatches a change event if the content has changed.
+     * @param {string} html - The new HTML content.
      */
     set value(html) {
         const newHtml = html != null ? String(html) : "";

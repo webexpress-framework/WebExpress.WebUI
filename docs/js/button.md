@@ -14,14 +14,14 @@ The `ButtonCtrl` component represents a foundational UI component that renders a
 
 The initial state and appearance of the button are defined using standard HTML attributes and `data-` attributes on the host element (e.g., `<button>` or `<a>`). The text for the button is taken from the element's inner content.
 
-| Attribute | Description | Example |
-| :--- | :--- | :--- |
-| `data-icon` | Specifies the CSS class for an icon to be displayed on the button. | `data-icon="fas fa-save"` |
-| `data-image` | Provides the URL for an image to be displayed on the button. | `data-image="/path/to/icon.png"` |
-| `data-color` | Applies a color-related CSS class, typically from a framework. | `data-color="btn-primary"` |
-| `data-size` | Applies a size-related CSS class. | `data-size="btn-sm"` |
-| `disabled` | A standard boolean attribute to render the button in a disabled state. | `<button disabled>...</button>` |
-| Text Content | The text label for the button is defined by the inner content of the HTML element. | `<button>Click Me</button>` |
+| Attribute    | Description                                                                        | Example
+|--------------|------------------------------------------------------------------------------------|---------------------------------
+| `data-icon`  | Specifies the CSS class for an icon to be displayed on the button.                 | `data-icon="fas fa-save"`
+| `data-image` | Provides the URL for an image to be displayed on the button.                       | `data-image="/path/to/icon.png"`
+| `data-color` | Applies a color-related CSS class, typically from a framework.                     | `data-color="btn-primary"`
+| `data-size`  | Applies a size-related CSS class.                                                  | `data-size="btn-sm"`
+| `disabled`   | A standard boolean attribute to render the button in a disabled state.             | `<button disabled>...</button>`
+| Text Content | The text label for the button is defined by the inner content of the HTML element. | `<button>Click Me</button>`
 
 Icons, images, and text labels can be used in any combination to achieve the desired appearance.
 

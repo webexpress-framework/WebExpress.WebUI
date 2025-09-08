@@ -18,10 +18,10 @@ The component consists of a header, which displays the name of the language and 
 
 The component's configuration is managed via `data-` attributes directly on the host element.
 
-| Attribute | Description |
-| :--- | :--- |
-| `data-language` | The language for syntax highlighting. Also serves as the label in the header. |
-| `data-line-numbers` | Controls whether line numbers are displayed (`true` or `false`). |
+| Attribute           | Description
+|---------------------|------------------------------------------------------------------------------
+| `data-language`     | The language for syntax highlighting. Also serves as the label in the header.
+| `data-line-numbers` | Controls whether line numbers are displayed (`true` or `false`).
 
 The code to be displayed is written directly as the text content of the host element.
 
