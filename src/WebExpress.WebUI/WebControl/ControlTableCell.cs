@@ -9,9 +9,12 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a table cell in a control, including its attributes and content.
     /// </summary>
-    /// <remarks>This class provides properties to define the cell's identifier, CSS class, inline styles, 
-    /// and the content displayed within the cell. It is typically used to represent and manipulate  individual cells in
-    /// a table-like control.</remarks>
+    /// <remarks>
+    /// This class provides properties to define the cell's identifier, 
+    /// CSS class, inline styles, and the content displayed within the cell. It 
+    /// is typically used to represent and manipulate  individual cells in
+    /// a table-like control.
+    /// </remarks>
     public class ControlTableCell : IControlTableCell
     {
         /// <summary>

@@ -8,6 +8,15 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlPanel : IControl
     {
         /// <summary> 
+        /// Returns the content of the panel. 
+        /// </summary> 
+        /// <remarks> 
+        /// The content property holds a collection of controls that represent 
+        /// the visual and interactive elements within this container. 
+        /// </remarks>
+        IEnumerable<IControl> Content { get; }
+
+        /// <summary> 
         /// Adds one or more controls to the content of the control panel.
         /// </summary> 
         /// <param name="controls">The controls to add to the content.</param> 

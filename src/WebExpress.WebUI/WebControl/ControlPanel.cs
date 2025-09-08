@@ -16,8 +16,8 @@ namespace WebExpress.WebUI.WebControl
         /// Returns the content of the panel. 
         /// </summary> 
         /// <remarks> 
-        /// The content property holds a collection of controls that represent the visual and interactive elements 
-        /// within this container. 
+        /// The content property holds a collection of controls that represent 
+        /// the visual and interactive elements within this container. 
         /// </remarks>
         public IEnumerable<IControl> Content => _content;
 

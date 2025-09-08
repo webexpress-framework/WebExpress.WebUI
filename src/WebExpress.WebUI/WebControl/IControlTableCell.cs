@@ -1,7 +1,4 @@
-﻿using WebExpress.WebCore.WebHtml;
-using WebExpress.WebCore.WebIcon;
-using WebExpress.WebCore.WebPage;
-using WebExpress.WebCore.WebUri;
+﻿using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -26,30 +23,5 @@ namespace WebExpress.WebUI.WebControl
         /// Returns the color scheme used for the cell.
         /// </summary>
         TypeColorTable Color { get; }
-
-        /// <summary>
-        /// Returns the icon associated with this instance.
-        /// </summary>
-        IIcon Icon { get; }
-
-        /// <summary>
-        /// Returns or sets the URI associated with the current resource.
-        /// </summary>
-        IUri Uri { get; }
-
-        /// <summary>
-        /// Returns or sets the target.
-        /// </summary>
-        TypeTarget Target { get; }
-
-        /// <summary>
-        /// Returns or sets the id of a modal dialogue.
-        /// </summary>
-        string Modal { get; }
-
-        /// <summary>
-        /// Returns the content associated with this instance.
-        /// </summary>
-        string Text { get; }
     }
 }
