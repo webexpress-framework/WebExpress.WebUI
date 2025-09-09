@@ -23,6 +23,17 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         "#483D8B", "#8B0000", "#9400D3", "#FF4500", "#DC143C"
     ];
 
+    // bootstrap modal references (created lazily)
+    _linkModalEl = null;
+    _linkModal = null;
+    _linkUrlInput = null;
+    _linkTextInput = null;
+
+    _imageModalEl = null;
+    _imageModal = null;
+    _imageUrlInput = null;
+    _imageAltInput = null;
+
     /**
      * Constructor to initialize the editor.
      * @param {HTMLElement} element - The DOM element associated with the editor instance.
@@ -348,7 +359,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Creates a button to insert a hyperlink.
+     * Creates a button to insert a hyperlink using a Bootstrap modal.
      * @returns {HTMLElement} The button element.
      */
     _createLinkButton() {
@@ -358,30 +369,14 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         button.title = "Insert Link";
         button.innerHTML = '<i class="fas fa-link"></i>';
         button.addEventListener("click", () => {
-            this._restoreSavedRange();
-            const url = window.prompt("URL:");
-            if (!url) {
-                return;
-            }
-            const safeUrl = this._sanitizeUrl(url);
-            if (!safeUrl) {
-                return;
-            }
-            const sel = window.getSelection();
-            let text = "";
-            if (sel && sel.rangeCount && !sel.isCollapsed) {
-                text = sel.toString();
-            }
-            if (!text) {
-                text = safeUrl.replace(/^https?:\/\//i, "");
-            }
-            this._insertHtmlAtCursor(`<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${this._escapeHtml(text)}</a>`);
+            // open the link modal (fallback to prompt if bootstrap is unavailable)
+            this._openLinkModal();
         });
         return button;
     }
 
     /**
-     * Creates a button to insert an image.
+     * Creates a button to insert an image using a Bootstrap modal.
      * @returns {HTMLElement} The button element.
      */
     _createImageButton() {
@@ -391,17 +386,8 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         button.title = "Insert Image";
         button.innerHTML = '<i class="fas fa-image"></i>';
         button.addEventListener("click", () => {
-            this._restoreSavedRange();
-            const url = window.prompt("Image URL:");
-            if (!url) {
-                return;
-            }
-            const safeUrl = this._sanitizeUrl(url);
-            if (!safeUrl) {
-                return;
-            }
-            const alt = window.prompt("Alt text (optional):") || "";
-            this._insertHtmlAtCursor(`<img src="${safeUrl}" alt="${this._escapeHtml(alt)}">`);
+            // open the image modal (fallback to prompt if bootstrap is unavailable)
+            this._openImageModal();
         });
         return button;
     }
@@ -615,7 +601,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      * @returns {HTMLButtonElement} The button element.
      */
     _createInsertColumnLeftButton() {
-        const action = { command: "insertColumnLeft", label: "Add Column Left", icon: "wx-icon add-col-left" };
+        const action = { command: "insertColumnLeft", label: "Add Column Left", icon: "wx-icon add-col-above" };
         return this._createTableButton(action);
     }
 
@@ -624,7 +610,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      * @returns {HTMLButtonElement} The button element.
      */
     _createInsertColumnRightButton() {
-        const action = { command: "insertColumnRight", label: "Add Column Right", icon: "wx-icon add-col-right" };
+        const action = { command: "insertColumnRight", label: "Add Column Right", icon: "wx-icon add-col-below" };
         return this._createTableButton(action);
     }
 
@@ -1380,6 +1366,271 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                 }
             });
         }
+    }
+
+    /**
+     * Opens the link modal (Bootstrap) or falls back to prompt dialogs.
+     */
+    _openLinkModal() {
+        // fallback to prompt if bootstrap is not available
+        const Bootstrap = window.bootstrap;
+        if (!Bootstrap || !Bootstrap.Modal) {
+            this._restoreSavedRange();
+            const url = window.prompt("URL:");
+            if (!url) {
+                return;
+            }
+            const safeUrl = this._sanitizeUrl(url);
+            if (!safeUrl) {
+                return;
+            }
+            const sel = window.getSelection();
+            let text = "";
+            if (sel && sel.rangeCount && !sel.isCollapsed) {
+                text = sel.toString();
+            }
+            if (!text) {
+                text = safeUrl.replace(/^https?:\/\//i, "");
+            }
+            this._insertHtmlAtCursor(`<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${this._escapeHtml(text)}</a>`);
+            return;
+        }
+
+        // ensure modal exists
+        if (!this._linkModalEl) {
+            this._createLinkModal();
+        }
+
+        // prefill from selection
+        let selectedText = "";
+        let selectedUrl = "";
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount && !sel.isCollapsed) {
+            selectedText = sel.toString();
+            let node = sel.getRangeAt(0).startContainer;
+            if (node && node.nodeType !== Node.ELEMENT_NODE) {
+                node = node.parentElement;
+            }
+            if (node) {
+                const anchor = node.closest('a[href]');
+                if (anchor) {
+                    selectedUrl = anchor.getAttribute('href') || "";
+                    if (!selectedText) {
+                        selectedText = anchor.textContent || "";
+                    }
+                }
+            }
+        }
+        this._linkUrlInput.value = selectedUrl;
+        this._linkTextInput.value = selectedText;
+
+        // show modal
+        this._linkModal.show();
+        setTimeout(() => {
+            // focus url input after modal transition
+            this._linkUrlInput.focus();
+            this._linkUrlInput.select();
+        }, 150);
+    }
+
+    /**
+     * Creates the link modal and wires up events.
+     */
+    _createLinkModal() {
+        const id = "wx-editor-link-modal-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+        const modal = document.createElement("div");
+        modal.className = "modal fade";
+        modal.id = id;
+        modal.tabIndex = -1;
+        modal.setAttribute("aria-labelledby", id + "-label");
+        modal.setAttribute("aria-hidden", "true");
+        modal.innerHTML = `
+<div class="modal-dialog">
+  <div class="modal-content">
+    <form>
+      <div class="modal-header">
+        <h5 class="modal-title" id="${id}-label">Insert Link</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">URL</label>
+          <input type="url" class="form-control" placeholder="https://example.com" required>
+          <div class="invalid-feedback">Please provide a valid URL.</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Text</label>
+          <input type="text" class="form-control" placeholder="Link text (optional)">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary">Insert</button>
+      </div>
+    </form>
+  </div>
+</div>`;
+        document.body.appendChild(modal);
+
+        const form = modal.querySelector("form");
+        const inputs = modal.querySelectorAll("input");
+        const urlInput = inputs[0];
+        const textInput = inputs[1];
+
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            // validate url
+            const safeUrl = this._sanitizeUrl(urlInput.value);
+            if (!safeUrl) {
+                // indicate invalid url
+                urlInput.classList.add("is-invalid");
+                return;
+            } else {
+                urlInput.classList.remove("is-invalid");
+            }
+
+            // perform insertion
+            this._restoreSavedRange();
+            const text = (textInput.value || "").trim() || safeUrl.replace(/^https?:\/\//i, "");
+            this._insertHtmlAtCursor(`<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${this._escapeHtml(text)}</a>`);
+
+            // update hidden input if present
+            if (this._formInput) {
+                this._formInput.value = this._editorElement.innerHTML;
+            }
+
+            this._linkModal.hide();
+        });
+
+        // clear invalid state when typing
+        urlInput.addEventListener("input", () => {
+            urlInput.classList.remove("is-invalid");
+        });
+
+        // keep references
+        this._linkModalEl = modal;
+        this._linkModal = new window.bootstrap.Modal(modal, { backdrop: true, keyboard: true });
+        this._linkUrlInput = urlInput;
+        this._linkTextInput = textInput;
+    }
+
+    /**
+     * Opens the image modal (Bootstrap) or falls back to prompt dialogs.
+     */
+    _openImageModal() {
+        // fallback to prompt if bootstrap is not available
+        const Bootstrap = window.bootstrap;
+        if (!Bootstrap || !Bootstrap.Modal) {
+            this._restoreSavedRange();
+            const url = window.prompt("Image URL:");
+            if (!url) {
+                return;
+            }
+            const safeUrl = this._sanitizeUrl(url);
+            if (!safeUrl) {
+                return;
+            }
+            const alt = window.prompt("Alt text (optional):") || "";
+            this._insertHtmlAtCursor(`<img src="${safeUrl}" alt="${this._escapeHtml(alt)}">`);
+            return;
+        }
+
+        // ensure modal exists
+        if (!this._imageModalEl) {
+            this._createImageModal();
+        }
+
+        // prefill blank
+        this._imageUrlInput.value = "";
+        this._imageAltInput.value = "";
+
+        // show modal
+        this._imageModal.show();
+        setTimeout(() => {
+            // focus url input after modal transition
+            this._imageUrlInput.focus();
+        }, 150);
+    }
+
+    /**
+     * Creates the image modal and wires up events.
+     */
+    _createImageModal() {
+        const id = "wx-editor-image-modal-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+        const modal = document.createElement("div");
+        modal.className = "modal fade";
+        modal.id = id;
+        modal.tabIndex = -1;
+        modal.setAttribute("aria-labelledby", id + "-label");
+        modal.setAttribute("aria-hidden", "true");
+        modal.innerHTML = `
+<div class="modal-dialog">
+  <div class="modal-content">
+    <form>
+      <div class="modal-header">
+        <h5 class="modal-title" id="${id}-label">Insert Image</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Image URL</label>
+          <input type="url" class="form-control" placeholder="https://example.com/image.png" required>
+          <div class="invalid-feedback">Please provide a valid image URL.</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Alt text</label>
+          <input type="text" class="form-control" placeholder="Alternative text (optional)">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary">Insert</button>
+      </div>
+    </form>
+  </div>
+</div>`;
+        document.body.appendChild(modal);
+
+        const form = modal.querySelector("form");
+        const inputs = modal.querySelectorAll("input");
+        const urlInput = inputs[0];
+        const altInput = inputs[1];
+
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            // validate url
+            const safeUrl = this._sanitizeUrl(urlInput.value);
+            if (!safeUrl) {
+                // indicate invalid url
+                urlInput.classList.add("is-invalid");
+                return;
+            } else {
+                urlInput.classList.remove("is-invalid");
+            }
+
+            // perform insertion
+            this._restoreSavedRange();
+            const alt = (altInput.value || "").trim();
+            this._insertHtmlAtCursor(`<img src="${safeUrl}" alt="${this._escapeHtml(alt)}">`);
+
+            // update hidden input if present
+            if (this._formInput) {
+                this._formInput.value = this._editorElement.innerHTML;
+            }
+
+            this._imageModal.hide();
+        });
+
+        // clear invalid state when typing
+        urlInput.addEventListener("input", () => {
+            urlInput.classList.remove("is-invalid");
+        });
+
+        // keep references
+        this._imageModalEl = modal;
+        this._imageModal = new window.bootstrap.Modal(modal, { backdrop: true, keyboard: true });
+        this._imageUrlInput = urlInput;
+        this._imageAltInput = altInput;
     }
 
     /**

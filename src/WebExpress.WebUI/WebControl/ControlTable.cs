@@ -45,6 +45,11 @@ namespace WebExpress.WebUI.WebControl
         public TypeBorderTable TableBorder { get; set; } = TypeBorderTable.Default;
 
         /// <summary>
+        /// Returns or sets a value indicating whether columns should be hidden.
+        /// </summary>
+        public bool SuppressHeaders { get; set; }
+
+        /// <summary>
         /// Returns or sets a value indicating whether columns can be removed.
         /// </summary>
         public bool AllowColumnRemove { get; set; }
@@ -182,6 +187,7 @@ namespace WebExpress.WebUI.WebControl
                         Class = Css.Concatenate("wx-table-columns", HeaderColor.ToClass())
                     }
                         .AddUserAttribute("data-color", HeaderColor.ToClass())
+                        .AddUserAttribute("data-suppress-headers", SuppressHeaders ? "true" : null)
                         .Add
                         (
                             _columns.Select

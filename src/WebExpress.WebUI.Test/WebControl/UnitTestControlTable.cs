@@ -112,6 +112,29 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the suppress headers property of the table control.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-webui-table"">*</div>")]
+        [InlineData(true, @"<div class=""wx-webui-table""><div class=""wx-table-columns"" data-suppress-headers=""true""></div></div>")]
+        public void SuppressHeaders(bool suppressHeaders, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTable
+            {
+                SuppressHeaders = suppressHeaders
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests the allow column remove property of the table control.
         /// </summary>
         [Theory]

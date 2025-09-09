@@ -53,6 +53,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     _hasOptions = false;
     _allowColumnRemove = true;
     _isTree = false;
+    _suppressHeaders = false;
 
     // drag state columns
     _draggedColumn = null;
@@ -689,6 +690,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             return []; 
         }
         const headerColor = columnsDiv.dataset.color || null;
+        this._suppressHeaders = columnsDiv.dataset.suppressHeaders === "true" || false;
         if (headerColor) { 
             this._head.classList.add(headerColor); 
         }
@@ -696,7 +698,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             id: div.id || ("col_" + idx),
             index: idx,
             name: div.dataset.objectName || null,
-            label: div.dataset.label,
+            label: div.dataset.label || "",
             icon: div.dataset.icon || null,
             image: div.dataset.image || null,
             color: div.dataset.color || null,
@@ -807,6 +809,10 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         const headRow = document.createElement("tr");
         this._head.appendChild(headRow);
         const colFrag = document.createDocumentFragment();
+        
+        if (this._suppressHeaders) {
+            return;
+        }
 
         if (this._movableRow) {
             headRow.appendChild(document.createElement("th"));

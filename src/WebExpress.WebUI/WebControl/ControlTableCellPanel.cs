@@ -60,7 +60,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public IControlTableCellPanel Add(params IControl[] controls)
         {
-
+            _content.AddRange(controls);
 
             return this;
         }
@@ -72,6 +72,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public IControlTableCellPanel Add(IEnumerable<IControl> controls)
         {
+            _content.AddRange(controls);
+
             return this;
         }
 
@@ -82,6 +84,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public IControlTableCellPanel Remove(IControl control)
         {
+            _content.Remove(control);
+
             return this;
         }
 
@@ -91,6 +95,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public IControlTableCellPanel Clear()
         {
+            _content.Clear();
 
             return this;
         }
