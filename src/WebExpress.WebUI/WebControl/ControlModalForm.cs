@@ -354,7 +354,7 @@ namespace WebExpress.WebUI.WebControl
 
                 var html = new HtmlElementFormForm()
                 {
-                    Id = !string.IsNullOrWhiteSpace(Id) ? $"{Id}_form" : null,
+                    Id = !string.IsNullOrWhiteSpace(Id) ? $"{Id}-form" : null,
                     Class = _form.FormLayout == TypeLayoutForm.Inline ? Css.Concatenate("wx-form-inline", GetClasses()) : GetClasses(),
                     Role = _form.Role,
                     Action = Uri?.ToString() ?? renderContext.Request.Uri?.ToString(),
