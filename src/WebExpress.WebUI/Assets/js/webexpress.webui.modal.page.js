@@ -103,4 +103,4 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
 }
 
 // Register the class in the controller
-webexpress.webui.Controller.registerClass("wx-webui-modalpage", webexpress.webui.ModalPageCtrl);
+webexpress.webui.Controller.registerClass("wx-webui-modal-page", webexpress.webui.ModalPageCtrl);

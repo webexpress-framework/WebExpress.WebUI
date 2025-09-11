@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the modal page control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-modalform"" *></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-webui-modalform"" *></div>")]
+        [InlineData(null, @"<div class=""wx-webui-modal-form"" *></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-modal-form"" *></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -36,9 +36,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the header property of the modal page control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-modalform"" data-close-label=""Close"">*</div>")]
-        [InlineData("abc", @"<div class=""wx-webui-modalform"" *><div class=""wx-modal-header"">abc</div>*</div>")]
-        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-modalform"" *><div class=""wx-modal-header"">WebExpress.WebUI</div>*</div>")]
+        [InlineData(null, @"<div class=""wx-webui-modal-form"" data-close-label=""Close"">*</div>")]
+        [InlineData("abc", @"<div class=""wx-webui-modal-form"" *><div class=""wx-modal-header"">abc</div>*</div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-modal-form"" *><div class=""wx-modal-header"">WebExpress.WebUI</div>*</div>")]
         public void Header(string header, string expected)
         {
             // preconditions
@@ -60,11 +60,11 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the size property of the modal page control.
         /// </summary>
         [Theory]
-        [InlineData(TypeModalSize.Default, @"<div class=""wx-webui-modalform"" data-close-label=""Close"">*</div>")]
-        [InlineData(TypeModalSize.Small, @"<div class=""wx-webui-modalform"" data-size=""modal-sm"" *>*</div>")]
-        [InlineData(TypeModalSize.Large, @"<div class=""wx-webui-modalform"" data-size=""modal-lg"" *>*</div>")]
-        [InlineData(TypeModalSize.ExtraLarge, @"<div class=""wx-webui-modalform"" data-size=""modal-xl"" *>*</div>")]
-        [InlineData(TypeModalSize.Fullscreen, @"<div class=""wx-webui-modalform"" data-size=""modal-fullscreen"" *>*</div>")]
+        [InlineData(TypeModalSize.Default, @"<div class=""wx-webui-modal-form"" data-close-label=""Close"">*</div>")]
+        [InlineData(TypeModalSize.Small, @"<div class=""wx-webui-modal-form"" data-size=""modal-sm"" *>*</div>")]
+        [InlineData(TypeModalSize.Large, @"<div class=""wx-webui-modal-form"" data-size=""modal-lg"" *>*</div>")]
+        [InlineData(TypeModalSize.ExtraLarge, @"<div class=""wx-webui-modal-form"" data-size=""modal-xl"" *>*</div>")]
+        [InlineData(TypeModalSize.Fullscreen, @"<div class=""wx-webui-modal-form"" data-size=""modal-fullscreen"" *>*</div>")]
         public void Size(TypeModalSize size, string expected)
         {
             // preconditions
@@ -86,8 +86,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the uri property of the modal page control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-modalform"" *>*</div>")]
-        [InlineData("/webui/abc", @"<div class=""wx-webui-modalform"" * data-uri=""/webui/abc"">*</div>")]
+        [InlineData(null, @"<div class=""wx-webui-modal-form"" *>*</div>")]
+        [InlineData("/webui/abc", @"<div class=""wx-webui-modal-form"" * data-uri=""/webui/abc"">*</div>")]
         public void Uri(string uri, string expected)
         {
             // preconditions
@@ -109,8 +109,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the selector property of the modal page control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-modalform"" *>*</div>")]
-        [InlineData("main", @"<div class=""wx-webui-modalform"" * data-selector=""main"">*</div>")]
+        [InlineData(null, @"<div class=""wx-webui-modal-form"" *>*</div>")]
+        [InlineData("main", @"<div class=""wx-webui-modal-form"" * data-selector=""main"">*</div>")]
         public void Selector(string selector, string expected)
         {
             // preconditions

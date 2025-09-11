@@ -299,6 +299,94 @@ webexpress.webui.Syntax = new class {
 };
 
 /**
+ * Stores panel definitions by key, optionally scoped via a modalId property on the panel object.
+ * A "panel definition" is a plain object that may contain metadata and render/onShow/onSubmit hooks.
+ */
+webexpress.webui.DialogPanels = new class {
+    constructor() {
+        /** @type {{[key: string]: Array<object>}} internal registry */
+        this._panels = {};
+    }
+
+    /**
+     * Registers one or multiple panels by modal key. Multiple panels per key are supported.
+     * Optional modal scoping can be expressed by setting `modalId` on the panel object itself.
+     *
+     * @param {string} modalKey - unique panel key used for lookup/autoload (e.g., data-key).
+     * @param {object} panel - panel definition.
+     * @returns {this} the registry instance for chaining.
+     */
+    register(modalKey, panel) {
+        // validate inputs
+        if (typeof modalKey !== "string" || modalKey.trim() === "") {
+            return this;
+        }
+        if (!panel || typeof panel !== "object") {
+            return this;
+        }
+
+        // ensure storage for key
+        if (!Array.isArray(this._panels[modalKey])) {
+            this._panels[modalKey] = [];
+        }
+
+        // store shallow copy to avoid external mutation
+        const copy = Object.assign({}, panel);
+        this._panels[modalKey].push(copy);
+
+        return this;
+    }
+
+    /**
+     * Retrieves all panels registered under a key.
+     *
+     * @param {string} modalKey - panel key.
+     * @returns {Array<object>} array of panel definitions (shallow-copied entries).
+     */
+    get(modalKey) {
+        // validate key
+        if (typeof modalKey !== "string" || modalKey.trim() === "") {
+            return [];
+        }
+
+        // return shallow copies to keep registry immutable from outside
+        if (Array.isArray(this._panels[modalKey])) {
+            return this._panels[modalKey].map((p) => {
+                return Object.assign({}, p);
+            });
+        } else {
+            return [];
+        }
+    }
+
+    /**
+     * Unregisters all panels by key.
+     *
+     * @param {string} modalKey - panel key.
+     * @returns {void}
+     */
+    unregister(modalKey) {
+        // validate key
+        if (typeof modalKey !== "string" || modalKey.trim() === "") {
+            return;
+        }
+
+        // remove key bucket when present
+        if (Object.prototype.hasOwnProperty.call(this._panels, modalKey)) {
+            delete this._panels[modalKey];
+        }
+    }
+
+    /**
+     * Clears the entire registry. useful for tests and full resets.
+     * @returns {void}
+     */
+    clear() {
+        this._panels = {};
+    }
+};
+
+/**
  * Base class for Controls.
  * This abstract class provides fundamental functionalities such as initialization, rendering, updating, and destruction.
  */

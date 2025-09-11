@@ -23,16 +23,22 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         "#483D8B", "#8B0000", "#9400D3", "#FF4500", "#DC143C"
     ];
 
-    // bootstrap modal references (created lazily)
+    // bootstrap modal references (created lazily) - now backed by ModalSidebarPanel
     _linkModalEl = null;
+    _linkModal = null;
     _linkModal = null;
     _linkUrlInput = null;
     _linkTextInput = null;
 
     _imageModalEl = null;
     _imageModal = null;
-    _imageUrlInput = null;
-    _imageAltInput = null;
+    _imageSidebarPanel = null;
+    _imageWebUrlInput = null;
+    _imageWebAltInput = null;
+    _imageSiteAltInput = null;
+    _imageUploadCtrl = null;
+    _imageFileListCtrl = null;
+    _selectedSiteImage = null;
 
     /**
      * Constructor to initialize the editor.
@@ -45,6 +51,11 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         element.removeAttribute('name');
         element.innerHTML = '';
         element.classList.add('wx-editor');
+
+        // optional: read image integration endpoints from dataset
+        this._imageUploadUri = element.dataset.imageUploadUri || "";
+        this._imageBaseUri = element.dataset.imageBaseUri || "";
+
         this._createToolbar(element);
         this._createEditorArea(element, content);
         this._createStatusBar(element);
@@ -184,7 +195,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             }
             if (node && this._editorElement && this._editorElement.contains(node)) {
                 const currentFormat = document.queryCommandValue("formatBlock") || "p";
-                const foundOption = formatOptions.find(opt => opt.command === currentFormat);
+                const foundOption = formatOptions.find(opt => { return opt.command === currentFormat; });
                 buttonText.textContent = foundOption ? foundOption.label : "Paragraph";
             }
         };
@@ -203,7 +214,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             { command: "italic", icon: "fas fa-italic", label: "Italic" },
             { command: "underline", icon: "fas fa-underline", label: "Underline" }
         ]);
-        document.addEventListener("selectionchange", () => this._updateButtonStates());
+        document.addEventListener("selectionchange", () => { this._updateButtonStates(); });
         buttons.forEach(button => {
             fragment.appendChild(button);
         });
@@ -315,7 +326,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             { command: "insertUnorderedList", icon: "fas fa-list-ul", label: "Bullet List" },
             { command: "insertOrderedList", icon: "fas fa-list-ol", label: "Numbered List" }
         ]);
-        document.addEventListener("selectionchange", () => this._updateButtonStates());
+        document.addEventListener("selectionchange", () => { this._updateButtonStates(); });
         buttons.forEach(button => {
             fragment.appendChild(button);
         });
@@ -332,7 +343,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             { command: "outdent", icon: "fas fa-outdent", label: "Decrease Indent" },
             { command: "indent", icon: "fas fa-indent", label: "Increase Indent" }
         ]);
-        document.addEventListener("selectionchange", () => this._updateButtonStates());
+        document.addEventListener("selectionchange", () => { this._updateButtonStates(); });
         buttons.forEach(button => {
             fragment.appendChild(button);
         });
@@ -351,7 +362,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             { command: "justifyRight", icon: "fas fa-align-right", label: "Align Right" },
             { command: "justifyFull", icon: "fas fa-align-justify", label: "Justify Text" }
         ]);
-        document.addEventListener("selectionchange", () => this._updateButtonStates());
+        document.addEventListener("selectionchange", () => { this._updateButtonStates(); });
         buttons.forEach(button => {
             fragment.appendChild(button);
         });
@@ -359,7 +370,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Creates a button to insert a hyperlink using a Bootstrap modal.
+     * Creates a button to insert a hyperlink using a ModalSidebarPanel (fallback to prompts if unavailable).
      * @returns {HTMLElement} The button element.
      */
     _createLinkButton() {
@@ -369,14 +380,13 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         button.title = "Insert Link";
         button.innerHTML = '<i class="fas fa-link"></i>';
         button.addEventListener("click", () => {
-            // open the link modal (fallback to prompt if bootstrap is unavailable)
             this._openLinkModal();
         });
         return button;
     }
 
     /**
-     * Creates a button to insert an image using a Bootstrap modal.
+     * Creates a button to insert an image using a ModalSidebarPanel (fallback to prompts if unavailable).
      * @returns {HTMLElement} The button element.
      */
     _createImageButton() {
@@ -386,7 +396,6 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         button.title = "Insert Image";
         button.innerHTML = '<i class="fas fa-image"></i>';
         button.addEventListener("click", () => {
-            // open the image modal (fallback to prompt if bootstrap is unavailable)
             this._openImageModal();
         });
         return button;
@@ -500,7 +509,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                             updateSizeDisplay(selectedRows, selectedCols);
                         }
                     });
-                    cell.addEventListener("click", e => {
+                    cell.addEventListener("click", (e) => {
                         this._insertTable(selectedRows, selectedCols);
                         if (menu.classList.contains("show")) {
                             menu.classList.remove("show");
@@ -1369,39 +1378,14 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Opens the link modal (Bootstrap) or falls back to prompt dialogs.
+     * opens the link modal using ModalSidebarPanel and autoloads pages via DialogPanels
      */
     _openLinkModal() {
-        // fallback to prompt if bootstrap is not available
-        const Bootstrap = window.bootstrap;
-        if (!Bootstrap || !Bootstrap.Modal) {
-            this._restoreSavedRange();
-            const url = window.prompt("URL:");
-            if (!url) {
-                return;
-            }
-            const safeUrl = this._sanitizeUrl(url);
-            if (!safeUrl) {
-                return;
-            }
-            const sel = window.getSelection();
-            let text = "";
-            if (sel && sel.rangeCount && !sel.isCollapsed) {
-                text = sel.toString();
-            }
-            if (!text) {
-                text = safeUrl.replace(/^https?:\/\//i, "");
-            }
-            this._insertHtmlAtCursor(`<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${this._escapeHtml(text)}</a>`);
-            return;
-        }
-
-        // ensure modal exists
         if (!this._linkModalEl) {
             this._createLinkModal();
         }
 
-        // prefill from selection
+        // compute prefill from current selection
         let selectedText = "";
         let selectedUrl = "";
         const sel = window.getSelection();
@@ -1409,228 +1393,135 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             selectedText = sel.toString();
             let node = sel.getRangeAt(0).startContainer;
             if (node && node.nodeType !== Node.ELEMENT_NODE) {
-                node = node.parentElement;
+                node = node.parentElement; // fix: use correct parentElement
             }
             if (node) {
-                const anchor = node.closest('a[href]');
+                const anchor = node.closest("a[href]");
                 if (anchor) {
-                    selectedUrl = anchor.getAttribute('href') || "";
+                    selectedUrl = anchor.getAttribute("href") || "";
                     if (!selectedText) {
                         selectedText = anchor.textContent || "";
                     }
                 }
             }
         }
-        this._linkUrlInput.value = selectedUrl;
-        this._linkTextInput.value = selectedText;
 
-        // show modal
-        this._linkModal.show();
-        setTimeout(() => {
-            // focus url input after modal transition
-            this._linkUrlInput.focus();
-            this._linkUrlInput.select();
-        }, 150);
+        // pass prefill to modal state for the page to consume
+        if (this._linkSidebarPanel) {
+            this._linkSidebarPanel._editor = this;
+            this._linkSidebarPanel._linkPrefill = { url: selectedUrl, text: selectedText };
+            if (typeof this._linkSidebarPanel.show === "function") {
+                this._linkSidebarPanel.show();
+            }
+        }
     }
 
     /**
-     * Creates the link modal and wires up events.
+     * creates the link modal and sets up autoload of pages by key
      */
     _createLinkModal() {
-        const id = "wx-editor-link-modal-" + Date.now() + "-" + Math.random().toString(36).slice(2);
-        const modal = document.createElement("div");
-        modal.className = "modal fade";
-        modal.id = id;
-        modal.tabIndex = -1;
-        modal.setAttribute("aria-labelledby", id + "-label");
-        modal.setAttribute("aria-hidden", "true");
-        modal.innerHTML = `
-<div class="modal-dialog">
-  <div class="modal-content">
-    <form>
-      <div class="modal-header">
-        <h5 class="modal-title" id="${id}-label">Insert Link</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label">URL</label>
-          <input type="url" class="form-control" placeholder="https://example.com" required>
-          <div class="invalid-feedback">Please provide a valid URL.</div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Text</label>
-          <input type="text" class="form-control" placeholder="Link text (optional)">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" class="btn btn-primary">Insert</button>
-      </div>
-    </form>
-  </div>
-</div>`;
-        document.body.appendChild(modal);
+        const id = "wx-editor-link-msp-" + Date.now() + "-" + Math.random().toString(36).slice(2);
 
-        const form = modal.querySelector("form");
-        const inputs = modal.querySelectorAll("input");
-        const urlInput = inputs[0];
-        const textInput = inputs[1];
+        // create host element; data-key enables DialogPanels autoload
+        const el = document.createElement("div");
+        el.id = id;
+        el.setAttribute("aria-labelledby", id + "-label");
+        el.setAttribute("aria-hidden", "true");
+        el.setAttribute("data-key", "editor-link");
+        el.setAttribute("data-submit-id", "insert-link");
+        el.setAttribute("data-validate-active-only", "true");
 
-        form.addEventListener("submit", (e) => {
-            e.preventDefault();
-            // validate url
-            const safeUrl = this._sanitizeUrl(urlInput.value);
-            if (!safeUrl) {
-                // indicate invalid url
-                urlInput.classList.add("is-invalid");
-                return;
-            } else {
-                urlInput.classList.remove("is-invalid");
-            }
+        // minimal dom as requested: header + footer + submit button
+        el.innerHTML = [
+            '<div class="wx-modal-header">Insert-Link</div>',
+            '<div class="wx-modal-footer"><button id="insert-link" class="btn btn-primary">Insert</button></div>'
+        ].join("");
 
-            // perform insertion
-            this._restoreSavedRange();
-            const text = (textInput.value || "").trim() || safeUrl.replace(/^https?:\/\//i, "");
-            this._insertHtmlAtCursor(`<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${this._escapeHtml(text)}</a>`);
+        // ensure a content container exists for ModalSidebarPanel body rendering
+        const footer = el.querySelector(".wx-modal-footer");
+        const content = document.createElement("div");
+        content.className = "wx-modal-content";
+        if (footer && footer.parentNode) {
+            footer.parentNode.insertBefore(content, footer);
+        } else {
+            el.appendChild(content);
+        }
 
-            // update hidden input if present
-            if (this._formInput) {
-                this._formInput.value = this._editorElement.innerHTML;
-            }
+        // wire submit button id for ModalSidebarPanel
+        el.setAttribute("data-submit-id", "insert-link");
 
-            this._linkModal.hide();
-        });
+        // mount element
+        document.body.appendChild(el);
 
-        // clear invalid state when typing
-        urlInput.addEventListener("input", () => {
-            urlInput.classList.remove("is-invalid");
-        });
+        // instantiate sidebar panel with element and store editor context
+        const modalCtrl = new webexpress.webui.ModalSidebarPanel(el);
+        modalCtrl._editor = this;
 
-        // keep references
-        this._linkModalEl = modal;
-        this._linkModal = new window.bootstrap.Modal(modal, { backdrop: true, keyboard: true });
-        this._linkUrlInput = urlInput;
-        this._linkTextInput = textInput;
+        // cache refs
+        this._linkModalEl = el;
+        this._linkSidebarPanel = modalCtrl;
     }
 
     /**
-     * Opens the image modal (Bootstrap) or falls back to prompt dialogs.
+     * opens the image modal using ModalSidebarPanel and autoloads pages via DialogPanels
      */
     _openImageModal() {
-        // fallback to prompt if bootstrap is not available
-        const Bootstrap = window.bootstrap;
-        if (!Bootstrap || !Bootstrap.Modal) {
-            this._restoreSavedRange();
-            const url = window.prompt("Image URL:");
-            if (!url) {
-                return;
-            }
-            const safeUrl = this._sanitizeUrl(url);
-            if (!safeUrl) {
-                return;
-            }
-            const alt = window.prompt("Alt text (optional):") || "";
-            this._insertHtmlAtCursor(`<img src="${safeUrl}" alt="${this._escapeHtml(alt)}">`);
-            return;
-        }
-
-        // ensure modal exists
         if (!this._imageModalEl) {
             this._createImageModal();
         }
 
-        // prefill blank
-        this._imageUrlInput.value = "";
-        this._imageAltInput.value = "";
-
-        // show modal
-        this._imageModal.show();
-        setTimeout(() => {
-            // focus url input after modal transition
-            this._imageUrlInput.focus();
-        }, 150);
+        if (this._imageSidebarPanel) {
+            this._imageSidebarPanel._editor = this;
+            if (typeof this._imageSidebarPanel.show === "function") {
+                this._imageSidebarPanel.show();
+            }
+        }
     }
 
     /**
-     * Creates the image modal and wires up events.
+     * creates the image modal and sets up autoload of pages by key
      */
     _createImageModal() {
-        const id = "wx-editor-image-modal-" + Date.now() + "-" + Math.random().toString(36).slice(2);
-        const modal = document.createElement("div");
-        modal.className = "modal fade";
-        modal.id = id;
-        modal.tabIndex = -1;
-        modal.setAttribute("aria-labelledby", id + "-label");
-        modal.setAttribute("aria-hidden", "true");
-        modal.innerHTML = `
-<div class="modal-dialog">
-  <div class="modal-content">
-    <form>
-      <div class="modal-header">
-        <h5 class="modal-title" id="${id}-label">Insert Image</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label">Image URL</label>
-          <input type="url" class="form-control" placeholder="https://example.com/image.png" required>
-          <div class="invalid-feedback">Please provide a valid image URL.</div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Alt text</label>
-          <input type="text" class="form-control" placeholder="Alternative text (optional)">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" class="btn btn-primary">Insert</button>
-      </div>
-    </form>
-  </div>
-</div>`;
-        document.body.appendChild(modal);
+        const id = "wx-editor-image-msp-" + Date.now() + "-" + Math.random().toString(36).slice(2);
 
-        const form = modal.querySelector("form");
-        const inputs = modal.querySelectorAll("input");
-        const urlInput = inputs[0];
-        const altInput = inputs[1];
+        // create host element; data-key enables DialogPanels autoload
+        const el = document.createElement("div");
+        el.id = id;
+        el.setAttribute("aria-labelledby", id + "-label");
+        el.setAttribute("aria-hidden", "true");
+        el.setAttribute("data-key", "editor-image");
+        el.setAttribute("data-submit-id", "insert-image");
+        el.setAttribute("data-validate-active-only", "true");
 
-        form.addEventListener("submit", (e) => {
-            e.preventDefault();
-            // validate url
-            const safeUrl = this._sanitizeUrl(urlInput.value);
-            if (!safeUrl) {
-                // indicate invalid url
-                urlInput.classList.add("is-invalid");
-                return;
-            } else {
-                urlInput.classList.remove("is-invalid");
-            }
+        // minimal dom: header + footer + submit button
+        el.innerHTML = [
+            '<div class="wx-modal-header">Insert-Image</div>',
+            '<div class="wx-modal-footer"><button id="insert-image" class="btn btn-primary">Insert</button></div>'
+        ].join("");
 
-            // perform insertion
-            this._restoreSavedRange();
-            const alt = (altInput.value || "").trim();
-            this._insertHtmlAtCursor(`<img src="${safeUrl}" alt="${this._escapeHtml(alt)}">`);
+        // ensure a content container exists for ModalSidebarPanel body rendering
+        const footer = el.querySelector(".wx-modal-footer");
+        const content = document.createElement("div");
+        content.className = "wx-modal-content";
+        if (footer && footer.parentNode) {
+            footer.parentNode.insertBefore(content, footer);
+        } else {
+            el.appendChild(content);
+        }
 
-            // update hidden input if present
-            if (this._formInput) {
-                this._formInput.value = this._editorElement.innerHTML;
-            }
+        // wire submit button id for ModalSidebarPanel
+        el.setAttribute("data-submit-id", "insert-image");
 
-            this._imageModal.hide();
-        });
+        // mount element
+        document.body.appendChild(el);
 
-        // clear invalid state when typing
-        urlInput.addEventListener("input", () => {
-            urlInput.classList.remove("is-invalid");
-        });
+        // instantiate sidebar panel with element and store editor context
+        const modalCtrl = new webexpress.webui.ModalSidebarPanel(el);
+        modalCtrl._editor = this;
 
-        // keep references
-        this._imageModalEl = modal;
-        this._imageModal = new window.bootstrap.Modal(modal, { backdrop: true, keyboard: true });
-        this._imageUrlInput = urlInput;
-        this._imageAltInput = altInput;
+        // cache refs
+        this._imageModalEl = el;
+        this._imageSidebarPanel = modalCtrl;
     }
 
     /**

@@ -45,5 +45,9 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "table.columns.toggle": "Spalten ein-/ausblenden",
     "table.handle.title": "Spalte ziehen um Reihenfolge zu ändern",
     "table.search.placeholder": "Suche...",
-    "table.filter.columns.label": "Spalten filtern"
+    "table.filter.columns.label": "Spalten filtern",
+    
+    "avatar.zoom.label": "Zoom",
+    "avatar.upload.image.label": "Bild auswählen",
+    "avatar.placeholder": "Bild auswählen durch Ziehen oder Doppelklick."
 });

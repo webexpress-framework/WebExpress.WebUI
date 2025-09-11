@@ -19,13 +19,16 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         // parse initial nodes and configuration from data attributes
-        this._nodes = this._parseNodes(Array.from(element.children).filter(e => e.classList.contains("wx-tree-node")));
+        this._nodes = this._parseNodes(Array.from(element.children).filter((e) => { return e.classList.contains("wx-tree-node"); }));
         this._layout = element.dataset.layout || null;
         this._showIndicator = element.dataset.indicator === "false" ? false : true;
+        this._showLeafIndicator = element.dataset.indicatorLeaf === "false" ? false : true; // leaf dot optional
         this._movable = element.dataset.movable === "true";
         this._container = document.createElement("ul");
         const layoutClasses = this._getLayoutClasses();
-        if (layoutClasses) this._container.className = layoutClasses;
+        if (layoutClasses) {
+            this._container.className = layoutClasses;
+        }
 
         // clean up the DOM element
         element.innerHTML = "";
@@ -55,19 +58,19 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
         // handle drag start
         element.addEventListener("dragstart", (event) => {
             if (!event.ctrlKey) {
-                event.preventDefault(); // Only allow drag if Ctrl is pressed
+                event.preventDefault(); // only allow drag if ctrl is pressed
                 return;
             }
             this._dragover = node;
             event.dataTransfer.setData("text/plain", JSON.stringify({
-                node: node.id,
+                node: node.id
             }));
             element.classList.add("wx-dragging");
         });
 
         // handle drag over
         element.addEventListener("dragover", (event) => {
-            event.preventDefault(); // Allow dropping by preventing default behavior
+            event.preventDefault(); // allow dropping by preventing default behavior
 
             if (this._isChildNode(this._dragover, node)) {
                 // prevent showing the indicator if the target node is a child of the dragged node
@@ -83,9 +86,9 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
 
             if (relativeY < height * 0.25) {
                 // top 25% of the element
-                this._dragIndicator.style.top = `${rect.top - 2 + window.scrollY}px`;
-                this._dragIndicator.style.left = `${rect.left + window.scrollX}px`;
-                this._dragIndicator.style.width = `${rect.width}px`;
+                this._dragIndicator.style.top = String(rect.top - 2 + window.scrollY) + "px";
+                this._dragIndicator.style.left = String(rect.left + window.scrollX) + "px";
+                this._dragIndicator.style.width = String(rect.width) + "px";
                 this._dragIndicator.style.display = "block";
                 element.classList.remove("wx-drag-over");
                 this._dragoverPosition = "above";
@@ -96,9 +99,9 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 this._dragoverPosition = "child";
             } else {
                 // bottom 25% of the element
-                this._dragIndicator.style.top = `${rect.top + height - 2 + window.scrollY}px`;
-                this._dragIndicator.style.left = `${rect.left + window.scrollX}px`;
-                this._dragIndicator.style.width = `${rect.width}px`;
+                this._dragIndicator.style.top = String(rect.top + height - 2 + window.scrollY) + "px";
+                this._dragIndicator.style.left = String(rect.left + window.scrollX) + "px";
+                this._dragIndicator.style.width = String(rect.width) + "px";
                 this._dragIndicator.style.display = "block";
                 element.classList.remove("wx-drag-over");
                 this._dragoverPosition = "below";
@@ -183,7 +186,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             this._nodes.splice(index, 0, draggedNode);
             draggedNode.parent = null;
         }
-        
+
         document.dispatchEvent(new CustomEvent(webexpress.webui.Event.MOVE_EVENT, {
             detail: {
                 sender: this._element,
@@ -193,7 +196,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 position: "above"
             }
         }));
-        
+
         this.render();
     }
 
@@ -208,7 +211,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
         targetNode.children = targetNode.children || [];
         targetNode.children.push(draggedNode);
         draggedNode.parent = targetNode;
-        
+
         document.dispatchEvent(new CustomEvent(webexpress.webui.Event.MOVE_EVENT, {
             detail: {
                 sender: this._element,
@@ -218,7 +221,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 position: "child"
             }
         }));
-        
+
         this.render();
     }
 
@@ -240,7 +243,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             this._nodes.splice(index + 1, 0, draggedNode);
             draggedNode.parent = null;
         }
-        
+
         document.dispatchEvent(new CustomEvent(webexpress.webui.Event.MOVE_EVENT, {
             detail: {
                 sender: this._element,
@@ -250,7 +253,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 position: "below"
             }
         }));
-        
+
         this.render();
     }
 
@@ -261,9 +264,9 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
      */
     _removeNodeFromCurrentPosition(node) {
         if (node.parent) {
-            node.parent.children = node.parent.children.filter(child => child !== node);
+            node.parent.children = node.parent.children.filter((child) => { return child !== node; });
         } else {
-            this._nodes = this._nodes.filter(n => n !== node);
+            this._nodes = this._nodes.filter((n) => { return n !== node; });
         }
     }
 
@@ -271,12 +274,12 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
      * Parses child elements as tree nodes.
      * @private
      * @param {Array} elements - The child elements to parse.
-     * @param {Object} [parentNode] - The parent node, optional for the root level.
+     * @param {Object} [parent] - The parent node, optional for the root level.
      * @returns {Array} An array of parsed tree nodes.
      */
     _parseNodes(elements, parent = null) {
         const nodes = [];
-        elements.forEach(elem => {
+        elements.forEach((elem) => {
             const node = {
                 id: elem.id || null,
                 label: elem.dataset.label || "Unnamed",
@@ -294,7 +297,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 parent: parent
             };
             // recursively parse children
-            node.children = this._parseNodes(Array.from(elem.children).filter(e => e.classList.contains("wx-tree-node")), node);
+            node.children = this._parseNodes(Array.from(elem.children).filter((e) => { return e.classList.contains("wx-tree-node"); }), node);
             nodes.push(node);
         });
         return nodes;
@@ -311,7 +314,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
         container.innerHTML = "";
         container.setAttribute("role", "tree");
 
-        nodes.forEach(node => {
+        nodes.forEach((node) => {
             const img = document.createElement("img");
             const icon = document.createElement("i");
             const li = document.createElement("li");
@@ -324,13 +327,17 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             switch (this._layout) {
                 case "wx-tree-group":
                 case "wx-tree-flush":
-                case "wx-tree-horizontal":
+                case "wx-tree-horizontal": {
                     li.classList.add("list-group-item");
                     break;
-                case "wx-tree-flat":
+                }
+                case "wx-tree-flat": {
                     break;
-                default:
+                }
+                default: {
                     li.classList.add("wx-tree-node");
+                    break;
+                }
             }
 
             // add aria-selected if selectable
@@ -340,7 +347,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
 
             // create the label container (button or link)
             const labelContainer = node.url ? document.createElement("a") : document.createElement("button");
-            labelContainer.className = `${node.color} wx-tree-label-container`;
+            labelContainer.className = String(node.color || "") + " wx-tree-label-container";
             if (node.active) {
                 labelContainer.className = "wx-tree-label-container active";
             }
@@ -370,12 +377,15 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 if (node.expand) {
                     indicator.classList.add("wx-tree-expand");
                     if (node.iconOpen && icon) {
-                        icon.className = ""; 
+                        icon.className = "";
                         icon.className = node.iconOpen;
                     }
-                    if (node.imageOpen && img) img.src = node.imageOpen;
+                    if (node.imageOpen && img) {
+                        img.src = node.imageOpen;
+                    }
                 }
-            } else if (this._showIndicator) {
+            } else if (this._showIndicator && this._showLeafIndicator) {
+                // optional dot indicator for leaf nodes
                 indicator = document.createElement("i");
                 indicator.className = "wx-tree-indicator-dot";
             }
@@ -385,7 +395,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 img.src = node.expand ? node.imageOpen : node.imageClose;
                 labelContainer.appendChild(img);
             }
-            
+
             if (node.iconOpen) {
                 icon.className = node.expand ? node.iconOpen : node.iconClose;
                 labelContainer.appendChild(icon);
@@ -408,13 +418,21 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             }
 
             // set link attributes if present
-            if (node.url) labelContainer.setAttribute("href", node.url);
-            if (node.target) labelContainer.setAttribute("target", node.target);
-            if (node.tooltip) labelContainer.setAttribute("title", node.tooltip);
+            if (node.url) {
+                labelContainer.setAttribute("href", node.url);
+            }
+            if (node.target) {
+                labelContainer.setAttribute("target", node.target);
+            }
+            if (node.tooltip) {
+                labelContainer.setAttribute("title", node.tooltip);
+            }
 
             // compose the node: indicator, label, and children
             const div = document.createElement("div");
-            if (indicator) div.appendChild(indicator);
+            if (indicator) {
+                div.appendChild(indicator);
+            }
             div.appendChild(labelContainer);
             li.appendChild(div);
 
@@ -423,7 +441,9 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             if (node.children && node.children.length > 0) {
                 ul = document.createElement("ul");
                 const layoutClasses = this._getLayoutClasses();
-                if (layoutClasses) ul.className = layoutClasses;
+                if (layoutClasses) {
+                    ul.className = layoutClasses;
+                }
                 ul.setAttribute("role", "group");
                 if (node.expand) {
                     this._renderTree(ul, node.children);
@@ -470,20 +490,36 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             detail: {
                 sender: this._element,
                 id: this._element.id,
-                node: node?.id
+                node: node ? node.id : null
             }
         }));
 
         if (!node.expand) {
-            if (indicator) indicator.classList.add("wx-tree-expand-animation");
-            if (icon && node.iconOpen) icon.className = node.iconOpen;
-            if (img && node.imageOpen) img.src = node.imageOpen;
-            if (ul) this._renderTree(ul, node.children);
+            if (indicator) {
+                indicator.classList.add("wx-tree-expand-animation");
+            }
+            if (icon && node.iconOpen) {
+                icon.className = node.iconOpen;
+            }
+            if (img && node.imageOpen) {
+                img.src = node.imageOpen;
+            }
+            if (ul) {
+                this._renderTree(ul, node.children);
+            }
         } else {
-            if (indicator) indicator.classList.remove("wx-tree-expand", "wx-tree-expand-animation");
-            if (icon && node.iconClose) icon.className = node.iconClose;
-            if (img && node.imageClose) img.src = node.imageClose;
-            if (ul) ul.innerHTML = "";
+            if (indicator) {
+                indicator.classList.remove("wx-tree-expand", "wx-tree-expand-animation");
+            }
+            if (icon && node.iconClose) {
+                icon.className = node.iconClose;
+            }
+            if (img && node.imageClose) {
+                img.src = node.imageClose;
+            }
+            if (ul) {
+                ul.innerHTML = "";
+            }
         }
         node.expand = !node.expand;
     }
@@ -497,10 +533,14 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
      */
     _findNodeById(id, nodes = this._nodes) {
         for (const node of nodes) {
-            if (node.id === id) return node;
+            if (node.id === id) {
+                return node;
+            }
             if (node.children && node.children.length > 0) {
                 const result = this._findNodeById(id, node.children);
-                if (result) return result;
+                if (result) {
+                    return result;
+                }
             }
         }
         return null;
@@ -513,16 +553,21 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
      */
     _getLayoutClasses() {
         switch (this._layout) {
-            case "wx-tree-group":
+            case "wx-tree-group": {
                 return "list-group";
-            case "wx-tree-flush":
+            }
+            case "wx-tree-flush": {
                 return "list-group list-group-flush";
-            case "wx-tree-flat":
+            }
+            case "wx-tree-flat": {
                 return "list-unstyled";
-            case "wx-tree-horizontal":
+            }
+            case "wx-tree-horizontal": {
                 return "list-group list-group-horizontal";
-            default:
+            }
+            default: {
                 return null;
+            }
         }
     }
 

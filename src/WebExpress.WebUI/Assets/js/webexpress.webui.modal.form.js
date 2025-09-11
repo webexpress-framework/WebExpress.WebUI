@@ -130,4 +130,4 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
 }
 
 // Register the class in the controller
-webexpress.webui.Controller.registerClass("wx-webui-modalform", webexpress.webui.ModalFormCtrl);
+webexpress.webui.Controller.registerClass("wx-webui-modal-form", webexpress.webui.ModalFormCtrl);
