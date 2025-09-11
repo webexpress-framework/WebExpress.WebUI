@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.Test.WebControl
     public class UnitTestControlFormItemInputCheck
     {
         /// <summary>
-        /// Tests the id property of the form item input checkbox control.
+        /// Tests the id property of the form check box control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
@@ -56,7 +56,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the Inline property of the form item input checkbox control.
+        /// Tests the Inline property of the form check box control.
         /// </summary>
         [Theory]
         [InlineData(false, @"<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
@@ -80,7 +80,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the Description property of the form item input checkbox control.
+        /// Tests the Description property of the form check box control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
@@ -105,7 +105,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the Layout property of the form item input checkbox control.
+        /// Tests the Layout property of the form check box control.
         /// </summary>
         [Theory]
         [InlineData(TypeLayoutCheckbox.Default, @"<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
@@ -129,7 +129,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the value method of the form text control.
+        /// Tests the value method of the form check box control.
         /// </summary>
         [Theory]
         [InlineData(null, @"*<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>*")]
@@ -154,7 +154,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the value method of the form text control.
+        /// Tests the value method of the form check box control.
         /// </summary>
         [Theory]
         [InlineData(null, @"*<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>*")]

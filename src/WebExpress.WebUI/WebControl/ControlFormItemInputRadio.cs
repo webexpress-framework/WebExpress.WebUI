@@ -14,12 +14,12 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormItemInputRadio : ControlFormItemInput<ControlFormInputValueString>
     {
         /// <summary>
-        /// Returns or sets the value of the optiopn.
+        /// Returns or sets the value of the option.
         /// </summary>
         public string Option { get; set; }
 
         /// <summary>
-        /// Liefert oder setzt ob die Checkbox in einer neuen Zeile angezeigt werden soll
+        /// Returns or sets a value indicating whether the content should be rendered inline.
         /// </summary>
         public bool Inline { get; set; }
 
@@ -36,9 +36,17 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
         /// </summary>
-        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
-        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
+        /// <param name="instance">
+        /// The name of the calling member. This is automatically provided by the compiler.
+        /// </param>
+        /// <param name="file">
+        /// The file path of the source file where this instance is created. This 
+        /// is automatically provided by the compiler.
+        /// </param>
+        /// <param name="line">
+        /// The line number in the source file where this instance is created. This 
+        /// is automatically provided by the compiler.
+        /// </param>
         public ControlFormItemInputRadio([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null)
             : this($"radio_{instance}_{file}_{line}".GetHashCode().ToString("X"))
         {

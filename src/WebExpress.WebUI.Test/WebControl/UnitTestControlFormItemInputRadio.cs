@@ -5,13 +5,13 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.Test.WebControl
 {
     /// <summary>
-    /// Tests the form item input radio control.
+    /// Tests the form radio control.
     /// </summary>
     [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputRadio
     {
         /// <summary>
-        /// Tests the id property of the form item input radio control.
+        /// Tests the id property of the form radio control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""form-check""><input type=""radio"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
@@ -34,7 +34,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the auto id property of the form check box control.
+        /// Tests the auto id property of the form radio control.
         /// </summary>
         [Theory]
         [InlineData(@"<div id=""*"" class=""form-check""><input name=""*"" type=""radio"" class=""form-check-input""><label class=""form-check-label"" for=""*""></label></div>")]
@@ -56,7 +56,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the Inline property of the form item input radio control.
+        /// Tests the Inline property of the form radio control.
         /// </summary>
         [Theory]
         [InlineData(false, @"<div class=""form-check""><input type=""radio"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
@@ -80,7 +80,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the Description property of the form item input radio control.
+        /// Tests the Description property of the form radio control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""form-check""><input type=""radio"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
@@ -105,7 +105,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the Description property of the form item input radio control.
+        /// Tests the Description property of the form radio control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""form-check""><input type=""radio"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
@@ -129,7 +129,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the value method of the form text control.
+        /// Tests the value method of the form radio control.
         /// </summary>
         [Theory]
         [InlineData(null, @"*<div class=""form-check""><input type=""radio"" value=""option"" class=""form-check-input""><label class=""form-check-label""></label></div>*")]
@@ -159,7 +159,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the value method of the form text control.
+        /// Tests the value method of the form radio control.
         /// </summary>
         [Theory]
         [InlineData(null, @"*<div class=""form-check""><input type=""radio"" value=""option"" class=""form-check-input""><label class=""form-check-label""></label></div>*")]
