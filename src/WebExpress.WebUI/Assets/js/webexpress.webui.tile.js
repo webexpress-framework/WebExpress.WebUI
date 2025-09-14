@@ -626,7 +626,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
     _dispatchEvent(constName, detail) {
         const evRoot = webexpress?.webui?.Event;
         const eventName = (evRoot && evRoot[constName]) || constName;
-        document.dispatchEvent(new CustomEvent(eventName, { detail: detail }));
+        this._dispatch(eventName, { detail });
     }
 
     /**

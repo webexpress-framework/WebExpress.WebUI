@@ -322,13 +322,7 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
                 }
                 updateselection();
                 // Trigger event for external listeners
-                document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CLICK_EVENT, {
-                    detail: {
-                        sender: this._element,
-                        id: this._element.id,
-                        item: currentValue
-                    }
-                }));
+                this._dispatch(webexpress.webui.Event.CLICK_EVENT, { item: currentValue });
             });
             // Double click handler: move to available
             li.addEventListener('dblclick', () => {
@@ -383,13 +377,7 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
                 }
                 updateselection();
                 // Trigger event for external listeners
-                document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CLICK_EVENT, {
-                    detail: {
-                        sender: this._element,
-                        id: this._element.id,
-                        item: currentValue
-                    }
-                }));
+                this._dispatch(webexpress.webui.Event.CLICK_EVENT, { item: currentValue });
             });
             // Double click handler: move to selected
             li.addEventListener('dblclick', () => {
@@ -544,13 +532,7 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
             if (this._hidden) this._hidden.value = newSerialized;
             this.render();
             // fire change event for external listeners
-            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
-                detail: {
-                    sender: this._element,
-                    id: this._element.id,
-                    value: [...this._values]
-                }
-            }));
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: [...this._values] });
         }
     }
 }

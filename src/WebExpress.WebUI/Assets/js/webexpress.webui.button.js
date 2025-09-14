@@ -33,12 +33,7 @@ webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
 
         // Attach the click event listener
         element.addEventListener("click", () => {
-            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CLICK_EVENT, {
-                detail: {
-                    sender: this._element,
-                    id: this._element.id || null
-                }
-            }));
+            this._dispatch(webexpress.webui.Event.CLICK_EVENT, { });
         });
     }
 

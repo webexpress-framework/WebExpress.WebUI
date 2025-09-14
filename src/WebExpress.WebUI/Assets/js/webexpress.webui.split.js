@@ -453,15 +453,11 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
 
         // fire size change event if requested
         if (fireEvent) {
-            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.SIZE_CHANGE_EVENT, {
-                detail: {
-                    sender: this._element,
-                    id: this._element.id,
-                    mainSize: mainSize,
-                    sideSize: sideSize,
-                    orientation: this._orientation
-                }
-            }));
+            this._dispatch(webexpress.webui.Event.SIZE_CHANGE_EVENT, {
+                mainSize: mainSize,
+                sideSize: sideSize,
+                orientation: this._orientation
+            });
         }
     }
 
@@ -503,12 +499,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         }
 
         // fire HIDE_EVENT
-        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.HIDE_EVENT, {
-            detail: {
-                sender: this._element,
-                id: this._element.id
-            }
-        }));
+        this._dispatch(webexpress.webui.Event.HIDE_EVENT, {});
     }
 
     /**
@@ -535,12 +526,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         this._setSideSizeCookie(sideSize);
 
         // fire SHOW_EVENT when side-pane is expanded (via double-click)
-        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.SHOW_EVENT, {
-            detail: {
-                sender: this._element,
-                id: this._element.id
-            }
-        }));
+        this._dispatch(webexpress.webui.Event.SHOW_EVENT, {});
     }
 
     /**

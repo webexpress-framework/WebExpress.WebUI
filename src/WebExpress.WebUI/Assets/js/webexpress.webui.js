@@ -443,6 +443,23 @@ webexpress.webui.Ctrl = class {
         
         return element;
     }
+
+    /**
+    * Dispatches a custom event.
+    * @param {string} type event type
+    * @param {object} detail payload
+    */
+    _dispatch(type, detail) {
+        document.dispatchEvent(new CustomEvent(type, {
+            detail: {
+                sender: this._element,
+                id: this._element.id,
+                ...detail
+            },
+            bubbles: true,
+            composed: true
+        }));
+    }
     
     /**
      * Returns the translated text for the specified i18n key.

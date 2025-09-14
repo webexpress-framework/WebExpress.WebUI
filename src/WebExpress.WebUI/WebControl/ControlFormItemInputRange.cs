@@ -71,6 +71,7 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementFieldInput()
             {
                 Id = Id,
+                Name = Name,
                 Class = Css.Concatenate("form-range", GetClasses()),
                 Style = GetStyles(),
                 Type = "range",

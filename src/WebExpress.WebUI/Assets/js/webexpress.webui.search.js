@@ -225,14 +225,10 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
                     suggestion.favorited = !suggestion.favorited;
 
                     // fire CHANGE_FAVORITE_EVENT
-                    document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_FAVORITE_EVENT, {
-                        detail: {
-                            sender: this._element,
-                            id: suggestion.id,
-                            label: suggestion.label,
-                            favorited: suggestion.favorited
-                        }
-                    }));
+                    this._dispatch(webexpress.webui.Event.CHANGE_FAVORITE_EVENT, {
+                        label: suggestion.label,
+                        favorited: suggestion.favorited
+                    });
                     this._refreshSuggestions();
                 });
                 suggestionItem.appendChild(favoriteIcon);
@@ -280,24 +276,14 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
      * Triggers the DROPDOWN_SHOW_EVENT.
      */
     _triggerDropdownShow() {
-        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_SHOW_EVENT, {
-            detail: {
-                sender: this._element,
-                id: this._element.id
-            }
-        }));
+        this._dispatch(webexpress.webui.Event.DROPDOWN_SHOW_EVENT, {});
     }
 
     /**
      * Triggers the DROPDOWN_HIDDEN_EVENT.
      */
     _triggerDropdownHidden() {
-        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
-            detail: {
-                sender: this._element,
-                id: this._element.id
-            }
-        }));
+        this._dispatch(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {});
     }
 
     /**
@@ -316,13 +302,7 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
         if (this._value !== value) {
             this._value = value;
             this._searchInput.value = value;
-            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_FILTER_EVENT, {
-                detail: {
-                    sender: this._element,
-                    id: this._element.id,
-                    value: value
-                }
-            }));
+            this._dispatch(webexpress.webui.Event.CHANGE_FILTER_EVENT, { value: value });
         }
     }
 };

@@ -74,11 +74,7 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
                     if (tag && !this._tags.includes(tag)) {
                         this._tags.push(tag);
                         // fire add event when a tag is added
-                        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.ADD_EVENT, {
-                            sender: this._element,
-                            id: this._element.id,
-                            detail: tag
-                        }));
+                        this._dispatch(webexpress.webui.Event.ADD_EVENT, { detail: tag });
                     }
                 });
                 this._input.value = "";
@@ -144,11 +140,7 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
                 e.preventDefault();
                 this._tags.splice(index, 1);
                 // fire remove event when a tag is removed by click
-                document.dispatchEvent(new CustomEvent(webexpress.webui.Event.REMOVE_EVENT, {
-                    sender: this._element,
-                    id: this._element.id,
-                    detail: tag
-                }));
+                this._dispatch(webexpress.webui.Event.REMOVE_EVENT, { detail: tag });
                 this.render();
             });
 

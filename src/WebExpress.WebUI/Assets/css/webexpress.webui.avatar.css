@@ -177,7 +177,7 @@
     display: block;
     width: 320px; /* adjusted by js through style to match data-viewport */
     height: 320px; /* adjusted by js */
-    border-radius: 12px;
+    border-radius: 1em;
     box-shadow: 0 0 0 1px rgba(0,0,0,0.08) inset;
     touch-action: none; /* allow custom pinch/drag */
     background: transparent; /* was #f5f5f5; make transparent to avoid gray cast */

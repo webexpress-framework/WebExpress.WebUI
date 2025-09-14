@@ -15,7 +15,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<input class=""form-range"" type=""range"" min=""0"" max=""10"" step=""1"">")]
-        [InlineData("id", @"<input id=""id"" class=""form-range"" type=""range"" min=""0"" max=""10"" step=""1"">")]
+        [InlineData("id", @"<input id=""id"" name=""id"" class=""form-range"" type=""range"" min=""0"" max=""10"" step=""1"">")]
         public void Id(string id, string expected)
         {
             // preconditions

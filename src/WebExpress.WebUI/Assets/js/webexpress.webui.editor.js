@@ -1546,13 +1546,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             this._formInput.value = newHtml;
         }
         if (oldHtml !== newHtml) {
-            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
-                detail: {
-                    sender: this._element,
-                    id: this._element.id,
-                    value: newHtml
-                }
-            }));
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: newHtml });
         }
     }
 };

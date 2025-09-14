@@ -329,13 +329,7 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
 
         if (this._hidden && this._hidden.value !== newSerialized) {
             this._hidden.value = newSerialized;
-            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
-                detail: {
-                    sender: this._element,
-                    id: this._element.id,
-                    value: newSerialized
-                }
-            }));
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: newSerialized });
         }
 
         this.render();

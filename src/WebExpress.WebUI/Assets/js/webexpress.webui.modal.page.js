@@ -73,16 +73,12 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
         modalInstance.show(); // Opens the modal
 
         // Trigger custom event for showing the modal
-        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.MODAL_SHOW_EVENT, {
-            detail: { sender: this._element, id: this._element.id }
-        }));
+        this._dispatch(webexpress.webui.Event.MODAL_SHOW_EVENT, {});
 
         // Load content dynamically after the modal is shown
         this._element.addEventListener("shown.bs.modal", () => {
             // Trigger event when data is requested
-            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DATA_REQUESTED_EVENT, {
-                detail: { sender: this._element, id: this._element.id }
-            }));
+            this._dispatch(webexpress.webui.Event.DATA_REQUESTED_EVENT, {});
 
             if (this._uri) {
                 fetch(this._uri)

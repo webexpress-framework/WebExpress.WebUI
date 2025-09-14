@@ -314,10 +314,26 @@ pre {
 }
     
 .wx-drag-over {
-    background-color: var(--bs-success-bg-subtle); /* Highlights the drop target with a green shade */
+    background: repeating-linear-gradient(
+        45deg,
+        #eee,
+        #eee 6px,
+        #f8f8f8 6px,
+        #f8f8f8 12px
+    );
     outline: 2px dashed var(--bs-success); /* Adds a dashed border for visual emphasis */
-    border-radius: 0;
+    border-radius: 0.5rem;
     z-index: 1000; 
+}
+
+[data-bs-theme=dark] .wx-drag-over {
+    background: repeating-linear-gradient(
+        45deg,
+        var(--bs-secondary-bg),
+        var(--bs-secondary-bg) 6px,
+        var(--bs-secondary) 6px,
+        var(--bs-secondary) 12px
+    );
 }
 
 .list-group-item.active a {

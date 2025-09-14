@@ -187,15 +187,11 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             draggedNode.parent = null;
         }
 
-        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.MOVE_EVENT, {
-            detail: {
-                sender: this._element,
-                id: this._element.id,
-                node: draggedNode.id,
-                target: targetNode.id,
-                position: "above"
-            }
-        }));
+        this._dispatch(webexpress.webui.Event.MOVE_EVENT, {
+            node: draggedNode.id,
+            target: targetNode.id,
+            position: "above"
+        });
 
         this.render();
     }
@@ -212,15 +208,11 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
         targetNode.children.push(draggedNode);
         draggedNode.parent = targetNode;
 
-        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.MOVE_EVENT, {
-            detail: {
-                sender: this._element,
-                id: this._element.id,
-                node: draggedNode.id,
-                target: targetNode.id,
-                position: "child"
-            }
-        }));
+        this._dispatch(webexpress.webui.Event.MOVE_EVENT, {
+            node: draggedNode.id,
+            target: targetNode.id,
+            position: "child"
+        });
 
         this.render();
     }
@@ -244,15 +236,11 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             draggedNode.parent = null;
         }
 
-        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.MOVE_EVENT, {
-            detail: {
-                sender: this._element,
-                id: this._element.id,
-                node: draggedNode.id,
-                target: targetNode.id,
-                position: "below"
-            }
-        }));
+        this._dispatch(webexpress.webui.Event.MOVE_EVENT, {
+            node: draggedNode.id,
+            target: targetNode.id,
+            position: "below"
+        });
 
         this.render();
     }
@@ -354,13 +342,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
 
             // click handler for node selection
             labelContainer.addEventListener("click", () => {
-                document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CLICK_EVENT, {
-                    detail: {
-                        sender: this._element,
-                        id: this._element.id,
-                        node: node.id
-                    }
-                }));
+                this._dispatch(webexpress.webui.Event.CLICK_EVENT, { node: node.id });
             });
 
             // add indicator and expansion/collapse logic if necessary
@@ -486,13 +468,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
      * @param {HTMLElement} indicator - The indicator element for the node.
      */
     _toggleNode(node, ul, icon, img, indicator) {
-        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
-            detail: {
-                sender: this._element,
-                id: this._element.id,
-                node: node ? node.id : null
-            }
-        }));
+        this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, { node: node ? node.id : null });
 
         if (!node.expand) {
             if (indicator) {

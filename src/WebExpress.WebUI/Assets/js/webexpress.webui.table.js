@@ -145,7 +145,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 if (!evtConst) { 
                     return; 
                 }
-                document.dispatchEvent(new CustomEvent(evtConst, { detail }));
+                this._dispatch(evtConst, { detail });
             }
         };
 

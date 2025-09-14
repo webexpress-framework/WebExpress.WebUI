@@ -232,12 +232,7 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
 
             setTimeout(() => {
                 this._dropdownmenu.style.display = "none";
-                document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
-                    detail: {
-                        sender: this._element,
-                        id: this._element.id
-                    }
-                }));
+                this._dispatch(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, { });
             }, 0);
         });
         dropdownMenu.appendChild(todayBtn);
@@ -384,13 +379,7 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         // update input and dispatch change if changed
         if (this._input && this._input.value !== newSerialized) {
             this._input.value = newSerialized;
-            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
-                detail: {
-                    sender: this._element,
-                    id: this._element.id,
-                    value: newSerialized
-                }
-            }));
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: newSerialized });
         }
 
         // update view date if available
@@ -646,12 +635,7 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
                             }
                             setTimeout(() => {
                                 this._dropdownmenu.style.display = "none";
-                                document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
-                                    detail: {
-                                        sender: this._element,
-                                        id: this._element.id
-                                    }
-                                }));
+                                this._dispatch(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, { });
                                 this._input.blur();
                             }, 0);
                         } else {
@@ -664,12 +648,7 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
                         this.value = currentDate;
                         setTimeout(() => {
                             this._dropdownmenu.style.display = "none";
-                            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
-                                detail: {
-                                    sender: this._element,
-                                    id: this._element.id
-                                }
-                            }));
+                            this._dispatch(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {});
                             this._input.blur();
                         }, 0);
                     }

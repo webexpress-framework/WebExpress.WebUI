@@ -126,9 +126,7 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         modalInstance.show();
 
         // Trigger event for showing the modal
-        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.MODAL_SHOW_EVENT, {
-            detail: { sender: this._element, id: this._element.id }
-        }));
+        this._dispatch(webexpress.webui.Event.MODAL_SHOW_EVENT, { });
     }
 
     /**
@@ -141,11 +139,7 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         this._element.addEventListener("hidden.bs.modal", () => {
             this._element.removeAttribute("style");
             this._element.removeAttribute("aria-hidden");
-
-            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.MODAL_HIDE_EVENT, {
-                sender: this._element,
-                id: this._element.id 
-            }));
+            this._dispatch(webexpress.webui.Event.MODAL_HIDE_EVENT, {});
         });
 
         this._element.innerHTML = "";

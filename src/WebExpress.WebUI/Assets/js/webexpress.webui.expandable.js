@@ -86,13 +86,7 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
     set expand(value) {
         if (this._expand !== value) {
             this._expand = value;
-            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
-                detail: {
-                    sender: this._element,
-                    id: this._element.id || null,
-                    value: value
-                }
-            }));
+            this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, { value: value });
             this.render();
         }
     }
@@ -186,12 +180,7 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
         }
         expander.addEventListener("click", () => {
             this.toggleExpand();
-            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CLICK_EVENT, {
-                detail: {
-                    sender: this._element,
-                    id: this._element.id || null
-                }
-            }));
+            this._dispatch(webexpress.webui.Event.CLICK_EVENT, { });
         });
         return expander;
     }
@@ -211,12 +200,7 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
         }
         icon.addEventListener("click", () => {
             this.toggleExpand();
-            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CLICK_EVENT, {
-                detail: {
-                    sender: this._element,
-                    id: this._element.id || null
-                }
-            }));
+            this._dispatch(webexpress.webui.Event.CLICK_EVENT, {});
         });
         return icon;
     }
@@ -231,12 +215,7 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
         img.src = this._expand ? this._imageOpen : this._imageClose;
         img.addEventListener("click", () => {
             this.toggleExpand();
-            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CLICK_EVENT, {
-                detail: {
-                    sender: this._element,
-                    id: this._element.id || null
-                }
-            }));
+            this._dispatch(webexpress.webui.Event.CLICK_EVENT, {});
         });
         return img;
     }
@@ -252,12 +231,7 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
         span.textContent = this._headerText;
         span.addEventListener("click", () => {
             this.toggleExpand();
-            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CLICK_EVENT, {
-                detail: {
-                    sender: this._element,
-                    id: this._element.id || null
-                }
-            }));
+            this._dispatch(webexpress.webui.Event.CLICK_EVENT, {});
         });
         return span;
     }

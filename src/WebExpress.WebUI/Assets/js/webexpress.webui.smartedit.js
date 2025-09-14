@@ -124,13 +124,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         this._hideEditIcon(element);
 
         // trigger start event
-        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.START_INLINE_EDIT_EVENT, {
-            detail: {
-                sender: element,
-                id: element.id,
-                value: this._value
-            }
-        }));
+        this._dispatch(webexpress.webui.Event.START_INLINE_EDIT_EVENT, { value: this._value });
 
         // clear selection
         if (window.getSelection) {
@@ -198,15 +192,11 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
 
                 if (response.ok) {
                     // trigger save
-                    document.dispatchEvent(new CustomEvent(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
-                        detail: {
-                            sender: element,
-                            id: element.id,
-                            value: this._value,
-                            status: response.status,
-                            statusText: ""
-                        }
-                    }));
+                    this._dispatch(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
+                        value: this._value,
+                        status: response.status,
+                        statusText: ""
+                    });
                     return;
                 } else {
                     // trigger error
@@ -216,21 +206,17 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
                             id: element.id,
                             value: this._value,
                             status: response.status,
-                            statusText: response.statusText
+                            statusText: ""
                         }
                     }));
                 }
             } catch (error) {
                 // trigger error
-                document.dispatchEvent(new CustomEvent(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
-                    detail: {
-                        sender: element,
-                        id: element.id,
-                        value: this._value,
-                        status: 500,
-                        statusText: ""
-                    }
-                }));
+                this._dispatch(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
+                    value: this._value,
+                    status: 500,
+                    statusText: ""
+                });
                 console.error(`Failed to edit`, error);
             } finally {
                 this._hideEditSpinner(element);
@@ -286,13 +272,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         element.innerHTML = '';
 
         // always trigger end event
-        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.END_INLINE_EDIT_EVENT, {
-            detail: {
-                sender: element,
-                id: element.id,
-                value: this._value
-            }
-        }));
+        this._dispatch(webexpress.webui.Event.END_INLINE_EDIT_EVENT, { value: this._value });
 
         if (save && typeof this.onSave === 'function') {
             this.onSave(element, value);

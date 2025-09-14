@@ -148,12 +148,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         // Update filter and re-render on input
         filterInput.addEventListener("input", () => {
             const filter = filterInput.value;
-            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_FILTER_EVENT, {
-                detail: {
-                    sender: this._element,
-                    filter: filter
-                }
-            }));
+            this._dispatch(webexpress.webui.Event.CHANGE_FILTER_EVENT, { filter: filter });
             this.render();
         });
 
@@ -161,12 +156,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         clearButton.addEventListener("click", (e) => {
             e.stopPropagation();
             filterInput.value = "";
-            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_FILTER_EVENT, {
-                detail: {
-                    sender: this._element,
-                    filter: ""
-                }
-            }));
+            this._dispatch(webexpress.webui.Event.CHANGE_FILTER_EVENT, { filter: "" });
             this.render();
         });
 
@@ -286,12 +276,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                         this.render();
                         
                         // Close the dropdown after selection
-                        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
-                            detail: {
-                                sender: this._element,
-                                id: this._element.id
-                            }
-                        }));
+                        this._dispatch(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, { });
                         this._dropdownmenu.style.display = "none";
                     }
                 });
@@ -423,13 +408,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
             this._values = normalized;
             this.render();
             if (this._hidden) this._hidden.value = newSerialized;
-            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
-                detail: {
-                    sender: this._element,
-                    id: this._element.id,
-                    value: [...this._values]
-                }
-            }));
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: [...this._values]  });
         }
     }
 };

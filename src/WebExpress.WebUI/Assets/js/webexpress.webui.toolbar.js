@@ -180,13 +180,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 }
 
                 renderedItem.addEventListener("click", () => {
-                    document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CLICK_EVENT, {
-                        detail: {
-                            sender: this._element,
-                            id: this._element.id || null,
-                            item: item
-                        }
-                    }));
+                    this._dispatch(webexpress.webui.Event.CLICK_EVENT, { item: item });
                 });
             } else if (item.type === "dropdown") {
                 // use DropdownCtrl for rendering dropdown buttons
@@ -285,13 +279,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 });
 
                 select.addEventListener("change", (event) => {
-                    document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
-                        detail: {
-                            sender: this._element,
-                            id: this._element.id || null,
-                            item: item
-                        }
-                    }));
+                    this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { item: item });
                 });
 
                 comboboxContainer.appendChild(select);

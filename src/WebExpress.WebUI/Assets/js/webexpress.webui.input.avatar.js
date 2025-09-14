@@ -24,7 +24,6 @@ webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
         this._outputQuality = parseFloat(this._element.dataset.outputQuality || "0.92");
         this._accept = this._element.getAttribute("accept") || "image/png,image/jpeg,image/webp,image/avif,image/gif,image/bmp,image/svg+xml";
         this._placeholder = this._element.getAttribute("placeholder") || this._i18n("webexpress.webui:avatar.placeholder", "Drop image here or double click");
-        this._fieldName = this._element.dataset.field || (this._name + "_data");
         this._overlayAlpha = this._parseNumber(this._element.dataset.overlayAlpha, 0.5, 0, 1);
 
         // state
@@ -127,7 +126,7 @@ webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
         // create hidden input for data-url payload
         this._hiddenFormInput = document.createElement("input");
         this._hiddenFormInput.type = "hidden";
-        this._hiddenFormInput.name = this._fieldName;
+        this._hiddenFormInput.name = this._name;
         this._element.appendChild(this._hiddenFormInput);
     }
 
@@ -309,7 +308,7 @@ webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
                 try {
                     const blob = await this._exportCroppedBlob();
                     const dataUrl = await this._blobToDataURL(blob);
-                    this._hiddenFormInput.value = String(dataUrl);
+                    this._hiddenFormInput.value = `file:${this._filename};${String(dataUrl)}`;
                 } catch (err) {
                     this._hiddenFormInput.value = "";
                 }
@@ -753,23 +752,6 @@ webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
             };
             reader.readAsDataURL(blob);
         });
-    }
-
-    /**
-     * Dispatches a custom event.
-     * @param {string} type event type
-     * @param {object} detail payload
-     */
-    _dispatch(type, detail) {
-        document.dispatchEvent(new CustomEvent(type, {
-            detail: {
-                sender: this._element,
-                id: this._element.id,
-                ...detail
-            },
-            bubbles: true,
-            composed: true
-        }));
     }
 
     /**
