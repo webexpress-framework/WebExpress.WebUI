@@ -43,13 +43,13 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="handler">The action to execute for validation the form.</param>
         /// <returns>The current instance for method chaining.</returns>
-        IControlUpload Validate(Action<ControlFormEventFormValidateFile> handler);
+        IControlUpload Validate(Action<ControlFormEventItemValidate<ControlFormInputValueFile>> handler);
 
         /// <summary>
         /// Processes the form with the specified handler.
         /// </summary>
         /// <param name="handler">The action to execute for processing the form.</param>
         /// <returns>The current instance for method chaining.</returns>
-        IControlUpload Process(Action<ControlFormEventFormProcessFile> handler);
+        IControlUpload Process(Action<ControlFormEventItemProcess<ControlFormInputValueFile>> handler);
     }
 }

@@ -2,7 +2,6 @@
 using System.Runtime.CompilerServices;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
-using WebExpress.WebCore.WebMessage;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
@@ -14,16 +13,17 @@ namespace WebExpress.WebUI.WebControl
     public class ControlUpload : Control, IControlUpload
     {
         private readonly ControlForm _form;
+        private readonly ControlFormItemInputFile _inputFile;
 
         /// <summary>
         /// Event to validate the input values.
         /// </summary>
-        public event Action<ControlFormEventFormValidateFile> ValidateForm;
+        public event Action<ControlFormEventItemValidate<ControlFormInputValueFile>> ValidateItem;
 
         /// <summary>
         /// Event is raised when the form is about to be processed.
         /// </summary>
-        public event Action<ControlFormEventFormProcessFile> ProcessForm;
+        public event Action<ControlFormEventItemProcess<ControlFormInputValueFile>> ProcessItem;
 
         /// <summary>
         /// Returns or sets the placeholder text displayed in the file upload area.
@@ -75,9 +75,11 @@ namespace WebExpress.WebUI.WebControl
             : base(id)
         {
             _form = new ControlForm($"upload_{id}".GetHashCode().ToString("X"));
+            _inputFile = new ControlFormItemInputFile("file");
 
-            _form.ValidateForm += OnValidate;
-            _form.ProcessForm += OnProcess;
+            _inputFile.ValidateItem += OnValidate;
+            _inputFile.ProcessItem += OnProcess;
+            _form.Add(_inputFile);
         }
 
         /// <summary>
@@ -85,9 +87,9 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="handler">The action to execute for validation the form.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public virtual IControlUpload Validate(Action<ControlFormEventFormValidateFile> handler)
+        public virtual IControlUpload Validate(Action<ControlFormEventItemValidate<ControlFormInputValueFile>> handler)
         {
-            ValidateForm += handler;
+            ValidateItem += handler;
 
             return this;
         }
@@ -97,9 +99,9 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="handler">The action to execute for processing the form.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public virtual IControlUpload Process(Action<ControlFormEventFormProcessFile> handler)
+        public virtual IControlUpload Process(Action<ControlFormEventItemProcess<ControlFormInputValueFile>> handler)
         {
-            ProcessForm += handler;
+            ProcessItem += handler;
 
             return this;
         }
@@ -138,38 +140,18 @@ namespace WebExpress.WebUI.WebControl
         /// Raises the validation event.
         /// </summary>
         /// <param name="eventArgument">The event argument.</param>
-        protected virtual void OnValidate(ControlFormEventFormValidate eventArgument)
+        protected virtual void OnValidate(ControlFormEventItemValidate<ControlFormInputValueFile> eventArgument)
         {
-            var file = eventArgument.Context?.Request?.GetParameter("file") as ParameterFile;
-
-            var eventArgumentFile = new ControlFormEventFormValidateFile
-            (
-                file?.Value,
-                file?.Data,
-                file?.ContentType,
-                eventArgument.Context
-            );
-
-            ValidateForm?.Invoke(eventArgumentFile);
+            ValidateItem?.Invoke(eventArgument);
         }
 
         /// <summary>
         /// Raises the process event.
         /// </summary>
         /// <param name="eventArgument">The context in which the control is rendered.</param>
-        protected virtual void OnProcess(ControlFormEventFormProcess eventArgument)
+        protected virtual void OnProcess(ControlFormEventItemProcess<ControlFormInputValueFile> eventArgument)
         {
-            var file = eventArgument.Context?.Request?.GetParameter("file") as ParameterFile;
-
-            var eventArgumentFile = new ControlFormEventFormProcessFile
-            (
-                file?.Value,
-                file?.Data,
-                file?.ContentType,
-                eventArgument.Context
-            );
-
-            ProcessForm?.Invoke(eventArgumentFile);
+            ProcessItem?.Invoke(eventArgument);
         }
     }
 }

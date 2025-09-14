@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebMessage;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -145,7 +146,13 @@ namespace WebExpress.WebUI.WebControl
         /// </returns>
         protected override ControlFormInputValueFile CreateValue(string value, IRenderControlFormContext renderContext)
         {
-            return new ControlFormInputValueFile(value);
+            var file = renderContext?.Request?.GetParameter(Name) as ParameterFile;
+
+            return new ControlFormInputValueFile(value)
+            {
+                ContentType = ContentTypeExtensions.ToContentTypeFromMime(file?.ContentType),
+                Data = file?.Data
+            };
         }
     }
 }
