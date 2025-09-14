@@ -453,7 +453,7 @@ webexpress.webui.Ctrl = class {
         document.dispatchEvent(new CustomEvent(type, {
             detail: {
                 sender: this._element,
-                id: this._element.id,
+                id: this._element?.id,
                 ...detail
             },
             bubbles: true,

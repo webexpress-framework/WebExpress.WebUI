@@ -113,22 +113,12 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
                 Style = GetStyles()
-            };
-
-            if (!string.IsNullOrWhiteSpace(Placeholder))
-            {
-                html.AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder));
             }
-
-            if (EnableFavorited)
-            {
-                html.AddUserAttribute("data-favorited", "true");
-            }
-
-            if (!string.IsNullOrWhiteSpace(Value))
-            {
-                html.AddUserAttribute("data-value", Value);
-            }
+                .AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder))
+                .AddUserAttribute("data-favorited", EnableFavorited ? "true" : null)
+                .AddUserAttribute("data-value", Value)
+                .AddUserAttribute("data-icon", Icon is Icon icon ? icon.Class : null)
+                .AddUserAttribute("data-image", Icon is ImageIcon image ? image.Uri?.ToString() : null);
 
             return html;
         }

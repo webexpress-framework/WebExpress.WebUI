@@ -328,3 +328,225 @@ The configuration is declarative. The host element requires a URI from which the
      data-size="modal-lg">
 </div>
 ```
+
+# ModalSidebarPanel
+
+The `ModalSidebarPanel` component provides a modal dialog with a left-hand navigation tree and a right-hand content area. It extends the `ModalCtrl` base component and builds the modal body into a two-pane layout, using SplitCtrl for a resizable sidebar and TreeCtrl for hierarchical navigation. Pages (panels) can be autoloaded via a registry key or added programmatically. Validation can be scoped to either all pages or only the currently active one. A submit button is managed by the base class and is wired into `ModalSidebarPanel` via an element ID; on successful validation the modal closes, otherwise an error alert is shown above the split control.
+
+```
+   ┌──────────────────────────────────────────────────────┐
+   │                                                      │
+   │  ┌────────────────────────────────────────────────┐  │
+   │  │ [Form Title]                               [x] │  │
+   │  ├─────────────────────┬─┬────────────────────────┤  │
+   │  │                     │░│                        │  │
+   │  │ ▼ [Icon] Node 1     │░│ Panel content          │  │
+   │  │   ► [Icon] Node 1.1 │░│ (active pane)          │  │
+   │  │   ► [Icon] Node 1.2 │▓│                        │  │
+   │  │ ► [Icon] Node 2     │░│                        │  │
+   │  │                     │░│                        │  │
+   │  │                     │░│                        │  │
+   │  ├─────────────────────┴─┴────────────────────────┤  │
+   │  │                        [Custom Button] [Close] │  │
+   │  └────────────────────────────────────────────────┘  │
+   │                                                      │
+   └──────────────────────────────────────────────────────┘
+```
+
+## Configuration
+
+Configuration is declared on the host element through data attributes. The header and footer are provided via dedicated CSS classes. The body is fully managed by this component and will be rebuilt into a split layout.
+
+| Attribute                   | Description
+|-----------------------------|--------------------------------------------------------------------------------------------------------
+| `data-key`                  | Registry key used to autoload pages from DialogPanels.
+| `data-side-width`           | Initial sidebar width in pixels (default: 280).
+| `data-min-side-width`       | Minimum sidebar width in pixels (default: 180).
+| `data-submit-id`            | The ID of the submit button managed by the base class in the modal footer. ModalSidebarPanel only wires this button.
+| `data-validate-active-only` | When set to `"true"`, only the currently active page is validated and hidden pages are ignored (default: `"false"` = validate all pages).
+
+Content markers inside the host element:
+
+- `.wx-modal-header`: Its content becomes the modal title.
+- `.wx-modal-footer`: Its content is placed into the modal footer before the auto-generated “Close” button.
+- Note: The body (`.wx-modal-content`) is not used; the component constructs the split layout itself.
+
+## Functionality
+
+ModalSidebarPanel wraps the Bootstrap modal behavior from ModalCtrl and adds a navigable, two-pane layout.
+
+- Dynamic body construction: The modal body is cleared and rebuilt into a split layout with a sidebar and a main area. SplitCtrl provides resizing; TreeCtrl renders the navigation tree.
+- Page model and navigation: Pages are managed as a flat list and projected as a hierarchy in the tree via optional `parentId`. A node index is maintained for quick lookups; ancestors are expanded automatically to reveal selected nodes, and the active node is tracked and highlighted.
+- Page API: Pages can expose `render(pane, ctrl)`, `onShow(ctrl)`, `validate(ctrl)`, and `onSubmit(ctrl)`. Each page receives its own pane element that is shown/hidden as the active page changes.
+- Autoload from registry: Using `data-panels-key`/`data-key`, panels registered in `webexpress.webui.DialogPanels` are loaded. If a registered panel specifies `modalId`, it is loaded only when it matches the current modal’s ID. Missing or conflicting IDs are resolved by generating a unique, safe ID.
+- Validation and submit: The submit button is created and managed by the base class; ModalSidebarPanel wires it via `data-submit-id`. On click, validation is performed. If validation fails, a Bootstrap alert (`alert alert-danger`) is shown above the split control and remains visible as long as errors persist. If validation passes, optional `onSubmit` hooks are invoked and the modal closes.
+- Robust tree click handling: The global click listener for TreeCtrl is managed idempotently and reattached when the modal is shown. Sender checks are tolerant to ensure page switching remains reliable.
+
+## Page Object API
+
+Pages supplied to ModalSidebarPanel (either autoloaded or added programmatically) follow this shape:
+
+- `id: string` – unique page ID. If omitted or duplicated, a safe ID is generated.
+- `title?: string` – label shown in the navigation tree (defaults to `id`).
+- `iconClass?: string` – optional icon CSS class for the node.
+- `image?: string` – optional image URL/class used by the tree control.
+- `parentId?: string|null` – optional parent page ID to form a hierarchy.
+- `render?: (pane: HTMLElement, ctrl: ModalSidebarPanel) => void` – render hook to populate the page pane.
+- `onShow?: (ctrl: ModalSidebarPanel) => void` – called when the page becomes visible.
+- `validate?: (ctrl: ModalSidebarPanel) => boolean | string | { valid: boolean, message?: string }` – validation hook. Returning:
+  - `true` means valid,
+  - `false` or a non-empty `string` means invalid (string is used as message),
+  - an object can specify `{ valid: false, message: '...' }` for details.
+- `onSubmit?: (ctrl: ModalSidebarPanel) => void` – optional hook executed after successful validation and before the modal closes.
+
+## Public Methods
+
+- `addPage(page)`: Adds a page to the navigation and creates its pane. If it is the first page, it becomes active.
+- `getActivePage()`: Returns the active page definition or `null`.
+- `selectPage(id)`: Programmatically activates a page by ID.
+- `submit()`: Triggers the submit workflow (validation, error alert handling, submit hooks, and modal close on success).
+- `fitSidePaneToContent()`: Asks the split controller to fit the sidebar to its content.
+
+## Programmatic Control
+
+### Accessing an automatically created instance
+
+```javascript
+// locate the host element
+const el = document.getElementById('my-modal-sidebar');
+
+// get the controller instance
+const sidebarCtrl = webexpress.webui.Controller.getInstanceByElement(el);
+
+if (sidebarCtrl) {
+    // show the modal
+    sidebarCtrl.show();
+}
+```
+
+### Adding pages and validating
+
+```javascript
+// add a page with render, validate and onSubmit hooks
+sidebarCtrl.addPage({
+    id: 'profile',
+    title: 'Profile',
+    parentId: null,
+    render: (pane, ctrl) => {
+        // render content
+        pane.innerHTML = `
+            <div class="p-2">
+                <label for="profile-name" class="form-label">Name</label>
+                <input id="profile-name" class="form-control" />
+            </div>`;
+    },
+    onShow: (ctrl) => {
+        // run after the pane becomes visible
+    },
+    validate: (ctrl) => {
+        // validate inputs on this page
+        const input = document.getElementById('profile-name');
+        if (!input || input.value.trim() === '') {
+            return { valid: false, message: 'Name is required.' };
+        }
+        return { valid: true };
+    },
+    onSubmit: (ctrl) => {
+        // persist data for this page
+        const input = document.getElementById('profile-name');
+        console.log('profile name:', input ? input.value : '');
+    }
+});
+
+// switch to the page
+sidebarCtrl.selectPage('profile');
+
+// optionally trigger submit programmatically
+sidebarCtrl.submit();
+```
+
+### Validating only the active page
+
+```html
+<!-- only the currently visible page is validated; hidden pages are ignored -->
+<div id="settings-modal"
+     class="wx-webui-modal-sidebar-panel"
+     data-size="modal-lg"
+     data-close-label="Close"
+     data-panels-key="settings"
+     data-submit-id="settings-submit"
+     data-validate-active-only="true">
+
+    <div class="wx-modal-header">
+        Settings
+    </div>
+
+    <div class="wx-modal-footer">
+        <!-- base class manages this button; id must match data-submit-id -->
+        <button id="settings-submit" type="button" class="btn btn-primary">Save</button>
+    </div>
+</div>
+```
+
+## Registering pages via DialogPanels
+
+Pages can be registered centrally and autoloaded into any `ModalSidebarPanel` that specifies a matching `data-panels-key`. The following example registers a page under the key `"key"`. Any modal with `data-panels-key="key"` will automatically load this page.
+
+```javascript
+// register a page under a registry key; will be autoloaded by modals with data-panels-key="key"
+webexpress.webui.DialogPanels.register("key", {
+    id: "info-pane",
+    parentId: null,
+    title: "Example Page",
+    iconClass: "fas fa-info-circle",
+    render: function(pane, ctrl) {
+        // render content for this page
+        pane.innerHTML = '<div class="p-2"><p>This is an example page loaded via DialogPanels.register().</p></div>';
+    },
+    onShow: function(ctrl) {
+        // run when this page becomes visible
+        // e.g., initialize controls or focus first input
+    },
+    onSubmit: function(ctrl) {
+        // handle submission for this page
+        // e.g., collect and send data to a server
+    }
+});
+```
+
+## Events
+
+ModalSidebarPanel integrates with Bootstrap’s modal events and the base component’s events.
+
+- `shown.bs.modal`: After the modal is shown; renders the tree, ensures an active page, wires the submit button, and fits the sidebar.
+- `hidden.bs.modal`: After the modal is hidden; cleans up event handlers and hides any validation alert.
+- `webexpress.webui.Event.MODAL_SHOW_EVENT`: Emitted by the base class when opening.
+- `webexpress.webui.Event.MODAL_HIDE_EVENT`: Emitted by the base class when closing.
+- `webexpress.webui.Event.CLICK_EVENT`: Global tree click events; managed idempotently and reattached as needed.
+
+## Example
+
+A declarative setup with autoloaded pages, a base-managed submit button bound via `data-submit-id`, and active-only validation:
+
+```html
+<div id="account-modal"
+     class="wx-webui-modal-sidebar-panel"
+     data-size="modal-lg"
+     data-close-label="Cancel"
+     data-panels-key="account"
+     data-submit-id="account-submit"
+     data-validate-active-only="true">
+
+    <div class="wx-modal-header">
+        Account Settings
+    </div>
+
+    <div class="wx-modal-footer">
+        <button id="account-submit" type="button" class="btn btn-success">
+            Save Changes
+        </button>
+    </div>
+</div>
+```
+
+At runtime, the body is composed into a split layout with a navigation tree and a content area. The first page is activated by default. Navigating in the tree switches the visible pane and expands ancestor nodes. On submit, validation runs either on all pages or only the active one, depending on the configuration; an error alert remains visible above the split control while errors persist. On success, any `onSubmit` hooks are executed and the modal closes.

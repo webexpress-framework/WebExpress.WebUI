@@ -74,6 +74,9 @@ if (splitCtrl) {
 
     // expand the side pane to a specific size (e.g., 300px) or its previous size
     splitCtrl.expandSidePane(300);
+    
+    // fits the side pane size to its content size
+    splitCtrl.fitSidePaneToContent();
 }
 ```
 

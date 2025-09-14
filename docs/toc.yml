@@ -9,6 +9,8 @@
 - name: JavaScript UI Documentation
   href: javascript.md
   children:
+    - name: Avatar
+      href: js/avatar.md
     - name: Button
       href: js/button.md
     - name: Code
