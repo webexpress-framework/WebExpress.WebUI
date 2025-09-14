@@ -261,11 +261,11 @@ namespace WebExpress.WebUI.WebControl
 
                 // uninizialized form
                 // fill the form with data
-                foreach (var item in items)
+                foreach (var item in items.Where(x => x != null))
                 {
                     item.Initialize(renderContext);
                 }
-                foreach (var item in Buttons)
+                foreach (var item in Buttons.Where(x => x != null))
                 {
                     item.Initialize(renderContext);
                 }
@@ -416,7 +416,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 Class = FormLayout == TypeLayoutForm.Inline ? "ms-2" : ""
             };
-            buttonPannel.Add(Buttons.Select(x => x.Render(renderContext, visualTree)));
+            buttonPannel.Add(Buttons.Select(x => x?.Render(renderContext, visualTree)));
 
             var footer = new HtmlElementSectionFooter();
             var footerPreferences = WebEx.ComponentHub.FragmentManager.GetFragments<IFragmentControl, SectionFormFooterPreferences>
@@ -476,7 +476,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public IControlForm Add(params IControlFormItem[] items)
         {
-            _items.AddRange(items);
+            _items.AddRange(items ?? []);
 
             return this;
         }

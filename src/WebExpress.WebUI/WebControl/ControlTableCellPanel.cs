@@ -115,7 +115,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = Style
             }
                 .AddUserAttribute("data-color", Color.ToClass())
-                .Add(_content.Select(x => x.Render(renderContext, visualTree)));
+                .Add(_content.Select(x => x?.Render(renderContext, visualTree)));
 
             return html;
         }
