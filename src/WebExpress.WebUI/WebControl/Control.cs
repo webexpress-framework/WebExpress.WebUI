@@ -15,6 +15,11 @@ namespace WebExpress.WebUI.WebControl
         private readonly Dictionary<string, Tuple<object, Func<string>, Func<string>>> _propertys = [];
 
         /// <summary>
+        /// Returns or sets the id of the control.
+        /// </summary>
+        public string Id { get; private set; }
+
+        /// <summary>
         /// Returns or sets the horizontal alignment.
         /// </summary>
         public virtual TypeHorizontalAlignment HorizontalAlignment
@@ -114,9 +119,17 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the id of the control.
+        /// Returns or sets the display type for the current object.
         /// </summary>
-        public string Id { get; private set; }
+        /// <remarks>
+        /// This property determines how the object is visually represented. Setting this
+        /// property may involve converting the value to a class representation.
+        /// </remarks>
+        public virtual TypeDisplay Display
+        {
+            get => (TypeDisplay)GetProperty(TypeDisplay.None);
+            set => SetProperty(value, () => value.ToClass());
+        }
 
         /// <summary>
         /// Returns or sets the css class.

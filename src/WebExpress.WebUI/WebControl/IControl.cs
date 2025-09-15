@@ -65,6 +65,15 @@ namespace WebExpress.WebUI.WebControl
         TypeHeight Height { get; set; }
 
         /// <summary>
+        /// Returns or sets the display type for the current object.
+        /// </summary>
+        /// <remarks>
+        /// This property determines how the object is visually represented. Setting this
+        /// property may involve converting the value to a class representation.
+        /// </remarks>
+        TypeDisplay Display { get; set; }
+
+        /// <summary>
         /// Returns or sets the css class.
         /// </summary>
         IEnumerable<string> Classes { get; set; }
