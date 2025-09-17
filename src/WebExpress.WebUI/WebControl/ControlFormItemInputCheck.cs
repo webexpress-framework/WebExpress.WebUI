@@ -24,7 +24,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the layout configuration for the type.
         /// </summary>
-        public TypeLayoutCheckbox Layout { get; set; } = TypeLayoutCheckbox.Default;
+        public TypeLayoutCheck Layout { get; set; } = TypeLayoutCheck.Default;
 
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.

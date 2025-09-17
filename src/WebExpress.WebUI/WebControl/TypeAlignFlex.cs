@@ -3,7 +3,7 @@
     /// <summary>
     /// Specifies the alignment of flexbox items.
     /// </summary>
-    public enum TypeAlignFlexbox
+    public enum TypeAlignFlex
     {
         /// <summary>
         /// No alignment.
@@ -37,24 +37,24 @@
     }
 
     /// <summary>
-    /// Provides extension methods for the <see cref="TypeAlignFlexbox"/> enum.
+    /// Provides extension methods for the <see cref="TypeAlignFlex"/> enum.
     /// </summary>
     public static class TypeAlignFlexboxExtensions
     {
         /// <summary>
-        /// Converts the <see cref="TypeAlignFlexbox"/> value to a corresponding CSS class.
+        /// Converts the <see cref="TypeAlignFlex"/> value to a corresponding CSS class.
         /// </summary>
         /// <param name="layout">The layout to be converted.</param>
         /// <returns>The CSS class corresponding to the layout.</returns>
-        public static string ToClass(this TypeAlignFlexbox layout)
+        public static string ToClass(this TypeAlignFlex layout)
         {
             return layout switch
             {
-                TypeAlignFlexbox.Start => "align-items-start",
-                TypeAlignFlexbox.End => "align-items-end",
-                TypeAlignFlexbox.Center => "align-items-center",
-                TypeAlignFlexbox.Baseline => "align-items-baseline",
-                TypeAlignFlexbox.Stretch => "align-items-stretch",
+                TypeAlignFlex.Start => "align-items-start",
+                TypeAlignFlex.End => "align-items-end",
+                TypeAlignFlex.Center => "align-items-center",
+                TypeAlignFlex.Baseline => "align-items-baseline",
+                TypeAlignFlex.Stretch => "align-items-stretch",
                 _ => string.Empty,
             };
         }

@@ -108,9 +108,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the Layout property of the form check box control.
         /// </summary>
         [Theory]
-        [InlineData(TypeLayoutCheckbox.Default, @"<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
-        [InlineData(TypeLayoutCheckbox.Switch, @"<div class=""form-check form-switch""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
-        public void Layout(TypeLayoutCheckbox layout, string expected)
+        [InlineData(TypeLayoutCheck.Default, @"<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
+        [InlineData(TypeLayoutCheck.Switch, @"<div class=""form-check form-switch""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
+        public void Layout(TypeLayoutCheck layout, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();

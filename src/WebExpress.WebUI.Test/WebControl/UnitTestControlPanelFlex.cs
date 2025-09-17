@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.Test.WebControl
     /// Tests the panel flexbox control.
     /// </summary>
     [Collection("NonParallelTests")]
-    public class UnitTestControlPanelFlexbox
+    public class UnitTestControlPanelFlex
     {
         /// <summary>
         /// Tests the id property of the panel flexbox control.
@@ -22,7 +22,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlPanelFlexbox(id)
+            var control = new ControlPanelFlex(id)
             {
             };
 
@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlPanelFlexbox()
+            var control = new ControlPanelFlex()
             {
                 Direction = direction,
             };
@@ -71,7 +71,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlPanelFlexbox()
+            var control = new ControlPanelFlex()
             {
                 Fluid = fluid,
             };
@@ -86,16 +86,16 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the layout property of the panel flexbox control.
         /// </summary>
         [Theory]
-        [InlineData(TypeLayoutFlexbox.None, @"<div></div>")]
-        [InlineData(TypeLayoutFlexbox.Default, @"<div class=""d-flex""></div>")]
-        [InlineData(TypeLayoutFlexbox.Inline, @"<div class=""d-inline-flex""></div>")]
-        public void Layout(TypeLayoutFlexbox layout, string expected)
+        [InlineData(TypeLayoutFlex.None, @"<div></div>")]
+        [InlineData(TypeLayoutFlex.Default, @"<div class=""d-flex""></div>")]
+        [InlineData(TypeLayoutFlex.Inline, @"<div class=""d-inline-flex""></div>")]
+        public void Layout(TypeLayoutFlex layout, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlPanelFlexbox()
+            var control = new ControlPanelFlex()
             {
                 Layout = layout,
             };
@@ -110,18 +110,18 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the justify property of the panel flexbox control.
         /// </summary>
         [Theory]
-        [InlineData(TypeJustifiedFlexbox.None, @"<div></div>")]
-        [InlineData(TypeJustifiedFlexbox.Start, @"<div class=""justify-content-start""></div>")]
-        [InlineData(TypeJustifiedFlexbox.Around, @"<div class=""justify-content-around""></div>")]
-        [InlineData(TypeJustifiedFlexbox.Between, @"<div class=""justify-content-between""></div>")]
-        [InlineData(TypeJustifiedFlexbox.End, @"<div class=""justify-content-end""></div>")]
-        public void Justify(TypeJustifiedFlexbox justify, string expected)
+        [InlineData(TypeJustifiedFlex.None, @"<div></div>")]
+        [InlineData(TypeJustifiedFlex.Start, @"<div class=""justify-content-start""></div>")]
+        [InlineData(TypeJustifiedFlex.Around, @"<div class=""justify-content-around""></div>")]
+        [InlineData(TypeJustifiedFlex.Between, @"<div class=""justify-content-between""></div>")]
+        [InlineData(TypeJustifiedFlex.End, @"<div class=""justify-content-end""></div>")]
+        public void Justify(TypeJustifiedFlex justify, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlPanelFlexbox()
+            var control = new ControlPanelFlex()
             {
                 Justify = justify,
             };
@@ -136,18 +136,18 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the align property of the panel flexbox control.
         /// </summary>
         [Theory]
-        [InlineData(TypeAlignFlexbox.None, @"<div></div>")]
-        [InlineData(TypeAlignFlexbox.Start, @"<div class=""align-items-start""></div>")]
-        [InlineData(TypeAlignFlexbox.Stretch, @"<div class=""align-items-stretch""></div>")]
-        [InlineData(TypeAlignFlexbox.Baseline, @"<div class=""align-items-baseline""></div>")]
-        [InlineData(TypeAlignFlexbox.End, @"<div class=""align-items-end""></div>")]
-        public void Align(TypeAlignFlexbox align, string expected)
+        [InlineData(TypeAlignFlex.None, @"<div></div>")]
+        [InlineData(TypeAlignFlex.Start, @"<div class=""align-items-start""></div>")]
+        [InlineData(TypeAlignFlex.Stretch, @"<div class=""align-items-stretch""></div>")]
+        [InlineData(TypeAlignFlex.Baseline, @"<div class=""align-items-baseline""></div>")]
+        [InlineData(TypeAlignFlex.End, @"<div class=""align-items-end""></div>")]
+        public void Align(TypeAlignFlex align, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlPanelFlexbox()
+            var control = new ControlPanelFlex()
             {
                 Align = align,
             };
@@ -172,7 +172,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlPanelFlexbox()
+            var control = new ControlPanelFlex()
             {
                 Wrap = wrap,
             };
@@ -196,7 +196,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlPanelFlexbox()
+            var control = new ControlPanelFlex()
             {
                 Theme = theme
             };
@@ -221,7 +221,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var childInstance = Activator.CreateInstance(child, [null]) as IControl;
-            var control = new ControlPanelFlexbox();
+            var control = new ControlPanelFlex();
 
             // test execution
             control.Add(childInstance);

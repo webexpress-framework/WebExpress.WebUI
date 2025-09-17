@@ -145,9 +145,9 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the horizontal alignment of the items.
         /// </summary>
-        public virtual TypeJustifiedFlexbox Justify
+        public virtual TypeJustifiedFlex Justify
         {
-            get => (TypeJustifiedFlexbox)GetProperty(TypeJustifiedFlexbox.Start);
+            get => (TypeJustifiedFlex)GetProperty(TypeJustifiedFlex.Start);
             set => SetProperty(value, () => value.ToClass());
         }
 

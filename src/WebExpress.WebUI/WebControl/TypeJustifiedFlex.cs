@@ -3,7 +3,7 @@
     /// <summary>
     /// Specifies the type of justification for a flexbox layout.
     /// </summary>
-    public enum TypeJustifiedFlexbox
+    public enum TypeJustifiedFlex
     {
         /// <summary>
         /// No justification.
@@ -37,24 +37,24 @@
     }
 
     /// <summary>
-    /// Provides extension methods for the <see cref="TypeJustifiedFlexbox"/> enum.
+    /// Provides extension methods for the <see cref="TypeJustifiedFlex"/> enum.
     /// </summary>
     public static class TypeTypeJustifiedFlexboxExtensions
     {
         /// <summary>
-        /// Converts the <see cref="TypeJustifiedFlexbox"/> value to a corresponding CSS class.
+        /// Converts the <see cref="TypeJustifiedFlex"/> value to a corresponding CSS class.
         /// </summary>
         /// <param name="layout">The layout to be converted.</param>
         /// <returns>The CSS class corresponding to the layout.</returns>
-        public static string ToClass(this TypeJustifiedFlexbox layout)
+        public static string ToClass(this TypeJustifiedFlex layout)
         {
             return layout switch
             {
-                TypeJustifiedFlexbox.Start => "justify-content-start",
-                TypeJustifiedFlexbox.End => "justify-content-end",
-                TypeJustifiedFlexbox.Center => "justify-content-center",
-                TypeJustifiedFlexbox.Between => "justify-content-between",
-                TypeJustifiedFlexbox.Around => "justify-content-around",
+                TypeJustifiedFlex.Start => "justify-content-start",
+                TypeJustifiedFlex.End => "justify-content-end",
+                TypeJustifiedFlex.Center => "justify-content-center",
+                TypeJustifiedFlex.Between => "justify-content-between",
+                TypeJustifiedFlex.Around => "justify-content-around",
                 _ => string.Empty,
             };
         }

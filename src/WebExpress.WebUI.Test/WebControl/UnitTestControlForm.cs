@@ -188,12 +188,12 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the justify property of the form control.
         /// </summary>
         [Theory]
-        [InlineData(TypeJustifiedFlexbox.None, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeJustifiedFlexbox.Start, @"<form id=""*"" class=""justify-content-start"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeJustifiedFlexbox.Around, @"<form id=""*"" class=""justify-content-around"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeJustifiedFlexbox.Between, @"<form id=""*"" class=""justify-content-between"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeJustifiedFlexbox.End, @"<form id=""*"" class=""justify-content-end"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        public void Justify(TypeJustifiedFlexbox justify, string expected)
+        [InlineData(TypeJustifiedFlex.None, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeJustifiedFlex.Start, @"<form id=""*"" class=""justify-content-start"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeJustifiedFlex.Around, @"<form id=""*"" class=""justify-content-around"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeJustifiedFlex.Between, @"<form id=""*"" class=""justify-content-between"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeJustifiedFlex.End, @"<form id=""*"" class=""justify-content-end"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        public void Justify(TypeJustifiedFlex justify, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();

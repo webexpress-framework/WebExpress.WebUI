@@ -3,7 +3,7 @@
     /// <summary>
     /// Specifies the type of layout for a flexbox.
     /// </summary>
-    public enum TypeLayoutFlexbox
+    public enum TypeLayoutFlex
     {
         /// <summary>
         /// No layout specified.
@@ -22,7 +22,7 @@
     }
 
     /// <summary>
-    /// Provides extension methods for the <see cref="TypeLayoutFlexbox"/> enum.
+    /// Provides extension methods for the <see cref="TypeLayoutFlex"/> enum.
     /// </summary>
     public static class TypeInlineFlexboxExtensions
     {
@@ -31,12 +31,12 @@
         /// </summary>
         /// <param name="layout">The layout to be converted.</param>
         /// <returns>The CSS class corresponding to the layout.</returns>
-        public static string ToClass(this TypeLayoutFlexbox layout)
+        public static string ToClass(this TypeLayoutFlex layout)
         {
             return layout switch
             {
-                TypeLayoutFlexbox.Default => "d-flex",
-                TypeLayoutFlexbox.Inline => "d-inline-flex",
+                TypeLayoutFlex.Default => "d-flex",
+                TypeLayoutFlex.Inline => "d-inline-flex",
                 _ => string.Empty,
             };
         }

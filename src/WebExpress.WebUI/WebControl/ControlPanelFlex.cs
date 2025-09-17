@@ -7,32 +7,32 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a control panel that uses a flexbox layout to arrange its child controls.
     /// </summary>
-    public class ControlPanelFlexbox : ControlPanel
+    public class ControlPanelFlex : ControlPanel
     {
         /// <summary>
         /// Returns or sets whether the items should be displayed inline.
         /// </summary>
-        public virtual TypeLayoutFlexbox Layout
+        public virtual TypeLayoutFlex Layout
         {
-            get => (TypeLayoutFlexbox)GetProperty(TypeLayoutFlexbox.Default);
+            get => (TypeLayoutFlex)GetProperty(TypeLayoutFlex.Default);
             set => SetProperty(value, () => value.ToClass());
         }
 
         /// <summary>
         /// Returns or sets the horizontal alignment of the items.
         /// </summary>
-        public virtual TypeJustifiedFlexbox Justify
+        public virtual TypeJustifiedFlex Justify
         {
-            get => (TypeJustifiedFlexbox)GetProperty(TypeJustifiedFlexbox.Start);
+            get => (TypeJustifiedFlex)GetProperty(TypeJustifiedFlex.Start);
             set => SetProperty(value, () => value.ToClass());
         }
 
         /// <summary>
         /// Returns or sets the vertical orientation of the items.
         /// </summary>
-        public virtual TypeAlignFlexbox Align
+        public virtual TypeAlignFlex Align
         {
-            get => (TypeAlignFlexbox)GetProperty(TypeAlignFlexbox.Start);
+            get => (TypeAlignFlex)GetProperty(TypeAlignFlex.Start);
             set => SetProperty(value, () => value.ToClass());
         }
 
@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="id">The id of the control.</param>
         /// <param name="content">The flexbox items.</param>
-        public ControlPanelFlexbox(string id = null, params IControl[] content)
+        public ControlPanelFlex(string id = null, params IControl[] content)
             : base(id, content)
         {
         }
