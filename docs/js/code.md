@@ -1,4 +1,6 @@
-﻿# CodeCtrl
+﻿![WebExpress-Framework](https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png)
+
+# CodeCtrl
 
 The `CodeCtrl` module provides a component that can display code with optional line numbers, a copy function, and language-dependent syntax highlighting. It is ideal for presenting code snippets in a user interface. Initialization is declarative via HTML, where configuration is controlled through `data-` attributes.
 

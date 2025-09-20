@@ -1,4 +1,4 @@
-![WebExpress](https://raw.githubusercontent.com/ReneSchwarzer/WebExpress.Doc/main/assets/banner.png)
+![WebExpress-Framework](https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png)
 
 # Introduction
 `WebExpress` is a powerful framework for creating modern web applications. This documentation provides a comprehensive overview of the JavaScript UI controls, explains their significance, highlights the differences from server-side controls, and demonstrates how these components can be used not only within `WebExpress` but also in other environments.

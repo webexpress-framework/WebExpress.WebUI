@@ -1,4 +1,4 @@
-![WebExpress](https://raw.githubusercontent.com/ReneSchwarzer/WebExpress.Doc/main/assets/banner.png)
+![WebExpress-Framework](https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png)
 
 # ModalCtrl
 
@@ -216,7 +216,7 @@ The following example shows the configuration of a modal that loads its content 
 -->
 <div id="user-profile-modal"
      class="wx-webui-modalpage"
-     data-uri="/users/ReneSchwarzer/details"
+     data-uri="/users/webexpress-framework/details"
      data-selector="#profile-details"
      data-size="modal-lg">
 
