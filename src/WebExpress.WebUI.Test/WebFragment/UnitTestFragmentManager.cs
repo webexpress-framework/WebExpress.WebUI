@@ -55,6 +55,9 @@ namespace WebExpress.WebUI.Test.WebFragment
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlForm), typeof(IScope), @"<form id=""webexpress-webui-test-testfragmentcontrolform-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlModalForm), typeof(IScope), @"<form id=""webexpress-webui-test-testfragmentcontrolmodalform-form"" *>*</form>")]
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlToolbarItemButton), typeof(IScope), @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritembutton"" class=""wx-toolbar-button"" data-label=""TestFragmentControlToolbarItemButton""></div>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlToolbarItemCombo), typeof(IScope), @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritemcombo"" class=""wx-toolbar-combo"" data-label=""TestFragmentControlToolbarItemCombo""></div>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlToolbarItemDropdown), typeof(IScope), @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritemdropdown"" class=""wx-toolbar-dropdown"" data-label=""TestFragmentControlToolbarItemDropdown""></div>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlToolbarItemLabel), typeof(IScope), @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritemlabel"" class=""wx-toolbar-label"" data-label=""TestFragmentControlToolbarItemLabel""></div>")]
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentHidden), typeof(IScope), null)]
         public void Render(Type applicationType, Type sectionType, Type scopeType, string expected)
         {

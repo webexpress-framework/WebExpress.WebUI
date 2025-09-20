@@ -59,11 +59,6 @@ namespace WebExpress.WebUI.WebControl
         public TypeActive Active { get; }
 
         /// <summary>
-        /// Returns the alignment of the toolbar item.
-        /// </summary>
-        public TypeToolbarItemAlignment Alignment { get; }
-
-        /// <summary>
         /// Adds one or more items to the combo.
         /// </summary>
         /// <param name="items">The items to add to the combo.</param>

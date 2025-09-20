@@ -8,5 +8,9 @@ namespace WebExpress.WebUI.WebControl
     /// </summary>
     public interface IControlToolbarItem : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
+        /// <summary>
+        /// Returns the alignment of the toolbar item.
+        /// </summary>
+        TypeToolbarItemAlignment Alignment { get; }
     }
 }

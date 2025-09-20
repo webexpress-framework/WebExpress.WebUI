@@ -197,6 +197,25 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlToolbarItem> items)
         {
+            return Render(renderContext, visualTree, items, _more);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="items">The items to be included in the dropdown.</param>
+        /// <param name="more">The more items to be included in the dropdown.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render
+        (
+            IRenderControlContext renderContext,
+            IVisualTreeControl visualTree,
+            IEnumerable<IControlToolbarItem> items,
+            IEnumerable<IControlDropdownItem> more
+        )
+        {
             if (!Enable)
             {
                 return null;
@@ -209,15 +228,15 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(),
                 Role = Role
             }
-                .Add(_items.Select(x => x.Render(renderContext, visualTree)))
+                .Add(items.Select(x => x.Render(renderContext, visualTree)))
                 .Add
                 (
-                    _more.Count != 0
+                    more.Any()
                         ? new HtmlElementTextContentDiv()
                         {
                             Class = "wx-toolbar-more"
                         }
-                            .Add(_more.Select(x => x.Render(renderContext, visualTree)))
+                            .Add(more.Select(x => x.Render(renderContext, visualTree)))
                         : null
                 );
 

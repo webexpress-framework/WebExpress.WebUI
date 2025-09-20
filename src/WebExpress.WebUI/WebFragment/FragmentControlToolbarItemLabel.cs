@@ -6,9 +6,9 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebFragment
 {
     /// <summary>
-    /// Represents a toolbar button control fragment that can be processed and rendered within a web page.
+    /// Represents a toolbar label control fragment that can be processed and rendered within a web page.
     /// </summary>
-    public abstract class FragmentControlToolbarItemButton : ControlToolbarItemButton, IFragmentWebUIElement<IRenderControlContext, IVisualTreeControl>, IFragmentControlToolbarItem
+    public abstract class FragmentControlToolbarItemLabel : ControlToolbarItemLabel, IFragmentWebUIElement<IRenderControlContext, IVisualTreeControl>, IFragmentControlToolbarItem
     {
         /// <summary>
         /// Returns the context of the fragment.
@@ -19,7 +19,7 @@ namespace WebExpress.WebUI.WebFragment
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="fragmentContext">The context of the fragment.</param>
-        protected FragmentControlToolbarItemButton(IFragmentContext fragmentContext)
+        protected FragmentControlToolbarItemLabel(IFragmentContext fragmentContext)
             : base(fragmentContext?.FragmentId?.ToString())
         {
             FragmentContext = fragmentContext;

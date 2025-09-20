@@ -64,11 +64,6 @@ namespace WebExpress.WebUI.WebControl
         TypeAlignmentDropdownMenu AlignmentMenu { get; }
 
         /// <summary>
-        /// Returns the alignment of the toolbar item.
-        /// </summary>
-        TypeToolbarItemAlignment Alignment { get; }
-
-        /// <summary>
         /// Adds one or more items to the dropdown.
         /// </summary>
         /// <param name="items">The items to add to the dropdown.</param>
