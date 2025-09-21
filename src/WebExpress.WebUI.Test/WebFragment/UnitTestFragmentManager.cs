@@ -39,25 +39,48 @@ namespace WebExpress.WebUI.Test.WebFragment
         /// Test the render function of the fragment manager.
         /// </summary>
         [Theory]
-        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlText), typeof(IScope), @"<p id=""webexpress-webui-test-testfragmentcontroltext"">TestFragmentControlText</p>")]
-        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlList), typeof(IScope), @"<ul id=""webexpress-webui-test-testfragmentcontrollist""><li></li></ul>")]
-        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlLink), typeof(IScope), @"<a id=""webexpress-webui-test-testfragmentcontrollink"" class=""link"">TestFragmentControlLink</a>")]
-        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlButtonLink), typeof(IScope), @"<a id=""webexpress-webui-test-testfragmentcontrolbuttonlink"" class=""btn"">TestFragmentControlButtonLink</a>")]
-        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlImage), typeof(IScope), @"<img id=""webexpress-webui-test-testfragmentcontrolimage"" src=""/a/b/c"">")]
-        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlDropdownItemLink), typeof(IScope), @"<div id=""webexpress.webui.test.testfragmentcontroldropdownitemlink"" class=""wx-dropdown-item"">TestFragmentControlDropdownItemLink</div>")]
-        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlNavigationItemLink), typeof(IScope), @"<a id=""webexpress-webui-test-testfragmentcontrolnavigationitemlink"" class=""link"">TestFragmentControlNavigationItemLink</a>")]
-        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlNavigation), typeof(IScope), @"<a id=""webexpress-webui-test-testfragmentcontrolnavigation"" class=""link"">TestFragmentControlNavigation</a>")]
-        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlPanel), typeof(IScope), @"<div id=""webexpress-webui-test-testfragmentcontrolpanel""><div>TestFragmentControlPanel</div></div>")]
-        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlPanelFlex), typeof(IScope), @"<div id=""webexpress-webui-test-testfragmentcontrolpanelflex""></div>")]
-        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlPanelTool), typeof(IScope), @"<div id=""webexpress-webui-test-testfragmentcontrolpaneltool"" class=""toolpanel border""><div class=""wx-webui-dropdown"" role=""button""></div><div><div>TestFragmentControlPanelTool</div></div></div>")]
-        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlSplitButtonItemLink), typeof(IScope), @"<a id=""webexpress-webui-test-testfragmentcontrolsplitbuttonitemlink"" class=""link"">TestFragmentControlSplitButtonItemLink</a>")]
-        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlTree), typeof(IScope), @"<ul id=""webexpress-webui-test-testfragmentcontroltree""><li></li></ul>")]
-        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlForm), typeof(IScope), @"<form id=""webexpress-webui-test-testfragmentcontrolform-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlModalForm), typeof(IScope), @"<form id=""webexpress-webui-test-testfragmentcontrolmodalform-form"" *>*</form>")]
-        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlToolbarItemButton), typeof(IScope), @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritembutton"" class=""wx-toolbar-button"" data-label=""TestFragmentControlToolbarItemButton""></div>")]
-        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlToolbarItemCombo), typeof(IScope), @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritemcombo"" class=""wx-toolbar-combo"" data-label=""TestFragmentControlToolbarItemCombo""></div>")]
-        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlToolbarItemDropdown), typeof(IScope), @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritemdropdown"" class=""wx-toolbar-dropdown"" data-label=""TestFragmentControlToolbarItemDropdown""></div>")]
-        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlToolbarItemLabel), typeof(IScope), @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritemlabel"" class=""wx-toolbar-label"" data-label=""TestFragmentControlToolbarItemLabel""></div>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlText), typeof(IScope),
+            @"<p id=""webexpress-webui-test-testfragmentcontroltext"">TestFragmentControlText</p>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlList), typeof(IScope),
+            @"<ul id=""webexpress-webui-test-testfragmentcontrollist""><li></li></ul>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlLink), typeof(IScope),
+            @"<a id=""webexpress-webui-test-testfragmentcontrollink"" class=""link"">TestFragmentControlLink</a>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlButtonLink), typeof(IScope),
+            @"<a id=""webexpress-webui-test-testfragmentcontrolbuttonlink"" class=""btn"">TestFragmentControlButtonLink</a>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlImage), typeof(IScope),
+            @"<img id=""webexpress-webui-test-testfragmentcontrolimage"" src=""/a/b/c"">")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlDropdown), typeof(IScope),
+            @"<div id=""webexpress-webui-test-testfragmentcontroldropdown"" class=""wx-webui-dropdown"" role=""button"" data-label=""TestFragmentControlDropdown""></div>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlDropdownItemLink), typeof(IScope),
+            @"<div id=""webexpress.webui.test.testfragmentcontroldropdownitemlink"" class=""wx-dropdown-item"">TestFragmentControlDropdownItemLink</div>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlNavigationItemDropdown), typeof(IScope),
+            @"<a id=""webexpress-webui-test-testfragmentcontrolnavigationitemdropdown"" class=""link"">TestFragmentControlNavigationItemDropdown</a>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlNavigationItemLink), typeof(IScope),
+            @"<a id=""webexpress-webui-test-testfragmentcontrolnavigationitemlink"" class=""link"">TestFragmentControlNavigationItemLink</a>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlNavigation), typeof(IScope),
+            @"<a id=""webexpress-webui-test-testfragmentcontrolnavigation"" class=""link"">TestFragmentControlNavigation</a>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlPanel), typeof(IScope),
+            @"<div id=""webexpress-webui-test-testfragmentcontrolpanel""><div>TestFragmentControlPanel</div></div>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlPanelFlex), typeof(IScope),
+            @"<div id=""webexpress-webui-test-testfragmentcontrolpanelflex""></div>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlPanelTool), typeof(IScope),
+            @"<div id=""webexpress-webui-test-testfragmentcontrolpaneltool"" class=""toolpanel border""><div class=""wx-webui-dropdown"" role=""button""></div><div><div>TestFragmentControlPanelTool</div></div></div>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlSplitButtonItemLink), typeof(IScope),
+            @"<a id=""webexpress-webui-test-testfragmentcontrolsplitbuttonitemlink"" class=""link"">TestFragmentControlSplitButtonItemLink</a>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlTree), typeof(IScope),
+            @"<ul id=""webexpress-webui-test-testfragmentcontroltree""><li></li></ul>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlForm), typeof(IScope),
+            @"<form id=""webexpress-webui-test-testfragmentcontrolform-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlModalForm), typeof(IScope),
+            @"<form id=""webexpress-webui-test-testfragmentcontrolmodalform-form"" *>*</form>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlToolbarItemButton), typeof(IScope),
+            @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritembutton"" class=""wx-toolbar-button"" data-label=""TestFragmentControlToolbarItemButton""></div>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlToolbarItemCombo), typeof(IScope),
+            @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritemcombo"" class=""wx-toolbar-combo"" data-label=""TestFragmentControlToolbarItemCombo""></div>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlToolbarItemDropdown), typeof(IScope),
+            @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritemdropdown"" class=""wx-toolbar-dropdown"" data-label=""TestFragmentControlToolbarItemDropdown""></div>")]
+        [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlToolbarItemLabel), typeof(IScope),
+            @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritemlabel"" class=""wx-toolbar-label"" data-label=""TestFragmentControlToolbarItemLabel""></div>")]
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentHidden), typeof(IScope), null)]
         public void Render(Type applicationType, Type sectionType, Type scopeType, string expected)
         {

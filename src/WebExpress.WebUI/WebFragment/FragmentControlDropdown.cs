@@ -6,13 +6,9 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebFragment
 {
     /// <summary>
-    /// Represents a navigation item link that is associated with a fragment and can be rendered as part of a control.
+    /// Represents a dropdown control within a fragment context.
     /// </summary>
-    /// <remarks>
-    /// This class extends <see cref="ControlNavigationItemLink"/> to provide additional
-    /// functionality for working with fragments.
-    /// </remarks>
-    public class FragmentControlNavigationItemLink : ControlNavigationItemLink, IFragmentControl<ControlNavigationItemLink>, IFragmentControlNavigationItem
+    public class FragmentControlDropdown : ControlDropdown, IFragmentControl<ControlDropdown>
     {
         /// <summary>
         /// Returns the context of the fragment.
@@ -23,7 +19,7 @@ namespace WebExpress.WebUI.WebFragment
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="fragmentContext">The context of the fragment.</param>
-        public FragmentControlNavigationItemLink(IFragmentContext fragmentContext)
+        public FragmentControlDropdown(IFragmentContext fragmentContext)
             : base(fragmentContext?.FragmentId?.ToString())
         {
             FragmentContext = fragmentContext;

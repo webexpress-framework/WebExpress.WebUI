@@ -71,11 +71,6 @@ namespace WebExpress.WebUI.WebControl
         public TypeAlignmentDropdownMenu AlignmentMenu { get; set; }
 
         /// <summary>
-        /// Returns or sets the image.
-        /// </summary>
-        public string Image { get; set; }
-
-        /// <summary>
         /// Returns or sets the height.
         /// </summary>
         public new int Height { get; set; } = -1;
