@@ -226,7 +226,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div><span>:</span><span></span></div>")]
-        [InlineData("http://example.com", @"<div><span>:</span><a href=""http://example.com/"" class=""link""><span></span></a></div>")]
+        [InlineData("http://example.com", @"<div><span>:</span><a href=""http://example.com/"" class=""wx-link""><span></span></a></div>")]
         public void Uri(string uri, string expected)
         {
             // preconditions

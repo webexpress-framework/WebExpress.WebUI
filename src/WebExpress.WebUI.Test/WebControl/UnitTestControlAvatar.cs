@@ -144,7 +144,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-profile""></div>")]
-        [InlineData("http://example.com", @"<div class=""wx-profile""><a href=""http://example.com/"" class=""link""></a></div>")]
+        [InlineData("http://example.com", @"<div class=""wx-profile""><a href=""http://example.com/"" class=""wx-link""></a></div>")]
         public void Uri(string uri, string expected)
         {
             // preconditions
