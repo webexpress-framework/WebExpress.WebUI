@@ -141,7 +141,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(typeof(ControlText), @"<div class=""alert"" role=""alert""><div><div></div></div><button class=""btn-close"" data-bs-dismiss=""alert"" aria-label=""close""></button></div>")]
-        [InlineData(typeof(ControlLink), @"<div class=""alert"" role=""alert""><div><a class=""link""></a></div><button class=""btn-close"" data-bs-dismiss=""alert"" aria-label=""close""></button></div>")]
+        [InlineData(typeof(ControlLink), @"<div class=""alert"" role=""alert""><div><a class=""wx-link""></a></div><button class=""btn-close"" data-bs-dismiss=""alert"" aria-label=""close""></button></div>")]
         [InlineData(typeof(ControlImage), @"<div class=""alert"" role=""alert""><div><img></div><button class=""btn-close"" data-bs-dismiss=""alert"" aria-label=""close""></button></div>")]
         public void Add(Type child, string expected)
         {

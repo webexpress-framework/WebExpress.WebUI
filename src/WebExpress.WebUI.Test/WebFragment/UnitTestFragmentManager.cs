@@ -44,7 +44,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlList), typeof(IScope),
             @"<ul id=""webexpress-webui-test-testfragmentcontrollist""><li></li></ul>")]
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlLink), typeof(IScope),
-            @"<a id=""webexpress-webui-test-testfragmentcontrollink"" class=""link"">TestFragmentControlLink</a>")]
+            @"<a id=""webexpress-webui-test-testfragmentcontrollink"" class=""wx-link"">TestFragmentControlLink</a>")]
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlButtonLink), typeof(IScope),
             @"<a id=""webexpress-webui-test-testfragmentcontrolbuttonlink"" class=""btn"">TestFragmentControlButtonLink</a>")]
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlImage), typeof(IScope),
@@ -54,11 +54,11 @@ namespace WebExpress.WebUI.Test.WebFragment
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlDropdownItemLink), typeof(IScope),
             @"<div id=""webexpress.webui.test.testfragmentcontroldropdownitemlink"" class=""wx-dropdown-item"">TestFragmentControlDropdownItemLink</div>")]
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlNavigationItemDropdown), typeof(IScope),
-            @"<a id=""webexpress-webui-test-testfragmentcontrolnavigationitemdropdown"" class=""link"">TestFragmentControlNavigationItemDropdown</a>")]
+            @"<a id=""webexpress-webui-test-testfragmentcontrolnavigationitemdropdown"" class=""wx-link"">TestFragmentControlNavigationItemDropdown</a>")]
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlNavigationItemLink), typeof(IScope),
-            @"<a id=""webexpress-webui-test-testfragmentcontrolnavigationitemlink"" class=""link"">TestFragmentControlNavigationItemLink</a>")]
+            @"<a id=""webexpress-webui-test-testfragmentcontrolnavigationitemlink"" class=""wx-link"">TestFragmentControlNavigationItemLink</a>")]
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlNavigation), typeof(IScope),
-            @"<a id=""webexpress-webui-test-testfragmentcontrolnavigation"" class=""link"">TestFragmentControlNavigation</a>")]
+            @"<a id=""webexpress-webui-test-testfragmentcontrolnavigation"" class=""wx-link"">TestFragmentControlNavigation</a>")]
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlPanel), typeof(IScope),
             @"<div id=""webexpress-webui-test-testfragmentcontrolpanel""><div>TestFragmentControlPanel</div></div>")]
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlPanelFlex), typeof(IScope),
@@ -66,7 +66,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlPanelTool), typeof(IScope),
             @"<div id=""webexpress-webui-test-testfragmentcontrolpaneltool"" class=""toolpanel border""><div class=""wx-webui-dropdown"" role=""button""></div><div><div>TestFragmentControlPanelTool</div></div></div>")]
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlSplitButtonItemLink), typeof(IScope),
-            @"<a id=""webexpress-webui-test-testfragmentcontrolsplitbuttonitemlink"" class=""link"">TestFragmentControlSplitButtonItemLink</a>")]
+            @"<a id=""webexpress-webui-test-testfragmentcontrolsplitbuttonitemlink"" class=""wx-link"">TestFragmentControlSplitButtonItemLink</a>")]
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlTree), typeof(IScope),
             @"<ul id=""webexpress-webui-test-testfragmentcontroltree""><li></li></ul>")]
         [InlineData(typeof(TestApplication), typeof(TestSectionFragmentControlForm), typeof(IScope),

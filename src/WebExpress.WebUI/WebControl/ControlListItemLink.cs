@@ -101,7 +101,7 @@ namespace WebExpress.WebUI.WebControl
             var link = new HtmlElementTextSemanticsA(Content.Select(x => x.Render(renderContext, visualTree)).ToArray())
             {
                 Id = Id,
-                Class = Css.Concatenate("link"),
+                Class = Css.Concatenate("wx-link"),
                 Style = GetStyles(),
                 Role = Role,
                 Href = Uri?.ToString() + (param.Length > 0 ? "?" + param : string.Empty),

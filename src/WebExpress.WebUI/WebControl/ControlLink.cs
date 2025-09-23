@@ -200,7 +200,7 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextSemanticsA([.. _controls.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
-                Class = Css.Concatenate("link", Icon is ImageIcon ? "d-inline-flex align-items-baseline" : null, GetClasses()),
+                Class = Css.Concatenate("wx-link", Icon is ImageIcon ? "d-inline-flex align-items-baseline" : null, GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
                 Href = Uri?.ToString() + (param.Length > 0 ? "?" + param : string.Empty),
@@ -213,14 +213,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 html.Add(new ControlIcon()
                 {
-                    Icon = Icon,
-                    Margin = !string.IsNullOrWhiteSpace(Text) ? new PropertySpacingMargin
-                    (
-                        PropertySpacing.Space.Auto,
-                        PropertySpacing.Space.Two,
-                        PropertySpacing.Space.Auto,
-                        PropertySpacing.Space.Auto
-                    ) : new PropertySpacingMargin(PropertySpacing.Space.None)
+                    Icon = Icon
                 }.Render(renderContext, visualTree));
             }
 

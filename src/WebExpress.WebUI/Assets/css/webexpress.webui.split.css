@@ -29,7 +29,7 @@
 
 /* Splitter styles */
 .wx-split .wx-splitter {
-    background: #ddd;
+    background: var(--bs-gray-300);
     z-index: 10;
     flex: 0 0 auto;
     user-select: none;

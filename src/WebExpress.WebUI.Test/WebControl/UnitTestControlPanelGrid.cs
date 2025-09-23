@@ -140,7 +140,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(typeof(ControlText), @"<div><div class=""row""><div></div></div></div>")]
-        [InlineData(typeof(ControlLink), @"<div><div class=""row""><a class=""link""></a></div></div>")]
+        [InlineData(typeof(ControlLink), @"<div><div class=""row""><a class=""wx-link""></a></div></div>")]
         [InlineData(typeof(ControlImage), @"<div><div class=""row""><img></div></div>")]
         public void Add(Type child, string expected)
         {

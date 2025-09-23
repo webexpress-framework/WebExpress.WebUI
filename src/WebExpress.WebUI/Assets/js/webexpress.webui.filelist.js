@@ -107,7 +107,7 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
             link.textContent = file.name;
             link.target = "_blank";
             link.rel = "noopener noreferrer";
-            link.className = "link";
+            link.className = "wx-link";
             
             divLeft.appendChild(link);
             left.appendChild(divLeft);

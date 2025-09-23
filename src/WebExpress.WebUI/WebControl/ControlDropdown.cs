@@ -136,7 +136,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public IControlDropdown AddSeperator()
         {
-            _items.Add(null);
+            _items.Add(new ControlDropdownItemDivider());
 
             return this;
         }
@@ -229,7 +229,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-menuCss", menuCss)
                 .AddUserAttribute(Active == TypeActive.Active ? "active" : null)
                 .AddUserAttribute(Active == TypeActive.Disabled ? "disabled" : null)
-                .Add(_items.Select(x => x.Render(renderContext, visualTree)));
+                .Add(_items.Select(x => x?.Render(renderContext, visualTree)));
 
             return html;
         }

@@ -97,7 +97,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(typeof(ControlText), @"<div id=""carousel"" class=""carousel slide"" data-bs-ride=""carousel"">*<div></div>*</div>")]
-        [InlineData(typeof(ControlLink), @"<div id=""carousel"" class=""carousel slide"" data-bs-ride=""carousel"">*<a class=""link""></a>*</div>")]
+        [InlineData(typeof(ControlLink), @"<div id=""carousel"" class=""carousel slide"" data-bs-ride=""carousel"">*<a class=""wx-link""></a>*</div>")]
         [InlineData(typeof(ControlImage), @"<div id=""carousel"" class=""carousel slide"" data-bs-ride=""carousel"">*<img>*</div>")]
         public void Add(Type child, string expected)
         {

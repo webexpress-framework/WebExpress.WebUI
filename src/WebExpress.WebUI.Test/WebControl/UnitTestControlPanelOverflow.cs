@@ -5,24 +5,24 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.Test.WebControl
 {
     /// <summary>
-    /// Tests the navigation control.
+    /// Tests the toast control.
     /// </summary>
     [Collection("NonParallelTests")]
-    public class UnitTestControlNavigation
+    public class UnitTestControlPanelOverflow
     {
         /// <summary>
-        /// Tests the id property of the navigation control.
+        /// Tests the id property of the toast control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<ul class=""nav""></ul>")]
-        [InlineData("id", @"<ul id=""id"" class=""nav""></ul>")]
+        [InlineData(null, @"<div class=""wx-webui-overflow""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-overflow""></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlNavigation(id)
+            var control = new ControlPanelOverflow(id)
             {
             };
 
@@ -33,24 +33,25 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the background color property of the navigation control.
+        /// Tests the background color property of the toast control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorBackground.Default, @"<ul class=""nav""></ul>")]
-        [InlineData(TypeColorBackground.Primary, @"<ul class=""nav bg-primary""></ul>")]
-        [InlineData(TypeColorBackground.Secondary, @"<ul class=""nav bg-secondary""></ul>")]
-        [InlineData(TypeColorBackground.Warning, @"<ul class=""nav bg-warning""></ul>")]
-        [InlineData(TypeColorBackground.Danger, @"<ul class=""nav bg-danger""></ul>")]
-        [InlineData(TypeColorBackground.Dark, @"<ul class=""nav bg-dark""></ul>")]
-        [InlineData(TypeColorBackground.Light, @"<ul class=""nav bg-light""></ul>")]
-        [InlineData(TypeColorBackground.Transparent, @"<ul class=""nav bg-transparent""></ul>")]
+        [InlineData(TypeColorBackground.Default, @"<div class=""wx-webui-overflow""></div>")]
+        [InlineData(TypeColorBackground.Primary, @"<div class=""wx-webui-overflow bg-primary""></div>")]
+        [InlineData(TypeColorBackground.Secondary, @"<div class=""wx-webui-overflow bg-secondary""></div>")]
+        [InlineData(TypeColorBackground.Info, @"<div class=""wx-webui-overflow bg-info""></div>")]
+        [InlineData(TypeColorBackground.Warning, @"<div class=""wx-webui-overflow bg-warning""></div>")]
+        [InlineData(TypeColorBackground.Danger, @"<div class=""wx-webui-overflow bg-danger""></div>")]
+        [InlineData(TypeColorBackground.Dark, @"<div class=""wx-webui-overflow bg-dark""></div>")]
+        [InlineData(TypeColorBackground.Light, @"<div class=""wx-webui-overflow bg-light""></div>")]
+        [InlineData(TypeColorBackground.Transparent, @"<div class=""wx-webui-overflow bg-transparent""></div>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlNavigation()
+            var control = new ControlPanelOverflow()
             {
                 BackgroundColor = new PropertyColorBackground(backgroundColor)
             };
@@ -62,22 +63,21 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the layout property of the navigation control.
+        /// Tests the theme property of the panel control.
         /// </summary>
         [Theory]
-        [InlineData(TypeLayoutTab.Default, @"<ul class=""nav""></ul>")]
-        [InlineData(TypeLayoutTab.Menu, @"<ul class=""nav""></ul>")]
-        [InlineData(TypeLayoutTab.Tab, @"<ul class=""nav nav-tabs""></ul>")]
-        [InlineData(TypeLayoutTab.Pill, @"<ul class=""nav nav-pills""></ul>")]
-        public void Layout(TypeLayoutTab layout, string expected)
+        [InlineData(TypeTheme.None, @"<div class=""wx-webui-overflow""></div>")]
+        [InlineData(TypeTheme.Light, @"<div class=""wx-webui-overflow"" data-bs-theme=""light""></div>")]
+        [InlineData(TypeTheme.Dark, @"<div class=""wx-webui-overflow"" data-bs-theme=""dark""></div>")]
+        public void Theme(TypeTheme theme, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlNavigation()
+            var control = new ControlPanelOverflow()
             {
-                Layout = layout
+                Theme = theme
             };
 
             // test execution
@@ -87,23 +87,27 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the add function of the navigation control.
+        /// Tests the add function of the toast control.
         /// </summary>
-        [Fact]
-        public void Add()
+        [Theory]
+        [InlineData(typeof(ControlText), @"<div class=""wx-webui-overflow""><div></div></div>")]
+        [InlineData(typeof(ControlLink), @"<div class=""wx-webui-overflow""><a class=""wx-link""></a></div>")]
+        [InlineData(typeof(ControlImage), @"<div class=""wx-webui-overflow""><img></div>")]
+        public void Add(Type child, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlNavigation();
+            var childInstance = Activator.CreateInstance(child, [null]) as IControl;
+            var control = new ControlPanelOverflow();
 
             // test execution
-            control.Add(new ControlNavigationItemLink() { Text = "abc" });
+            control.Add(childInstance);
 
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<ul class=""nav""><li class=""nav-item""><a class=""wx-link nav-link"">abc</a></li></ul>", html);
+            AssertExtensions.EqualWithPlaceholders(expected, html);
         }
     }
 }

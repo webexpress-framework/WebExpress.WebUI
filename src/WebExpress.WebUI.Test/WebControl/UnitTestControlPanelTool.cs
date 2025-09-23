@@ -95,7 +95,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var childInstance = new ControlDropdownItemLink() { Label = text };
+            var childInstance = new ControlDropdownItemLink() { Text = text };
             var control = new ControlPanelTool()
             {
             };
@@ -136,7 +136,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(typeof(ControlText), @"<div class=""toolpanel border""><div class=""wx-webui-dropdown"" role=""button""></div><div><div></div></div></div>")]
-        [InlineData(typeof(ControlLink), @"<div class=""toolpanel border""><div class=""wx-webui-dropdown"" role=""button""></div><div><a class=""link""></a></div></div>")]
+        [InlineData(typeof(ControlLink), @"<div class=""toolpanel border""><div class=""wx-webui-dropdown"" role=""button""></div><div><a class=""wx-link""></a></div></div>")]
         [InlineData(typeof(ControlImage), @"<div class=""toolpanel border""><div class=""wx-webui-dropdown"" role=""button""></div><div><img></div></div>")]
         public void Add(Type child, string expected)
         {

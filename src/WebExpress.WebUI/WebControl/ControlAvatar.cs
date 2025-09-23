@@ -89,7 +89,7 @@ namespace WebExpress.WebUI.WebControl
                         ? new HtmlElementTextSemanticsA(User)
                         {
                             Href = Uri.ToString(),
-                            Class = "link"
+                            Class = "wx-link"
                         }
                         : new HtmlText(User)
                 );

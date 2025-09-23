@@ -111,7 +111,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(typeof(ControlText), @"<footer><div></div></footer>")]
-        [InlineData(typeof(ControlLink), @"<footer><a class=""link""></a></footer>")]
+        [InlineData(typeof(ControlLink), @"<footer><a class=""wx-link""></a></footer>")]
         [InlineData(typeof(ControlImage), @"<footer><img></footer>")]
         public void Add(Type child, string expected)
         {

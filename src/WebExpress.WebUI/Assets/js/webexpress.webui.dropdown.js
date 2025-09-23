@@ -108,7 +108,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
             // Create a regular menu item (enabled or disabled)
             if (!item.disabled) {
                 const link = document.createElement("a");
-                link.className = "link dropdown-item";
+                link.className = "wx-link dropdown-item";
                 if (item.color) link.classList.add(item.color);
                 link.href = item.uri;
 

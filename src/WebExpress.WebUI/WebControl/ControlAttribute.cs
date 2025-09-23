@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
@@ -96,12 +95,12 @@ namespace WebExpress.WebUI.WebControl
             (
                 Icon != null ? icon : null,
                 keyElement,
-                Uri != null 
-                    ? new HtmlElementTextSemanticsA(valueElement) 
-                    { 
+                Uri != null
+                    ? new HtmlElementTextSemanticsA(valueElement)
+                    {
                         Href = Uri.ToString(),
-                        Class = "link"
-                    } 
+                        Class = "wx-link"
+                    }
                     : valueElement
             )
             {

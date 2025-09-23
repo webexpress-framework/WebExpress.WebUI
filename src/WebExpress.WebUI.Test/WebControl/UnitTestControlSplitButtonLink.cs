@@ -212,7 +212,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var html5 = control5.Render(context, visualTree);
             var html6 = control6.Render(context, visualTree);
 
-            var expected = @"<div class=""btn-group"" role=""button"">*<a class=""link"">abc</a>*</div>";
+            var expected = @"<div class=""btn-group"" role=""button"">*<a class=""wx-link"">abc</a>*</div>";
             AssertExtensions.EqualWithPlaceholders(expected, html1);
             AssertExtensions.EqualWithPlaceholders(expected, html2);
             AssertExtensions.EqualWithPlaceholders(expected, html3);

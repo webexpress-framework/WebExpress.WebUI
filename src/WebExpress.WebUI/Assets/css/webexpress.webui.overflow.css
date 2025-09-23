@@ -1,0 +1,131 @@
+.wx-overflow {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    box-sizing: border-box;
+    overflow: hidden;
+    min-width: 3em;
+    flex: 1;
+}
+
+/* Visible items container */
+.wx-overflow-visible {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    min-width: 0;
+    box-sizing: border-box;
+    gap: clamp(0.2em, 0.3vw, 0.5em);
+}
+
+/* More wrapper & button */
+.wx-overflow-more {
+    flex: 1;
+    display: inline-flex;
+    align-items: stretch;
+    border-radius: 0.2em;
+}
+
+.wx-overflow-more .btn {
+    border: none;
+}
+
+.wx-overflow-more .btn:hover {
+    background: var(--bs-light);
+}
+
+.wx-overflow-more .btn:focus {
+    background: var(--bs-light);
+}
+    
+/* Dropdown (Popper-target) */
+.wx-overflow-menu {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    min-width: 10em;
+    max-width: min(20em, 85vw);
+    max-height: 60vh;
+    padding: 0.5em 0;
+    margin: 0;
+    box-sizing: border-box;
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 4px;
+    box-shadow: 0 6px 18px -4px rgba(0,0,0,0.18), 0 2px 6px -2px rgba(0,0,0,0.12);
+    z-index: 1000;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Wrappers for moved items */
+.wx-overflow-menu-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.25em 1em;
+    color: var(--bs-body-color);
+}
+
+.wx-overflow-menu-item:hover {
+    background: var(--bs-light);
+}
+
+/* Styles for disabled submenu items.
+ * They are visually muted and do not respond to user interaction.
+ */
+.wx-overflow-menu-item:disabled {
+    color: var(--bs-secundary);
+    pointer-events: none;
+}
+
+.wx-overflow-submenu {
+    display: inline-flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.wx-overflow-submenu > span {
+    cursor: pointer;
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2em;
+}
+
+/* A header within a submenu panel.
+ * It provides a title or category for a group of items.
+ */
+.wx-overflow-submenu-header {
+    display: block;
+    padding: 0.25em 1em;
+    margin-bottom: 0;
+    font-size: 0.875em;
+    color: var(--bs-gray-500);
+    white-space: nowrap;
+}
+
+/* A divider within a submenu panel.
+ * It is used to visually separate groups of items.
+ */
+.wx-overflow-submenu-divider {
+    height: 0;
+    margin: 0.5rem 0;
+    overflow: hidden;
+    border-top: 1px solid var(--bs-border-color);
+}
+
+[data-bs-theme="dark"] .wx-overflow-more .btn:hover {
+    background: var(--bs-gray-800);
+}
+
+[data-bs-theme="dark"] .wx-overflow-more .btn:focus {
+    background: var(--bs-gray-800);
+}
+
+[data-bs-theme="dark"] .wx-overflow-menu-item:hover {
+    background-color: var(--bs-primary);
+}

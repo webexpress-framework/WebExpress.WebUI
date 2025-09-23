@@ -90,7 +90,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(typeof(ControlText), @"<div class=""input-group-prepend""><div></div></div>")]
-        [InlineData(typeof(ControlLink), @"<div class=""input-group-prepend""><a class=""link""></a></div>")]
+        [InlineData(typeof(ControlLink), @"<div class=""input-group-prepend""><a class=""wx-link""></a></div>")]
         [InlineData(typeof(ControlImage), @"<div class=""input-group-prepend""><img></div>")]
         public void Add(Type child, string expected)
         {

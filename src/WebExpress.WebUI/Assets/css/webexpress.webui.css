@@ -7,9 +7,13 @@ pre {
     color: var(--bs-code-color);
 }
 
-.link {
+.wx-link {
+    color: rgba(var(--bs-link-color-rgb), var(--bs-link-opacity, 1));
     text-decoration: none;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: clamp(0.2em, 0.5vw, 0.5em);
 }
 
 .hide {
@@ -39,7 +43,7 @@ pre {
     align-items: center;
     justify-content: flex-start;
     padding-left: 1em;
-    gap: 0.5em;
+    gap: clamp(0.2em, 0.5vw, 0.5em);
 }
 
 .wx-breadcrumb > li {

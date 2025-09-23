@@ -13,7 +13,6 @@
 /* Styles for left-aligned items */
 .wx-toolbar-left {
     display: flex; /* Ensure left-aligned items are on one line */
-    flex: 1; /* Allow left-aligned items to take up available space */
     justify-content: flex-start; /* Align items to the start */
     gap: 8px; /* Add spacing between items */
     align-items: center;
@@ -23,7 +22,6 @@
 /* Styles for right-aligned items */
 .wx-toolbar-right {
     display: flex; /* Ensure right-aligned items are on one line */
-    flex: 1; /* Allow right-aligned items to take up available space */
     justify-content: flex-end; /* Align items to the end */
     gap: 8px; /* Add spacing between items */
     align-items: center;
@@ -118,8 +116,9 @@
 /* Styles for toolbar separators */
 .wx-toolbar-separator {
     width: 1px; /* Set width */
-    height: 1.6em;
-    background-color: var(--bs-secondary); /* Use secondary color for separator */
+    height: 1em;
+    background-color: var(--bs-border-color); /* Use secondary color for separator */
+    margin: 0 4px; /* Add horizontal spacing */
 }
 
 /* Styles for comboboxes */

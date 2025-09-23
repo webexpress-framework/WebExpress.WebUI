@@ -18,8 +18,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<a class=""link""></a>")]
-        [InlineData("id", @"<a id=""id"" class=""link""></a>")]
+        [InlineData(null, @"<a class=""wx-link""></a>")]
+        [InlineData("id", @"<a id=""id"" class=""wx-link""></a>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -40,9 +40,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the text property of the link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<a class=""link""></a>")]
-        [InlineData("abc", @"<a class=""link"">abc</a>")]
-        [InlineData("webexpress.webui:plugin.name", @"<a class=""link"">WebExpress.WebUI</a>")]
+        [InlineData(null, @"<a class=""wx-link""></a>")]
+        [InlineData("abc", @"<a class=""wx-link"">abc</a>")]
+        [InlineData("webexpress.webui:plugin.name", @"<a class=""wx-link"">WebExpress.WebUI</a>")]
         public void Text(string text, string expected)
         {
             // preconditions
@@ -64,9 +64,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the uri property of the link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<a class=""link""></a>")]
-        [InlineData("/a", @"<a class=""link"" href=""/a""></a>")]
-        [InlineData("/a/b", @"<a class=""link"" href=""/a/b""></a>")]
+        [InlineData(null, @"<a class=""wx-link""></a>")]
+        [InlineData("/a", @"<a class=""wx-link"" href=""/a""></a>")]
+        [InlineData("/a/b", @"<a class=""wx-link"" href=""/a/b""></a>")]
         public void Uri(string uri, string expected)
         {
             // preconditions
@@ -88,9 +88,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the title property of the link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<a class=""link""></a>")]
-        [InlineData("a", @"<a class=""link"" title=""a""></a>")]
-        [InlineData("b", @"<a class=""link"" title=""b""></a>")]
+        [InlineData(null, @"<a class=""wx-link""></a>")]
+        [InlineData("a", @"<a class=""wx-link"" title=""a""></a>")]
+        [InlineData("b", @"<a class=""wx-link"" title=""b""></a>")]
         public void Title(string title, string expected)
         {
             // preconditions
@@ -112,11 +112,11 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the target property of the link control.
         /// </summary>
         [Theory]
-        [InlineData(TypeTarget.None, @"<a class=""link""></a>")]
-        [InlineData(TypeTarget.Blank, @"<a class=""link"" target=""_blank""></a>")]
-        [InlineData(TypeTarget.Self, @"<a class=""link"" target=""_self""></a>")]
-        [InlineData(TypeTarget.Parent, @"<a class=""link"" target=""_parent""></a>")]
-        [InlineData(TypeTarget.Framename, @"<a class=""link"" target=""_framename""></a>")]
+        [InlineData(TypeTarget.None, @"<a class=""wx-link""></a>")]
+        [InlineData(TypeTarget.Blank, @"<a class=""wx-link"" target=""_blank""></a>")]
+        [InlineData(TypeTarget.Self, @"<a class=""wx-link"" target=""_self""></a>")]
+        [InlineData(TypeTarget.Parent, @"<a class=""wx-link"" target=""_parent""></a>")]
+        [InlineData(TypeTarget.Framename, @"<a class=""wx-link"" target=""_framename""></a>")]
         public void Target(TypeTarget target, string expected)
         {
             // preconditions
@@ -138,10 +138,10 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the tooltip property of the link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<a class=""link""></a>")]
-        [InlineData("a", @"<a class=""link"" title=""a"" data-bs-toggle=""tooltip""></a>")]
-        [InlineData("b", @"<a class=""link"" title=""b"" data-bs-toggle=""tooltip""></a>")]
-        [InlineData("a<br/>b", @"<a class=""link"" title=""a<br/>b"" data-bs-toggle=""tooltip""></a>")]
+        [InlineData(null, @"<a class=""wx-link""></a>")]
+        [InlineData("a", @"<a class=""wx-link"" title=""a"" data-bs-toggle=""tooltip""></a>")]
+        [InlineData("b", @"<a class=""wx-link"" title=""b"" data-bs-toggle=""tooltip""></a>")]
+        [InlineData("a<br/>b", @"<a class=""wx-link"" title=""a<br/>b"" data-bs-toggle=""tooltip""></a>")]
         public void Tooltip(string tooltip, string expected)
         {
             // preconditions
@@ -163,8 +163,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the icon property of the link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<a class=""link""></a>")]
-        [InlineData(typeof(IconStar), @"<a class=""link""><i class=""fas fa-star""></i></a>")]
+        [InlineData(null, @"<a class=""wx-link""></a>")]
+        [InlineData(typeof(IconStar), @"<a class=""wx-link""><i class=""fas fa-star""></i></a>")]
         public void Icon(Type icon, string expected)
         {
             // preconditions
@@ -186,8 +186,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the modal property of the link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<a class=""link""></a>")]
-        [InlineData("modal", @"<a class=""link"" data-wx-toggle=""modal"" data-wx-target=""#modal""></a>")]
+        [InlineData(null, @"<a class=""wx-link""></a>")]
+        [InlineData("modal", @"<a class=""wx-link"" data-wx-toggle=""modal"" data-wx-target=""#modal""></a>")]
         public void Modal(string modal, string expected)
         {
             // preconditions
@@ -234,12 +234,11 @@ namespace WebExpress.WebUI.Test.WebControl
             var html5 = control5.Render(context, visualTree);
             var html6 = control6.Render(context, visualTree);
 
-            Assert.Equal(@"<a class=""link""><i class=""fas fa-star""></i></a>", html1.Trim());
-            Assert.Equal(@"<a class=""link""><i class=""fas fa-star""></i></a>", html2.Trim());
-            Assert.Equal(@"<a class=""link""><i class=""fas fa-star""></i></a>", html3.Trim());
-            Assert.Equal(@"<a class=""link""><i class=""fas fa-star""></i></a>", html4.Trim());
-            Assert.Equal(@"<a class=""link""><i class=""fas fa-star""></i></a>", html5.Trim());
-            Assert.Equal(@"<a class=""link""><i class=""fas fa-star""></i></a>", html6.Trim());
+            Assert.Equal(@"<a class=""wx-link""><i class=""fas fa-star""></i></a>", html1.Trim());
+            Assert.Equal(@"<a class=""wx-link""><i class=""fas fa-star""></i></a>", html2.Trim());
+            Assert.Equal(@"<a class=""wx-link""><i class=""fas fa-star""></i></a>", html4.Trim());
+            Assert.Equal(@"<a class=""wx-link""><i class=""fas fa-star""></i></a>", html5.Trim());
+            Assert.Equal(@"<a class=""wx-link""><i class=""fas fa-star""></i></a>", html6.Trim());
         }
     }
 }

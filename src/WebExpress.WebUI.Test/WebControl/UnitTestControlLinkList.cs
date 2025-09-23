@@ -161,7 +161,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             var html = control.Render(context, visualTree);
 
-            Assert.Equal(@"<div><a class=""link"">abc</a></div>", html.Trim());
+            Assert.Equal(@"<div><a class=""wx-link"">abc</a></div>", html.Trim());
         }
     }
 }

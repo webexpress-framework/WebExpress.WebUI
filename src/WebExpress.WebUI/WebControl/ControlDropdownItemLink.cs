@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the label.
         /// </summary>
-        public string Label { get; set; }
+        public string Text { get; set; }
 
         /// <summary>
         /// Returns or sets the target uri.
@@ -76,7 +76,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Label)))
+            return new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Text)))
             {
                 Id = Id,
                 Class = "wx-dropdown-item"

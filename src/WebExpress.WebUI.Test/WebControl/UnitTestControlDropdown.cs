@@ -288,7 +288,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlDropdown();
 
             // test execution
-            control.Add(new ControlDropdownItemLink() { Label = "abc" });
+            control.Add(new ControlDropdownItemLink() { Text = "abc" });
 
             var html = control.Render(context, visualTree);
 

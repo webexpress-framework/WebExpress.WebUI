@@ -447,7 +447,7 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
         }
         // Add label as link
         const a = document.createElement('a');
-        a.className = 'link';
+        a.className = 'wx-link';
         a.setAttribute('href', 'javascript:void(0)');
         a.setAttribute('draggable', 'false');
         a.textContent = currentValue.label;
