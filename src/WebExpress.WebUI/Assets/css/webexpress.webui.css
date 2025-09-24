@@ -330,6 +330,18 @@ pre {
     z-index: 1000; 
 }
 
+/* Resizable container that activates only on direct hover */
+.wx-resizable {
+    padding-right: 0.5em;
+}
+
+/* Enable resizing only when hovering the container itself, not its children */
+.wx-resizable:hover:not(:has(:hover)) {
+    overflow: auto;
+    resize: both;
+}
+
+
 [data-bs-theme=dark] .wx-drag-over {
     background: repeating-linear-gradient(
         45deg,

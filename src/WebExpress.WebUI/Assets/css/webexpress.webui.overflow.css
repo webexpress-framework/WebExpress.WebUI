@@ -18,6 +18,7 @@
     min-width: 0;
     box-sizing: border-box;
     gap: clamp(0.2em, 0.3vw, 0.5em);
+    width: 100%;
 }
 
 /* More wrapper & button */

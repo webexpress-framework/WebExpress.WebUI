@@ -654,4 +654,7 @@ webexpress.webui.Event = class {
     static TILE_SEARCH_EVENT = "webexpress.webui.tile.search";
     // Event triggered when tiles are sorted by a specific criterion.
     static TILE_SORT_EVENT = "webexpress.webui.tile.sort";
+    // Event triggered when a responsive layout breakpoint changes.
+    static BREAKPOINT_CHANGE_EVENT = "webexpress.webui.breakpoint.change";
+
 }
