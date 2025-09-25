@@ -38,8 +38,6 @@
 }
 
 .wx-selection > ul > li > span > img {
-    height: 1.2em;
-    vertical-align: middle;
 }
 
 .wx-selection > div:nth-child(2) {
@@ -86,8 +84,6 @@
 }
 
 .wx-selection > div:nth-child(2) > ul > li > span > img {
-    height: 1.2em;
-    vertical-align: middle;
 }
 
 .wx-selection > div:nth-child(2) > ul > li > a {
@@ -193,8 +189,6 @@
 }
 
 .wx-selection div:nth-child(3) > ul > li > button > img {
-    height: 1.2em;
-    vertical-align: middle;
 }
 
 .wx-selection div:nth-child(3) > ul > li > button > i {

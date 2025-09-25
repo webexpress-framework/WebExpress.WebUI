@@ -34,8 +34,6 @@
 /* shared image style for header/body icons */
 .wx-table > thead > tr > th > div > img,
 .wx-table > tbody > tr > td > div > img {
-    height: 1.2em;
-    min-width: 1em;
 }
 
 /* hover state (light) */
@@ -221,8 +219,6 @@
 }
 
 .wx-table .wx-tree > div > img{
-    height: 1.2em;
-    min-width: 1em;
 }
 
 .wx-table .wx-tree-toggle:focus-visible {

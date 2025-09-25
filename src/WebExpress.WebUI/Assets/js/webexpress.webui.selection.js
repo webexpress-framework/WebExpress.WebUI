@@ -101,6 +101,7 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
             // optional image
             if (item.image) {
                 const img = document.createElement("img");
+                img.className = "wx-icon";
                 img.src = item.image;
                 img.alt = "";
                 wrapper.appendChild(img);

@@ -16,6 +16,12 @@ pre {
     gap: clamp(0.2em, 0.5vw, 0.5em);
 }
 
+img.wx-icon {
+    height: 1.2em;
+    min-width: 1em;
+    vertical-align: middle; 
+}
+
 .hide {
     display: none;
 }

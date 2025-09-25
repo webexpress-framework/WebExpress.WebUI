@@ -353,6 +353,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
                 if (item?.image) {
                     const img = document.createElement("img");
                     img.src = item.image;
+                    img.className = "wx-icon";
                     span.appendChild(img);
                 }
                 if (item?.icon) {
@@ -383,6 +384,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
                 if (item?.image) {
                     const img = document.createElement("img");
                     img.src = item.image;
+                    img.className = "wx-icon";
                     span.appendChild(img);
                 }
                 if (item?.icon) {

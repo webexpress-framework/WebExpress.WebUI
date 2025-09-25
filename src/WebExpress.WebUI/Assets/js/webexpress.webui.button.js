@@ -102,6 +102,7 @@ webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
         // Append image if defined
         if (this._image) {
             const img = document.createElement("img");
+            img.className = "wx-icon";
             img.src = this._image;
             this._element.appendChild(img);
         }

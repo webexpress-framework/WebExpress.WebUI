@@ -1,46 +1,14 @@
 .wx-overflow {
     display: flex;
     flex-direction: row;
-    align-items: stretch;
+    align-items: center;
     box-sizing: border-box;
     overflow: hidden;
     min-width: 3em;
-    flex: 1;
-}
-
-/* Visible items container */
-.wx-overflow-visible {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: nowrap;
-    white-space: nowrap;
-    min-width: 0;
-    box-sizing: border-box;
     gap: clamp(0.2em, 0.3vw, 0.5em);
-    width: 100%;
+    white-space: nowrap;
 }
-
-/* More wrapper & button */
-.wx-overflow-more {
-    flex: 1;
-    display: inline-flex;
-    align-items: stretch;
-    border-radius: 0.2em;
-}
-
-.wx-overflow-more .btn {
-    border: none;
-}
-
-.wx-overflow-more .btn:hover {
-    background: var(--bs-light);
-}
-
-.wx-overflow-more .btn:focus {
-    background: var(--bs-light);
-}
-    
+   
 /* Dropdown (Popper-target) */
 .wx-overflow-menu {
     display: none;
@@ -62,16 +30,22 @@
 }
 
 /* Wrappers for moved items */
-.wx-overflow-menu-item {
+.wx-overflow-menu-item {   
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
     padding: 0.25em 1em;
     color: var(--bs-body-color);
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5em;
 }
 
 .wx-overflow-menu-item:hover {
     background: var(--bs-light);
+}
+
+.wx-overflow-menu-item button:hover {
+    background: unset;
 }
 
 /* Styles for disabled submenu items.

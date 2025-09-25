@@ -326,6 +326,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
             }
             if (tile.image) {
                 const img = document.createElement("img");
+                img.className = "wx-icon";
                 img.src = tile.image;
                 img.alt = "";
                 header.appendChild(img);

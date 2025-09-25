@@ -116,6 +116,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                     const img = document.createElement("img");
                     img.src = item.image;
                     img.alt = item.content;
+                    img.className = "wx-icon";
                     link.appendChild(img);
                 }
                 if (item.icon) {
@@ -183,6 +184,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
 
         if (this._image) {
             const img = document.createElement("img");
+            img.className = "wx-icon";
             img.src = this._image;
             button.appendChild(img);
         }

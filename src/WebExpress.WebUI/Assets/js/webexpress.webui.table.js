@@ -843,6 +843,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             }
             if (col.image) {
                 const img = document.createElement("img");
+                img.className = "wx-icon";
                 img.src = col.image;
                 img.alt = "";
                 inner.appendChild(img);
@@ -1052,6 +1053,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 const wrap = document.createElement("div");
                 if (cell.image) {
                     const img = document.createElement("img");
+                    img.className = "wx-icon";
                     img.src = cell.image;
                     img.alt = "";
                     wrap.appendChild(img);

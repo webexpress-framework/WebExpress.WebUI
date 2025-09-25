@@ -8,8 +8,6 @@
 }  
 
 .wx-dropdown > button > img {
-    height: 1.2em;
-    min-width: 1em;
     vertical-align: middle; 
 }  
 
@@ -22,5 +20,4 @@
 }
 
 .wx-dropdown > ul > li > a > img {
-    height: 1.2em;
 }

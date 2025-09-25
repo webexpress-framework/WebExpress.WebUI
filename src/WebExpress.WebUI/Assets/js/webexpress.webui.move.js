@@ -123,6 +123,7 @@ webexpress.webui.MoveCtrl = class extends webexpress.webui.Ctrl {
         // image
         if (opt.image) {
             const img = document.createElement("img");
+            img.className = "wx-icon";
             img.src = opt.image;
             img.alt = "";
             li.appendChild(img);

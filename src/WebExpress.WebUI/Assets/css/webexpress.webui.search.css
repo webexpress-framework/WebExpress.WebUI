@@ -94,7 +94,6 @@
 
 /* Styling for suggestion images */
 .wx-search > div:nth-child(2) > ul > li > a > img {
-    height: 1.2em;
 }
 
 /* Styling for suggestion icons */

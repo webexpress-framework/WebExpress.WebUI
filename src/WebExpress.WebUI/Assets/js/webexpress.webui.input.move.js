@@ -440,6 +440,7 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
         // Add image if specified
         if (currentValue.image) {
             const img = document.createElement('img');
+            img.className = "wx-icon";
             img.setAttribute('src', currentValue.image);
             img.setAttribute('title', '');
             img.setAttribute('draggable', 'false');

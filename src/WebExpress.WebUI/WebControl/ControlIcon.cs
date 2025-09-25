@@ -1,5 +1,6 @@
 ﻿using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -54,7 +55,20 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var html = Icon?.Render(renderContext, visualTree, Id, Title, GetClasses(), GetStyles(), Role);
+            var css = Icon is ImageIcon
+                ? Css.Concatenate("wx-icon", GetClasses())
+                : GetClasses();
+
+            var html = Icon?.Render
+            (
+                renderContext,
+                visualTree,
+                Id,
+                Title,
+                css,
+                GetStyles(),
+                Role
+            );
 
             return html;
         }

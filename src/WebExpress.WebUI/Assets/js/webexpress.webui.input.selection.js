@@ -246,6 +246,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                         }
                         if (item.image) {
                             const img = document.createElement("img");
+                            img.className = "wx-icon";
                             img.src = item.image;
                             span.prepend(img);
                         }
@@ -260,6 +261,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                         }
                         if (item.image) {
                             const img = document.createElement("img");
+                            img.className = "wx-icon";
                             img.src = item.image;
                             a.prepend(img);
                         }
@@ -307,6 +309,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
 
                 if (item.image) {
                     const img = document.createElement("img");
+                    img.className = "wx-icon";
                     img.src = item.image;
                     span.appendChild(img);
                 }

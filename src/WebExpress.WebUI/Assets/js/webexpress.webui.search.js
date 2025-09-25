@@ -204,6 +204,7 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
             }
             if (suggestion.image) {
                 const img = document.createElement("img");
+                img.className = "wx-icon";
                 img.src = suggestion.image;
                 container.appendChild(img);
             }

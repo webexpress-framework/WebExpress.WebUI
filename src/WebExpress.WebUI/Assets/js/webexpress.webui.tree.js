@@ -310,6 +310,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             li.setAttribute("role", "treeitem");
             li.setAttribute("aria-expanded", node.expand ? "true" : "false");
             li.setAttribute("aria-level", this._getNodeLevel(node));
+            img.className = "wx-icon";
 
             // add layout-specific classes
             switch (this._layout) {

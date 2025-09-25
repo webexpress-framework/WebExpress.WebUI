@@ -3,8 +3,8 @@
     display: flex; /* Use Flexbox for horizontal alignment */
     flex-wrap: nowrap; 
     align-items: center;
-    gap: 8px; /* Add spacing between items */
-    padding: 8px;
+    gap: clamp(0.2em, 0.3vw, 0.5em); /* Add spacing between items */
+    padding: clamp(0.2em, 0.3vw, 0.5em);
     background-color: var(--bs-body-bg); /* Light background for toolbar */
     border: none; 
     border-radius: 0; 
@@ -43,7 +43,6 @@
 }
 
 .wx-toolbar-button img {
-    height: 1.2em;
 }
 
 .wx-toolbar-button i {
@@ -130,10 +129,6 @@
     line-height: 1;
 }
 
-.wx-toolbar-combo img {
-    height: 1.2em;
-}
-
 .wx-toolbar-combo label {
     display: inline-flex;
     align-items: center;
@@ -157,13 +152,13 @@
 
 .wx-toolbar-combo .form-select:focus {
     background-color: var(--bs-secondary-bg);
-    color: var(--bs-body-color);
-    border-radius: 4px;
+    border: 0;
+    outline: 0;
+    box-shadow: none;
 }
 
 .wx-toolbar-combo .form-select:hover {
-    background-color: var(--bs-light-hover);
-    color: var(--bs-body-color);
+    background-color: var(--bs-secondary-bg);
 }
 
 .wx-toolbar-combo .form-select:disabled {
