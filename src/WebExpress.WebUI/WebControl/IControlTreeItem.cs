@@ -12,7 +12,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns the label of the tree item.
         /// </summary>
-        string Label { get; }
+        string Text { get; }
 
         /// <summary>
         /// Returns the child tree items.

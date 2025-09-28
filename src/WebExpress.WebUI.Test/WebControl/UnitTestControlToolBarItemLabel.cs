@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.Test.WebControl
     /// Tests the toolbar item label control.
     /// </summary>
     [Collection("NonParallelTests")]
-    public class UnitTestControlToolBarItemLabel
+    public class UnitTestControlToolbarItemLabel
     {
         /// <summary>
         /// Tests the id property of the toolbar item label control.
@@ -33,13 +33,13 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the label property of the toolbar item label control.
+        /// Tests the text property of the toolbar item label control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-toolbar-label""></div>")]
         [InlineData("abc", @"<div class=""wx-toolbar-label"" data-label=""abc""></div>")]
         [InlineData("webexpress.WebUI:plugin.name", @"<div class=""wx-toolbar-label"" data-label=""WebExpress.WebUI""></div>")]
-        public void Label(string text, string expected)
+        public void Text(string text, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemLabel()
             {
-                Label = text,
+                Text = text,
             };
 
             // test execution

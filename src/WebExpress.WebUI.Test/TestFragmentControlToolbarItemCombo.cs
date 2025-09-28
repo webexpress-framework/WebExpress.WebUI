@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.Test
         public TestFragmentControlToolbarItemCombo(IFragmentContext fragmentContext)
             : base(fragmentContext)
         {
-            Label = "TestFragmentControlToolbarItemCombo";
+            Text = "TestFragmentControlToolbarItemCombo";
         }
     }
 }

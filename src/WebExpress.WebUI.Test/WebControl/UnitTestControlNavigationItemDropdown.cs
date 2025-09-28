@@ -172,7 +172,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemDropdown()
             {
-                Label = text,
+                Text = text,
             };
 
             // test execution

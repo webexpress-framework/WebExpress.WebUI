@@ -8,12 +8,12 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a toolbar item button control.
+    /// Represents a sidebar item link control.
     /// </summary>
     /// <remarks>
-    /// This class is used to create a button within a toolbar.
+    /// This class is used to create a link within a sidebar.
     /// </remarks>
-    public class ControlToolbarItemButton : IControlToolbarItem
+    public class ControlSidebarItemLink : IControlSidebarItem
     {
         private readonly string _id;
 
@@ -63,15 +63,21 @@ namespace WebExpress.WebUI.WebControl
         public PropertyColorText Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the alignment of the toolbar item.
+        /// Returns or sets the mode of the type sidebar, which determines its behavior.
         /// </summary>
-        public TypeToolbarItemAlignment Alignment { get; set; } = TypeToolbarItemAlignment.Default;
+        public virtual TypeSidebarMode Mode { get; set; }
+
+        /// <summary>
+        /// Returns or sets the dismissibility behavior of the sidebar.
+        /// </summary>
+        public TypeDismissibilitySidebar Dismissibility { get; set; }
+
 
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        public ControlToolbarItemButton(string id = null)
+        public ControlSidebarItemLink(string id = null)
         {
             _id = id;
         }
@@ -87,8 +93,10 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = "wx-toolbar-button"
+                Class = "wx-sidebar-link"
             }
+                .AddUserAttribute("data-mode", Mode != TypeSidebarMode.Default ? Mode.ToData() : null)
+                .AddUserAttribute("data-dismissibility", Dismissibility != TypeDismissibilitySidebar.None ? "true" : null)
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, Text))
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
                 .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
@@ -99,8 +107,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-color-css", Color?.ToClass())
                 .AddUserAttribute("data-color-style", Color?.ToStyle())
                 .AddUserAttribute(Active == TypeActive.Active ? "active" : null)
-                .AddUserAttribute(Active == TypeActive.Disabled ? "disabled" : null)
-                .AddUserAttribute("data-align", Alignment.ToValue());
+                .AddUserAttribute(Active == TypeActive.Disabled ? "disabled" : null);
         }
     }
 }

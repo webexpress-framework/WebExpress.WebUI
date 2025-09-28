@@ -385,7 +385,7 @@ namespace WebExpress.WebUI.WebControl
                     Classes = ["wx-validation-alert"],
                     BackgroundColor = bgColor,
                     Text = I18N.Translate(renderContext.Request?.Culture, v.Text),
-                    Dismissible = TypeDismissibleAlert.Dismissible,
+                    Dismissibility = TypeDismissibilityAlert.Dismissible,
                     Fade = TypeFade.FadeShow
                 }.Render(renderContext, visualTree));
             }

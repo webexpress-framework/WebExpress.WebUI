@@ -1,19 +1,18 @@
 ﻿using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
-using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a toolbar item button control.
+    /// Represents a sidebar item panel control.
     /// </summary>
     /// <remarks>
-    /// This class is used to create a button within a toolbar.
+    /// This class is used to create a panel within a sidebar.
     /// </remarks>
-    public class ControlToolbarItemButton : IControlToolbarItem
+    public class ControlSidebarItemControl : IControlSidebarItem
     {
         private readonly string _id;
 
@@ -21,31 +20,6 @@ namespace WebExpress.WebUI.WebControl
         /// Returns the unique identifier for the entity.
         /// </summary>
         public string Id => _id;
-
-        /// <summary>
-        /// Returns or sets whether the link is active or not.
-        /// </summary>
-        public TypeActive Active { get; set; }
-
-        /// <summary>
-        /// Returns or sets the label.
-        /// </summary>
-        public string Text { get; set; }
-
-        /// <summary>
-        /// Returns or sets the target uri.
-        /// </summary>
-        public IUri Uri { get; set; }
-
-        /// <summary>
-        /// Returns or sets the target.
-        /// </summary>
-        public TypeTarget Target { get; set; }
-
-        /// <summary>
-        /// Returns or sets the id of a modal dialogue.
-        /// </summary>
-        public string Modal { get; set; }
 
         /// <summary>
         /// Returns or sets the icon.
@@ -63,15 +37,20 @@ namespace WebExpress.WebUI.WebControl
         public PropertyColorText Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the alignment of the toolbar item.
+        /// Returns or sets the content to be displayed within the control.
         /// </summary>
-        public TypeToolbarItemAlignment Alignment { get; set; } = TypeToolbarItemAlignment.Default;
+        public IControl Content { get; set; }
+
+        /// <summary>
+        /// Returns or sets the mode of the type sidebar, which determines its behavior.
+        /// </summary>
+        public virtual TypeSidebarModeExtended Mode { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        public ControlToolbarItemButton(string id = null)
+        public ControlSidebarItemControl(string id = null)
         {
             _id = id;
         }
@@ -87,20 +66,15 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = "wx-toolbar-button"
+                Class = "wx-sidebar-control"
             }
-                .AddUserAttribute("data-label", I18N.Translate(renderContext, Text))
+                .AddUserAttribute("data-mode", Mode != TypeSidebarModeExtended.Default ? Mode.ToData() : null)
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
                 .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-uri", Uri?.ToString())
-                .AddUserAttribute("data-target", Target.ToStringValue())
-                .AddUserAttribute("data-modal", Modal)
                 .AddUserAttribute("data-title", I18N.Translate(renderContext, Tooltip))
                 .AddUserAttribute("data-color-css", Color?.ToClass())
                 .AddUserAttribute("data-color-style", Color?.ToStyle())
-                .AddUserAttribute(Active == TypeActive.Active ? "active" : null)
-                .AddUserAttribute(Active == TypeActive.Disabled ? "disabled" : null)
-                .AddUserAttribute("data-align", Alignment.ToValue());
+                .Add(Content?.Render(renderContext, visualTree));
         }
     }
 }

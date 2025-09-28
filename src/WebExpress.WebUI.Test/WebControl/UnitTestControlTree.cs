@@ -60,19 +60,19 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the label property of the tree control item.
+        /// Tests the text property of the tree control item.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-tree""><div class=""wx-tree-node""></div></div>")]
         [InlineData("abc", @"<div class=""wx-webui-tree""><div class=""wx-tree-node"" data-label=""abc""></div></div>")]
         [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-tree""><div class=""wx-tree-node"" data-label=""WebExpress.WebUI""></div></div>")]
-        public void Label(string label, string expected)
+        public void Text(string label, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlTree(null, new ControlTreeItem() { Label = label })
+            var control = new ControlTree(null, new ControlTreeItem() { Text = label })
             {
             };
 
@@ -305,9 +305,11 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
 
             // test execution
-            var control = new ControlTree(null, items.ToArray());
+            var control = new ControlTree()
+                .Add(items);
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -325,15 +327,15 @@ namespace WebExpress.WebUI.Test.WebControl
                         [
                             new ControlTreeItem("1.1")
                             {
-                                Label = "Node 1.1", Uri = new UriEndpoint("/home")
+                                Text = "Node 1.1", Uri = new UriEndpoint("/home")
                             },
                             new ControlTreeItem("1.2")
                             {
-                                Label = "Node 1.2"
+                                Text = "Node 1.2"
                             }
                         ])
                         {
-                            Label = "Node 1",
+                            Text = "Node 1",
                             Icon = new IconHome(),
                             Expand = true
                         },
@@ -341,18 +343,18 @@ namespace WebExpress.WebUI.Test.WebControl
                         [
                             new ControlTreeItem("2.1")
                             {
-                                Label = "Node 2.1",
+                                Text = "Node 2.1",
                                 Uri = new UriEndpoint("/info"),
                                 Target = TypeTarget.Blank,
                                 Tooltip = "Tooltip"
                             },
                             new ControlTreeItem("2.2")
                             {
-                                Label = "Node 2.2"
+                                Text = "Node 2.2"
                             }
                         ])
                         {
-                            Label = "Node 2",
+                            Text = "Node 2",
                             Icon = new IconCog()
                         }
                     ],

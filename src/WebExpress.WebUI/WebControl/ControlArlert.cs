@@ -20,9 +20,9 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets whether the control can be closed.
         /// </summary>
-        public TypeDismissibleAlert Dismissible
+        public TypeDismissibilityAlert Dismissibility
         {
-            get => (TypeDismissibleAlert)GetProperty(TypeDismissibleAlert.Dismissible);
+            get => (TypeDismissibilityAlert)GetProperty(TypeDismissibilityAlert.Dismissible);
             set => SetProperty(value, () => value.ToClass());
         }
 
@@ -79,7 +79,7 @@ namespace WebExpress.WebUI.WebControl
             (
                 !string.IsNullOrWhiteSpace(Head) ? head : null,
                 new HtmlText(Text),
-                Dismissible != TypeDismissibleAlert.None ? button : null
+                Dismissibility != TypeDismissibilityAlert.None ? button : null
             )
             {
                 Id = Id,

@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.Test
         public TestFragmentControlDropdown(IFragmentContext fragmentContext)
             : base(fragmentContext)
         {
-            Label = "TestFragmentControlDropdown";
+            Text = "TestFragmentControlDropdown";
         }
     }
 }

@@ -59,7 +59,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the label.
         /// </summary>
-        public string Label { get; set; }
+        public string Text { get; set; }
 
         /// <summary>
         /// Returns or sets the tooltip.
@@ -198,7 +198,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = _id,
                 Class = Css.Concatenate("wx-toolbar-dropdown", buttonCss)
             }
-                .AddUserAttribute("data-label", I18N.Translate(renderContext, Label))
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, Text))
                 .AddUserAttribute("data-title", I18N.Translate(renderContext, Tooltip))
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
                 .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())

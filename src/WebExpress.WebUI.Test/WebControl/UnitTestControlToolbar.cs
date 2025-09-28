@@ -40,6 +40,8 @@ namespace WebExpress.WebUI.Test.WebControl
         [Theory]
         [InlineData(TypeColorBackground.Default, @"<nav class=""wx-webui-toolbar px-2 navbar-expand-sm""></nav>")]
         [InlineData(TypeColorBackground.Primary, @"<nav class=""wx-webui-toolbar bg-primary px-2 navbar-expand-sm""></nav>")]
+        [InlineData(TypeColorBackground.Info, @"<nav class=""wx-webui-toolbar bg-info px-2 navbar-expand-sm""></nav>")]
+        [InlineData(TypeColorBackground.Success, @"<nav class=""wx-webui-toolbar bg-success px-2 navbar-expand-sm""></nav>")]
         [InlineData(TypeColorBackground.Secondary, @"<nav class=""wx-webui-toolbar bg-secondary px-2 navbar-expand-sm""></nav>")]
         [InlineData(TypeColorBackground.Warning, @"<nav class=""wx-webui-toolbar bg-warning px-2 navbar-expand-sm""></nav>")]
         [InlineData(TypeColorBackground.Danger, @"<nav class=""wx-webui-toolbar bg-danger px-2 navbar-expand-sm""></nav>")]
@@ -74,7 +76,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlToolbar(null, new ControlToolbarItemButton() { Label = "abc" });
+            var control = new ControlToolbar(null, new ControlToolbarItemButton() { Text = "abc" });
 
             // test execution
             var html = control.Render(context, visualTree);

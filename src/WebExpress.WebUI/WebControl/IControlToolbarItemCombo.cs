@@ -41,7 +41,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns the label.
         /// </summary>
-        public string Label { get; }
+        public string Text { get; }
 
         /// <summary>
         /// Returns the tooltip.

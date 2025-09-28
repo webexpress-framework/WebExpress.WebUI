@@ -23,7 +23,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the label of the tree item.
         /// </summary>
-        public string Label { get; set; }
+        public string Text { get; set; }
 
         /// <summary>
         /// Returns or sets the icon associated with the tree item.
@@ -140,7 +140,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-tree-node"),
             }
-                .AddUserAttribute("data-label", I18N.Translate(Label))
+                .AddUserAttribute("data-label", I18N.Translate(Text))
                 .AddUserAttribute("data-expand", Expand ? "true" : null)
                 .AddUserAttribute("data-active", Active ? "true" : null)
                 .AddUserAttribute("data-modal", Modal)

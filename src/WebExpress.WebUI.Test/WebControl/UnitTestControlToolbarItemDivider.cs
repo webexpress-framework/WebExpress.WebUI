@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.Test.WebControl
     /// Tests the toolbar item divider control.
     /// </summary>
     [Collection("NonParallelTests")]
-    public class UnitTestControlToolBarItemSeperator
+    public class UnitTestControlToolbarItemDivider
     {
         /// <summary>
         /// Tests the id property of the toolbar item divider control.

@@ -1,13 +1,15 @@
-﻿using WebExpress.WebCore.Internationalization;
-using WebExpress.WebCore.WebHtml;
+﻿using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a label item in a toolbar.
+    /// Represents a sidebar item link control.
     /// </summary>
-    public class ControlToolbarItemLabel : IControlToolbarItem
+    /// <remarks>
+    /// This class is used to create a link within a sidebar.
+    /// </remarks>
+    public class ControlSidebarItemDivider : IControlSidebarItem
     {
         private readonly string _id;
 
@@ -17,35 +19,20 @@ namespace WebExpress.WebUI.WebControl
         public string Id => _id;
 
         /// <summary>
-        /// Returns or sets the label.
-        /// </summary>
-        public string Text { get; set; }
-
-        /// <summary>
-        /// Returns or sets a tooltip text.
-        /// </summary>
-        public string Tooltip { get; set; }
-
-        /// <summary>
         /// Returns or sets the link color.
         /// </summary>
         public PropertyColorText Color { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the feature is disabled.
+        /// Returns or sets the mode of the type sidebar, which determines its behavior.
         /// </summary>
-        public bool Disabled { get; set; } = false;
-
-        /// <summary>
-        /// Returns or sets the alignment of the toolbar item.
-        /// </summary>
-        public TypeToolbarItemAlignment Alignment { get; set; } = TypeToolbarItemAlignment.Default;
+        public virtual TypeSidebarMode Mode { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        public ControlToolbarItemLabel(string id = null)
+        public ControlSidebarItemDivider(string id = null)
         {
             _id = id;
         }
@@ -61,14 +48,11 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = "wx-toolbar-label"
+                Class = "wx-sidebar-separator"
             }
-                .AddUserAttribute("data-label", I18N.Translate(renderContext, Text))
-                .AddUserAttribute("data-title", I18N.Translate(renderContext, Tooltip))
+                .AddUserAttribute("data-mode", Mode != TypeSidebarMode.Default ? Mode.ToData() : null)
                 .AddUserAttribute("data-color-css", Color?.ToClass())
-                .AddUserAttribute("data-color-style", Color?.ToStyle())
-                .AddUserAttribute(Disabled ? "disabled" : null)
-                .AddUserAttribute("data-align", Alignment.ToValue());
+                .AddUserAttribute("data-color-style", Color?.ToStyle());
         }
     }
 }
