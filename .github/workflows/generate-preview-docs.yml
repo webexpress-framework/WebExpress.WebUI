@@ -62,11 +62,14 @@ jobs:
         echo '  </packageSources>' >> nuget.config
         echo '</configuration>' >> nuget.config
 
+    - name: Debug: List all .csproj files
+      run: find . -name "*.csproj"
+
     - name: Restore packages with local feed
-      run: dotnet restore WebExpress.WebUI/src/WebExpress.WebUI/WebExpress.WebUI.csproj --configfile nuget.config
+      run: dotnet restore ./src/WebExpress.WebUI/WebExpress.WebUI.csproj --configfile nuget.config
 
     - name: Build WebExpress.WebUI
-      run: dotnet build WebExpress.WebUI/src/WebExpress.WebUI/WebExpress.WebUI.csproj -c Release
+      run: dotnet build ./src/WebExpress.WebUI/WebExpress.WebUI.csproj -c Release --no-restore
 
     - name: Generate documentation
       run: |
