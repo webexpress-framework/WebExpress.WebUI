@@ -1,7 +1,6 @@
 ﻿using WebExpress.WebCore.WebMessage;
-using WebExpress.WebUI.WebControl;
 
-namespace WebExpress.WebUi.WebControl
+namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// Represents an event that handles the upload of a file in a control form.

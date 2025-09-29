@@ -1,7 +1,6 @@
 ﻿using System;
-using WebExpress.WebUI.WebControl;
 
-namespace WebExpress.WebUi.WebControl
+namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// Represents a modal control that extends the base control functionality.

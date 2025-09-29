@@ -4,11 +4,10 @@ using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebMessage;
-using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
-namespace WebExpress.WebUi.WebControl
+namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// Represents a modal form control for file uploads, providing functionality for 
