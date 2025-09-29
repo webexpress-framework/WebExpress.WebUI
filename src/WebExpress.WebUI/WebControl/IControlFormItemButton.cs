@@ -55,8 +55,9 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="controls">The controls to add to the content.</param>
         /// <remarks>
-        /// This method allows adding one or multiple controls to the <see cref="Content"/> collection of the control panel. 
-        /// It is useful for dynamically constructing the user interface by appending various controls to the panel's content.
+        /// This method allows adding one or multiple controls to the content collection of the 
+        /// control panel. It is useful for dynamically constructing the user interface by appending 
+        /// various controls to the panel's content.
         /// 
         /// Example usage:
         /// <code>
@@ -65,6 +66,7 @@ namespace WebExpress.WebUI.WebControl
         /// var text2 = new ControlText { Text = "Cancel" };
         /// button.Add(text1, text2);
         /// </code>
+        /// 
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
@@ -75,8 +77,9 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="controls">The controls to add to the content.</param>
         /// <remarks>
-        /// This method allows adding one or multiple controls to the <see cref="Content"/> collection of the control panel. 
-        /// It is useful for dynamically constructing the user interface by appending various controls to the panel's content.
+        /// This method allows adding one or multiple controls to the content collection of the control 
+        /// panel. It is useful for dynamically constructing the user interface by appending various 
+        /// controls to the panel's content.
         /// 
         /// Example usage:
         /// <code>
@@ -85,6 +88,7 @@ namespace WebExpress.WebUI.WebControl
         /// var text2 = new ControlText { Text = "Cancel" };
         /// button.Add(new List<IControl>([text1, text2]));
         /// </code>
+        /// 
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
@@ -95,7 +99,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="control">The control to remove from the content.</param>
         /// <remarks>
-        /// This method allows removing a specific control from the <see cref="Content"/> collection of 
+        /// This method allows removing a specific control from the content collection of 
         /// the control panel.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>

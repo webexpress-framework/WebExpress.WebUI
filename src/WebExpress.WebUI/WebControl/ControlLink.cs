@@ -117,8 +117,9 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="controls">The controls to add to the content.</param>
         /// <remarks>
-        /// This method allows adding one or multiple controls to the <see cref="Content"/> collection of the control panel. 
-        /// It is useful for dynamically constructing the user interface by appending various controls to the panel's content.
+        /// This method allows adding one or multiple controls to the content collection 
+        /// of the control panel. It is useful for dynamically constructing the user interface by 
+        /// appending various controls to the panel's content.
         /// 
         /// Example usage:
         /// <code>
@@ -127,6 +128,7 @@ namespace WebExpress.WebUI.WebControl
         /// var text2 = new ControlText { Text = "B" };
         /// link.Add(text1, text2);
         /// </code>
+        /// 
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
         public void Add(params IControl[] controls)
@@ -139,8 +141,9 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="controls">The controls to add to the content.</param>
         /// <remarks>
-        /// This method allows adding one or multiple controls to the <see cref="Content"/> collection of the control panel. 
-        /// It is useful for dynamically constructing the user interface by appending various controls to the panel's content.
+        /// This method allows adding one or multiple controls to the content collection 
+        /// of the control panel. It is useful for dynamically constructing the user interface by 
+        /// appending various controls to the panel's content.
         /// 
         /// Example usage:
         /// <code>
@@ -149,6 +152,7 @@ namespace WebExpress.WebUI.WebControl
         /// var text2 = new ControlText { Text = "B" };
         /// link.Add(new List<IControl>([text1, text2]));
         /// </code>
+        /// 
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
         public void Add(IEnumerable<IControl> controls)

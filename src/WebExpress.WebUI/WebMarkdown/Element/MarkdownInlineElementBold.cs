@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.WebMarkdown.Element
         /// </summary>
         public override string PlainText => string.Concat(Content.Select(e => e.PlainText));
 
-        // <summary>
+        /// <summary>
         /// Initializes a new instance of the class with the specified content.
         /// </summary>
         /// <param name="content">The inline elements that are enclosed by the bold formatting.</param>

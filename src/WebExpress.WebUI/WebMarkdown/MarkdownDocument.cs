@@ -35,7 +35,7 @@ namespace WebExpress.WebUI.WebMarkdown
             return this;
         }
 
-        // <summary>
+        /// <summary>
         /// Adds one or more inline elements to the paragraph.
         /// </summary>
         /// <param name="nodes">The nodes to add.</param>
@@ -57,7 +57,10 @@ namespace WebExpress.WebUI.WebMarkdown
             foreach (var node in _nodes)
             {
                 if (sb.Length > 0)
+                {
                     sb.AppendLine();
+                }
+
                 sb.Append(node.PlainText);
             }
 

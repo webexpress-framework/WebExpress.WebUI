@@ -12,6 +12,7 @@ namespace WebExpress.WebUI.WebControl
         /// This method allows adding one or multiple links to the collection of 
         /// the link list control. It is useful for dynamically constructing the user interface by appending 
         /// various links to the link list content. 
+        /// 
         /// Example usage: 
         /// <code> 
         /// var list = new ControlLinkList(); 
@@ -19,6 +20,7 @@ namespace WebExpress.WebUI.WebControl
         /// var link2 = new ControlLink { Text = "B" };
         /// list.Add(text1, text2);
         /// </code> 
+        /// 
         /// This method accepts any control that implements the <see cref="IControlLink"/> interface.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
@@ -32,6 +34,7 @@ namespace WebExpress.WebUI.WebControl
         /// This method allows adding one or multiple links to the collection of 
         /// the link list control. It is useful for dynamically constructing the user interface by appending 
         /// various links to the link list content. 
+        /// 
         /// Example usage: 
         /// <code> 
         /// var list = new ControlLinkList(); 
@@ -39,6 +42,7 @@ namespace WebExpress.WebUI.WebControl
         /// var link2 = new ControlLink { Text = "B" };
         /// list.Add(text1, text2);
         /// </code> 
+        /// 
         /// This method accepts any control that implements the <see cref="IControlLink"/> interface.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>

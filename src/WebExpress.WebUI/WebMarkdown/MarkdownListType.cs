@@ -57,7 +57,7 @@ namespace WebExpress.WebUI.WebMarkdown
         }
 
         /// <summary>
-        /// Converts a list marker string (e.g. "1.", "I.", "a.") into a corresponding <see cref="HtmlListType"/>.
+        /// Converts a list marker string (e.g. "1.", "I.", "a.") into a corresponding <see cref="MarkdownListType"/>.
         /// </summary>
         /// <param name="input">The list marker to analyze.</param>
         /// <returns>

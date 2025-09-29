@@ -89,6 +89,7 @@ namespace WebExpress.WebUI.WebControl
         /// <remarks> 
         /// This method allows adding one or multiple items to the collection of 
         /// the control.
+        /// 
         /// Example usage: 
         /// <code> 
         /// var control = new ControlNavigation(); 
@@ -96,6 +97,7 @@ namespace WebExpress.WebUI.WebControl
         /// var text2 = new ControlNavigationItemLink { Text = "B" };
         /// control.Add(text1, text2);
         /// </code> 
+        /// 
         /// This method accepts any items that implements the <see cref="IControlNavigationItem"/> interface.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
@@ -113,6 +115,7 @@ namespace WebExpress.WebUI.WebControl
         /// <remarks> 
         /// This method allows adding one or multiple items to the collection of 
         /// the control.
+        /// 
         /// Example usage: 
         /// <code> 
         /// var control = new ControlNavigation(); 
@@ -120,6 +123,7 @@ namespace WebExpress.WebUI.WebControl
         /// var text2 = new ControlNavigationItemLink { Text = "B" };
         /// control.Add(new List<IControl>([text1, text2]));
         /// </code> 
+        /// 
         /// This method accepts any items that implements the <see cref="IControlNavigationItem"/> interface.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>

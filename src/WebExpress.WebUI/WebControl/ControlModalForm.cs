@@ -150,6 +150,7 @@ namespace WebExpress.WebUI.WebControl
         /// This method allows adding one or multiple form items to the <see cref="ControlFormItem"/> collection of 
         /// the form. It is useful for dynamically constructing the user interface by appending 
         /// various controls to the form's content. 
+        /// 
         /// Example usage: 
         /// <code> 
         /// var form = new ControlForm(); 
@@ -157,6 +158,7 @@ namespace WebExpress.WebUI.WebControl
         /// var button2 = new ControlButton { Text = "Cancel" };
         /// form.Add(button1, button2);
         /// </code> 
+        /// 
         /// This method accepts any control that implements the <see cref="ControlFormItem"/> interface.
         /// </remarks>
         public virtual IControlForm Add(params IControlFormItem[] items)
@@ -175,6 +177,7 @@ namespace WebExpress.WebUI.WebControl
         /// This method allows adding one or multiple form items to the <see cref="ControlFormItem"/> collection of 
         /// the form. It is useful for dynamically constructing the user interface by appending 
         /// various controls to the form's content. 
+        /// 
         /// Example usage: 
         /// <code> 
         /// var form = new ControlForm(); 
@@ -182,6 +185,7 @@ namespace WebExpress.WebUI.WebControl
         /// var button2 = new ControlButton { Text = "Cancel" };
         /// form.Add(button1, button2);
         /// </code> 
+        /// 
         /// This method accepts any control that implements the <see cref="ControlFormItem"/> interface.
         /// </remarks>
         public virtual IControlForm Add(IEnumerable<IControlFormItem> items)

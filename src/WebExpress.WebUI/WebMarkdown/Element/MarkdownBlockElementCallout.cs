@@ -39,7 +39,7 @@ namespace WebExpress.WebUI.WebMarkdown.Element
             _content.AddRange(content);
         }
 
-        // <summary>
+        /// <summary>
         /// Adds one or more elements to the quote.
         /// </summary>
         /// <param name="content">The elements to add.</param>
@@ -51,7 +51,7 @@ namespace WebExpress.WebUI.WebMarkdown.Element
             return this;
         }
 
-        // <summary>
+        /// <summary>
         /// Adds one or more elements to the quote.
         /// </summary>
         /// <param name="content">The elements to add.</param>

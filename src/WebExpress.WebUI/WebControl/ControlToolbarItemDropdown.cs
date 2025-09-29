@@ -101,9 +101,10 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="items">The items to add to the dropdown.</param>
         /// <remarks>
-        /// This method allows adding one or multiple dropdown items to the <see cref="Items"/> collection of 
+        /// This method allows adding one or multiple dropdown items to the items collection of 
         /// the dropdown control. It is useful for dynamically constructing the dropdown menu by appending 
         /// various items to it.
+        /// 
         /// Example usage:
         /// <code>
         /// var dropdown = new DropdownControl();
@@ -111,6 +112,7 @@ namespace WebExpress.WebUI.WebControl
         /// var item2 = new ControlDropdownItemLink { Text = "Option 2" };
         /// dropdown.Add(item1, item2);
         /// </code>
+        /// 
         /// This method accepts any item that implements the <see cref="IControlDropdownItem"/> interface.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>

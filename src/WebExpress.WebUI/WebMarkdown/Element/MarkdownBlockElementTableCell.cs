@@ -13,6 +13,7 @@ namespace WebExpress.WebUI.WebMarkdown.Element
 
         /// <summary>
         /// Returns the horizontal alignment for this cell's content.
+        /// </summary>
         public MarkdownCellAlign Align => _align;
 
         /// <summary>

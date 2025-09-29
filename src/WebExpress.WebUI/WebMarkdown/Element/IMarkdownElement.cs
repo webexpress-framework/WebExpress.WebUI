@@ -9,6 +9,5 @@ namespace WebExpress.WebUI.WebMarkdown.Element
         /// Returns the plain text representation of this node and its children.
         /// </summary>
         string PlainText { get; }
-
     }
 }

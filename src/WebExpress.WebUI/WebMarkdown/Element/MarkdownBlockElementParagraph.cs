@@ -37,7 +37,7 @@ namespace WebExpress.WebUI.WebMarkdown.Element
             _content.AddRange(content);
         }
 
-        // <summary>
+        /// <summary>
         /// Adds one or more inline elements to the paragraph.
         /// </summary>
         /// <param name="content">The elements to add.</param>

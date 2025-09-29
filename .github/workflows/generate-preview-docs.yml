@@ -62,24 +62,17 @@ jobs:
         echo '  </packageSources>' >> nuget.config
         echo '</configuration>' >> nuget.config
 
-    - name: Debug list all .csproj files
-      run: find . -name "*.csproj"
-
     - name: Restore packages with local feed
       run: dotnet restore ./src/WebExpress.WebUI/WebExpress.WebUI.csproj --configfile nuget.config
 
     - name: Build WebExpress.WebUI
       run: dotnet build ./src/WebExpress.WebUI/WebExpress.WebUI.csproj -c Release --no-restore
 
-    - name: Create globalMetadata.json
-      run: |
-        echo '{ "_isPreview": true }' > docs/globalMetadata.json
-
     - name: Generate documentation
       run: |
         cd docs 
         docfx metadata
-        docfx build -o _site/preview --globalMetadataFile globalMetadata.json
+        docfx build -o _site/preview
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3

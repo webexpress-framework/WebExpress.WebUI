@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.WebMarkdown
         Pipe,
 
         /// <summary>
-        /// < - less-than (used for html).
+        /// &lt; - less-than (used for html).
         /// </summary>
         Less,
 
@@ -21,35 +21,35 @@ namespace WebExpress.WebUI.WebMarkdown
         Plus,
 
         /// <summary>
-        /// > - greater-than (used for blockquotes and html).
+        /// &gt; - greater-than (used for blockquotes and html).
         /// </summary>
         Greater,
 
         /// <summary>
-        /// >> - doubble greater-than (used to indicate multi-line cells within a Markdown table or nested blockquote).
+        /// &gt;&gt; - doubble greater-than (used to indicate multi-line cells within a Markdown table or nested blockquote).
         /// </summary>
         DoubleGreater,
 
         /// <summary>
-        /// >? - callout symbol for helpful or supportive content.
+        /// &gt;? - callout symbol for helpful or supportive content.
         /// Typically used for tips, suggestions, or contextual assistance.
         /// </summary>
         GratherHint,
 
         /// <summary>
-        /// >! - callout symbol for cautionary or alert messages.
+        /// &gt;! - callout symbol for cautionary or alert messages.
         /// Used to signal potential issues, risks, or non-critical concerns.
         /// </summary>
         GratherWarning,
 
         /// <summary>
-        /// >!! - callout symbol for critical or blocking problems.
+        /// &gt;!! - callout symbol for critical or blocking problems.
         /// Highlights fatal errors, exceptions, or urgent issues requiring immediate attention.
         /// </summary>
         GratherError,
 
         /// <summary>
-        /// >* - callout symbol for positive feedback or highlighted achievements.
+        /// &gt;* - callout symbol for positive feedback or highlighted achievements.
         /// Used to celebrate successful actions, best practices, or recommended insights.
         /// </summary>
         GratherSuccess,
