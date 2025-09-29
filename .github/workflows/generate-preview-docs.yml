@@ -40,6 +40,9 @@ jobs:
       run: |
         git clone --branch develop https://github.com/webexpress-framework/WebExpress.WebCore.git
         mkdir -p packages
+        
+    - name: Create wwwroot directory for WebCore
+        run: mkdir -p WebExpress.WebCore/src/WebExpress.WebCore/wwwroot
 
     - name: Build local NuGet package
       run: |
