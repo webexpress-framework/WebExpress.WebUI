@@ -62,7 +62,7 @@ jobs:
         echo '  </packageSources>' >> nuget.config
         echo '</configuration>' >> nuget.config
 
-    - name: Debug: List all .csproj files
+    - name: Debug list all .csproj files
       run: find . -name "*.csproj"
 
     - name: Restore packages with local feed
