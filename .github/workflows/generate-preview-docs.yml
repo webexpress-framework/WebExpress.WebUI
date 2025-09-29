@@ -71,11 +71,15 @@ jobs:
     - name: Build WebExpress.WebUI
       run: dotnet build ./src/WebExpress.WebUI/WebExpress.WebUI.csproj -c Release --no-restore
 
+    - name: Create globalMetadata.json
+      run: |
+        echo '{ "_isPreview": true }' > docs/globalMetadata.json
+
     - name: Generate documentation
       run: |
         cd docs 
         docfx metadata
-        docfx build -o _site/preview --globalMetadata "_isPreview=true"
+        docfx build -o _site/preview --globalMetadataFile globalMetadata.json
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
