@@ -6,11 +6,11 @@
     public interface IControlResponsive : IControl
     {
         /// <summary>
-        /// Adds a panel that becomes visible at the specified breakpoint.
+        /// Adds a panel with a specific breakpoint.
         /// </summary>
         /// <param name="panel">The panel to add.</param>
         /// <param name="breakpoint">
-        /// The minimum width at which the panel becomes visible. Use < 0 to register as fallback panel.
+        /// The minimum width at which the panel becomes visible. Use values less than 0 to register as fallback panel.
         /// </param>
         /// <returns>The current instance for method chaining.</returns>
         IControlResponsive Add(IControlPanel panel, int breakpoint);

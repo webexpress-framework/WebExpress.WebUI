@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.WebMarkdown.Element
             return this;
         }
 
-        // <summary>
+        /// <summary>
         /// Adds one or more inline elements to the paragraph.
         /// </summary>
         /// <param name="content">The elements to add.</param>

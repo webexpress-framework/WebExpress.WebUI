@@ -78,6 +78,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         IEnumerable<string> Classes { get; set; }
 
+        /// <summary>
         /// Returns or sets the css style.
         /// </summary>
         IEnumerable<string> Styles { get; set; }

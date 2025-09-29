@@ -41,7 +41,7 @@ namespace WebExpress.WebUI.WebControl
         /// var control = new ControlNavigation(); 
         /// var text1 = new ControlNavigationItemLink { Text = "A" };
         /// var text2 = new ControlNavigationItemLink { Text = "B" };
-        /// control.Add(new List<IControlNavigationItem> { text1, text2 });
+        /// control.Add(text1, text2);
         /// </code> 
         /// 
         /// This method accepts any items that implement the <see cref="IControlNavigationItem"/> interface.

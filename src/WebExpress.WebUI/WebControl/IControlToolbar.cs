@@ -56,7 +56,7 @@ namespace WebExpress.WebUI.WebControl
         /// var tool = new ControlToolbar();
         /// var item1 = new ControlToolBarItemButton { Text = "Item 1" };
         /// var item2 = new ControlToolBarItemButton { Text = "Item 2" };
-        /// tool.Add(new List<IControlToolbarItem> { item1, item2 });
+        /// tool.Add(item1, item2);
         /// </code>
         /// 
         /// This method accepts any item that derives from <see cref="IControlToolbarItem"/>.

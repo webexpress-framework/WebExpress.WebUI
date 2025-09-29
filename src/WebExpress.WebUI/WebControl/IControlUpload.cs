@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         IUri Uri { get; }
 
-        // <summary>
+        /// <summary>
         /// Returns a value indicating whether multiple selections are allowed.
         /// </summary>
         bool Multiple { get; }

@@ -1,6 +1,6 @@
 ﻿namespace WebExpress.WebUI.WebIcon
 {
-    // <summary>
+    /// <summary>
     /// Represents an icon for an exclamation triangle.
     /// </summary>
     public class IconExclamationTriangle : Icon

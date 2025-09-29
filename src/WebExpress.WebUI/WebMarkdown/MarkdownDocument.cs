@@ -23,7 +23,7 @@ namespace WebExpress.WebUI.WebMarkdown
         {
         }
 
-        // <summary>
+        /// <summary>
         /// Adds one or more inline elements to the paragraph.
         /// </summary>
         /// <param name="nodes">The nodes to add.</param>

@@ -40,7 +40,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         public IControl Footer { get; set; }
 
-        // <summary>
+        /// <summary>
         /// Returns or sets a value indicating whether favorited suggestions are enabled.
         /// </summary>
         public bool EnableFavorited { get; set; }
