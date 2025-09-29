@@ -38,7 +38,7 @@ jobs:
       
     - name: Clone WebExpress.WebCore
       run: |
-        git clone https://github.com/webexpress-framework/WebExpress.WebCore.git
+        git clone --branch develop https://github.com/webexpress-framework/WebExpress.WebCore.git
         mkdir -p packages
 
     - name: Build local NuGet package
