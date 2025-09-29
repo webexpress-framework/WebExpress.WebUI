@@ -63,7 +63,10 @@ jobs:
         echo '</configuration>' >> nuget.config
 
     - name: Restore packages with local feed
-      run: dotnet restore --configfile nuget.config
+      run: dotnet restore WebExpress.WebUI/src/WebExpress.WebUI/WebExpress.WebUI.csproj --configfile nuget.config
+
+      - name: Build WebExpress.WebUI
+        run: dotnet build WebExpress.WebUI/src/WebExpress.WebUI/WebExpress.WebUI.csproj -c Release
 
     - name: Generate documentation
       run: |
