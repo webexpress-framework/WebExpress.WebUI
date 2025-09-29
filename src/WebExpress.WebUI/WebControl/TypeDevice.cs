@@ -26,11 +26,11 @@
         /// </summary>
         Medium,
         /// <summary>
-        /// Suitable for laptops & desktops 992px or greater.
+        /// Suitable for laptops and desktops 992px or greater.
         /// </summary>
         Large,
         /// <summary>
-        /// Suitable for laptops & desktops 1200px or greater.
+        /// Suitable for laptops and desktops 1200px or greater.
         /// </summary>
         ExtraLarge
     }

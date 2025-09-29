@@ -5,7 +5,7 @@
 - name: MarkDown Guide
   href: md-guide.md
 - name: API Documentation
-  href: api/WebExpress.WebUI.html
+  href: api/
 - name: JavaScript UI Documentation
   href: javascript.md
   children:
