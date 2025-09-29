@@ -12,7 +12,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
         super(element);
         // parse items from DOM
         this._parseItems(Array.from(element.querySelectorAll(
-            ".wx-toolbar-button, .wx-toolbar-separator, .wx-toolbar-dropdown, .wx-toolbar-combo, .wx-toolbar-label, .wx-toolbar-mode"
+            ".wx-toolbar-button, .wx-toolbar-separator, .wx-toolbar-dropdown, .wx-toolbar-combo, .wx-toolbar-label"
         )));
         // parse More dropdown
         this._parseMoreDropdown(element.querySelector(".wx-toolbar-more"));
@@ -41,24 +41,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                     overflow: "hide",
                     el
                 };
-            }
-            if (el.classList.contains("wx-toolbar-mode")) {
-                return {
-                    type: "mode",
-                    label: el.dataset.label || null,
-                    icon: el.dataset.icon || null,
-                    image: el.dataset.image || null,
-                    title: el.dataset.title || null,
-                    colorCss: el.getAttribute("data-color-css") || null,
-                    colorStyle: el.getAttribute("data-color-style") || null,
-                    align,
-                    disabled,
-                    active,
-                    overflow: "never",
-                    el
-                };
-            }
-            if (el.classList.contains("wx-toolbar-combo")) {
+            } else if (el.classList.contains("wx-toolbar-combo")) {
                 return {
                     type: "combo",
                     label: el.dataset.label || null,
@@ -74,11 +57,9 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                     disabled,
                     active,
                     overflow: el.dataset.overflow || "",
-                    el
+                    element: el
                 };
-            }
-            if (el.classList.contains("wx-toolbar-dropdown")) {
-                el.classList.remove("wx-toolbar-dropdown");
+            } else if (el.classList.contains("wx-toolbar-dropdown")) {
                 return {
                     type: "dropdown",
                     colorCss: el.getAttribute("data-color-css") || null,
@@ -89,12 +70,12 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                     disabled,
                     active,
                     overflow: el.dataset.overflow || "",
-                    el
+                    element: el
                 };
-            }
-            if (el.classList.contains("wx-toolbar-button")) {
+            } else if (el.classList.contains("wx-toolbar-button")) {
                 return {
                     type: "button",
+                    id: el.id,
                     label: el.dataset.label || null,
                     icon: el.dataset.icon || null,
                     image: el.dataset.image || null,
@@ -105,10 +86,9 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                     disabled,
                     active,
                     overflow: el.dataset.overflow || "",
-                    el
+                    element: el
                 };
-            }
-            if (el.classList.contains("wx-toolbar-label")) {
+            } else if (el.classList.contains("wx-toolbar-label")) {
                 // always set overflow=hide for labels in the DOM
                 el.setAttribute("data-overflow", "hide");
                 return {
@@ -120,7 +100,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                     align,
                     disabled,
                     overflow: "hide",
-                    el
+                    element: el
                 };
             }
         });
@@ -131,11 +111,19 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
      * @param {HTMLElement} element - element to parse
      */
     _parseMoreDropdown(element) {
-        if (element) {
-            this._moreDropdownElement = element;
+        this._moreRaw = element;
+        // store reference to more dropdown element if available
+        if (element && element.classList.contains("wx-toolbar-more")) {
+            const instance = webexpress.webui.Controller.getInstanceByElement(element);
+            if (instance) {
+                this._more = element;
+                instance.icon = "fas fa-ellipsis-h";
+                instance.menuCSS = "wx-toolbar-more-menu";
+            } else {
+                this._more = this._createMoreDropdownWithController();
+            }
         } else {
-            this._moreDropdownElement = document.createElement("div");
-            this._moreDropdownElement.className = "wx-toolbar-more";
+            this._more = null;
         }
     }
 
@@ -144,10 +132,12 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
      * @returns {boolean}
      */
     _hasMoreDropdownItems() {
-        if (this._moreDropdownElement && this._moreDropdownElement.children.length > 0) {
-            for (let i = 0; i < this._moreDropdownElement.children.length; i++) {
-                const child = this._moreDropdownElement.children[i];
-                if (!child.classList.contains("wx-dropdown-header")) {
+        // check if there are usable entries in the more dropdown
+        if (this._more && this._more.children.length > 0) {
+            for (let i = 0; i < this._more.children.length; i++) {
+                const child = this._more.children[i];
+                if (!child.classList.contains("wx-dropdown-header") && 
+                    !child.classList.contains("wx-dropdown-separator")) {
                     return true;
                 }
             }
@@ -174,7 +164,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
         overflowRoot.style.width = "100%";
         overflowRoot.dataset.overflowCutoff = "false";
 
-        // add left-aligned
+        // add left-aligned items
         for (const item of this._items) {
             if (item.align !== "right") {
                 overflowRoot.appendChild(this._renderItem(item));
@@ -182,7 +172,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
         }
         // add spring
         overflowRoot.appendChild(spring);
-        // add right-aligned
+        // add right-aligned items
         for (const item of this._items) {
             if (item.align === "right") {
                 overflowRoot.appendChild(this._renderItem(item));
@@ -202,9 +192,9 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             }
         });
 
-        // More dropdown if needed
+        // more dropdown if needed
         if (this._hasMoreDropdownItems()) {
-            container.appendChild(this._createMoreDropdownWithController());
+            container.appendChild(this._more);
         }
     }
 
@@ -220,69 +210,46 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             el.dataset.overflow = "hide";
             return el;
         }
-        if (item.type === "mode") {
-            const el = document.createElement("button");
-            el.className = "btn wx-toolbar-mode";
-            if (item.disabled) { el.classList.add("disabled"); }
-            if (item.active) { el.classList.add("active"); }
-            el.type = "button";
-            if (item.image) {
-                const img = document.createElement("img");
-                img.src = item.image;
-                el.appendChild(img);
-            }
-            if (item.icon) {
-                const icon = document.createElement("i");
-                icon.className = item.icon;
-                el.appendChild(icon);
-            }
-            if (item.label) {
-                const span = document.createElement("span");
-                span.textContent = item.label;
-                el.appendChild(span);
-            }
-            if (item.colorCss) { el.classList.add(item.colorCss); }
-            if (item.colorStyle) { el.setAttribute("style", item.colorStyle); }
-            if (item.title) { el.title = item.title; }
-            el.dataset.overflow = "never";
-            el.addEventListener("click", () => {
-                this._dispatch(webexpress.webui.Event.CLICK_EVENT, { item: item });
-            });
-            return el;
-        }
         if (item.type === "button") {
-            const el = document.createElement("button");
-            el.className = "btn wx-toolbar-button";
-            if (item.disabled) { el.classList.add("disabled"); }
-            if (item.active) { el.classList.add("active"); }
-            el.type = "button";
+            const instance = webexpress.webui.Controller.getInstanceByElement(item.element);
+            if (instance) {
+                return item.element;
+            }
+            
+            item.element.classList.add("btn");
+            item.element.type = "button";
             if (item.image) {
                 const img = document.createElement("img");
+                img.className = "wx-icon";
                 img.src = item.image;
-                el.appendChild(img);
+                item.element.appendChild(img);
             }
             if (item.icon) {
                 const icon = document.createElement("i");
                 icon.className = item.icon;
-                el.appendChild(icon);
+                item.element.appendChild(icon);
             }
             if (item.label) {
                 const span = document.createElement("span");
                 span.textContent = item.label;
-                el.appendChild(span);
+                item.element.appendChild(span);
             }
-            if (item.colorCss) { el.classList.add(item.colorCss); }
-            if (item.colorStyle) { el.setAttribute("style", item.colorStyle); }
-            if (item.title) { el.title = item.title; }
-            el.addEventListener("click", () => {
+            if (item.colorCss) { item.element.classList.add(item.colorCss); }
+            if (item.colorStyle) { item.element.setAttribute("style", item.colorStyle); }
+            if (item.title) { item.element.title = item.title; }
+            
+            item.element.addEventListener("click", () => {
                 this._dispatch(webexpress.webui.Event.CLICK_EVENT, { item: item });
             });
-            return el;
+            return item.element;
         }
         if (item.type === "dropdown") {
-            const dropdownCtrl = new webexpress.webui.DropdownCtrl(item.el);
-            dropdownCtrl._buttonCss = "wx-toolbar-dropdown";
-            dropdownCtrl._buttonStyle = "";
+            const instance = webexpress.webui.Controller.getInstanceByElement(item.element);
+            if (instance) {
+                return item.element;
+            }
+            
+            const dropdownCtrl = new webexpress.webui.DropdownCtrl(item.element);
             if (item.toggle) { dropdownCtrl._buttonCss += " dropdown-toggle"; }
             if (item.disabled) { dropdownCtrl._element.classList.add("disabled"); }
             if (item.active) { dropdownCtrl._buttonCss += " active"; }
@@ -299,6 +266,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             if (item.title) { combo.title = item.title; }
             if (item.image) {
                 const img = document.createElement("img");
+                img.className = "wx-icon";
                 img.src = item.image;
                 combo.appendChild(img);
                 if (item.disabled) { img.classList.add("disabled"); }
@@ -356,35 +324,39 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
      * @returns {HTMLElement} dropdown root element
      */
     _createMoreDropdownWithController() {
+        // create dropdown menu for more items
         const items = [];
-        Array.from(this._moreDropdownElement.children).forEach((child) => {
-            if (child.classList.contains("wx-dropdown-header")) {
-                items.push({
-                    type: "header",
-                    content: child.textContent,
-                    icon: child.dataset.icon || null
-                });
-            } else if (child.classList.contains("wx-dropdown-divider")) {
-                items.push({ type: "divider" });
-            } else if (child.classList.contains("wx-dropdown-item")) {
-                items.push({
-                    id: child.id || null,
-                    uri: child.dataset.uri || "javascript:void(0);",
-                    image: child.dataset.image || null,
-                    icon: child.dataset.icon || null,
-                    content: child.textContent || null,
-                    color: child.dataset.color || null,
-                    disabled: child.hasAttribute("disabled")
-                });
-            }
-        });
+        if (this._moreRaw) {
+            Array.from(this._moreRaw.children).forEach((child) => {
+                if (child.classList.contains("wx-dropdown-header")) {
+                    items.push({
+                        type: "header",
+                        content: child.textContent,
+                        icon: child.dataset.icon || null
+                    });
+                } else if (child.classList.contains("wx-dropdown-divider")) {
+                    items.push({ type: "divider" });
+                } else if (child.classList.contains("wx-dropdown-item")) {
+                    items.push({
+                        id: child.id || null,
+                        uri: child.dataset.uri || "javascript:void(0);",
+                        image: child.dataset.image || null,
+                        icon: child.dataset.icon || null,
+                        content: child.textContent || null,
+                        color: child.dataset.color || null,
+                        disabled: child.hasAttribute("disabled")
+                    });
+                }
+            });
+        }
 
         const dropdownContainer = document.createElement("div");
+        dropdownContainer.className = "wx-toolbar-more";
         const dropdownCtrl = new webexpress.webui.DropdownCtrl(dropdownContainer);
         dropdownCtrl.label = null;
         dropdownCtrl.icon = "fas fa-ellipsis-h";
         dropdownCtrl.menuCSS = "wx-toolbar-more-menu";
-        dropdownCtrl.buttonCss = "wx-toolbar-more-dropdown btn";
+        dropdownCtrl.buttonCss = "btn";
         dropdownCtrl.items = items;
 
         dropdownContainer.addEventListener(webexpress.webui.Event.CLICK_EVENT, (e) => {

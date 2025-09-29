@@ -55,3 +55,6 @@
       href: js/upload.md
 - name: Tutorials
   href: tutorials.md
+- name: Preview
+  href: preview/index.md
+  

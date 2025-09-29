@@ -36,6 +36,41 @@ webexpress.webui.Controller = new class {
                     }
                 });
             });
+            // find all elements with the attribute data-wx-toggle="split"
+            document.querySelectorAll("[data-wx-toggle='split']").forEach(el => {
+                el.addEventListener("click", () => {
+                    const target = el.getAttribute("data-wx-target");
+                    const instance = this.getInstance(target);
+                    if (instance && typeof instance.toggleSidePane === "function") {
+                        instance.toggleSidePane();
+                    }
+                });
+                document.addEventListener(webexpress.webui.Event.HIDE_EVENT, (e) => {
+                    const target = el.getAttribute("data-wx-target");
+                    if (e.detail.sender === el) {
+                        const instance = this.getInstance(target);
+                        if (instance) {
+                            const descriptor = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(instance), "collapsed");
+                            if (descriptor && descriptor.set) {
+                                instance.collapsed = true;
+                            }
+                        }
+                    }
+                });
+                document.addEventListener(webexpress.webui.Event.SHOW_EVENT, (e) => {
+                    const target = el.getAttribute("data-wx-target");
+                    if (e.detail.sender === el) {
+                        const instance = this.getInstance(target);
+                        if (instance) {
+                            const descriptor = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(instance), "collapsed");
+                            if (descriptor && descriptor.set) {
+                                instance.collapsed = false;
+                            }
+                        }
+                    }
+                });
+            });
+
         });
     }
 
@@ -76,6 +111,28 @@ webexpress.webui.Controller = new class {
                 }
             }
         }
+    }
+    
+    /**
+     * Creates an instance from a registered classType string and a DOM element.
+     * @param {string} classType - The registered class name (selector).
+     * @param {HTMLElement} element - The DOM element to bind the instance to.
+     * @returns {Object|null} - The created instance or null if not found.
+     */
+    createInstanceByClassType(classType, element) {
+        const ClassConstructor = this.classRegistry.get(classType);
+        if (ClassConstructor) {
+            try {
+                const instance = new ClassConstructor(element);
+                this.instanceMap.set(element, instance);
+                return instance;
+            } catch (error) {
+                console.error(`Failed to instantiate class "${classType}"`, error);
+            }
+        } else {
+            console.warn(`Class "${classType}" is not registered.`);
+        }
+        return null;
     }
 
     /**

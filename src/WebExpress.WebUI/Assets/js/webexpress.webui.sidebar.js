@@ -20,9 +20,9 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
         this._element = element;
         this._isReduced = false;
         this._manualOverride = false;
-        this._toggleButton = null;
+        this._toolbarElement = null;
         // set breakpoint to a sensible default if not present
-        this._breakpoint = parseInt(element.getAttribute("data-breakpoint"), 10) || 1024;
+        this._breakpoint = parseInt(element.getAttribute("data-breakpoint"), 10) || 100;
         this._items = this._parseItems(element.children);
 
         // clean up the DOM and remove all data attributes
@@ -54,12 +54,13 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             const isHeader = el.classList.contains("wx-sidebar-header");
             const isPanel = el.classList.contains("wx-sidebar-control");
             const isLink = el.classList.contains("wx-sidebar-link");
+            const isToolbar = el.classList.contains("wx-sidebar-toolbar");
             const iconClass = el.getAttribute("data-icon");
             const iconImg = el.getAttribute("data-image");
             const label = el.getAttribute("data-label") || el.textContent.trim();
             const link = el.getAttribute("data-uri") || null;
             const tooltip = el.getAttribute("data-tooltip") || null;
-            const isRemoveable = el.getAttribute("data-dismissibility") === "true";
+            const isRemoveable = el.getAttribute("data-removeable") === "true";
             const mode = el.getAttribute("data-mode") || ""; // "hide" or "overlay"
 
             if (isHeader) {
@@ -126,6 +127,14 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                     mode: mode,
                     content: el.children[0] ? el.children[0].cloneNode(true) : null
                 });
+            } else if (isToolbar) {
+                el.classList.remove("wx-sidebar-toolbar");
+                // toolbar gets handled as special item
+                items.push({
+                    index: i,
+                    element: el,
+                    type: "toolbar"
+                });
             }
         }
         return items;
@@ -136,38 +145,28 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
      */
     _buildSidebar() {
         for (let item of this._items) {
-            if (item.element.parentElement !== this._element) {
-                this._element.appendChild(item.element);
+            if (item.type !== "toolbar") {
+                if (item.element.parentElement !== this._element) {
+                    this._element.appendChild(item.element);
+                }
             }
         }
     }
 
     /**
-     * builds a toggle button always visible at the footer of the sidebar
+     * builds a toolbar at the footer of the sidebar, if available
      */
     _buildFooter() {
-        this._footer = document.createElement("div");
-        this._footer.className = "wx-sidebar-footer";
-
-        this._toggleIcon = document.createElement("i");
-        this._toggleIcon.className = "fas fa-angles-right";
-
-        this._toggleButton = document.createElement("button");
-        this._toggleButton.type = "button";
-        this._toggleButton.className = "btn";
-        this._toggleButton.setAttribute("aria-pressed", "false");
-        this._toggleButton.appendChild(this._toggleIcon);
-
-        this._toggleButton.addEventListener("click", () => {
-            // manual override disables resize logic
-            this._manualOverride = true;
-            this._isReduced = !this._isReduced;
-            this._updateView();
-            this._dispatch(webexpress.webui.Event.BREAKPOINT_CHANGE_EVENT, { reduced: this._isReduced });
-        });
-
-        this._footer.appendChild(this._toggleButton);
-        this._element.appendChild(this._footer);
+        for (let item of this._items) {
+            if (item.type === "toolbar") {
+                this._toolbarElement = item.element;
+                if (!this._toolbarElement._toolbarCtrl) {
+                    this._toolbarElement._toolbarCtrl = new webexpress.webui.ToolbarCtrl(this._toolbarElement);
+                }
+                this._element.appendChild(this._toolbarElement);
+                break;
+            }
+        }
     }
 
     /**
@@ -249,6 +248,9 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             this._dispatch(webexpress.webui.Event.SHOW_EVENT, { sidebar: this._element });
         }
         for (let item of this._items) {
+            if (item.type === "toolbar") {
+                continue;
+            }
             item.element.innerHTML = "";
 
             if (item.type === "header") {
@@ -317,17 +319,16 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             }
             if (item.type === "panel") {
                 if (this._isReduced && (item.mode === "" || item.mode === "hide")) {
+                    item.element.classList.remove("overlay");
                     item.element.classList.add("hide");
                     continue;
                 } else if (this._isReduced && item.mode === "overlay") {
+                    item.element.classList.add("overlay");
                     item.element.classList.remove("hide");
                     if (item.iconClass) {
                         const icon = document.createElement("i");
                         icon.className = item.iconClass;
                         item.element.appendChild(icon);
-                        icon.addEventListener("click", () => {
-                            this._showPanelOverlay(item);
-                        });
                     }
                     if (item.iconImg) {
                         const img = document.createElement("img");
@@ -335,27 +336,19 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                         img.src = item.iconImg;
                         img.alt = "";
                         item.element.appendChild(img);
-                        img.addEventListener("click", () => {
-                            this._showPanelOverlay(item);
-                        });
                     }
+                    
+                    item.element.addEventListener("click", () => {
+                        this._showPanelOverlay(item);
+                    });
                     continue;
                 } else {
+                    item.element.classList.remove("overlay");
                     item.element.classList.remove("hide");
                     if (item.content) {
                         item.element.appendChild(item.content.cloneNode(true));
                     }
                 }
-            }
-        }
-
-        if (this._toggleButton) {
-            if (this._isReduced) {
-                this._toggleIcon.className = "fas fa-angles-right";
-                this._toggleButton.setAttribute("aria-pressed", "true");
-            } else {
-                this._toggleIcon.className = "fas fa-angles-left";
-                this._toggleButton.setAttribute("aria-pressed", "false");
             }
         }
     }
@@ -373,7 +366,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             content.appendChild(item.content.cloneNode(true));
         }
         overlayPanel.appendChild(content);
-        this._element.appendChild(overlayPanel);
+        document.body.appendChild(overlayPanel);
 
         if (typeof this._initializePopper === "function") {
             this._initializePopper(item.element, overlayPanel);
@@ -430,8 +423,8 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
      * cleans up resources
      */
     destroy() {
-        if (this._toggleButton && this._toggleButton.parentElement === this._element) {
-            this._element.removeChild(this._toggleButton);
+        if (this._footer && this._footer.parentElement === this._element) {
+            this._element.removeChild(this._footer);
         }
     }
 };

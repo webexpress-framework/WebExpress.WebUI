@@ -528,6 +528,19 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         // fire SHOW_EVENT when side-pane is expanded (via double-click)
         this._dispatch(webexpress.webui.Event.SHOW_EVENT, {});
     }
+    
+    /**
+     * toggles the side pane between collapsed and expanded state
+     * @returns {void}
+     */
+    toggleSidePane() {
+        // toggle collapse/expand
+        if (this._sidePaneCollapsed) {
+            this.expandSidePane();
+        } else {
+            this.collapseSidePane();
+        }
+    }
 
     /**
      * Fits the side pane size to its content size.

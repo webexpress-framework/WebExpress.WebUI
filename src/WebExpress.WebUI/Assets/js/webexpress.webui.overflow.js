@@ -48,6 +48,8 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
 
             var menuStructure = null;
             var buttonContentNodes = [];
+            
+            el.removeAttribute("data-overflow");
 
             if (isDropdown) {
                 var dropdownMenu = el.querySelector(".dropdown-menu");
@@ -150,7 +152,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
 
         // add the button and menu at the end of wx-overflow
         this._element.appendChild(this._moreButton);
-        this._element.appendChild(this._menu);
+        document.body.appendChild(this._menu);
         this._initializePopper(this._moreButton, this._menu);
     }
 
@@ -241,13 +243,12 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
      * Inserts initial items (force go directly to overflow).
      */
     _initialInsert() {
-        var self = this;
-        this._items.forEach(function(item) {
+        this._items.forEach((item) => {
             if (item.force) {
-                self._representInOverflow(item);
+                this._representInOverflow(item);
             } else {
                 // insert before the overflow button
-                self._element.insertBefore(item.element, self._moreButton);
+                this._element.insertBefore(item.element, this._moreButton);
             }
         });
         if (this._items.some(function(i) { return i.force; })) {
@@ -305,13 +306,11 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
 
     /**
      * Moves items to overflow until everything fits.
-     * ab jetzt: wenn das linkeste ausgeblendet ist, werden alle weiteren rechts davon auch ausgeblendet
      */
     _shrinkUntilFit() {
         var guard = 1000;
         var moved = false;
         var firstHiddenIdx = null;
-        // wie bisher: ausblenden bis overflow passt
         while (this._needsOverflow() && guard > 0) {
             guard--;
             var candidate = this._findLastMovableVisibleItem();
@@ -327,16 +326,16 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
                 this._representInOverflow(candidate);
             }
             moved = true;
-            // merke dir das erste entfernte element
+            // remember the first removed element
             if (firstHiddenIdx === null) {
                 firstHiddenIdx = candidate.index;
             }
-            // cutoff für das erste overflowed item bleibt wie gehabt
+            // cutoff or the first overflowed item remains unchanged
             if (this._cutoffEnabled && this._firstOverflowIndex === null) {
                 this._firstOverflowIndex = candidate.index;
             }
         }
-        // ab hier: alles rechts vom ersten entfernten element ebenfalls entfernen
+        // from this point: delete all items to the right of the first removed element
         if (firstHiddenIdx !== null) {
             for (var i = firstHiddenIdx + 1; i < this._items.length; i++) {
                 var item = this._items[i];
@@ -739,8 +738,6 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             const target = evt.target.closest(".wx-overflow-menu-item, .dropdown-item, .wx-overflow-menu-item > a, .wx-overflow-menu-item > button");
             if (target) {
                 this._closeSubmenu(item, trigger);
-                // optional: also close main menu; falls nicht gewünscht, Zeile auskommentieren
-                // this._hideMenu(true);
             }
         });
 

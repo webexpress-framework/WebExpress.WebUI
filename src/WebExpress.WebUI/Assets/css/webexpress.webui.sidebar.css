@@ -74,12 +74,12 @@
     pointer-events: auto;
 }
 
+/* removable button for links */
 .wx-sidebar .wx-sidebar-link > .btn:hover,
 .wx-sidebar .wx-sidebar-link > .btn:focus {
     color: var(--bs-body-color);
 }
-    
-/* removable button for items */
+
 /* sidebar panel */
 .wx-sidebar .wx-sidebar-panel {
     display: flex;
@@ -92,6 +92,10 @@
     background: none;
     font-size: 1em;
     min-height: 44px;
+}
+
+.wx-sidebar .wx-sidebar-panel.overlay:hover {
+    background: var(--bs-secondary-bg);
 }
 
 /* panel content inside sidebar */
@@ -112,23 +116,14 @@
 }
 
 /* footer */
-.wx-sidebar .wx-sidebar-footer {
-    display: inline-flex;
-    transition: background 0.15s;
-    flex-direction: row;
-    justify-content: flex-end;
-    align-items: center;
+.wx-sidebar > .wx-toolbar {
+    background: none;
+    padding: 0;
 }
 
-.wx-sidebar .wx-sidebar-footer .btn {
-    border: 0;
-    transition: background 0.15s;
-}
-
-.wx-sidebar .wx-sidebar-footer .btn:hover,
-.wx-sidebar .wx-sidebar-footer .btn:active,
-.wx-sidebar .wx-sidebar-footer .btn:focus {
-    background: var(--bs-secondary-bg);
+.wx-sidebar.wx-sidebar-reduced > .wx-toolbar > .wx-overflow {
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .wx-sidebar .hide {

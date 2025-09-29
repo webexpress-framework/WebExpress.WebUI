@@ -26,12 +26,12 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
         this._active = element.hasAttribute("active") ? "active" : null;
         this._disabled = element.hasAttribute("disabled") ? "disabled" : null;
 
-        // Parse dropdown items from descendant elements
+        // parse dropdown items from descendant elements
         this._parseItemsFromElements(
             Array.from(element.querySelectorAll(".wx-dropdown-header, .wx-dropdown-divider, .wx-dropdown-item"))
         );
 
-        // Clean up the DOM element
+        // clean up the DOM element
         element.innerHTML = "";
         [
             "data-label", "data-icon", "data-image", "data-color", "data-menucss",
@@ -40,7 +40,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
         ].forEach(attr => element.removeAttribute(attr));
         element.classList.add("wx-dropdown");
 
-        // Initial rendering of button and menu
+        // initial rendering of button and menu
         this.render();
     }
 
@@ -74,6 +74,21 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                         .filter(cls => cls !== "wx-dropdown-item")
                         .find(cls => cls.startsWith("wx-")) || "",
                     disabled: elem.hasAttribute("disabled"),
+                    data: Array.from(elem.attributes)
+                        .filter(attr =>
+                            attr.name.startsWith("data-") &&
+                            attr.name !== "data-uri" &&
+                            attr.name !== "data-icon" &&
+                            attr.name !== "data-image" &&
+                            attr.name !== "data-color"
+                        )
+                        .map(attr => [attr.name, attr.value]),
+                    aria: Array.from(elem.attributes)
+                        .filter(attr =>
+                            attr.name.startsWith("aria")
+                        )
+                        .map(attr => [attr.name, attr.value]),
+                    role: elem.getAttribute("role"),
                 });
             }
         });
@@ -91,7 +106,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
         const li = document.createElement("li");
 
         if (item.type === "header") {
-            // Create a header item with optional icon
+            // create a header item with optional icon
             const header = document.createElement("span");
             header.classList.add("dropdown-header");
             if (item.icon) {
@@ -102,12 +117,13 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
             header.append(item.content);
             li.appendChild(header);
         } else if (item.type === "divider") {
-            // Create a divider element
+            // create a divider element
             li.classList.add("dropdown-divider");
         } else {
-            // Create a regular menu item (enabled or disabled)
+            // create a regular menu item (enabled or disabled)
             if (!item.disabled) {
                 const link = document.createElement("a");
+                link.id = item.id;
                 link.className = "wx-link dropdown-item";
                 if (item.color) link.classList.add(item.color);
                 link.href = item.uri;
@@ -127,8 +143,18 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                 const span = document.createElement("span");
                 span.textContent = item.content;
                 link.appendChild(span);
+                
+                if (item.role) { link.setAttribute("role", item.role); }
+                // apply all data-* attributes
+                item.data?.forEach(([key, value]) => {
+                    link.setAttribute(key, value);
+                });
+                // apply all aria-* attributes
+                item.aria?.forEach(([key, value]) => {
+                    link.setAttribute(key, value);
+                });
 
-                // Register click handler for the menu item
+                // register click handler for the menu item
                 link.addEventListener("click", () => {
                     if (typeof item.action === "function") {
                         item.action();
@@ -145,7 +171,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
 
                 li.appendChild(link);
             } else {
-                // Create a disabled menu item
+                // create a disabled menu item
                 const disabledItem = document.createElement("span");
                 disabledItem.className = "dropdown-item text-muted disabled";
                 disabledItem.setAttribute("aria-disabled", "true");
