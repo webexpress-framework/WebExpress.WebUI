@@ -74,9 +74,9 @@ jobs:
         docfx metadata
         docfx build
 
-    - name: Debug list all directories
+    - name: Debug list all directories in docs
       run: |
-        find . -type d | sort
+        find docs -type d | sort
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
