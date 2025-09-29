@@ -72,7 +72,11 @@ jobs:
       run: |
         cd docs 
         docfx metadata
-        docfx build -o _site
+        docfx build
+
+    - name: Debug list all directories
+      run: |
+        find . -type d | sort
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3

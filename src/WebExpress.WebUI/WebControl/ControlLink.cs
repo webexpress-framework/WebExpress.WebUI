@@ -150,7 +150,7 @@ namespace WebExpress.WebUI.WebControl
         /// var link = new ControlLink();
         /// var text1 = new ControlText { Text = "A" };
         /// var text2 = new ControlText { Text = "B" };
-        /// link.Add(new List<IControl>([text1, text2]));
+        /// link.Add(text1, text2);
         /// </code>
         /// 
         /// This method accepts any control that implements the <see cref="IControl"/> interface.

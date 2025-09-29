@@ -78,7 +78,7 @@ namespace WebExpress.WebUI.WebControl
         /// var list = new ControlList();
         /// var item1 = new ControlListItem { Text = "Item 1" };
         /// var item2 = new ControlListItem { Text = "Item 2" };
-        /// list.Add(new List<IControl>([ item1, item2 ]));
+        /// list.Add(item1).Add(item2);
         /// </code>
         /// 
         /// This method accepts any item that derives from <see cref="ControlListItem"/>.

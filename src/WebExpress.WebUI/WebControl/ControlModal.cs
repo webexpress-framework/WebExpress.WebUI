@@ -105,7 +105,7 @@ namespace WebExpress.WebUI.WebControl
         /// var modal = new ControlModal(); 
         /// var text1 = new ControlText { Text = "Save" };
         /// var text2 = new ControlText { Text = "Cancel" };
-        /// modal.Add(new List<IControl>([text1, text2]));
+        /// modal.Add(text1, text2);
         /// </code> 
         /// 
         /// This method accepts any control that implements the <see cref="IControl"/> interface.

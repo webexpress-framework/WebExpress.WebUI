@@ -105,7 +105,7 @@ namespace WebExpress.WebUI.WebControl
         /// var panel = new ControlFormItemPanel(); 
         /// var text1 = new ControlText { Text = "A" };
         /// var text2 = new ControlText { Text = "B" };
-        /// panel.Add(new List<IControl>([text1, text2]));
+        /// panel.Add(text1, text2);
         /// </code> 
         /// 
         /// This method accepts any control that implements the <see cref="IControl"/> interface.

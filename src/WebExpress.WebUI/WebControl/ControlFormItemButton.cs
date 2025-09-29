@@ -108,6 +108,7 @@ namespace WebExpress.WebUI.WebControl
         /// var text2 = new ControlText { Text = "Cancel" };
         /// button.Add(text1, text2);
         /// </code>
+        /// 
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
@@ -132,8 +133,9 @@ namespace WebExpress.WebUI.WebControl
         /// var button = new ControlFormItemButton();
         /// var text1 = new ControlText { Text = "Save" };
         /// var text2 = new ControlText { Text = "Cancel" };
-        /// button.Add(new List<IControl>([text1, text2]));
+        /// button.Add(text1, text2);
         /// </code>
+        /// 
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
