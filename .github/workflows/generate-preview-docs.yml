@@ -44,9 +44,13 @@ jobs:
     - name: Create wwwroot directory for WebCore
       run: mkdir -p WebExpress.WebCore/src/WebExpress.WebCore/wwwroot
 
-    - name: Build local NuGet package
+    - name: Build WebExpress.WebCore
       run: |
-        dotnet pack WebExpress.WebCore/src/WebExpress.WebCore/WebExpress.WebCore.csproj -c Release -o packages
+        dotnet build WebExpress.WebCore/src/WebExpress.WebCore/WebExpress.WebCore.csproj -c Release
+
+    - name: Pack WebExpress.WebCore
+      run: |
+        dotnet pack WebExpress.WebCore/src/WebExpress.WebCore/WebExpress.WebCore.csproj -c Release -o packages --no-build
 
     - name: Create nuget.config
       run: |
