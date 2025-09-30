@@ -1,11 +1,11 @@
 /**
  * Controller that manages horizontal items and moves overflowing items into an overflow menu.
  * Supports items marked with data-overflow="never" (never move) and data-overflow="force" (always in overflow).
+ * Overflow logic can be enabled/disabled via setAutoDistribute(boolean).
  */
 webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
-
     /**
-     * @constructor
+     * creates a new overflow controller instance
      * @param {HTMLElement} element root horizontal container
      */
     constructor(element) {
@@ -21,6 +21,8 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
         // configuration flags
         this._cutoffEnabled = (this._element.dataset.overflowCutoff || "").toLowerCase() === "true";
         this._firstOverflowIndex = null;
+        // auto distribute flag, can be set via public method
+        this._autoDistribute = true;
 
         this._parseItems();
 
@@ -29,32 +31,98 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
 
         this._buildOverflowDropdown();
         this._initialInsert();
-        this._distribute();
+
+        // only distribute if autoDistribute is enabled
+        if (this._autoDistribute) {
+            this._distribute();
+        }
         this._setupResizeHandling();
         this._setupGlobalListeners();
     }
 
     /**
-     * Parses direct children into descriptors (supports dropdown extraction).
+     * enables or disables automatic overflow distribution
+     * @param {boolean} enabled
+     */
+    setAutoDistribute(enabled) {
+        this._autoDistribute = !!enabled;
+        if (this._autoDistribute) {
+            this._distribute();
+        }
+    }
+
+    /**
+     * sets up resize handling with debounce, respects autoDistribute flag
+     */
+    _setupResizeHandling() {
+        // debounce helper
+        function debounce(fn, delay) {
+            let t = null;
+            return function() {
+                const args = arguments;
+                if (t) {
+                    clearTimeout(t);
+                }
+                t = setTimeout(function() { fn.apply(null, args); }, delay);
+            };
+        }
+        const onResize = debounce(() => {
+            // only distribute if autoDistribute is enabled
+            if (this._autoDistribute) {
+                this.reflow();
+                if (this._submenuPopper) {
+                    this._submenuPopper.update();
+                }
+            }
+        }, 80);
+
+        if (typeof ResizeObserver === "function") {
+            this._resizeObserver = new ResizeObserver(onResize);
+            this._resizeObserver.observe(this._element);
+        } else {
+            window.addEventListener("resize", onResize);
+        }
+    }
+
+    /**
+     * public API: handleOverflow is called explicitly by the toolbar controller
+     */
+    handleOverflow() {
+        this._distribute();
+    }
+
+    /**
+     * public API: restore all items from overflow
+     */
+    restore() {
+        this._restoreVisibleBaseline();
+        this._growIfSpace();
+        // ensure more button and menu are at the end
+        this._element.appendChild(this._moreButton);
+        this._element.appendChild(this._menu);
+    }
+
+    /**
+     * parses direct children into descriptors (supports dropdown extraction)
      */
     _parseItems() {
-        var self = this;
+        const self = this;
         this._originalElements.forEach(function(el, i) {
-            var attr = el.dataset.overflow || "";
-            var isForce = attr === "force";
-            var isNever = attr === "never";
-            var isHideOnly = attr === "hide"; 
-            var isDropdown = el.classList.contains("wx-dropdown");
+            const attr = el.dataset.overflow || "";
+            const isForce = attr === "force";
+            const isNever = attr === "never";
+            const isHideOnly = attr === "hide";
+            const isDropdown = el.classList.contains("wx-dropdown");
 
-            var menuStructure = null;
-            var buttonContentNodes = [];
-            
+            let menuStructure = null;
+            let buttonContentNodes = [];
+
             el.removeAttribute("data-overflow");
 
             if (isDropdown) {
-                var dropdownMenu = el.querySelector(".dropdown-menu");
+                const dropdownMenu = el.querySelector(".dropdown-menu");
                 if (dropdownMenu) {
-                    var allElements = Array.from(dropdownMenu.querySelectorAll(
+                    const allElements = Array.from(dropdownMenu.querySelectorAll(
                         ".dropdown-header, .dropdown-item, .dropdown-divider"
                     ));
                     menuStructure = allElements.map(function(node) {
@@ -67,13 +135,13 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
                         }
                     });
                 }
-                var dropdownButton = el.querySelector("button");
+                const dropdownButton = el.querySelector("button");
                 if (dropdownButton) {
                     buttonContentNodes = Array.from(dropdownButton.childNodes).map(function(n) { return n.cloneNode(true); });
                 }
             }
 
-            var item = {
+            const item = {
                 id: "oi-" + (self._idSeq++),
                 index: i,
                 element: el,
@@ -92,7 +160,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * Builds overflow trigger and menu and appends at the end of wx-overflow.
+     * builds overflow trigger and menu and appends at the end of wx-overflow
      */
     _buildOverflowDropdown() {
         this._moreButton = document.createElement("button");
@@ -101,11 +169,11 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
         this._moreButton.setAttribute("aria-haspopup", "true");
         this._moreButton.setAttribute("aria-expanded", "false");
 
-        var label = this._element.dataset.moreLabel;
+        const label = this._element.dataset.moreLabel;
         if (label) {
             this._moreButton.textContent = label;
         } else {
-            var icon = document.createElement("i");
+            const icon = document.createElement("i");
             icon.className = "fas fa-chevron-down";
             this._moreButton.appendChild(icon);
         }
@@ -116,9 +184,8 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
         this._menu.style.display = "none";
 
         this._moreButton.addEventListener("click", (event) => {
-            // always use curly braces for control structures
-            var button = event.currentTarget;
-            var expanded = button.getAttribute("aria-expanded") === "true";
+            const button = event.currentTarget;
+            const expanded = button.getAttribute("aria-expanded") === "true";
             if (expanded) {
                 this._hideMenu();
             } else {
@@ -150,27 +217,26 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             }
         });
 
-        // add the button and menu at the end of wx-overflow
         this._element.appendChild(this._moreButton);
         document.body.appendChild(this._menu);
         this._initializePopper(this._moreButton, this._menu);
     }
 
     /**
-     * Sets up global listeners for outside click and escape.
+     * sets up global listeners for outside click and escape
      */
     _setupGlobalListeners() {
-        var self = this;
+        const self = this;
         document.addEventListener("click", function(e) {
             if (!self._element.contains(e.target)) {
                 self._closeAllSubmenus();
                 self._hideMenu(true);
                 return;
             }
-            var inMainMenu = self._menu.contains(e.target);
-            var inSubmenuPanel = !!self._element.querySelector(".wx-overflow-subpanel") &&
+            const inMainMenu = self._menu.contains(e.target);
+            const inSubmenuPanel = !!self._element.querySelector(".wx-overflow-subpanel") &&
                 Array.from(self._element.querySelectorAll(".wx-overflow-subpanel")).some(function(p) { return p.contains(e.target); });
-            var isMoreButton = self._moreButton.contains(e.target);
+            const isMoreButton = self._moreButton.contains(e.target);
             if (!inMainMenu && !inSubmenuPanel && !isMoreButton) {
                 self._closeAllSubmenus();
             }
@@ -184,7 +250,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * Shows overflow menu.
+     * shows overflow menu
      * @param {Function} cb callback
      */
     _showMenu(cb) {
@@ -200,7 +266,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * Hides overflow menu.
+     * hides overflow menu
      * @param {boolean} suppressFocus suppress focusing the button
      */
     _hideMenu(suppressFocus) {
@@ -217,21 +283,21 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * Focuses first focusable item in overflow menu.
+     * focuses first focusable item in overflow menu
      */
     _focusFirstMenuItem() {
-        var list = this._collectMenuFocusable();
+        const list = this._collectMenuFocusable();
         if (list.length > 0) {
             list[0].focus();
         }
     }
 
     /**
-     * Collects focusable nodes inside the overflow menu.
+     * collects focusable nodes inside the overflow menu
      * @returns {HTMLElement[]} focusable list
      */
     _collectMenuFocusable() {
-        var selectors = [
+        const selectors = [
             ".wx-overflow-menu-item > button:not([disabled])",
             ".wx-overflow-menu-item > a",
             ".wx-overflow-submenu .btn"
@@ -240,14 +306,13 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * Inserts initial items (force go directly to overflow).
+     * inserts initial items (force go directly to overflow)
      */
     _initialInsert() {
         this._items.forEach((item) => {
             if (item.force) {
                 this._representInOverflow(item);
             } else {
-                // insert before the overflow button
                 this._element.insertBefore(item.element, this._moreButton);
             }
         });
@@ -257,14 +322,14 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * Public API to trigger distribution.
+     * public API: triggers distribution
      */
     reflow() {
         this._distribute();
     }
 
     /**
-     * Orchestrates distribution (visible vs overflow).
+     * orchestrates distribution (visible vs overflow)
      */
     _distribute() {
         this._restoreVisibleBaseline();
@@ -273,25 +338,23 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
         }
         this._shrinkUntilFit();
         this._growIfSpace();
-        var hasOverflowItems = this._items.some((i) => { return this._isRepresentedInOverflow(i); });
+        const hasOverflowItems = this._items.some((i) => { return this._isRepresentedInOverflow(i); });
         if (!hasOverflowItems) {
             this._moreButton.style.display = "none";
             this._hideMenu(true);
         } else {
             this._moreButton.style.display = "inline-flex";
         }
-        // always ensure the more button and menu are at the end
         this._element.appendChild(this._moreButton);
         this._element.appendChild(this._menu);
     }
 
     /**
-     * Restores baseline by placing all non-represented originals into the visible container.
+     * restores baseline by placing all non-represented originals into the visible container
      */
     _restoreVisibleBaseline() {
-        var self = this;
-        // remove all non-overflow items and append in order before the overflow button
-        var children = Array.from(this._element.children);
+        const self = this;
+        const children = Array.from(this._element.children);
         children.forEach(function(child) {
             if (!child.classList.contains("wx-overflow-more") && !child.classList.contains("wx-overflow-menu")) {
                 self._element.removeChild(child);
@@ -306,14 +369,15 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
 
     /**
      * Moves items to overflow until everything fits.
+     * All items (except 'never') right of a hidden/overflowed item must be moved to overflow.
      */
     _shrinkUntilFit() {
-        var guard = 1000;
-        var moved = false;
-        var firstHiddenIdx = null;
+        let guard = 1000;
+        let moved = false;
+        let firstHiddenIdx = null;
         while (this._needsOverflow() && guard > 0) {
             guard--;
-            var candidate = this._findLastMovableVisibleItem();
+            const candidate = this._findLastMovableVisibleItem();
             if (!candidate) {
                 break;
             }
@@ -326,27 +390,35 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
                 this._representInOverflow(candidate);
             }
             moved = true;
-            // remember the first removed element
             if (firstHiddenIdx === null) {
                 firstHiddenIdx = candidate.index;
             }
-            // cutoff or the first overflowed item remains unchanged
             if (this._cutoffEnabled && this._firstOverflowIndex === null) {
                 this._firstOverflowIndex = candidate.index;
             }
         }
-        // from this point: delete all items to the right of the first removed element
+        // move all elements right of the first hidden/overflowed (except 'never') to overflow
         if (firstHiddenIdx !== null) {
-            for (var i = firstHiddenIdx + 1; i < this._items.length; i++) {
-                var item = this._items[i];
+            let hideMode = false;
+            for (let i = 0; i < this._items.length; i++) {
+                const item = this._items[i];
                 if (item.force || item.never) {
                     continue;
                 }
-                if (item.element.parentElement === this._element) {
-                    this._element.removeChild(item.element);
+                if (hideMode) {
+                    if (item.element.parentElement === this._element) {
+                        this._element.removeChild(item.element);
+                    }
+                    if (!item.hideOnly && !this._isRepresentedInOverflow(item)) {
+                        this._representInOverflow(item);
+                    }
                 }
-                if (!item.hideOnly && !this._isRepresentedInOverflow(item)) {
-                    this._representInOverflow(item);
+                // if item is hidden or in overflow, all right siblings must be hidden/overflowed too
+                if (
+                    item.hideOnly && item.element.parentElement !== this._element ||
+                    !item.hideOnly && this._isRepresentedInOverflow(item)
+                ) {
+                    hideMode = true;
                 }
             }
         }
@@ -357,9 +429,9 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
      * this enforces that if the leftmost item is in overflow, all right siblings are also in overflow
      */
     _moveAllTrailingAfterFirstHiddenOrOverflowed() {
-        var firstHiddenIdx = null;
-        for (var i = 0; i < this._items.length; i++) {
-            var item = this._items[i];
+        let firstHiddenIdx = null;
+        for (let i = 0; i < this._items.length; i++) {
+            const item = this._items[i];
             if (
                 this._isRepresentedInOverflow(item) ||
                 (item.hideOnly && item.element.parentElement !== this._element)
@@ -371,7 +443,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
         if (firstHiddenIdx === null) {
             return;
         }
-        var self = this;
+        const self = this;
         this._items.forEach(function (item, idx) {
             if (idx > firstHiddenIdx && !item.force && item.element.parentElement === self._element) {
                 self._element.removeChild(item.element);
@@ -389,60 +461,53 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
         if (this._cutoffEnabled && this._firstOverflowIndex !== null) {
             return;
         }
-        var self = this;
-        var allLeftVisible = true;
-        for (var i = 0; i < this._items.length; i++) {
-            var item = this._items[i];
+        const self = this;
+        let allLeftVisible = true;
+        for (let i = 0; i < this._items.length; i++) {
+            const item = this._items[i];
             if (item.force || item.never) {
                 continue;
             }
-            // check if left siblings are all visible
             if (!allLeftVisible) {
-                // as soon as one item left is not visible, nothing right of it should be (re)inserted
                 if (item.element.parentElement === this._element) {
                     this._element.removeChild(item.element);
                 }
                 if (!item.hideOnly && !this._isRepresentedInOverflow(item)) {
-                    this._representInOverflow(item);
+                    self._representInOverflow(item);
                 }
                 continue;
             }
-            // try to restore hideOnly item
             if (item.hideOnly && item.element.parentElement !== this._element) {
-                this._insertVisibleOrdered(item);
+                self._insertVisibleOrdered(item);
                 if (this._needsOverflow()) {
                     if (item.element.parentElement === this._element) {
                         this._element.removeChild(item.element);
                     }
-                    // no further items can be restored, break the loop
                     allLeftVisible = false;
                     continue;
                 }
             }
-            // try to restore overflowed item
             if (!item.hideOnly && this._isRepresentedInOverflow(item)) {
-                this._removeOverflowRepresentation(item);
-                this._insertVisibleOrdered(item);
+                self._removeOverflowRepresentation(item);
+                self._insertVisibleOrdered(item);
                 if (this._needsOverflow()) {
                     if (item.element.parentElement === this._element) {
                         this._element.removeChild(item.element);
                     }
-                    this._representInOverflow(item);
-                    // no further items can be restored, break the loop
+                    self._representInOverflow(item);
                     allLeftVisible = false;
                     continue;
                 }
             }
-            // check status for next iteration
             if (
                 (item.hideOnly && item.element.parentElement !== this._element) ||
-                (!item.hideOnly && this._isRepresentedInOverflow(item))
+                (!item.hideOnly && self._isRepresentedInOverflow(item))
             ) {
                 allLeftVisible = false;
             }
         }
-        var anyOverflow = this._items.some(function (i) { return self._isRepresentedInOverflow(i); });
-        var anyHideOnlyHidden = this._items.some(function (i) { return i.hideOnly && i.element.parentElement !== self._element; });
+        const anyOverflow = this._items.some(function (i) { return self._isRepresentedInOverflow(i); });
+        const anyHideOnlyHidden = this._items.some(function (i) { return i.hideOnly && i.element.parentElement !== self._element; });
         if (!anyOverflow && !anyHideOnlyHidden) {
             this._firstOverflowIndex = null;
         }
@@ -453,14 +518,14 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
      * @param {object} item descriptor
      */
     _insertVisibleOrdered(item) {
-        var children = Array.from(this._element.children);
-        var inserted = false;
-        for (var i = 0; i < children.length; i++) {
-            var child = children[i];
+        const children = Array.from(this._element.children);
+        let inserted = false;
+        for (let i = 0; i < children.length; i++) {
+            const child = children[i];
             if (child === this._moreButton || child === this._menu) {
                 continue;
             }
-            var ref = this._items.find(function(it) { return it.element === child; });
+            const ref = this._items.find(function(it) { return it.element === child; });
             if (ref && ref.index > item.index) {
                 this._element.insertBefore(item.element, child);
                 inserted = true;
@@ -479,11 +544,11 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
      */
     _insertOverflowOrdered(wrapper, index) {
         wrapper.dataset.originalIndex = String(index);
-        var list = Array.from(this._menu.querySelectorAll(".wx-overflow-menu-item"));
-        var inserted = false;
-        for (var i = 0; i < list.length; i++) {
-            var node = list[i];
-            var idxAttr = node.dataset.originalIndex;
+        const list = Array.from(this._menu.querySelectorAll(".wx-overflow-menu-item"));
+        let inserted = false;
+        for (let i = 0; i < list.length; i++) {
+            const node = list[i];
+            const idxAttr = node.dataset.originalIndex;
             if (idxAttr && parseInt(idxAttr, 10) > index) {
                 this._menu.insertBefore(wrapper, node);
                 inserted = true;
@@ -501,14 +566,14 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
      */
     _representInOverflow(item) {
         if (item.submenu) {
-            var wrapper = document.createElement("div");
+            const wrapper = document.createElement("div");
             wrapper.className = "wx-overflow-menu-item";
             wrapper.setAttribute("role", "none");
 
-            var triggerRow = document.createElement("div");
+            const triggerRow = document.createElement("div");
             triggerRow.className = "wx-overflow-submenu";
 
-            var label = document.createElement("span");
+            const label = document.createElement("span");
             label.className = "wx-link";
             if (item.submenuLabel && item.submenuLabel.length > 0) {
                 item.submenuLabel.forEach(function(n) { label.appendChild(n.cloneNode(true)); });
@@ -516,14 +581,14 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
                 label.textContent = "Submenu";
             }
 
-            var button = document.createElement("button");
+            const button = document.createElement("button");
             button.type = "button";
             button.className = "btn";
             button.setAttribute("aria-haspopup", "true");
             button.setAttribute("aria-expanded", "false");
             button.dataset.itemId = item.id;
 
-            var icon = document.createElement("i");
+            const icon = document.createElement("i");
             icon.className = "fas fa-chevron-right";
             button.appendChild(icon);
 
@@ -554,7 +619,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             this._insertOverflowOrdered(wrapper, item.index);
             item.inOverflowAsTrigger = true;
         } else {
-            var wrapper2 = document.createElement("div");
+            const wrapper2 = document.createElement("div");
             wrapper2.className = "wx-overflow-menu-item";
             wrapper2.setAttribute("role", "none");
 
@@ -570,14 +635,14 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
      */
     _removeOverflowRepresentation(item) {
         if (item.submenu && item.inOverflowAsTrigger) {
-            var node = this._findSubmenuTriggerWrapper(item);
+            const node = this._findSubmenuTriggerWrapper(item);
             if (node && node.parentElement === this._menu) {
                 node.parentElement.removeChild(node);
             }
             item.inOverflowAsTrigger = false;
             this._closeSubmenu(item, null);
         } else {
-            var parent = item.element.parentElement;
+            const parent = item.element.parentElement;
             if (parent && parent.classList.contains("wx-overflow-menu-item")) {
                 parent.parentElement && parent.parentElement.removeChild(parent);
             }
@@ -593,7 +658,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
         if (item.submenu) {
             return item.inOverflowAsTrigger === true;
         }
-        var p = item.element.parentElement;
+        const p = item.element.parentElement;
         return !!(p && p.classList.contains("wx-overflow-menu-item"));
     }
 
@@ -603,9 +668,9 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
      * @returns {HTMLElement|null} wrapper
      */
     _findSubmenuTriggerWrapper(item) {
-        var nodes = this._menu.querySelectorAll(".wx-overflow-menu-item");
-        for (var i = 0; i < nodes.length; i++) {
-            var trig = nodes[i].querySelector(".btn[data-item-id]");
+        const nodes = this._menu.querySelectorAll(".wx-overflow-menu-item");
+        for (let i = 0; i < nodes.length; i++) {
+            const trig = nodes[i].querySelector(".btn[data-item-id]");
             if (trig && trig.dataset.itemId === item.id) {
                 return nodes[i];
             }
@@ -618,8 +683,8 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
      * @returns {object|null} descriptor
      */
     _findLastMovableVisibleItem() {
-        for (var i = this._items.length - 1; i >= 0; i--) {
-            var item = this._items[i];
+        for (let i = this._items.length - 1; i >= 0; i--) {
+            const item = this._items[i];
             if (item.force || item.never) {
                 continue;
             }
@@ -635,8 +700,8 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
      * @returns {boolean} need
      */
     _needsOverflow() {
-        var container = this._element;
-        var tempShown = false;
+        const container = this._element;
+        let tempShown = false;
 
         if (!this._moreButton) {
             return false;
@@ -647,21 +712,21 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             tempShown = true;
         }
 
-        var moreWidth = this._moreButton.getBoundingClientRect().width;
-        var classicalOverflow = container.scrollWidth > container.clientWidth + 0.5;
+        const moreWidth = this._moreButton.getBoundingClientRect().width;
+        const classicalOverflow = container.scrollWidth > container.clientWidth + 0.5;
 
-        var geometricOverlap = false;
-        var lastVisibleEl = this._getLastVisibleNonForceItemElement();
+        let geometricOverlap = false;
+        const lastVisibleEl = this._getLastVisibleNonForceItemElement();
         if (lastVisibleEl) {
-            var lastRect = lastVisibleEl.getBoundingClientRect();
-            var containerRect = container.getBoundingClientRect();
-            var allowedRight = containerRect.left + container.clientWidth - moreWidth;
+            const lastRect = lastVisibleEl.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            const allowedRight = containerRect.left + container.clientWidth - moreWidth;
             if (lastRect.right > allowedRight - 0.5) {
                 geometricOverlap = true;
             }
         }
 
-        var need = classicalOverflow || geometricOverlap;
+        const need = classicalOverflow || geometricOverlap;
 
         if (tempShown && 
             !need && 
@@ -681,8 +746,8 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
      * @returns {HTMLElement|null} element
      */
     _getLastVisibleNonForceItemElement() {
-        for (var i = this._items.length - 1; i >= 0; i--) {
-            var item = this._items[i];
+        for (let i = this._items.length - 1; i >= 0; i--) {
+            const item = this._items[i];
             if (item.force || item.never) {
                 continue;
             }
@@ -733,7 +798,6 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
 
         this._prepareSubmenuPanel(panel, item.submenu);
 
-        // delegation: close submenu when a submenu item (or legacy .dropdown-item) is clicked
         panel.addEventListener("click", (evt) => {
             const target = evt.target.closest(".wx-overflow-menu-item, .dropdown-item, .wx-overflow-menu-item > a, .wx-overflow-menu-item > button");
             if (target) {
@@ -796,10 +860,9 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
         submenus.forEach(sub => {
             const elem = sub.element.cloneNode(true);
             if (sub.type === "header") {
-                elem.classList.add("wx-overflow-submenu-header"); // keep semantic header class
+                elem.classList.add("wx-overflow-submenu-header");
                 elem.setAttribute("role", "presentation");
             } else if (sub.type === "item") {
-                // ensure consistent clickable class
                 elem.classList.add("wx-overflow-menu-item");
                 elem.setAttribute("role", "menuitem");
                 elem.tabIndex = -1;
@@ -820,7 +883,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
         const instances = trigger
             ? item.submenuInstances.filter(inst => inst.trigger === trigger)
             : item.submenuInstances.slice();
-        for (let inst of instances) {
+        for (const inst of instances) {
             const { panel, trigger: trig } = inst;
             if (panel && panel.parentElement) {
                 if (panel.hide) {
@@ -843,7 +906,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             return false;
         }
         const top = Array.from(this._openSubmenus).pop();
-        for (let item of this._items) {
+        for (const item of this._items) {
             const inst = item.submenuInstances.find(s => s.panel === top);
             if (inst) {
                 this._closeSubmenu(item, inst.trigger);
@@ -858,7 +921,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
      * Closes all open submenus.
      */
     _closeAllSubmenus() {
-        for (let item of this._items) {
+        for (const item of this._items) {
             if (item.submenuInstances.length > 0) {
                 this._closeSubmenu(item, null);
             }
@@ -940,16 +1003,16 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
      */
     _setupResizeHandling() {
         function debounce(fn, delay) {
-            var t = null;
+            let t = null;
             return function() {
-                var args = arguments;
+                const args = arguments;
                 if (t) {
                     clearTimeout(t);
                 }
                 t = setTimeout(function() { fn.apply(null, args); }, delay);
             };
         }
-        var onResize = debounce(() => {
+        const onResize = debounce(() => {
             this.reflow();
             if (this._submenuPopper) {
                 this._submenuPopper.update();
