@@ -29,12 +29,18 @@
       href: js/modal.md
     - name: Move
       href: js/move.md
+    - name: Overflow
+      href: js/overflow.md
     - name: Pagination
       href: js/pagination.md
+    - name: Responsive
+      href: js/responsive.md
     - name: Search
       href: js/search.md
     - name: Selection
       href: js/selection.md
+    - name: Sidebar
+      href: js/sidebar.md
     - name: SmartEdit
       href: js/smartedit.md
     - name: SmartView

@@ -1,6 +1,6 @@
 /**
  * Sidebar controller for responsive sidebars using WX-prefixed classes and Popper.js for overlays.
- * Element types: .wx-sidebar-item, .wx-sidebar-divider, .wx-sidebar-header, .wx-sidebar-panel.
+ * Element types: .wx-sidebar-link, .wx-sidebar-separator, .wx-sidebar-header, .wx-sidebar-panel.
  * Compact mode is controlled via data-mode: "hide" or "overlay".
  * The following events are triggered:
  * - webexpress.webui.Event.REMOVE_EVENT

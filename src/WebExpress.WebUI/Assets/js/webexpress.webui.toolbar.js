@@ -1,7 +1,9 @@
 /**
  * Controller for rendering and managing a responsive toolbar with overflow logic.
  * The toolbar supports different child types (buttons, separators, dropdowns, combos, labels, more menu).
- * overflow handling is delegated to OverflowCtrl, which can be explicitly controlled to ensure labels are hidden before items are moved to overflow
+ * overflow handling is delegated to OverflowCtrl, which can be explicitly controlled to ensure that
+ * button labels with icons are hidden individually before moving items into overflow,
+ * and restored from overflow before showing labels again when space increases.
  */
 webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     /**
@@ -198,41 +200,40 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * updates toolbar layout on resize and initial render
-     * hides button labels if needed, triggers overflow only if labels hiding is not enough
+     * hides button labels individually (only if an icon/image is present) before triggering overflow.
+     * when expanding, restores items from overflow before showing labels again individually as space allows.
      */
     _updateToolbarLayout() {
-        const container = this._element;
-        const overflowRoot = container.querySelector(".wx-overflow");
+        const overflowRoot = this._getOverflowRoot();
         if (!overflowRoot) {
             return;
         }
-        // show all labels first
-        const buttons = overflowRoot.querySelectorAll(".wx-toolbar-button span");
-        for (let i = 0; i < buttons.length; i++) {
-            buttons[i].style.display = "";
+
+        // first, try to restore items from overflow when space might have increased
+        if (this._overflowCtrl && typeof this._overflowCtrl.restore === "function") {
+            this._overflowCtrl.restore();
         }
-        let labelHidden = false;
-        // check for overflow with labels
-        if (overflowRoot.scrollWidth > overflowRoot.clientWidth) {
-            for (let i = 0; i < buttons.length; i++) {
-                buttons[i].style.display = "none";
+
+        // shrink phase: hide labels one-by-one (right-to-left) before moving items into overflow
+        let safety = 500; // simple guard to avoid infinite loops
+        while (overflowRoot.scrollWidth > overflowRoot.clientWidth && safety > 0) {
+            const next = this._findNextLabelToHide(overflowRoot);
+            if (next) {
+                this._hideButtonLabel(next);
+            } else {
+                break;
             }
-            labelHidden = true;
+            safety--;
         }
-        // check again for overflow after hiding labels
+
+        // if still overflowing, move items into overflow via controller
         if (overflowRoot.scrollWidth > overflowRoot.clientWidth) {
             if (this._overflowCtrl && typeof this._overflowCtrl.handleOverflow === "function") {
                 this._overflowCtrl.handleOverflow();
             }
         } else {
-            if (this._overflowCtrl && typeof this._overflowCtrl.restore === "function") {
-                this._overflowCtrl.restore();
-            }
-            if (!labelHidden) {
-                for (let i = 0; i < buttons.length; i++) {
-                    buttons[i].style.display = "";
-                }
-            }
+            // grow phase: show labels one-by-one (left-to-right) but only after restoring items
+            this._showLabelsAsSpaceAllows(overflowRoot);
         }
     }
 
@@ -251,29 +252,47 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
         if (item.type === "button") {
             const instance = webexpress.webui.Controller.getInstanceByElement(item.element);
             if (instance) {
+                // ensure legacy buttons still have detectable label/icon state
+                this._ensureButtonDetectionAttributes(item.element);
                 return item.element;
             }
             item.element.classList.add("btn");
             item.element.type = "button";
+            let hasIconOrImage = false;
             if (item.image) {
                 const img = document.createElement("img");
                 img.className = "wx-icon";
                 img.src = item.image;
                 item.element.appendChild(img);
+                hasIconOrImage = true;
             }
             if (item.icon) {
                 const icon = document.createElement("i");
                 icon.className = item.icon;
                 item.element.appendChild(icon);
+                hasIconOrImage = true;
             }
             if (item.label) {
                 const span = document.createElement("span");
+                span.className = "wx-toolbar-button-label";
                 span.textContent = item.label;
                 item.element.appendChild(span);
             }
-            if (item.colorCss) { item.element.classList.add(item.colorCss); }
-            if (item.colorStyle) { item.element.setAttribute("style", item.colorStyle); }
-            if (item.title) { item.element.title = item.title; }
+            if (hasIconOrImage) {
+                item.element.dataset.hasIcon = "true";
+            } else {
+                item.element.dataset.hasIcon = "false";
+            }
+            item.element.dataset.labelHidden = "false";
+            if (item.colorCss) {
+                item.element.classList.add(item.colorCss);
+            }
+            if (item.colorStyle) {
+                item.element.setAttribute("style", item.colorStyle);
+            }
+            if (item.title) {
+                item.element.title = item.title;
+            }
             item.element.addEventListener("click", () => {
                 this._dispatch(webexpress.webui.Event.CLICK_EVENT, { item: item });
             });
@@ -285,49 +304,87 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 return item.element;
             }
             const dropdownCtrl = new webexpress.webui.DropdownCtrl(item.element);
-            if (item.toggle) { dropdownCtrl._buttonCss += " dropdown-toggle"; }
-            if (item.disabled) { dropdownCtrl._element.classList.add("disabled"); }
-            if (item.active) { dropdownCtrl._buttonCss += " active"; }
-            if (item.colorCss) { dropdownCtrl._buttonCss += ` ${item.colorCss}`; }
-            if (item.colorStyle) { dropdownCtrl._buttonStyle += ` ${item.colorStyle}`; }
-            if (item.title) { dropdownCtrl._element.title = item.title; }
+            if (item.toggle) {
+                dropdownCtrl._buttonCss += " dropdown-toggle";
+            }
+            if (item.disabled) {
+                dropdownCtrl._element.classList.add("disabled");
+            }
+            if (item.active) {
+                dropdownCtrl._buttonCss += " active";
+            }
+            if (item.colorCss) {
+                dropdownCtrl._buttonCss += ` ${item.colorCss}`;
+            }
+            if (item.colorStyle) {
+                dropdownCtrl._buttonStyle += ` ${item.colorStyle}`;
+            }
+            if (item.title) {
+                dropdownCtrl._element.title = item.title;
+            }
             dropdownCtrl.render();
             return dropdownCtrl._element;
         }
         if (item.type === "combo") {
             const combo = document.createElement("div");
             combo.className = "wx-toolbar-combo";
-            if (item.disabled) { combo.classList.add("disabled"); }
-            if (item.title) { combo.title = item.title; }
+            if (item.disabled) {
+                combo.classList.add("disabled");
+            }
+            if (item.title) {
+                combo.title = item.title;
+            }
             if (item.image) {
                 const img = document.createElement("img");
                 img.className = "wx-icon";
                 img.src = item.image;
                 combo.appendChild(img);
-                if (item.disabled) { img.classList.add("disabled"); }
-                if (item.colorCss) { img.classList.add(item.colorCss); }
-                if (item.colorStyle) { img.setAttribute("style", item.colorStyle); }
+                if (item.disabled) {
+                    img.classList.add("disabled");
+                }
+                if (item.colorCss) {
+                    img.classList.add(item.colorCss);
+                }
+                if (item.colorStyle) {
+                    img.setAttribute("style", item.colorStyle);
+                }
             }
             if (item.icon) {
                 const icon = document.createElement("i");
                 icon.className = item.icon;
                 combo.appendChild(icon);
-                if (item.disabled) { icon.classList.add("disabled"); }
-                if (item.colorCss) { icon.classList.add(item.colorCss); }
-                if (item.colorStyle) { icon.setAttribute("style", item.colorStyle); }
+                if (item.disabled) {
+                    icon.classList.add("disabled");
+                }
+                if (item.colorCss) {
+                    icon.classList.add(item.colorCss);
+                }
+                if (item.colorStyle) {
+                    icon.setAttribute("style", item.colorStyle);
+                }
             }
             if (item.label) {
                 const label = document.createElement("label");
                 label.textContent = item.label || "";
                 combo.appendChild(label);
-                if (item.disabled) { label.classList.add("disabled"); }
-                if (item.colorCss) { label.classList.add(item.colorCss); }
-                if (item.colorStyle) { label.setAttribute("style", item.colorStyle); }
+                if (item.disabled) {
+                    label.classList.add("disabled");
+                }
+                if (item.colorCss) {
+                    label.classList.add(item.colorCss);
+                }
+                if (item.colorStyle) {
+                    label.setAttribute("style", item.colorStyle);
+                }
             }
             const select = document.createElement("select");
             select.className = "form-select";
-            if (item.disabled) { select.setAttribute("disabled", true); }
-            if (item.active) { select.classList.add("active"); }
+            if (item.disabled) {
+                select.setAttribute("disabled", true);
+            }
+            if (item.active) {
+                select.classList.add("active");
+            }
             item.options.forEach(function (opt) {
                 const o = document.createElement("option");
                 o.textContent = opt.text;
@@ -344,10 +401,18 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             const el = document.createElement("span");
             el.className = "wx-toolbar-label";
             el.textContent = item.content;
-            if (item.disabled) { el.classList.add("disabled"); }
-            if (item.colorCss) { el.classList.add(item.colorCss); }
-            if (item.colorStyle) { el.setAttribute("style", item.colorStyle); }
-            if (item.title) { el.title = item.title; }
+            if (item.disabled) {
+                el.classList.add("disabled");
+            }
+            if (item.colorCss) {
+                el.classList.add(item.colorCss);
+            }
+            if (item.colorStyle) {
+                el.setAttribute("style", item.colorStyle);
+            }
+            if (item.title) {
+                el.title = item.title;
+            }
             el.dataset.overflow = "hide";
             return el;
         }
@@ -397,6 +462,155 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
         });
 
         return dropdownContainer;
+    }
+
+    /**
+     * returns the overflow root element
+     * @returns {HTMLElement|null}
+     */
+    _getOverflowRoot() {
+        const container = this._element;
+        const overflowRoot = container.querySelector(".wx-overflow");
+        if (!overflowRoot) {
+            return null;
+        }
+        return overflowRoot;
+    }
+
+    /**
+     * ensures that a pre-existing button element has detection attributes/classes
+     * @param {HTMLElement} buttonEl
+     */
+    _ensureButtonDetectionAttributes(buttonEl) {
+        // detect icon or image presence
+        const hasIconOrImage = !!buttonEl.querySelector("i, img");
+        buttonEl.dataset.hasIcon = hasIconOrImage ? "true" : "false";
+        // find an existing label span and mark it
+        const labelSpan = this._findLabelSpan(buttonEl);
+        if (labelSpan && !labelSpan.classList.contains("wx-toolbar-button-label")) {
+            labelSpan.classList.add("wx-toolbar-button-label");
+        }
+        if (!buttonEl.dataset.labelHidden) {
+            buttonEl.dataset.labelHidden = "false";
+        }
+    }
+
+    /**
+     * finds the label span for a given button element
+     * @param {HTMLElement} buttonEl
+     * @returns {HTMLElement|null}
+     */
+    _findLabelSpan(buttonEl) {
+        // prefer explicit class, fallback to the first span child
+        let span = buttonEl.querySelector(".wx-toolbar-button-label");
+        if (!span) {
+            span = buttonEl.querySelector("span");
+        }
+        return span || null;
+    }
+
+    /**
+     * returns whether a button's label can be hidden (icon present and label currently visible)
+     * @param {HTMLElement} buttonEl
+     * @returns {boolean}
+     */
+    _canHideLabel(buttonEl) {
+        if (!buttonEl || !buttonEl.classList.contains("wx-toolbar-button")) {
+            return false;
+        }
+        const labelSpan = this._findLabelSpan(buttonEl);
+        const hasIcon = buttonEl.dataset.hasIcon === "true" || !!buttonEl.querySelector("i, img");
+        const isHidden = buttonEl.dataset.labelHidden === "true" || (labelSpan && labelSpan.style.display === "none");
+        if (!labelSpan) {
+            return false;
+        }
+        if (!hasIcon) {
+            return false;
+        }
+        if (isHidden) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * hides a single button label and marks the state
+     * @param {HTMLElement} buttonEl
+     */
+    _hideButtonLabel(buttonEl) {
+        const span = this._findLabelSpan(buttonEl);
+        if (span) {
+            // hide only the label span
+            span.style.display = "none";
+            buttonEl.dataset.labelHidden = "true";
+        }
+    }
+
+    /**
+     * tries to show a single button label; reverts if it causes overflow
+     * @param {HTMLElement} buttonEl
+     * @param {HTMLElement} overflowRoot
+     * @returns {boolean} true if label was shown and kept, false if reverted
+     */
+    _tryShowButtonLabel(buttonEl, overflowRoot) {
+        const span = this._findLabelSpan(buttonEl);
+        if (!span) {
+            return false;
+        }
+        // show the label tentatively
+        const previousDisplay = span.style.display;
+        span.style.display = "";
+        // force state to visible for bookkeeping
+        buttonEl.dataset.labelHidden = "false";
+
+        // if this triggers overflow, revert
+        if (overflowRoot.scrollWidth > overflowRoot.clientWidth) {
+            span.style.display = previousDisplay || "none";
+            buttonEl.dataset.labelHidden = "true";
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * finds the next button whose label should be hidden (right-to-left)
+     * @param {HTMLElement} overflowRoot
+     * @returns {HTMLElement|null}
+     */
+    _findNextLabelToHide(overflowRoot) {
+        const buttons = Array.from(overflowRoot.querySelectorAll(".wx-toolbar-button"));
+        for (let i = buttons.length - 1; i >= 0; i--) {
+            const btn = buttons[i];
+            if (this._canHideLabel(btn)) {
+                return btn;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * shows labels one-by-one (left-to-right) as long as there is enough space
+     * @param {HTMLElement} overflowRoot
+     */
+    _showLabelsAsSpaceAllows(overflowRoot) {
+        const buttons = Array.from(overflowRoot.querySelectorAll(".wx-toolbar-button"));
+        for (let i = 0; i < buttons.length; i++) {
+            const btn = buttons[i];
+            const isHidden = btn.dataset.labelHidden === "true";
+            const canShow = isHidden && !!this._findLabelSpan(btn);
+            if (canShow) {
+                // only attempt to show if the button actually has an icon (we only hide such labels)
+                const hasIcon = btn.dataset.hasIcon === "true" || !!btn.querySelector("i, img");
+                if (!hasIcon) {
+                    continue;
+                }
+                const shown = this._tryShowButtonLabel(btn, overflowRoot);
+                if (!shown) {
+                    // stop when next label would overflow
+                    break;
+                }
+            }
+        }
     }
 
     /**
