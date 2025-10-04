@@ -12,7 +12,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
     _items = [];
 
     /**
-     * constructor for sidebar control
+     * Constructor for sidebar control
      * @param {HTMLElement} element - root element of the sidebar
      */
     constructor(element) {
@@ -30,6 +30,9 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
         element.classList.add("wx-sidebar");
         element.innerHTML = "";
 
+        this._sidebarWrapper = document.createElement("div");
+        this._element.appendChild(this._sidebarWrapper);
+
         this._buildSidebar();
         this._buildFooter();
         this._setupPanelOverlayHandling();
@@ -41,7 +44,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * parses all sidebar children and creates item descriptors
+     * Parses all sidebar children and creates item descriptors
      * @param {HTMLCollection} children - original sidebar children
      * @returns {Array} list of item descriptors
      */
@@ -56,10 +59,13 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             const isLink = el.classList.contains("wx-sidebar-link");
             const isToolbar = el.classList.contains("wx-sidebar-toolbar");
             const iconClass = el.getAttribute("data-icon");
+            const isActive = el.hasAttribute("active");
+            const isDisabled = el.hasAttribute("disabled");
             const iconImg = el.getAttribute("data-image");
             const label = el.getAttribute("data-label") || el.textContent.trim();
             const link = el.getAttribute("data-uri") || null;
             const tooltip = el.getAttribute("data-tooltip") || null;
+            const target = el.getAttribute("data-target") || null;
             const isRemoveable = el.getAttribute("data-removeable") === "true";
             const mode = el.getAttribute("data-mode") || ""; // "hide" or "overlay"
 
@@ -74,7 +80,9 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                     iconImg: null,
                     label: label,
                     link: null,
+                    active: null,
                     tooltip: null,
+                    target: null,
                     isRemoveable: null,
                     mode: "hide",
                     content: null
@@ -90,7 +98,9 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                     iconImg: null,
                     label: null,
                     link: null,
+                    active: null,
                     tooltip: null,
+                    target: null,
                     isRemoveable: null,
                     mode: mode,
                     content: null
@@ -98,6 +108,12 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             } else if (isLink) {
                 const item = document.createElement("div");
                 item.className = "wx-sidebar-link";
+                if (isActive) {
+                    item.setAttribute("active", "");
+                }
+                if (isDisabled) {
+                    item.setAttribute("disabled", "");
+                }
                 items.push({
                     index: i,
                     element: item,
@@ -106,7 +122,9 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                     iconImg: iconImg,
                     label: label,
                     link: link,
+                    active: isActive,
                     tooltip: tooltip,
+                    target: target,
                     isRemoveable: isRemoveable,
                     mode: mode,
                     content: null
@@ -121,11 +139,15 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                     iconClass: iconClass,
                     iconImg: iconImg,
                     label: label,
+                    active: null,
                     link: null,
                     tooltip: null,
+                    target: null,
                     isRemoveable: null,
                     mode: mode,
-                    content: el.children[0] ? el.children[0].cloneNode(true) : null
+                    content: el.children[0]
+                        ? this._detachElement(el.children[0])
+                        : null
                 });
             } else if (isToolbar) {
                 el.classList.remove("wx-sidebar-toolbar");
@@ -141,20 +163,20 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * ensures all items are in the sidebar in DOM order
+     * Ensures all items are in the sidebar in DOM order
      */
     _buildSidebar() {
         for (let item of this._items) {
             if (item.type !== "toolbar") {
                 if (item.element.parentElement !== this._element) {
-                    this._element.appendChild(item.element);
+                    this._sidebarWrapper.appendChild(item.element);
                 }
             }
         }
     }
 
     /**
-     * builds a toolbar at the footer of the sidebar, if available
+     * Builds a toolbar at the footer of the sidebar, if available
      */
     _buildFooter() {
         for (let item of this._items) {
@@ -170,7 +192,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * handles overlays for panels with data-mode="overlay" in compact mode using Popper.js
+     * Handles overlays for panels with data-mode="overlay" in compact mode using Popper.js
      */
     _setupPanelOverlayHandling() {
         for (let item of this._items) {
@@ -199,7 +221,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * sets up resize handling with debounce and resets manual override on breakpoint change
+     * Sets up resize handling with debounce and resets manual override on breakpoint change
      */
     _setupResizeHandling() {
         // debounce utility for resize event
@@ -237,7 +259,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * updates the sidebar view (reduced or expanded)
+     * Updates the sidebar view (reduced or expanded)
      */
     _updateView() {
         if (this._isReduced) {
@@ -278,10 +300,20 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                     item.element.classList.remove("hide");
                 }
                 const link = document.createElement("a");
+                link.className = "wx-link";
+                if (item.link) {
+                    link.href = item.link;
+                }
                 if (item.iconClass) {
                     const icon = document.createElement("i");
                     icon.className = item.iconClass;
                     link.appendChild(icon);
+                }
+                if (item.target) {
+                    link.target = item.target;
+                }
+                if (item.tooltip) {
+                    link.title = item.tooltip;
                 }
                 if (item.iconImg) {
                     const img = document.createElement("img");
@@ -346,7 +378,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                     item.element.classList.remove("overlay");
                     item.element.classList.remove("hide");
                     if (item.content) {
-                        item.element.appendChild(item.content.cloneNode(true));
+                        item.element.appendChild(item.content);
                     }
                 }
             }
@@ -354,10 +386,11 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * opens the overlay panel for panel items in overlay mode
+     * Opens the overlay panel for panel items in overlay mode
      * @param {Object} item - panel item descriptor
      */
     _showPanelOverlay(item) {
+        // create overlay panel element
         const overlayPanel = document.createElement("div");
         overlayPanel.className = "wx-sidebar-panel-overlay";
         const content = document.createElement("div");
@@ -368,18 +401,36 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
         overlayPanel.appendChild(content);
         document.body.appendChild(overlayPanel);
 
+        // initialize popper if available
         if (typeof this._initializePopper === "function") {
             this._initializePopper(item.element, overlayPanel);
         }
 
         this._dispatch(webexpress.webui.Event.SHOW_EVENT, { overlay: overlayPanel });
 
-        // handle click outside & ESC
+        // prevent outside handler for any interaction inside the overlay
+        overlayPanel.addEventListener("mousedown", (event) => {
+            // prevent bubbling so global listeners do not treat it as outside click
+            event.stopPropagation();
+        });
+        overlayPanel.addEventListener("click", (event) => {
+            // extra safety for other global click handlers
+            event.stopPropagation();
+        });
+        // optional: support touch devices
+        overlayPanel.addEventListener("touchstart", (event) => {
+            // prevent bubbling on touch as well
+            event.stopPropagation();
+        }, { passive: true });
+
+        // handle click outside and ESC
         const handleClickOutside = (event) => {
+            // only close overlay if click was outside both overlay and trigger element
             if (!overlayPanel.contains(event.target) && !item.element.contains(event.target)) {
                 overlayPanel.style.display = "none";
                 document.removeEventListener("mousedown", handleClickOutside);
                 document.removeEventListener("keydown", handleEsc);
+                document.removeEventListener("touchstart", handleClickOutside, { passive: true });
                 if (overlayPanel.parentElement) {
                     overlayPanel.parentElement.removeChild(overlayPanel);
                 }
@@ -391,18 +442,22 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                 overlayPanel.style.display = "none";
                 document.removeEventListener("mousedown", handleClickOutside);
                 document.removeEventListener("keydown", handleEsc);
+                document.removeEventListener("touchstart", handleClickOutside, { passive: true });
                 if (overlayPanel.parentElement) {
                     overlayPanel.parentElement.removeChild(overlayPanel);
                 }
                 this._dispatch(webexpress.webui.Event.HIDE_EVENT, { overlay: overlayPanel });
             }
         };
+
         document.addEventListener("mousedown", handleClickOutside);
         document.addEventListener("keydown", handleEsc);
+        // optional: support touch devices
+        document.addEventListener("touchstart", handleClickOutside, { passive: true });
     }
 
     /**
-     * expands sidebar to full view
+     * Expands sidebar to full view
      */
     expand() {
         this._isReduced = false;
@@ -411,7 +466,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * reduces sidebar to compact view
+     * Reduces sidebar to compact view
      */
     reduce() {
         this._isReduced = true;
@@ -420,7 +475,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * cleans up resources
+     * Cleans up resources
      */
     destroy() {
         if (this._footer && this._footer.parentElement === this._element) {

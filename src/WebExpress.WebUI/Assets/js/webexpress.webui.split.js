@@ -4,6 +4,7 @@
  * - webexpress.webui.Event.SIZE_CHANGE_EVENT
  * - webexpress.webui.Event.HIDE_EVENT
  * - webexpress.webui.Event.SHOW_EVENT
+ * Persists side size and collapsed state via a single cookie (when the element has an id).
  */
 webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     _sidePaneCollapsed = false;
@@ -63,7 +64,6 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         element.removeAttribute("data-splitter-size");
         element.removeAttribute("data-order");
         element.removeAttribute("data-unit");
-        // element.innerHTML = "";
 
         // set base classes
         element.classList.remove("wx-webui-split");
@@ -121,17 +121,16 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
             }
         }
 
-        // cookie name unique per element (only if id exists)
-        if (element.id) {
-            this._cookieName = "wx-split-size-" + element.id;
-        } else {
-            this._cookieName = null;
-        }
+        // single cookie name unique per element (only if id exists)
+        this._cookieName = element.id ? ("wx-split-" + element.id) : null;
 
-        // set initial side size: Cookie > data-size > minSide > half, but respect min and max boundaries
-        let initialSide = this._getSideSizeFromCookie();
+        // read initial state from cookie v1 (no migration)
+        const state = this._getStateFromCookie();
+
+        // set initial side size: cookie.size > data-size > minSide > half, respect min/max
+        let initialSide = (state && typeof state.size === "number") ? state.size : this._parseInitialSideSize(this._initialSideAttr);
         if (initialSide == null) {
-            initialSide = this._parseInitialSideSize(this._initialSideAttr) ?? Math.floor((this._orientation === "vertical" ? element.clientHeight : element.clientWidth) / 2);
+            initialSide = Math.floor((this._orientation === "vertical" ? element.clientHeight : element.clientWidth) / 2);
         }
         if (this._minSide !== null) {
             initialSide = Math.max(initialSide, this._minSide);
@@ -142,12 +141,15 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         this._sideSize = initialSide;
         this._setPaneSizes(this._sideSize);
 
+        // restore collapsed state from cookie if available
+        if (state && state.collapsed === true) {
+            // collapse after initial sizing so previous size can be captured
+            this.collapseSidePane();
+        }
+
         // make panes scrollable only if content is too large
         if (this._mainPane) {
             this._mainPane.style.overflow = "auto";
-        }
-        if (this._sidePane) {
-            this._sidePane.style.overflow = "auto";
         }
 
         // handle splitter drag
@@ -204,7 +206,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
                     this.expandSidePane(newSideSize);
                 } else {
                     this._setPaneSizes(newSideSize, true);
-                    this._setSideSizeCookie(newSideSize);
+                    this._setStateCookie({ size: newSideSize, collapsed: this._sidePaneCollapsed });
                 }
             };
 
@@ -279,11 +281,11 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Reads the side pane size from a cookie, if available.
-     * Only loads the size if a cookie name exists (i.e., if an ID is set on the element).
-     * @returns {number|null} returns the side pane size in pixels if available, otherwise null.
+     * Reads split state from a single cookie (version 1).
+     * Only loads the state if a cookie name exists (i.e., if an id is set on the element).
+     * @returns {{v:number,size:number|null,collapsed:boolean|null}|null} returns the parsed state or null.
      */
-    _getSideSizeFromCookie() {
+    _getStateFromCookie() {
         if (!this._cookieName) {
             return null;
         }
@@ -292,31 +294,42 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         for (let c of ca) {
             c = c.trim();
             if (c.indexOf(name) === 0) {
-                const v = c.substring(name.length, c.length);
-                const n = parseInt(v, 10);
-                if (isNaN(n)) {
-                    return null;
-                } else {
-                    return n;
+                const raw = c.substring(name.length, c.length);
+                try {
+                    const json = decodeURIComponent(raw);
+                    const obj = JSON.parse(json);
+                    if (obj && obj.v === 1) {
+                        const size = (typeof obj.size === "number" && isFinite(obj.size)) ? obj.size : null;
+                        const collapsed = (obj.collapsed === 1 || obj.collapsed === true) ? true : (obj.collapsed === 0 || obj.collapsed === false ? false : null);
+                        return { v: 1, size: size, collapsed: collapsed };
+                    }
+                } catch (e) {
+                    // ignore parse errors
                 }
+                return null;
             }
         }
         return null;
     }
 
     /**
-     * Stores the side pane size in a cookie for 30 days.
-     * Only saves the size if a cookie name exists (i.e., if an ID is set on the element).
-     * @param {number} size - the side pane size in pixels to store.
+     * Stores split state in a single cookie (version 1) for 30 days.
+     * Only saves the state if a cookie name exists (i.e., if an id is set on the element).
+     * @param {{size:number,collapsed:boolean}} state - the state to store.
      * @returns {void}
      */
-    _setSideSizeCookie(size) {
+    _setStateCookie(state) {
         if (!this._cookieName) {
             return;
         }
+        const payload = {
+            v: 1,
+            size: Math.round(typeof state.size === "number" ? state.size : this._sideSize || 0),
+            collapsed: state.collapsed ? 1 : 0
+        };
         const d = new Date();
         d.setTime(d.getTime() + (30 * 24 * 60 * 60 * 1000));
-        document.cookie = this._cookieName + "=" + Math.round(size) + ";expires=" + d.toUTCString() + ";path=/";
+        document.cookie = this._cookieName + "=" + encodeURIComponent(JSON.stringify(payload)) + ";expires=" + d.toUTCString() + ";path=/";
     }
 
     /**
@@ -498,6 +511,9 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
             this._mainPane.style.height = "";
         }
 
+        // persist collapsed state together with last known size
+        this._setStateCookie({ size: this._sideSize, collapsed: true });
+
         // fire HIDE_EVENT
         this._dispatch(webexpress.webui.Event.HIDE_EVENT, {});
     }
@@ -523,14 +539,16 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         }
         this._sidePane.style.display = "";
         this._setPaneSizes(sideSize, true);
-        this._setSideSizeCookie(sideSize);
 
-        // fire SHOW_EVENT when side-pane is expanded (via double-click)
+        // persist expanded state with current size
+        this._setStateCookie({ size: sideSize, collapsed: false });
+
+        // fire SHOW_EVENT when side-pane is expanded (via interaction)
         this._dispatch(webexpress.webui.Event.SHOW_EVENT, {});
     }
-    
+
     /**
-     * toggles the side pane between collapsed and expanded state
+     * Toggles the side pane between collapsed and expanded state.
      * @returns {void}
      */
     toggleSidePane() {
@@ -598,7 +616,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
             this.expandSidePane(newSide);
         } else {
             this._setPaneSizes(newSide, true);
-            this._setSideSizeCookie(newSide);
+            this._setStateCookie({ size: newSide, collapsed: this._sidePaneCollapsed });
         }
     }
 

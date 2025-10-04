@@ -1,6 +1,6 @@
 /**
  * Controller that manages horizontal items and moves overflowing items into an overflow menu.
- * Supports items marked with data-overflow="never" (never move) and data-overflow="force" (always in overflow).
+ * Supports items marked with data-overflow="never" (never move), data-overflow="force" (always in overflow) and data-overflow="hide" (hide in overflow).
  * Overflow logic can be enabled/disabled via setAutoDistribute(boolean).
  */
 webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {

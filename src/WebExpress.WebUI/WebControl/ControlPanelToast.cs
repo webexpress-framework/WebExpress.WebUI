@@ -67,10 +67,11 @@ namespace WebExpress.WebUI.WebControl
 
             var button = new HtmlElementFieldButton()
             {
-                Class = "btn-close"
-            };
-            button.AddUserAttribute("data-bs-dismiss", "alert");
-            button.AddUserAttribute("aria-label", "close");
+                Class = "btn"
+            }
+                .Add(new HtmlElementTextSemanticsI() { Class = "fas fa-xmark" })
+                .AddUserAttribute("data-bs-dismiss", "alert")
+                .AddUserAttribute("aria-label", "close");
 
             return new HtmlElementTextContentDiv()
             {

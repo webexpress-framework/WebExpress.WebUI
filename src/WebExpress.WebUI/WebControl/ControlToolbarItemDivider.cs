@@ -21,6 +21,11 @@ namespace WebExpress.WebUI.WebControl
         public TypeToolbarItemAlignment Alignment { get; set; } = TypeToolbarItemAlignment.Default;
 
         /// <summary>
+        /// Returns the overflow behavior of the toolbar item.
+        /// </summary>
+        public TypeToolbarItemOverflow Overflow { get; set; } = TypeToolbarItemOverflow.Default;
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -42,7 +47,8 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = "wx-toolbar-separator"
             }
-                .AddUserAttribute("data-align", Alignment.ToValue());
+                .AddUserAttribute("data-align", Alignment.ToValue())
+                .AddUserAttribute("data-overflow", Overflow.ToValue());
         }
     }
 }

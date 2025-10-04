@@ -7,6 +7,17 @@ pre {
     color: var(--bs-code-color);
 }
 
+.hide {
+    display: none;
+}
+
+.alert-dismissible [data-bs-dismiss="alert"] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 2;
+}
+
 .wx-link {
     color: rgba(var(--bs-link-color-rgb), var(--bs-link-opacity, 1));
     text-decoration: none;
@@ -20,10 +31,6 @@ img.wx-icon {
     height: 1.2em;
     min-width: 1em;
     vertical-align: middle; 
-}
-
-.hide {
-    display: none;
 }
 
 .wx-esm {
@@ -179,78 +186,6 @@ img.wx-icon {
     height: 4em;
 }
 
-.wx-timeline {
-    list-style: none;
-    margin: 0px;
-    padding-left: 10px
-}
-
-.wx-timeline .item {
-    border: none;
-    margin-top: 5px;
-    margin-bottom: 20px;
-    padding: 5px;
-}
-
-.wx-timeline .item .header {
-    width: 100%;
-}
-
-.wx-timeline .item .header p span {
-    margin: 0px;
-    color: gray;
-    font-weight: normal;
-}
-
-.wx-timeline .item .header small {
-    margin: 0px;
-    color: gray;
-}
-
-.wx-timeline .item .post {
-    padding: 5px 5px 15px 5px;
-    position: relative;
-}
-
-.wx-timeline .item .options {
-    margin-bottom: 10px;
-}
-
-.wx-timeline .item form {
-    margin-left: 0px;
-    margin-right: 50px;
-}
-
-.wx-timeline .item form textarea {
-    margin-bottom: 10px;
-}
-
-.wx-timeline .item form button {
-    display: inline-block;
-}
-
-.wx-timeline .item .comment {
-    background-color: white;
-    margin-left: 50px;
-}
-
-.wx-timeline .item .comment .header {
-    border: none;
-    margin-bottom: 10px;
-}
-
-.wx-timeline .item .comment .post {
-    background-color: white;
-    margin-left: 50px;
-    margin-right: 0px;
-    padding: 5px;
-    margin-bottom: 10px;
-}
-
-.wx-timeline .item .comment .options {
-    margin-left: 50px;
-}
-
 .wx-callout {
     position: relative;
     display: flex;
@@ -347,15 +282,8 @@ img.wx-icon {
     resize: both;
 }
 
-
 [data-bs-theme=dark] .wx-drag-over {
-    background: repeating-linear-gradient(
-        45deg,
-        var(--bs-secondary-bg),
-        var(--bs-secondary-bg) 6px,
-        var(--bs-secondary) 6px,
-        var(--bs-secondary) 12px
-    );
+    background: repeating-linear-gradient( 45deg, var(--bs-secondary-bg), var(--bs-secondary-bg) 6px, var(--bs-secondary) 6px, var(--bs-secondary) 12px );
 }
 
 .list-group-item.active a {

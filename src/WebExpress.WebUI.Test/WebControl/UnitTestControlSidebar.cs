@@ -114,5 +114,27 @@ namespace WebExpress.WebUI.Test.WebControl
 
             AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-sidebar""><div class=""wx-sidebar-link"" data-label=""abc""></div></div>", html);
         }
+
+        /// <summary>
+        /// Tests the add function of the sidebar control.
+        /// </summary>
+        [Fact]
+        public void AddToolbarItem()
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlSidebar(null)
+                .Add(new ControlToolbarItemButton()
+                {
+                    Text = "abc"
+                });
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-sidebar""><div class=""wx-sidebar-toolbar""><div class=""wx-toolbar-button"" data-label=""abc""></div></div></div>", html);
+        }
     }
 }

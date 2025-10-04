@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.Test.WebControl
     /// Tests the sidebar item panel control.
     /// </summary>
     [Collection("NonParallelTests")]
-    public class UnitTestControlSidebarItemControl
+    public class UnitTestControlSidebarItemDynamic
     {
         /// <summary>
         /// Tests the id property of the sidebar item control.
@@ -24,7 +24,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlSidebarItemControl(id)
+            var control = new ControlSidebarItemDynamic(id)
             {
             };
 
@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlSidebarItemControl()
+            var control = new ControlSidebarItemDynamic()
             {
                 Tooltip = tooltip,
             };
@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlSidebarItemControl()
+            var control = new ControlSidebarItemDynamic()
             {
                 Icon = icon != null ? Activator.CreateInstance(icon) as IIcon : null
             };
@@ -102,7 +102,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlSidebarItemControl()
+            var control = new ControlSidebarItemDynamic()
             {
                 Color = new PropertyColorText(color)
             };
@@ -115,7 +115,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the mode property of the sidebar item divider control.
+        /// Tests the mode property of the sidebar item control.
         /// </summary>
         [Theory]
         [InlineData(TypeSidebarModeExtended.Default, @"<div class=""wx-sidebar-control""></div>")]
@@ -127,7 +127,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CrerateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlSidebarItemControl()
+            var control = new ControlSidebarItemDynamic()
             {
                 Mode = mode
             };
@@ -140,10 +140,10 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the content property of the sidebar item divider control.
+        /// Tests the render content function of the sidebar item control.
         /// </summary>
         [Fact]
-        public void Control()
+        public void RenderControl()
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();

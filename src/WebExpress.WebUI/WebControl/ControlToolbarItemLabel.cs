@@ -42,6 +42,11 @@ namespace WebExpress.WebUI.WebControl
         public TypeToolbarItemAlignment Alignment { get; set; } = TypeToolbarItemAlignment.Default;
 
         /// <summary>
+        /// Returns the overflow behavior of the toolbar item.
+        /// </summary>
+        public TypeToolbarItemOverflow Overflow { get; set; } = TypeToolbarItemOverflow.Default;
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -68,7 +73,8 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-color-css", Color?.ToClass())
                 .AddUserAttribute("data-color-style", Color?.ToStyle())
                 .AddUserAttribute(Disabled ? "disabled" : null)
-                .AddUserAttribute("data-align", Alignment.ToValue());
+                .AddUserAttribute("data-align", Alignment.ToValue())
+                .AddUserAttribute("data-overflow", Overflow.ToValue());
         }
     }
 }

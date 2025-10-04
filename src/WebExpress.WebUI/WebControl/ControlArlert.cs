@@ -70,23 +70,22 @@ namespace WebExpress.WebUI.WebControl
 
             var button = new HtmlElementFieldButton()
             {
-                Class = "btn-close"
-            };
-            button.AddUserAttribute("data-bs-dismiss", "alert");
-            button.AddUserAttribute("aria-label", "close");
+                Class = "btn"
+            }
+                .Add(new HtmlElementTextSemanticsI() { Class = "fas fa-xmark" })
+                .AddUserAttribute("data-bs-dismiss", "alert")
+                .AddUserAttribute("aria-label", "close");
 
-            return new HtmlElementTextContentDiv
-            (
-                !string.IsNullOrWhiteSpace(Head) ? head : null,
-                new HtmlText(Text),
-                Dismissibility != TypeDismissibilityAlert.None ? button : null
-            )
+            return new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("alert", GetClasses()),
                 Style = GetStyles(),
                 Role = "alert"
-            };
+            }
+                .Add(!string.IsNullOrWhiteSpace(Head) ? head : null)
+                .Add(new HtmlText(Text))
+                .Add(Dismissibility != TypeDismissibilityAlert.None ? button : null);
         }
     }
 }

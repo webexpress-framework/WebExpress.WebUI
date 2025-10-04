@@ -16,6 +16,11 @@ namespace WebExpress.WebUI.WebControl
         IEnumerable<IControlSidebarItem> Items { get; }
 
         /// <summary>
+        /// Returns the collection of toolbar items associated with the control.
+        /// </summary>
+        IEnumerable<IControlToolbarItem> ToolbarItems { get; }
+
+        /// <summary>
         /// Adds one or more sidebar items to the sidebar.
         /// </summary>
         /// <param name="items">The sidebar items to add.</param>
@@ -35,5 +40,26 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="item">The sidebar item to remove.</param>
         /// <returns>The current instance for method chaining.</returns>
         IControlSidebar Remove(IControlSidebarItem item);
+
+        /// <summary>
+        /// Adds one or more controls to the sidebar toolbar (footer).
+        /// </summary>
+        /// <param name="items">The toolbar items to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        IControlSidebar Add(params IControlToolbarItem[] items);
+
+        /// <summary>
+        /// Adds one or more controls to the sidebar toolbar (footer).
+        /// </summary>
+        /// <param name="items">The toolbar items to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        IControlSidebar Add(IEnumerable<IControlToolbarItem> items);
+
+        /// <summary>
+        /// Removes a control from the sidebar toolbar (footer).
+        /// </summary>
+        /// <param name="item">The toolbar item to remove.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        IControlSidebar Remove(IControlToolbarItem item);
     }
 }

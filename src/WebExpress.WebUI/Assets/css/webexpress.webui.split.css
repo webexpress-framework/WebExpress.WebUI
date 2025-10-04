@@ -23,7 +23,6 @@
 .wx-split .wx-side-pane {
     min-width: 20px;
     min-height: 20px;
-    overflow: auto; /* Show scrollbars only when content does not fit */
     box-sizing: border-box;
 }
 

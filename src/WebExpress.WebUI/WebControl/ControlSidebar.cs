@@ -11,6 +11,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlSidebar : Control, IControlSidebar
     {
         private readonly List<IControlSidebarItem> _items = [];
+        private readonly List<IControlToolbarItem> _toolbarItems = [];
 
         /// <summary>
         /// Returns the list of sidebar items.
@@ -19,6 +20,11 @@ namespace WebExpress.WebUI.WebControl
         /// A list of <see cref="IControlToolbarItem"/> representing the items in the toolbar.
         /// </value>
         public virtual IEnumerable<IControlSidebarItem> Items => _items;
+
+        /// <summary>
+        /// Returns the collection of controls that make up the toolbar (footer) section.
+        /// </summary>
+        public virtual IEnumerable<IControlToolbarItem> ToolbarItems => _toolbarItems;
 
         /// <summary>
         /// Returns or sets the breakpoint value that determines when the layout switches between 
@@ -74,6 +80,42 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Adds one or more controls to the sidebar toolbar (footer).
+        /// </summary>
+        /// <param name="items">The toolbar items to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlSidebar Add(params IControlToolbarItem[] items)
+        {
+            _toolbarItems.AddRange(items);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds one or more controls to the sidebar toolbar (footer).
+        /// </summary>
+        /// <param name="items">The toolbar items to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlSidebar Add(IEnumerable<IControlToolbarItem> items)
+        {
+            _toolbarItems.AddRange(items);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Removes a control from the sidebar toolbar (footer).
+        /// </summary>
+        /// <param name="item">The toolbar item to remove.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlSidebar Remove(IControlToolbarItem item)
+        {
+            _toolbarItems.Remove(item);
+
+            return this;
+        }
+
+        /// <summary>
         /// Converts the control to an HTML representation.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
@@ -111,6 +153,16 @@ namespace WebExpress.WebUI.WebControl
                 Role = Role
             }
                 .Add(items.Select(x => x.Render(renderContext, visualTree)))
+                .Add
+                (
+                    _toolbarItems.Count != 0
+                    ? new HtmlElementTextContentDiv()
+                    {
+                        Class = "wx-sidebar-toolbar"
+                    }
+                        .Add(_toolbarItems.Select(x => x.Render(renderContext, visualTree)))
+                    : null
+                )
                 .AddUserAttribute("data-breakpoint", Breakpoint >= 0 ? Breakpoint.ToString() : null);
 
             return html;

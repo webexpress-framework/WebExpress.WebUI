@@ -12,5 +12,10 @@ namespace WebExpress.WebUI.WebControl
         /// Returns the alignment of the toolbar item.
         /// </summary>
         TypeToolbarItemAlignment Alignment { get; }
+
+        /// <summary>
+        /// Returns the overflow behavior of the toolbar item.
+        /// </summary>
+        TypeToolbarItemOverflow Overflow { get; }
     }
 }

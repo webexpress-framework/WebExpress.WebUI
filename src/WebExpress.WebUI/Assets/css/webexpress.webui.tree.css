@@ -103,5 +103,5 @@
     height: 2px;
     border-bottom: 2px dashed var(--bs-success);
     z-index: 1000;
-    pointer-events: none; /* Prevent interaction with the indicator */
+    pointer-events: none; /* prevent interaction with the indicator */
 }

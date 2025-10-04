@@ -1,19 +1,19 @@
 ﻿using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
-using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a toolbar item button control.
+    /// Represents a toolbar item that toggles between compact and expanded views of a split control side pane.
     /// </summary>
     /// <remarks>
-    /// This class is used to create a button within a toolbar.
+    /// This control allows users to switch the side pane between a reduced (compact) and normal 
+    /// (full) layout mode, enabling adaptive UI behavior based on context or user preference.
     /// </remarks>
-    public class ControlToolbarItemButton : IControlToolbarItem
+    public class ControlToolbarItemButtonSplitToggle : IControlToolbarItem
     {
         private readonly string _id;
 
@@ -21,31 +21,6 @@ namespace WebExpress.WebUI.WebControl
         /// Returns the unique identifier for the entity.
         /// </summary>
         public string Id => _id;
-
-        /// <summary>
-        /// Returns or sets whether the link is active or not.
-        /// </summary>
-        public TypeActive Active { get; set; }
-
-        /// <summary>
-        /// Returns or sets the label.
-        /// </summary>
-        public string Text { get; set; }
-
-        /// <summary>
-        /// Returns or sets the target uri.
-        /// </summary>
-        public IUri Uri { get; set; }
-
-        /// <summary>
-        /// Returns or sets the target.
-        /// </summary>
-        public TypeTarget Target { get; set; }
-
-        /// <summary>
-        /// Returns or sets the id of a modal dialogue.
-        /// </summary>
-        public string Modal { get; set; }
 
         /// <summary>
         /// Returns or sets the icon.
@@ -56,6 +31,11 @@ namespace WebExpress.WebUI.WebControl
         /// Returns or sets a tooltip text.
         /// </summary>
         public string Tooltip { get; set; }
+
+        /// <summary>
+        /// Returns or sets the identifier for the splitter.
+        /// </summary>
+        public string SpltterId { get; set; }
 
         /// <summary>
         /// Returns or sets the link color.
@@ -76,7 +56,7 @@ namespace WebExpress.WebUI.WebControl
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        public ControlToolbarItemButton(string id = null)
+        public ControlToolbarItemButtonSplitToggle(string id = null)
         {
             _id = id;
         }
@@ -92,21 +72,23 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = "wx-toolbar-button"
+                Class = "wx-toolbar-button wx-webui-button-split-toggle"
             }
-                .AddUserAttribute("data-label", I18N.Translate(renderContext, Text))
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
                 .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-uri", Uri?.ToString())
-                .AddUserAttribute("data-target", Target.ToStringValue())
-                .AddUserAttribute("data-modal", Modal)
                 .AddUserAttribute("data-title", I18N.Translate(renderContext, Tooltip))
                 .AddUserAttribute("data-color-css", Color?.ToClass())
                 .AddUserAttribute("data-color-style", Color?.ToStyle())
-                .AddUserAttribute(Active == TypeActive.Active ? "active" : null)
-                .AddUserAttribute(Active == TypeActive.Disabled ? "disabled" : null)
                 .AddUserAttribute("data-align", Alignment.ToValue())
-                .AddUserAttribute("data-overflow", Overflow.ToValue());
+                .AddUserAttribute("data-overflow", Overflow.ToValue())
+                .AddUserAttribute("data-wx-toggle", "split")
+                .AddUserAttribute
+                (
+                    "data-wx-target",
+                    !string.IsNullOrWhiteSpace(SpltterId)
+                        ? $"#{SpltterId}"
+                        : null
+                );
         }
     }
 }
