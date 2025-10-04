@@ -9,6 +9,7 @@
 webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     _sidePaneCollapsed = false;
     _sidePanePrevSize = null;
+    _collapseThreshold = 10; // collapse 10px before reaching minimum
 
     /**
      * Constructor
@@ -195,6 +196,28 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
                         newSideSize = ev.clientX - rect.left - offset;
                     }
                 }
+
+                // check collapse threshold before applying min clamp
+                let willCollapse = false;
+                if (this._minSide !== null) {
+                    if (newSideSize <= (this._minSide + this._collapseThreshold)) {
+                        willCollapse = true;
+                    }
+                } else {
+                    if (newSideSize <= this._collapseThreshold) {
+                        willCollapse = true;
+                    }
+                }
+
+                if (willCollapse) {
+                    if (!this._sidePaneCollapsed) {
+                        this.collapseSidePane();
+                    }
+                    this._setStateCookie({ size: this._sideSize, collapsed: true });
+                    return;
+                }
+
+                // apply constraints when not collapsing
                 if (this._minSide !== null) {
                     newSideSize = Math.max(this._minSide, newSideSize);
                 }
@@ -202,6 +225,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
                     newSideSize = Math.min(this._maxSide, newSideSize);
                 }
                 newSideSize = Math.max(0, newSideSize);
+
                 if (this._sidePaneCollapsed && newSideSize > 0) {
                     this.expandSidePane(newSideSize);
                 } else {
