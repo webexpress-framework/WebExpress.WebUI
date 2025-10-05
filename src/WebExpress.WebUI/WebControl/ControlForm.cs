@@ -160,9 +160,17 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
         /// </summary>
-        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
-        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
+        /// <param name="instance">
+        /// The name of the calling member. This is automatically provided by the compiler.
+        /// </param>
+        /// <param name="file">
+        /// The file path of the source file where this instance is created. This is 
+        /// automatically provided by the compiler.
+        /// </param>
+        /// <param name="line">
+        /// The line number in the source file where this instance is created. This is 
+        /// automatically provided by the compiler.
+        /// </param>
         /// <param name="items">The form items to add to the form.</param>
         public ControlForm([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null, params IControlFormItem[] items)
             : this($"{instance}_{file}_{line}".GetHashCode().ToString("X"), items)
@@ -177,7 +185,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlForm(string id, params IControlFormItem[] items)
             : base(id)
         {
-            FormId.Name = id;
+            FormId.Name = id?.Replace('.', '-');
             _items.AddRange(items);
         }
 
