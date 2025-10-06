@@ -8,29 +8,42 @@
         /// <summary>
         /// Line chart type.
         /// </summary>
-        Line = 0,
+        Line,
 
         /// <summary>
         /// Bar chart type.
         /// </summary>
-        Bar = 1,
+        Bar,
 
         /// <summary>
         /// Pie chart type.
         /// </summary>
-        Pie = 2,
+        Pie,
 
         /// <summary>
         /// Doughnut chart type.
         /// </summary>
-        Doughnut = 3,
-
-        // Polar = 4,
+        Doughnut,
 
         /// <summary>
         /// Radar chart type.
         /// </summary>
-        Radar = 5
+        Radar,
+
+        /// <summary>
+        /// Polar area chart type.
+        /// </summary>
+        PolarArea,
+
+        /// <summary>
+        /// Bubble chart type.
+        /// </summary>
+        Bubble,
+
+        /// <summary>
+        /// Scatter chart type.
+        /// </summary>
+        Scatter
     }
 
     /// <summary>
@@ -52,6 +65,9 @@
                 TypeChart.Pie => "pie",
                 TypeChart.Doughnut => "doughnut",
                 TypeChart.Radar => "radar",
+                TypeChart.PolarArea => "polarArea",
+                TypeChart.Bubble => "bubble",
+                TypeChart.Scatter => "scatter",
                 _ => "line",
             };
         }

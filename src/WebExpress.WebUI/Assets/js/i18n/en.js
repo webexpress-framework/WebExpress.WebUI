@@ -49,5 +49,8 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     
     "avatar.zoom.label": "Zoom",
     "avatar.upload.image.label": "Bild auswählen",
-    "avatar.placeholder": "Drop image here or double click."
+    "avatar.placeholder": "Drop image here or double click.",
+    
+    "page.contentNotLoaded.label": "Content could not be loaded.",
+    "page.contentNotLoaded.details": "Please check your internet connection or try reloading the page. If the problem persists, the requested resource may be temporarily unavailable or a technical error may have occurred. You may also try refreshing the page or contact technical support if you need assistance."
 });
