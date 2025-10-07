@@ -161,7 +161,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
         const spring = document.createElement("div");
         spring.style.flex = "1 1 auto";
         spring.style.pointerEvents = "none";
-        spring.dataset.overflow = "hide";
+        spring.dataset.overflow = "never";
 
         // create flex root
         const overflowRoot = document.createElement("div");
