@@ -4,7 +4,7 @@
  * - webexpress.webui.Event.DATA_REQUESTED_EVENT
  * - webexpress.webui.Event.DATA_ARRIVED_EVENT
  */
-webexpress.webui.InlinePageCtrl = class extends webexpress.webui.Ctrl {
+webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Creates a new controller instance bound to the given element.
      * @param {HTMLElement} element - The host element that will receive the embedded content.
@@ -184,4 +184,4 @@ webexpress.webui.InlinePageCtrl = class extends webexpress.webui.Ctrl {
 };
 
 // register the class in the controller registry
-webexpress.webui.Controller.registerClass("wx-webui-inline-page", webexpress.webui.InlinePageCtrl);
+webexpress.webui.Controller.registerClass("wx-webui-frame", webexpress.webui.FrameCtrl);
