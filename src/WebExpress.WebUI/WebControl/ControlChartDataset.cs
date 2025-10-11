@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace WebExpress.WebUI.WebControl
+﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// Represents a dataset for a chart control.
@@ -13,9 +11,9 @@ namespace WebExpress.WebUI.WebControl
         public string Title { get; set; }
 
         /// <summary>
-        /// Returns or sets the data. Accepts float values or objects for scatter/bubble charts.
+        /// Returns or sets the data. Accepts scalar values or objects for scatter/bubble charts.
         /// </summary>
-        public IEnumerable<object> Data { get; set; }
+        public IControlChartDatasetPointCollection Data { get; set; }
 
         /// <summary>
         /// Returns or sets the background color.

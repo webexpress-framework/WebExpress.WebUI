@@ -308,8 +308,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var labels = new List<string> { "Jan", "Feb" };
             var control = new ControlChart()
             {
-                Labels = labels
-            };
+            }
+                .AddLabel(labels);
 
             // test execution
             var html = control.Render(context, visualTree);
@@ -477,7 +477,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var ds = new ControlChartDataset
             {
                 Title = "Series A",
-                Data = [1f, 2f, 3f],
+                Data = new ControlChartDatasetPointCollection(1f, 2f, 3f),
                 BackgroundColor = "#ff00ff",
                 BorderColor = "#ff00ff",
                 BorderWidth = 2
@@ -515,7 +515,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 .AddDataset(new ControlChartDataset
                 {
                     Title = "Alpha",
-                    Data = [1f, 2f],
+                    Data = new ControlChartDatasetPointCollection(1f, 2f),
                     BackgroundColor = "#ff00ff",
                     BorderColor = "#ff00ff",
                     BorderWidth = 1
@@ -523,7 +523,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 .AddDataset(new ControlChartDataset
                 {
                     Title = "Beta",
-                    Data = [3f, 4f],
+                    Data = new ControlChartDatasetPointCollection(3f, 4f),
                     BackgroundColor = "#ff00ff",
                     BorderColor = "#ff00ff",
                     BorderWidth = 2

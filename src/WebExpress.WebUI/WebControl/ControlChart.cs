@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
+using System.Text.Json;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -10,11 +10,17 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a chart control that can be used to display various types of charts.
     /// </summary>
-    public class ControlChart : Control
+    public class ControlChart : Control, IControlChart
     {
+        private static readonly JsonSerializerOptions _options = new()
+        {
+            WriteIndented = false,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+            Converters = { new ControlChartDatasetPointCollectionConverter() }
+        };
         private readonly List<ControlChartDataset> _datasets = [];
-
-        private List<string> _labels = [];
+        private readonly List<string> _labels = [];
         private TypeChart _type;
         private string _title;
         private string _titleX;
@@ -31,18 +37,7 @@ namespace WebExpress.WebUI.WebControl
         private bool _xBeginAtZero;
 
         /// <summary>
-        /// Initializes a new instance of the class.
-        /// </summary>
-        /// <param name="id">The id of the control.</param>
-        /// <param name="datasets">The datasets to be used in the chart.</param>
-        public ControlChart(string id = null, params ControlChartDataset[] datasets)
-            : base(id)
-        {
-            _datasets.AddRange(datasets);
-        }
-
-        /// <summary>
-        /// Gets or sets the chart type. The setter returns the instance for fluent chaining.
+        /// Returns or sets the chart type. The setter returns the instance for fluent chaining.
         /// </summary>
         public TypeChart Type
         {
@@ -51,34 +46,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Fluent setter for Type property.
-        /// </summary>
-        public ControlChart SetType(TypeChart type)
-        {
-            Type = type;
-            return this;
-        }
-
-        /// <summary>
-        /// Gets or sets the labels. The setter returns the instance for fluent chaining.
-        /// </summary>
-        public List<string> Labels
-        {
-            get { return _labels; }
-            set { _labels = value ?? []; }
-        }
-
-        /// <summary>
-        /// Fluent setter for Labels property.
-        /// </summary>
-        public ControlChart SetLabels(IEnumerable<string> labels)
-        {
-            Labels = labels?.ToList() ?? [];
-            return this;
-        }
-
-        /// <summary>
-        /// Gets or sets the chart title. The setter returns the instance for fluent chaining.
+        /// Returns or sets the chart title. The setter returns the instance for fluent chaining.
         /// </summary>
         public string Title
         {
@@ -87,16 +55,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Fluent setter for Title property.
-        /// </summary>
-        public ControlChart SetTitle(string title)
-        {
-            Title = title;
-            return this;
-        }
-
-        /// <summary>
-        /// Gets or sets the x-axis title. The setter returns the instance for fluent chaining.
+        /// Returns or sets the x-axis title. The setter returns the instance for fluent chaining.
         /// </summary>
         public string TitleX
         {
@@ -105,16 +64,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Fluent setter for TitleX property.
-        /// </summary>
-        public ControlChart SetTitleX(string titleX)
-        {
-            TitleX = titleX;
-            return this;
-        }
-
-        /// <summary>
-        /// Gets or sets the y-axis title. The setter returns the instance for fluent chaining.
+        /// Returns or sets the y-axis title. The setter returns the instance for fluent chaining.
         /// </summary>
         public string TitleY
         {
@@ -123,16 +73,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Fluent setter for TitleY property.
-        /// </summary>
-        public ControlChart SetTitleY(string titleY)
-        {
-            TitleY = titleY;
-            return this;
-        }
-
-        /// <summary>
-        /// Gets or sets the chart width. The setter returns the instance for fluent chaining.
+        /// Returns or sets the chart width. The setter returns the instance for fluent chaining.
         /// </summary>
         public new int Width
         {
@@ -141,16 +82,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Fluent setter for Width property.
-        /// </summary>
-        public ControlChart SetWidth(int width)
-        {
-            Width = width;
-            return this;
-        }
-
-        /// <summary>
-        /// Gets or sets the chart height. The setter returns the instance for fluent chaining.
+        /// Returns or sets the chart height. The setter returns the instance for fluent chaining.
         /// </summary>
         public new int Height
         {
@@ -159,16 +91,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Fluent setter for Height property.
-        /// </summary>
-        public ControlChart SetHeight(int height)
-        {
-            Height = height;
-            return this;
-        }
-
-        /// <summary>
-        /// Gets or sets the minimum y-value. The setter returns the instance for fluent chaining.
+        /// Returns or sets the minimum y-value. The setter returns the instance for fluent chaining.
         /// </summary>
         public float Minimum
         {
@@ -177,16 +100,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Fluent setter for Minimum property.
-        /// </summary>
-        public ControlChart SetMinimum(float minimum)
-        {
-            Minimum = minimum;
-            return this;
-        }
-
-        /// <summary>
-        /// Gets or sets the maximum y-value. The setter returns the instance for fluent chaining.
+        /// Returns or sets the maximum y-value. The setter returns the instance for fluent chaining.
         /// </summary>
         public float Maximum
         {
@@ -195,16 +109,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Fluent setter for Maximum property.
-        /// </summary>
-        public ControlChart SetMaximum(float maximum)
-        {
-            Maximum = maximum;
-            return this;
-        }
-
-        /// <summary>
-        /// Gets or sets whether the chart is responsive. The setter returns the instance for fluent chaining.
+        /// Returns or sets whether the chart is responsive. The setter returns the instance for fluent chaining.
         /// </summary>
         public bool Responsive
         {
@@ -213,16 +118,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Fluent setter for Responsive property.
-        /// </summary>
-        public ControlChart SetResponsive(bool responsive)
-        {
-            Responsive = responsive;
-            return this;
-        }
-
-        /// <summary>
-        /// Gets or sets whether the chart maintains aspect ratio. The setter returns the instance for fluent chaining.
+        /// Returns or sets whether the chart maintains aspect ratio. The setter returns the instance for fluent chaining.
         /// </summary>
         public bool MaintainAspectRatio
         {
@@ -231,16 +127,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Fluent setter for MaintainAspectRatio property.
-        /// </summary>
-        public ControlChart SetMaintainAspectRatio(bool maintainAspectRatio)
-        {
-            MaintainAspectRatio = maintainAspectRatio;
-            return this;
-        }
-
-        /// <summary>
-        /// Gets or sets whether the legend is displayed. The setter returns the instance for fluent chaining.
+        /// Returns or sets whether the legend is displayed. The setter returns the instance for fluent chaining.
         /// </summary>
         public bool LegendDisplay
         {
@@ -249,16 +136,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Fluent setter for LegendDisplay property.
-        /// </summary>
-        public ControlChart SetLegendDisplay(bool legendDisplay)
-        {
-            LegendDisplay = legendDisplay;
-            return this;
-        }
-
-        /// <summary>
-        /// Gets or sets whether the title is displayed. The setter returns the instance for fluent chaining.
+        /// Returns or sets whether the title is displayed. The setter returns the instance for fluent chaining.
         /// </summary>
         public bool TitleDisplay
         {
@@ -267,16 +145,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Fluent setter for TitleDisplay property.
-        /// </summary>
-        public ControlChart SetTitleDisplay(bool titleDisplay)
-        {
-            TitleDisplay = titleDisplay;
-            return this;
-        }
-
-        /// <summary>
-        /// Gets or sets whether the y-axis begins at zero. The setter returns the instance for fluent chaining.
+        /// Returns or sets whether the y-axis begins at zero. The setter returns the instance for fluent chaining.
         /// </summary>
         public bool YBeginAtZero
         {
@@ -285,16 +154,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Fluent setter for YBeginAtZero property.
-        /// </summary>
-        public ControlChart SetYBeginAtZero(bool yBeginAtZero)
-        {
-            YBeginAtZero = yBeginAtZero;
-            return this;
-        }
-
-        /// <summary>
-        /// Gets or sets whether the x-axis begins at zero. The setter returns the instance for fluent chaining.
+        /// Returns or sets whether the x-axis begins at zero. The setter returns the instance for fluent chaining.
         /// </summary>
         public bool XBeginAtZero
         {
@@ -303,41 +163,90 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Fluent setter for XBeginAtZero property.
-        /// </summary>
-        public ControlChart SetXBeginAtZero(bool xBeginAtZero)
-        {
-            XBeginAtZero = xBeginAtZero;
-            return this;
-        }
-
-        /// <summary>
-        /// Gets the datasets.
+        /// Returns the datasets.
         /// </summary>
         public IEnumerable<ControlChartDataset> Data => _datasets;
 
         /// <summary>
-        /// Fluent adder for datasets.
+        /// Returns the labels. The setter returns the instance for fluent chaining.
         /// </summary>
-        public ControlChart AddDataset(ControlChartDataset dataset)
+        public IEnumerable<string> Labels => _labels;
+
+        /// <summary>
+        /// Adds one or more datasets to the control chart.
+        /// </summary>
+        /// <param name="datasets">
+        /// An array of objects to add to the control chart. Each dataset represents a
+        /// series of data points to be displayed.
+        /// </param>
+        /// <returns>The updated instance, including the newly added dataset.</returns>
+        public IControlChart AddDataset(params ControlChartDataset[] datasets)
         {
-            if (dataset != null)
-            {
-                _datasets.Add(dataset);
-            }
+            _datasets.AddRange(datasets);
+
             return this;
         }
 
         /// <summary>
-        /// Fluent adder for labels.
+        /// Adds one or more datasets to the control chart.
         /// </summary>
-        public ControlChart AddLabel(string label)
+        /// <param name="datasets">
+        /// An array of objects to add to the control chart. Each dataset represents a
+        /// series of data points to be displayed.
+        /// </param>
+        /// <returns>The updated instance, including the newly added dataset.</returns>
+        public IControlChart AddDataset(IEnumerable<ControlChartDataset> datasets)
         {
-            if (!string.IsNullOrEmpty(label))
-            {
-                _labels.Add(label);
-            }
+            _datasets.AddRange(datasets);
+
             return this;
+        }
+
+        /// <summary>
+        /// Adds one or more labels to the control chart.
+        /// </summary>
+        /// <remarks>
+        /// This method allows adding multiple labels at once. If a label already exists in the
+        /// chart, it will not be duplicated.
+        /// </remarks>
+        /// <param name="labels">
+        /// An array of labels to add to the chart. Each label represents a distinct category or data point.
+        /// </param>
+        /// <returns>The updated instance with the added label.</returns>
+        public IControlChart AddLabel(params string[] labels)
+        {
+            _labels.AddRange(labels);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds one or more labels to the control chart.
+        /// </summary>
+        /// <remarks>
+        /// This method allows adding multiple labels at once. If a label already exists in the
+        /// chart, it will not be duplicated.
+        /// </remarks>
+        /// <param name="labels">
+        /// An array of labels to add to the chart. Each label represents a distinct category or data point.
+        /// </param>
+        /// <returns>The updated instance with the added label.</returns>
+        public IControlChart AddLabel(IEnumerable<string> labels)
+        {
+            _labels.AddRange(labels);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the class.
+        /// </summary>
+        /// <param name="id">The id of the control.</param>
+        /// <param name="datasets">The datasets to be used in the chart.</param>
+        public ControlChart(string id = null, params ControlChartDataset[] datasets)
+            : base(id)
+        {
+            _datasets.AddRange(datasets);
         }
 
         /// <summary>
@@ -391,7 +300,7 @@ namespace WebExpress.WebUI.WebControl
                 {
                     html = html.AddUserAttribute(prefix + "label", ds.Title);
                 }
-                if (ds.Data != null && ds.Data.Any())
+                if (ds.Data != null && ds.Data.Count != 0)
                 {
                     html = html.AddUserAttribute(prefix + "data", SerializeJson(ds.Data));
                 }
@@ -420,7 +329,9 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>JSON string.</returns>
         private static string SerializeJson(object obj)
         {
-            return System.Text.Json.JsonSerializer.Serialize(obj).Replace("\"", "&quot;");
+            return JsonSerializer
+                .Serialize(obj, _options)
+                .Replace("\"", "&quot;");
         }
     }
 }
