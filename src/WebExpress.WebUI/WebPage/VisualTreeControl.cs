@@ -113,104 +113,26 @@ namespace WebExpress.WebUI.WebPage
             Title = pageContext?.PageTitle;
             _favicons.Add(new Favicon(RouteEndpoint.Combine(baseUri, "img/rocket.png")));
 
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/fontawesome.min.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/bootstrap.min.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/solid.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.avatar.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.button.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.calendar.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.code.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.date.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.dropdown.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.editor.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.expandable.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.filelist.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.form.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.modal.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.modal.page.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.modal.form.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.move.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.overflow.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.pagination.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.search.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.selection.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.sidebar.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.smartedit.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.smartview.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.split.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.table.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.tag.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.tile.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.toolbar.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.tree.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(baseUri, "css/webexpress.webui.upload.css"));
 
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/bootstrap.min.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/chart.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/popper.min.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.avatar.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.button.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.button.split.toggle.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.calendar.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.chart.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.code.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.date.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.dropdown.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.editor.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.expandable.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.filelist.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.frame.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.input.avatar.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.input.calendar.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.input.date.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.input.move.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.input.selection.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.input.tag.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.modal.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.modal.page.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.modal.form.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.modal.confirm.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.modal.confirm.delete.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.modal.sidebar.panel.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.move.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.overflow.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.pagination.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.responsive.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.search.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.search.content.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.selection.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.sidebar.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.smartedit.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.smartview.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.split.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.table.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.tag.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.tile.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.toolbar.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.tree.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/webexpress.webui.upload.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/i18n/en.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/i18n/de.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/bash.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/basic.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/cmd.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/cobol.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/cpp.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/csharp.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/groovy.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/java.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/javascript.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/markdown.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/php.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/powershell.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/property.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/python.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/visualbasic.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/syntax/xml.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/panels/webexpress.webapp.panel.editor.image.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(baseUri, "js/panels/webexpress.webapp.panel.editor.link.js"));
+            foreach (var include in _componentHub.IncludeManager
+                .GetIncludes(pageContext.ApplicationContext))
+            {
+                var includeBaseUri = RouteEndpoint.Combine(contextPath, include.PluginContext.PluginId.ToString());
+                foreach (var file in include.Files.Where(x => x.Type == WebCore.WebInclude.TypeInclude.StyleSheet))
+                {
+                    _cssLinks.Add(RouteEndpoint.Combine(includeBaseUri, file.FileName));
+                }
+            }
+
+            foreach (var include in _componentHub.IncludeManager
+                .GetIncludes(pageContext.ApplicationContext))
+            {
+                var includeBaseUri = RouteEndpoint.Combine(contextPath, include.PluginContext.PluginId.ToString());
+                foreach (var file in include.Files.Where(x => x.Type == WebCore.WebInclude.TypeInclude.JavaScript))
+                {
+                    _headerScriptLinks.Add(RouteEndpoint.Combine(includeBaseUri, file.FileName));
+                }
+            }
 
             _base = contextPath;
 
