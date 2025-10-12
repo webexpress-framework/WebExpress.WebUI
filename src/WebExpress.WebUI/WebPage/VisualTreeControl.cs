@@ -117,20 +117,26 @@ namespace WebExpress.WebUI.WebPage
             foreach (var include in _componentHub.IncludeManager
                 .GetIncludes(pageContext.ApplicationContext))
             {
-                var includeBaseUri = RouteEndpoint.Combine(contextPath, include.PluginContext.PluginId.ToString());
-                foreach (var file in include.Files.Where(x => x.Type == WebCore.WebInclude.TypeInclude.StyleSheet))
+                if (!include.Scopes.Any() || pageContext.Scopes.Intersect(include.Scopes).Any())
                 {
-                    _cssLinks.Add(RouteEndpoint.Combine(includeBaseUri, file.FileName));
+                    var includeBaseUri = RouteEndpoint.Combine(contextPath, include.PluginContext.PluginId.ToString());
+                    foreach (var file in include.Files.Where(x => x.Type == WebCore.WebInclude.TypeInclude.StyleSheet))
+                    {
+                        _cssLinks.Add(RouteEndpoint.Combine(includeBaseUri, file.FileName));
+                    }
                 }
             }
 
             foreach (var include in _componentHub.IncludeManager
                 .GetIncludes(pageContext.ApplicationContext))
             {
-                var includeBaseUri = RouteEndpoint.Combine(contextPath, include.PluginContext.PluginId.ToString());
-                foreach (var file in include.Files.Where(x => x.Type == WebCore.WebInclude.TypeInclude.JavaScript))
+                if (!include.Scopes.Any() || pageContext.Scopes.Intersect(include.Scopes).Any())
                 {
-                    _headerScriptLinks.Add(RouteEndpoint.Combine(includeBaseUri, file.FileName));
+                    var includeBaseUri = RouteEndpoint.Combine(contextPath, include.PluginContext.PluginId.ToString());
+                    foreach (var file in include.Files.Where(x => x.Type == WebCore.WebInclude.TypeInclude.JavaScript))
+                    {
+                        _headerScriptLinks.Add(RouteEndpoint.Combine(includeBaseUri, file.FileName));
+                    }
                 }
             }
 
