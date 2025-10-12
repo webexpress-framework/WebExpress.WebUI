@@ -13,7 +13,7 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
         this._uri = element.getAttribute("data-uri") || ""; // Retrieve the URI for loading content
         this._selector = element.getAttribute("data-selector") || "body"; // Retrieve the selector for the content area
 
-        // Cleanup the DOM element
+        // cleanup the DOM element
         element.removeAttribute("data-uri");
         element.removeAttribute("data-selector");
     }
@@ -26,17 +26,17 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
         const parser = new DOMParser();
         const doc = parser.parseFromString(response, "text/html");
 
-        this._contentDiv = doc.querySelector(this._selector); // Locate the main content area
+        this._contentDiv = doc.querySelector(this._selector); // locate the main content area
 
-        // Clear existing content in body and append the new content
+        // clear existing content in body and append the new content
         this._bodyDiv.innerHTML = "";
         this._bodyDiv.appendChild(this._contentDiv);
 
-        // Clear the DOM element and append the dialog structure
+        // clear the DOM element and append the dialog structure
         this._element.innerHTML = "";
         this._element.appendChild(this._dialogDiv);
 
-        // Bind click event to close the modal when dismiss button is clicked
+        // bind click event to close the modal when dismiss button is clicked
         this._dialogDiv.querySelectorAll("[data-wx-dismiss='modal']").forEach(button => {
             button.addEventListener("click", () => this.hide());
         });
@@ -47,7 +47,7 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
      * Ensures the modal is properly initialized before showing it.
      */
     show() {
-        // Show placeholder while loading content
+        // show placeholder while loading content
         const placeholder = document.createElement("p");
         placeholder.classList.add("placeholder-glow");
         placeholder.innerHTML = `
@@ -70,14 +70,14 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
         });
 
         const modalInstance = bootstrap.Modal.getOrCreateInstance(this._element);
-        modalInstance.show(); // Opens the modal
+        modalInstance.show(); // opens the modal
 
-        // Trigger custom event for showing the modal
+        // trigger custom event for showing the modal
         this._dispatch(webexpress.webui.Event.MODAL_SHOW_EVENT, {});
 
-        // Load content dynamically after the modal is shown
+        // load content dynamically after the modal is shown
         this._element.addEventListener("shown.bs.modal", () => {
-            // Trigger event when data is requested
+            // trigger event when data is requested
             this._dispatch(webexpress.webui.Event.DATA_REQUESTED_EVENT, {});
 
             if (this._uri) {
@@ -86,7 +86,7 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
                     .then(data => {
                         this._update(data);
 
-                        // Trigger event when data has successfully arrived
+                        // trigger event when data has successfully arrived
                         this._element.dispatchEvent(new CustomEvent(webexpress.webui.Event.DATA_ARRIVED_EVENT, {
                             detail: { sender: this._element, id: this._element.id, response: data }
                         }));

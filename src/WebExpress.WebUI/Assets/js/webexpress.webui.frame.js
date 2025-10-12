@@ -30,7 +30,6 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Creates and returns a loading placeholder element.
      * @returns {HTMLElement} The placeholder element.
-     * @private
      */
     _createPlaceholder() {
         // create container div
@@ -72,7 +71,6 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Updates the host element's content using the fetched HTML string.
      * @param {string} response - The raw HTML string fetched from the server.
-     * @private
      */
     _update(response) {
         // parse the incoming html into a detached document
@@ -86,7 +84,10 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
         }
 
         // replace host element content with the selected region's inner html
-        this._element.innerHTML = source ? source.innerHTML : "";
+        this._element.innerHTML = "";
+        Array.from(source.childNodes).forEach(node => {
+            this._element.appendChild(node);
+        });
     }
 
     /**
@@ -94,16 +95,15 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
      * Dispatches DATA_REQUESTED_EVENT before fetching, and DATA_ARRIVED_EVENT after successful update.
      */
     load() {
+        this._element.innerHTML = "";
+
         // guard against empty uri
         if (!this._uri) {
-            // clear element if no uri is provided
-            this._element.innerHTML = "";
             return;
         }
 
         // show a simple loading placeholder
         const placeholder = this._createPlaceholder();
-        this._element.innerHTML = "";
         this._element.appendChild(placeholder);
 
         // notify that data fetching starts

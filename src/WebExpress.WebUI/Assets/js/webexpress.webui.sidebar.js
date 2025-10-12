@@ -396,7 +396,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
         const content = document.createElement("div");
         content.className = "wx-sidebar-panelcontent";
         if (item.content) {
-            content.appendChild(item.content.cloneNode(true));
+            content.appendChild(item.content);
         }
         overlayPanel.appendChild(content);
         document.body.appendChild(overlayPanel);
