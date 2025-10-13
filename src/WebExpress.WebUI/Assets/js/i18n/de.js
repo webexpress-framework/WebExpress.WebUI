@@ -51,6 +51,6 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "avatar.upload.image.label": "Bild auswählen",
     "avatar.placeholder": "Bild auswählen durch Ziehen oder Doppelklick.",
     
-    "page.contentNotLoaded.label": "Der Inhalt konnte nicht geladen werden.",
-    "page.contentNotLoaded.details": "Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie die Seite erneut zu laden. Falls das Problem weiterhin besteht, könnte die angeforderte Ressource momentan nicht verfügbar sein oder ein technischer Fehler vorliegen. Sie können auch versuchen, die Seite zu aktualisieren oder sich an den technischen Support wenden, falls Unterstützung benötigt wird."
+    "frame.contentNotLoaded.label": "Der Inhalt konnte nicht geladen werden.",
+    "frame.contentNotLoaded.details": "Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie die Seite erneut zu laden. Falls das Problem weiterhin besteht, könnte die angeforderte Ressource momentan nicht verfügbar sein oder ein technischer Fehler vorliegen. Sie können auch versuchen, die Seite zu aktualisieren oder sich an den technischen Support wenden, falls Unterstützung benötigt wird."
 });
