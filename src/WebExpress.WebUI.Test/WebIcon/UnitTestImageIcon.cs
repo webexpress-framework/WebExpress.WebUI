@@ -23,7 +23,7 @@ namespace WebExpress.WebUI.Test.WebIcon
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
             var size = new PropertySizeIcon(16, 16, TypeSizeUnit.Pixel);
             var icon = uri == null

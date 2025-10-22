@@ -46,7 +46,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(applicationType).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [scopeType]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [scopeType]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             // test execution
@@ -71,7 +71,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<ul id=""webexpress-webui-test-testfragmentcontrollist""><li></li></ul>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlList));
@@ -90,7 +90,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<a id=""webexpress-webui-test-testfragmentcontrollink"" class=""wx-link"">TestFragmentControlLink</a>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlLink));
@@ -109,7 +109,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<a id=""webexpress-webui-test-testfragmentcontrolbuttonlink"" class=""btn"">TestFragmentControlButtonLink</a>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlButtonLink));
@@ -128,7 +128,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<img id=""webexpress-webui-test-testfragmentcontrolimage"" src=""/a/b/c"">";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlImage));
@@ -147,7 +147,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<div id=""webexpress-webui-test-testfragmentcontroldropdown"" class=""wx-webui-dropdown"" role=""button"" data-label=""TestFragmentControlDropdown""></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlDropdown));
@@ -166,7 +166,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<div id=""webexpress.webui.test.testfragmentcontroldropdownitemlink"" class=""wx-dropdown-item"">TestFragmentControlDropdownItemLink</div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlDropdownItemLink));
@@ -185,7 +185,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<a id=""webexpress-webui-test-testfragmentcontrolnavigationitemdropdown"" class=""wx-link"">TestFragmentControlNavigationItemDropdown</a>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlNavigationItemDropdown));
@@ -204,7 +204,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<a id=""webexpress-webui-test-testfragmentcontrolnavigationitemlink"" class=""wx-link"">TestFragmentControlNavigationItemLink</a>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlNavigationItemLink));
@@ -223,7 +223,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<a id=""webexpress-webui-test-testfragmentcontrolnavigation"" class=""wx-link"">TestFragmentControlNavigation</a>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlNavigation));
@@ -242,7 +242,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolpanel""><div>TestFragmentControlPanel</div></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlPanel));
@@ -261,7 +261,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolpanelflex""></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlPanelFlex));
@@ -280,7 +280,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolpaneltool"" class=""toolpanel border""><div class=""wx-webui-dropdown"" role=""button""></div><div><div>TestFragmentControlPanelTool</div></div></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlPanelTool));
@@ -299,7 +299,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<a id=""webexpress-webui-test-testfragmentcontrolsplitbuttonitemlink"" class=""wx-link"">TestFragmentControlSplitButtonItemLink</a>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlSplitButtonItemLink));
@@ -318,7 +318,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<ul id=""webexpress-webui-test-testfragmentcontroltree""><li></li></ul>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlTree));
@@ -337,7 +337,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<form id=""webexpress-webui-test-testfragmentcontrolform-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlForm));
@@ -356,7 +356,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<form id=""webexpress-webui-test-testfragmentcontrolmodalform-form"" *>*</form>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlModalForm));
@@ -375,7 +375,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritembutton"" class=""wx-toolbar-button"" data-label=""TestFragmentControlToolbarItemButton""></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlToolbarItemButton));
@@ -394,7 +394,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritemcombo"" class=""wx-toolbar-combo"" data-label=""TestFragmentControlToolbarItemCombo""></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlToolbarItemCombo));
@@ -413,7 +413,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritemdropdown"" class=""wx-toolbar-dropdown"" data-label=""TestFragmentControlToolbarItemDropdown""></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlToolbarItemDropdown));
@@ -432,7 +432,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritemlabel"" class=""wx-toolbar-label"" data-label=""TestFragmentControlToolbarItemLabel""></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlToolbarItemLabel));
@@ -451,7 +451,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = (string)null;
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentHidden));
@@ -470,7 +470,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<div id=""webexpress.webui.test.testfragmentcontrolsidebaritemlink"" class=""wx-sidebar-link"" data-label=""TestFragmentControlSidebarItemLink""></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlSidebarItemLink));
@@ -489,7 +489,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<div id=""webexpress.webui.test.testfragmentcontrolsidebaritemheader"" class=""wx-sidebar-header"" data-label=""TestFragmentControlSidebarItemHeader""></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlSidebarItemHeader));
@@ -508,7 +508,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<div id=""webexpress.webui.test.testfragmentcontrolsidebaritemcontrol"" class=""wx-sidebar-control""><div>TestFragmentControlSidebarItemControl</div></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlSidebarItemControl));
@@ -527,7 +527,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             var expected = @"<div id=""webexpress.webui.test.testfragmentcontrolsidebaritemdynamic"" class=""wx-sidebar-control""><div>FragmentControlSidebarItemDynamic</div></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock(application, [typeof(IScope)]);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlSidebarItemDynamic));

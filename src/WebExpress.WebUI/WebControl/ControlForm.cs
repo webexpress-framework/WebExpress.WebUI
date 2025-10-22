@@ -459,8 +459,6 @@ namespace WebExpress.WebUI.WebControl
                 form.Add(footer);
             }
 
-            visualTree.AddScript(Id, $"new webexpress.webui.form.progess('{Id}', '{Method}');");
-
             return form;
         }
 

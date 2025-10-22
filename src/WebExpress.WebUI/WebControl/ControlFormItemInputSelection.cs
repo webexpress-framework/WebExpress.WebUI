@@ -113,24 +113,11 @@ namespace WebExpress.WebUI.WebControl
                 {
                     Id = x.Id,
                     Class = "wx-selection-item"
-                };
-
-                option.AddUserAttribute("data-label", I18N.Translate(x.Label));
-
-                if (x.Icon is Icon icon)
-                {
-                    option.AddUserAttribute("data-icon", icon.Class);
                 }
-
-                if (x.Icon is ImageIcon image)
-                {
-                    option.AddUserAttribute("data-image", image.Uri?.ToString());
-                }
-
-                if (x.LabelColor != TypeColorSelection.Default)
-                {
-                    option.AddUserAttribute("data-label-color", x.LabelColor.ToClass());
-                }
+                    .AddUserAttribute("data-label", I18N.Translate(x.Label))
+                    .AddUserAttribute("data-label-color", x.LabelColor != TypeColorSelection.Default
+                        ? x.LabelColor.ToClass()
+                        : null);
 
                 if (x.Selected)
                 {
@@ -142,6 +129,16 @@ namespace WebExpress.WebUI.WebControl
                     option.AddUserAttribute("disabled");
                 }
 
+                if (x.Icon is Icon icon)
+                {
+                    option.AddUserAttribute("data-icon", icon.Class);
+                }
+
+                if (x.Icon is ImageIcon image)
+                {
+                    option.AddUserAttribute("data-image", image.Uri?.ToString());
+                }
+
                 return option;
 
             })])
@@ -149,27 +146,11 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
                 Style = GetStyles()
-            };
-
-            if (!string.IsNullOrWhiteSpace(Name))
-            {
-                html.AddUserAttribute("name", Name);
             }
-
-            if (!string.IsNullOrWhiteSpace(Placeholder))
-            {
-                html.AddUserAttribute("placeholder", I18N.Translate(Placeholder));
-            }
-
-            if (MultiSelect)
-            {
-                html.AddUserAttribute("data-multiselection", "true");
-            }
-
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                html.AddUserAttribute("data-value", value);
-            }
+                .AddUserAttribute("name", Name)
+                .AddUserAttribute("placeholder", I18N.Translate(Placeholder))
+                .AddUserAttribute("data-multiselection", MultiSelect ? "true" : null)
+                .AddUserAttribute("data-value", value);
 
             return html;
         }

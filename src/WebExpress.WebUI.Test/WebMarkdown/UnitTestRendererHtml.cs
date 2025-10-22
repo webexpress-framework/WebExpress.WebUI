@@ -37,7 +37,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var document = MarkdownParser.Parse(markdown);
 
             // test execution
@@ -65,7 +65,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var document = MarkdownParser.Parse(markdown);
 
             // test execution
@@ -96,7 +96,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var document = MarkdownParser.Parse(markdown);
 
             // test execution
@@ -124,7 +124,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var document = MarkdownParser.Parse(markdown);
 
             // test execution
@@ -151,7 +151,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var document = MarkdownParser.Parse(markdown);
 
             // test execution
@@ -178,7 +178,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var document = MarkdownParser.Parse(markdown);
 
             // test execution
@@ -210,7 +210,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
 
             // test execution
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var html = document.ConvertToHtml(renderContext);
 
             // validation
@@ -244,7 +244,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var document = MarkdownParser.Parse(markdown);
 
             // test execution
@@ -273,7 +273,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
 
             // test execution
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var renderContext = UnitTestControlFixture.CrerateRenderContextMock();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var html = document.ConvertToHtml(renderContext);
 
             // validation

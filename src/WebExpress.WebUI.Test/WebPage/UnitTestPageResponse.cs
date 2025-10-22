@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.Test.WebPage
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTreeContext = new VisualTreeContext(context);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
 
@@ -42,7 +42,7 @@ namespace WebExpress.WebUI.Test.WebPage
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTreeContext = new VisualTreeContext(context);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext)
             {
@@ -66,7 +66,7 @@ namespace WebExpress.WebUI.Test.WebPage
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTreeContext = new VisualTreeContext(context);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext)
             {
@@ -90,7 +90,7 @@ namespace WebExpress.WebUI.Test.WebPage
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTreeContext = new VisualTreeContext(context);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext)
             {
@@ -114,7 +114,7 @@ namespace WebExpress.WebUI.Test.WebPage
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTreeContext = new VisualTreeContext(context);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext)
             {
@@ -138,7 +138,7 @@ namespace WebExpress.WebUI.Test.WebPage
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTreeContext = new VisualTreeContext(context);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext)
             {
@@ -162,7 +162,7 @@ namespace WebExpress.WebUI.Test.WebPage
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTreeContext = new VisualTreeContext(context);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext)
             {
@@ -186,7 +186,7 @@ namespace WebExpress.WebUI.Test.WebPage
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTreeContext = new VisualTreeContext(context);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext)
             {
@@ -210,7 +210,7 @@ namespace WebExpress.WebUI.Test.WebPage
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTreeContext = new VisualTreeContext(context);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext)
             {
@@ -234,7 +234,7 @@ namespace WebExpress.WebUI.Test.WebPage
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTreeContext = new VisualTreeContext(context);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext)
             {
@@ -261,7 +261,7 @@ namespace WebExpress.WebUI.Test.WebPage
             var applicationContext = new ApplicationContext();
             var routeProperty = typeof(ApplicationContext).GetProperty("Route");
             routeProperty?.SetValue(applicationContext, new RouteEndpoint("/route"));
-            var context = UnitTestControlFixture.CrerateRenderContextMock(applicationContext);
+            var context = UnitTestControlFixture.CreateRenderContextMock(applicationContext);
             var visualTreeContext = new VisualTreeContext(context);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
 

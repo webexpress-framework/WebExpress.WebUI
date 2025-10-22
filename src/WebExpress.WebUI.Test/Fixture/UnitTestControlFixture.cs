@@ -189,7 +189,7 @@ namespace WebExpress.WebUI.Test.Fixture
         /// <param name="applicationContext">The application context. If null, defaults to null.</param>
         /// <param name="scopes">The scopes of the page. If null, defaults to null.</param>
         /// <returns>A mock render context for testing.</returns>
-        public static IRenderControlContext CrerateRenderContextMock(IApplicationContext applicationContext = null, IEnumerable<Type> scopes = null)
+        public static IRenderControlContext CreateRenderContextMock(IApplicationContext applicationContext = null, IEnumerable<Type> scopes = null)
         {
             var request = CrerateRequestMock();
 
