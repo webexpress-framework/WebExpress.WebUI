@@ -63,6 +63,34 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                 });
             } else {
                 const itemClasses = Array.from(elem.classList);
+                // collect data-* attributes except known control attributes
+                const dataAttributes = Array.from(elem.attributes)
+                    .filter(attr => {
+                        if (!attr.name.startsWith("data-")) {
+                            return false;
+                        }
+                        if (attr.name === "data-uri") {
+                            return false;
+                        }
+                        if (attr.name === "data-icon") {
+                            return false;
+                        }
+                        if (attr.name === "data-image") {
+                            return false;
+                        }
+                        if (attr.name === "data-color") {
+                            return false;
+                        }
+                        return true;
+                    })
+                    .map(attr => [attr.name, attr.value]);
+
+                // add modal toggle attribute when data-modal is present
+                if (elem.dataset.modal) {
+                    dataAttributes.push(["data-wx-toggle", "modal"]);
+                    dataAttributes.push(["data-wx-target", elem.dataset.modal]);
+                }
+
                 items.push({
                     id: elem.id || null,
                     uri: elem.dataset.uri || "javascript:void(0);",
@@ -74,15 +102,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                         .filter(cls => cls !== "wx-dropdown-item")
                         .find(cls => cls.startsWith("wx-")) || "",
                     disabled: elem.hasAttribute("disabled"),
-                    data: Array.from(elem.attributes)
-                        .filter(attr =>
-                            attr.name.startsWith("data-") &&
-                            attr.name !== "data-uri" &&
-                            attr.name !== "data-icon" &&
-                            attr.name !== "data-image" &&
-                            attr.name !== "data-color"
-                        )
-                        .map(attr => [attr.name, attr.value]),
+                    data: dataAttributes,
                     aria: Array.from(elem.attributes)
                         .filter(attr =>
                             attr.name.startsWith("aria")
@@ -196,7 +216,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
     render() {
         this._element.innerHTML = "";
 
-        // Create the main dropdown button
+        // create the main dropdown button
         const button = document.createElement("button");
         button.className = "btn";
         button.type = "button";
@@ -226,23 +246,23 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
             button.appendChild(span);
         }
 
-        // Create the dropdown menu list
+        // create the dropdown menu list
         const ul = document.createElement("ul");
         ul.className = "dropdown-menu";
         if (this._menuCss) ul.classList.add(...this._menuCss.split(" "));
 
-        // Add all menu items
+        // add all menu items
         this._items.forEach(item => {
             const li = this._createMenuItem(item);
             ul.appendChild(li);
         });
 
-        // Append button and menu to the container
+        // append button and menu to the container
         this._element.appendChild(button);
         this._element.appendChild(ul);
 
-        // Handle visibility change event
-        // Fires CHANGE_VISIBILITY_EVENT when the menu is shown or hidden
+        // handle visibility change event
+        // fires CHANGE_VISIBILITY_EVENT when the menu is shown or hidden
         button.addEventListener('show.bs.dropdown', () => {
             const visEvent = new CustomEvent(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
                 detail: {
@@ -264,55 +284,91 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Gets or sets the button label.
+     * Gets the button label.
+     * @returns {string|null} The current button label or null when not set.
      */
     get label() {
         return this._label;
     }
+
+    /**
+     * Sets the button label.
+     * Re-renders the control to apply the new label immediately.
+     * @param {string|null} value - The new button label or null to clear it.
+     */
     set label(value) {
         this._label = value;
         this.render();
     }
 
     /**
-     * Gets or sets the button icon.
+     * Gets the button icon CSS classes.
+     * @returns {string|null} The icon class list (space-separated) or null when not set.
      */
     get icon() {
         return this._icon;
     }
+
+    /**
+     * Sets the button icon CSS classes.
+     * Re-renders the control to apply the new icon immediately.
+     * @param {string|null} value - The icon class list (space-separated) or null to clear it.
+     */
     set icon(value) {
         this._icon = value;
         this.render();
     }
 
     /**
-     * Gets or sets the button color class.
+     * Gets the button color CSS class.
+     * Note: this getter exposes the current color field as stored in the instance.
+     * @returns {string|null} The button color class or null when not set.
      */
     get color() {
         return this._color;
     }
+
+    /**
+     * Sets the button color CSS class.
+     * Re-renders the control to apply the new color immediately.
+     * @param {string|null} value - The button color class or null to clear it.
+     */
     set color(value) {
         this._color = value;
         this.render();
     }
 
     /**
-     * Gets or sets the menu CSS classes.
+     * Gets additional CSS classes for the dropdown menu.
+     * @returns {string|null} The CSS classes (space-separated) or null when not set.
      */
     get menuCSS() {
         return this._menuCss;
     }
+
+    /**
+     * Sets additional CSS classes for the dropdown menu.
+     * Re-renders the control to apply the new classes immediately.
+     * @param {string|null} value - The CSS classes (space-separated) or null to clear them.
+     */
     set menuCSS(value) {
         this._menuCss = value;
         this.render();
     }
 
     /**
-     * Gets or sets the array of menu items.
+     * Gets the array of menu items currently configured for the dropdown.
+     * @returns {Array<Object>} The current items array.
      */
     get items() {
         return this._items;
     }
+
+    /**
+     * Sets the array of menu items to be rendered in the dropdown.
+     * Re-renders the control to apply the new items immediately.
+     * @param {Array<Object>} value - The new items array.
+     */
     set items(value) {
         this._items = value;
         this.render();

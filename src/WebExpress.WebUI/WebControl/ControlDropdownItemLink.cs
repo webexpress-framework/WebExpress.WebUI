@@ -86,7 +86,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-uri", Uri?.ToString())
                 .AddUserAttribute("data-target", Target.ToStringValue())
-                .AddUserAttribute("data-modal", Modal)
+                .AddUserAttribute("data-modal", !string.IsNullOrWhiteSpace(Modal) ? $"#{Modal}" : null)
                 .AddUserAttribute("data-tooltip", Tooltip)
                 .AddUserAttribute("data-color", Color.ToClass());
         }

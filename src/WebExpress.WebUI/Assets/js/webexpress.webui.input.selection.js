@@ -17,7 +17,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         // Initialize properties from attributes and dataset
         const name = element.getAttribute("name");
         const value = element.dataset.value || null;
-        this._placeholder = element.getAttribute("placeholder") || "Select an option";
+        this._placeholder = element.getAttribute("placeholder") || this._i18n("webexpress.webui:selection.placeholder", "Select an option");
         this._multiselect = element.dataset.multiselection === "true";
         this._values = [];
         this._items = [];

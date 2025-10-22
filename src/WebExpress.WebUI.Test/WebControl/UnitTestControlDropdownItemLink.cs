@@ -136,6 +136,29 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the modal property of the dropdown item link control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-dropdown-item""></div>")]
+        [InlineData("a", @"<div class=""wx-dropdown-item"" data-modal=""#a""></div>")]
+        public void Modal(string modal, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlDropdownItemLink()
+            {
+                Modal = modal
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
+        }
+
+        /// <summary>
         /// Tests the icon property of the dropdown item link control.
         /// </summary>
         [Theory]
