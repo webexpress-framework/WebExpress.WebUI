@@ -18,12 +18,17 @@ webexpress.webui.ModalConfirmDelete = class extends webexpress.webui.ModalConfir
      * @param {function} deleteAction - The function to execute upon confirmation.
      */
     confirmation(deleteAction) {
-        super.confirmation("Are you sure you want to delete this item?", deleteAction);
+        super.confirmation
+            (
+                this._i18n("webexpress.webui:delete.header", "Confirmation"),
+                this._i18n("webexpress.webui:delete.description", "Are you sure you want to delete this item?"),
+                deleteAction
+            );
 
         // Customize button style for deletion
         if (this._confirmButton) {
             this._confirmButton.classList.add("btn-danger");
-            this._confirmButton.textContent = "Delete";
+            this._confirmButton.textContent = this._i18n("webexpress.webui:delete", "Delete");
         }
     }
 }

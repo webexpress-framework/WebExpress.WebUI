@@ -17,3 +17,18 @@ form.inputtextbox.validation.min=The text. entspricht nicht der minimalen Länge
 form.inputtextbox.validation.max=The text. ist größer als die maximalen Länge von {0}!
 
 modal.close.label=Schließen
+
+confirm.label=Bestätigung
+confirm.header=Bestätigung einholen
+confirm.description=Sind Sie sicher das Sie das tun möchten?
+
+delete.label=Löschen
+delete.header=Löschen bestätigen
+delete.description=Sind Sie sicher, dass Sie dieses Element löschen möchten?
+
+
+fileupload.label=Hochladen
+fileupload.header=Dokument hochladen
+fileupload.file.label=Dokument
+fileupload.file.description=Bitte wählen Sie ein Dokument von Ihrem lokalen Gerät aus.
+fileupload.file.validation.error.nofile=Es wurde keine Datei angegeben.

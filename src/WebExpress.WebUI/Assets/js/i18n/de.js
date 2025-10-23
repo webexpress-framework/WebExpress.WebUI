@@ -11,6 +11,8 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "selected": "Ausgewählt",
     "available": "Verfügbar",
     "search": "Suche",
+    "delete": "Löschen",
+    "confirm": "Bestätigung",
 
     "calendar.select_date": "Datum auswählen",
     "calendar.select_range": "Zeitraum auswählen",
@@ -37,6 +39,12 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "calendar.sun": "So",
     "calendar.today": "Heute",
     "calendar.format": "DD.MM.YYYY",
+
+    "confirm.header": "Bestätigung einholen",
+    "confirm.description": "Sind Sie sicher das Sie das tun möchten?",
+
+    "delete.header": "Löschen bestätigen",
+    "delete.description": "Sind Sie sicher, dass Sie dieses Element löschen möchten?",
 
     "selection.placeholder": "Bitte eine Option wählen",
 

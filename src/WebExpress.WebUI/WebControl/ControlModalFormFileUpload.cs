@@ -116,8 +116,8 @@ namespace WebExpress.WebUI.WebControl
 
             Initialize(x =>
             {
-                Header = I18N.Translate(x.Context, "webexpress.webapp:fileupload.header");
-                SubmitButtonLabel = I18N.Translate(x.Context, "webexpress.webapp:fileupload.label");
+                Header = I18N.Translate(x.Context, "webexpress.webui:fileupload.header");
+                SubmitButtonLabel = I18N.Translate(x.Context, "webexpress.webui:fileupload.label");
             });
 
 

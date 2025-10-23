@@ -26,7 +26,7 @@ namespace WebExpress.WebUI.WebMarkdown
         /// <returns>A <see cref="MarkdownDocument"/> containing the parsed elements.</returns>
         public static MarkdownDocument Parse(string markdown)
         {
-            var tokenizer = new MarkdownTokenizer(markdown.TrimEnd());
+            var tokenizer = new MarkdownTokenizer(markdown?.TrimEnd());
             var tokenStream = new MarkdownTokenStream(tokenizer.Tokenize(), markdown);
 
             return Parse(tokenStream);
