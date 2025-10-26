@@ -32,6 +32,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/webexpress.webui.input.move.js")]
     [Asset("/assets/js/webexpress.webui.input.selection.js")]
     [Asset("/assets/js/webexpress.webui.input.tag.js")]
+    [Asset("/assets/js/webexpress.webui.list.js")]
     [Asset("/assets/js/webexpress.webui.modal.js")]
     [Asset("/assets/js/webexpress.webui.modal.page.js")]
     [Asset("/assets/js/webexpress.webui.modal.form.js")]

@@ -24,6 +24,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/css/webexpress.webui.expandable.css")]
     [Asset("/assets/css/webexpress.webui.filelist.css")]
     [Asset("/assets/css/webexpress.webui.form.css")]
+    [Asset("/assets/css/webexpress.webui.list.css")]
     [Asset("/assets/css/webexpress.webui.modal.css")]
     [Asset("/assets/css/webexpress.webui.modal.page.css")]
     [Asset("/assets/css/webexpress.webui.modal.form.css")]

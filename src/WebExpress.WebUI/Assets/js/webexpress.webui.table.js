@@ -6,32 +6,18 @@
  * - Persisted state (columns + tree collapsed nodes)
  * - Tree utilities (expand/collapse level management)
  * - Column searching and dropdown management
- *
- * Public API:
- *  - expandAll()
- *  - collapseAll()
- *  - expandFirstLevels(levelCount)
- *  - collapseDeeperThan(levelCount)
- *  - setColumns(columns, preserveExisting = true)
- *  - insertRow(rowData, parentId = null, index = null)
- *  - deleteRow(rowId)
- *  - searchColumns(term)
- *  - enableChangeFlash()
- *  - disableChangeFlash()
- *  - setChangeFlash(enabled)
- *  - suppressNextChangeFlash()
- *
- * Dispatched events (via webexpress.webui.Event constants when present):
- *  - TABLE_SORT_EVENT
- *  - COLUMN_REORDER_EVENT
- *  - COLUMN_VISIBILITY_EVENT
- *  - COLUMN_SEARCH_EVENT
- *  - START_INLINE_EDIT_EVENT
- *  - SAVE_INLINE_EDIT_EVENT
- *  - END_INLINE_EDIT_EVENT
- *  - ROW_REORDER_EVENT
- *  - CHANGE_VISIBILITY_EVENT
- *  - MOVE_EVENT
+
+ * The following events are triggered:
+ *  - webexpress.webui.Event.TABLE_SORT_EVENT
+ *  - webexpress.webui.Event.COLUMN_REORDER_EVENT
+ *  - webexpress.webui.Event.COLUMN_VISIBILITY_EVENT
+ *  - webexpress.webui.Event.COLUMN_SEARCH_EVENT
+ *  - webexpress.webui.Event.START_INLINE_EDIT_EVENT
+ *  - webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT
+ *  - webexpress.webui.Event.END_INLINE_EDIT_EVENT
+ *  - webexpress.webui.Event.ROW_REORDER_EVENT
+ *  - webexpress.webui.Event.CHANGE_VISIBILITY_EVENT
+ *  - webexpress.webui.Event.MOVE_EVENT
  */
 webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
@@ -2371,19 +2357,20 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
      * @param {Object} row Row object.
      */
     _flashRow(row) {
-        if (!this._highlightChanges) { 
-            return; 
+        if (!this._highlightChanges) {
+            return;
         }
-        if (!row || !row._anchorTr) { 
-            return; 
+        if (!row || !row._anchorTr) {
+            return;
         }
         const tr = row._anchorTr;
         tr.classList.add("wx-row-flash");
+        // keep slightly longer than css animation (1.2s) to ensure completion
         setTimeout(() => {
-            if (tr.isConnected) { 
-                tr.classList.remove("wx-row-flash"); 
+            if (tr.isConnected) {
+                tr.classList.remove("wx-row-flash");
             }
-        }, 3000);
+        }, 1500);
     }
 
     /**

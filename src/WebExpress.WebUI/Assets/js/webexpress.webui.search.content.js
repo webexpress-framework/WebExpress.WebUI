@@ -10,7 +10,7 @@
  * - data-target-ids: comma-separated list of element IDs to search within (required).
  * - data-highlight-color: optional css color for highlight background (default: "yellow").
  *
- * Events:
+ * The following events are triggered:
  * - webexpress.webui.Event.CHANGE_FILTER_EVENT (dispatched when the search value changes)
  */
 webexpress.webui.SearchContentCtrl = class extends webexpress.webui.Ctrl {

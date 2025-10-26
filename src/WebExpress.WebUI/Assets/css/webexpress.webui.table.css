@@ -296,20 +296,44 @@
 }
 
 /* highlight row after content change (new or modified) */
-.wx-table .wx-row-flash > td {
-    background-color: var(--bs-warning); 
-    transition: background-color .6s ease; /* smooth fade-out transition */
+@keyframes wx-row-flash {
+    0% {
+        background-color: rgba(var(--bs-warning-rgb), 0.85);
+    }
+
+    100% {
+        background-color: transparent;
+    }
 }
 
-/* stronger contrast for dark themes */
-[data-bs-theme=dark] .wx-table .wx-row-flash {
-    background-color: #806b00 !important;
-    color: #fff;
+/* Table: animate the cells, because Bootstrap applies background to td/th */
+.wx-table tr.wx-row-flash > td {
+    animation: wx-row-flash 1.2s ease-out;
 }
 
-/* prefers-reduced-motion: reduce transition impact for accessibility */
+/* List: animate the entire list item */
+.wx-list li.wx-row-flash,
+.wx-list .wx-row-flash {
+    animation: wx-row-flash 1.2s ease-out;
+}
+
+/* reduce motion for users that prefer it */
 @media (prefers-reduced-motion: reduce) {
-    .wx-table .wx-row-flash {
-        transition: none;
+    .wx-table tr.wx-row-flash > td,
+    .wx-list li.wx-row-flash,
+    .wx-list .wx-row-flash {
+        animation-duration: 1ms;
+        animation-iteration-count: 1;
+    }
+}
+
+/* high-contrast mode: avoid animation, use outline hint */
+@media (forced-colors: active) {
+    .wx-table tr.wx-row-flash > td,
+    .wx-list li.wx-row-flash,
+    .wx-list .wx-row-flash {
+        animation: none;
+        outline: 2px solid currentColor;
+        outline-offset: -2px;
     }
 }
