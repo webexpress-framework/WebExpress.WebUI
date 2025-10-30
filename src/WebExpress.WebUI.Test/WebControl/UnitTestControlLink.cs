@@ -236,6 +236,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             Assert.Equal(@"<a class=""wx-link""><i class=""fas fa-star""></i></a>", html1.Trim());
             Assert.Equal(@"<a class=""wx-link""><i class=""fas fa-star""></i></a>", html2.Trim());
+            Assert.Equal(@"<a class=""wx-link""><i class=""fas fa-star""></i></a>", html3.Trim());
             Assert.Equal(@"<a class=""wx-link""><i class=""fas fa-star""></i></a>", html4.Trim());
             Assert.Equal(@"<a class=""wx-link""><i class=""fas fa-star""></i></a>", html5.Trim());
             Assert.Equal(@"<a class=""wx-link""><i class=""fas fa-star""></i></a>", html6.Trim());

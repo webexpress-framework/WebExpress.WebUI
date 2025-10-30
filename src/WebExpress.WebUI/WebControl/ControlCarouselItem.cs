@@ -16,7 +16,7 @@
         public string Text { get; set; }
 
         /// <summary>
-        /// Retruns or sets the slideshow element, such as an image.
+        /// Returns or sets the slideshow element, such as an image.
         /// </summary>
         public IControl Control { get; set; }
 

@@ -115,7 +115,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the mode property of the sidebar item divider control.
+        /// Tests the mode property of the sidebar item control.
         /// </summary>
         [Theory]
         [InlineData(TypeSidebarModeExtended.Default, @"<div class=""wx-sidebar-control""></div>")]
@@ -140,7 +140,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the content property of the sidebar item divider control.
+        /// Tests the content property of the sidebar item control.
         /// </summary>
         [Fact]
         public void Control()

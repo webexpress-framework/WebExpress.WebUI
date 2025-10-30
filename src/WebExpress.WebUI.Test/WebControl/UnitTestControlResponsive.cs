@@ -5,7 +5,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.Test.WebControl
 {
     /// <summary>
-    /// Tests the pagination control.
+    /// Tests the responsive control.
     /// </summary>
     [Collection("NonParallelTests")]
     public class UnitTestControlResponsive

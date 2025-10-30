@@ -5,13 +5,13 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.Test.WebControl
 {
     /// <summary>
-    /// Tests the modal page control.
+    /// Tests the remote modal form control.
     /// </summary>
     [Collection("NonParallelTests")]
     public class UnitTestControlModalRemoteForm
     {
         /// <summary>
-        /// Tests the id property of the modal page control.
+        /// Tests the id property of the remote modal form control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-modal-form"" *></div>")]
@@ -33,7 +33,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the header property of the modal page control.
+        /// Tests the header property of the remote modal form control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-modal-form"" data-close-label=""Close"">*</div>")]
@@ -57,7 +57,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the size property of the modal page control.
+        /// Tests the size property of the remote modal form control.
         /// </summary>
         [Theory]
         [InlineData(TypeModalSize.Default, @"<div class=""wx-webui-modal-form"" data-close-label=""Close"">*</div>")]
@@ -83,7 +83,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the uri property of the modal page control.
+        /// Tests the uri property of the remote modal form control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-modal-form"" *>*</div>")]
@@ -106,7 +106,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the selector property of the modal page control.
+        /// Tests the selector property of the remote modal form control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-modal-form"" *>*</div>")]

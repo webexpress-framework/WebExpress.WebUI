@@ -138,34 +138,5 @@ namespace WebExpress.WebUI.Test.WebControl
             // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
-
-        /// <summary>
-        /// Tests the render content function of the sidebar item control.
-        /// </summary>
-        [Fact]
-        public void RenderControl()
-        {
-            // preconditions
-            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CreateRenderContextMock();
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlSidebarItemControl()
-            {
-                Content = new ControlText()
-                {
-                    Text = "Content"
-                },
-            };
-
-            // test execution
-            var html = control.Render(context, visualTree);
-
-            // validation
-            AssertExtensions.EqualWithPlaceholders
-            (
-                @"<div class=""wx-sidebar-control""><div>Content</div></div>",
-                html
-            );
-        }
     }
 }

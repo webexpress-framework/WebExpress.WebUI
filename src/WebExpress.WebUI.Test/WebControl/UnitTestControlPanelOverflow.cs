@@ -5,13 +5,13 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.Test.WebControl
 {
     /// <summary>
-    /// Tests the toast control.
+    /// Tests the overflow panel control.
     /// </summary>
     [Collection("NonParallelTests")]
     public class UnitTestControlPanelOverflow
     {
         /// <summary>
-        /// Tests the id property of the toast control.
+        /// Tests the id property of the overflow panel control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-overflow""></div>")]
@@ -33,7 +33,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the background color property of the toast control.
+        /// Tests the background color property of the overflow panel control.
         /// </summary>
         [Theory]
         [InlineData(TypeColorBackground.Default, @"<div class=""wx-webui-overflow""></div>")]
@@ -63,7 +63,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the theme property of the panel control.
+        /// Tests the theme property of the overflow panel control.
         /// </summary>
         [Theory]
         [InlineData(TypeTheme.None, @"<div class=""wx-webui-overflow""></div>")]
@@ -87,7 +87,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the add function of the toast control.
+        /// Tests the add function of the overflow panel control.
         /// </summary>
         [Theory]
         [InlineData(typeof(ControlText), @"<div class=""wx-webui-overflow""><div></div></div>")]
