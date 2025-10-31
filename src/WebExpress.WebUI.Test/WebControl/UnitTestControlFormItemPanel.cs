@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemPanel(id)
             {
@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemPanel()
             {
@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemPanel()
             {
@@ -90,14 +90,14 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(typeof(ControlText), @"<div><div></div></div>")]
-        [InlineData(typeof(ControlLink), @"<div><a class=""link""></a></div>")]
+        [InlineData(typeof(ControlLink), @"<div><a class=""wx-link""></a></div>")]
         [InlineData(typeof(ControlImage), @"<div><img></div>")]
         public void Add(Type child, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var childInstance = Activator.CreateInstance(child, [null]) as IControl;
             var control = new ControlFormItemPanel();

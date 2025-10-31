@@ -46,7 +46,7 @@
         {
             if ((TypeColor)SystemColor == TypeColor.User)
             {
-                return "background:" + UserColor + ";";
+                return "color:" + UserColor + ";";
             }
 
             return null;

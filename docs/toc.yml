@@ -2,24 +2,63 @@
   href: index.md
 - name: User Guide
   href: user-guide.md
+- name: MarkDown Guide
+  href: md-guide.md
 - name: API Documentation
-  href: api/WebExpress.WebUI.html
-- name: JavaScript UI API Documentation
-  href: javascript_ui_api.md
+  href: api/
+- name: JavaScript UI Documentation
+  href: javascript.md
   children:
-    - name: ButtonCtrl
-      href: jsui-api/buttonCtrl.md
-    - name: DropDownButtonCtrl
-      href: jsui-api/dropDownButtonCtrl.md
-    - name: ExpandCtrl
-      href: jsui-api/expandCtrl.md
-    - name: MoveCtrl
-      href: jsui-api/moveCtrl.md
-    - name: SearchCtrl
-      href: jsui-api/searchCtrl.md
-    - name: SelectionCtrl
-      href: jsui-api/selectionCtrl.md
-    - name: TreeCtrl
-      href: jsui-api/treeCtrl.md
+    - name: Avatar
+      href: js/avatar.md
+    - name: Button
+      href: js/button.md
+    - name: Code
+      href: js/code.md
+    - name: Date
+      href: js/date.md
+    - name: Dropdown
+      href: js/dropdown.md
+    - name: Editor
+      href: js/editor.md
+    - name: Expandable
+      href: js/expandable.md
+    - name: FileList
+      href: js/filelist.md      
+    - name: Modal
+      href: js/modal.md
+    - name: Move
+      href: js/move.md
+    - name: Overflow
+      href: js/overflow.md
+    - name: Pagination
+      href: js/pagination.md
+    - name: Responsive
+      href: js/responsive.md
+    - name: Search
+      href: js/search.md
+    - name: Selection
+      href: js/selection.md
+    - name: Sidebar
+      href: js/sidebar.md
+    - name: SmartEdit
+      href: js/smartedit.md
+    - name: SmartView
+      href: js/smartview.md
+    - name: Split
+      href: js/split.md
+    - name: Table
+      href: js/table.md
+    - name: Tag
+      href: js/tag.md
+    - name: Tile
+      href: js/tile.md
+    - name: Toolbar
+      href: js/toolbar.md
+    - name: Tree
+      href: js/tree.md
+    - name: Upload
+      href: js/upload.md
 - name: Tutorials
   href: tutorials.md
+

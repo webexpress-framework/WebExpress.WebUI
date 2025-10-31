@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebComponent;
 using WebExpress.WebCore.WebEndpoint;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebMessage;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebControl;
 
@@ -14,6 +16,8 @@ namespace WebExpress.WebUI.WebPage
     /// </summary>
     public class VisualTreeControl : IVisualTreeControl
     {
+        private int _statusCode = 200;
+        private IRoute _base;
         private readonly IComponentHub _componentHub;
         private readonly List<Favicon> _favicons = [];
         private readonly List<string> _styles = [];
@@ -29,6 +33,15 @@ namespace WebExpress.WebUI.WebPage
         /// Returns the component hub.
         /// </summary>
         protected IComponentHub ComponentHub => _componentHub;
+
+        /// <summary>
+        /// Returns or sets the HTTP status code associated with the response.
+        /// </summary>
+        public int StatusCode
+        {
+            get { return _statusCode; }
+            set { _statusCode = Math.Max(_statusCode, value); }
+        }
 
         /// <summary>
         /// Returns the title of the html document.
@@ -71,6 +84,11 @@ namespace WebExpress.WebUI.WebPage
         public IEnumerable<string> CssLinks => _cssLinks;
 
         /// <summary>
+        /// Returns the base route for the current page.
+        /// </summary>
+        public IRoute Base => _base;
+
+        /// <summary>
         /// Returns the meta information.
         /// </summary>
         public IReadOnlyDictionary<string, string> Meta => _meta;
@@ -87,43 +105,42 @@ namespace WebExpress.WebUI.WebPage
         /// <param name="pageContext">The page context.</param>
         public VisualTreeControl(IComponentHub componentHub, IPageContext pageContext)
         {
+            var contextPath = pageContext.ApplicationContext?.Route;
+            var baseUri = RouteEndpoint.Combine(contextPath, "webexpress.webui/assets");
+
             _componentHub = componentHub;
 
             Title = pageContext?.PageTitle;
+            _favicons.Add(new Favicon(RouteEndpoint.Combine(baseUri, "img/rocket.png")));
 
-            var contextPath = pageContext.ApplicationContext?.ContextPath;
-            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/fontawesome.min.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/bootstrap.min.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/solid.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/summernote-bs5.min.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.expand.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.form.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.modalform.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.modalpage.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.more.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.move.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.pagination.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.search.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.selection.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.table.css"));
-            _cssLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/css/webexpress.webui.toolpanel.css"));
 
-            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/jquery-3.7.1.min.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/popper.min.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/bootstrap.min.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/summernote-bs5.min.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.expand.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.form.progress.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.modalform.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.modalpage.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.more.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.move.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.pagination.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.search.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.selection.js"));
-            _headerScriptLinks.Add(RouteEndpoint.Combine(contextPath, "/assets/js/webexpress.webui.table.js"));
+            foreach (var include in _componentHub.IncludeManager
+                .GetIncludes(pageContext.ApplicationContext))
+            {
+                if (!include.Scopes.Any() || pageContext.Scopes.Intersect(include.Scopes).Any())
+                {
+                    var includeBaseUri = RouteEndpoint.Combine(contextPath, include.PluginContext.PluginId.ToString());
+                    foreach (var file in include.Files.Where(x => x.Type == WebCore.WebInclude.TypeInclude.StyleSheet))
+                    {
+                        _cssLinks.Add(RouteEndpoint.Combine(includeBaseUri, file.FileName));
+                    }
+                }
+            }
+
+            foreach (var include in _componentHub.IncludeManager
+                .GetIncludes(pageContext.ApplicationContext))
+            {
+                if (!include.Scopes.Any() || pageContext.Scopes.Intersect(include.Scopes).Any())
+                {
+                    var includeBaseUri = RouteEndpoint.Combine(contextPath, include.PluginContext.PluginId.ToString());
+                    foreach (var file in include.Files.Where(x => x.Type == WebCore.WebInclude.TypeInclude.JavaScript))
+                    {
+                        _headerScriptLinks.Add(RouteEndpoint.Combine(includeBaseUri, file.FileName));
+                    }
+                }
+            }
+
+            _base = contextPath;
 
             _meta.Add("charset", "UTF-8");
             _meta.Add("viewport", "width=device-width, initial-scale=1");
@@ -310,13 +327,38 @@ namespace WebExpress.WebUI.WebPage
             html.Head.Styles = Styles;
             html.Head.Meta = Meta;
             html.Head.Scripts = HeaderScripts;
-            //html.Body.Elements.AddRange(Content?.Where(x => x.Enable).Select(x => x.Render(context)));
+            html.Head.Base = _base?.ToString();
             html.Body.Scripts = [.. Scripts.Values];
 
             html.Head.CssLinks = CssLinks.Where(x => x != null).Select(x => x.ToString());
             html.Head.ScriptLinks = HeaderScriptLinks?.Where(x => x != null).Select(x => x.ToString());
 
             return html;
+        }
+
+        /// <summary>
+        /// Retrieves a response based on the provided visual tree context.
+        /// </summary>
+        /// <param name="context">The visual tree context used to generate the response. Cannot be null.</param>
+        /// <returns>A object representing the generated response.</returns>
+        public Response GetResponse(IVisualTreeContext context)
+        {
+            var content = Render(context);
+
+            return StatusCode switch
+            {
+                200 => new ResponseOK() { Content = content },
+                201 => new ResponseCreated() { Content = content },
+                204 => new ResponseNoContent() { Content = content },
+                301 => new ResponseMovedPermanently() { Content = content },
+                302 => new ResponseMovedTemporarily() { Content = content },
+                400 => new ResponseBadRequest() { Content = content },
+                401 => new ResponseUnauthorized() { Content = content },
+                404 => new ResponseNotFound() { Content = content },
+                422 => new ResponseUnprocessableEntity() { Content = content },
+                500 => new ResponseInternalServerError() { Content = content },
+                _ => new ResponseOK() { Content = content }
+            };
         }
     }
 }

@@ -30,6 +30,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemHelpText(string id = null)
             : base(id)
         {
+            TextColor = new PropertyColorText(TypeColorText.Muted);
         }
 
         /// <summary>
@@ -38,7 +39,6 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="renderContext">The context in which the control is rendered.</param>
         public override void Initialize(IRenderControlFormContext renderContext)
         {
-            TextColor = new PropertyColorText(TypeColorText.Muted);
         }
 
         /// <summary>

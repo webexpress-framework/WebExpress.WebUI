@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlHtml : Control
     {
         /// <summary>
-        /// Retruns or sets the html source code.
+        /// Returns or sets the html source code.
         /// </summary>
         public string Html { get; set; }
 

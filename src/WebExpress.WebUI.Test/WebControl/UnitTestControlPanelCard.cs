@@ -1,4 +1,5 @@
-﻿using WebExpress.WebUI.Test.Fixture;
+﻿using WebExpress.WebCore.WebUri;
+using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
 
@@ -20,7 +21,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelCard(id)
             {
@@ -38,11 +39,12 @@ namespace WebExpress.WebUI.Test.WebControl
         [Theory]
         [InlineData(null, @"<div class=""card border""><div class=""card-body""><div class=""card-text""></div></div></div>")]
         [InlineData("header", @"<div class=""card border""><div class=""card-header"">header</div>*</div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""card border""><div class=""card-header"">WebExpress.WebUI</div><div class=""card-body"">*</div></div>")]
         public void Header(string header, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelCard()
             {
@@ -60,16 +62,16 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""card border""><div class=""card-body""><div class=""card-text""></div></div></div>")]
-        [InlineData("headerImage", @"<div class=""card border""><img src=""headerImage"" class=""card-img-top"">*</div>")]
+        [InlineData("/headerImage", @"<div class=""card border""><img src=""/headerImage"" class=""card-img-top"">*</div>")]
         public void HeaderImage(string headerImage, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelCard()
             {
-                HeaderImage = headerImage
+                HeaderImage = headerImage != null ? new UriEndpoint(headerImage) : null
             };
 
             // test execution
@@ -88,7 +90,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelCard()
             {
@@ -111,7 +113,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelCard()
             {
@@ -129,16 +131,40 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""card border""><div class=""card-body""><div class=""card-text""></div></div></div>")]
-        [InlineData("footerImage", @"<div class=""card border"">*<img src=""footerImage"" class=""card-img-top""></div>")]
+        [InlineData("/footerImage", @"<div class=""card border"">*<img src=""/footerImage"" class=""card-img-top""></div>")]
         public void FooterImage(string footerImage, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelCard()
             {
-                FooterImage = footerImage
+                FooterImage = footerImage != null ? new UriEndpoint(footerImage) : null
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the theme property of the panel control.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeTheme.None, @"<div class=""card border"">*</div>")]
+        [InlineData(TypeTheme.Light, @"<div class=""card border"" data-bs-theme=""light"">*</div>")]
+        [InlineData(TypeTheme.Dark, @"<div class=""card border"" data-bs-theme=""dark"">*</div>")]
+        public void Theme(TypeTheme theme, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlPanelCard()
+            {
+                Theme = theme
             };
 
             // test execution

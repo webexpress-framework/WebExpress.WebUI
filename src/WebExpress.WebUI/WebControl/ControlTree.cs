@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a tree control that can display hierarchical data.
     /// </summary>
-    public class ControlTree : Control
+    public class ControlTree : Control, IControlTree
     {
         private readonly List<ControlTreeItem> _nodes = [];
 
@@ -20,24 +20,20 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the layout.
         /// </summary>
-        public TypeLayoutTree Layout
-        {
-            get => (TypeLayoutTree)GetProperty(TypeLayoutTree.Default);
-            set => SetProperty(value, () => value.ToClass());
-        }
+        public TypeLayoutTree Layout { get; set; } = TypeLayoutTree.Default;
 
         /// <summary>
-        /// Returns or sets a value indicating whether the tree is sorted.
+        /// Returns or sets a value indicating whether to show an indicator for expandable nodes.
         /// </summary>
-        public bool Sorted { get; set; }
+        public bool DisableIndicator { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the tree should display a border.
+        /// Returns or sets a value indicating whether the tree nodes are movable.
         /// </summary>
-        public bool ShowBorder { get; set; }
+        public bool Movable { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the class.
+        /// Initializes a new instance of the <see cref="ControlTree"/> class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
         /// <param name="items">The tree items to be added to the control.</param>
@@ -45,33 +41,42 @@ namespace WebExpress.WebUI.WebControl
             : base(id)
         {
             _nodes.AddRange(items);
-            ShowBorder = true;
         }
 
         /// <summary>
         /// Adds the specified tree items to the control.
         /// </summary>
         /// <param name="items">The tree items to be added.</param>
-        public void Add(params ControlTreeItem[] items)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlTree Add(params ControlTreeItem[] items)
         {
             _nodes.AddRange(items);
-        }
+
+            return this;
+        }
+
         /// <summary>
         /// Adds the specified tree items to the control.
         /// </summary>
         /// <param name="items">The tree items to be added.</param>
-        public void Add(IEnumerable<ControlTreeItem> items)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlTree Add(IEnumerable<ControlTreeItem> items)
         {
             _nodes.AddRange(items);
+
+            return this;
         }
 
         /// <summary>
         /// Removes the specified tree item from the control.
         /// </summary>
         /// <param name="item">The tree item to be removed.</param>
-        public void Remove(ControlTreeItem item)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlTree Remove(ControlTreeItem item)
         {
             _nodes.Remove(item);
+
+            return this;
         }
 
         /// <summary>
@@ -82,40 +87,62 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var items = (from x in Nodes select x.Render(renderContext, visualTree)).ToList();
+            return Render(renderContext, visualTree, Nodes);
+        }
 
-            switch (Layout)
-            {
-                case TypeLayoutTree.Horizontal:
-                case TypeLayoutTree.Flush:
-                case TypeLayoutTree.Group:
-                    items.ForEach(x => x.AddClass("list-group-item"));
-                    break;
-            }
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="nodes">The collection of tree nodes to process.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<ControlTreeItem> nodes)
+        {
+            var classes = new List<string>(["wx-webui-tree"]);
+            classes.AddRange(Classes);
 
-            var html = new HtmlElementTextContentUl([.. items])
+            var html = new HtmlElementTextContentDiv([.. RenderChildren(renderContext, visualTree, nodes)])
             {
                 Id = Id,
-                Class = Css.Concatenate("", GetClasses()),
-                Style = GetStyles(),
-                Role = Role
+                Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
+                Style = GetStyles()
             };
 
-            if (Layout == TypeLayoutTree.TreeView)
+            if (Layout != TypeLayoutTree.Default)
             {
-                visualTree.AddScript("treeview", @"var toggler = document.getElementsByClassName(""tree-treeview-angle"");
-                for (var i = 0; i < toggler.length; i++)
-                {
-                    toggler[i].addEventListener(""click"", function() {
-                        this.parentElement.parentElement.querySelector("".tree-treeview-node"").classList.toggle(""tree-node-hide"");
-                        this.classList.toggle(""tree-treeview-angle-down"");
-
-                    });
+                html.AddUserAttribute("data-layout", Layout.ToClass());
             }
-            ");
+
+            if (DisableIndicator)
+            {
+                html.AddUserAttribute("data-indicator", "false");
+            }
+
+            if (Movable)
+            {
+                html.AddUserAttribute("data-movable", "true");
             }
 
             return html;
+        }
+
+        /// <summary>
+        /// Recursively generates HTML elements for the given tree nodes.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="children">The collection of tree nodes to process.</param>
+        /// <returns>A collection of HTML div elements representing the tree nodes.</returns>
+        private static IEnumerable<IHtmlElement> RenderChildren(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlTreeItem> children)
+        {
+            return children.Select(x =>
+            {
+                var html = x.Render(renderContext, visualTree) as IHtmlElement;
+                html.Add(RenderChildren(renderContext, visualTree, x.Children));
+
+                return html;
+            });
         }
     }
 }

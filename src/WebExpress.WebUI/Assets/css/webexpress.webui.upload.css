@@ -1,0 +1,109 @@
+/* Base Upload Control Styling */
+.wx-upload {
+    border: 2px dashed var(--bs-border-color, #ced4da);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    text-align: center;
+    font-family: var(--bs-font-sans-serif, sans-serif);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.wx-upload-file-preview {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 0.5em;
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
+    border-radius: 0.2em;
+    padding-top: 0.1em;
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+    padding-bottom: 0.1em;
+    background-color: var(--bs-secondary);
+    color: var(--bs-body-bg);
+}
+
+.wx-upload-file-preview > button {
+    border: 0;
+    background: none;
+    color: var(--bs-body-bg);
+}
+
+.wx-upload-file-preview > button:hover {
+    color: var(--bs-secondary-color);
+}
+
+/* Dropzone Styling */
+.wx-upload-dropzone {
+    cursor: pointer;
+    padding: 1rem;
+    font-size: 1rem;
+    color: var(--bs-secondary-color, #6c757d);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.wx-upload-dropzone.hover {
+    background-color: var(--bs-primary-bg-subtle, #e7f1ff);
+    color: var(--bs-primary, #0d6efd);
+    border-color: var(--bs-primary, #0d6efd);
+}
+
+/* Progress Bar Container */
+.wx-upload-progress {
+    margin-bottom: 0.75rem;
+    text-align: left;
+    font-size: 0.875rem;
+    color: var(--bs-body-color, #212529);
+}
+
+.wx-upload-progress .bar {
+    background-color: var(--bs-secondary-bg, #e9ecef);
+    border-radius: 0.25rem;
+    overflow: hidden;
+    height: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.wx-upload-progress .fill {
+    background-color: var(--bs-primary, #0d6efd);
+    height: 100%;
+    width: 0%;
+    transition: width 0.4s ease;
+}
+
+/* Success/Error States */
+.wx-upload-progress.success .fill {
+    background-color: var(--bs-success, #198754);
+}
+
+.wx-upload-progress.error .fill {
+    background-color: var(--bs-danger, #dc3545);
+}
+
+/* Dark Mode Support */
+[data-bs-theme="dark"] .wx-upload {
+    background-color: var(--bs-dark-bg-subtle, #212529);
+    color: var(--bs-light, #f8f9fa);
+    border-color: var(--bs-gray-700, #495057);
+}
+
+[data-bs-theme="dark"] .wx-upload-dropzone {
+    color: var(--bs-light, #f8f9fa);
+}
+
+[data-bs-theme="dark"] .wx-upload-dropzone.hover {
+    background-color: var(--bs-primary-bg-subtle, #0d6efd33);
+    color: var(--bs-primary, #0d6efd);
+}
+
+[data-bs-theme="dark"] .wx-upload-progress .bar {
+    background-color: var(--bs-gray-700, #495057);
+}
+
+[data-bs-theme="dark"] .wx-upload-progress .fill {
+    background-color: var(--bs-primary, #0d6efd);
+}

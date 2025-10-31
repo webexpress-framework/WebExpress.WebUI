@@ -1,209 +1,182 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
+using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a tree item control that can contain other controls and tree items.
+    /// Represents a tree node for the <see cref="ControlTree"/>.
     /// </summary>
-    public class ControlTreeItem : Control
+    public class ControlTreeItem : IControlTreeItem
     {
-        private readonly List<IControl> _content = [];
-        private readonly List<ControlTreeItem> _children = [];
+        private readonly List<IControlTreeItem> _children = [];
 
         /// <summary>
-        /// Returns the content.
+        /// Returns the unique identifier of the tree item.
         /// </summary>
-        public IEnumerable<IControl> Content => _content;
+        public string Id { get; }
+
+        /// <summary>
+        /// Returns or sets the label of the tree item.
+        /// </summary>
+        public string Text { get; set; }
+
+        /// <summary>
+        /// Returns or sets the icon associated with the tree item.
+        /// </summary>
+        public IIcon Icon { get { return IconOpen; } set { IconOpen = IconClose = value; } }
+
+        /// <summary>
+        /// Returns or sets the icon associated with the tree item.
+        /// </summary>
+        public IIcon IconOpen { get; set; }
+
+        /// <summary>
+        /// Returns or sets the icon associated with the tree item.
+        /// </summary>
+        public IIcon IconClose { get; set; }
+
+        /// <summary>
+        /// Returns or sets a value indicating whether the tree item is expanded.
+        /// </summary>
+        public bool Expand { get; set; }
+
+        /// <summary>
+        /// Returns or sets a tooltip text.
+        /// </summary>
+        public string Tooltip { get; set; }
+
+        /// <summary>
+        /// Returns or sets a value indicating whether the tree item is active.
+        /// </summary>
+        public bool Active { get; set; }
+
+        /// <summary>
+        /// Returns or sets the id of a modal dialogue.
+        /// </summary>
+        public string Modal { get; set; }
+
+        /// <summary>
+        /// Returns or sets the link color.
+        /// </summary>
+        public TypeColorText Color { get; set; }
+
+        /// <summary>
+        /// Returns or sets the target uri.
+        /// </summary>
+        public IUri Uri { get; set; }
+
+        /// <summary>
+        /// Returns or sets the target.
+        /// </summary>
+        public TypeTarget Target { get; set; }
 
         /// <summary>
         /// Returns the child tree items.
         /// </summary>
-        public IEnumerable<ControlTreeItem> Children => _children;
-
-        /// <summary>
-        /// Returns a value indicating whether any child tree item is active.
-        /// </summary>
-        /// <value>
-        /// <c>true</c> if any child tree item is active; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsAnyChildrenActive
-        {
-            get
-            {
-                if (Active == TypeActive.Active) return true;
-
-                return Children.Where(x => x.IsAnyChildrenActive).Any();
-            }
-        }
-
-        /// <summary>
-        /// Returns or sets the active state of the tree item.
-        /// </summary>
-        /// <value>
-        /// The active state of the tree item.
-        /// </value>
-        public TypeActive Active
-        {
-            get => (TypeActive)GetProperty(TypeActive.None);
-            set => SetProperty(value, () => value.ToClass());
-        }
-
-        /// <summary>
-        /// Returns or sets the layout of the tree item.
-        /// </summary>
-        /// <value>
-        /// The layout of the tree item.
-        /// </value>
-        public TypeLayoutTreeItem Layout
-        {
-            get => (TypeLayoutTreeItem)GetProperty(TypeLayoutTreeItem.Default);
-            set => SetProperty(value, () => value.ToClass());
-        }
-
-        /// <summary>
-        /// Returns or sets the expand state of the tree item.
-        /// </summary>
-        /// <value>
-        /// The expand state of the tree item.
-        /// </value>
-        public TypeExpandTree Expand
-        {
-            get => (TypeExpandTree)GetProperty(TypeExpandTree.None);
-            set => SetProperty(value, () => value.ToClass());
-        }
+        public IEnumerable<IControlTreeItem> Children => _children;
 
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
-        /// <param name="id">The id of the control.</param>
-        /// <param name="content">The content or child of the node.</param>
-        public ControlTreeItem(string id = null, params IControl[] content)
-            : base(id)
+        /// <param name="id">The unique identifier of the tree node.</param>
+        /// <param name="children">The children of the tree node.</param>
+        public ControlTreeItem(string id = null, params IControlTreeItem[] children)
         {
-            _content.AddRange(content.Where(x => x is not ControlTreeItem));
-            _children.AddRange(content.Where(x => x is ControlTreeItem).Select(x => x as ControlTreeItem));
-        }
-
-        /// <summary>
-        /// Adds the specified content to the tree item.
-        /// </summary>
-        /// <param name="content">The content to add.</param>
-        public void Add(params IControl[] content)
-        {
-            _content.AddRange(content);
-        }        /// <summary>
-        /// Adds the specified content to the tree item.
-        /// </summary>
-        /// <param name="content">The content to add.</param>
-        public void Add(IEnumerable<IControl> content)
-        {
-            _content.AddRange(content);
-        }
-        /// <summary>
-        /// Adds the specified children to the tree item.
-        /// </summary>
-        /// <param name="content">The children to add.</param>
-        public void Add(params ControlTreeItem[] children)
-        {
+            Id = id;
             _children.AddRange(children);
         }
 
         /// <summary>
-        /// Adds the specified children to the tree item.
+        /// Adds the specified children to the tree node.
         /// </summary>
-        /// <param name="content">The children to add.</param>
-        public void Add(IEnumerable<ControlTreeItem> children)
+        /// <param name="children">The children to add.</param>
+        /// <returns>The current instance, allowing for method chaining.</returns>
+        public IControlTreeItem Add(params IControlTreeItem[] children)
         {
             _children.AddRange(children);
+
+            return this;
         }
 
         /// <summary>
-        /// Removes the specified content or children from the tree item.
+        /// Adds the specified children to the tree node.
         /// </summary>
-        /// <param name="control">The content or child to remove.</param>
-        public void Remove(IControl control)
+        /// <param name="children">The children to add.</param>
+        /// <returns>The current instance, allowing for method chaining.</returns>
+        public IControlTreeItem Add(IEnumerable<IControlTreeItem> children)
         {
-            if (control is ControlTreeItem)
-            {
-                _children.Remove(control as ControlTreeItem);
+            _children.AddRange(children);
 
-                return;
-            }
-
-            _content.Remove(control);
+            return this;
         }
 
         /// <summary>
-        /// Converts the control to an HTML representation.
+        /// Removes the specified content or child tree item from the tree item.
+        /// </summary>
+        /// <param name="child">The content or child tree item to remove.</param>
+        /// <returns>The current instance, allowing for method chaining.</returns>
+        public IControlTreeItem Remove(IControlTreeItem child)
+        {
+            _children.Remove(child);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Converts the cell to an HTML representation.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <param name="visualTree">The visual tree representing the control's structure.</param>
         /// <returns>An HTML node representing the rendered control.</returns>
-        public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var content = _content.Select(x => x.Render(renderContext, visualTree)).ToArray();
-            var container = default(HtmlElementTextContentDiv);
-
-            if (Layout == TypeLayoutTreeItem.TreeView)
-            {
-                var expander = new HtmlElementTextSemanticsSpan
-                {
-                    Class = Css.Concatenate("wx-tree-treeview-expander", _children.Count > 0 ? "wx-tree-treeview-angle" : "wx-tree-treeview-dot")
-                };
-
-                if (_children.Count > 0 && Expand != TypeExpandTree.Collapse)
-                {
-                    expander.Class = Css.Concatenate("wx-tree-treeview-angle-down", expander.Class);
-                }
-
-                container = new HtmlElementTextContentDiv(expander, content.Length > 1 ? new HtmlElementTextContentDiv(content) : content.FirstOrDefault())
-                {
-                    Class = Css.Concatenate("wx-tree-treeview-container")
-                };
-            }
-            else
-            {
-                container = new HtmlElementTextContentDiv(content.Length > 1 ? new HtmlElementTextContentDiv(content) : content.FirstOrDefault())
-                {
-                    Class = Css.Concatenate("", GetClasses()),
-                };
-            }
-
-            var html = new HtmlElementTextContentLi(container)
+            var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate(Active.ToClass()),
-                Style = GetStyles(),
-                Role = Role
-            };
+                Class = Css.Concatenate("wx-tree-node"),
+            }
+                .AddUserAttribute("data-label", I18N.Translate(Text))
+                .AddUserAttribute("data-expand", Expand ? "true" : null)
+                .AddUserAttribute("data-active", Active ? "true" : null)
+                .AddUserAttribute("data-modal", Modal)
+                .AddUserAttribute("data-color", Color.ToClass())
+                .AddUserAttribute("data-tooltip", Tooltip)
+                .AddUserAttribute("data-uri", Uri?.ToString())
+                .AddUserAttribute("data-target", Target.ToStringValue());
 
-            if (_children.Count > 0)
+            if (IconOpen == IconClose && Icon is Icon icon)
             {
-                var children = _children.Select(x => x.Render(renderContext, visualTree)).ToList();
+                html.AddUserAttribute("data-icon", icon.Class);
+            }
 
-                switch (Layout)
-                {
-                    case TypeLayoutTreeItem.Horizontal:
-                    case TypeLayoutTreeItem.Flush:
-                    case TypeLayoutTreeItem.Group:
-                        children.ForEach(x => x.AddClass("list-group-item"));
-                        break;
-                }
+            if (IconOpen != IconClose && IconOpen is Icon iconOpen)
+            {
+                html.AddUserAttribute("data-icon-opened", iconOpen.Class);
+            }
 
-                var ul = new HtmlElementTextContentUl([.. children])
-                {
-                    Class = Css.Concatenate(Layout switch
-                    {
-                        TypeLayoutTreeItem.TreeView => "wx-tree-treeview-node",
-                        TypeLayoutTreeItem.Simple => "wx-tree-simple-node",
-                        _ => Layout.ToClass()
-                    }, Expand.ToClass())
-                };
+            if (IconOpen != IconClose && IconClose is Icon iconClose)
+            {
+                html.AddUserAttribute("data-icon-closed", iconClose.Class);
+            }
 
-                html.Add(ul);
+            if (IconOpen == IconClose && Icon is ImageIcon image)
+            {
+                html.AddUserAttribute("data-image", image.Uri?.ToString());
+            }
+
+            if (IconOpen != IconClose && IconOpen is ImageIcon imageOpen)
+            {
+                html.AddUserAttribute("data-image-opened", imageOpen.Uri?.ToString());
+            }
+
+            if (IconOpen != IconClose && IconClose is ImageIcon imageClose)
+            {
+                html.AddUserAttribute("data-image-closed", imageClose.Uri?.ToString());
             }
 
             return html;

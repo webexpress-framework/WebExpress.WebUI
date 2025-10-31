@@ -43,7 +43,14 @@
         /// <returns>The CSS class corresponding to the size.</returns>
         public static string ToClass(this TypeSizeText size)
         {
-            return string.Empty;
+            return size switch
+            {
+                TypeSizeText.ExtraLarge => "wx-elg",
+                TypeSizeText.Large => "wx-lg",
+                TypeSizeText.Small => "wx-sm",
+                TypeSizeText.ExtraSmall => "wx-esm",
+                _ => string.Empty,
+            };
         }
 
         /// <summary>
@@ -53,14 +60,7 @@
         /// <returns>The CSS style corresponding to the size.</returns>
         public static string ToStyle(this TypeSizeText size)
         {
-            return size switch
-            {
-                TypeSizeText.ExtraLarge => "font-size:2rem;",
-                TypeSizeText.Large => "font-size:1.5rem;",
-                TypeSizeText.Small => "font-size:0.75rem;",
-                TypeSizeText.ExtraSmall => "font-size:0.55rem;",
-                _ => string.Empty,
-            };
+            return string.Empty;
         }
     }
 }

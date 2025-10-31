@@ -41,9 +41,10 @@ namespace WebExpress.WebUI.WebControl
         /// </summary> 
         /// <param name="controls">The controls to add to the content.</param> 
         /// <remarks> 
-        /// This method allows adding one or multiple controls to the <see cref="Content"/> collection of 
+        /// This method allows adding one or multiple controls to the content collection of 
         /// the list item. It is useful for dynamically constructing the user interface by appending 
         /// various controls to the content. 
+        /// 
         /// Example usage: 
         /// <code> 
         /// var item = new ControlListItem(); 
@@ -51,6 +52,7 @@ namespace WebExpress.WebUI.WebControl
         /// var text2 = new ControlText { Text = "B" };
         /// item.Add(text1, text2);
         /// </code> 
+        /// 
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
         public virtual void Add(params IControl[] controls)
@@ -63,16 +65,18 @@ namespace WebExpress.WebUI.WebControl
         /// </summary> 
         /// <param name="controls">The controls to add to the content.</param> 
         /// <remarks> 
-        /// This method allows adding one or multiple controls to the <see cref="Content"/> collection of 
+        /// This method allows adding one or multiple controls to the content collection of 
         /// the list item. It is useful for dynamically constructing the user interface by appending 
         /// various controls to the content. 
+        /// 
         /// Example usage: 
         /// <code> 
         /// var item = new ControlListItem(); 
         /// var text1 = new ControlText { Text = "A" };
         /// var text2 = new ControlText { Text = "B" };
-        /// item.Add(new List<IControl>([text1, text2]));
+        /// item.Add(text1, text2);
         /// </code> 
+        /// 
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
         public virtual void Add(IEnumerable<IControl> controls)
@@ -85,7 +89,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="control">The control to remove from the content.</param>
         /// <remarks>
-        /// This method allows removing a specific control from the <see cref="Content"/> collection of 
+        /// This method allows removing a specific control from the content collection of 
         /// the list item.
         /// </remarks>
         public virtual void Remove(IControl control)
@@ -101,13 +105,13 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return new HtmlElementTextContentLi(Content.Where(x => x.Enable).Select(x => x.Render(renderContext, visualTree)).ToArray())
+            return new HtmlElementTextContentLi([.. Content.Where(x => x.Enable).Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
                 Class = GetClasses(),
                 Style = GetStyles(),
                 Role = Role
-            };
+            }.AddUserAttribute("aria-current", Active == TypeActive.Active ? "true" : null);
         }
     }
 }

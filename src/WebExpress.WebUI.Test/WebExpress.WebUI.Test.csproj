@@ -1,24 +1,29 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
-
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-    <Configurations>Debug;Release;Test</Configurations>
+    <Configurations>Debug;Release;Test;DebugLocal</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Data\ComplexExample1.md" />
+    <None Remove="Data\ComplexExample2.md" />
+    <None Remove="Data\ComplexExample3.md" />
     <None Remove="Data\ComplexForm.txt" />
+    <None Remove="Data\TableExample1.md" />
+    <None Remove="Data\TableExample2.md" />
+    <None Remove="Data\TableExample3.md" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
-    <PackageReference Include="WebExpress.WebCore" Version="0.0.8-alpha" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="WebExpress.WebCore" Version="0.0.9-alpha" />
     <PackageReference Include="xunit" Version="2.9.3" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2">
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -29,7 +34,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Data\ComplexExample1.md" />
+    <EmbeddedResource Include="Data\ComplexExample2.md" />
+    <EmbeddedResource Include="Data\ComplexExample3.md" />
     <EmbeddedResource Include="Data\ComplexForm.txt" />
+    <EmbeddedResource Include="Data\TableExample1.md" />
+    <EmbeddedResource Include="Data\TableExample2.md" />
+    <EmbeddedResource Include="Data\TableExample3.md" />
   </ItemGroup>
 
 </Project>

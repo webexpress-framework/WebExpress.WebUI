@@ -1,388 +1,183 @@
 /**
- * A selection box to enable options.
- * The following events are triggered:
- * - webexpress.webui.change.value with parameter value.
+ * Read-only flat list of move options with optional selection marking.
+ * All options are always rendered as a single <ul> list (no headers, buttons, drag & drop).
+ * Selected options receive a CSS class 'is-selected'.
+ * Initial selection may be provided via data-value (semicolon separated IDs).
+ * Programmatic updates via the value setter re-render and emit CHANGE_VALUE_EVENT.
  */
-webexpress.webui.moveCtrl = class extends webexpress.webui.events {
-    _container = $("<div class='wx-move'/>");
-    _selectedList = $("<ul class='list-group list-group-flush'/>");
-    _availableList = $("<ul class='list-group list-group-flush'/>");
-    _buttonToSelectedAll = $("<button class='btn btn-primary btn-block' type='button'/>");
-    _buttonToSelected = $("<button class='btn btn-primary btn-block' type='button'/>");
-    _buttonToAvailable = $("<button class='btn btn-primary btn-block' type='button'/>");
-    _buttonToAvailableAll = $("<button class='btn btn-primary btn-block' type='button'/>");
-    _hidden = $("<input type='hidden'/>");
-    _options = [];
-    _values = [];
-    _selectedoptions = new Map(); // Key=Ctrl, Value=options
-    _availableoptions = new Map(); // Key=Ctrl, Value=options
-    
+webexpress.webui.MoveCtrl = class extends webexpress.webui.Ctrl {
+
     /**
      * Constructor
-     * @param settings Options for styling the control:
-     *        - id Sets the id of the control.
-     *        - name The control name.
-     *        - css The CSS classes used to design the control.
-     *        - header The heading { selected, available }.
-     *        - buttons The button label { toselectedall, toselected, toavailable, toavailableall }.
+     * @param {HTMLElement} element host element containing .wx-webui-move-option children
      */
-    constructor(settings) {
-        super();
+    constructor(element) {
+        super(element);
 
-        const { id, name, css, header, buttons } = settings;
-        const selectedContainer = $("<div class='wx-move-list'/>");
-        const selectedHeader = $("<span class='text-muted'>" + header.selected + "</span>");
-        const availableContainer = $("<div class='wx-move-list'/>");
-        const availableHeader = $("<span class='text-muted'>" + header.available + "</span>");
-        const buttonContainer = $("<div class='wx-move-button d-grid gap-2'/>");
-        
-        this._container.attr("id", id ?? "");
+        // read attributes
+        const initialValue = element.dataset.value || "";
 
-        if (css) {
-            this._container.addClass(css);
+        // parse options
+        this._options = this._parseOptions(element.querySelectorAll(".wx-webui-move-option"));
+        this._values = this._normalizeValues(initialValue, this._options.map(o => o.id));
+
+        // cleanup element
+        element.innerHTML = "";
+        element.classList.add("wx-move");
+
+        // single list
+        this._list = document.createElement("ul");
+        element.appendChild(this._list);
+
+        // initial render
+        this.render();
+    }
+
+    /**
+     * Parses option elements
+     * @param {NodeListOf<Element>} nodes option nodes
+     * @returns {Array} parsed option objects
+     * @private
+     */
+    _parseOptions(nodes) {
+        const out = [];
+        nodes.forEach(div => {
+            out.push({
+                id: div.id,
+                label: div.textContent.trim(),
+                image: div.dataset.image || null,
+                icon: div.dataset.icon || null,
+                disabled: div.hasAttribute("disabled")
+            });
+        });
+        return out;
+    }
+
+    /**
+     * Normalizes raw value input to an array of valid unique ids
+     * @param {Array|string|null|undefined} values raw value(s)
+     * @param {Array} validIds list of allowed ids
+     * @returns {Array} normalized id array
+     * @private
+     */
+    _normalizeValues(values, validIds) {
+        let arr = [];
+        if (values == null) {
+            arr = [];
+        } else if (Array.isArray(values)) {
+            arr = values;
+        } else if (typeof values === "string") {
+            const t = values.trim();
+            if (t.length > 0) {
+                arr = t.includes(";")
+                    ? t.split(";").map(v => v.trim()).filter(Boolean)
+                    : [t];
+            }
+        }
+        const valid = new Set(validIds.map(v => String(v)));
+        const seen = new Set();
+        return arr
+            .map(v => String(v))
+            .filter(v => valid.has(v) && !seen.has(v) && seen.add(v));
+    }
+
+    /**
+     * Renders the flat list
+     */
+    render() {
+        if (!this._list) return;
+        this._list.innerHTML = "";
+        const selectedSet = new Set(this._values.map(v => String(v)));
+
+        if (this._options.length === 0) {
+            const emptyLi = document.createElement("li");
+            emptyLi.textContent = "";
+            this._list.appendChild(emptyLi);
+            return;
         }
 
-        if (name) {
-            this._hidden.attr("name", name);
-        }
-        
-        this._buttonToSelectedAll.html(buttons.toselectedall);
-        this._buttonToSelected.html(buttons.toselected);
-        this._buttonToAvailable.html(buttons.toavailable);
-        this._buttonToAvailableAll.html(buttons.toavailableall);
-        
-        selectedContainer.append(selectedHeader);
-        selectedContainer.append(this._selectedList);
-        availableContainer.append(availableHeader);
-        availableContainer.append(this._availableList);
-        buttonContainer.append(this._buttonToSelectedAll);
-        buttonContainer.append(this._buttonToSelected);
-        buttonContainer.append(this._buttonToAvailable);
-        buttonContainer.append(this._buttonToAvailableAll);
-
-        // Event listeners for drag and drop functionality
-        selectedContainer.on('dragenter', (e) => {
-            e.preventDefault();
-            this._selectedList.addClass('drag-over');
+        this._options.forEach(opt => {
+            this._list.appendChild(this._createListItem(opt, selectedSet.has(String(opt.id))));
         });
-        
-        selectedContainer.on('dragover', (e) => {
-            e.preventDefault();
-            this._selectedList.addClass('drag-over');
-        });
-        
-        selectedContainer.on('dragleave', () => {
-            this._selectedList.removeClass('drag-over');
-        });
-        
-        selectedContainer.on('drop', (e) => {
-            this._selectedList.removeClass('drag-over');
-            this.moveToSelected();
-            e.preventDefault(); 
-        });
-        
-        availableContainer.on('dragenter', (e) => {
-            e.preventDefault();
-            this._availableList.addClass('drag-over');
-        });
-        
-        availableContainer.on('dragover', (e) => {
-            e.preventDefault();
-            this._availableList.addClass('drag-over');
-        });
-        
-        availableContainer.on('dragleave', () => {
-            this._availableList.removeClass('drag-over');
-        });
-        
-        availableContainer.on('drop', (e) => {
-            this._availableList.removeClass('drag-over');
-            this.moveToAvailable();
-            e.preventDefault();
-        });
-        
-        this._buttonToSelectedAll.click(() => {    
-            this.moveToSelectedAll();
-        });
-
-        this._buttonToSelected.click(() => {
-            this.moveToSelected();
-        });
-        
-        this._buttonToAvailableAll.click(() => {
-            this.moveToAvailableAll();
-        });
-
-        this._buttonToAvailable.click(() => {  
-            this.moveToAvailable();
-        });
-        
-        this._container.append(selectedContainer);
-        this._container.append(buttonContainer);
-        this._container.append(availableContainer);
-
-        if (name) {
-            this._container.append(this._hidden);
-        }
-        
-        this.update();
-    }
-    
-    /**
-     * Move all entries to the left (selected).
-     */
-    moveToSelectedAll() {
-        this.value = this._options.map(element => element.Id);
-        this.update();
-    }
-    
-    /**
-     * Moves selected entries to the left (selected).
-     */
-    moveToSelected() {
-        this.value = this._values.concat(Array.from(this._availableoptions.entries()).filter(([key, value]) => value != null).map(([key, value]) => value.Id));
-        this.update();
     }
 
     /**
-     * Move all entries to the right (available).
+     * Creates a single list item
+     * @param {Object} opt option object
+     * @param {boolean} isSelected selection flag
+     * @returns {HTMLLIElement} li element
+     * @private
      */
-    moveToAvailableAll() {
-        this.value = [];
-        this.update();
-    }
+    _createListItem(opt, isSelected) {
+        const li = document.createElement("li");
+        if (isSelected) li.classList.add("is-selected");
+        if (opt.disabled) li.classList.add("is-disabled");
 
-    /**
-     * Moves selected entries to the right (available).
-     */
-    moveToAvailable() {
-        this.value = this._values.filter(b => !Array.from(this._selectedoptions.entries()).filter(([key, value]) => value != null).map(([key, value]) => value.Id).includes(b));
-        this.update();
-    }
-   
-    /**
-     * Update of the control.
-     */
-    update() {
-        const values = this._values != null ? this._values : [];
-        const comparison = (a, b) => a === b.Id;
-        const relativeComplement = this._options.filter(b => values.every(a => !comparison(a, b)));
-        const intersection = this._options.filter(b => values.includes(b.Id));
-        
-        this._selectedList.children().remove();
-        this._availableList.children().remove();
-        this._selectedoptions.clear();
-        this._availableoptions.clear();
-
-        const updateselection = () => {
-            this._selectedoptions.forEach((value, key) => {
-                if (value != null) {
-                    key.addClass("bg-primary");
-                    key.children().addClass("text-white");
-                } else {
-                    key.removeClass("bg-primary");
-                    key.children().removeClass("text-white");
-                }
-            });
-            this._availableoptions.forEach((value, key) => {
-                if (value != null) {
-                    key.addClass("bg-primary");
-                    key.children().addClass("text-white");
-                } else {
-                    key.removeClass("bg-primary");
-                    key.children().removeClass("text-white");
-                }
-            });
-            
-            if (Array.from(this._availableoptions.values()).filter(elem => elem != null).length === 0) {
-                this._buttonToSelected.addClass("disabled");
-                this._buttonToSelected.prop("disabled", true);
-            } else {
-                this._buttonToSelected.removeClass("disabled");
-                this._buttonToSelected.prop("disabled", false);
-            }
-            
-            if (Array.from(this._selectedoptions.values()).filter(elem => elem != null).length === 0) {
-                this._buttonToAvailable.addClass("disabled");
-                this._buttonToAvailable.prop("disabled", true);
-            } else {
-                this._buttonToAvailable.removeClass("disabled");
-                this._buttonToAvailable.prop("disabled", false);
-            }
-        };
-
-        intersection.forEach((currentValue) => {   
-            const li = $("<li class='list-group-item' draggable='true'/>");
-            const img = $("<img title='' src='" + currentValue.image + "' draggable='false'/>");
-            const icon = $("<i class='text-primary " + currentValue.icon + "' draggable='false'/>");
-            const a = $("<a class='link' href='javascript:void(0)' draggable='false'>" + currentValue.label + "</a>");
-            if (currentValue.icon != null) {
-                li.append(icon);
-            }
-            if (currentValue.image != null) {
-                li.append(img);
-            }
-            li.append(a);
-            this._selectedoptions.set(li, null);
-                        
-            li.click((event) => {   
-                if (event.ctrlKey) {
-                    if (!Array.from(this._selectedoptions.values()).some(elem => elem === currentValue)) {
-                        this._selectedoptions.set(li, currentValue);
-                    } else {
-                        this._selectedoptions.set(li, null);
-                    }
-                    this._availableoptions.forEach((value, key, map) => map.set(key, null));
-                } else {
-                    this._selectedoptions.forEach((value, key, map) => map.set(key, null));
-                    this._selectedoptions.set(li, currentValue);
-                    this._availableoptions.forEach((value, key, map) => map.set(key, null));
-                }
-                updateselection();
-            }).dblclick(() => {  
-                this._selectedoptions.forEach((value, key, map) => map.set(key, null));
-                this._selectedoptions.set(li, currentValue);
-                this._availableoptions.forEach((value, key, map) => map.set(key, null));
-
-                this.moveToAvailable();
-            }).keyup((event) => { 
-                if (event.keyCode === 32) {
-                    if (!Array.from(this._selectedoptions.keys()).some(elem => elem === currentValue)) {
-                        this._selectedoptions.set(li, currentValue);
-                    } else {
-                        this._selectedoptions.set(li, null);
-                    }
-                    this._availableoptions.forEach((value, key, map) => map.set(key, null));
-                    updateselection();
-                }
-            });
-            
-            li.on('dragstart', (e) => {
-                this._selectedoptions.forEach((value, key, map) => map.set(key, null));
-                this._selectedoptions.set(li, currentValue);
-                this._availableoptions.forEach((value, key, map) => map.set(key, null));    
-                updateselection();             
-            });
-
-            this._selectedList.append(li);
-        });
-
-        relativeComplement.forEach((currentValue) => { 
-            const li = $("<li class='list-group-item' draggable='true'/>");
-            const img = $("<img title='' src='" + currentValue.image + "' draggable='false'/>");
-            const icon = $("<i class='text-primary " + currentValue.icon + "' draggable='false'/>");
-            const a = $("<a class='link' href='javascript:void(0)' draggable='false'>" + currentValue.label + "</a>");
-            if (currentValue.icon != null) {
-                li.append(icon);
-            }
-            if (currentValue.image != null) {
-                li.append(img);
-            }
-            li.append(a);
-            this._availableoptions.set(li, null);
-            
-            li.click((event) => {   
-                if (event.ctrlKey) {
-                    if (!Array.from(this._availableoptions.values()).some(elem => elem === currentValue)) {
-                        this._availableoptions.set(li, currentValue);
-                    } else {
-                        this._availableoptions.set(li, null);
-                    }
-                    this._selectedoptions.forEach((value, key, map) => map.set(key, null));
-                } else {
-                    this._selectedoptions.forEach((value, key, map) => map.set(key, null));
-                    this._availableoptions.forEach((value, key, map) => map.set(key, null));
-                    this._availableoptions.set(li, currentValue);
-                }
-                                
-                updateselection();
-            }).dblclick(() => {  
-                this._selectedoptions.forEach((value, key, map) => map.set(key, null));
-                this._availableoptions.forEach((value, key, map) => map.set(key, null));
-                this._availableoptions.set(li, currentValue);
-
-                this.moveToSelected();
-            }).keyup((event) => { 
-                if (event.keyCode === 32) {
-                    if (!Array.from(this._availableoptions.keys()).some(elem => elem === currentValue)) {
-                        this._availableoptions.set(li, currentValue);
-                    } else {
-                        this._availableoptions.set(li, null);
-                    }
-                    this._selectedoptions.forEach((value, key, map) => map.set(key, null));
-                    updateselection();
-                }
-            });
-            
-            li.on('dragstart', (e) => {
-                this._selectedoptions.forEach((value, key, map) => map.set(key, null));
-                this._availableoptions.forEach((value, key, map) => map.set(key, null));
-                this._availableoptions.set(li, currentValue);
-                updateselection();
-            });
-
-            this._availableList.append(li);
-        });
-        
-        if (relativeComplement.length === 0) {
-            this._buttonToSelectedAll.addClass("disabled");
-            this._buttonToSelectedAll.prop("disabled", true);
-        } else {
-            this._buttonToSelectedAll.removeClass("disabled");
-            this._buttonToSelectedAll.prop("disabled", false);
+        // icon
+        if (opt.icon) {
+            const icon = document.createElement("i");
+            icon.className = `text-primary ${opt.icon}`;
+            li.appendChild(icon);
         }
 
-        if (values.length === 0) {
-            this._buttonToAvailableAll.addClass("disabled");
-            this._buttonToAvailableAll.prop("disabled", true);
-        } else {
-            this._buttonToAvailableAll.removeClass("disabled");
-            this._buttonToAvailableAll.prop("disabled", false);
+        // image
+        if (opt.image) {
+            const img = document.createElement("img");
+            img.className = "wx-icon";
+            img.src = opt.image;
+            img.alt = "";
+            li.appendChild(img);
         }
-        
-        updateselection();
+
+        // label
+        const span = document.createElement("span");
+        span.textContent = opt.label;
+        li.appendChild(span);
+
+        return li;
     }
 
     /**
-     * Returns all options.
+     * Returns all options
+     * @returns {Array} option list
      */
     get options() {
         return this._options;
     }
 
     /**
-     * Sets the options.
-     * @param options An array of options { Id, Label, Icon, Image }.
+     * Sets options, preserving selection where possible
+     * @param {Array} options new options array
      */
     set options(options) {
-        this._options = options;
-        this.update();
+        const prevSelected = new Set(this._values.map(v => String(v)));
+        this._options = Array.isArray(options) ? options : [];
+        this._values = this._normalizeValues(Array.from(prevSelected), this._options.map(o => o.id));
+        this.render();
     }
-    
+
     /**
-     * Returns the selected options.
+     * Returns selected ids
+     * @returns {Array} selected ids
      */
     get value() {
         return this._values;
     }
-    
+
     /**
-     * Sets the selected options.
-     * @param values An array with object ids.
+     * Sets selected ids (programmatic)
+     * @param {Array|string|null|undefined} values new selection
      */
     set value(values) {
-        if (this._values !== values) {
-            this._values = values;
-            this._hidden.val(this._values.join(';'));
-            this.update();
-            this.trigger('webexpress.webui.change.value', values);
+        const normalized = this._normalizeValues(values, this._options.map(o => o.id));
+        const oldSer = (this._values || []).join(";");
+        const newSer = normalized.join(";");
+        if (oldSer !== newSer) {
+            this._values = normalized;
+            this.render();
         }
     }
-    
-    /**
-     * Returns the control.
-     */
-    get getCtrl() {
-        return this._container;
-    }
-}
+};
+
+// Register the class in the controller
+webexpress.webui.Controller.registerClass("wx-webui-move", webexpress.webui.MoveCtrl);

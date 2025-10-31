@@ -1,5 +1,6 @@
 ﻿using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebUI.WebMarkdown;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -213,13 +214,21 @@ namespace WebExpress.WebUI.WebControl
                     };
                     break;
                 case TypeFormatText.Code:
-                    html = new HtmlElementTextSemanticsCode(new HtmlText(text))
-                    {
-                        Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
-                        Role = Role
-                    };
+                    html = text?.Split('\n').Length > 1
+                        ? new HtmlElementTextContentPre(new HtmlText(text))
+                        {
+                            Id = Id,
+                            Class = GetClasses(),
+                            Style = GetStyles(),
+                            Role = Role
+                        }
+                        : new HtmlElementTextSemanticsCode(new HtmlText(text))
+                        {
+                            Id = Id,
+                            Class = GetClasses(),
+                            Style = GetStyles(),
+                            Role = Role
+                        };
                     break;
                 case TypeFormatText.Output:
                     html = new HtmlElementTextSemanticsSamp(new HtmlText(text))
@@ -312,7 +321,7 @@ namespace WebExpress.WebUI.WebControl
                     };
                     break;
                 case TypeFormatText.Markdown:
-                    return new HtmlRaw(Markdig.Markdown.ToHtml(text));
+                    return MarkdownParser.Parse(text).ConvertToHtml(renderContext);
                 default:
                     html = new HtmlElementTextContentDiv(new HtmlText(text))
                     {

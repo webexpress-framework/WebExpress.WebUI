@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebFragment
     /// <summary>
     /// Represents a dropdown item link control within a fragment context.
     /// </summary>
-    public class FragmentControlDropdownItemLink : ControlDropdownItemLink, IFragmentControl<ControlDropdownItemLink>
+    public class FragmentControlDropdownItemLink : ControlDropdownItemLink, IFragmentWebUIElement<IRenderControlContext, IVisualTreeControl>, IFragmentControlDropdownItem
     {
         /// <summary>
         /// Returns the context of the fragment.

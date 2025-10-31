@@ -14,45 +14,107 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the alert control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""alert"" role=""alert""><button class=""btn-close"" data-bs-dismiss=""alert"" aria-label=""close""></button></div>")]
-        [InlineData("id", @"<div id=""id"" class=""alert"" role=""alert""><button class=""btn-close"" data-bs-dismiss=""alert"" aria-label=""close""></button></div>")]
-        [InlineData("03C6031F-04A9-451F-B817-EBD6D32F8B0C", @"<div id=""03C6031F-04A9-451F-B817-EBD6D32F8B0C"" class=""alert"" role=""alert""><button class=""btn-close"" data-bs-dismiss=""alert"" aria-label=""close""></button></div>")]
+        [InlineData(null, @"<div class=""alert"" role=""alert""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""alert"" role=""alert""></div>")]
+        [InlineData("03C6031F-04A9-451F-B817-EBD6D32F8B0C", @"<div id=""03C6031F-04A9-451F-B817-EBD6D32F8B0C"" class=""alert"" role=""alert""></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAlert(id)
             {
+                Dismissibility = TypeDismissibilityAlert.None
             };
 
             // test execution
             var html = control.Render(context, visualTree);
 
-            Assert.Equal(expected, html.Trim());
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
         /// <summary>
         /// Tests the text property of the alert control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""alert"" role=""alert""><button class=""btn-close"" data-bs-dismiss=""alert"" aria-label=""close""></button></div>")]
+        [InlineData(null, @"<div class=""alert"" role=""alert""></div>")]
+        [InlineData("", @"<div class=""alert"" role=""alert""></div>")]
+        [InlineData("abc", @"<div class=""alert"" role=""alert"">abc</div>")]
         public void Text(string text, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAlert()
             {
+                Dismissibility = TypeDismissibilityAlert.None,
                 Text = text
             };
 
             // test execution
             var html = control.Render(context, visualTree);
 
-            Assert.Equal(expected, html.Trim());
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the backgroundcolor property of the alert control.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeColorBackgroundAlert.Default, @"<div class=""alert"" role=""alert""></div>")]
+        [InlineData(TypeColorBackgroundAlert.Primary, @"<div class=""alert bg-primary"" role=""alert""></div>")]
+        [InlineData(TypeColorBackgroundAlert.Secondary, @"<div class=""alert bg-secondary"" role=""alert""></div>")]
+        [InlineData(TypeColorBackgroundAlert.Info, @"<div class=""alert alert-info"" role=""alert""></div>")]
+        [InlineData(TypeColorBackgroundAlert.Warning, @"<div class=""alert alert-warning"" role=""alert""></div>")]
+        [InlineData(TypeColorBackgroundAlert.Danger, @"<div class=""alert alert-danger"" role=""alert""></div>")]
+        [InlineData(TypeColorBackgroundAlert.Dark, @"<div class=""alert alert-dark"" role=""alert""></div>")]
+        [InlineData(TypeColorBackgroundAlert.White, @"<div class=""alert bg-white"" role=""alert""></div>")]
+        [InlineData(TypeColorBackgroundAlert.Transparent, @"<div class=""alert bg-transparent"" role=""alert""></div>")]
+        public void BackgroundColor(TypeColorBackgroundAlert color, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlAlert()
+            {
+                Dismissibility = TypeDismissibilityAlert.None,
+                BackgroundColor = new PropertyColorBackgroundAlert(color)
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the dismissibility property of the alert control.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeDismissibilityAlert.None, @"<div class=""alert"" role=""alert""></div>")]
+        [InlineData(TypeDismissibilityAlert.Dismissible, @"<div class=""alert alert-dismissible"" role=""alert""><button class=""btn"" data-bs-dismiss=""alert"" aria-label=""close""><i class=""fas fa-xmark""></i></button></div>")]
+        public void Dismissibility(TypeDismissibilityAlert dismissibility, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlAlert()
+            {
+                Dismissibility = dismissibility
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
         }
     }
 }

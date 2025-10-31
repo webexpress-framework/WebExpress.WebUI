@@ -1,0 +1,201 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using WebExpress.WebCore.Internationalization;
+using WebExpress.WebCore.WebHtml;
+using WebExpress.WebUI.WebPage;
+
+namespace WebExpress.WebUI.WebControl
+{
+    /// <summary>
+    /// Represents a text box input form item control.
+    /// </summary>
+    public class ControlFormItemInputText : ControlFormItemInput<ControlFormInputValueString>
+    {
+        /// <summary>
+        /// Determines whether it is a multi-line text box.
+        /// </summary>
+        public TypeEditTextFormat Format { get; set; }
+
+        /// <summary>
+        /// Returns or sets the description.
+        /// </summary>
+        public string Description { get; set; }
+
+        /// <summary>
+        /// Returns or sets a placeholder text.
+        /// </summary>
+        public string Placeholder { get; set; }
+
+        /// <summary>
+        /// Returns or sets the minimum length.
+        /// </summary>
+        public uint? MinLength { get; set; }
+
+        /// <summary>
+        /// Returns or sets the maximum length.
+        /// </summary>
+        public uint? MaxLength { get; set; }
+
+        /// <summary>
+        /// Returns or sets whether inputs are enforced.
+        /// </summary>
+        public bool Required { get; set; }
+
+        /// <summary>
+        /// Returns or sets a search pattern that checks the content.
+        /// </summary>
+        public string Pattern { get; set; }
+
+        /// <summary>
+        /// Returns or sets the height of the text field (for Multiline and WYSIWYG).
+        /// </summary>
+        public uint? Rows { get; set; } = 8;
+
+        /// <summary>
+        /// Initializes a new instance of the class with an automatically assigned ID.
+        /// </summary>
+        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
+        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
+        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
+        public ControlFormItemInputText([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null)
+            : this($"textbox_{instance}_{file}_{line}".GetHashCode().ToString("X"))
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the class.
+        /// </summary>
+        /// <param name="id">The id of the control.</param>
+        public ControlFormItemInputText(string id)
+            : base(id)
+        {
+            Margin = new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.Two, PropertySpacing.Space.None, PropertySpacing.Space.None);
+        }
+
+        /// <summary>
+        /// Initializes the form element.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        public override void Initialize(IRenderControlFormContext renderContext)
+        {
+            base.Initialize(renderContext);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
+        {
+            var id = Id;
+            var value = renderContext.GetValue<ControlFormInputValueString>(this);
+            var classes = new List<string>(Classes)
+            {
+                "form-control"
+            };
+
+            if (Disabled)
+            {
+                classes.Add("disabled");
+            }
+
+            return Format switch
+            {
+                TypeEditTextFormat.Multiline => new HtmlElementFormTextarea()
+                {
+                    Id = Id,
+                    Value = value?.Text,
+                    Name = Name,
+                    Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
+                    Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
+                    Role = Role,
+                    Placeholder = I18N.Translate(renderContext.Request?.Culture, Placeholder),
+                    Rows = Rows.ToString()
+                },
+                TypeEditTextFormat.Wysiwyg => new HtmlElementTextContentDiv()
+                {
+                    Id = id,
+                    //Value = value,
+                    //Name = Name,
+                    Class = Css.Concatenate("wx-webui-editor", classes),
+                    Style = GetStyles(),
+                    Role = Role,
+                    //Placeholder = I18N.Translate(renderContext.Request?.Culture, Placeholder),
+                    //Rows = Rows.ToString()
+                }.AddUserAttribute("name", Name),
+                _ => new HtmlElementFieldInput()
+                {
+                    Id = Id,
+                    Value = value?.Text,
+                    Name = Name,
+                    MinLength = MinLength?.ToString(),
+                    MaxLength = MaxLength?.ToString(),
+                    Required = Required,
+                    Pattern = Pattern,
+                    Type = "text",
+                    Disabled = Disabled,
+                    Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
+                    Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
+                    Role = Role,
+                    Placeholder = I18N.Translate(renderContext.Request?.Culture, Placeholder)
+                },
+            };
+        }
+
+        /// <summary>
+        /// Validates the input elements within a form for correctness of the data.
+        /// </summary>
+        /// <param name="renderContext">The context in which the inputs are validated, containing form data and state.</param>
+        /// <returns>A collection of <see cref="ValidationResult"/> objects representing the validation 
+        /// results for each input element. Each result indicates whether the input is valid or contains errors.
+        /// </returns>
+        public override IEnumerable<ValidationResult> Validate(IRenderControlFormContext renderContext)
+        {
+            var validationResults = new List<ValidationResult>(base.Validate(renderContext));
+            var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
+
+            if (Disabled)
+            {
+                return [];
+            }
+
+            if (Required && string.IsNullOrWhiteSpace(value))
+            {
+                validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, "webexpress.webui:form.inputtextbox.validation.required"));
+
+                return validationResults;
+            }
+
+            if (!string.IsNullOrWhiteSpace(MinLength?.ToString()) && Convert.ToInt32(MinLength) > value?.Length)
+            {
+                validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputtextbox.validation.min"), MinLength)));
+            }
+
+            if (!string.IsNullOrWhiteSpace(MaxLength?.ToString()) && Convert.ToInt32(MaxLength) < value?.Length)
+            {
+                validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputtextbox.validation.max"), MaxLength)));
+            }
+
+            return validationResults;
+        }
+
+        /// <summary>
+        /// Creates an value from the specified string representation.
+        /// </summary>
+        /// <param name="value">
+        /// The string representation of the value to be converted. Cannot be null.
+        /// </param>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <returns>
+        /// The value created from the specified string representation.
+        /// </returns>
+        protected override ControlFormInputValueString CreateValue(string value, IRenderControlFormContext renderContext)
+        {
+            return new ControlFormInputValueString(value);
+        }
+    }
+}

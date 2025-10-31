@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelGrid(id)
             {
@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelGrid()
             {
@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelGrid()
             {
@@ -98,7 +98,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelGrid()
             {
@@ -112,17 +112,41 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the theme property of the panel control.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeTheme.None, @"<div>*</div>")]
+        [InlineData(TypeTheme.Light, @"<div data-bs-theme=""light"">*</div>")]
+        [InlineData(TypeTheme.Dark, @"<div data-bs-theme=""dark"">*</div>")]
+        public void Theme(TypeTheme theme, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlPanelGrid()
+            {
+                Theme = theme
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests the add function of the grid control.
         /// </summary>
         [Theory]
         [InlineData(typeof(ControlText), @"<div><div class=""row""><div></div></div></div>")]
-        [InlineData(typeof(ControlLink), @"<div><div class=""row""><a class=""link""></a></div></div>")]
+        [InlineData(typeof(ControlLink), @"<div><div class=""row""><a class=""wx-link""></a></div></div>")]
         [InlineData(typeof(ControlImage), @"<div><div class=""row""><img></div></div>")]
         public void Add(Type child, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var childInstance = Activator.CreateInstance(child, [null]) as IControl;
             var control = new ControlPanelGrid();

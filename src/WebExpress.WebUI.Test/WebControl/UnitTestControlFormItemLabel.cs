@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemLabel(id)
             {
@@ -44,7 +44,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemLabel()
             {
@@ -68,7 +68,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemLabel()
             {
@@ -86,17 +86,17 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(false, @"<label></label>")]
-        [InlineData(true, @"<label></label>")]
+        [InlineData(true, @"<label for=""*""></label>")]
         public void FormItem(bool formItem, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemLabel()
+            var control = new ControlFormItemLabel(null)
             {
-                FormItem = formItem ? new ControlFormItemInputTextBox() : null
+                FormItem = formItem ? new ControlFormItemInputText() : null
             };
 
             // test execution

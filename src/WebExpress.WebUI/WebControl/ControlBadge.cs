@@ -1,5 +1,5 @@
-﻿using System;
-using WebExpress.WebCore.WebHtml;
+﻿using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -30,12 +30,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the target uri.
         /// </summary>
-        public Uri Uri { get; set; }
+        public IUri Uri { get; set; }
 
         /// <summary>
         /// Returns or sets the value.
         /// </summary>
-        public int? Value { get; set; }
+        public string Value { get; set; }
 
         /// <summary>
         /// Return or specifies the vertical orientation..
@@ -74,20 +74,20 @@ namespace WebExpress.WebUI.WebControl
         {
             if (Uri != null)
             {
-                return new HtmlElementTextSemanticsA(new HtmlText(Value.ToString()))
+                return new HtmlElementTextSemanticsA(new HtmlText(Value))
                 {
                     Id = Id,
-                    Class = Css.Concatenate("wx-badge", GetClasses()),
+                    Class = Css.Concatenate("badge link", GetClasses()),
                     Style = GetStyles(),
                     Href = Uri.ToString(),
                     Role = Role
                 };
             }
 
-            return new HtmlElementTextSemanticsSpan(new HtmlText(Value.ToString()))
+            return new HtmlElementTextSemanticsSpan(new HtmlText(Value))
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-badge", GetClasses()),
+                Class = Css.Concatenate("badge", GetClasses()),
                 Style = GetStyles(),
                 Role = Role
             };

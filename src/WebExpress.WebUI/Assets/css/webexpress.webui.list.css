@@ -1,0 +1,171 @@
+/* base: rely on bootstrap color and spacing variables */
+.wx-list {
+    /* use bootstrap's body colors to integrate with the theme */
+    color: var(--bs-body-color);
+    background-color: transparent;
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+
+/* list items (flat rows) */
+.wx-list > li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.wx-list-li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.375rem 0.5rem;
+    border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+    background-color: transparent;
+    transition: background-color 120ms ease-in;
+}
+
+.wx-list-li:hover {
+    /* use bootstrap subtle background for hover */
+    background-color: var(--bs-tertiary-bg);
+}
+
+/* drag handle */
+.wx-list-drag-handle {
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    line-height: 1;
+    opacity: 0.85;
+    padding: 0.125rem 0.25rem;
+    border-radius: var(--bs-border-radius-sm);
+    color: var(--bs-secondary-color);
+}
+
+.wx-list-drag-handle:active {
+    cursor: grabbing;
+    opacity: 1;
+}
+
+.wx-list-drag-handle:focus-visible {
+    outline: 0;
+    /* use bootstrap focus ring */
+    box-shadow: 0 0 0 var(--bs-focus-ring-width, 0.25rem) var(--bs-focus-ring-color, rgba(var(--bs-primary-rgb), 0.25));
+    background-color: rgba(var(--bs-primary-rgb), 0.08);
+}
+
+/* main content area inside item */
+.wx-list-body {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* text and icons inside content */
+.wx-list-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+/* compact inline-edit input uses bootstrap control sizing */
+.wx-list-content .form-control {
+    padding: 0.25rem 0.5rem;
+    height: calc(1.5em + 0.5rem + 2px);
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+/* icon next to text */
+.wx-list .wx-icon {
+    width: 1rem;
+    height: 1rem;
+    object-fit: contain;
+    display: inline-block;
+}
+
+/* placeholder while dragging an item */
+.wx-list-drag-placeholder {
+    list-style: none;
+    margin: 0.125rem 0;
+    border: calc(var(--bs-border-width) + 1px) dashed var(--bs-border-color);
+    background-color: rgba(var(--bs-primary-rgb), 0.075);
+    border-radius: var(--bs-border-radius);
+    min-height: 2.25rem; /* safety when js height is not set */
+    pointer-events: none; /* do not intercept pointer while dragging */
+}
+
+/* emphasize dragged source lightly */
+.wx-list-li.wx-list-dragging {
+    opacity: 0.6;
+}
+
+/* optional delete button (pairs with .btn.btn-link.text-danger) */
+.wx-list-delete {
+    /* keep bootstrap's link-danger color and only tweak interactions */
+    padding: 0.125rem 0.25rem;
+    border-radius: var(--bs-border-radius-sm);
+}
+
+.wx-list-delete:hover {
+    text-decoration: underline;
+    background-color: rgba(var(--bs-danger-rgb), 0.06);
+}
+
+.wx-list-delete:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 var(--bs-focus-ring-width, 0.25rem) rgba(var(--bs-danger-rgb), 0.35);
+}
+
+/* reserve trailing space when rows without controls should align with rows that have controls */
+.wx-list-options-placeholder {
+    width: 2.5rem;
+    flex: 0 0 auto;
+}
+
+/* change flash animation using bootstrap warning color */
+@keyframes wx-row-flash {
+    0% {
+        background-color: rgba(var(--bs-warning-rgb), 0.85);
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}
+
+.wx-row-flash {
+    animation: wx-row-flash 1.2s ease-out;
+}
+
+/* reduce motion for users that prefer it */
+@media (prefers-reduced-motion: reduce) {
+    .wx-row-flash {
+        animation-duration: 1ms;
+        animation-iteration-count: 1;
+    }
+}
+
+/* high-contrast mode */
+@media (forced-colors: active) {
+    .wx-list-drag-placeholder {
+        border-color: currentColor;
+        background: transparent;
+    }
+
+    .wx-list-drag-handle {
+        border: 1px solid currentColor;
+    }
+
+    .wx-row-flash {
+        animation: none;
+        outline: 2px solid currentColor;
+        outline-offset: -2px;
+    }
+}

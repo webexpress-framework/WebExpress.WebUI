@@ -1,8 +1,8 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -13,19 +13,30 @@ namespace WebExpress.WebUI.WebControl
     public class ControlAttribute : Control
     {
         /// <summary>
-        /// Returns or sets the text color of the name.
+        /// Returns or sets the text color of the key.
         /// </summary>
-        public PropertyColorText NameColor { get; set; }
+        public PropertyColorText Color
+        {
+            get => (PropertyColorText)GetPropertyObject();
+            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+        }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Returns or sets the text color of the key.
+        /// </summary>
+        public PropertyColorText KeyColor { get; set; }
+
+        /// <summary>
+        /// Returns or sets the icon associated with the attribute, typically 
+        /// used to visually represent the attribute's meaning or category.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the name.
+        /// Returns or sets the key of the attribute, representing the name or 
+        /// identifier in the key-value pair.
         /// </summary>
-        public string Name { get; set; }
+        public string Key { get; set; }
 
         /// <summary>
         /// Returns or sets the value.
@@ -35,7 +46,13 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets a link.
         /// </summary>
-        public Uri Uri { get; set; }
+        public IUri Uri { get; set; }
+
+        /// <summary>
+        /// Returns or sets the character used to separate the key and value in the displayed attribute.
+        /// Common separators include ':' or '='.
+        /// </summary>
+        public char Separator { get; set; } = ':';
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -59,25 +76,32 @@ namespace WebExpress.WebUI.WebControl
                 return null;
             }
 
+            var key = I18N.Translate(renderContext.Request?.Culture, Key);
+            var seperator = string.IsNullOrWhiteSpace(key) ? '\0' : Separator;
             var icon = Icon?.Render(renderContext, visualTree);
 
-            var name = new HtmlElementTextSemanticsSpan(new HtmlText(I18N.Translate(renderContext.Request?.Culture, Name)))
+            var keyElement = new HtmlElementTextSemanticsSpan(new HtmlText(key + Separator))
             {
                 Id = string.IsNullOrWhiteSpace(Id) ? string.Empty : $"{Id}_name",
-                Class = NameColor?.ToClass()
+                Class = KeyColor?.ToClass()
             };
 
-            var value = new HtmlElementTextSemanticsSpan(new HtmlText(I18N.Translate(renderContext.Request?.Culture, Value)))
+            var valueElement = new HtmlElementTextSemanticsSpan(new HtmlText(I18N.Translate(renderContext.Request?.Culture, Value)))
             {
-                Id = string.IsNullOrWhiteSpace(Id) ? string.Empty : $"{Id}_value",
-                Class = NameColor?.ToClass()
+                Id = string.IsNullOrWhiteSpace(Id) ? string.Empty : $"{Id}_value"
             };
 
             var html = new HtmlElementTextContentDiv
             (
                 Icon != null ? icon : null,
-                name,
-                Uri != null ? new HtmlElementTextSemanticsA(value) { Href = Uri.ToString() } : value
+                keyElement,
+                Uri != null
+                    ? new HtmlElementTextSemanticsA(valueElement)
+                    {
+                        Href = Uri.ToString(),
+                        Class = "wx-link"
+                    }
+                    : valueElement
             )
             {
                 Id = Id,

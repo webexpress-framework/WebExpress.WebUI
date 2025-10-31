@@ -1,0 +1,339 @@
+/* Base table layout */
+.wx-table {
+    caption-side: bottom;
+    border-collapse: collapse;
+}
+
+.wx-table > thead {
+    position: sticky;
+    top: 0;
+    z-index: 500;
+    box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
+}
+
+/* header cells */
+.wx-table > thead > tr > th {
+    box-sizing: border-box;
+    position: relative;
+    text-align: left;
+    padding-right: 34px;
+    outline: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    align-items: center;
+    vertical-align: middle;
+}
+
+/* header content wrapper */
+.wx-table > thead > tr > th > div {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+/* shared image style for header/body icons */
+.wx-table > thead > tr > th > div > img,
+.wx-table > tbody > tr > td > div > img {
+}
+
+/* hover state (light) */
+.wx-table > thead > tr > th:hover {
+    background-color: var(--bs-light);
+    cursor: pointer;
+}
+
+/* hover state (dark) */
+[data-bs-theme=dark] .wx-table > thead > tr > th:hover {
+    background-color: var(--bs-dark);
+    color: var(--bs-light);
+}
+
+/* sorting indicators */
+.wx-table > thead > tr > th.wx-sort-asc::after,
+.wx-table > thead > tr > th.wx-sort-desc::after {
+    font-size: 0.5em;
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--bs-secondary);
+    line-height: 1;
+}
+
+.wx-table > thead > tr > th.wx-sort-asc::after { content: "▲"; }
+.wx-table > thead > tr > th.wx-sort-desc::after { content: "▼"; }
+
+/* actions header cell */
+.wx-table > thead > tr > th.wx-table-actions {
+    padding-right: .25rem;
+    min-width: 2.5rem;
+    text-align: center;
+    position: relative;
+}
+
+.wx-table-actions {
+    position: relative;
+}
+
+.wx-table-actions .dropdown-menu {
+    overflow: auto;
+    max-height: 60vh;
+}
+
+/* body cells */
+.wx-table > tbody > tr > td {
+    position: relative;
+}
+
+.wx-table > tbody > tr > td > div {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    width: 100%;
+}
+
+.wx-table > tbody > tr > td > div > .wx-inline-edit {
+    width: 100%;
+}
+
+/* drag & drop common */
+.wx-table .wx-table-drag-handle {
+    cursor: grab;
+    color: var(--bs-secondary);
+    user-select: none;
+}
+
+.wx-table .wx-table-drag-handle:hover {
+    color: var(--bs-secondary);
+}
+
+.wx-table .wx-table-drag-indicator {
+  position: fixed;
+  pointer-events: none;
+  z-index: 2147483647;
+  width: 2px;
+  border-left: 2px dashed var(--bs-success);
+  opacity: .9;
+}
+
+/* header/row visual while dragging */
+.wx-table .wx-table-dragging {
+  opacity: .6;
+}
+
+.wx-table .wx-table-drag-placeholder {
+    background-color: var(--bs-success-bg-subtle);
+    border: 2px dashed var(--bs-success);
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* row drag placeholder cells (pattern background) */
+.wx-table .wx-table-drag-placeholder > td {
+    background: repeating-linear-gradient(
+        45deg,
+        #eee,
+        #eee 6px,
+        #f8f8f8 6px,
+        #f8f8f8 12px
+    ) !important;
+    outline: 2px dashed var(--bs-success);
+    outline-offset: 1px;
+    z-index: 20000;
+}
+
+/* column resizing */
+.wx-table .wx-table-column-resizer {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    cursor: col-resize;
+    z-index: 1000;
+    touch-action: none;
+}
+
+.wx-table .wx-table-resizing {
+    cursor: col-resize !important;
+}
+
+/* Tree / hierarchical row support */
+.wx-table .wx-tree {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25em;
+    width: 100%;
+}
+
+/* angle icon */
+.wx-table .wx-tree-indicator-angle {
+    content: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+DQo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIJdmlld0JveD0iMCAwIDEzNSAxOTAiPg0KCTxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJPCFbQ0RBVEFbDQoJCS5zdDEge2ZpbGw6IzdmN2Y3ZjtzdHJva2U6bm9uZTt9DQoJXV0+DQoJPC9zdHlsZT4NCgkJPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTgsLTE4KSI+DQoJCQk8cGF0aCBkPSJNMS42NiAxNzMuMiBMMTguNyAxOTAuMjMgQTUuNjY5MjkgNS42NjkyOSAtMTgwIDAgMCAyNi43MiAxOTAuMjMgTDk4Ljg3IDExOC4wOCBBNS42NjkyOSA1LjY2OTI5IC0xODAgMCAwIDk4Ljg3DQoJCQkJCQkgMTEwLjA2IEwyNi43MiAzNy45IEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMTguNyAzNy45IEwxLjY2IDU0Ljk0IEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMS42NiA2Mi45Ng0KCQkJCQkJIEw0OC43NiAxMTAuMDYgQTUuNjY5MjkgNS42NjkyOSAwIDAgMSA0OC43NiAxMTguMDYgTDEuNjYgMTY1LjE4IEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMS42NiAxNzMuMiBaIg0KCQkJCQljbGFzcz0ic3QxIi8+DQoJCTwvZz4NCjwvc3ZnPg==');
+    height: 0.8rem;
+    width: 0.8rem;
+    display: inline-block;
+    vertical-align: middle;
+    transition: transform .18s ease;
+    transform-origin: 50% 50%;
+}
+
+.wx-table .wx-tree-expand {
+    transform: rotate(90deg);
+}
+
+/* lead container (indent + toggle) */
+.wx-table .wx-tree-lead {
+    font-size: inherit;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: .25em;
+}
+
+/* indentation spacer */
+.wx-table .wx-tree-indent {
+    display: inline-block;
+    height: 1px;
+}
+
+/* toggle button */
+.wx-table .wx-tree-toggle {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--bs-body-color);
+    min-width: 0.8rem;
+    min-height: 0.8rem;
+}
+
+.wx-table .wx-tree > div {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25em;
+}
+
+.wx-table .wx-tree > div > img{
+}
+
+.wx-table .wx-tree-toggle:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* placeholder when no toggle exists */
+.wx-table .wx-tree-toggle-placeholder {
+    opacity: 0;
+    width: 0.8rem;
+    display: inline-block;
+}
+
+/* keep text alignment after tree lead */
+.wx-table .wx-tree-lead + * {
+    flex-grow: 1;
+}
+
+/* drag handle focus synergy */
+.wx-table .wx-table-drag-handle:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: -2px;
+    border-radius: 2px;
+}
+
+/* subtle row hover */
+.wx-table tbody tr {
+    transition: background-color .15s linear;
+}
+
+/* small screens */
+@media (max-width: 576px) {
+    .wx-table .wx-tree-toggle {
+        font-size: .65rem;
+    }
+}
+
+/* high contrast preference */
+@media (prefers-contrast: more) {
+    .wx-table .wx-tree-toggle:focus-visible {
+        outline-width: 3px;
+    }
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .wx-table .wx-tree-indicator-angle {
+        transition: none;
+    }
+}
+
+/* Column dropdown drag & drop (reordering inside actions menu) */
+.wx-table .wx-columns-list {
+    position: relative;
+}
+
+.wx-table .wx-columns-list .wx-col-placeholder {
+    border: 2px dashed var(--bs-success);
+    margin: 2px 0;
+    height: 36px;
+    border-radius: 4px;
+    background: repeating-linear-gradient(
+        45deg,
+        #fafafa,
+        #fafafa 6px,
+        #f0f0f0 6px,
+        #f0f0f0 12px
+    );
+}
+
+.wx-table .wx-columns-list .wx-col-item.dragging {
+    opacity: .4;
+}
+
+/* highlight row after content change (new or modified) */
+@keyframes wx-row-flash {
+    0% {
+        background-color: rgba(var(--bs-warning-rgb), 0.85);
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}
+
+/* Table: animate the cells, because Bootstrap applies background to td/th */
+.wx-table tr.wx-row-flash > td {
+    animation: wx-row-flash 1.2s ease-out;
+}
+
+/* List: animate the entire list item */
+.wx-list li.wx-row-flash,
+.wx-list .wx-row-flash {
+    animation: wx-row-flash 1.2s ease-out;
+}
+
+/* reduce motion for users that prefer it */
+@media (prefers-reduced-motion: reduce) {
+    .wx-table tr.wx-row-flash > td,
+    .wx-list li.wx-row-flash,
+    .wx-list .wx-row-flash {
+        animation-duration: 1ms;
+        animation-iteration-count: 1;
+    }
+}
+
+/* high-contrast mode: avoid animation, use outline hint */
+@media (forced-colors: active) {
+    .wx-table tr.wx-row-flash > td,
+    .wx-list li.wx-row-flash,
+    .wx-list .wx-row-flash {
+        animation: none;
+        outline: 2px solid currentColor;
+        outline-offset: -2px;
+    }
+}

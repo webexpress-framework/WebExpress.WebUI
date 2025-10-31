@@ -7,7 +7,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a navigation control.
     /// </summary>
-    public class ControlNavigation : Control
+    public class ControlNavigation : Control, IControlNavigation
     {
         private List<IControlNavigationItem> _items = [];
 
@@ -87,8 +87,9 @@ namespace WebExpress.WebUI.WebControl
         /// </summary> 
         /// <param name="items">The items to add to the control.</param> 
         /// <remarks> 
-        /// This method allows adding one or multiple items to the <see cref="Items"/> collection of 
+        /// This method allows adding one or multiple items to the collection of 
         /// the control.
+        /// 
         /// Example usage: 
         /// <code> 
         /// var control = new ControlNavigation(); 
@@ -96,11 +97,15 @@ namespace WebExpress.WebUI.WebControl
         /// var text2 = new ControlNavigationItemLink { Text = "B" };
         /// control.Add(text1, text2);
         /// </code> 
+        /// 
         /// This method accepts any items that implements the <see cref="IControlNavigationItem"/> interface.
         /// </remarks>
-        public virtual void Add(params IControlNavigationItem[] items)
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlNavigation Add(params IControlNavigationItem[] items)
         {
             _items.AddRange(items);
+
+            return this;
         }
 
         /// <summary> 
@@ -108,20 +113,25 @@ namespace WebExpress.WebUI.WebControl
         /// </summary> 
         /// <param name="items">The items to add to the control.</param> 
         /// <remarks> 
-        /// This method allows adding one or multiple items to the <see cref="Items"/> collection of 
+        /// This method allows adding one or multiple items to the collection of 
         /// the control.
+        /// 
         /// Example usage: 
         /// <code> 
         /// var control = new ControlNavigation(); 
         /// var text1 = new ControlNavigationItemLink { Text = "A" };
         /// var text2 = new ControlNavigationItemLink { Text = "B" };
-        /// control.Add(new List<IControl>([text1, text2]));
+        /// control.Add(text1, text2);
         /// </code> 
+        /// 
         /// This method accepts any items that implements the <see cref="IControlNavigationItem"/> interface.
         /// </remarks>
-        public virtual void Add(IEnumerable<IControlNavigationItem> controls)
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlNavigation Add(IEnumerable<IControlNavigationItem> items)
         {
-            _items.AddRange(controls);
+            _items.AddRange(items);
+
+            return this;
         }
 
         /// <summary>
@@ -129,12 +139,15 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="item">The item to remove from the content.</param>
         /// <remarks>
-        /// This method allows removing a specific item from the <see cref="Items"/> collection of 
+        /// This method allows removing a specific item from the collection of 
         /// the control.
         /// </remarks>
-        public virtual void Remove(IControlNavigationItem item)
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlNavigation Remove(IControlNavigationItem item)
         {
             _items.Remove(item);
+
+            return this;
         }
 
         /// <summary>
@@ -145,8 +158,20 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var items = new List<HtmlElement>();
-            foreach (var item in Items)
+            return Render(renderContext, visualTree, _items);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="items">The navigation entries.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlNavigationItem> items)
+        {
+            var htmlItems = new List<HtmlElement>();
+            foreach (var item in items)
             {
                 var i = item.Render(renderContext, visualTree) as HtmlElement;
 
@@ -204,13 +229,13 @@ namespace WebExpress.WebUI.WebControl
                     //i.AddClass(Css.Concatenate("nav-link"));
                 }
 
-                items.Add(new HtmlElementTextContentLi(i)
+                htmlItems.Add(new HtmlElementTextContentLi(i)
                 {
                     Class = "nav-item"
                 });
             }
 
-            var html = new HtmlElementTextContentUl(items.ToArray())
+            var html = new HtmlElementTextContentUl(htmlItems.ToArray())
             {
                 Id = Id,
                 Class = Css.Concatenate("nav", GetClasses()),

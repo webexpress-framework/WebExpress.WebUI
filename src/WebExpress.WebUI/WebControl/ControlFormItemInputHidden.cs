@@ -6,7 +6,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a hidden input form item control.
     /// </summary>
-    public class ControlFormItemInputHidden : ControlFormItemInput
+    public class ControlFormItemInputHidden : ControlFormItemInput<ControlFormInputValueString>
     {
         /// <summary>
         /// Initializes a new instance of the class.
@@ -15,16 +15,6 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemInputHidden(string id = null)
             : base(id)
         {
-            Name = Id;
-        }
-
-        /// <summary>
-        /// Initializes the form element.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        public override void Initialize(IRenderControlFormContext renderContext)
-        {
-            Value = renderContext?.Request.GetParameter(Name)?.Value;
         }
 
         /// <summary>
@@ -35,14 +25,31 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            var value = renderContext?.GetValue<ControlFormInputValueString>(this)?.Text;
+
             return new HtmlElementFieldInput()
             {
                 Id = Id,
-                Value = Value,
+                Value = value,
                 Name = Name,
                 Type = "hidden",
                 Role = Role
             };
+        }
+
+        /// <summary>
+        /// Creates an value from the specified string representation.
+        /// </summary>
+        /// <param name="value">
+        /// The string representation of the value to be converted. Cannot be null.
+        /// </param>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <returns>
+        /// The value created from the specified string representation.
+        /// </returns>
+        protected override ControlFormInputValueString CreateValue(string value, IRenderControlFormContext renderContext)
+        {
+            return new ControlFormInputValueString(value);
         }
     }
 }

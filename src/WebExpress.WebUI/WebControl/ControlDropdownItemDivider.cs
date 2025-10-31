@@ -9,15 +9,20 @@ namespace WebExpress.WebUI.WebControl
     /// <remarks>
     /// This class is used to create a visual separation between dropdown items.
     /// </remarks>
-    public class ControlDropdownItemDivider : Control, IControlDropdownItem
+    public class ControlDropdownItemDivider : IControlDropdownItem
     {
+        /// <summary>
+        /// Returns the unique identifier for the entity.
+        /// </summary>
+        public string Id { get; set; }
+
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
         public ControlDropdownItemDivider(string id = null)
-            : base(id)
         {
+            Id = id;
         }
 
         /// <summary>
@@ -26,14 +31,13 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <param name="visualTree">The visual tree representing the control's structure.</param>
         /// <returns>An HTML node representing the rendered control.</returns>
-        public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("dropdown-divider", GetClasses()),
-                Style = GetStyles(),
-                Role = Role
+                Class = "wx-dropdown-divider",
+                Role = "separator"
             };
 
             return html;

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using WebExpress.WebCore.Internationalization;
+﻿using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -45,11 +44,6 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
-            var c = new List<string>
-            {
-                "form-control-static"
-            };
-
             var html = new HtmlElementTextContentP()
             {
                 Id = Id,

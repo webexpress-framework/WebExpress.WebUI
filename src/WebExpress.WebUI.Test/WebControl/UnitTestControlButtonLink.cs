@@ -22,7 +22,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink(id)
             {
@@ -44,7 +44,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
@@ -69,7 +69,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
@@ -93,7 +93,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
@@ -120,7 +120,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
@@ -148,7 +148,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
@@ -172,7 +172,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
@@ -190,12 +190,12 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<a class=""btn""></a>")]
-        [InlineData(typeof(IconStar), @"<a class=""btn""><span class=""fas fa-star""></span></a>")]
+        [InlineData(typeof(IconStar), @"<a class=""btn""><i class=""fas fa-star""></i></a>")]
         public void Icon(Type icon, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
@@ -216,7 +216,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control1 = new ControlButtonLink(null, new ControlIcon() { Icon = new IconStar() });
             var control2 = new ControlButtonLink(null, [new ControlIcon() { Icon = new IconStar() }]);
@@ -227,9 +227,9 @@ namespace WebExpress.WebUI.Test.WebControl
             var html2 = control2.Render(context, visualTree);
             var html3 = control3.Render(context, visualTree);
 
-            Assert.Equal(@"<a class=""btn""><span class=""fas fa-star""></span></a>", html1.Trim());
-            Assert.Equal(@"<a class=""btn""><span class=""fas fa-star""></span></a>", html2.Trim());
-            Assert.Equal(@"<a class=""btn""><span class=""fas fa-star""></span></a>", html3.Trim());
+            Assert.Equal(@"<a class=""btn""><i class=""fas fa-star""></i></a>", html1.Trim());
+            Assert.Equal(@"<a class=""btn""><i class=""fas fa-star""></i></a>", html2.Trim());
+            Assert.Equal(@"<a class=""btn""><i class=""fas fa-star""></i></a>", html3.Trim());
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -7,13 +7,8 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Interface for a control.
     /// </summary>
-    public interface IControl
+    public interface IControl : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
-        /// <summary>
-        /// Returns or sets the id.
-        /// </summary>
-        string Id { get; }
-
         /// <summary>
         /// Returns or sets the horizontal alignment.
         /// </summary>
@@ -70,10 +65,20 @@ namespace WebExpress.WebUI.WebControl
         TypeHeight Height { get; set; }
 
         /// <summary>
+        /// Returns or sets the display type for the current object.
+        /// </summary>
+        /// <remarks>
+        /// This property determines how the object is visually represented. Setting this
+        /// property may involve converting the value to a class representation.
+        /// </remarks>
+        TypeDisplay Display { get; set; }
+
+        /// <summary>
         /// Returns or sets the css class.
         /// </summary>
         IEnumerable<string> Classes { get; set; }
 
+        /// <summary>
         /// Returns or sets the css style.
         /// </summary>
         IEnumerable<string> Styles { get; set; }
@@ -92,13 +97,5 @@ namespace WebExpress.WebUI.WebControl
         /// Determines whether the control is active and rendering.
         /// </summary>
         bool Enable { get; set; }
-
-        /// <summary>
-        /// Converts the control to an HTML representation.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        /// <param name="visualTree">The visual tree representing the control's structure.</param>
-        /// <returns>An HTML node representing the rendered control.</returns>
-        IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree);
     }
 }

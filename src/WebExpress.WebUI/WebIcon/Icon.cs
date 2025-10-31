@@ -12,7 +12,7 @@ namespace WebExpress.WebUI.WebIcon
         /// <summary>
         /// Returns the CSS class associated with the icon.
         /// </summary>
-        protected abstract string Class { get; }
+        public abstract string Class { get; }
 
         /// <summary>
         /// Converts the icon to an HTML representation.
@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.WebIcon
         /// <returns>An HTML node representing the rendered icon.</returns>
         public IHtmlNode Render(IRenderContext renderContext, IVisualTree visualTree, string id = null, string description = null, string css = null, string style = null, string role = null)
         {
-            var html = new HtmlElementTextSemanticsSpan()
+            var html = new HtmlElementTextSemanticsI()
             {
                 Id = id,
                 Class = Css.Concatenate([Class, css]),

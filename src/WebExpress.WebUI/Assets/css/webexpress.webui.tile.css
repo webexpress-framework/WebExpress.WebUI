@@ -1,0 +1,290 @@
+/* Container */
+.wx-tile {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: stretch;
+    background: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    font-family: var(--bs-body-font-family);
+    font-size: var(--bs-body-font-size);
+    line-height: var(--bs-body-line-height);
+}
+
+/* Tile card */
+.wx-tile-card {
+    background: var(--bs-card-bg, var(--bs-body-bg));
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    box-shadow: 0 2px 6px rgba(0,0,0,.05);
+    width: 200px;
+    min-height: 110px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    user-select: none;
+    transition: box-shadow .25s, border-color .25s, background-color .25s, color .25s;
+    overflow: hidden;
+    outline: none;
+    color: inherit;
+}
+
+.wx-tile-card:hover {
+    border-color: var(--bs-border-color-translucent, var(--bs-border-color));
+}
+
+.wx-tile-card:active {
+    box-shadow: 0 6px 20px rgba(0,0,0,.18);
+}
+
+/* Remove button */
+.wx-tile-card .wx-tile-remove-btn {
+    position: absolute;
+    top: .25rem;
+    right: .25rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s ease-in-out, color .2s;
+    z-index: 2;
+    background: transparent;
+    border: none;
+    font-size: .95em;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 6px;
+    color: var(--bs-secondary);
+}
+
+.wx-tile-card:hover .wx-tile-remove-btn,
+.wx-tile-card:focus-within .wx-tile-remove-btn {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.wx-tile-card .wx-tile-remove-btn:hover,
+.wx-tile-card .wx-tile-remove-btn:focus {
+    color: var(--bs-danger);
+    outline: none;
+}
+
+.wx-tile-card .wx-tile-remove-btn:focus-visible {
+    outline: 2px solid var(--bs-danger);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Content structure */
+.wx-tile-card .card-title {
+    display: inline-flex;
+    align-items: center;
+    font-size: 1em;
+    font-weight: 600;
+    margin: 0.55em 0.6em 0.25em;
+    gap: 0.5em;
+    line-height: 1.2;
+    color: inherit;
+}
+
+.wx-tile-card .card-title > img {
+    display: inline-block;
+}
+
+.wx-tile-card .card-body {
+    flex: 1 1 auto;
+    padding: .75rem .85rem;
+    color: inherit;
+}
+
+/* Drag states */
+.wx-tile-card[draggable="true"] {
+    cursor: grab;
+}
+
+.wx-tile-card.wx-dragging {
+    opacity: .55;
+    border-color: var(--bs-secondary);
+    cursor: grabbing;
+}
+
+.wx-tile-card.wx-drop-target {
+    border-style: solid;
+}
+
+/* Horizontal half insertion (left/right) */
+.wx-tile-card.wx-drop-before,
+.wx-tile-card.wx-drop-after {
+    position: relative;
+}
+
+.wx-tile-card.wx-drop-before::before,
+.wx-tile-card.wx-drop-after::before,
+.wx-tile-card.wx-drop-before::after,
+.wx-tile-card.wx-drop-after::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    z-index: 3;
+}
+
+.wx-tile-card.wx-drop-before::after {
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    opacity: 50%;
+    background: repeating-linear-gradient(
+        45deg,
+        #eee,
+        #eee 6px,
+        #f8f8f8 6px,
+        #f8f8f8 12px
+    );
+}
+
+.wx-tile-card.wx-drop-after::after {
+    top: 0;
+    right: 0;
+    width: 50%;
+    height: 100%;
+    opacity: 50%;
+    background: repeating-linear-gradient(
+        45deg,
+        #eee,
+        #eee 6px,
+        #f8f8f8 6px,
+        #f8f8f8 12px
+    );
+}
+
+/* start/end drop zones */
+.wx-drop-target {
+    outline: 2px dashed var(--bs-success);
+}
+
+/* Focus accessibility */
+.wx-tile-card:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+    z-index: 4;
+}
+
+.wx-tile-card.wx-drop-before:focus-visible::before,
+.wx-tile-card.wx-drop-after:focus-visible::before {
+    box-shadow: 0 0 0 1px rgba(0,0,0,.15);
+}
+
+/* Flash highlight */
+.wx-tile-card.wx-tile-flash {
+    animation: wx-tile-flash .7s linear 2;
+}
+
+@keyframes wx-tile-flash {
+    0% { box-shadow: 0 0 0 0 var(--bs-warning); }
+    50% { box-shadow: 0 0 10px 5px var(--bs-warning); }
+    100% { box-shadow: 0 0 0 0 var(--bs-warning); }
+}
+
+/* Color variants (applied to .wx-tile-card) */
+.wx-tile-primary {
+    background: color-mix(in srgb, var(--bs-primary) 52%, var(--bs-body-bg));
+    color: var(--bs-light, #fff);
+}
+
+.wx-tile-secondary {
+    background: color-mix(in srgb, var(--bs-secondary) 52%, var(--bs-body-bg));
+    color: var(--bs-light, #fff);
+}
+
+.wx-tile-success {
+    background: color-mix(in srgb, var(--bs-success) 50%, var(--bs-body-bg));
+    color: var(--bs-light, #fff);
+}
+
+.wx-tile-info {
+    background: color-mix(in srgb, var(--bs-info) 55%, var(--bs-body-bg));
+    color: var(--bs-dark, #031b21);
+}
+
+.wx-tile-warning {
+    background: color-mix(in srgb, var(--bs-warning) 55%, var(--bs-body-bg));
+    color: var(--bs-dark, #2d2300);
+}
+
+.wx-tile-danger {
+    background: color-mix(in srgb, var(--bs-danger) 50%, var(--bs-body-bg));
+    color: var(--bs-light, #fff);
+}
+
+.wx-tile-light {
+    background: var(--bs-light);
+    color: var(--bs-body-color);
+}
+
+.wx-tile-dark {
+    background: var(--bs-dark);
+    color: var(--bs-light, #fff);
+}
+
+.wx-tile-white {
+    background: #ffffff;
+    color: var(--bs-body-color);
+}
+
+.wx-tile-transparent {
+    background: transparent;
+    color: inherit;
+    border-style: dashed;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .wx-tile-card,
+    .wx-tile-card .wx-tile-remove-btn,
+    .wx-tile-dropzone::before,
+    .wx-tile-card.wx-tile-flash {
+        animation: none;
+        transition: none;
+    }
+}
+
+/* High contrast / forced colors */
+@media (forced-colors: active) {
+    .wx-tile-card {
+        border: 1px solid CanvasText;
+        background: Canvas;
+        color: CanvasText;
+        box-shadow: none;
+    }
+    .wx-tile-card.wx-drop-before::before,
+    .wx-tile-card.wx-drop-after::before {
+        background: Highlight;
+        box-shadow: none;
+    }
+    .wx-tile-card.wx-drop-before::after,
+    .wx-tile-card.wx-drop-after::after {
+        background: transparent;
+        outline: 1px dashed Highlight;
+    }
+    .wx-tile-dropzone.wx-drop-target::before {
+        outline-color: Highlight;
+        background: transparent;
+    }
+    .wx-tile-card:focus-visible {
+        outline: 2px solid Highlight;
+    }
+}
+
+/* Print adjustments */
+@media print {
+    .wx-tile {
+        gap: .5rem;
+    }
+    .wx-tile-card {
+        box-shadow: none;
+        background: #fff;
+        border-color: #999;
+    }
+    .wx-tile-card .wx-tile-remove-btn {
+        display: none;
+    }
+}

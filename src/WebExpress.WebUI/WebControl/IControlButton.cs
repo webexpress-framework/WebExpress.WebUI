@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebIcon;
+﻿using System.Collections.Generic;
+using WebExpress.WebCore.WebIcon;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -46,5 +47,31 @@ namespace WebExpress.WebUI.WebControl
         /// Returns or sets the activation status of the button.
         /// </summary>
         TypeActive Active { get; set; }
+
+        /// <summary>
+        /// Returns or sets the id of a modal dialogue.
+        /// </summary>
+        string Modal { get; set; }
+
+        /// <summary>
+        /// Adds one or more controls to the content.
+        /// </summary>
+        /// <param name="controls">The controls to add to the content.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        IControlButton Add(params IControl[] items);
+
+        /// <summary>
+        /// Adds one or more controls to the content.
+        /// </summary>
+        /// <param name="controls">The controls to add to the content.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        IControlButton Add(IEnumerable<IControl> items);
+
+        /// <summary>
+        /// Removes a control from the content of the button.
+        /// </summary>
+        /// <param name="control">The control to remove from the content.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        IControlButton Remove(IControl control);
     }
 }

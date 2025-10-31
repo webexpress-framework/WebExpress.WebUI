@@ -20,9 +20,9 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets whether the control can be closed.
         /// </summary>
-        public TypeDismissibleAlert Dismissible
+        public TypeDismissibilityAlert Dismissibility
         {
-            get => (TypeDismissibleAlert)GetProperty(TypeDismissibleAlert.Dismissible);
+            get => (TypeDismissibilityAlert)GetProperty(TypeDismissibilityAlert.Dismissible);
             set => SetProperty(value, () => value.ToClass());
         }
 
@@ -70,23 +70,22 @@ namespace WebExpress.WebUI.WebControl
 
             var button = new HtmlElementFieldButton()
             {
-                Class = "btn-close"
-            };
-            button.AddUserAttribute("data-bs-dismiss", "alert");
-            button.AddUserAttribute("aria-label", "close");
+                Class = "btn"
+            }
+                .Add(new HtmlElementTextSemanticsI() { Class = "fas fa-xmark" })
+                .AddUserAttribute("data-bs-dismiss", "alert")
+                .AddUserAttribute("aria-label", "close");
 
-            return new HtmlElementTextContentDiv
-            (
-                !string.IsNullOrWhiteSpace(Head) ? head : null,
-                new HtmlText(Text),
-                Dismissible != TypeDismissibleAlert.None ? button : null
-            )
+            return new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("alert", GetClasses()),
                 Style = GetStyles(),
                 Role = "alert"
-            };
+            }
+                .Add(!string.IsNullOrWhiteSpace(Head) ? head : null)
+                .Add(new HtmlText(Text))
+                .Add(Dismissibility != TypeDismissibilityAlert.None ? button : null);
         }
     }
 }

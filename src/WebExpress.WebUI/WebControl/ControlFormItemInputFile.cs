@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebMessage;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -11,7 +13,7 @@ namespace WebExpress.WebUI.WebControl
     /// This control allows users to select files to upload. It supports setting descriptions, placeholders, 
     /// required fields, and accepted file types. It also provides validation and rendering functionalities.
     /// </remarks>
-    public class ControlFormItemInputFile : ControlFormItemInput
+    public class ControlFormItemInputFile : ControlFormItemInput<ControlFormInputValueFile>
     {
         private readonly List<string> _acceptFile = [];
 
@@ -36,13 +38,23 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<string> AcceptFile => _acceptFile;
 
         /// <summary>
+        /// Initializes a new instance of the class with an automatically assigned ID.
+        /// </summary>
+        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
+        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
+        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
+        public ControlFormItemInputFile([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null)
+            : this($"file_{instance}_{file}_{line}".GetHashCode().ToString("X"))
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        public ControlFormItemInputFile(string id = null)
+        public ControlFormItemInputFile(string id)
             : base(!string.IsNullOrWhiteSpace(id) ? id : "file")
         {
-            Name = Id;
             Margin = new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.Two, PropertySpacing.Space.None, PropertySpacing.Space.None);
         }
 
@@ -65,15 +77,6 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Initializes the form element.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        public override void Initialize(IRenderControlFormContext renderContext)
-        {
-            Value = renderContext?.Request.GetParameter(Name)?.Value;
-        }
-
-        /// <summary>
         /// Converts the control to an HTML representation.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
@@ -81,20 +84,15 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
-            var resultClasses = ValidationResult switch
-            {
-                TypesInputValidity.Warning => "input-warning",
-                TypesInputValidity.Error => "input-error",
-                _ => ""
-            };
+            var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
 
             var html = new HtmlElementFieldInput()
             {
                 Id = Id,
-                Value = Value,
+                Value = value,
                 Name = Name,
                 Type = "file",
-                Class = Css.Concatenate("form-control-file", resultClasses, GetClasses()),
+                Class = Css.Concatenate("form-control-file", GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
                 Placeholder = Placeholder
@@ -106,24 +104,55 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Checks the input element for correctness of the data.
+        /// Validates the input elements within a form for correctness of the data.
         /// </summary>
-        /// <param name="renderContext">The context in which the inputs are validated.</param>
-        public override void Validate(IRenderControlFormContext renderContext)
+        /// <param name="renderContext">The context in which the inputs are validated, containing form data and state.</param>
+        /// <returns>A collection of <see cref="ValidationResult"/> objects representing the validation 
+        /// results for each input element. Each result indicates whether the input is valid or contains errors.
+        /// </returns>
+        public override IEnumerable<ValidationResult> Validate(IRenderControlFormContext renderContext)
         {
+            var validationResults = new List<ValidationResult>();
+            var value = renderContext.GetValue<ControlFormInputValueFile>(this)?.Name;
+
             if (Disabled)
             {
-                return;
+                return [];
             }
 
-            if (Required && string.IsNullOrWhiteSpace(base.Value))
+            if (Required && string.IsNullOrWhiteSpace(value))
             {
-                AddValidationResult(new ValidationResult(TypesInputValidity.Error, "webexpress.webui:form.inputfile.validation.required"));
-
-                return;
+                validationResults.Add(new ValidationResult
+                (
+                    TypeInputValidity.Error,
+                    "webexpress.webui:form.inputfile.validation.required"
+                ));
             }
 
-            base.Validate(renderContext);
+            validationResults.AddRange(base.Validate(renderContext));
+
+            return validationResults;
+        }
+
+        /// <summary>
+        /// Creates an value from the specified string representation.
+        /// </summary>
+        /// <param name="value">
+        /// The string representation of the value to be converted. Cannot be null.
+        /// </param>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <returns>
+        /// The value created from the specified string representation.
+        /// </returns>
+        protected override ControlFormInputValueFile CreateValue(string value, IRenderControlFormContext renderContext)
+        {
+            var file = renderContext?.Request?.GetParameter(Name) as ParameterFile;
+
+            return new ControlFormInputValueFile(value)
+            {
+                ContentType = ContentTypeExtensions.ToContentTypeFromMime(file?.ContentType),
+                Data = file?.Data
+            };
         }
     }
 }

@@ -1,249 +1,178 @@
 /**
- * A selection box.
- * The following events are triggered:
- * - webexpress.webui.change.filter with parameter filter.
- * - webexpress.webui.change.value with parameter value.
+ * Read-only selection list that displays all provided items.
  */
-webexpress.webui.selectionCtrl = class extends webexpress.webui.events {
-    _container = $("<span class='wx-selection form-control' />");
-    _selection = $("<ul/>");
-    _hidden = $("<input type='hidden'/>");
-    _dropdownmenu = $("<div class='dropdown-menu'/>");
-    _dropdownoptions = $("<ul/>");
-    _filter = $("<input type='text'/>");
-    _options = [];
-    _values = []; // array with selected ids from _options.
-    _placeholder = null;
-    _hidedescription = false;
-    _multiselect = false;
-    _optionfilter = (x, y) => x?.toLowerCase().startsWith(y?.toLowerCase());
+webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
 
     /**
-     * Constructor
-     * @param settings Options for styling the control:
-     *        - id Sets the id of the control.
-     *        - css The CSS classes used to design the control.
-     *        - placeholder The placeholder text.
-     *        - hidedescription Disabled the description.
-     *        - multiselect Allows you to select multiple items.
+     * Creates the read-only selection list.
+     * @param {HTMLElement} element host element containing .wx-selection-item children
      */
-    constructor(settings) {
-        super();
+    constructor(element) {
+        super(element);
 
-        const id = settings.id;
-        const name = settings.name;
-        const css = settings.css;
-        const hidedescription = settings.hidedescription;
-        const multiselect = settings.multiselect;
-        const placeholder = settings.placeholder !== undefined ? settings.placeholder : null;
+        // parse all items before clearing
+        this._items = this._parseItems(element.querySelectorAll(".wx-selection-item"));
+        this._values = [];
 
-        const dropdown = $("<span data-bs-toggle='dropdown' aria-expanded='false'/>");
-        const expand = $("<a class='fas fa-angle-down' href='#'/>");
-
-        this._container.attr("id", id ?? "");
-
-        if (css != null) {
-            this._container.addClass(css);
+        // read optional initial selection markers
+        const initial = element.dataset.value || null;
+        if (initial) {
+            this._values = this._normalizeValues(initial, this._items.map(i => i.id));
         }
 
-        if (name != null) {
-            this._hidden.attr("name", name);
-        }
+        // prepare container
+        element.innerHTML = "";
+        element.classList.add("wx-selection");
 
-        if (hidedescription != null) {
-            this._hidedescription = hidedescription;
-        }
+        // create list node
+        this._list = document.createElement("ul");
+        element.appendChild(this._list);
 
-        if (multiselect != null) {
-            this._multiselect = multiselect;
-        }
-
-        this._container.on('show.bs.dropdown', () => {
-            const width = this._container.width();
-            this._dropdownmenu.width(width);
-        });
-
-        this._container.on('shown.bs.dropdown', () => {
-            this._filter.focus();
-            this.update();
-        });
-
-        this._filter.keyup((e) => {
-            const filter = this._filter.val();
-            e.stopPropagation();
-            this.trigger('webexpress.webui.change.filter', filter !== undefined || filter != null ? filter : "");
-            this.update();
-            if (this._dropdownmenu.is(":hidden")) {
-                dropdown.dropdown('toggle');
-            }
-        });
-
-        this._placeholder = placeholder;
-
-        this._dropdownmenu.append(this._filter);
-        this._dropdownmenu.append(this._dropdownoptions);
-
-        dropdown.append(this._selection);
-        dropdown.append(expand);
-
-        this._container.append(dropdown);
-        this._container.append(this._dropdownmenu);
-        this._container.append(this._hidden);
-
-        this.value = [];
+        this.render();
     }
 
     /**
-     * Update of the control.
+     * Parses wx-selection-item nodes into internal item objects.
+     * @param {NodeListOf<Element>} nodes item elements
+     * @returns {Array} parsed items
+     * @private
      */
-    update() {
-        this._dropdownoptions.children().remove();
-
-        this._options.forEach((option) => {
-            const id = option.id ?? null;
-            const label = option.label ?? null;
-            if (!this._values.includes(id)) {
-                if (id == null && (label == null || label == '-')) {
-                    const li = $("<li class='dropdown-divider'/>");
-                    this._dropdownoptions.append(li);
-                } else if (id == null && label != null) {
-                    const li = $("<li class='dropdown-header'>" + label + "</li>");
-                    this._dropdownoptions.append(li);
-                } else {
-                    const description = option.description != null && option.description.length > 0 ? option.description : null;
-                    const image = option.image ?? null;
-                    const color = option.color ?? 'text-dark';
-                    const instruction = option.instruction != null ? "<small>(" + option.instruction + ")</small>": "";
-                    const li = $("<li class='dropdown-item'/>");
-                    const a = $("<a class='link " + color + "' href='javascript:void(0)'>" + option.label + "</a>" + instruction);
-                    const p = $("<p class='small text-muted'>" + description + "</p>");
-
-                    if (image != null) {
-                        const box = $("<span/>");
-                        const span = $("<span/>");
-                        const img = $("<img src='" + image + "' alt=''/>");
-
-                        box.append(img);
-                        box.append(a);
-                        span.append(box);
-                        if (!this._hidedescription && description != null) {
-                            span.append(p);
-                        }
-                        li.append(span);
-                    } else {
-                        li.append(a);
-                        if (!this._hidedescription && description != null) {
-                            li.append(p);
-                        }
-                    }
-
-                    li.click(() => {
-                        if (!this._multiselect) {
-                            this.value = [];
-                        }
-
-                        if (!this._values.includes(option.id)) {
-                            const value = this.value.slice();
-                            value.push(option.id);
-                            this.value = value;
-                            this._filter.val("");
-                        }
-                        this.update();
-                    });
-
-                    if (this._optionfilter(option.label, this._filter.val())) {
-                        this._dropdownoptions.append(li);
-                    }
-                }
-            }
+    _parseItems(nodes) {
+        const items = [];
+        nodes.forEach(elem => {
+            items.push({
+                id: elem.getAttribute("id") || null,
+                label: elem.dataset.label || elem.textContent.trim(),
+                labelColor: elem.dataset.labelColor || null,
+                icon: elem.dataset.icon || null,
+                image: elem.dataset.image || null,
+                // keep original rich content if needed later
+                content: elem.innerHTML || "",
+                disabled: elem.hasAttribute("disabled")
+            });
         });
-
-        this._selection.children("li").remove();
-        this._values.forEach((value) => {
-            const option = this._options.find(elem => elem.id == value);
-            if (option != null) {
-                const label = option.label ?? null;
-                const image = option.image ?? null;
-                const color = option.color ?? 'text-dark';
-                const a = $("<a class='link " + color + "' href='javascript:void(0)'>" + option.label + "</a>");
-                const close = $("<a class='fas fa-times' href='#'/>");
-                const li = $("<li/>");
-
-                close.click(() => {
-                    this.value = this._values.filter(item => item !== value);
-                });
-
-                if (image != null) {
-                    const img = $("<img src='" + image + "' alt=''/>");
-                    li.append(img);
-                    li.append(a);
-                    li.append(close);
-                    this._selection.append(li);
-                } else {
-                    li.append($("<span>" + label + "</span>"));
-                    li.append(close);
-                    this._selection.append(li);
-                }
-            }
-        });
+        return items;
     }
 
     /**
-     * Returns the options.
+     * Normalizes input (array/string) into a de-duplicated array of valid ids.
+     * @param {Array|string|null|undefined} values input values
+     * @param {Array} validIds list of allowed ids
+     * @returns {Array} normalized id list
+     * @private
+     */
+    _normalizeValues(values, validIds) {
+        let arr = [];
+        if (values == null) {
+            arr = [];
+        } else if (Array.isArray(values)) {
+            arr = values;
+        } else if (typeof values === "string") {
+            const trimmed = values.trim();
+            if (trimmed.length > 0) {
+                arr = trimmed.includes(";")
+                    ? trimmed.split(";").map(v => v.trim()).filter(v => v.length > 0)
+                    : [trimmed];
+            }
+        }
+        const valid = new Set(validIds.map(id => String(id)));
+        const seen = new Set();
+        return arr
+            .map(v => String(v))
+            .filter(v => valid.has(v) && !seen.has(v) && seen.add(v));
+    }
+
+    /**
+     * Renders all items (never filtered); applies 'selected' marking where needed.
+     */
+    render() {
+        if (!this._list) return;
+        this._list.innerHTML = "";
+
+        this._items.forEach(item => {
+            const li = document.createElement("li");
+            if (item.labelColor) li.classList.add(item.labelColor);
+            if (item.disabled) li.classList.add("is-disabled");
+            if (this._values.includes(String(item.id))) {
+                li.classList.add("selected");
+            }
+
+            const wrapper = document.createElement("span");
+            // optional image
+            if (item.image) {
+                const img = document.createElement("img");
+                img.className = "wx-icon";
+                img.src = item.image;
+                img.alt = "";
+                wrapper.appendChild(img);
+            }
+            // optional icon
+            if (item.icon) {
+                const icon = document.createElement("i");
+                icon.className = item.icon;
+                wrapper.appendChild(icon);
+            }
+            // label
+            const labelSpan = document.createElement("span");
+            labelSpan.textContent = item.label;
+            wrapper.appendChild(labelSpan);
+
+            li.appendChild(wrapper);
+            this._list.appendChild(li);
+        });
+
+        // add an empty state marker only if keinerlei items exist
+        if (this._items.length === 0) {
+            const li = document.createElement("li");
+            li.textContent = "";
+            this._list.appendChild(li);
+        }
+    }
+
+    /**
+     * Returns all option items.
+     * @returns {Array} items
      */
     get options() {
-        return this._options;
+        return this._items;
     }
 
     /**
-     * Sets the options.
-     * @param data An array with object ids {id, label, description, image, color, instruction}.
+     * Replaces option list and re-renders, preserving selection markers if possible.
+     * @param {Array} items new item list
      */
-    set options(options) {
-        if (options != null) {
-            // determine selected options
-            let selectedOptions = this.selectedOptions;
-            // remove the selected options if they are included in the new options
-            selectedOptions = selectedOptions.filter(elem => !options.some(o => o.id === elem.id));
-            // join the selected and the new options
-            this._options = [...new Set([...options, ...selectedOptions])];
-        } else {
-            this._options = [];
-        }
-        this.update();
+    set options(items) {
+        const oldValues = [...this._values];
+        this._items = Array.isArray(items) ? items : [];
+        this._values = this._normalizeValues(oldValues, this._items.map(i => i.id));
+        this.render();
     }
 
     /**
-     * Returns the selected options.
-     */
-    get selectedOptions() {
-        return this._options.filter(elem => this.value.includes(elem.id));
-    }
-
-    /**
-     * Returns the selected options.
+     * Returns current selected (marked) ids.
+     * @returns {Array} selected ids
      */
     get value() {
         return this._values;
     }
 
     /**
-     * Sets the selected options.
-     * @param values Sets the id of the selected option.
+     * Sets selection markers programmatically; does not hide other items.
+     * Triggers CHANGE_VALUE_EVENT if marking changes.
+     * @param {Array|string|null|undefined} values selection ids
      */
     set value(values) {
-        if (this._values != values) {
-            this._values = values;
-            this.update();
-            this._hidden.val(this._values.join(';'));
-            this.trigger('webexpress.webui.change.value', values);
+        const validIds = this._items.map(i => i.id);
+        const normalized = this._normalizeValues(values, validIds);
+        const oldSerialized = (this._values || []).join(";");
+        const newSerialized = normalized.join(";");
+
+        if (oldSerialized !== newSerialized) {
+            this._values = normalized;
+            this.render();
         }
     }
+};
 
-    /**
-     * Returns the control.
-     */
-    get getCtrl() {
-        return this._container;
-    }
-}
+// register the class
+webexpress.webui.Controller.registerClass("wx-webui-selection", webexpress.webui.SelectionCtrl);

@@ -9,11 +9,25 @@ form.submit.label=Submit
 form.reset.label=Reset
 form.next.label=Next
 form.cancel.label=Cancel
-form.selectionmove.available=Available options
-form.selectionmove.selected=Selected options
+form.move.available=Available options
+form.move.selected=Selected options
 form.inputfile.validation.required=The text field must not be empty!
 form.inputtextbox.validation.required=The text field must not be empty!
 form.inputtextbox.validation.min=The text does not correspond to the minimum length of {0}!
 form.inputtextbox.validation.max=The text is larger than the maximum length of {0}!
 
 modal.close.label=Close
+
+confirm.label=Confirm
+confirm.header=Request Confirmation
+confirm.description=Are you sure you want to do this?
+
+delete.label=Delete
+delete.header=Confirm Delete
+delete.description=Are you sure you want to delete this item?
+
+fileupload.label=Upload
+fileupload.header=Upload document
+fileupload.file.label=Document
+fileupload.file.description=Please select a document from your local device.
+fileupload.file.validation.error.nofile=No file was specified.

@@ -5,6 +5,7 @@ using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebMessage;
 using WebExpress.WebCore.WebUri;
+using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -63,9 +64,9 @@ namespace WebExpress.WebUI.WebControl
         public TypeTarget Target { get; set; }
 
         /// <summary>
-        /// Returns or sets a modal dialogue.
+        /// Returns or sets the id of a modal dialogue.
         /// </summary>
-        public PropertyModal Modal { get; set; } = new PropertyModal();
+        public string Modal { get; set; }
 
         /// <summary>
         /// Returns or sets the icon.
@@ -116,8 +117,9 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="controls">The controls to add to the content.</param>
         /// <remarks>
-        /// This method allows adding one or multiple controls to the <see cref="Content"/> collection of the control panel. 
-        /// It is useful for dynamically constructing the user interface by appending various controls to the panel's content.
+        /// This method allows adding one or multiple controls to the content collection 
+        /// of the control panel. It is useful for dynamically constructing the user interface by 
+        /// appending various controls to the panel's content.
         /// 
         /// Example usage:
         /// <code>
@@ -126,6 +128,7 @@ namespace WebExpress.WebUI.WebControl
         /// var text2 = new ControlText { Text = "B" };
         /// link.Add(text1, text2);
         /// </code>
+        /// 
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
         public void Add(params IControl[] controls)
@@ -138,16 +141,18 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="controls">The controls to add to the content.</param>
         /// <remarks>
-        /// This method allows adding one or multiple controls to the <see cref="Content"/> collection of the control panel. 
-        /// It is useful for dynamically constructing the user interface by appending various controls to the panel's content.
+        /// This method allows adding one or multiple controls to the content collection 
+        /// of the control panel. It is useful for dynamically constructing the user interface by 
+        /// appending various controls to the panel's content.
         /// 
         /// Example usage:
         /// <code>
         /// var link = new ControlLink();
         /// var text1 = new ControlText { Text = "A" };
         /// var text2 = new ControlText { Text = "B" };
-        /// link.Add(new List<IControl>([text1, text2]));
+        /// link.Add(text1, text2);
         /// </code>
+        /// 
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
         public void Add(IEnumerable<IControl> controls)
@@ -199,7 +204,7 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextSemanticsA([.. _controls.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
-                Class = Css.Concatenate("link", GetClasses()),
+                Class = Css.Concatenate("wx-link", Icon is ImageIcon ? "d-inline-flex align-items-baseline" : null, GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
                 Href = Uri?.ToString() + (param.Length > 0 ? "?" + param : string.Empty),
@@ -212,14 +217,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 html.Add(new ControlIcon()
                 {
-                    Icon = Icon,
-                    Margin = !string.IsNullOrWhiteSpace(Text) ? new PropertySpacingMargin
-                    (
-                        PropertySpacing.Space.None,
-                        PropertySpacing.Space.Two,
-                        PropertySpacing.Space.None,
-                        PropertySpacing.Space.None
-                    ) : new PropertySpacingMargin(PropertySpacing.Space.None)
+                    Icon = Icon
                 }.Render(renderContext, visualTree));
             }
 
@@ -233,26 +231,10 @@ namespace WebExpress.WebUI.WebControl
                 html.AddUserAttribute("data-bs-toggle", "tooltip");
             }
 
-            if (Modal == null || Modal.Type == TypeModal.None)
+            if (!string.IsNullOrWhiteSpace(Modal))
             {
-
-            }
-            else if (Modal.Type == TypeModal.Form)
-            {
-                html.OnClick = $"new webexpress.webui.modalFormCtrl({{ close: '{I18N.Translate(renderContext.Request, "webexpress.webui:form.cancel.label")}', uri: '{Modal.Uri?.ToString() ?? html.Href}', size: '{Modal.Size.ToString().ToLower()}', redirect: '{Modal.RedirectUri}'}});";
-                html.Href = "#";
-            }
-            else if (Modal.Type == TypeModal.Brwoser)
-            {
-                html.OnClick = $"new webexpress.webui.modalPageCtrl({{ close: '{I18N.Translate(renderContext.Request, "webexpress.webui:form.cancel.label")}', uri: '{Modal.Uri?.ToString() ?? html.Href}', size: '{Modal.Size.ToString().ToLower()}', redirect: '{Modal.RedirectUri}'}});";
-                html.Href = "#";
-            }
-            else if (Modal.Type == TypeModal.Modal)
-            {
-                html.AddUserAttribute("data-bs-toggle", "modal");
-                html.AddUserAttribute("data-bs-target", "#" + Modal.Modal.Id);
-
-                return new HtmlElementTextContentDiv(html, Modal.Modal.Render(renderContext, visualTree));
+                html.AddUserAttribute("data-wx-toggle", "modal");
+                html.AddUserAttribute("data-wx-target", $"#{Modal}");
             }
 
             return html;

@@ -16,11 +16,6 @@
         Flat,
 
         /// <summary>
-        /// A simple layout tree with minimal styling.
-        /// </summary>
-        Simple,
-
-        /// <summary>
         /// A grouped layout tree.
         /// </summary>
         Group,
@@ -33,12 +28,7 @@
         /// <summary>
         /// A horizontal layout tree with items displayed in a row.
         /// </summary>
-        Horizontal,
-
-        /// <summary>
-        /// A tree view layout tree with expandable nodes.
-        /// </summary>
-        TreeView
+        Horizontal
     }
 
     /// <summary>
@@ -55,13 +45,11 @@
         {
             return layout switch
             {
-                TypeLayoutTree.TreeView => "tree-treeview",
-                TypeLayoutTree.Group => "list-group",
-                TypeLayoutTree.Simple => "tree-simple",
-                TypeLayoutTree.Flat => "list-unstyled",
-                TypeLayoutTree.Flush => "list-group list-group-flush",
-                TypeLayoutTree.Horizontal => "list-group list-group-horizontal",
-                _ => string.Empty,
+                TypeLayoutTree.Group => "wx-tree-group",
+                TypeLayoutTree.Flat => "wx-tree-flat",
+                TypeLayoutTree.Flush => "wx-tree-flush",
+                TypeLayoutTree.Horizontal => "wx-tree-horizontal",
+                _ => "wx-tree"
             };
         }
     }

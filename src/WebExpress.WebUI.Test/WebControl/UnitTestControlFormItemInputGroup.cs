@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputGroup(id, new ControlFormItemGroupColumnVertical())
             {
@@ -44,7 +44,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputGroup(null, new ControlFormItemGroupColumnVertical())
             {
@@ -61,22 +61,22 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form group control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-form-group-column""></div>")]
-        [InlineData("abc", @"<div class=""wx-form-group-column""></div>")]
+        [InlineData(null, @"*<div class=""wx-form-group-column""></div>*")]
+        [InlineData("abc", @"*<div class=""wx-form-group-column""></div>*")]
         public void Value(string value, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputGroup(null, new ControlFormItemGroupColumnVertical())
+            var control = new ControlFormItemInputGroup(null, new ControlFormItemGroupColumnVertical());
+            var form = new ControlForm().Add(control).Initialize(renderContext =>
             {
-                Value = value
-            };
+                renderContext.SetValue(control, new ControlFormInputValueString(value));
+            });
 
             // test execution
-            var html = control.Render(context, visualTree);
+            var html = form.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }

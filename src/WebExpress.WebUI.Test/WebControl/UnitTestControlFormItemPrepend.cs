@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemPrepend(id)
             {
@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemPrepend()
             {
@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemPrepend()
             {
@@ -90,14 +90,14 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(typeof(ControlText), @"<div class=""input-group-prepend""><div></div></div>")]
-        [InlineData(typeof(ControlLink), @"<div class=""input-group-prepend""><a class=""link""></a></div>")]
+        [InlineData(typeof(ControlLink), @"<div class=""input-group-prepend""><a class=""wx-link""></a></div>")]
         [InlineData(typeof(ControlImage), @"<div class=""input-group-prepend""><img></div>")]
         public void Add(Type child, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var childInstance = Activator.CreateInstance(child, [null]) as IControl;
             var control = new ControlFormItemPrepend();

@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using WebExpress.WebCore.WebEndpoint;
+using System.Text.Json;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -11,9 +10,157 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a chart control that can be used to display various types of charts.
     /// </summary>
-    public class ControlChart : Control
+    public class ControlChart : Control, IControlChart
     {
+        private static readonly JsonSerializerOptions _options = new()
+        {
+            WriteIndented = false,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+            Converters = { new ControlChartDatasetPointCollectionConverter() }
+        };
         private readonly List<ControlChartDataset> _datasets = [];
+        private readonly List<string> _labels = [];
+        private TypeChart _type;
+        private string _title;
+        private string _titleX;
+        private string _titleY;
+        private int _width;
+        private int _height;
+        private float _minimum = float.MinValue;
+        private float _maximum = float.MaxValue;
+        private bool _responsive;
+        private bool _maintainAspectRatio;
+        private bool _legendDisplay;
+        private bool _titleDisplay;
+        private bool _yBeginAtZero;
+        private bool _xBeginAtZero;
+
+        /// <summary>
+        /// Returns or sets the chart type. The setter returns the instance for fluent chaining.
+        /// </summary>
+        public TypeChart Type
+        {
+            get { return _type; }
+            set { _type = value; }
+        }
+
+        /// <summary>
+        /// Returns or sets the chart title. The setter returns the instance for fluent chaining.
+        /// </summary>
+        public string Title
+        {
+            get { return _title; }
+            set { _title = value; }
+        }
+
+        /// <summary>
+        /// Returns or sets the x-axis title. The setter returns the instance for fluent chaining.
+        /// </summary>
+        public string TitleX
+        {
+            get { return _titleX; }
+            set { _titleX = value; }
+        }
+
+        /// <summary>
+        /// Returns or sets the y-axis title. The setter returns the instance for fluent chaining.
+        /// </summary>
+        public string TitleY
+        {
+            get { return _titleY; }
+            set { _titleY = value; }
+        }
+
+        /// <summary>
+        /// Returns or sets the chart width. The setter returns the instance for fluent chaining.
+        /// </summary>
+        public new int Width
+        {
+            get { return _width; }
+            set { _width = value; }
+        }
+
+        /// <summary>
+        /// Returns or sets the chart height. The setter returns the instance for fluent chaining.
+        /// </summary>
+        public new int Height
+        {
+            get { return _height; }
+            set { _height = value; }
+        }
+
+        /// <summary>
+        /// Returns or sets the minimum y-value. The setter returns the instance for fluent chaining.
+        /// </summary>
+        public float Minimum
+        {
+            get { return _minimum; }
+            set { _minimum = value; }
+        }
+
+        /// <summary>
+        /// Returns or sets the maximum y-value. The setter returns the instance for fluent chaining.
+        /// </summary>
+        public float Maximum
+        {
+            get { return _maximum; }
+            set { _maximum = value; }
+        }
+
+        /// <summary>
+        /// Returns or sets whether the chart is responsive. The setter returns the instance for fluent chaining.
+        /// </summary>
+        public bool Responsive
+        {
+            get { return _responsive; }
+            set { _responsive = value; }
+        }
+
+        /// <summary>
+        /// Returns or sets whether the chart maintains aspect ratio. The setter returns the instance for fluent chaining.
+        /// </summary>
+        public bool MaintainAspectRatio
+        {
+            get { return _maintainAspectRatio; }
+            set { _maintainAspectRatio = value; }
+        }
+
+        /// <summary>
+        /// Returns or sets whether the legend is displayed. The setter returns the instance for fluent chaining.
+        /// </summary>
+        public bool LegendDisplay
+        {
+            get { return _legendDisplay; }
+            set { _legendDisplay = value; }
+        }
+
+        /// <summary>
+        /// Returns or sets whether the title is displayed. The setter returns the instance for fluent chaining.
+        /// </summary>
+        public bool TitleDisplay
+        {
+            get { return _titleDisplay; }
+            set { _titleDisplay = value; }
+        }
+
+        /// <summary>
+        /// Returns or sets whether the y-axis begins at zero. The setter returns the instance for fluent chaining.
+        /// </summary>
+        public bool YBeginAtZero
+        {
+            get { return _yBeginAtZero; }
+            set { _yBeginAtZero = value; }
+        }
+
+        /// <summary>
+        /// Returns or sets whether the x-axis begins at zero. The setter returns the instance for fluent chaining.
+        /// </summary>
+        public bool XBeginAtZero
+        {
+            get { return _xBeginAtZero; }
+            set { _xBeginAtZero = value; }
+        }
 
         /// <summary>
         /// Returns the datasets.
@@ -21,49 +168,75 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<ControlChartDataset> Data => _datasets;
 
         /// <summary>
-        /// Returns or sets the labels.
+        /// Returns the labels. The setter returns the instance for fluent chaining.
         /// </summary>
-        public ICollection<string> Labels { get; set; } = new List<string>();
+        public IEnumerable<string> Labels => _labels;
 
         /// <summary>
-        /// Returns or sets the type.
+        /// Adds one or more datasets to the control chart.
         /// </summary>
-        public TypeChart Type { get; set; }
+        /// <param name="datasets">
+        /// An array of objects to add to the control chart. Each dataset represents a
+        /// series of data points to be displayed.
+        /// </param>
+        /// <returns>The updated instance, including the newly added dataset.</returns>
+        public IControlChart AddDataset(params ControlChartDataset[] datasets)
+        {
+            _datasets.AddRange(datasets);
+
+            return this;
+        }
 
         /// <summary>
-        /// Returns or sets the title.
+        /// Adds one or more datasets to the control chart.
         /// </summary>
-        public string Title { get; set; }
+        /// <param name="datasets">
+        /// An array of objects to add to the control chart. Each dataset represents a
+        /// series of data points to be displayed.
+        /// </param>
+        /// <returns>The updated instance, including the newly added dataset.</returns>
+        public IControlChart AddDataset(IEnumerable<ControlChartDataset> datasets)
+        {
+            _datasets.AddRange(datasets);
+
+            return this;
+        }
 
         /// <summary>
-        /// Returns or sets the title of the x-axis.
+        /// Adds one or more labels to the control chart.
         /// </summary>
-        public string TitleX { get; set; }
+        /// <remarks>
+        /// This method allows adding multiple labels at once. If a label already exists in the
+        /// chart, it will not be duplicated.
+        /// </remarks>
+        /// <param name="labels">
+        /// An array of labels to add to the chart. Each label represents a distinct category or data point.
+        /// </param>
+        /// <returns>The updated instance with the added label.</returns>
+        public IControlChart AddLabel(params string[] labels)
+        {
+            _labels.AddRange(labels);
+
+            return this;
+        }
 
         /// <summary>
-        /// Returns or sets the title of the y-axis.
+        /// Adds one or more labels to the control chart.
         /// </summary>
-        public string TitleY { get; set; }
+        /// <remarks>
+        /// This method allows adding multiple labels at once. If a label already exists in the
+        /// chart, it will not be duplicated.
+        /// </remarks>
+        /// <param name="labels">
+        /// An array of labels to add to the chart. Each label represents a distinct category or data point.
+        /// </param>
+        /// <returns>The updated instance with the added label.</returns>
+        public IControlChart AddLabel(IEnumerable<string> labels)
+        {
+            _labels.AddRange(labels);
 
-        /// <summary>
-        /// Returns or sets the width.
-        /// </summary>
-        public new int Width { get; set; }
-
-        /// <summary>
-        /// Returns or sets the height.
-        /// </summary>
-        public new int Height { get; set; }
-
-        /// <summary>
-        /// Returns or sets the minimum.
-        /// </summary>
-        public float Minimum { get; set; } = float.MinValue;
-
-        /// <summary>
-        /// Returns or sets the maximum.
-        /// </summary>
-        public float Maximum { get; set; } = float.MaxValue;
+            return this;
+        }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -74,100 +247,91 @@ namespace WebExpress.WebUI.WebControl
             : base(id)
         {
             _datasets.AddRange(datasets);
-        }
-        /// <summary>
-        /// Initializes the control.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        /// <param name="visualTree">The visual tree representing the control's structure.</param>
-        protected void Initialize(IRenderControlContext renderContext, IVisualTreeControl visualTree)
-        {
-            visualTree.AddHeaderScriptLink(RouteEndpoint.Combine(renderContext.PageContext?.ApplicationContext?.ContextPath, "/assets/js/Chart.min.js"));
-            visualTree.AddCssLink(RouteEndpoint.Combine(renderContext.PageContext?.ApplicationContext?.ContextPath, "/assets/css/Chart.min.css"));
-
-            var builder = new StringBuilder();
-            var data = new List<StringBuilder>();
-            builder.Append($"var config_{Id} = {{");
-            //if (Type != TypeChart.Polar)
-            {
-                builder.Append($"type:'{Type.ToType()}',");
-            }
-            builder.Append("data:{");
-            builder.Append($"labels:[{string.Join(",", Labels.Select(x => $"'{x}'"))}],");
-            builder.Append("datasets:[{");
-            foreach (var v in Data)
-            {
-                var buf = new StringBuilder();
-
-                buf.Append($"label:'{v.Title}',");
-                buf.Append($"backgroundColor:{(v.BackgroundColor.Count <= 1 ? v.BackgroundColor.Select(x => $"'{x}'").FirstOrDefault()?.ToString() : $"[ {string.Join(",", v.BackgroundColor.Select(x => $"'{x}'"))} ]")},");
-                buf.Append($"borderColor:{(v.BorderColor.Count <= 1 ? v.BorderColor.Select(x => $"'{x}'").FirstOrDefault()?.ToString() : $"[ {string.Join(",", v.BorderColor.Select(x => $"'{x}'"))} ]")},");
-                buf.Append($"data:[");
-                if (v.Data != null)
-                {
-                    buf.Append(string.Join(",", v.Data.Select(x => x.ToString(CultureInfo.InvariantCulture))));
-                }
-                buf.Append($"],");
-                if (Type == TypeChart.Line)
-                {
-                    buf.Append($"fill:'{v.Fill.ToType()}',");
-                    buf.Append($"pointStyle:'{v.Point.ToType()}'");
-                }
-                data.Add(buf);
-            }
-            builder.Append(string.Join("},{", data));
-            builder.Append("}]");
-            builder.Append("},");
-            builder.Append("options:{");
-            builder.Append("responsive:true,");
-            builder.Append($"title:{{display:{(string.IsNullOrWhiteSpace(Title) ? "false" : "true")},text:'{Title}'}},");
-            builder.Append("tooltips:{mode:'index',intersect:false},");
-            builder.Append("hover:{mode:'nearest',intersect:true},");
-            if (Type == TypeChart.Line || Type == TypeChart.Bar)
-            {
-                builder.Append($"scales:{{");
-                builder.Append($"xAxes:[{{display: true,scaleLabel:{{display:true,labelString:'{TitleX}'}}}}],");
-                builder.Append($"yAxes:[{{display:true,ticks:{{{(Minimum != float.MinValue ? $"min:{Minimum},suggestedMin:{Minimum}," : "")}{(Maximum != float.MaxValue ? $"max:{Maximum},suggestedMax:{Maximum}," : "")}}},scaleLabel:{{display:true,labelString:'{TitleY}'}}}}]");
-                builder.Append($"}}");
-            }
-            builder.Append("}};");
-
-            builder.AppendLine($"var chart_{Id} = new Chart(document.getElementById('{Id}').getContext('2d'), config_{Id});");
-
-            visualTree.AddScript($"chart_{Id}", builder.ToString());
         }
 
         /// <summary>
-        /// Converts the control to an HTML representation.
+        /// Converts the control to an HTML representation using data-attributes for ChartCtrl.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <param name="visualTree">The visual tree representing the control's structure.</param>
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            Initialize(renderContext, visualTree);
-
-            var html = new HtmlElementScriptingCanvas()
+            var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("", GetClasses()),
+                Class = Css.Concatenate("wx-webui-chart", GetClasses()),
                 Style = GetStyles(),
                 Role = Role
-            };
+            }
+                // set chart type
+                .AddUserAttribute("data-type", _type.ToType())
+                // set chart labels as json array
+                .AddUserAttribute("data-labels", _labels.Count != 0 ? SerializeJson(_labels) : null)
+                // set option flags
+                .AddUserAttribute("data-responsive", _responsive ? "true" : null)
+                .AddUserAttribute("data-maintain-aspect-ratio", _maintainAspectRatio ? "true" : null)
+                .AddUserAttribute("data-legend-display", _legendDisplay ? "true" : null)
+                .AddUserAttribute("data-title-display", _titleDisplay ? "true" : null)
+                // set translated titles and axis settings
+                .AddUserAttribute("data-title-text", I18N.Translate(renderContext, _title))
+                .AddUserAttribute("data-scale-y-begin-at-zero", _yBeginAtZero ? "true" : null)
+                .AddUserAttribute("data-scale-y-title", I18N.Translate(renderContext, _titleY))
+                .AddUserAttribute("data-scale-x-begin-at-zero", _xBeginAtZero ? "true" : null)
+                .AddUserAttribute("data-scale-x-title", I18N.Translate(renderContext, _titleX))
+                // set min/max values for y axis
+                .AddUserAttribute("data-scale-y-min", _minimum > float.MinValue ? _minimum.ToString(CultureInfo.InvariantCulture) : null)
+                .AddUserAttribute("data-scale-y-max", _maximum < float.MaxValue ? _maximum.ToString(CultureInfo.InvariantCulture) : null)
+                // set width and height
+                .AddUserAttribute("data-width", _width > 0 ? _width.ToString(CultureInfo.InvariantCulture) : null)
+                .AddUserAttribute("data-height", _height > 0 ? _height.ToString(CultureInfo.InvariantCulture) : null)
+                // set dataset count
+                .AddUserAttribute("data-dataset-count", _datasets.Count > 0 ? _datasets.Count.ToString(CultureInfo.InvariantCulture) : null);
 
-            if (Width > 0)
+            var dsIndex = 0;
+            foreach (var ds in _datasets)
             {
-                html.Width = Width;
-                html.Style = Css.Concatenate($"width: {Width}px;", html.Style);
+                if (dsIndex >= 10)
+                {
+                    break;
+                }
+                var prefix = $"data-dataset{dsIndex}-";
+                if (!string.IsNullOrWhiteSpace(ds.Title))
+                {
+                    html = html.AddUserAttribute(prefix + "label", ds.Title);
+                }
+                if (ds.Data != null && ds.Data.Count != 0)
+                {
+                    html = html.AddUserAttribute(prefix + "data", SerializeJson(ds.Data));
+                }
+                if (!string.IsNullOrWhiteSpace(ds.BackgroundColor))
+                {
+                    html = html.AddUserAttribute(prefix + "background-color", ds.BackgroundColor);
+                }
+                if (!string.IsNullOrWhiteSpace(ds.BorderColor))
+                {
+                    html = html.AddUserAttribute(prefix + "border-color", ds.BorderColor);
+                }
+                if (ds.BorderWidth > 0)
+                {
+                    html = html.AddUserAttribute(prefix + "border-width", ds.BorderWidth.ToString(CultureInfo.InvariantCulture));
+                }
+                dsIndex++;
             }
 
-            if (Height > 0)
-            {
-                html.Height = Height;
-                html.Style = Css.Concatenate($"height: {Height}px;", html.Style);
-            }
+            return html;
+        }
 
-            return new HtmlElementTextContentDiv(html) { Class = "chart-container" };
+        /// <summary>
+        /// Serializes an object to a compact JSON string.
+        /// </summary>
+        /// <param name="obj">The object to serialize.</param>
+        /// <returns>JSON string.</returns>
+        private static string SerializeJson(object obj)
+        {
+            return JsonSerializer
+                .Serialize(obj, _options)
+                .Replace("\"", "&quot;");
         }
     }
 }

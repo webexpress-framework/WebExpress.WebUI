@@ -16,13 +16,13 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the button control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<button type=""button"" class=""btn""></button>")]
-        [InlineData("id", @"<button id=""id"" type=""button"" class=""btn""></button>")]
+        [InlineData(null, @"<button type=""button"" class=""wx-button btn""></button>")]
+        [InlineData("id", @"<button id=""id"" type=""button"" class=""wx-button btn""></button>")]
         public void Id(string id, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButton(id)
             {
@@ -38,13 +38,13 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the text property of the button control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<button type=""button"" class=""btn""></button>")]
-        [InlineData("abc", @"<button type=""button"" class=""btn"">abc</button>")]
+        [InlineData(null, @"<button type=""button"" class=""wx-button btn""></button>")]
+        [InlineData("abc", @"<button type=""button"" class=""wx-button btn"">abc</button>")]
         public void Text(string text, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButton()
             {
@@ -61,14 +61,14 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the size property of the button control.
         /// </summary>
         [Theory]
-        [InlineData(TypeSizeButton.Default, @"<button type=""button"" class=""btn""></button>")]
-        [InlineData(TypeSizeButton.Small, @"<button type=""button"" class=""btn btn-sm""></button>")]
-        [InlineData(TypeSizeButton.Large, @"<button type=""button"" class=""btn btn-lg""></button>")]
+        [InlineData(TypeSizeButton.Default, @"<button type=""button"" class=""wx-button btn""></button>")]
+        [InlineData(TypeSizeButton.Small, @"<button type=""button"" class=""wx-button btn btn-sm""></button>")]
+        [InlineData(TypeSizeButton.Large, @"<button type=""button"" class=""wx-button btn btn-lg""></button>")]
         public void Size(TypeSizeButton size, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButton()
             {
@@ -85,17 +85,18 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the backgroundcolor property of the button control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorButton.Default, @"<button type=""button"" class=""btn""></button>")]
-        [InlineData(TypeColorButton.Primary, @"<button type=""button"" class=""btn btn-primary""></button>")]
-        [InlineData(TypeColorButton.Secondary, @"<button type=""button"" class=""btn btn-secondary""></button>")]
-        [InlineData(TypeColorButton.Warning, @"<button type=""button"" class=""btn btn-warning""></button>")]
-        [InlineData(TypeColorButton.Danger, @"<button type=""button"" class=""btn btn-danger""></button>")]
-        [InlineData(TypeColorButton.Dark, @"<button type=""button"" class=""btn btn-dark""></button>")]
+        [InlineData(TypeColorButton.Default, @"<button type=""button"" class=""wx-button btn""></button>")]
+        [InlineData(TypeColorButton.Primary, @"<button type=""button"" class=""wx-button btn btn-primary""></button>")]
+        [InlineData(TypeColorButton.Secondary, @"<button type=""button"" class=""wx-button btn btn-secondary""></button>")]
+        [InlineData(TypeColorButton.Info, @"<button type=""button"" class=""wx-button btn btn-info""></button>")]
+        [InlineData(TypeColorButton.Warning, @"<button type=""button"" class=""wx-button btn btn-warning""></button>")]
+        [InlineData(TypeColorButton.Danger, @"<button type=""button"" class=""wx-button btn btn-danger""></button>")]
+        [InlineData(TypeColorButton.Dark, @"<button type=""button"" class=""wx-button btn btn-dark""></button>")]
         public void BackgroundColor(TypeColorButton color, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButton()
             {
@@ -112,18 +113,18 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the outline property of the button control.
         /// </summary>
         [Theory]
-        [InlineData(false, TypeColorButton.Default, @"<button type=""button"" class=""btn""></button>")]
-        [InlineData(true, TypeColorButton.Default, @"<button type=""button"" class=""btn""></button>")]
-        [InlineData(true, TypeColorButton.Primary, @"<button type=""button"" class=""btn btn-outline-primary""></button>")]
-        [InlineData(true, TypeColorButton.Secondary, @"<button type=""button"" class=""btn btn-outline-secondary""></button>")]
-        [InlineData(true, TypeColorButton.Warning, @"<button type=""button"" class=""btn btn-outline-warning""></button>")]
-        [InlineData(true, TypeColorButton.Danger, @"<button type=""button"" class=""btn btn-outline-danger""></button>")]
-        [InlineData(true, TypeColorButton.Dark, @"<button type=""button"" class=""btn btn-outline-dark""></button>")]
+        [InlineData(false, TypeColorButton.Default, @"<button type=""button"" class=""wx-button btn""></button>")]
+        [InlineData(true, TypeColorButton.Default, @"<button type=""button"" class=""wx-button btn""></button>")]
+        [InlineData(true, TypeColorButton.Primary, @"<button type=""button"" class=""wx-button btn btn-outline-primary""></button>")]
+        [InlineData(true, TypeColorButton.Secondary, @"<button type=""button"" class=""wx-button btn btn-outline-secondary""></button>")]
+        [InlineData(true, TypeColorButton.Warning, @"<button type=""button"" class=""wx-button btn btn-outline-warning""></button>")]
+        [InlineData(true, TypeColorButton.Danger, @"<button type=""button"" class=""wx-button btn btn-outline-danger""></button>")]
+        [InlineData(true, TypeColorButton.Dark, @"<button type=""button"" class=""wx-button btn btn-outline-dark""></button>")]
         public void Outline(bool outline, TypeColorButton color, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButton()
             {
@@ -141,13 +142,13 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the block property of the button control.
         /// </summary>
         [Theory]
-        [InlineData(TypeBlockButton.None, @"<button type=""button"" class=""btn""></button>")]
-        [InlineData(TypeBlockButton.Block, @"<button type=""button"" class=""btn btn-block""></button>")]
+        [InlineData(TypeBlockButton.None, @"<button type=""button"" class=""wx-button btn""></button>")]
+        [InlineData(TypeBlockButton.Block, @"<button type=""button"" class=""wx-button btn btn-block""></button>")]
         public void Block(TypeBlockButton block, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButton()
             {
@@ -164,13 +165,13 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the icon property of the button control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<button type=""button"" class=""btn""></button>")]
-        [InlineData(typeof(IconStar), @"<button type=""button"" class=""btn""><span class=""fas fa-star""></span></button>")]
+        [InlineData(null, @"<button type=""button"" class=""wx-button btn""></button>")]
+        [InlineData(typeof(IconStar), @"<button type=""button"" class=""wx-button btn""><i class=""fas fa-star""></i></button>")]
         public void Icon(Type icon, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButton()
             {
@@ -191,7 +192,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control1 = new ControlButton(null, new ControlIcon() { Icon = new IconStar() });
             var control2 = new ControlButton(null, [new ControlIcon() { Icon = new IconStar() }]);
@@ -212,12 +213,12 @@ namespace WebExpress.WebUI.Test.WebControl
             var html5 = control5.Render(context, visualTree);
             var html6 = control6.Render(context, visualTree);
 
-            Assert.Equal(@"<button type=""button"" class=""btn""><span class=""fas fa-star""></span></button>", html1.Trim());
-            Assert.Equal(@"<button type=""button"" class=""btn""><span class=""fas fa-star""></span></button>", html2.Trim());
-            Assert.Equal(@"<button type=""button"" class=""btn""><span class=""fas fa-star""></span></button>", html3.Trim());
-            Assert.Equal(@"<button type=""button"" class=""btn""><span class=""fas fa-star""></span></button>", html4.Trim());
-            Assert.Equal(@"<button type=""button"" class=""btn""><span class=""fas fa-star""></span></button>", html5.Trim());
-            Assert.Equal(@"<button type=""button"" class=""btn""><span class=""fas fa-star""></span></button>", html6.Trim());
+            Assert.Equal(@"<button type=""button"" class=""wx-button btn""><i class=""fas fa-star""></i></button>", html1.Trim());
+            Assert.Equal(@"<button type=""button"" class=""wx-button btn""><i class=""fas fa-star""></i></button>", html2.Trim());
+            Assert.Equal(@"<button type=""button"" class=""wx-button btn""><i class=""fas fa-star""></i></button>", html3.Trim());
+            Assert.Equal(@"<button type=""button"" class=""wx-button btn""><i class=""fas fa-star""></i></button>", html4.Trim());
+            Assert.Equal(@"<button type=""button"" class=""wx-button btn""><i class=""fas fa-star""></i></button>", html5.Trim());
+            Assert.Equal(@"<button type=""button"" class=""wx-button btn""><i class=""fas fa-star""></i></button>", html6.Trim());
         }
     }
 }

@@ -5,7 +5,14 @@ using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebFragment
 {
-    public class FragmentControlNavigationItemLink : ControlNavigationItemLink, IFragmentControl<ControlNavigationItemLink>
+    /// <summary>
+    /// Represents a navigation item link that is associated with a fragment and can be rendered as part of a control.
+    /// </summary>
+    /// <remarks>
+    /// This class extends <see cref="ControlNavigationItemLink"/> to provide additional
+    /// functionality for working with fragments.
+    /// </remarks>
+    public class FragmentControlNavigationItemLink : ControlNavigationItemLink, IFragmentControl<ControlNavigationItemLink>, IFragmentControlNavigationItem
     {
         /// <summary>
         /// Returns the context of the fragment.

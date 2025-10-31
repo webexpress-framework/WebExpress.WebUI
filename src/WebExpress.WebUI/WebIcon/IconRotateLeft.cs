@@ -8,6 +8,6 @@
         /// <summary>
         /// Returns the CSS class associated with the icon.
         /// </summary>
-        protected override string Class => "fa-solid fa-rotate-left";
+        public override string Class => "fa-solid fa-rotate-left";
     }
 }

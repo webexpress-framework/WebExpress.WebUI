@@ -16,13 +16,13 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the icon control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<span class=""fas fa-star""></span>")]
-        [InlineData("id", @"<span id=""id"" class=""fas fa-star""></span>")]
+        [InlineData(null, @"<i class=""fas fa-star""></i>")]
+        [InlineData("id", @"<i id=""id"" class=""fas fa-star""></i>")]
         public void Id(string id, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlIcon(id)
             {
@@ -39,13 +39,13 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the title property of the icon control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<span class=""fas fa-star""></span>")]
-        [InlineData("abc", @"<span class=""fas fa-star"" title=""abc""></span>")]
+        [InlineData(null, @"<i class=""fas fa-star""></i>")]
+        [InlineData("abc", @"<i class=""fas fa-star"" title=""abc""></i>")]
         public void Title(string title, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlIcon()
             {
@@ -64,12 +64,12 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"")]
-        [InlineData(typeof(IconStar), @"<span class=""fas fa-star""></span>")]
+        [InlineData(typeof(IconStar), @"<i class=""fas fa-star""></i>")]
         public void Icon(Type icon, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlIcon()
             {
@@ -86,16 +86,16 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the size property of the icon control.
         /// </summary>
         [Theory]
-        [InlineData(TypeSizeText.Default, @"<span class=""fas fa-star""></span>")]
-        [InlineData(TypeSizeText.ExtraSmall, @"<span class=""fas fa-star"" style=""font-size:0.55rem;""></span>")]
-        [InlineData(TypeSizeText.Small, @"<span class=""fas fa-star"" style=""font-size:0.75rem;""></span>")]
-        [InlineData(TypeSizeText.Large, @"<span class=""fas fa-star"" style=""font-size:1.5rem;""></span>")]
-        [InlineData(TypeSizeText.ExtraLarge, @"<span class=""fas fa-star"" style=""font-size:2rem;""></span>")]
+        [InlineData(TypeSizeText.Default, @"<i class=""fas fa-star""></i>")]
+        [InlineData(TypeSizeText.ExtraSmall, @"<i class=""fas fa-star wx-esm""></i>")]
+        [InlineData(TypeSizeText.Small, @"<i class=""fas fa-star wx-sm""></i>")]
+        [InlineData(TypeSizeText.Large, @"<i class=""fas fa-star wx-lg""></i>")]
+        [InlineData(TypeSizeText.ExtraLarge, @"<i class=""fas fa-star wx-elg""></i>")]
         public void Size(TypeSizeText size, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlIcon()
             {
@@ -113,16 +113,16 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the vertical alignment property of the icon control.
         /// </summary>
         [Theory]
-        [InlineData(TypeVerticalAlignment.Default, @"<span class=""fas fa-star""></span>")]
-        [InlineData(TypeVerticalAlignment.Middle, @"<span class=""fas fa-star align-middle""></span>")]
-        [InlineData(TypeVerticalAlignment.TextTop, @"<span class=""fas fa-star align-text-top""></span>")]
-        [InlineData(TypeVerticalAlignment.TextBottom, @"<span class=""fas fa-star align-text-bottom""></span>")]
-        [InlineData(TypeVerticalAlignment.Bottom, @"<span class=""fas fa-star align-bottom""></span>")]
+        [InlineData(TypeVerticalAlignment.Default, @"<i class=""fas fa-star""></i>")]
+        [InlineData(TypeVerticalAlignment.Middle, @"<i class=""fas fa-star align-middle""></i>")]
+        [InlineData(TypeVerticalAlignment.TextTop, @"<i class=""fas fa-star align-text-top""></i>")]
+        [InlineData(TypeVerticalAlignment.TextBottom, @"<i class=""fas fa-star align-text-bottom""></i>")]
+        [InlineData(TypeVerticalAlignment.Bottom, @"<i class=""fas fa-star align-bottom""></i>")]
         public void VerticalAlignment(TypeVerticalAlignment verticalAlignment, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlIcon()
             {

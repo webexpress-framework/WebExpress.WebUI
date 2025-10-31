@@ -4,35 +4,72 @@
     padding: 2px;
 }
 
+.wx-move > ul {
+    padding-left: 0.2em;
+    margin-right: auto;
+    margin-bottom: 0;
+}
+
+.wx-move > ul > li {
+    float: left;
+    display: flex;
+    color: var(--bs-body-color);
+    background-color: var(--bs-secondary-bg);
+    align-items: center;
+    margin-right: 0.5em;
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
+    border-radius: 0.2em;
+    padding-top: 0.1em;
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+    padding-bottom: 0.1em;
+    white-space: nowrap;
+    gap: 0.5em;
+}
+
+.wx-move > ul > li > span {
+    color: var(--bs-body-color);
+}
+
+.wx-move > ul > li > img {
+}
+
+.wx-move > ul > li > i {
+}
+
 .wx-move-list {
     margin: 0px;
     width: 40%;
 }
 
-    .wx-move-list > p {
-        cursor: default;
-        padding-left: 0.5em;
-    }
+.wx-move-list > p {
+    cursor: default;
+    padding-left: 0.5em;
+}
 
-    .wx-move-list > ul {
-        height: 250px;
-        overflow-y: auto;
-        cursor: default;
-    }
+.wx-move-list > ul {
+    height: 250px;
+    overflow-y: auto;
+    cursor: default;
+}
 
-        .wx-move-list > ul > li {
-            cursor: pointer;
-        }
+.wx-move-list > ul > li {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+}
 
-            .wx-move-list > ul > li > img {
-                height: 16px;
-                margin-right: 0.5em;
-            }
+.wx-move-list > ul > li > img {
+}
 
-            .wx-move-list > ul > li > i {
-                margin-right: 0.5em;
-            }
+.wx-move-list > ul > li > i {
+}
 
 .wx-move-button {
     margin: auto;
+    gap: 0.5em;
+    display: flex;
+    flex-direction: column;
 }

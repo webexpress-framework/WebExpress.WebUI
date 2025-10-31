@@ -44,22 +44,23 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("callout", GetClasses()),
+                Class = Css.Concatenate("wx-callout", GetClasses()),
                 Style = GetStyles(),
-                Role = Role
+                Role = Role,
+                DataTheme = Theme.ToValue()
             };
 
             if (Title != null)
             {
                 html.Add(new HtmlElementTextSemanticsSpan(new HtmlText(Title))
                 {
-                    Class = "callout-title"
+                    Class = "wx-callout-title"
                 });
             }
 
             html.Add(new HtmlElementTextContentDiv(Content.Select(x => x.Render(renderContext, visualTree)).ToArray())
             {
-                Class = "callout-body"
+                Class = "wx-callout-body"
             });
 
             return html;

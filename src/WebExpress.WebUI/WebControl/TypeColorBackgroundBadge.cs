@@ -47,17 +47,7 @@
         /// <summary>
         /// Light background color.
         /// </summary>
-        Light = 8,
-
-        /// <summary>
-        /// White background color.
-        /// </summary>
-        White = 9,
-
-        /// <summary>
-        /// Transparent background color.
-        /// </summary>
-        Transparent = 10
+        Light = 8
     }
 
     /// <summary>
@@ -74,16 +64,14 @@
         {
             return layout switch
             {
-                TypeColorBackgroundBadge.Primary => "bg-primary",
-                TypeColorBackgroundBadge.Secondary => "bg-secondary",
-                TypeColorBackgroundBadge.Success => "bg-success",
-                TypeColorBackgroundBadge.Info => "bg-info",
-                TypeColorBackgroundBadge.Warning => "bg-warning",
-                TypeColorBackgroundBadge.Danger => "bg-danger",
-                TypeColorBackgroundBadge.Light => "bg-light",
-                TypeColorBackgroundBadge.Dark => "bg-dark",
-                TypeColorBackgroundBadge.White => "bg-white",
-                TypeColorBackgroundBadge.Transparent => "bg-transparent",
+                TypeColorBackgroundBadge.Primary => "text-bg-primary",
+                TypeColorBackgroundBadge.Secondary => "text-bg-secondary",
+                TypeColorBackgroundBadge.Success => "text-bg-success",
+                TypeColorBackgroundBadge.Info => "text-bg-info",
+                TypeColorBackgroundBadge.Warning => "text-bg-warning",
+                TypeColorBackgroundBadge.Danger => "text-bg-danger",
+                TypeColorBackgroundBadge.Light => "text-bg-light",
+                TypeColorBackgroundBadge.Dark => "text-bg-dark",
                 _ => string.Empty,
             };
         }

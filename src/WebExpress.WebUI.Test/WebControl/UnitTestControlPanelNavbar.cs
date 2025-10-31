@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelNavbar(id)
             {
@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelNavbar()
             {
@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelNavbar()
             {
@@ -98,7 +98,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelNavbar()
             {
@@ -112,17 +112,41 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the theme property of the panel control.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeTheme.None, @"<nav class=""navbar"">*</nav>")]
+        [InlineData(TypeTheme.Light, @"<nav class=""navbar"" data-bs-theme=""light"">*</nav>")]
+        [InlineData(TypeTheme.Dark, @"<nav class=""navbar"" data-bs-theme=""dark"">*</nav>")]
+        public void Theme(TypeTheme theme, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlPanelNavbar()
+            {
+                Theme = theme
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests the add function of the navbar control.
         /// </summary>
         [Theory]
         [InlineData(typeof(ControlText), @"<nav class=""navbar""><div></div></nav>")]
-        [InlineData(typeof(ControlLink), @"<nav class=""navbar""><a class=""link""></a></nav>")]
+        [InlineData(typeof(ControlLink), @"<nav class=""navbar""><a class=""wx-link""></a></nav>")]
         [InlineData(typeof(ControlImage), @"<nav class=""navbar""><img></nav>")]
         public void Add(Type child, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var childInstance = Activator.CreateInstance(child, [null]) as IControl;
             var control = new ControlPanelNavbar();

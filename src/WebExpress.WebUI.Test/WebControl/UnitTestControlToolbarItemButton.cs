@@ -18,13 +18,13 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the toolbar item button control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<a class=""link nav-link""></a>")]
-        [InlineData("id", @"<a id=""id"" class=""link nav-link""></a>")]
+        [InlineData(null, @"<div class=""wx-toolbar-button""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-toolbar-button""></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemButton(id)
             {
@@ -37,46 +37,17 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the background color property of the toolbar item button control.
-        /// </summary>
-        [Theory]
-        [InlineData(TypeColorBackground.Default, @"<a class=""link nav-link""></a>")]
-        [InlineData(TypeColorBackground.Primary, @"<a class=""link nav-link bg-primary""></a>")]
-        [InlineData(TypeColorBackground.Secondary, @"<a class=""link nav-link bg-secondary""></a>")]
-        [InlineData(TypeColorBackground.Warning, @"<a class=""link nav-link bg-warning""></a>")]
-        [InlineData(TypeColorBackground.Danger, @"<a class=""link nav-link bg-danger""></a>")]
-        [InlineData(TypeColorBackground.Dark, @"<a class=""link nav-link bg-dark""></a>")]
-        [InlineData(TypeColorBackground.Light, @"<a class=""link nav-link bg-light""></a>")]
-        [InlineData(TypeColorBackground.Transparent, @"<a class=""link nav-link bg-transparent""></a>")]
-        public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
-        {
-            // preconditions
-            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlToolbarItemButton()
-            {
-                BackgroundColor = new PropertyColorBackground(backgroundColor)
-            };
-
-            // test execution
-            var html = control.Render(context, visualTree);
-
-            AssertExtensions.EqualWithPlaceholders(expected, html);
-        }
-
-        /// <summary>
         /// Tests the text property of the toolbar item button control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<a class=""link nav-link""></a>")]
-        [InlineData("abc", @"<a class=""link nav-link"">abc</a>")]
-        [InlineData("webexpress.WebUI:plugin.name", @"<a class=""link nav-link"">WebExpress.WebUI</a>")]
+        [InlineData(null, @"<div class=""wx-toolbar-button""></div>")]
+        [InlineData("abc", @"<div class=""wx-toolbar-button"" data-label=""abc""></div>")]
+        [InlineData("webexpress.WebUI:plugin.name", @"<div class=""wx-toolbar-button"" data-label=""WebExpress.WebUI""></div>")]
         public void Text(string text, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemButton()
             {
@@ -93,14 +64,14 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the tooltip property of the toolbar item button control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<a class=""link nav-link""></a>")]
-        [InlineData("abc", @"<a class=""link nav-link"" title=""abc"" data-bs-toggle=""tooltip""></a>")]
-        [InlineData("webexpress.WebUI:plugin.name", @"<a class=""link nav-link"" title=""WebExpress.WebUI"" data-bs-toggle=""tooltip""></a>")]
+        [InlineData(null, @"<div class=""wx-toolbar-button""></div>")]
+        [InlineData("abc", @"<div class=""wx-toolbar-button"" data-title=""abc""></div>")]
+        [InlineData("webexpress.WebUI:plugin.name", @"<div class=""wx-toolbar-button"" data-title=""WebExpress.WebUI""></div>")]
         public void Tooltip(string tooltip, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemButton()
             {
@@ -117,13 +88,13 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the icon property of the toolbar item button control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<a class=""link nav-link""></a>")]
-        [InlineData(typeof(IconStar), @"<a class=""link nav-link""><span class=""fas fa-star""></span></a>")]
+        [InlineData(null, @"<div class=""wx-toolbar-button""></div>")]
+        [InlineData(typeof(IconStar), @"<div class=""wx-toolbar-button"" data-icon=""fas fa-star""></div>")]
         public void Icon(Type icon, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemButton()
             {
@@ -140,14 +111,14 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the active property of the toolbar item button control.
         /// </summary>
         [Theory]
-        [InlineData(TypeActive.None, @"<a class=""link nav-link""></a>")]
-        [InlineData(TypeActive.Active, @"<a class=""link nav-link active""></a>")]
-        [InlineData(TypeActive.Disabled, @"<a class=""link nav-link disabled""></a>")]
+        [InlineData(TypeActive.None, @"<div class=""wx-toolbar-button""></div>")]
+        [InlineData(TypeActive.Active, @"<div class=""wx-toolbar-button"" active></div>")]
+        [InlineData(TypeActive.Disabled, @"<div class=""wx-toolbar-button"" disabled></div>")]
         public void Active(TypeActive active, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemButton()
             {
@@ -161,19 +132,42 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the modal property of the toolbar item button control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-toolbar-button""></div>")]
+        [InlineData("id", @"<div class=""wx-toolbar-button"" data-modal=""id""></div>")]
+        public void Modal(string modal, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlToolbarItemButton()
+            {
+                Modal = modal
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
+        }
+
+        /// <summary>
         /// Tests the uri property of the toolbar item button control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<a class=""link""></a>")]
-        [InlineData("/a", @"<a class=""link"" href=""/a""></a>")]
-        [InlineData("/a/b", @"<a class=""link"" href=""/a/b""></a>")]
+        [InlineData(null, @"<div class=""wx-toolbar-button""></div>")]
+        [InlineData("/a", @"<div class=""wx-toolbar-button"" data-uri=""/a""></div>")]
+        [InlineData("/a/b", @"<div class=""wx-toolbar-button"" data-uri=""/a/b""></div>")]
         public void Uri(string uri, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlLink()
+            var control = new ControlToolbarItemButton()
             {
                 Uri = uri != null ? new UriEndpoint(uri) : null,
             };
@@ -181,49 +175,54 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
-            Assert.Equal(expected, html.Trim());
+            AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
         }
 
         /// <summary>
-        /// Tests the title property of the toolbar item button control.
+        /// Tests the color property of the toolbar item button control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<a class=""link""></a>")]
-        [InlineData("a", @"<a class=""link"" title=""a""></a>")]
-        [InlineData("b", @"<a class=""link"" title=""b""></a>")]
-        public void Title(string title, string expected)
+        [InlineData(TypeColorText.Default, @"<div class=""wx-toolbar-button""></div>")]
+        [InlineData(TypeColorText.Primary, @"<div class=""wx-toolbar-button"" data-color-css=""text-primary""></div>")]
+        [InlineData(TypeColorText.Secondary, @"<div class=""wx-toolbar-button"" data-color-css=""text-secondary""></div>")]
+        [InlineData(TypeColorText.Warning, @"<div class=""wx-toolbar-button"" data-color-css=""text-warning""></div>")]
+        [InlineData(TypeColorText.Danger, @"<div class=""wx-toolbar-button"" data-color-css=""text-danger""></div>")]
+        [InlineData(TypeColorText.Dark, @"<div class=""wx-toolbar-button"" data-color-css=""text-dark""></div>")]
+        [InlineData(TypeColorText.Light, @"<div class=""wx-toolbar-button"" data-color-css=""text-light""></div>")]
+        [InlineData(TypeColorText.Muted, @"<div class=""wx-toolbar-button"" data-color-css=""text-muted""></div>")]
+        public void Color(TypeColorText color, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlLink()
+            var control = new ControlToolbarItemButton()
             {
-                Title = title,
+                Color = new PropertyColorText(color)
             };
 
             // test execution
             var html = control.Render(context, visualTree);
 
-            Assert.Equal(expected, html.Trim());
+            AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
         /// <summary>
         /// Tests the target property of the toolbar item button control.
         /// </summary>
         [Theory]
-        [InlineData(TypeTarget.None, @"<a class=""link""></a>")]
-        [InlineData(TypeTarget.Blank, @"<a class=""link"" target=""_blank""></a>")]
-        [InlineData(TypeTarget.Self, @"<a class=""link"" target=""_self""></a>")]
-        [InlineData(TypeTarget.Parent, @"<a class=""link"" target=""_parent""></a>")]
-        [InlineData(TypeTarget.Framename, @"<a class=""link"" target=""_framename""></a>")]
+        [InlineData(TypeTarget.None, @"<div class=""wx-toolbar-button""></div>")]
+        [InlineData(TypeTarget.Blank, @"<div class=""wx-toolbar-button"" data-target=""_blank""></div>")]
+        [InlineData(TypeTarget.Self, @"<div class=""wx-toolbar-button"" data-target=""_self""></div>")]
+        [InlineData(TypeTarget.Parent, @"<div class=""wx-toolbar-button"" data-target=""_parent""></div>")]
+        [InlineData(TypeTarget.Framename, @"<div class=""wx-toolbar-button"" data-target=""_framename""></div>")]
         public void Target(TypeTarget target, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlLink()
+            var control = new ControlToolbarItemButton()
             {
                 Target = target,
             };
@@ -231,44 +230,31 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
-            Assert.Equal(expected, html.Trim());
+            AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
         }
 
         /// <summary>
-        /// Tests the add function of the toolbar item button control.
+        /// Tests the alignment property of the toolbar item button control.
         /// </summary>
-        [Fact]
-        public void Add()
+        [Theory]
+        [InlineData(TypeToolbarItemAlignment.Default, @"<div class=""wx-toolbar-button""></div>")]
+        [InlineData(TypeToolbarItemAlignment.Left, @"<div class=""wx-toolbar-button"" data-align=""left""></div>")]
+        [InlineData(TypeToolbarItemAlignment.Right, @"<div class=""wx-toolbar-button"" data-align=""right""></div>")]
+        public void Alignment(TypeToolbarItemAlignment alignment, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control1 = new ControlLink(null, new ControlIcon() { Icon = new IconStar() });
-            var control2 = new ControlLink(null, [new ControlIcon() { Icon = new IconStar() }]);
-            var control3 = new ControlLink(null, new List<ControlIcon>([new ControlIcon() { Icon = new IconStar() }]).ToArray());
-            var control4 = new ControlLink(null);
-            var control5 = new ControlLink(null);
-            var control6 = new ControlLink(null);
+            var control = new ControlToolbarItemButton()
+            {
+                Alignment = alignment,
+            };
 
             // test execution
-            control4.Add(new ControlIcon() { Icon = new IconStar() });
-            control5.Add([new ControlIcon() { Icon = new IconStar() }]);
-            control6.Add(new List<ControlIcon>([new ControlIcon() { Icon = new IconStar() }]).ToArray());
+            var html = control.Render(context, visualTree);
 
-            var html1 = control1.Render(context, visualTree);
-            var html2 = control2.Render(context, visualTree);
-            var html3 = control3.Render(context, visualTree);
-            var html4 = control4.Render(context, visualTree);
-            var html5 = control5.Render(context, visualTree);
-            var html6 = control6.Render(context, visualTree);
-
-            Assert.Equal(@"<a class=""link""><span class=""fas fa-star""></span></a>", html1.Trim());
-            Assert.Equal(@"<a class=""link""><span class=""fas fa-star""></span></a>", html2.Trim());
-            Assert.Equal(@"<a class=""link""><span class=""fas fa-star""></span></a>", html3.Trim());
-            Assert.Equal(@"<a class=""link""><span class=""fas fa-star""></span></a>", html4.Trim());
-            Assert.Equal(@"<a class=""link""><span class=""fas fa-star""></span></a>", html5.Trim());
-            Assert.Equal(@"<a class=""link""><span class=""fas fa-star""></span></a>", html6.Trim());
+            AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
         }
     }
 }

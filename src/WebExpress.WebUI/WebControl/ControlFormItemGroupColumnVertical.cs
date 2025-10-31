@@ -73,7 +73,7 @@ namespace WebExpress.WebUI.WebControl
                     div.Style = $"width: {width}%";
                 }
 
-                if (item is ControlFormItemInput input)
+                if (item is IControlFormItemInput input)
                 {
                     var icon = new ControlIcon() { Icon = input?.Icon };
                     var label = new ControlFormItemLabel(!string.IsNullOrEmpty(item.Id) ? item.Id + "_label" : string.Empty);
@@ -87,7 +87,12 @@ namespace WebExpress.WebUI.WebControl
                     label.FormItem = item;
                     help.Text = I18N.Translate(renderGroupContext.Request?.Culture, input?.Help);
 
-                    if (icon.Icon != null && !string.IsNullOrWhiteSpace(label.Text))
+                    if (icon.Icon != null && string.IsNullOrWhiteSpace(label.Text))
+                    {
+                        icon.Classes = ["me-2", "pt-1"];
+                        fieldset.Add(new HtmlElementTextSemanticsSpan(icon.Render(renderGroupContext, visualTree)));
+                    }
+                    else if (icon.Icon != null)
                     {
                         icon.Classes = ["me-2", "pt-1"];
                         fieldset.Add(new HtmlElementTextSemanticsSpan(icon.Render(renderGroupContext, visualTree), label.Render(renderGroupContext, visualTree))

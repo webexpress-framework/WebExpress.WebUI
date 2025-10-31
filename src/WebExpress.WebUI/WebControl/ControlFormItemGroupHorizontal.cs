@@ -23,6 +23,7 @@ namespace WebExpress.WebUI.WebControl
         /// Initializes the form element.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="state">The state of the form control, such as New, Update, Submit, or Reset.</param>
         public override void Initialize(IRenderControlFormContext renderContext)
         {
             var renderGroupContext = new RenderControlFormGroupContext(renderContext, this);
@@ -56,7 +57,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 var row = new HtmlElementTextContentDiv() { };
 
-                if (item is ControlFormItemInput input)
+                if (item is IControlFormItemInput input)
                 {
                     var icon = new ControlIcon() { Icon = input?.Icon };
                     var label = new ControlFormItemLabel(!string.IsNullOrEmpty(item.Id) ? item.Id + "_label" : string.Empty);
@@ -71,9 +72,15 @@ namespace WebExpress.WebUI.WebControl
                     help.Text = I18N.Translate(renderGroupContext.Request?.Culture, input?.Help);
                     help.Classes = ["ms-2"];
 
-                    if (icon.Icon != null && !string.IsNullOrWhiteSpace(label.Text))
+                    if (icon.Icon != null && string.IsNullOrWhiteSpace(label.Text))
                     {
-                        icon.Classes = ["me-2", "pt-1"];
+                        icon.Classes = ["pt-1"];
+
+                        row.Add(new HtmlElementTextContentDiv(icon.Render(renderGroupContext, visualTree)));
+                    }
+                    else if (icon.Icon != null)
+                    {
+                        icon.Classes = ["pt-1"];
 
                         row.Add(new HtmlElementTextContentDiv(icon.Render(renderGroupContext, visualTree), label.Render(renderGroupContext, visualTree)) { });
                     }

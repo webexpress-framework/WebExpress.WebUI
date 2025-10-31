@@ -15,7 +15,6 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemButtonReset(string id = null, params IControl[] content)
             : base(id, content)
         {
-            Name = Id;
             Text = "webexpress.webui:form.reset.label";
             Icon = new IconRotateLeft();
             Color = new PropertyColorButton(TypeColorButton.Secondary);

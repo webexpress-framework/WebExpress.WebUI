@@ -1,0 +1,219 @@
+/**
+ * Styles for the wx-webui-date and wx-webui-calendar controls.
+ */
+.wx-calendar {
+    width: 25em;
+}
+
+/* Calendar header (navigation) */
+.wx-calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    gap: 0.25rem;
+}
+
+.wx-calendar-header > span {
+    flex: 1;
+    text-align: center;
+}
+
+.wx-calendar-display {
+    color: var(--bs-body-color, #dee2e6);
+}
+
+/* Month and year label */
+.wx-calendar-monthyear {
+    flex: 1 1 auto;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1rem;
+    color: var(--bs-body-color, #212529);
+    letter-spacing: .06em;
+}
+
+/* Navigation buttons */
+.wx-calendar-nav {
+    background: none;
+    border: none;
+    color: var(--bs-body-color, #212529);
+    font-size: 1.15em;
+    cursor: pointer;
+    padding: 0.15em 0.55em;
+    border-radius: var(--bs-border-radius-sm, 0.25em);
+    transition: background 0.15s;
+    line-height: 1.2;
+}
+
+.wx-calendar-nav:hover,
+.wx-calendar-nav:focus {
+    background: var(--bs-secondary-bg, #f8f9fa);
+    color: var(--bs-primary, #0d6efd);
+}
+
+/* Gap between calendar cells */
+.wx-calendar-table {
+    border-collapse: separate;
+    border-spacing: 3px 3px; /* horizontal and vertical gap */
+    width: 100%;
+    font-size: 0.98em;
+    margin-bottom: 0;
+    background: transparent;
+}
+
+.wx-calendar-table th,
+.wx-calendar-table td {
+    width: 2.1em;
+    height: 2.1em;
+    text-align: center;
+    vertical-align: middle;
+    border: none;
+}
+
+.wx-calendar-table th {
+    color: var(--bs-secondary-color, #6c757d);
+    font-weight: bold;
+    font-size: 0.96em;
+    background: none;
+}
+
+/* Calendar week column */
+.wx-calendar-table th:first-child,
+.wx-calendar-table td:first-child {
+    color: var(--bs-info, #0dcaf0);
+    background: none;
+    min-width: 2em;
+    width: 2.4em;
+    border-radius: 0;
+    cursor: default;
+}
+
+.wx-calendar-table td:first-child {
+    background: var(--bs-light, #f8f9fa);
+}
+
+.wx-calendar-table button {
+    width: 100%;
+    height: 100%;
+    background: none;
+    border-radius: var(--bs-border-radius-sm, 0.25em);
+    border: 0;
+}
+
+.wx-calendar-day:hover {
+    background: var(--bs-secondary-bg, #f8f9fa);
+}
+
+/* Selected day */
+.wx-calendar-day.selected {
+    background: var(--bs-primary, #0d6efd);
+    color: var(--bs-light, #fff);
+    font-weight: bold;
+}
+
+.wx-calendar-day.selected:hover {
+    background: var(--bs-secondary, #87929d);
+}
+
+.wx-calendar-day {
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+}
+
+/* Days from other months */
+.wx-calendar-out {
+    color: var(--bs-tertiary-color, #adb5bd);
+    background: none;
+    cursor: default;
+}
+
+.wx-calendar-red {
+    color: var(--bs-danger, #dc3545) !important;
+}
+
+/* Preview range (hover) highlighting with underline */
+.wx-calendar-day.preview {
+    background: #e0eaff;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.wx-calendar-day.preview.range-start,
+.wx-calendar-day.preview.range-end {
+    background: #8ab4f8;
+    color: #fff;
+    font-weight: bold;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.wx-calendar-day.preview.range-middle {
+    background: #c2dbfa;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* Toolbar styling next to preview */
+.wx-calendar-toolbar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.25em;
+}
+
+.wx-calendar-toolbar .btn {
+    padding: 0.3em 0.6em;
+    min-width: 2.2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+}
+
+/* Responsive styles */
+@media (max-width: 600px) {
+    .wx-calendar-table th,
+    .wx-calendar-table td {
+        width: 1.6em;
+        height: 1.6em;
+        font-size: 0.85em;
+    }
+}
+
+/* Dark mode styles */
+[data-bs-theme="dark"] .wx-calendar-monthyear {
+    color: var(--bs-light, #fff);
+}
+[data-bs-theme="dark"] .wx-calendar-nav {
+    color: var(--bs-light, #fff);
+}
+[data-bs-theme="dark"] .wx-calendar-nav:hover,
+[data-bs-theme="dark"] .wx-calendar-nav:focus {
+    background: var(--bs-secondary-bg, #23262b);
+    color: var(--bs-primary, #0d6efd);
+}
+[data-bs-theme="dark"] .wx-calendar-table th,
+[data-bs-theme="dark"] .wx-calendar-table td {
+    color: var(--bs-light, #d3d7dc);
+}
+[data-bs-theme="dark"] .wx-calendar-table td.wx-calendar-out {
+    color: var(--bs-tertiary-color, #7a7e85);
+}
+[data-bs-theme="dark"] .wx-calendar-table td.selected,
+[data-bs-theme="dark"] .wx-calendar-table td.wx-calendar-day:hover:not(.wx-calendar-out):not(.selected) {
+    background: var(--bs-primary, #0d6efd);
+    color: var(--bs-light, #fff);
+}
+[data-bs-theme="dark"] .wx-calendar-table td:first-child {
+    background: var(--bs-secondary-bg, #23262b);
+    color: var(--bs-info, #0dcaf0);
+}
+
+[data-bs-theme="dark"] .wx-calendar-toolbar .btn {
+    background: var(--bs-body, var(--bs-dark, #212529));
+    color: var(--bs-body-color, var(--bs-white, #fff));
+}
+
+[data-bs-theme="dark"] .wx-calendar-toolbar .btn:hover,
+[data-bs-theme="dark"] .wx-calendar-toolbar .btn:focus {
+    background: var(--bs-secondary-bg, #424649);
+}

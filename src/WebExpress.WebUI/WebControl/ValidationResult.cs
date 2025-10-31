@@ -8,7 +8,7 @@
         /// <summary>
         /// Returns the type of the validation result.
         /// </summary>
-        public TypesInputValidity Type { get; private set; }
+        public TypeInputValidity Type { get; private set; }
 
         /// <summary>
         /// Returns the error text.
@@ -20,7 +20,7 @@
         /// </summary>
         /// <param name="type">The type of the validation result.</param>
         /// <param name="text">The error text.</param>
-        public ValidationResult(TypesInputValidity type, string text)
+        public ValidationResult(TypeInputValidity type, string text)
         {
             Type = type;
             Text = text;

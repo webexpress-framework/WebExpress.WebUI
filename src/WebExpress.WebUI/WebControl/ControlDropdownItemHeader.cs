@@ -7,8 +7,13 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a header item in a dropdown control.
     /// </summary>
-    public class ControlDropdownItemHeader : Control, IControlDropdownItem
+    public class ControlDropdownItemHeader : IControlDropdownItem
     {
+        /// <summary>
+        /// Returns or sets the unique identifier for the entity.
+        /// </summary>
+        public string Id { get; set; }
+
         /// <summary>
         /// Returns or sets the text.
         /// </summary>
@@ -19,8 +24,8 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="id">The id of the control.</param>
         public ControlDropdownItemHeader(string id = null)
-            : base(id)
         {
+            Id = id;
         }
 
         /// <summary>
@@ -29,14 +34,13 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <param name="visualTree">The visual tree representing the control's structure.</param>
         /// <returns>An HTML node representing the rendered control.</returns>
-        public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return new HtmlElementTextContentLi(new HtmlText(I18N.Translate(renderContext.Request.Culture, Text)))
+            return new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Text)))
             {
                 Id = Id,
-                Class = Css.Concatenate("dropdown-header", GetClasses()),
-                Style = GetStyles(),
-                Role = Role
+                Class = "wx-dropdown-header",
+                Role = "heading"
             };
         }
     }

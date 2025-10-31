@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a button form item control.
     /// </summary>
-    public class ControlFormItemButton : ControlFormItem
+    public class ControlFormItemButton : ControlFormItem, IControlFormItemButton
     {
         private readonly List<IControl> _content = [];
 
@@ -60,7 +60,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Event is triggered when the button is clicked.
         /// </summary>
-        public EventHandler<FormEventArgs> Click;
+        public EventHandler<ControlFormEvent> Click;
 
         /// <summary>
         /// Returns or sets the text.
@@ -71,11 +71,6 @@ namespace WebExpress.WebUI.WebControl
         /// Returns or sets the type. (button, submit, reset)
         /// </summary>
         public TypeButton Type { get; set; } = TypeButton.Default;
-
-        /// <summary>
-        /// Returns or sets the value.
-        /// </summary>
-        public string Value { get; set; }
 
         /// <summary>
         /// Returns or sets the icon.
@@ -91,6 +86,10 @@ namespace WebExpress.WebUI.WebControl
             : base(id)
         {
             _content.AddRange(content);
+
+            Name = Id;
+            Disabled = false;
+            Size = TypeSizeButton.Default;
         }
 
         /// <summary>
@@ -98,8 +97,9 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="controls">The controls to add to the content.</param>
         /// <remarks>
-        /// This method allows adding one or multiple controls to the <see cref="Content"/> collection of the control panel. 
-        /// It is useful for dynamically constructing the user interface by appending various controls to the panel's content.
+        /// This method allows adding one or multiple controls to the content collection 
+        /// of the control panel. It is useful for dynamically constructing the user interface by 
+        /// appending various controls to the panel's content.
         /// 
         /// Example usage:
         /// <code>
@@ -108,11 +108,15 @@ namespace WebExpress.WebUI.WebControl
         /// var text2 = new ControlText { Text = "Cancel" };
         /// button.Add(text1, text2);
         /// </code>
+        /// 
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
-        public virtual void Add(params IControl[] controls)
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlFormItemButton Add(params IControl[] controls)
         {
             _content.AddRange(controls);
+
+            return this;
         }
 
         /// <summary>
@@ -120,21 +124,26 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="controls">The controls to add to the content.</param>
         /// <remarks>
-        /// This method allows adding one or multiple controls to the <see cref="Content"/> collection of the control panel. 
-        /// It is useful for dynamically constructing the user interface by appending various controls to the panel's content.
+        /// This method allows adding one or multiple controls to the <see cref="Content"/> collection 
+        /// of the control panel. It is useful for dynamically constructing the user interface by 
+        /// appending various controls to the panel's content.
         /// 
         /// Example usage:
         /// <code>
         /// var button = new ControlFormItemButton();
         /// var text1 = new ControlText { Text = "Save" };
         /// var text2 = new ControlText { Text = "Cancel" };
-        /// button.Add(new List<IControl>([text1, text2]));
+        /// button.Add(text1, text2);
         /// </code>
+        /// 
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
-        public void Add(IEnumerable<IControl> controls)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlFormItemButton Add(IEnumerable<IControl> controls)
         {
             _content.AddRange(controls);
+
+            return this;
         }
 
         /// <summary>
@@ -145,9 +154,12 @@ namespace WebExpress.WebUI.WebControl
         /// This method allows removing a specific control from the <see cref="Content"/> collection of 
         /// the control panel.
         /// </remarks>
-        public void Remove(IControl control)
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlFormItemButton Remove(IControl control)
         {
             _content.Remove(control);
+
+            return this;
         }
 
         /// <summary>
@@ -156,18 +168,6 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="renderContext">The context in which the control is rendered.</param>
         public override void Initialize(IRenderControlFormContext renderContext)
         {
-            Disabled = false;
-            Size = TypeSizeButton.Default;
-
-            if (renderContext.Request.HasParameter(Name))
-            {
-                var value = renderContext.Request.GetParameter(Name)?.Value;
-
-                if (!string.IsNullOrWhiteSpace(Value) && value == Value)
-                {
-                    OnClickEvent(new FormEventArgs() { Context = renderContext });
-                }
-            }
         }
 
         /// <summary>
@@ -183,7 +183,6 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Name = Name,
                 Type = Type.ToTypeString(),
-                Value = Value,
                 Class = Css.Concatenate("btn", GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
@@ -224,7 +223,7 @@ namespace WebExpress.WebUI.WebControl
         /// Triggers the click event.
         /// </summary>
         /// <param name="e">The event argument.</param>
-        protected virtual void OnClickEvent(FormEventArgs e)
+        protected virtual void OnClickEvent(ControlFormEvent e)
         {
             Click?.Invoke(this, e);
         }

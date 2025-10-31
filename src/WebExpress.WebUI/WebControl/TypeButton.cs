@@ -33,15 +33,12 @@
         /// <returns>The string representation of the button type.</returns>
         public static string ToTypeString(this TypeButton type)
         {
-            switch (type)
+            return type switch
             {
-                case TypeButton.Submit:
-                    return "submit";
-                case TypeButton.Reset:
-                    return "reset";
-            }
-
-            return "button";
+                TypeButton.Submit => "submit",
+                TypeButton.Reset => "reset",
+                _ => "button",
+            };
         }
     }
 }

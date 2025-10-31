@@ -8,6 +8,6 @@
         /// <summary>
         /// Returns the CSS class associated with the icon.
         /// </summary>
-        protected override string Class => "fas fa-clock";
+        public override string Class => "fas fa-clock";
     }
 }

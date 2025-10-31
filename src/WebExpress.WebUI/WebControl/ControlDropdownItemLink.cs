@@ -1,6 +1,8 @@
-﻿using System.Linq;
-using WebExpress.WebCore.Internationalization;
+﻿using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
+using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -8,16 +10,62 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a dropdown item link control.
     /// </summary>
-    public class ControlDropdownItemLink : ControlLink, IControlDropdownItem
+    public class ControlDropdownItemLink : IControlDropdownItem
     {
+        private readonly string _id;
+
+        /// <summary>
+        /// Returns the unique identifier for the entity.
+        /// </summary>
+        public string Id => _id;
+
+        /// <summary>
+        /// Returns or sets whether the link is active or not.
+        /// </summary>
+        public TypeActive Active { get; set; }
+
+        /// <summary>
+        /// Returns or sets the label.
+        /// </summary>
+        public string Text { get; set; }
+
+        /// <summary>
+        /// Returns or sets the target uri.
+        /// </summary>
+        public IUri Uri { get; set; }
+
+        /// <summary>
+        /// Returns or sets the target.
+        /// </summary>
+        public TypeTarget Target { get; set; }
+
+        /// <summary>
+        /// Returns or sets the id of a modal dialogue.
+        /// </summary>
+        public string Modal { get; set; }
+
+        /// <summary>
+        /// Returns or sets the icon.
+        /// </summary>
+        public IIcon Icon { get; set; }
+
+        /// <summary>
+        /// Returns or sets a tooltip text.
+        /// </summary>
+        public string Tooltip { get; set; }
+
+        /// <summary>
+        /// Returns or sets the link color.
+        /// </summary>
+        public TypeColorText Color { get; set; }
+
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        /// <param name="content">The content of the html element.</param>
-        public ControlDropdownItemLink(string id = null, params IControl[] content)
-            : base(id, content)
+        public ControlDropdownItemLink(string id = null)
         {
+            _id = id;
         }
 
         /// <summary>
@@ -26,68 +74,21 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <param name="visualTree">The visual tree representing the control's structure.</param>
         /// <returns>An HTML node representing the rendered control.</returns>
-        public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var param = ""; // GetParams(context?.Page);
-
-            var html = new HtmlElementTextSemanticsA([.. Controls.Select(x => x.Render(renderContext, visualTree))])
+            return new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Text)))
             {
                 Id = Id,
-                Class = Css.Concatenate("link", GetClasses()),
-                Style = GetStyles(),
-                Role = Role,
-                Href = Uri?.ToString() + (param.Length > 0 ? "?" + param : string.Empty),
-                Target = Target,
-                Title = string.IsNullOrEmpty(Title) ? I18N.Translate(renderContext.Request, Tooltip) : I18N.Translate(renderContext.Request, Title),
-                OnClick = OnClick?.ToString()
-            };
-
-            if (Icon != null)
-            {
-                html.Add(new ControlIcon()
-                {
-                    Icon = Icon,
-                    Margin = !string.IsNullOrWhiteSpace(Text) ? new PropertySpacingMargin
-                    (
-                        PropertySpacing.Space.None,
-                        PropertySpacing.Space.Two,
-                        PropertySpacing.Space.None,
-                        PropertySpacing.Space.None
-                    ) : new PropertySpacingMargin(PropertySpacing.Space.None)
-                }.Render(renderContext, visualTree));
+                Class = "wx-dropdown-item"
             }
-
-            if (!string.IsNullOrWhiteSpace(Text))
-            {
-                html.Add(new HtmlText(I18N.Translate(renderContext.Request, Text)));
-            }
-
-            if (Modal == null || Modal.Type == TypeModal.None)
-            {
-
-            }
-            else if (Modal.Type == TypeModal.Form)
-            {
-                html.OnClick = $"new webexpress.webui.modalFormCtrl({{ close: '{I18N.Translate(renderContext.Request, "webexpress.webui:form.cancel.label")}', uri: '{Modal.Uri?.ToString() ?? html.Href}', size: '{Modal.Size.ToString().ToLower()}', redirect: '{Modal.RedirectUri}'}});";
-                html.Href = "#";
-            }
-            else if (Modal.Type == TypeModal.Brwoser)
-            {
-                html.OnClick = $"new webexpress.webui.modalPageCtrl({{ close: '{I18N.Translate(renderContext.Request, "webexpress.webui:form.cancel.label")}', uri: '{Modal.Uri?.ToString() ?? html.Href}', size: '{Modal.Size.ToString().ToLower()}', redirect: '{Modal.RedirectUri}'}});";
-                html.Href = "#";
-            }
-            else if (Modal.Type == TypeModal.Modal)
-            {
-                html.AddUserAttribute("data-bs-toggle", "modal");
-                html.AddUserAttribute("data-bs-target", "#" + Modal.Modal.Id);
-            }
-
-            if (!string.IsNullOrWhiteSpace(Tooltip))
-            {
-                html.AddUserAttribute("data-bs-toggle", "tooltip");
-            }
-
-            return html;
+                .AddUserAttribute("id", Id)
+                .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
+                .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-uri", Uri?.ToString())
+                .AddUserAttribute("data-target", Target.ToStringValue())
+                .AddUserAttribute("data-modal", !string.IsNullOrWhiteSpace(Modal) ? $"#{Modal}" : null)
+                .AddUserAttribute("data-tooltip", Tooltip)
+                .AddUserAttribute("data-color", Color.ToClass());
         }
     }
 }

@@ -14,13 +14,13 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the table control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<table class=""table table-striped""><thead><tr></tr></thead><tbody></tbody></table>")]
-        [InlineData("id", @"<table id=""id"" class=""table table-striped""><thead><tr></tr></thead><tbody></tbody></table>")]
+        [InlineData(null, @"<div class=""wx-webui-table""><div class=""wx-table-columns""></div></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-table""><div class=""wx-table-columns""></div></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTable(id)
             {
@@ -33,50 +33,21 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the column layout property of the table control.
+        /// Tests the table border property of the table control.
         /// </summary>
         [Theory]
-        [InlineData(TypesLayoutTableRow.Default, @"<table class=""table table-striped""><thead><tr></tr></thead><tbody></tbody></table>")]
-        [InlineData(TypesLayoutTableRow.Primary, @"<table class=""table table-striped""><thead><tr></tr></thead><tbody></tbody></table>")]
-        [InlineData(TypesLayoutTableRow.Secondary, @"<table class=""table table-striped""><thead><tr></tr></thead><tbody></tbody></table>")]
-        [InlineData(TypesLayoutTableRow.Info, @"<table class=""table table-striped""><thead><tr></tr></thead><tbody></tbody></table>")]
-        [InlineData(TypesLayoutTableRow.Success, @"<table class=""table table-striped""><thead><tr></tr></thead><tbody></tbody></table>")]
-        [InlineData(TypesLayoutTableRow.Warning, @"<table class=""table table-striped""><thead><tr></tr></thead><tbody></tbody></table>")]
-        [InlineData(TypesLayoutTableRow.Danger, @"<table class=""table table-striped""><thead><tr></tr></thead><tbody></tbody></table>")]
-        [InlineData(TypesLayoutTableRow.Light, @"<table class=""table table-striped""><thead><tr></tr></thead><tbody></tbody></table>")]
-        [InlineData(TypesLayoutTableRow.Dark, @"<table class=""table table-striped""><thead><tr></tr></thead><tbody></tbody></table>")]
-        public void ColumnLayout(TypesLayoutTableRow layout, string expected)
+        [InlineData(TypeBorderTable.Default, @"<div class=""wx-webui-table""><div class=""wx-table-columns""></div></div>")]
+        [InlineData(TypeBorderTable.Borderless, @"<div class=""wx-webui-table"" data-border=""table-borderless""><div class=""wx-table-columns""></div></div>")]
+        [InlineData(TypeBorderTable.Bordered, @"<div class=""wx-webui-table"" data-border=""table-bordered""><div class=""wx-table-columns""></div></div>")]
+        public void TableBorder(TypeBorderTable border, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTable
             {
-                ColumnLayout = layout
-            };
-
-            // test execution
-            var html = control.Render(context, visualTree);
-
-            AssertExtensions.EqualWithPlaceholders(expected, html);
-        }
-
-        /// <summary>
-        /// Tests the responsive property of the table control.
-        /// </summary>
-        [Theory]
-        [InlineData(false, @"<table class=""table table-striped""><thead><tr></tr></thead><tbody></tbody></table>")]
-        [InlineData(true, @"<table class=""table table-striped table-responsive""><thead><tr></tr></thead><tbody></tbody></table>")]
-        public void Responsive(bool responsive, string expected)
-        {
-            // preconditions
-            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlTable
-            {
-                Responsive = responsive
+                TableBorder = border
             };
 
             // test execution
@@ -89,13 +60,15 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the striped property of the table control.
         /// </summary>
         [Theory]
-        [InlineData(true, @"<table class=""table table-striped""><thead><tr></tr></thead><tbody></tbody></table>")]
-        [InlineData(false, @"<table class=""table""><thead><tr></tr></thead><tbody></tbody></table>")]
-        public void Striped(bool striped, string expected)
+        [InlineData(TypeStripedTable.Default, @"<div class=""wx-webui-table""><div class=""wx-table-columns""></div></div>")]
+        [InlineData(TypeStripedTable.Column, @"<div class=""wx-webui-table"" data-striped=""table-striped-columns""><div class=""wx-table-columns""></div></div>")]
+        [InlineData(TypeStripedTable.Row, @"<div class=""wx-webui-table"" data-striped=""table-striped""><div class=""wx-table-columns""></div></div>")]
+        [InlineData(TypeStripedTable.Both, @"<div class=""wx-webui-table"" data-striped=""table-striped-columns table-striped""><div class=""wx-table-columns""></div></div>")]
+        public void Striped(TypeStripedTable striped, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTable
             {
@@ -109,20 +82,27 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the reflow property of the table control.
+        /// Tests the color property of the table control.
         /// </summary>
         [Theory]
-        [InlineData(true, @"<table class=""table table-striped table-reflow""><thead><tr></tr></thead><tbody></tbody></table>")]
-        [InlineData(false, @"<table class=""table table-striped""><thead><tr></tr></thead><tbody></tbody></table>")]
-        public void Reflow(bool reflow, string expected)
+        [InlineData(TypeColorTable.Default, @"<div class=""wx-webui-table"">*</div>")]
+        [InlineData(TypeColorTable.Primary, @"<div class=""wx-webui-table"" data-color=""table-primary"">*</div>")]
+        [InlineData(TypeColorTable.Secondary, @"<div class=""wx-webui-table"" data-color=""table-secondary"">*</div>")]
+        [InlineData(TypeColorTable.Info, @"<div class=""wx-webui-table"" data-color=""table-info"">*</div>")]
+        [InlineData(TypeColorTable.Success, @"<div class=""wx-webui-table"" data-color=""table-success"">*</div>")]
+        [InlineData(TypeColorTable.Warning, @"<div class=""wx-webui-table"" data-color=""table-warning"">*</div>")]
+        [InlineData(TypeColorTable.Danger, @"<div class=""wx-webui-table"" data-color=""table-danger"">*</div>")]
+        [InlineData(TypeColorTable.Light, @"<div class=""wx-webui-table"" data-color=""table-light"">*</div>")]
+        [InlineData(TypeColorTable.Dark, @"<div class=""wx-webui-table"" data-color=""table-dark"">*</div>")]
+        public void Color(TypeColorTable color, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTable
             {
-                Reflow = reflow
+                Color = color
             };
 
             // test execution
@@ -130,5 +110,148 @@ namespace WebExpress.WebUI.Test.WebControl
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
+
+        /// <summary>
+        /// Tests the suppress headers property of the table control.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-webui-table"">*</div>")]
+        [InlineData(true, @"<div class=""wx-webui-table""><div class=""wx-table-columns"" data-suppress-headers=""true""></div></div>")]
+        public void SuppressHeaders(bool suppressHeaders, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTable
+            {
+                SuppressHeaders = suppressHeaders
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the allow column remove property of the table control.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-webui-table"">*</div>")]
+        [InlineData(true, @"<div class=""wx-webui-table"" data-allow-column-remove=""true"">*</div>")]
+        public void AllowColumnRemove(bool allowColumnRemove, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTable
+            {
+                AllowColumnRemove = allowColumnRemove
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the movable row property of the table control.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-webui-table"">*</div>")]
+        [InlineData(true, @"<div class=""wx-webui-table"" data-movable-row=""true"">*</div>")]
+        public void MovableRow(bool movablerow, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTable
+            {
+                MovableRow = movablerow
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the persist-key property of the table control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-webui-table"">*</div>")]
+        [InlineData("", @"<div class=""wx-webui-table"">*</div>")]
+        [InlineData("abc", @"<div class=""wx-webui-table"" data-persist-key=""abc"">*</div>")]
+        public void PersistKey(string persistKey, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTable
+            {
+                PersistKey = persistKey
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests adding a column to the table.
+        /// </summary>
+        [Fact]
+        public void AddColumn()
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTable();
+
+            // add column
+            control.AddColumn("Column 1");
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            // expected HTML
+            var expected = @"<div class=""wx-webui-table""><div class=""wx-table-columns""><div data-label=""Column 1""></div></div></div>";
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests adding rows to the table.
+        /// </summary>
+        [Fact]
+        public void AddRow()
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTable();
+
+            // add rows
+            control.AddRow(new ControlTableCell());
+            control.AddRow(new ControlTableCell());
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            // expected HTML
+            var expected = @"<div class=""wx-webui-table""><div class=""wx-table-columns""></div><div class=""wx-table-row""><div></div></div><div class=""wx-table-row""><div></div></div></div>";
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
     }
 }

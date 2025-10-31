@@ -73,24 +73,10 @@ namespace WebExpress.WebUI.WebControl
                 button.Add(new HtmlText(I18N.Translate(renderContext.Request?.Culture, Text)));
             }
 
-            if (Modal == null || Modal.Type == TypeModal.None)
+            if (!string.IsNullOrWhiteSpace(Modal))
             {
-
-            }
-            else if (Modal.Type == TypeModal.Form)
-            {
-                button.OnClick = $"new webexpress.webui.modalFormCtrl({{ close: '{I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.cancel.label")}', uri: '{Modal.Uri?.ToString() ?? button.Href}', size: '{Modal.Size.ToString().ToLower()}', redirect: '{Modal.RedirectUri}'}});";
-                button.Href = "#";
-            }
-            else if (Modal.Type == TypeModal.Brwoser)
-            {
-                button.OnClick = $"new webexpress.webui.modalPageCtrl({{ close: '{I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.cancel.label")}', uri: '{Modal.Uri?.ToString() ?? button.Href}', size: '{Modal.Size.ToString().ToLower()}', redirect: '{Modal.RedirectUri}'}});";
-                button.Href = "#";
-            }
-            else if (Modal.Type == TypeModal.Modal)
-            {
-                button.AddUserAttribute("data-bs-toggle", "modal");
-                button.AddUserAttribute("data-bs-target", "#" + Modal.Modal.Id);
+                button.AddUserAttribute("data-wx-toggle", "modal");
+                button.AddUserAttribute("data-wx-target", $"#{Modal}");
             }
 
             var dropdownButton = new HtmlElementTextSemanticsSpan(new HtmlElementTextSemanticsSpan() { Class = "caret" })
@@ -120,7 +106,7 @@ namespace WebExpress.WebUI.WebControl
 
             var html = new HtmlElementTextContentDiv
             (
-                Modal != null && Modal.Type == TypeModal.Modal ? (IHtmlNode)new HtmlList(button, Modal.Modal.Render(renderContext, visualTree)) : button,
+                button,
                 dropdownButton,
                 dropdownElements
             )

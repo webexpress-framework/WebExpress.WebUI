@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemButton(id)
             {
@@ -43,7 +43,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemButton(null)
             {
@@ -64,7 +64,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control1 = new ControlListItemButton(null, new ControlIcon() { Icon = new IconStar() });
             var control2 = new ControlListItemButton(null, [new ControlIcon() { Icon = new IconStar() }]);
@@ -85,12 +85,12 @@ namespace WebExpress.WebUI.Test.WebControl
             var html5 = control5.Render(context, visualTree);
             var html6 = control6.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><span class=""fas fa-star""></span></button>", html1);
-            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><span class=""fas fa-star""></span></button>", html2);
-            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><span class=""fas fa-star""></span></button>", html3);
-            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><span class=""fas fa-star""></span></button>", html4);
-            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><span class=""fas fa-star""></span></button>", html5);
-            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><span class=""fas fa-star""></span></button>", html6);
+            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><i class=""fas fa-star""></i></button>", html1);
+            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><i class=""fas fa-star""></i></button>", html2);
+            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><i class=""fas fa-star""></i></button>", html3);
+            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><i class=""fas fa-star""></i></button>", html4);
+            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><i class=""fas fa-star""></i></button>", html5);
+            AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><i class=""fas fa-star""></i></button>", html6);
         }
     }
 }

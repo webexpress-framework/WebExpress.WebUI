@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlText(id)
             {
@@ -44,7 +44,7 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlText()
             {
@@ -62,23 +62,23 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the text color property of the attribute control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorText.Default, @"<div><span></span><span></span></div>")]
-        [InlineData(TypeColorText.Primary, @"<div class=""text-primary""><span></span><span></span></div>")]
-        [InlineData(TypeColorText.Secondary, @"<div class=""text-secondary""><span></span><span></span></div>")]
-        [InlineData(TypeColorText.Info, @"<div class=""text-info""><span></span><span></span></div>")]
-        [InlineData(TypeColorText.Success, @"<div class=""text-success""><span></span><span></span></div>")]
-        [InlineData(TypeColorText.Warning, @"<div class=""text-warning""><span></span><span></span></div>")]
-        [InlineData(TypeColorText.Danger, @"<div class=""text-danger""><span></span><span></span></div>")]
-        [InlineData(TypeColorText.Light, @"<div class=""text-light""><span></span><span></span></div>")]
-        [InlineData(TypeColorText.Dark, @"<div class=""text-dark""><span></span><span></span></div>")]
-        [InlineData(TypeColorText.Muted, @"<div class=""text-muted""><span></span><span></span></div>")]
+        [InlineData(TypeColorText.Default, @"<div></div>")]
+        [InlineData(TypeColorText.Primary, @"<div class=""text-primary""></div>")]
+        [InlineData(TypeColorText.Secondary, @"<div class=""text-secondary""></div>")]
+        [InlineData(TypeColorText.Info, @"<div class=""text-info""></div>")]
+        [InlineData(TypeColorText.Success, @"<div class=""text-success""></div>")]
+        [InlineData(TypeColorText.Warning, @"<div class=""text-warning""></div>")]
+        [InlineData(TypeColorText.Danger, @"<div class=""text-danger""></div>")]
+        [InlineData(TypeColorText.Light, @"<div class=""text-light""></div>")]
+        [InlineData(TypeColorText.Dark, @"<div class=""text-dark""></div>")]
+        [InlineData(TypeColorText.Muted, @"<div class=""text-muted""></div>")]
         public void TextColor(TypeColorText color, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlAttribute()
+            var control = new ControlText()
             {
                 TextColor = new PropertyColorText(color)
             };
@@ -101,9 +101,9 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlAttribute()
+            var control = new ControlText()
             {
                 Margin = new PropertySpacingMargin(spaceLeft, spaceRight, spaceTop, spaceBottom)
             };

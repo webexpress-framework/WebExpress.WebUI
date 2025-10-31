@@ -1,0 +1,32 @@
+/* Base FileList Control Styling */
+.wx-file-list > .wx-upload-preview > table {
+}
+
+.wx-file-list > .wx-upload-preview > table > tbody > tr {
+}
+
+.wx-file-list > .wx-upload-preview > table > tbody > tr > td {
+    text-align: left;
+}
+
+.wx-file-list > .wx-upload-preview > table > tbody > tr > td:last-child {
+    text-align: right;
+}
+
+.wx-file-list > .wx-upload-preview > table > tbody > tr > td > div {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wx-file-list > .wx-upload-preview > table > tbody > tr > td > div > img {
+}
+
+.wx-file-list > .wx-upload-preview > table > tbody > tr > td > div > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+}

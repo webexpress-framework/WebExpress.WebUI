@@ -1,0 +1,148 @@
+/* root sidebar container */
+.wx-sidebar {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: stretch;
+    max-height: 100%;
+}
+
+/* reduced (compact) sidebar */
+.wx-webui-sidebar.wx-sidebar-reduced {
+    transition: width 0.2s;
+    overflow-x: hidden;
+}
+
+.wx-sidebar > div:not(.wx-toolbar) {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* sidebar header */
+.wx-sidebar .wx-sidebar-header {
+    font-weight: bold;
+    font-size: clamp(0.75em, 0.9vw, 1em);
+    padding: 0em clamp(0.75em, 0.9vw, 1em) clamp(0.25em, 0.3vw, 0.5em) clamp(0.75em, 0.9vw, 1em);
+    color: var(--bs-secondary);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.wx-sidebar .wx-sidebar-header:not(:first-child) {
+    padding-top: clamp(0.5em, 0.75vw, 1em);
+}
+
+/* sidebar divider */
+.wx-sidebar .wx-sidebar-divider {
+    border-bottom: 1px solid #ececec;
+    margin: 0.5em 0;
+    height: 0;
+}
+
+/* sidebar link */
+.wx-sidebar .wx-sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: clamp(0.5em, 0.5vw, 0.75em);
+    cursor: pointer;
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    justify-content: space-between;
+    gap: clamp(0.2em, 0.3vw, 0.5em);
+    font-size: clamp(0.75em, 0.9vw, 1em);
+}
+
+.wx-sidebar .wx-sidebar-link:hover {
+    background: var(--bs-secondary-bg);
+}
+
+.wx-sidebar .wx-sidebar-link[active] {
+    background-color: var(--bs-primary);
+    color: white;
+}
+
+.wx-sidebar .wx-sidebar-link > .wx-link {
+    display: inline-flex;
+    gap: clamp(0.2em, 0.3vw, 0.5em);
+    align-items: center;
+    flex: 1;
+}
+
+.wx-sidebar .wx-sidebar-link[active] > .wx-link  {
+    color: white;
+}
+
+.wx-sidebar .wx-sidebar-link > .btn {
+    color: var(--bs-secondary);
+    padding: 0 clamp(0.2em, 0.3vw, 0.5em);
+    border: 0;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.wx-sidebar .wx-sidebar-link:hover > .btn {
+    opacity: 1;
+}
+
+/* removable button for links */
+.wx-sidebar .wx-sidebar-link > .btn:hover,
+.wx-sidebar .wx-sidebar-link > .btn:focus {
+    color: var(--bs-body-color);
+}
+
+/* sidebar panel */
+.wx-sidebar .wx-sidebar-panel {
+    display: flex;
+    align-items: center;
+    padding: clamp(0.5em, 0.5vw, 0.75em);
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+    border: none;
+    background: none;
+    font-size: clamp(0.75em, 0.9vw, 1em);
+}
+
+.wx-sidebar .wx-sidebar-panel.overlay:hover {
+    background: var(--bs-secondary-bg);
+}
+
+/* panel content inside sidebar */
+.wx-sidebar-panel-overlay {
+    position: absolute;
+    left: 60px;
+    top: 0;
+    min-width: clamp(10em, 15vw, 20em);
+    max-width: clamp(20em, 22vw, 25em);
+    max-height: clamp(50%, 50vh, 75%);
+    background: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+    border-radius: 4px;
+    z-index: 1000;
+    padding: 18px;
+    margin: 12px 0;
+    animation: fadeIn 0.2s;
+    overflow-y: auto;
+}
+
+/* footer */
+.wx-sidebar > .wx-toolbar {
+    background: none;
+    padding: 0;
+}
+
+.wx-sidebar.wx-sidebar-reduced > .wx-toolbar > .wx-overflow {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.wx-sidebar .hide {
+    display: none;
+}

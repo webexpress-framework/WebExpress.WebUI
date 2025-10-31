@@ -15,12 +15,12 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData("id", @"<form id=""id"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData("id", @"<form id=""id-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void Id(string id, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlModalForm(id)
             {
@@ -37,15 +37,16 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData("abc", @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*<h4 class=""modal-title"">abc</h4>*</form>")]
+        [InlineData("abc", @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data""><div class=""wx-webui-modal"" role=""dialog"" *><div class=""wx-modal-header"">abc</div>*</div></form>")]
+        [InlineData("webexpress.webui:plugin.name", @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data""><div class=""wx-webui-modal"" role=""dialog"" *><div class=""wx-modal-header"">WebExpress.WebUI</div>*</div></form>")]
 
         public void Header(string header, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlModalForm()
+            var control = new ControlModalForm(null)
             {
                 Header = header
             };
@@ -64,15 +65,13 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlModalForm()
-            {
-            };
+            var form = new ControlModalForm(null);
 
             // test execution
-            control.Add(new ControlFormItemInputTextBox() { Value = "abc" });
-            var html = control.Render(context, visualTree);
+            form.Add(new ControlFormItemInputText());
+            var html = form.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(@"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*<input * type=""text"" class=""form-control"">*</form>", html);
         }

@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.WebNotification
         DateTime Created { get; }
 
         /// <summary>
-        /// Progress as a percentage: 0-100%. <0 Without progress.
+        /// Progress as a percentage: 0–100%. Values less than 0 indicate no progress.
         /// </summary>
         [JsonPropertyName("progress")]
         int Progress { get; set; }

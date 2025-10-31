@@ -10,10 +10,11 @@ namespace WebExpress.WebUI.WebControl
     /// This class provides the base functionality for form items, including properties for the name of the input field,
     /// initialization, and rendering to HTML.
     /// </remarks>
-    public abstract class ControlFormItem : Control
+    public abstract class ControlFormItem : Control, IControlFormItem
     {
         /// <summary>
         /// Returns or sets the name of the input field.
+        /// This name is used to identify the form item in the context of form submissions.
         /// </summary>
         public string Name { get; set; }
 

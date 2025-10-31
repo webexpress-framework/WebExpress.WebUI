@@ -14,13 +14,13 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the dropdown item divider control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""dropdown-divider""></div>")]
-        [InlineData("id", @"<div id=""id"" class=""dropdown-divider""></div>")]
+        [InlineData(null, @"<div class=""wx-dropdown-divider"" role=""separator""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-dropdown-divider"" role=""separator""></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDropdownItemDivider(id)
             {

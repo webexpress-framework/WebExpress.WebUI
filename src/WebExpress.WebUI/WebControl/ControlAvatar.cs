@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -13,7 +14,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the avatar image.
         /// </summary>
-        public Uri Image { get; set; }
+        public IUri Image { get; set; }
 
         /// <summary>
         /// Returns or sets the name of the user.
@@ -21,11 +22,16 @@ namespace WebExpress.WebUI.WebControl
         public string User { get; set; }
 
         /// <summary>
+        /// Returns or sets a link.
+        /// </summary>
+        public IUri Uri { get; set; }
+
+        /// <summary>
         /// Returns or sets the size.
         /// </summary>
-        public TypeSizeButton Size
+        public TypeSizeAvatar Size
         {
-            get => (TypeSizeButton)GetProperty(TypeSizeButton.Default);
+            get => (TypeSizeAvatar)GetProperty(TypeSizeAvatar.Default);
             set => SetProperty(value, () => value.ToClass());
         }
 
@@ -69,13 +75,24 @@ namespace WebExpress.WebUI.WebControl
                 };
             }
 
-            var html = new HtmlElementTextContentDiv(img, new HtmlText(User))
+            var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-profile", GetClasses()),
                 Style = GetStyles(),
                 Role = Role
-            };
+            }
+                .Add(img)
+                .Add
+                (
+                    Uri != null
+                        ? new HtmlElementTextSemanticsA(User)
+                        {
+                            Href = Uri.ToString(),
+                            Class = "wx-link"
+                        }
+                        : new HtmlText(User)
+                );
 
             if (Modal != null)
             {

@@ -14,13 +14,13 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the modal control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""modal fade"" role=""dialog""><div class=""modal-dialog"" role=""document""><div class=""modal-content""><div class=""modal-header""><h4 class=""modal-title""></h4><button class=""btn-close"" aria-label=""close"" data-bs-dismiss=""modal""></button></div><div class=""modal-body""></div><div class=""modal-footer""><button type=""button"" class=""btn"" data-bs-dismiss=""modal"">Close</button></div></div></div></div>")]
-        [InlineData("id", @"<div id=""id"" class=""modal fade"" role=""dialog""><div class=""modal-dialog"" role=""document""><div class=""modal-content""><div class=""modal-header""><h4 class=""modal-title""></h4><button class=""btn-close"" aria-label=""close"" data-bs-dismiss=""modal""></button></div><div class=""modal-body""></div><div class=""modal-footer""><button type=""button"" class=""btn"" data-bs-dismiss=""modal"">Close</button></div></div></div></div>")]
+        [InlineData(null, @"<div class=""wx-webui-modal"" data-close-label=""Close"">*</div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-modal"" data-close-label=""Close"">*</div>")]
         public void Id(string id, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlModal(id)
             {
@@ -36,16 +36,16 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the header property of the modal control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""modal fade"" role=""dialog""><div class=""modal-dialog"" role=""document""><div class=""modal-content""><div class=""modal-header""><h4 class=""modal-title""></h4><button class=""btn-close"" aria-label=""close"" data-bs-dismiss=""modal""></button></div><div class=""modal-body""></div><div class=""modal-footer""><button type=""button"" class=""btn"" data-bs-dismiss=""modal"">Close</button></div></div></div></div>")]
-        [InlineData("abc", @"<div class=""modal fade"" role=""dialog""><div class=""modal-dialog"" role=""document""><div class=""modal-content""><div class=""modal-header""><h4 class=""modal-title"">abc</h4><button class=""btn-close"" aria-label=""close"" data-bs-dismiss=""modal""></button></div><div class=""modal-body""></div><div class=""modal-footer""><button type=""button"" class=""btn"" data-bs-dismiss=""modal"">Close</button></div></div></div></div>")]
-
+        [InlineData(null, @"<div class=""wx-webui-modal"" *>*</div>")]
+        [InlineData("abc", @"<div class=""wx-webui-modal"" *><div class=""wx-modal-header"">abc</div>*</div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-modal"" *><div class=""wx-modal-header"">WebExpress.WebUI</div>*</div>")]
         public void Header(string header, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CrerateRenderContextMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlModal()
+            var control = new ControlModal(null)
             {
                 Header = header
             };
@@ -53,7 +53,33 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
-            Assert.Equal(expected, html.Trim());
+            AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
+        }
+
+        /// <summary>
+        /// Tests the size property of the modal control.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeModalSize.Default, @"<div class=""wx-webui-modal"" data-close-label=""Close"">*</div>")]
+        [InlineData(TypeModalSize.Small, @"<div class=""wx-webui-modal"" data-size=""modal-sm"" *>*</div>")]
+        [InlineData(TypeModalSize.Large, @"<div class=""wx-webui-modal"" data-size=""modal-lg"" *>*</div>")]
+        [InlineData(TypeModalSize.ExtraLarge, @"<div class=""wx-webui-modal"" data-size=""modal-xl"" *>*</div>")]
+        [InlineData(TypeModalSize.Fullscreen, @"<div class=""wx-webui-modal"" data-size=""modal-fullscreen"" *>*</div>")]
+        public void Size(TypeModalSize size, string expected)
+        {
+            // preconditions
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlModal(null)
+            {
+                Size = size
+            };
+
+            // test execution
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
         }
     }
 }

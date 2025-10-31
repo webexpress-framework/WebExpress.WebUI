@@ -30,4 +30,27 @@
         /// </summary>
         Fullscreen
     }
+
+    /// <summary>
+    /// Provides extension methods for the <see cref="TypeModalSize"/> enum.
+    /// </summary>
+    public static class TypeModalSizeExtensions
+    {
+        /// <summary>
+        /// Converts the <see cref="TypeActive"/> value to a corresponding CSS class.
+        /// </summary>
+        /// <param name="size">The <see cref="TypeModalSize"/> value to be converted.</param>
+        /// <returns>The CSS class corresponding to the <see cref="TypeModalSize"/> value.</returns>
+        public static string ToClass(this TypeModalSize size)
+        {
+            return size switch
+            {
+                TypeModalSize.Small => "modal-sm",
+                TypeModalSize.Large => "modal-lg",
+                TypeModalSize.ExtraLarge => "modal-xl",
+                TypeModalSize.Fullscreen => "modal-fullscreen",
+                _ => string.Empty,
+            };
+        }
+    }
 }

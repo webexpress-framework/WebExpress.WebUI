@@ -7,13 +7,13 @@ namespace WebExpress.WebUI.Test
     /// <summary>
     /// A dummy fragment for testing purposes.
     /// </summary>
-    [Section<TestSectionFragmentControlPanelFlexbox>()]
-    public sealed class TestFragmentControlPanelFlexbox : FragmentControlPanelFlexbox
+    [Section<TestSectionFragmentControlPanelFlex>()]
+    public sealed class TestFragmentControlPanelFlex : FragmentControlPanelFlex
     {
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
-        public TestFragmentControlPanelFlexbox(IFragmentContext fragmentContext)
+        public TestFragmentControlPanelFlex(IFragmentContext fragmentContext)
             : base(fragmentContext)
         {
         }

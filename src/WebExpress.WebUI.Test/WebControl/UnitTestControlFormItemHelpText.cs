@@ -14,14 +14,14 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the form item help text control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<small></small>")]
-        [InlineData("id", @"<small id=""id""></small>")]
+        [InlineData(null, @"<small class=""text-muted""></small>")]
+        [InlineData("id", @"<small id=""id"" class=""text-muted""></small>")]
         public void Id(string id, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemHelpText(id)
             {
@@ -37,15 +37,15 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the text property of the form item help text control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<small></small>")]
-        [InlineData("abc", @"<small>abc</small>")]
-        [InlineData("webexpress.webui:plugin.name", @"<small>WebExpress.WebUI</small>")]
+        [InlineData(null, @"<small class=""text-muted""></small>")]
+        [InlineData("abc", @"<small class=""text-muted"">abc</small>")]
+        [InlineData("webexpress.webui:plugin.name", @"<small class=""text-muted"">WebExpress.WebUI</small>")]
         public void Text(string text, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemHelpText()
             {
@@ -62,17 +62,17 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the size property of the form item help text control.
         /// </summary>
         [Theory]
-        [InlineData(TypeSizeText.Default, @"<small></small>")]
-        [InlineData(TypeSizeText.ExtraSmall, @"<small style=""font-size:0.55rem;""></small>")]
-        [InlineData(TypeSizeText.Small, @"<small style=""font-size:0.75rem;""></small>")]
-        [InlineData(TypeSizeText.Large, @"<small style=""font-size:1.5rem;""></small>")]
-        [InlineData(TypeSizeText.ExtraLarge, @"<small style=""font-size:2rem;""></small>")]
+        [InlineData(TypeSizeText.Default, @"<small class=""text-muted""></small>")]
+        [InlineData(TypeSizeText.ExtraSmall, @"<small class=""text-muted wx-esm""></small>")]
+        [InlineData(TypeSizeText.Small, @"<small class=""text-muted wx-sm""></small>")]
+        [InlineData(TypeSizeText.Large, @"<small class=""text-muted wx-lg""></small>")]
+        [InlineData(TypeSizeText.ExtraLarge, @"<small class=""text-muted wx-elg""></small>")]
         public void Size(TypeSizeText size, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
-            var context = new RenderControlFormContext(UnitTestControlFixture.CrerateRenderContextMock(), form);
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemHelpText()
             {
