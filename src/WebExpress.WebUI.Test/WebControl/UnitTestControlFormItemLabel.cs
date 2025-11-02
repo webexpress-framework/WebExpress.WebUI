@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the form label control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<label></label>")]
-        [InlineData("id", @"<label id=""id""></label>")]
+        [InlineData(null, @"<label class=""wx-form-label""></label>")]
+        [InlineData("id", @"<label id=""id"" class=""wx-form-label""></label>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -30,6 +30,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -37,8 +38,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the name property of the form label control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<label></label>")]
-        [InlineData("abc", @"<label></label>")]
+        [InlineData(null, @"<label class=""wx-form-label""></label>")]
+        [InlineData("abc", @"<label class=""wx-form-label""></label>")]
         public void Name(string name, string expected)
         {
             // preconditions
@@ -54,6 +55,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -61,8 +63,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the text property of the form label control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<label></label>")]
-        [InlineData("abc", @"<label>abc</label>")]
+        [InlineData(null, @"<label class=""wx-form-label""></label>")]
+        [InlineData("abc", @"<label class=""wx-form-label"">abc</label>")]
         public void Text(string text, string expected)
         {
             // preconditions
@@ -78,6 +80,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -85,8 +88,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the form item property of the form label control.
         /// </summary>
         [Theory]
-        [InlineData(false, @"<label></label>")]
-        [InlineData(true, @"<label for=""*""></label>")]
+        [InlineData(false, @"<label class=""wx-form-label""></label>")]
+        [InlineData(true, @"<label class=""wx-form-label"" for=""*""></label>")]
         public void FormItem(bool formItem, string expected)
         {
             // preconditions
@@ -102,6 +105,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
     }

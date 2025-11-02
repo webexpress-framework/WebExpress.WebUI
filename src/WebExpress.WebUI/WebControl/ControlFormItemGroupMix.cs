@@ -59,18 +59,54 @@ namespace WebExpress.WebUI.WebControl
                 if (item is IControlFormItemInput input)
                 {
                     var icon = new ControlIcon() { Icon = input?.Icon };
-                    var label = new ControlFormItemLabel(!string.IsNullOrEmpty(item.Id) ? item.Id + "_label" : string.Empty);
+                    var label = default(IHtmlNode);
                     var help = new ControlFormItemHelpText(!string.IsNullOrEmpty(item.Id) ? item.Id + "_help" : string.Empty);
 
-                    label.Initialize(renderGroupContext);
-                    help.Initialize(renderGroupContext);
+                    if (!string.IsNullOrWhiteSpace(input.Label) && !input.Required)
+                    {
+                        var text = I18N.Translate(renderGroupContext, input.Label);
 
-                    label.Text = I18N.Translate(renderGroupContext.Request?.Culture, input?.Label);
-                    label.FormItem = item;
-                    label.Classes = ["me-2"];
+                        var l = new ControlFormItemLabel(!string.IsNullOrEmpty(item.Id) ? item.Id + "_label" : string.Empty)
+                        {
+                            Classes = ["me-2"],
+                            Text = text.EndsWith(":") ? text : text + ":"
+                        };
+
+                        l.Initialize(renderGroupContext);
+                        l.FormItem = item;
+
+                        label = l.Render(renderGroupContext, visualTree);
+                    }
+                    else if (!string.IsNullOrWhiteSpace(input.Label))
+                    {
+                        var text = I18N.Translate(renderGroupContext, input.Label)?.Trim(':');
+                        var l = new ControlFormItemLabel(!string.IsNullOrEmpty(item.Id) ? item.Id + "_label" : string.Empty)
+                        {
+                            Text = text
+                        };
+                        var required = new ControlFormItemLabel(null)
+                        {
+                            Text = "*",
+                            Classes = ["wx-form-required"],
+                            TextColor = new PropertyColorText(TypeColorText.Danger)
+                        };
+
+                        l.Initialize(renderGroupContext);
+                        l.FormItem = item;
+
+                        label = new HtmlElementTextSemanticsSpan()
+                        {
+                            Class = "wx-form-label me-2"
+                        }
+                            .Add(l.Render(renderGroupContext, visualTree).RemoveClass("wx-form-label"))
+                            .Add(required.Render(renderGroupContext, visualTree))
+                            .Add(new HtmlText(":"));
+                    }
+
+                    help.Initialize(renderGroupContext);
                     help.Text = I18N.Translate(renderGroupContext.Request?.Culture, input?.Help);
 
-                    if (icon.Icon != null && string.IsNullOrWhiteSpace(label.Text))
+                    if (icon.Icon != null && label == null)
                     {
                         icon.Classes = ["pt-1"];
 
@@ -80,11 +116,11 @@ namespace WebExpress.WebUI.WebControl
                     {
                         icon.Classes = ["pt-1"];
 
-                        row.Add(new HtmlElementTextContentDiv(icon.Render(renderGroupContext, visualTree), label.Render(renderGroupContext, visualTree)));
+                        row.Add(new HtmlElementTextContentDiv(icon.Render(renderGroupContext, visualTree), label));
                     }
-                    else if (!string.IsNullOrWhiteSpace(label.Text))
+                    else if (label != null)
                     {
-                        row.Add(new HtmlElementTextContentDiv(label.Render(renderGroupContext, visualTree)));
+                        row.Add(new HtmlElementTextContentDiv(label));
                     }
 
                     if (!string.IsNullOrWhiteSpace(input?.Help))

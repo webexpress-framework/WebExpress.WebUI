@@ -16,11 +16,6 @@ namespace WebExpress.WebUI.WebControl
         public string Description { get; set; }
 
         /// <summary>
-        /// Returns or sets whether inputs are enforced.
-        /// </summary>
-        public bool Required { get; set; }
-
-        /// <summary>
         /// Gets or sets the placeholder text displayed when no date is selected.
         /// </summary>
         public string Placeholder { get; set; }

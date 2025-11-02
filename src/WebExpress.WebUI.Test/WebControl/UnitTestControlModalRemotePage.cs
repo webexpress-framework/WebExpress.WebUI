@@ -110,7 +110,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-modal-page"" *>*</div>")]
-        [InlineData("main", @"<div class=""wx-webui-modal-page"" * data-selector=""main"">*</div>")]
+        [InlineData("main", @"<div class=""wx-webui-modal-page"" * data-selector=""#main"">*</div>")]
         public void Selector(string selector, string expected)
         {
             // preconditions

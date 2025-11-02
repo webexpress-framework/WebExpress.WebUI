@@ -329,7 +329,7 @@ namespace WebExpress.WebUI.WebControl
         {
             var classes = Classes.ToList();
             var formElement = _form.Render(renderContext, visualTree, items);
-            var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(Header)))
+            var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Header)))
             {
                 Class = "wx-modal-header"
             };
@@ -349,7 +349,7 @@ namespace WebExpress.WebUI.WebControl
                 Role = "dialog"
             }
             .AddUserAttribute("data-size", Size.ToClass())
-            .AddUserAttribute("data-close-label", I18N.Translate(CloseLabel));
+            .AddUserAttribute("data-close-label", I18N.Translate(renderContext, CloseLabel));
 
             if (formElement is HtmlElementFormForm form && _form.State != TypeFormState.Success)
             {

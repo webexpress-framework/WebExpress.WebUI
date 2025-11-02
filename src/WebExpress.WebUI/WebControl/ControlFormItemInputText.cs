@@ -39,11 +39,6 @@ namespace WebExpress.WebUI.WebControl
         public uint? MaxLength { get; set; }
 
         /// <summary>
-        /// Returns or sets whether inputs are enforced.
-        /// </summary>
-        public bool Required { get; set; }
-
-        /// <summary>
         /// Returns or sets a search pattern that checks the content.
         /// </summary>
         public string Pattern { get; set; }

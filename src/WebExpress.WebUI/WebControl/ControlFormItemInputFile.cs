@@ -28,11 +28,6 @@ namespace WebExpress.WebUI.WebControl
         public string Placeholder { get; set; }
 
         /// <summary>
-        /// Returns or sets whether inputs are enforced.
-        /// </summary>
-        public bool Required { get; set; }
-
-        /// <summary>
         /// Returns or sets the accepted files.
         /// </summary>
         public IEnumerable<string> AcceptFile => _acceptFile;
