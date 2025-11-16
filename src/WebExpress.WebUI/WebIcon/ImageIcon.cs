@@ -18,10 +18,19 @@ namespace WebExpress.WebUI.WebIcon
         public PropertySizeIcon Size { get; }
 
         /// <summary>
-        /// Returns the URI associated with the icon.
-        /// This property must be implemented by derived classes to provide the specific URI of the icon.
+        /// Returns the URI associated with the icon. This property must be 
+        /// implemented by derived classes to provide the specific URI of the icon.
         /// </summary>
         public IUri Uri { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImageIcon"/> class.
+        /// </summary>
+        /// <param name="uri">The URI of the icon.</param>
+        public ImageIcon(IUri uri)
+        {
+            Uri = uri;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ImageIcon"/> class.
@@ -39,7 +48,9 @@ namespace WebExpress.WebUI.WebIcon
         /// </summary>
         /// <param name="uri">The URI of the icon.</param>
         /// <param name="size">The size of the icon.</param>
-        /// <param name="applicationContext">The application context to be associated with the icon.</param>
+        /// <param name="applicationContext">
+        /// The application context to be associated with the icon.
+        /// </param>
         protected ImageIcon(IUri uri, PropertySizeIcon size, IApplicationContext applicationContext = null)
         {
             var assembly = GetType().Assembly;
@@ -61,7 +72,9 @@ namespace WebExpress.WebUI.WebIcon
         /// <param name="renderContext">The context in which the icon is rendered.</param>
         /// <param name="visualTree">The visual tree representing the icon's structure.</param>
         /// <param name="id">The id attribute of the HTML element.</param>
-        /// <param name="description">The description of the icon, used for accessibility and tooltips.</param>
+        /// <param name="description">
+        /// The description of the icon, used for accessibility and tooltips.
+        /// </param>
         /// <param name="css">The CSS class of the HTML element.</param>
         /// <param name="style">The inline style of the HTML element.</param>
         /// <param name="role">The ARIA role of the HTML element.</param>

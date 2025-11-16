@@ -88,6 +88,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                     icon: el.dataset.icon || null,
                     image: el.dataset.image || null,
                     title: el.dataset.title || null,
+                    modal: el.dataset.modal || null,
                     colorCss: el.getAttribute("data-color-css") || null,
                     colorStyle: el.getAttribute("data-color-style") || null,
                     align: align,
@@ -292,6 +293,10 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             }
             if (item.title) {
                 item.element.title = item.title;
+            }
+            if (item.modal) {
+                item.element.setAttribute("data-wx-toggle", "modal");
+                item.element.setAttribute("data-wx-target", item.modal);
             }
             item.element.addEventListener("click", () => {
                 this._dispatch(webexpress.webui.Event.CLICK_EVENT, { item: item });

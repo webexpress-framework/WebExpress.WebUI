@@ -136,7 +136,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-toolbar-button""></div>")]
-        [InlineData("id", @"<div class=""wx-toolbar-button"" data-modal=""id""></div>")]
+        [InlineData("id", @"<div class=""wx-toolbar-button"" data-modal=""#id""></div>")]
         public void Modal(string modal, string expected)
         {
             // preconditions
