@@ -61,7 +61,6 @@ namespace WebExpress.WebUI.WebControl
             var siteManager = WebEx.ComponentHub.SitemapManager;
             var lastEndpointContext = default(IEndpointContext);
 
-
             var html = new HtmlElementTextContentOl()
             {
                 Id = Id,
@@ -117,7 +116,7 @@ namespace WebExpress.WebUI.WebControl
                                 Href = href
                             })
                     );
-                } 
+                }
                 else if (endpointContext is PageContext page)
                 {
                     var display = I18N.Translate(renderContext.Request?.Culture, page.PageTitle);
@@ -128,7 +127,7 @@ namespace WebExpress.WebUI.WebControl
                         new HtmlElementTextContentLi()
                             .Add
                             (
-                                icon != null 
+                                icon != null
                                     ? new ControlIcon()
                                     {
                                         Icon = icon
