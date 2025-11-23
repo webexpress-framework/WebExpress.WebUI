@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
-using WebExpress.WebCore.WebMessage;
+using WebExpress.WebCore.WebParameter;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
@@ -148,14 +148,6 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            //Form.RedirectUri = RedirectUri ?? context.Uri;
-
-            //var list = new[] { Epilogue }
-            //    .Concat(Form.Items)
-            //    .Concat([Prologue]);
-
-            //return base.Render(context, list.Where(x => x != null));
-
             return base.Render(renderContext, visualTree, Items);
         }
 

@@ -33,6 +33,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             Assert.Equal(expected, html.Trim());
         }
 
@@ -57,6 +58,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             Assert.Equal(expected, html.Trim());
         }
 
@@ -75,12 +77,13 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemLink()
             {
-                Uri = uri != null ? new UriEndpoint(uri) : null,
+                Uri = uri is not null ? new UriEndpoint(uri) : null,
             };
 
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             Assert.Equal(expected, html.Trim());
         }
 
@@ -105,6 +108,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             Assert.Equal(expected, html.Trim());
         }
 
@@ -131,6 +135,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             Assert.Equal(expected, html.Trim());
         }
 
@@ -156,6 +161,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             Assert.Equal(expected, html.Trim());
         }
 
@@ -173,12 +179,13 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemLink()
             {
-                Icon = icon != null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
         }
 
@@ -202,6 +209,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             Assert.Equal(expected, html.Trim());
         }
 
@@ -224,6 +232,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var html2 = control2.Render(context, visualTree);
             var html3 = control3.Render(context, visualTree);
 
+            // validation
             Assert.Equal(@"<a class=""wx-link""><i class=""fas fa-star""></i></a>", html1.Trim());
             Assert.Equal(@"<a class=""wx-link""><i class=""fas fa-star""></i></a>", html2.Trim());
             Assert.Equal(@"<a class=""wx-link""><i class=""fas fa-star""></i></a>", html3.Trim());

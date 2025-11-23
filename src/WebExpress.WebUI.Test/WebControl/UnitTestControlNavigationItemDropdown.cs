@@ -31,6 +31,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -60,6 +61,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -84,6 +86,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -108,6 +111,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -131,6 +135,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -154,6 +159,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -178,6 +184,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -202,6 +209,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -219,12 +227,13 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemDropdown()
             {
-                Icon = icon != null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -249,6 +258,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -272,6 +282,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -292,6 +303,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-dropdown"" role=""button""><div class=""wx-dropdown-item"">abc</div></div>", html.Trim());
         }
     }

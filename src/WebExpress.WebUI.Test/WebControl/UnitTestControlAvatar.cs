@@ -70,7 +70,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatar()
             {
-                Image = uri != null ? new UriEndpoint(uri) : null
+                Image = uri is not null ? new UriEndpoint(uri) : null
             };
 
             // test execution
@@ -153,7 +153,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatar()
             {
-                Uri = uri != null ? new UriEndpoint(uri) : null
+                Uri = uri is not null ? new UriEndpoint(uri) : null
             };
 
             // test execution

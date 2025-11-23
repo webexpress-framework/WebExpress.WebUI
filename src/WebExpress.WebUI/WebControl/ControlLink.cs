@@ -4,6 +4,7 @@ using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebMessage;
+using WebExpress.WebCore.WebParameter;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
@@ -170,7 +171,7 @@ namespace WebExpress.WebUI.WebControl
             var dict = new Dictionary<string, Parameter>();
 
             // transfer of the parameters from the request.
-            if (Params != null)
+            if (Params is not null)
             {
                 foreach (var v in Params)
                 {
@@ -213,7 +214,7 @@ namespace WebExpress.WebUI.WebControl
                 OnClick = OnClick?.ToString()
             };
 
-            if (Icon != null)
+            if (Icon is not null)
             {
                 html.Add(new ControlIcon()
                 {

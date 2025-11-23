@@ -12,7 +12,7 @@ webexpress.webui.SmartViewCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Constructor
-     * @param {HTMLElement} element Host element for the display control.
+     * @param {HTMLElement} element The host element for the display control.
      */
     constructor(element) {
         super(element);
@@ -30,8 +30,8 @@ webexpress.webui.SmartViewCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Extracts the most relevant value from the editor child or fallback content.
-     * @param {HTMLElement} element Host element.
-     * @returns {string} Extracted value.
+     * @param {HTMLElement} element The host element.
+     * @returns {string} The extracted value.
      */
     _getEditorValue(element) {
         // get the control instance
@@ -58,58 +58,61 @@ webexpress.webui.SmartViewCtrl = class extends webexpress.webui.Ctrl {
 
         // hidden input inside wrapper
         let el = this._view?.querySelector('input');
-        if (el) return el.value;
+        if (el) {
+            return el.value;
+        }
 
         // any data-value deep inside
         el = element.querySelector('[data-value]');
-        if (el) return el.getAttribute('data-value');
+        if (el) {
+            return el.getAttribute('data-value');
+        }
 
         // fallback text
         return (this._view?.textContent || '').trim();
     }
 
     /**
-     * Gets current textual display value (raw).
-     * @returns {string} Current raw value as string.
+     * Gets the current textual display value (raw).
+     * @returns {string} The current raw value as a string.
      */
     get value() {
         return this._value;
     }
 
     /**
-     * Sets value programmatically and refreshes display.
-     * @param {string|string[]} value New raw value.
+     * Sets the value programmatically and refreshes the display.
+     * @param {string|string[]} value The new raw value.
      */
     set value(value) {
         this._value = value;
 
         // update underlying embedded control if available
         const ctrl = webexpress.webui.Controller.getInstanceByElement(this._view);
-        if (ctrl && ctrl instanceof webexpress.webui.DateCtrl) {
-            ctrl.value = value;
-        } else if (ctrl && ctrl instanceof webexpress.webui.CalendarCtrl) {
-            ctrl.value = value;
-        } else if (ctrl && ctrl instanceof webexpress.webui.SelectionCtrl) {
-            ctrl.value = value;
-        } else if (ctrl && ctrl instanceof webexpress.webui.MoveCtrl) {
-            ctrl.value = value;
-        } else if (ctrl && ctrl instanceof webexpress.webui.TagCtrl) {
-            ctrl.value = value;
-        } else if (ctrl && ctrl instanceof webexpress.webui.EditorCtrl) {
-            ctrl.value = value;
+        if (ctrl) {
+            if (ctrl instanceof webexpress.webui.DateCtrl ||
+                ctrl instanceof webexpress.webui.CalendarCtrl ||
+                ctrl instanceof webexpress.webui.SelectionCtrl ||
+                ctrl instanceof webexpress.webui.MoveCtrl ||
+                ctrl instanceof webexpress.webui.TagCtrl ||
+                ctrl instanceof webexpress.webui.EditorCtrl) {
+                ctrl.value = value;
+            }
         } else if (this._view?.tagName === 'SELECT') {
             // single select assumption: pick first token
             const first = Array.isArray(value) ? value[0] : String(value).split(';')[0];
             const opt = Array.from(this._view.options).find(o => String(o.value) === String(first));
-            if (opt) this._view.value = opt.value;
-        } else if (this._view?.tagName === 'INPUT') {
-            this._view.value = value;
-        } else if (this._view?.tagName === 'TEXTAREA') {
+            if (opt) {
+                this._view.value = opt.value;
+            }
+        } else if (this._view?.tagName === 'INPUT' || this._view?.tagName === 'TEXTAREA') {
             this._view.value = value;
         }
-        
+
         this._element.innerHTML = '';
-        this._element.appendChild(this._view.cloneNode(true));
+        if (this._view) {
+            this._element.appendChild(this._view.cloneNode(true));
+        }
     }
 };
 

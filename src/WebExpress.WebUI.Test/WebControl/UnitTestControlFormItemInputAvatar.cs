@@ -122,7 +122,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                Uri = uri != null ? new UriEndpoint(uri) : null
+                Uri = uri is not null ? new UriEndpoint(uri) : null
             };
 
             var html = control.Render(context, visualTree);
@@ -255,9 +255,10 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                Accept = accept != null ? [.. accept.Split(',')
-                    .Select(x => ContentTypeExtensions.ToContentTypeFromMime(x))
-                ] : null
+                Accept = accept is not null
+                    ? [.. accept.Split(',')
+                        .Select(x => ContentTypeExtensions.ToContentTypeFromMime(x))]
+                    : null
             };
 
             var html = control.Render(context, visualTree);
@@ -350,7 +351,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var icon = iconType != null ? Activator.CreateInstance(iconType) as IIcon : null;
+            var icon = iconType is not null ? Activator.CreateInstance(iconType) as IIcon : null;
             var control = new ControlFormItemInputAvatar(null)
             {
             };

@@ -94,7 +94,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var icon = iconType != null ? Activator.CreateInstance(iconType) as IIcon : null;
+            var icon = iconType is not null ? Activator.CreateInstance(iconType) as IIcon : null;
             var control = new ControlTree(null, new ControlTreeItem() { Icon = icon })
             {
             };
@@ -117,8 +117,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var iconOpen = iconOpenType != null ? Activator.CreateInstance(iconOpenType) as IIcon : null;
-            var iconClose = iconCloseType != null ? Activator.CreateInstance(iconOpenType) as IIcon : null;
+            var iconOpen = iconOpenType is not null ? Activator.CreateInstance(iconOpenType) as IIcon : null;
+            var iconClose = iconCloseType is not null ? Activator.CreateInstance(iconOpenType) as IIcon : null;
             var control = new ControlTree(null, new ControlTreeItem() { IconOpen = iconOpen, IconClose = iconClose })
             {
             };
@@ -141,7 +141,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlTree(null, new ControlTreeItem() { Uri = uri != null ? new UriEndpoint(uri) : null })
+            var control = new ControlTree(null, new ControlTreeItem() { Uri = uri is not null ? new UriEndpoint(uri) : null })
             {
             };
 

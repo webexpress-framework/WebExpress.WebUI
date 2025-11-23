@@ -111,10 +111,18 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("shape", Shape.ToShape())
                 .AddUserAttribute("viewport", Viewport > 0 ? Viewport.ToString() : null)
                 .AddUserAttribute("size", OutputSize > 0 ? OutputSize.ToString() : null)
-                .AddUserAttribute("output-format", OutputFormat != ContentType.Unknown ? OutputFormat.GetMimeType() : null)
-                .AddUserAttribute("output-quality", OutputQuality > 0 ? OutputQuality.ToString(System.Globalization.CultureInfo.InvariantCulture) : null)
-                .AddUserAttribute("accept", Accept != null ? string.Join(",", Accept?.Select(x => x.GetMimeType())) : null)
-                .AddUserAttribute("overlay-alpha", OverlayAlpha > 0 ? OverlayAlpha.ToString(System.Globalization.CultureInfo.InvariantCulture) : null)
+                .AddUserAttribute("output-format", OutputFormat != ContentType.Unknown
+                    ? OutputFormat.GetMimeType()
+                    : null)
+                .AddUserAttribute("output-quality", OutputQuality > 0
+                    ? OutputQuality.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                    : null)
+                .AddUserAttribute("accept", Accept is not null
+                    ? string.Join(",", Accept?.Select(x => x.GetMimeType()))
+                    : null)
+                .AddUserAttribute("overlay-alpha", OverlayAlpha > 0
+                    ? OverlayAlpha.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                    : null)
                 .AddUserAttribute("data-value", value);
 
             return html;

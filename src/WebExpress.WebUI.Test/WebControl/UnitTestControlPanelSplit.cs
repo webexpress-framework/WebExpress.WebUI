@@ -104,17 +104,17 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var childInstance1 = child1 != null ? Activator.CreateInstance(child1, [null]) as IControl : null;
-            var childInstance2 = child2 != null ? Activator.CreateInstance(child2, [null]) as IControl : null;
+            var childInstance1 = child1 is not null ? Activator.CreateInstance(child1, [null]) as IControl : null;
+            var childInstance2 = child2 is not null ? Activator.CreateInstance(child2, [null]) as IControl : null;
             var control = new ControlPanelSplit();
 
             // test execution
-            if (childInstance1 != null)
+            if (childInstance1 is not null)
             {
                 control.AddSidePanel(childInstance1);
             }
 
-            if (childInstance2 != null)
+            if (childInstance2 is not null)
             {
                 control.AddMainPanel(childInstance2);
             }

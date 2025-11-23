@@ -108,19 +108,19 @@ namespace WebExpress.WebUI.WebControl
                     help.Text = I18N.Translate(renderGroupContext.Request?.Culture, input?.Help);
                     help.Classes = ["ms-2"];
 
-                    if (icon.Icon != null && label == null)
+                    if (icon.Icon is not null && label is null)
                     {
                         icon.Classes = ["pt-1"];
 
                         row.Add(new HtmlElementTextContentDiv(icon.Render(renderGroupContext, visualTree)));
                     }
-                    else if (icon.Icon != null)
+                    else if (icon.Icon is not null)
                     {
                         icon.Classes = ["pt-1"];
 
                         row.Add(new HtmlElementTextContentDiv(icon.Render(renderGroupContext, visualTree), label));
                     }
-                    else if (label != null)
+                    else if (label is not null)
                     {
                         row.Add(new HtmlElementTextContentDiv(label));
                     }

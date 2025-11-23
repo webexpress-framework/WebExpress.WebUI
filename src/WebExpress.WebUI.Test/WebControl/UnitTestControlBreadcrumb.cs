@@ -30,6 +30,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -45,14 +46,15 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlBreadcrumb 
-            { 
-                Uri = new UriEndpoint(uri) 
+            var control = new ControlBreadcrumb
+            {
+                Uri = new UriEndpoint(uri)
             };
 
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -71,15 +73,16 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlBreadcrumb 
-            { 
-                Size = size, 
-                Uri = new UriEndpoint("http://example.com/a/b/c") 
+            var control = new ControlBreadcrumb
+            {
+                Size = size,
+                Uri = new UriEndpoint("http://example.com/a/b/c")
             };
 
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -100,6 +103,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -120,6 +124,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -134,25 +139,21 @@ namespace WebExpress.WebUI.Test.WebControl
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var context = UnitTestControlFixture.CreateRenderContextMock(application);
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
             var uriResource = new UriEndpoint(uri);
             var control = new ControlBreadcrumb()
             {
                 Uri = !string.IsNullOrWhiteSpace(uri) ? uriResource : null
             };
 
-            if (uriResource.PathSegments.LastOrDefault() != null)
-            {
-                uriResource.PathSegments.LastOrDefault().Display ??= "abc";
-            }
-
-            var uriProperty = context.Request.GetType().GetProperty("Uri");
-            uriProperty.SetValue(context.Request, uriResource);
+            var uriProperty = renderContext.Request.GetType().GetProperty("Uri");
+            uriProperty.SetValue(renderContext.Request, uriResource);
 
             // test execution
-            var html = control.Render(context, visualTree);
+            var html = control.Render(renderContext, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
     }

@@ -93,9 +93,9 @@ namespace WebExpress.WebUI.WebControl
 
             var html = new HtmlElementTextContentDiv
             (
-                Icon != null ? icon : null,
+                Icon is not null ? icon : null,
                 keyElement,
-                Uri != null
+                Uri is not null
                     ? new HtmlElementTextSemanticsA(valueElement)
                     {
                         Href = Uri.ToString(),

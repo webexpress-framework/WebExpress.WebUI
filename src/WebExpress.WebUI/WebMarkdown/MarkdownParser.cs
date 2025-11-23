@@ -251,7 +251,7 @@ namespace WebExpress.WebUI.WebMarkdown
         /// </returns>
         private static bool IsQuote(MarkdownTokenStream tokenStream)
         {
-            return tokenStream.Peek(MarkdownTokenType.Greater) != null &&
+            return tokenStream.Peek(MarkdownTokenType.Greater) is not null &&
                 tokenStream.PeekNext(MarkdownTokenType.Space, MarkdownTokenType.Tab) is not null;
         }
 
@@ -596,7 +596,7 @@ namespace WebExpress.WebUI.WebMarkdown
                     MarkdownTokenType.DoubleHyphen,
                     MarkdownTokenType.TripleHyphen,
                     MarkdownTokenType.MultiHyphen
-                ) != null && preview.Skip
+                ) is not null && preview.Skip
                 (
                     MarkdownTokenType.Pipe,
                     MarkdownTokenType.DoubleHyphen,

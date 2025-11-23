@@ -52,7 +52,7 @@ namespace WebExpress.WebUI.WebControl
                 OnClick = OnClick?.ToString()
             };
 
-            if (Icon != null)
+            if (Icon is not null)
             {
                 button.Add(new ControlIcon()
                 {
@@ -93,7 +93,7 @@ namespace WebExpress.WebUI.WebControl
                     [.. Items.Select
                     (
                         x =>
-                        x == null || x is ControlDropdownItemDivider || x is ControlLine ?
+                        x is null || x is ControlDropdownItemDivider || x is ControlLine ?
                         new HtmlElementTextContentLi() { Class = "dropdown-divider", Inline = true } :
                         x is ControlDropdownItemHeader ?
                         x.Render(renderContext, visualTree) :

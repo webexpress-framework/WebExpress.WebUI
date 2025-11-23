@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using WebExpress.WebCore.WebHtml;
-using WebExpress.WebCore.WebMessage;
+using WebExpress.WebCore.WebParameter;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 

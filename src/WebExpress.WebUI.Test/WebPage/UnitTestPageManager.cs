@@ -22,7 +22,7 @@ namespace WebExpress.WebUI.Test.WebPage
             // test execution
             var page = componentHub.PageManager.GetPages(pageType, application);
 
-            if (id == null)
+            if (id is null)
             {
                 Assert.Empty(page);
                 return;

@@ -124,21 +124,21 @@ namespace WebExpress.WebUI.WebControl
                     help.Text = I18N.Translate(renderGroupContext.Request?.Culture, input?.Help);
                     help.Classes = ["ms-2"];
 
-                    if (icon.Icon != null)
+                    if (icon.Icon is not null)
                     {
                         icon.Classes = ["me-2", "pt-1"];
 
                         row.Add(new HtmlElementTextContentDiv(icon.Render(renderContext, visualTree)));
                     }
 
-                    if (label != null)
+                    if (label is not null)
                     {
                         row.Add(new HtmlElementTextContentDiv(label));
                     }
 
                     row.Add(new HtmlElementTextContentDiv(item.Render(renderContext, visualTree)) { });
 
-                    if (input != null)
+                    if (input is not null)
                     {
                         row.Add(new HtmlElementTextContentDiv(help.Render(renderContext, visualTree)));
                     }

@@ -44,7 +44,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public IControlResponsive Add(IControlPanel panel, int breakpoint)
         {
-            if (panel == null)
+            if (panel is null)
             {
                 return this;
             }
@@ -69,7 +69,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public IControlResponsive Remove(IControlPanel panel)
         {
-            if (panel == null)
+            if (panel is null)
             {
                 return this;
             }
@@ -90,7 +90,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public IControlResponsive SetFallback(IControlPanel panel)
         {
-            if (panel == null)
+            if (panel is null)
             {
                 return this;
             }

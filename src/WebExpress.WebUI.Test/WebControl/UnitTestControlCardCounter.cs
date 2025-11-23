@@ -125,7 +125,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlCardCounter()
             {
-                Icon = icon != null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // test execution

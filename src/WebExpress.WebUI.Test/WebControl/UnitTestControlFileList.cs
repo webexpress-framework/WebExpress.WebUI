@@ -76,7 +76,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFileList()
                 .Add(new ControlFileListItem()
                 {
-                    Icon = icon != null
+                    Icon = icon is not null
                         ? Activator.CreateInstance(icon) as IIcon
                         : null
                 });

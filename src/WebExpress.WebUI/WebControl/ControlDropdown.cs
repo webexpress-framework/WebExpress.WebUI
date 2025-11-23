@@ -191,7 +191,7 @@ namespace WebExpress.WebUI.WebControl
             var buttonStyle = "";
             var menuCss = "";
 
-            if (Color != null)
+            if (Color is not null)
             {
                 buttonCss = Css.Concatenate(Color?.ToClass(Outline), buttonCss);
                 buttonStyle = Style.Concatenate(Color?.ToStyle(), buttonStyle);

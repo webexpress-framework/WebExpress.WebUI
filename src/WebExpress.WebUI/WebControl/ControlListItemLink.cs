@@ -3,7 +3,7 @@ using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
-using WebExpress.WebCore.WebMessage;
+using WebExpress.WebCore.WebParameter;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
@@ -68,7 +68,7 @@ namespace WebExpress.WebUI.WebControl
             var dict = new Dictionary<string, Parameter>();
 
             // copying the parameters of the link
-            if (Params != null)
+            if (Params is not null)
             {
                 foreach (var v in Params)
                 {
@@ -110,7 +110,7 @@ namespace WebExpress.WebUI.WebControl
                 OnClick = OnClick?.ToString()
             };
 
-            if (Icon != null)
+            if (Icon is not null)
             {
                 link.Add(new ControlIcon()
                 {
@@ -130,14 +130,6 @@ namespace WebExpress.WebUI.WebControl
             {
                 link.Add(new HtmlText(I18N.Translate(renderContext.Request?.Culture, Text)));
             }
-
-            //if (Modal != null)
-            //{
-            //    html.AddUserAttribute("data-bs-toggle", "modal");
-            //    html.AddUserAttribute("data-bs-target", "#" + Modal.Id);
-
-            //    return new HtmlList(html, Modal.Render(context));
-            //}
 
             if (!string.IsNullOrWhiteSpace(Tooltip))
             {

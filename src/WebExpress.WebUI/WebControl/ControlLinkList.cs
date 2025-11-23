@@ -133,8 +133,8 @@ namespace WebExpress.WebUI.WebControl
 
             var html = new HtmlElementTextContentDiv
             (
-                Icon != null ? icon : null,
-                Name != null ? name : null
+                Icon is not null ? icon : null,
+                Name is not null ? name : null
             )
             {
                 Id = Id,

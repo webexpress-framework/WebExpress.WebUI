@@ -7,7 +7,6 @@ using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebFragment;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebMessage;
-using WebExpress.WebCore.WebPage;
 using WebExpress.WebCore.WebScope;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebFragment;
@@ -269,11 +268,11 @@ namespace WebExpress.WebUI.WebControl
 
                 // uninizialized form
                 // fill the form with data
-                foreach (var item in items.Where(x => x != null))
+                foreach (var item in items.Where(x => x is not null))
                 {
                     item.Initialize(renderContext);
                 }
-                foreach (var item in Buttons.Where(x => x != null))
+                foreach (var item in Buttons.Where(x => x is not null))
                 {
                     item.Initialize(renderContext);
                 }
@@ -324,7 +323,7 @@ namespace WebExpress.WebUI.WebControl
                         throw new RedirectException(RedirectUri);
                     }
 
-                    if (Conformation != null)
+                    if (Conformation is not null)
                     {
                         return new HtmlElementFormForm(Conformation.Render(renderContext, visualTree))
                         {

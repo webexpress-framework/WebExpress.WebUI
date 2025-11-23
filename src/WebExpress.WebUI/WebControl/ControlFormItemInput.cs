@@ -91,7 +91,7 @@ namespace WebExpress.WebUI.WebControl
         {
             var value = renderContext.Request.GetParameter(Name)?.Value;
 
-            if (value == null)
+            if (value is null)
             {
                 var eventArgument = new ControlFormEventItemInitialize<TValue>()
                 {

@@ -71,7 +71,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelCard()
             {
-                HeaderImage = headerImage != null ? new UriEndpoint(headerImage) : null
+                HeaderImage = headerImage is not null ? new UriEndpoint(headerImage) : null
             };
 
             // test execution
@@ -140,7 +140,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelCard()
             {
-                FooterImage = footerImage != null ? new UriEndpoint(footerImage) : null
+                FooterImage = footerImage is not null ? new UriEndpoint(footerImage) : null
             };
 
             // test execution

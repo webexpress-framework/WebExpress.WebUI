@@ -33,6 +33,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -57,6 +58,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -75,12 +77,13 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                Uri = uri != null ? new UriEndpoint(uri) : null,
+                Uri = uri is not null ? new UriEndpoint(uri) : null,
             };
 
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -105,6 +108,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -131,6 +135,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -156,6 +161,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -173,12 +179,13 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                Icon = icon != null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -202,6 +209,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -234,6 +242,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var html5 = control5.Render(context, visualTree);
             var html6 = control6.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""wx-link""><i class=""fas fa-star""></i></a></li>", html1);
             AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""wx-link""><i class=""fas fa-star""></i></a></li>", html2);
             AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""wx-link""><i class=""fas fa-star""></i></a></li>", html3);

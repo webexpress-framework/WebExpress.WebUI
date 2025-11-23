@@ -102,12 +102,12 @@ namespace WebExpress.WebUI.WebControl
                     help.Initialize(renderGroupContext);
                     help.Text = I18N.Translate(renderGroupContext, input.Help);
 
-                    if (icon.Icon != null && label == null)
+                    if (icon.Icon is not null && label is null)
                     {
                         icon.Classes = ["me-2", "pt-1"];
                         fieldset.Add(new HtmlElementTextSemanticsSpan(icon.Render(renderGroupContext, visualTree)));
                     }
-                    else if (icon.Icon != null)
+                    else if (icon.Icon is not null)
                     {
                         icon.Classes = ["me-2", "pt-1"];
                         fieldset.Add(new HtmlElementTextSemanticsSpan(icon.Render(renderGroupContext, visualTree), label)
@@ -115,7 +115,7 @@ namespace WebExpress.WebUI.WebControl
                             Style = "display: flex;"
                         });
                     }
-                    else if (label != null)
+                    else if (label is not null)
                     {
                         fieldset.Add(label);
                     }

@@ -1,4 +1,4 @@
-﻿using WebExpress.WebCore.WebMessage;
+﻿using WebExpress.WebCore.WebParameter;
 
 namespace WebExpress.WebUI.WebControl
 {

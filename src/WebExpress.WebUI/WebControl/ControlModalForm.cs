@@ -111,7 +111,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlModalForm(string id, params IControlFormItem[] items)
             : base(id)
         {
-            _form = new ControlForm(id != null ? $"form_{id}" : null, items ?? []);
+            _form = new ControlForm(id is not null ? $"form_{id}" : null, items ?? []);
 
             _form.InitializeForm += (e) => InitializeForm?.Invoke(e);
             _form.ValidateForm += (e) => ValidateForm?.Invoke(e);
@@ -360,7 +360,7 @@ namespace WebExpress.WebUI.WebControl
                 {
                     TypeFormState.Default => null,
                     TypeFormState.Error => "true",
-                    TypeFormState.Success => _form.Conformation != null ? "true" : null,
+                    TypeFormState.Success => _form.Conformation is not null ? "true" : null,
                     _ => null
                 };
 
@@ -385,7 +385,7 @@ namespace WebExpress.WebUI.WebControl
             }
 
             content.Add(_form.Conformation?.Render(renderContext, visualTree));
-            modal.AddUserAttribute("data-auto-show", _form.Conformation != null ? "true" : null);
+            modal.AddUserAttribute("data-auto-show", _form.Conformation is not null ? "true" : null);
 
             return modal;
         }

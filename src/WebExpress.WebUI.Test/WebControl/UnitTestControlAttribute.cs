@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAttribute()
             {
-                Icon = icon != null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // test execution
@@ -243,7 +243,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAttribute()
             {
-                Uri = uri != null ? new UriEndpoint(uri) : null
+                Uri = uri is not null ? new UriEndpoint(uri) : null
             };
 
             // test execution

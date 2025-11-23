@@ -1,4 +1,4 @@
-﻿using WebExpress.WebCore.WebMessage;
+﻿using WebExpress.WebCore.WebParameter;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
@@ -286,7 +286,7 @@ namespace WebExpress.WebUI.Test.WebControl
                     x =>
                     {
                         x
-                        .Add(x.Value != null, "validation1", TypeInputValidity.Warning)
+                        .Add(x.Value is not null, "validation1", TypeInputValidity.Warning)
                         .Add(x.Value?.Items.Count() > 3, "validation2")
                         .Add(false, "validation3");
                         validated = true;
@@ -339,6 +339,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = form.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
             Assert.True(processed);
         }

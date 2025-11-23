@@ -26,7 +26,7 @@ namespace WebExpress.WebUI.Test.WebIcon
             var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
             var size = new PropertySizeIcon(16, 16, TypeSizeUnit.Pixel);
-            var icon = uri == null
+            var icon = uri is null
                 ? Activator.CreateInstance(iconType, [size, renderContext.PageContext.ApplicationContext]) as IIcon
                 : Activator.CreateInstance(iconType, [new UriEndpoint(uri), size,]) as IIcon;
 

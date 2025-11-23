@@ -55,7 +55,7 @@ namespace WebExpress.WebUI.WebControl
                 Role = Role
             };
 
-            if (Icon != null)
+            if (Icon is not null)
             {
                 html.Add(new ControlIcon()
                 {

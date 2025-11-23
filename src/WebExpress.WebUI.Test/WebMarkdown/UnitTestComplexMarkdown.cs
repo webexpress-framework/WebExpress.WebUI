@@ -40,7 +40,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         {
             var assembly = Assembly.GetExecutingAssembly();
             using var stream = assembly.GetManifestResourceStream(resourceName);
-            if (stream == null)
+            if (stream is null)
             {
                 throw new FileNotFoundException("Resource not found: " + resourceName);
             }

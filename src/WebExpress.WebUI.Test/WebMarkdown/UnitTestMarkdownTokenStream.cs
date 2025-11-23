@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
             var peek = stream.Peek(queryType);
 
             // validation
-            Assert.Equal(expected, peek != null);
+            Assert.Equal(expected, peek is not null);
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
             var peek = stream.Peek(queryTypes);
 
             // validation
-            Assert.True(peek != null);
+            Assert.True(peek is not null);
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
             var peek = stream.Peek(queryTypes);
 
             // validation
-            Assert.False(peek != null);
+            Assert.False(peek is not null);
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
             var peekNext = stream.PeekNext(queryType);
 
             // validation
-            Assert.Equal(expected, peekNext != null);
+            Assert.Equal(expected, peekNext is not null);
         }
 
         /// <summary>
@@ -311,7 +311,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
             // validation
             Assert.Equal(expectedPosition, stream.Position);
             var token = stream.Peek();
-            if (expectedNextTokenType == null)
+            if (expectedNextTokenType is null)
             {
                 Assert.Null(token); // Expect null if the position is beyond the end of the stream
             }
@@ -486,7 +486,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
             var originalPosition = tokenStream.Position;
 
             // test execution
-            var previewedTokenStram = stopToken != null ? tokenStream.Preview(stopToken.Value) : tokenStream.Preview();
+            var previewedTokenStram = stopToken is not null ? tokenStream.Preview(stopToken.Value) : tokenStream.Preview();
 
             // validation
             Assert.Equal(expectedCount, previewedTokenStram?.Count());

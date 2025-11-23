@@ -91,7 +91,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual string ToString(string format, IFormatProvider formatProvider)
         {
             // join all items with semicolon
-            return _items != null && _items.Count != 0
+            return _items is not null && _items.Count != 0
                 ? string.Join("; ", _items)
                 : string.Empty;
         }

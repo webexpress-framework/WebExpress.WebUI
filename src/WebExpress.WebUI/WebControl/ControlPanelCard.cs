@@ -71,7 +71,7 @@ namespace WebExpress.WebUI.WebControl
                 html.Add(new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(Header))) { Class = "card-header" });
             }
 
-            if (HeaderImage != null)
+            if (HeaderImage is not null)
             {
                 html.Add(new HtmlElementMultimediaImg()
                 {
@@ -100,7 +100,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = "card-body"
             });
 
-            if (FooterImage != null)
+            if (FooterImage is not null)
             {
                 html.Add(new HtmlElementMultimediaImg()
                 {

@@ -125,12 +125,12 @@ namespace WebExpress.WebUI.WebControl
                     help.Initialize(renderGroupContext);
                     help.Text = I18N.Translate(renderGroupContext.Request?.Culture, input?.Help);
 
-                    if (icon.Icon != null && label == null)
+                    if (icon.Icon is not null && label is null)
                     {
                         icon.Classes = ["me-2", "pt-1"];
                         row.Add(new HtmlElementTextContentDiv(icon.Render(renderGroupContext, visualTree)));
                     }
-                    else if (icon.Icon != null)
+                    else if (icon.Icon is not null)
                     {
                         icon.Classes = ["me-2", "pt-1"];
                         row.Add(new HtmlElementTextContentDiv(icon.Render(renderGroupContext, visualTree), label)
@@ -138,7 +138,7 @@ namespace WebExpress.WebUI.WebControl
                             Style = "display: flex;"
                         });
                     }
-                    else if (label != null)
+                    else if (label is not null)
                     {
                         row.Add(new HtmlElementTextContentDiv(label));
                     }

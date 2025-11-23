@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlImage()
             {
-                Uri = uri != null ? new UriEndpoint(uri) : null,
+                Uri = uri is not null ? new UriEndpoint(uri) : null,
             };
 
             // test execution

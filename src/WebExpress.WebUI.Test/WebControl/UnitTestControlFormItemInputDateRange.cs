@@ -81,7 +81,7 @@ namespace WebExpress.WebUI.Test.WebControl
                     control,
                     new ControlFormInputValueDate
                     (
-                        value != null
+                        value is not null
                             ? DateTime.ParseExact
                             (
                                 value,

@@ -192,7 +192,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var icon = iconType != null ? Activator.CreateInstance(iconType) as IIcon : null;
+            var icon = iconType is not null ? Activator.CreateInstance(iconType) as IIcon : null;
             var control = new ControlFormItemInputMove(null, new ControlFormItemInputMoveItem() { Icon = icon })
             {
             };

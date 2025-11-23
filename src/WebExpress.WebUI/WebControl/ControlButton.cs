@@ -150,7 +150,7 @@ namespace WebExpress.WebUI.WebControl
                 Disabled = Active == TypeActive.Disabled
             };
 
-            if (Icon != null)
+            if (Icon is not null)
             {
                 html.Add(new ControlIcon()
                 {
