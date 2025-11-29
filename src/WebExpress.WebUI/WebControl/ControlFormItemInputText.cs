@@ -111,16 +111,12 @@ namespace WebExpress.WebUI.WebControl
                     Placeholder = I18N.Translate(renderContext.Request?.Culture, Placeholder),
                     Rows = Rows.ToString()
                 },
-                TypeEditTextFormat.Wysiwyg => new HtmlElementTextContentDiv()
+                TypeEditTextFormat.Wysiwyg => new HtmlElementTextContentDiv(new HtmlText(value?.Text))
                 {
                     Id = id,
-                    //Value = value,
-                    //Name = Name,
                     Class = Css.Concatenate("wx-webui-editor", classes),
                     Style = GetStyles(),
                     Role = Role,
-                    //Placeholder = I18N.Translate(renderContext.Request?.Culture, Placeholder),
-                    //Rows = Rows.ToString()
                 }.AddUserAttribute("name", Name),
                 _ => new HtmlElementFieldInput()
                 {

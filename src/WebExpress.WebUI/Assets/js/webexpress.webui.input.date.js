@@ -435,14 +435,52 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
      * @returns {string} Formatted string.
      */
     _formatDateString(date, format) {
-        const yyyy = date.getFullYear().toString();
+        const yyyy = String(date.getFullYear());
         const mm = String(date.getMonth() + 1).padStart(2, "0");
         const dd = String(date.getDate()).padStart(2, "0");
+        const mNoPad = String(date.getMonth() + 1);
+        const dNoPad = String(date.getDate());
 
-        return format
-            .replace(/YYYY/gi, yyyy)
-            .replace(/MM/gi, mm)
-            .replace(/DD/gi, dd);
+        // determine localized full month name if requested
+        // inline comments inside functions are lowercase per project rules
+        let monthName = null;
+        if (webexpress.webui && webexpress.webui.I18N) {
+            monthName = this._i18n(`webexpress.webui:calendar.${this._getMonthKey(date.getMonth())}`);
+        } else {
+            monthName = this._getMonthKey(date.getMonth());
+        }
+
+        // tokenize the format and replace tokens in a single pass to avoid accidental replacements
+        const tokenRe = /(YYYY|mmmm|MM|DD|M|D)/gi;
+        let out = "";
+        let lastIndex = 0;
+        let m;
+        while ((m = tokenRe.exec(format)) !== null) {
+            // append literal part between tokens
+            out += format.substring(lastIndex, m.index);
+            const tok = m[0];
+            // replace known tokens (case-insensitive handling)
+            if (/^mmmm$/i.test(tok)) {
+                out += monthName;
+            } else if (/^YYYY$/i.test(tok)) {
+                out += yyyy;
+            } else if (/^MM$/i.test(tok)) {
+                out += mm;
+            } else if (/^DD$/i.test(tok)) {
+                out += dd;
+            } else if (/^M$/i.test(tok)) {
+                out += mNoPad;
+            } else if (/^D$/i.test(tok)) {
+                out += dNoPad;
+            } else {
+                // unknown token: keep as-is
+                out += tok;
+            }
+            lastIndex = tokenRe.lastIndex;
+        }
+        // append remaining literal suffix
+        out += format.substring(lastIndex);
+        return out;
     }
 
     /**

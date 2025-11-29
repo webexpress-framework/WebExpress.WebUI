@@ -1,6 +1,5 @@
 /**
  * Read-only date (or date range) display control.
- * Stores only normalized values internally (no raw), i.e. Date or { start: Date|null, end: Date|null } or null.
  */
 webexpress.webui.DateCtrl = class extends webexpress.webui.Ctrl {
     /**
@@ -18,7 +17,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.Ctrl {
             || document.documentElement.getAttribute("lang")
             || navigator.language
             || "de-DE";
-        this._format = element.dataset.format || "short"; // supports: short|medium|long|full or token pattern e.g. "DD.MM.YYYY"
+        this._dateFormat = element.getAttribute("data-format") || this._i18n("webexpress.webui:calendar.format");
         this._rangeSeparator = element.dataset.separator || " – ";
 
         // normalize initial value
@@ -128,7 +127,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.Ctrl {
      * @returns {string} The currently active format string
      */
     get format() {
-        return this._format;
+        return this._dateFormat;
     }
 
     /**
@@ -144,8 +143,8 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.Ctrl {
      */
     set format(fmt) {
         const next = typeof fmt === "string" && fmt.trim().length > 0 ? fmt.trim() : "short";
-        if (next !== this._format) {
-            this._format = next;
+        if (next !== this._dateFormat) {
+            this._dateFormat = next;
             this.render();
         }
     }
@@ -166,7 +165,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.Ctrl {
         if (a === b) {
             return true;
         }
-        const isDate = function(x) { return x instanceof Date && !isNaN(x.getTime()); };
+        const isDate = function (x) { return x instanceof Date && !isNaN(x.getTime()); };
         if (isDate(a) && isDate(b)) {
             return a.getTime() === b.getTime();
         }
@@ -197,8 +196,8 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.Ctrl {
      */
     _normalizeValue(val) {
         if (val && typeof val === "object" && !(val instanceof Date)) {
-            const start = this._toDate(val.start);
-            const end = this._toDate(val.end);
+            const start = this._parseDate(val.start, this._dateFormat);
+            const end = this._parseDate(val.end, this._dateFormat);
             if (start && end && this._isSameDay(start, end)) {
                 return start;
             } else {
@@ -222,9 +221,9 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.Ctrl {
             }
 
             if (s.includes(";")) {
-                const parts = s.split(";").map(function(x) { return x.trim(); }).filter(Boolean);
-                const start = this._toDate(parts[0]);
-                const end = this._toDate(parts[1]);
+                const parts = s.split(";").map(function (x) { return x.trim(); }).filter(Boolean);
+                const start = this._parseDate(parts[0], this._dateFormat);
+                const end = this._parseDate(parts[1], this._dateFormat);
                 if (start && end && this._isSameDay(start, end)) {
                     return start;
                 } else {
@@ -235,8 +234,8 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.Ctrl {
             if (s.includes(" - ") || s.includes(" – ") || s.includes(" bis ")) {
                 const sep = s.includes(" - ") ? " - " : (s.includes(" – ") ? " – " : " bis ");
                 const segs = s.split(sep);
-                const start = this._toDate(segs[0] ? segs[0].trim() : "");
-                const end = this._toDate(segs[1] ? segs[1].trim() : "");
+                const start = this._parseDate(segs[0] ? segs[0].trim() : "", this._dateFormat);
+                const end = this._parseDate(segs[1] ? segs[1].trim() : "", this._dateFormat);
                 if (start && end && this._isSameDay(start, end)) {
                     return start;
                 } else {
@@ -244,7 +243,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.Ctrl {
                 }
             }
 
-            const d = this._toDate(s);
+            const d = this._parseDate(s, this._dateFormat);
             return d ? d : null;
         }
 
@@ -268,99 +267,188 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Tries to convert input to Date.
-     * @param {Date|string|number|null|undefined} x Input.
-     * @returns {Date|null} Date or null.
+     * Parses a date string according to the given format.
+     * Supports multiple formats such as "yyyy-MM-dd", "dd.MM.yyyy", "MM/dd/yyyy", "M/d/yyyy", etc.
+     * @param {string} value - Input string.
+     * @param {string} format - Format string.
+     * @returns {Date|null} Parsed Date or null.
+     * @private
      */
-    _toDate(x) {
-        if (!x && x !== 0) {
+    _parseDate(value, format) {
+        if (!value && value !== 0) {
             return null;
         }
-        if (x instanceof Date) {
-            return isNaN(x.getTime()) ? null : x;
+        const v = String(value).trim();
+        if (v.length === 0) {
+            return null;
         }
-        if (typeof x === "number") {
-            const d = new Date(x);
-            return isNaN(d.getTime()) ? null : d;
-        }
-        if (typeof x === "string") {
-            const t = x.trim();
-            if (t.length === 0) {
-                return null;
+
+        const normalizedFormat = (format || "").toLowerCase();
+
+        let year, month, day;
+
+        if (normalizedFormat === "yyyy-mm-dd") {
+            const m = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+            if (m) {
+                year = parseInt(m[1], 10);
+                month = parseInt(m[2], 10) - 1;
+                day = parseInt(m[3], 10);
             }
-            // try native parse (handles iso and many locales)
-            const n = Date.parse(t);
-            if (!isNaN(n)) {
-                const d = new Date(n);
-                if (!isNaN(d.getTime())) {
-                    return d;
+        } else if (normalizedFormat === "dd.mm.yyyy") {
+            const m = v.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+            if (m) {
+                day = parseInt(m[1], 10);
+                month = parseInt(m[2], 10) - 1;
+                year = parseInt(m[3], 10);
+            }
+        } else if (normalizedFormat === "mm/dd/yyyy") {
+            const m = v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+            if (m) {
+                month = parseInt(m[1], 10) - 1;
+                day = parseInt(m[2], 10);
+                year = parseInt(m[3], 10);
+            }
+        } else if (normalizedFormat === "m/d/yyyy") {
+            const m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (m) {
+                month = parseInt(m[1], 10) - 1;
+                day = parseInt(m[2], 10);
+                year = parseInt(m[3], 10);
+            }
+        } else if (normalizedFormat === "mmmm dd, yyyy") {
+            const m = v.match(/^([a-zA-Z]+) (\d{1,2}), (\d{4})$/);
+            if (m) {
+                month = this._parseMonth(m[1]);
+                day = parseInt(m[2], 10);
+                year = parseInt(m[3], 10);
+            }
+        } else if (normalizedFormat === "dddd, mmmm dd, yyyy") {
+            const m = v.match(/^[a-zA-Z]+, ([a-zA-Z]+) (\d{1,2}), (\d{4})$/);
+            if (m) {
+                month = this._parseMonth(m[1]);
+                day = parseInt(m[2], 10);
+                year = parseInt(m[3], 10);
+            }
+        } else {
+            // fallback: try common patterns (ISO, DD.MM.YYYY, etc.)
+            // try ISO-like first
+            const iso = /^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::(\d{2}))?)?$/.exec(v);
+            if (iso) {
+                year = parseInt(iso[1], 10);
+                month = parseInt(iso[2], 10) - 1;
+                day = parseInt(iso[3], 10);
+            } else {
+                const alt = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(v);
+                if (alt) {
+                    day = parseInt(alt[1], 10);
+                    month = parseInt(alt[2], 10) - 1;
+                    year = parseInt(alt[3], 10);
                 }
             }
-            // try DD.MM.YYYY with optional HH:mm
-            const m1 = /^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+(\d{1,2}):(\d{2}))?$/.exec(t);
-            if (m1) {
-                const dd = parseInt(m1[1], 10);
-                const mm = parseInt(m1[2], 10) - 1;
-                const yyyy = parseInt(m1[3], 10);
-                const hh = m1[4] ? parseInt(m1[4], 10) : 0;
-                const mi = m1[5] ? parseInt(m1[5], 10) : 0;
-                const d = new Date(yyyy, mm, dd, hh, mi, 0, 0);
-                return isNaN(d.getTime()) ? null : d;
-            }
-            // try YYYY-MM-DD with optional time
-            const m2 = /^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::(\d{2}))?)?$/.exec(t);
-            if (m2) {
-                const yyyy = parseInt(m2[1], 10);
-                const mm = parseInt(m2[2], 10) - 1;
-                const dd = parseInt(m2[3], 10);
-                const hh = m2[4] ? parseInt(m2[4], 10) : 0;
-                const mi = m2[5] ? parseInt(m2[5], 10) : 0;
-                const ss = m2[6] ? parseInt(m2[6], 10) : 0;
-                const d = new Date(yyyy, mm, dd, hh, mi, ss, 0);
-                return isNaN(d.getTime()) ? null : d;
-            }
         }
+
+        if (typeof year === "number" && typeof month === "number" && typeof day === "number") {
+            const d = new Date(year, month, day);
+            if (d.getFullYear() === year && d.getMonth() === month && d.getDate() === day) {
+                return d;
+            }
+            return null;
+        }
+
         return null;
     }
 
     /**
-     * Formats date according to configured pattern or style.
-     * @param {Date} d Date to format.
+     * helper to parse month names to 0-based month index
+     * @param {string} monthStr month name like "January" or "Feb"
+     * @returns {number|null} month index 0..11 or null
+     * @private
+     */
+    _parseMonth(monthStr) {
+        if (!monthStr || typeof monthStr !== "string") {
+            return null;
+        }
+        const months = [
+            "january", "february", "march", "april", "may", "june",
+            "july", "august", "september", "october", "november", "december"
+        ];
+        const idx = months.indexOf(monthStr.toLowerCase());
+        return idx !== -1 ? idx : null;
+    }
+
+    /**
+     * Formats a date for input display.
+     * @param {Date} date - Date to format.
+     * @returns {string} Formatted date string.
+     */
+    _formatDate(date) {
+        if (this._dateFormat && typeof this._dateFormat === "string") {
+            return this._formatDateString(date, this._dateFormat);
+        }
+        return date.toLocaleDateString("en-US");
+    }
+
+    /**
+     * Formats a Date object according to the given format (supports YYYY, MM, DD, M, D and mmmm).
+     * @param {Date} date - Date to format.
+     * @param {string} format - Format string.
      * @returns {string} Formatted string.
      */
-    _formatDate(d) {
-        if (!(d instanceof Date) || isNaN(d.getTime())) {
-            return "";
+    _formatDateString(date, format) {
+        const yyyy = String(date.getFullYear());
+        const mm = String(date.getMonth() + 1).padStart(2, "0");
+        const dd = String(date.getDate()).padStart(2, "0");
+        const mNoPad = String(date.getMonth() + 1);
+        const dNoPad = String(date.getDate());
+
+        // resolve month name locally (do not rely on calendar controller's helper)
+        // english month keys are used for i18n lookup if available
+        const monthKeys = [
+            "january", "february", "march", "april", "may", "june",
+            "july", "august", "september", "october", "november", "december"
+        ];
+        const monthKey = monthKeys[date.getMonth()];
+        let monthName = monthKey;
+        if (typeof webexpress !== "undefined" && webexpress.webui && webexpress.webui.I18N && typeof this._i18n === "function") {
+            try {
+                monthName = this._i18n(`webexpress.webui:calendar.${monthKey}`);
+            } catch (e) {
+                monthName = monthKey;
+            }
         }
 
-        const f = this._format;
-
-        // token-based formatting (supports YYYY, MM, DD)
-        if (/[YMD]/.test(f) && !/^(short|medium|long|full)$/i.test(f)) {
-            const yyyy = String(d.getFullYear());
-            const mm = String(d.getMonth() + 1).padStart(2, "0");
-            const dd = String(d.getDate()).padStart(2, "0");
-            return f
-                .replace(/YYYY/g, yyyy)
-                .replace(/MM/g, mm)
-                .replace(/DD/g, dd);
+        // tokenize and replace tokens in a single pass to avoid accidental replacements
+        // supported tokens: YYYY, mmmm, MM, DD, M, D (case-insensitive)
+        const tokenRe = /(YYYY|mmmm|MM|DD|M|D)/gi;
+        let out = "";
+        let lastIndex = 0;
+        let m;
+        while ((m = tokenRe.exec(format)) !== null) {
+            // append literal part between tokens
+            out += format.substring(lastIndex, m.index);
+            const tok = m[0];
+            // replace known tokens (case-insensitive handling)
+            if (/^mmmm$/i.test(tok)) {
+                out += monthName;
+            } else if (/^YYYY$/i.test(tok)) {
+                out += yyyy;
+            } else if (/^MM$/i.test(tok)) {
+                out += mm;
+            } else if (/^DD$/i.test(tok)) {
+                out += dd;
+            } else if (/^M$/i.test(tok)) {
+                out += mNoPad;
+            } else if (/^D$/i.test(tok)) {
+                out += dNoPad;
+            } else {
+                // unknown token: keep as-is
+                out += tok;
+            }
+            lastIndex = tokenRe.lastIndex;
         }
-
-        const style = String(f).toLowerCase();
-        let dateStyle = "short";
-        if (style === "medium" || style === "long" || style === "full") {
-            dateStyle = style;
-        }
-
-        try {
-            const fmt = new Intl.DateTimeFormat(this._locale, { dateStyle: dateStyle });
-            return fmt.format(d);
-        } catch (e) {
-            const yyyy = String(d.getFullYear());
-            const mm = String(d.getMonth() + 1).padStart(2, "0");
-            const dd = String(d.getDate()).padStart(2, "0");
-            return dd + "." + mm + "." + yyyy;
-        }
+        // append remaining literal suffix
+        out += format.substring(lastIndex);
+        return out;
     }
 };
 
