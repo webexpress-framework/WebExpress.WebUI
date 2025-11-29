@@ -11,8 +11,7 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "selected": "Selected",
     "available": "Available",
     "search": "Search",
-    "delete": "Delete",
-    "confirm": "confirm",
+    "rating": "Rating",
 
     "calendar.select_date": "Select date",
     "calendar.select_range": "Select range",
@@ -40,14 +39,6 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "calendar.today": "Today",
     "calendar.format": "M/D/YYYY",
 
-    "confirm.header": "Request Confirmation",
-    "confirm.description": "Are you sure you want to do this?",
-
-    "delete.header": "Confirm Deletion",
-    "delete.description": "Are you sure you want to delete this item?",
-
-    "selection.placeholder": "Select an option",
-
     "upload.placeholder": "Drop file here or click to upload.",
     
     "table.columns.label": "Columns",
@@ -61,6 +52,7 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "avatar.upload.image.label": "Bild auswählen",
     "avatar.placeholder": "Drop image here or double click.",
     
-    "frame.contentNotLoaded.label": "Content could not be loaded.",
-    "frame.contentNotLoaded.details": "Please check your internet connection or try reloading the page. If the problem persists, the requested resource may be temporarily unavailable or a technical error may have occurred. You may also try refreshing the page or contact technical support if you need assistance."
+    "page.contentNotLoaded.label": "Content could not be loaded.",
+    "page.contentNotLoaded.details": "Please check your internet connection or try reloading the page. If the problem persists, the requested resource may be temporarily unavailable or a technical error may have occurred. You may also try refreshing the page or contact technical support if you need assistance."
+    
 });

@@ -1,0 +1,35 @@
+.wx-rating-container {
+  display: inline-flex;
+  gap: 0.25rem;
+  cursor: pointer;
+}
+/* cursor behavior for rating controls */
+.wx-rating .wx-rating-container {
+  cursor: pointer;
+}
+
+/* readonly display uses default cursor */
+.wx-rating-view .wx-rating-container {
+  cursor: default;
+}
+
+.wx-rating-star {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #ccc;
+  transition: color .15s ease-in-out;
+  outline: none;
+  user-select: none;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+.wx-rating-star.active {
+  color: #f5a623;
+}
+.wx-rating-star:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}

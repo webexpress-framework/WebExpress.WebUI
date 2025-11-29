@@ -7,7 +7,7 @@
 .wx-table > thead {
     position: sticky;
     top: 0;
-    z-index: 50;
+    z-index: 500;
     box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
 }
 

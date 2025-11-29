@@ -5,7 +5,6 @@
 	display: flex;
 	flex-wrap: wrap;
 	height: auto;
-    background: var(--bs-body-bg);
 }
 
 .wx-tag > ul {

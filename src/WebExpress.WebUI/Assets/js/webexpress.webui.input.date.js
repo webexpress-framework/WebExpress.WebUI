@@ -393,6 +393,28 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
 
         this.render();
     }
+    
+    /**
+     * Gets current format string.
+     * Supports: "short" | "medium" | "long" | "full" | token patterns like "DD.MM.YYYY".
+     * @returns {string} Current format.
+     */
+    get format() {
+        return this._dateFormat;
+    }
+
+    /**
+     * Sets format and re-renders.
+     * Accepts: "short" | "medium" | "long" | "full" | token patterns like "DD.MM.YYYY".
+     * @param {string} fmt New format.
+     */
+    set format(fmt) {
+        const next = typeof fmt === "string" && fmt.trim().length > 0 ? fmt.trim() : "short";
+        if (next !== this._dateFormat) {
+            this._dateFormat = next;
+            this.render();
+        }
+    }
 
     /**
      * Formats a date for input display.

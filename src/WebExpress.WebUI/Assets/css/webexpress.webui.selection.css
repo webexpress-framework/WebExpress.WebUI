@@ -1,6 +1,8 @@
 .wx-selection {
     position: relative;
     padding: 0px;
+    display: flex;
+    align-items: center;
 }
 
 .wx-selection > ul {

@@ -88,8 +88,13 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
     render() {
         if (!this._list) return;
         this._list.innerHTML = "";
+        // build lookup for selected ids
+        const selected = new Set((this._values || []).map(v => String(v)));
+        // filter items to render only selected ones (preserve original order)
+        const itemsToRender = this._items.filter(item => selected.has(String(item.id)));
 
-        this._items.forEach(item => {
+
+        itemsToRender.forEach(item => {
             const li = document.createElement("li");
             if (item.labelColor) li.classList.add(item.labelColor);
             if (item.disabled) li.classList.add("is-disabled");

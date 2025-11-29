@@ -88,6 +88,7 @@ webexpress.webui.MoveCtrl = class extends webexpress.webui.Ctrl {
         if (!this._list) return;
         this._list.innerHTML = "";
         const selectedSet = new Set(this._values.map(v => String(v)));
+        const selectedOptions = this._options.filter(o => selectedSet.has(String(o.id)));
 
         if (this._options.length === 0) {
             const emptyLi = document.createElement("li");
@@ -96,8 +97,8 @@ webexpress.webui.MoveCtrl = class extends webexpress.webui.Ctrl {
             return;
         }
 
-        this._options.forEach(opt => {
-            this._list.appendChild(this._createListItem(opt, selectedSet.has(String(opt.id))));
+        selectedOptions.forEach(opt => {
+            this._list.appendChild(this._createListItem(opt, true));
         });
     }
 
