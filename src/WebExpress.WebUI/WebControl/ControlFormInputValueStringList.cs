@@ -71,6 +71,18 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Adds items to the list.
+        /// </summary>
+        /// <param name="items">Strings to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public ControlFormInputValueStringList Add(IEnumerable<string> items)
+        {
+            // add non-empty and trimmed items to the list
+            _items.AddRange(items?.Where(x => !string.IsNullOrEmpty(x)).Select(x => x.Trim()) ?? []);
+            return this;
+        }
+
+        /// <summary>
         /// Removes an item from the list.
         /// </summary>
         /// <param name="item">String to remove.</param>
