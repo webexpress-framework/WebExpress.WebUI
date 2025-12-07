@@ -44,22 +44,6 @@ namespace WebExpress.WebUI.WebControl
         bool SuppressHeaders { get; }
 
         /// <summary>
-        /// Returns a value indicating whether columns can be removed.
-        /// </summary>
-        bool AllowColumnRemove { get; }
-
-        /// <summary>
-        /// Returns a value indicating whether rows in the table can be moved.
-        /// </summary>
-        bool MovableRow { get; }
-
-        /// <summary>
-        /// Returns the key used to persist data (column order, visibility, 
-        /// widths, active sort) across sessions.
-        /// </summary>
-        string PersistKey { get; }
-
-        /// <summary>
         /// Adds a column to the table.
         /// </summary>
         /// <param name="name">The header of the column.</param>

@@ -198,6 +198,10 @@ webexpress.webui.Controller = new class {
      * @returns {Object|null} - The instance associated with the element, or null if not found or type mismatch.
      */
     getInstanceByElement(element, ClassConstructor) {
+        if (element._wx_controller) {
+            return element._wx_controller;
+        }
+        
         if (this.instanceMap.has(element)) {
             const instance = this.instanceMap.get(element);
             if (ClassConstructor) {
@@ -440,6 +444,97 @@ webexpress.webui.DialogPanels = new class {
      */
     clear() {
         this._panels = {};
+    }
+};
+
+/**
+ * Central registry for table cell templates (renderers).
+ * Stores renderer functions and their default options by type key.
+ */
+webexpress.webui.TableTemplates = new class {
+    constructor() {
+        /** @type {{[key: string]: {fn: Function, options: Object}}} internal registry */
+        this._templates = {};
+    }
+
+    /**
+     * Registers a renderer function for a specific type.
+     * Overwrites existing renderers if the same type is registered again.
+     * @param {string} type - unique template key (e.g., "date", "move", "currency").
+     * @param {Function} rendererFn - function(val, cell, row, opts) => Node|String.
+     * @param {object} [defaultOptions={}] - optional default options merged with column options.
+     * @returns {this} the registry instance for chaining.
+     */
+    register(type, rendererFn, defaultOptions = {}) {
+        // validate inputs
+        if (typeof type !== "string" || type.trim() === "") {
+            return this;
+        }
+        if (typeof rendererFn !== "function") {
+            console.error(`TableTemplates: renderer for type '${type}' must be a function.`);
+            return this;
+        }
+
+        // store definition
+        this._templates[type] = {
+            fn: rendererFn,
+            options: typeof defaultOptions === "object" ? defaultOptions : {}
+        };
+
+        return this;
+    }
+
+    /**
+     * Retrieves the renderer definition for a given type.
+     * @param {string} type - template key.
+     * @returns {{fn: Function, options: Object}|null} the renderer definition or null if not found.
+     */
+    get(type) {
+        // validate key
+        if (typeof type !== "string" || type.trim() === "") {
+            return null;
+        }
+
+        // return the entry if exists
+        if (Object.prototype.hasOwnProperty.call(this._templates, type)) {
+            return this._templates[type];
+        }
+
+        return null;
+    }
+
+    /**
+     * Checks if a renderer exists for the given type.
+     * @param {string} type - template key.
+     * @returns {boolean} true if registered.
+     */
+    has(type) {
+        return Object.prototype.hasOwnProperty.call(this._templates, type);
+    }
+
+    /**
+     * Unregisters a renderer by type.
+     * @param {string} type - template key.
+     * @returns {void}
+     */
+    unregister(type) {
+        // validate key
+        if (typeof type !== "string" || type.trim() === "") {
+            return;
+        }
+
+        // remove key bucket when present
+        if (Object.prototype.hasOwnProperty.call(this._templates, type)) {
+            delete this._templates[type];
+        }
+    }
+
+    /**
+     * Clears the entire registry. useful for tests and full resets.
+     * @returns {void}
+     */
+    clear() {
+        this._templates = {};
     }
 };
 

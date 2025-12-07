@@ -59,29 +59,6 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the render script property of the table column.
-        /// </summary>
-        [Theory]
-        [InlineData(null, @"<div></div>")]
-        [InlineData("abc", @"<div data-render=""abc""></div>")]
-        public void RenderScript(string text, string expected)
-        {
-            // preconditions
-            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CreateRenderContextMock();
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlTableColumn()
-            {
-                RenderScript = text
-            };
-
-            // test execution
-            var html = control.Render(context, visualTree);
-
-            AssertExtensions.EqualWithPlaceholders(expected, html);
-        }
-
-        /// <summary>
         /// Tests the icon property of the table column.
         /// </summary>
         [Theory]

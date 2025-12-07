@@ -118,7 +118,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorTag.Danger, @"<div class=""wx-webui-input-tag"" data-color-css=""wx-tag-danger""></div>")]
         [InlineData(TypeColorTag.Light, @"<div class=""wx-webui-input-tag"" data-color-css=""wx-tag-light""></div>")]
         [InlineData(TypeColorTag.Dark, @"<div class=""wx-webui-input-tag"" data-color-css=""wx-tag-dark""></div>")]
-        public void Color(TypeColorTag color, string expected)
+        public void SystemColor(TypeColorTag color, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -141,6 +141,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-input-tag""></div>")]
+        [InlineData("", @"<div class=""wx-webui-input-tag""></div>")]
+        [InlineData(" ", @"<div class=""wx-webui-input-tag""></div>")]
         [InlineData("gold", @"<div class=""wx-webui-input-tag"" data-color-style=""background: gold;""></div>")]
         public void UserColor(string color, string expected)
         {

@@ -7,7 +7,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a date control.
     /// </summary>
-    public class ControlDate : Control, IControlTemplate
+    public class ControlDate : Control, IControlTableTemplate
     {
         /// <summary>
         /// Returns or sets the date format string used for formatting date values.

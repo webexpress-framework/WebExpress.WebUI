@@ -11,12 +11,12 @@ namespace WebExpress.WebUI.WebControl
     /// </summary>
     public class ControlTableColumnTemplate : ControlTableColumn
     {
-        private IControlTemplate _template;
+        private IControlTableTemplate _template;
 
         /// <summary>
         /// Returns the control template that defines the visual structure and behavior of the control.
         /// </summary>
-        public IControlTemplate Template => _template;
+        public IControlTableTemplate Template => _template;
 
         /// <summary>
         /// Initializes a new instance of the class with the specified identifier.
@@ -25,7 +25,7 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="template">
         /// The control template to associate with the column.
         /// </param>
-        public ControlTableColumnTemplate(string id = null, IControlTemplate template = null)
+        public ControlTableColumnTemplate(string id = null, IControlTableTemplate template = null)
             : base(id)
         {
             _template = template;
@@ -40,7 +40,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>
         /// The current instance, allowing for method chaining.
         /// </returns>
-        public ControlTableColumnTemplate Add(IControlTemplate template)
+        public ControlTableColumnTemplate Add(IControlTableTemplate template)
         {
             _template = template;
 
@@ -63,7 +63,6 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
                 .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-color", Color.ToClass())
-                .AddUserAttribute("data-render", RenderScript)
                 .Add(_template?.Render(renderContext, visualTree));
 
             return html;
