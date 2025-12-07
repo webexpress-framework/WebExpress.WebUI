@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-tag"" role=""tag""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-tag"" role=""tag""></div>")]
         public void Id(string id, string expected)
         {
             // preconditions
@@ -29,17 +29,17 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
         /// <summary>
-        /// Tests the text property of the tag control.
+        /// Tests the value property of the tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
-        [InlineData("abc", @"<div class=""wx-tag wx-tag-pill"" role=""tag"">abc</div>")]
-        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-tag wx-tag-pill"" role=""tag"">WebExpress.WebUI</div>")]
-        public void Text(string text, string expected)
+        [InlineData(null, @"<div class=""wx-webui-tag"" role=""tag""></div>")]
+        [InlineData("abc", @"<div class=""wx-webui-tag"" role=""tag"" data-value=""abc""></div>")]
+        public void Value(string text, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -47,22 +47,30 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTag()
             {
-                Text = text
+                Value = text
             };
 
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
         /// <summary>
-        /// Tests the pill property of the tag control.
+        /// Tests the color property of the tag control.
         /// </summary>
         [Theory]
-        [InlineData(false, @"<div class=""wx-tag"" role=""tag""></div>")]
-        [InlineData(true, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
-        public void Pill(bool pill, string expected)
+        [InlineData(TypeColorTag.Default, @"<div class=""wx-webui-tag"" role=""tag""></div>")]
+        [InlineData(TypeColorTag.Primary, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-primary""></div>")]
+        [InlineData(TypeColorTag.Secondary, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-secondary""></div>")]
+        [InlineData(TypeColorTag.Info, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-info""></div>")]
+        [InlineData(TypeColorTag.Success, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-success""></div>")]
+        [InlineData(TypeColorTag.Warning, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-warning""></div>")]
+        [InlineData(TypeColorTag.Danger, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-danger""></div>")]
+        [InlineData(TypeColorTag.Light, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-light""></div>")]
+        [InlineData(TypeColorTag.Dark, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-dark""></div>")]
+        public void SystemColor(TypeColorTag color, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -70,29 +78,25 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTag()
             {
-                Pill = pill
+                Color = new PropertyColorTag(color)
             };
 
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
         /// <summary>
-        /// Tests the layout property of the tag control.
+        /// Tests the color property of the tag control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorBackgroundBadge.Default, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
-        [InlineData(TypeColorBackgroundBadge.Primary, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
-        [InlineData(TypeColorBackgroundBadge.Secondary, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
-        [InlineData(TypeColorBackgroundBadge.Info, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
-        [InlineData(TypeColorBackgroundBadge.Success, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
-        [InlineData(TypeColorBackgroundBadge.Warning, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
-        [InlineData(TypeColorBackgroundBadge.Danger, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
-        [InlineData(TypeColorBackgroundBadge.Light, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
-        [InlineData(TypeColorBackgroundBadge.Dark, @"<div class=""wx-tag wx-tag-pill"" role=""tag""></div>")]
-        public void Layout(TypeColorBackgroundBadge layout, string expected)
+        [InlineData(null, @"<div class=""wx-webui-tag"" role=""tag""></div>")]
+        [InlineData("", @"<div class=""wx-webui-tag"" role=""tag""></div>")]
+        [InlineData(" ", @"<div class=""wx-webui-tag"" role=""tag""></div>")]
+        [InlineData("gold", @"<div class=""wx-webui-tag"" role=""tag"" data-color-style=""background: gold;""></div>")]
+        public void UserColor(string color, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -100,12 +104,13 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTag()
             {
-                Layout = new PropertyColorBackgroundBadge(layout)
+                Color = new PropertyColorTag(color)
             };
 
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
     }

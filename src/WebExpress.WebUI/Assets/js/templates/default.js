@@ -105,7 +105,7 @@ webexpress.webui.TableTemplates.register("selection", (val, cell, row, opts) => 
 
     if (editable) {
         const editor = document.createElement("div");
-        editor.id = "wx_sel_" + Math.random().toString(36).substr(2, 5);
+        editor.id = "wx_" + Math.random().toString(36).slice(2, 7);
         const inputCtrl = new webexpress.webui.InputSelectionCtrl(editor);
         inputCtrl.options = options;
         inputCtrl.value = val;
@@ -146,7 +146,7 @@ webexpress.webui.TableTemplates.register("combo", (val, cell, row, opts) => {
     if (editable) {
         const select = document.createElement("select");
         select.className = "form-select"; 
-        select.id = "wx_combo_" + Math.random().toString(36).substr(2, 5);
+        select.id = "wx_" + Math.random().toString(36).slice(2, 7);
 
         options.forEach(opt => {
             const optionEl = document.createElement("option");
@@ -183,7 +183,7 @@ webexpress.webui.TableTemplates.register("text", (val, cell, row, opts) => {
         const input = document.createElement("input");
         input.type = "text";
         input.className = "form-control";
-        input.id = "wx_text_" + Math.random().toString(36).substr(2, 9);
+        input.id = "wx_" + Math.random().toString(36).slice(2, 7);
         input.value = val !== null && typeof val !== "undefined" ? String(val) : "";
 
         // attach input to container
@@ -221,7 +221,7 @@ webexpress.webui.TableTemplates.register("numeric", (val, cell, row, opts) => {
         const input = document.createElement("input");
         input.type = "number";
         input.className = "form-control";
-        input.id = "wx_numeric_" + Math.random().toString(36).substr(2, 9);
+        input.id = "wx_" + Math.random().toString(36).slice(2, 7);
 
         // set value if provided
         if (val !== null && typeof val !== "undefined" && val !== "") {
@@ -291,7 +291,7 @@ webexpress.webui.TableTemplates.register("move", (val, cell, row, opts) => {
 
     if (editable) {
         const editor = document.createElement("div");
-        editor.id = "wx_sel_" + Math.random().toString(36).substr(2, 5);
+        editor.id = "wx_" + Math.random().toString(36).slice(2, 7);
         const inputCtrl = new webexpress.webui.InputMoveCtrl(editor);
         inputCtrl.options = options;
         inputCtrl.value = val;
@@ -321,7 +321,7 @@ webexpress.webui.TableTemplates.register("rating", (val, cell, row, opts) => {
 
     if (editable) {
         const editor = document.createElement("div");
-        editor.id = "wx_sel_" + Math.random().toString(36).substr(2, 5);
+        editor.id = "wx_" + Math.random().toString(36).slice(2, 7);
         const inputCtrl = new webexpress.webui.InputRatingCtrl(editor);
         inputCtrl.stars = stars;
         inputCtrl.value = val;
@@ -350,7 +350,7 @@ webexpress.webui.TableTemplates.register("editor", (val, cell, row, opts) => {
 
     if (editable) {
         const editor = document.createElement("div");
-        editor.id = "wx_sel_" + Math.random().toString(36).substr(2, 5);
+        editor.id = "wx_" + Math.random().toString(36).slice(2, 7);
         const inputCtrl = new webexpress.webui.EditorCtrl(editor);
         inputCtrl.value = val;
         editor._wx_controller = inputCtrl;
