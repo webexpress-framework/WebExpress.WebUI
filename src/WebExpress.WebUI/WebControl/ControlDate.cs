@@ -12,7 +12,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the date format string used for formatting date values.
         /// </summary>
-        public string Format { get; set; }
+        public string Format { get; set; } = "yyyy-MM-dd";
+
+        /// <summary>
+        /// Returns or sets the color associated with this date.
+        /// </summary>
+        public PropertyColorDate Color { get; set; }
 
         /// <summary>
         /// Returns or sets the date associated with the current instance.
@@ -45,6 +50,8 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = "wx-webui-date"
             }
+                .AddUserAttribute("data-color-css", Color?.ToClass())
+                .AddUserAttribute("data-color-style", Color?.ToStyle())
                 .AddUserAttribute("data-format", Format);
 
             return html;

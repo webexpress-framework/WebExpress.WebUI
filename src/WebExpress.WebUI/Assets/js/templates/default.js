@@ -1,8 +1,11 @@
-// Date Renderer
+// Date renderer
 webexpress.webui.TableTemplates.register("date", (val, cell, row, opts) => {
     if (!val) return "";
     const editable = opts.editable === "true";
     const format = opts.format || "yyyy-MM-dd";
+    const placeholder = opts.placeholder || null;
+    const cssColor = opts.colorCss || null;
+    const styleColor = opts.colorStyle || null;
     const container = document.createElement("div");
     
     if (editable) {
@@ -10,11 +13,18 @@ webexpress.webui.TableTemplates.register("date", (val, cell, row, opts) => {
         const inputCtrl = new webexpress.webui.InputDateCtrl(editor);
         editor._wx_controller = inputCtrl;
         inputCtrl.format = format;
+        inputCtrl._placeholderText = placeholder;
         inputCtrl.value = val;
         container.appendChild(editor);
         if (row.id) container.dataset.objectId = row.id;
         new webexpress.webui.SmartEditCtrl(container);
     } else {
+        if (cssColor) {
+            container.setAttribute("data-color-css", cssColor);
+        }
+        if (styleColor) {
+            container.setAttribute("data-color-style", styleColor);
+        }
         const ctrl = new webexpress.webui.DateCtrl(container);
         ctrl.format = format;
         ctrl.value = val;
@@ -23,11 +33,14 @@ webexpress.webui.TableTemplates.register("date", (val, cell, row, opts) => {
     return container;
 });
 
-// Date Renderer
+// Calendar renderer
 webexpress.webui.TableTemplates.register("calendar", (val, cell, row, opts) => {
     if (!val) return "";
     const editable = opts.editable === "true";
     const format = opts.format || "yyyy-MM-dd";
+    const placeholder = opts.placeholder || null;
+    const cssColor = opts.colorCss || null;
+    const styleColor = opts.colorStyle || null;
     const container = document.createElement("div");
     
     if (editable) {
@@ -35,11 +48,18 @@ webexpress.webui.TableTemplates.register("calendar", (val, cell, row, opts) => {
         const inputCtrl = new webexpress.webui.InputCalendarCtrl(editor);
         editor._wx_controller = inputCtrl;
         inputCtrl.format = format;
+        inputCtrl._placeholderText = placeholder;
         inputCtrl.value = val;
         if (row.id) container.dataset.objectId = row.id;
         container.appendChild(editor);
         new webexpress.webui.SmartEditCtrl(container);
     } else {
+        if (cssColor) {
+            container.setAttribute("data-color-css", cssColor);
+        }
+        if (styleColor) {
+            container.setAttribute("data-color-style", styleColor);
+        }
         const ctrl = new webexpress.webui.DateCtrl(container);
         ctrl.format = format;
         ctrl.value = val;
@@ -48,7 +68,7 @@ webexpress.webui.TableTemplates.register("calendar", (val, cell, row, opts) => {
     return container;
 });
 
-// Tag Renderer
+// Tag renderer
 webexpress.webui.TableTemplates.register("tag", (val, cell, row, opts) => {
     if (!val) return "";
     const editable = opts.editable === "true";
@@ -78,7 +98,7 @@ webexpress.webui.TableTemplates.register("tag", (val, cell, row, opts) => {
     return container;
 });
 
-// Selection Renderer
+// Selection renderer
 webexpress.webui.TableTemplates.register("selection", (val, cell, row, opts) => {
     if ((val === null || val === undefined || val === "") && !opts.editable) {
         return "";
@@ -123,7 +143,7 @@ webexpress.webui.TableTemplates.register("selection", (val, cell, row, opts) => 
     return container;
 });
 
-// Combo Renderer
+// Combo renderer
 webexpress.webui.TableTemplates.register("combo", (val, cell, row, opts) => {
     if ((val === null || val === undefined || val === "") && !opts.editable) {
         return "";
@@ -133,7 +153,7 @@ webexpress.webui.TableTemplates.register("combo", (val, cell, row, opts) => {
     const editable = opts.editable === "true";
     let options = [];
 
-    // Parse Generic Children
+    // parse Generic Children
     if (opts.children && opts.children.length > 0) {
         options = opts.children.map(child => ({
             value: child.value || child.id || child.text,
@@ -162,7 +182,7 @@ webexpress.webui.TableTemplates.register("combo", (val, cell, row, opts) => {
         if (row.id) container.dataset.objectId = row.id;
         new webexpress.webui.SmartEditCtrl(container);
     } else {
-        // Read-Only
+        // read-Only
         const valStr = String(val ?? "");
         const match = options.find(o => String(o.value) === valStr);
         container.textContent = match ? (match.text || match.label) : valStr;
@@ -171,7 +191,7 @@ webexpress.webui.TableTemplates.register("combo", (val, cell, row, opts) => {
     return container;
 });
 
-// Text Renderer
+// Text renderer
 // Registers a simple text renderer that shows a native input[type="text"] in edit mode
 // and a plain text node in read-only mode.
 webexpress.webui.TableTemplates.register("text", (val, cell, row, opts) => {
@@ -206,7 +226,7 @@ webexpress.webui.TableTemplates.register("text", (val, cell, row, opts) => {
     return container;
 });
 
-// Numeric Renderer
+// Numeric renderer
 // Registers a simple numeric renderer that shows a native input[type="number"] in edit mode
 // and a plain text node in read-only mode.
 webexpress.webui.TableTemplates.register("numeric", (val, cell, row, opts) => {
@@ -264,7 +284,7 @@ webexpress.webui.TableTemplates.register("numeric", (val, cell, row, opts) => {
     return container;
 });
 
-// Move Renderer
+// Move renderer
 webexpress.webui.TableTemplates.register("move", (val, cell, row, opts) => {
     if ((val === null || val === undefined || val === "") && !opts.editable) {
         return "";
@@ -309,7 +329,7 @@ webexpress.webui.TableTemplates.register("move", (val, cell, row, opts) => {
     return container;
 });
 
-// Rating Renderer
+// Rating renderer
 webexpress.webui.TableTemplates.register("rating", (val, cell, row, opts) => {
     if ((val === null || val === undefined || val === "") && !opts.editable) {
         return "";
@@ -339,7 +359,7 @@ webexpress.webui.TableTemplates.register("rating", (val, cell, row, opts) => {
     return container;
 });
 
-// Editor Renderer
+// Editor renderer
 webexpress.webui.TableTemplates.register("editor", (val, cell, row, opts) => {
     if ((val === null || val === undefined || val === "") && !opts.editable) {
         return "";

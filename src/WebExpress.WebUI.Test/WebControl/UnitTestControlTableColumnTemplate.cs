@@ -129,7 +129,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             var html = control.Render(context, visualTree);
-            var expected = @"<div><div class=""wx-webui-date""></div></div>";
+            var expected = @"<div><div class=""wx-webui-date"" data-format=""yyyy-MM-dd""></div></div>";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }

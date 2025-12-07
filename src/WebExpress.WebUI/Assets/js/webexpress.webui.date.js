@@ -23,19 +23,33 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.Ctrl {
         // normalize initial value
         this._value = this._normalizeValue(initialText);
 
-        // cleanup element
+        // extract color configuration from data-color
+        const colorCss = element.getAttribute("data-color-css") || null;
+        const colorStyle = element.getAttribute("data-color-style") || null;
+
+        // cleanup DOM
+        element.removeAttribute("data-format");
+        element.removeAttribute("data-color-css");
+        element.removeAttribute("data-color-style");
         element.removeAttribute("data-value");
         element.classList.add("wx-date");
         element.innerHTML = "";
 
         // output
         const span = document.createElement("span");
+        if (colorCss) {
+            span.classList.add(colorCss);
+        }
+        if (colorStyle) {
+            span.style.cssText = colorStyle;
+        }
         const icon = document.createElement("i");
         icon.classList.add("fa-solid", "fa-calendar-days");
         span.appendChild(icon);
 
         this._span = document.createElement("span");
         span.appendChild(this._span);
+        
         element.appendChild(span);
 
         this.render();
