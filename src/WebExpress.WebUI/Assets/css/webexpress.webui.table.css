@@ -1,11 +1,11 @@
 /* --- Base Table Layout --- */
 .wx-table {
     caption-side: bottom;
-    border-collapse: separate; /* Better for sticky headers than collapse */
+    border-collapse: separate; /* better for sticky headers than collapse */
     border-spacing: 0;
-    table-layout: fixed; /* CRITICAL: Prevents layout trashing during drag */
+    table-layout: fixed; /* prevents layout trashing during drag */
     width: 100%;
-    min-width: 100%; /* Prevents column collapse */
+    min-width: 100%; /* prevents column collapse */
     margin-bottom: 0;
 }
 
@@ -13,24 +13,22 @@
 .wx-table > thead {
     position: sticky;
     top: 0;
-    box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
     background-color: var(--bs-body-bg, #fff);
 }
 
 .wx-table > thead > tr > th {
-    box-sizing: border-box;
-    position: relative;
-    text-align: left;
-    padding: 0.5rem 0.5rem;
-    padding-right: 24px; /* Space for sort indicator */
-    outline: 0;
-    overflow: hidden; /* Default text clip */
+    overflow: hidden;
     white-space: nowrap;
-    vertical-align: middle;
-    user-select: none;
-    border-bottom: 2px solid var(--bs-border-color);
-    background-color: inherit;
-    background-clip: padding-box;
+}
+
+.wx-table > thead > tr > th:hover {
+    background-color: var(--bs-light);
+    cursor: pointer;
+}
+
+[data-bs-theme=dark] .wx-table > thead > tr > th:hover {
+    background-color: var(--bs-dark);
+    color: var(--bs-light);
 }
 
 /* Header Content Wrapper */
@@ -43,32 +41,13 @@
     text-overflow: ellipsis;
 }
 
-/* --- Header drag column (left handle header) --- */
+/* --- Header Drag Column (Left Handle) --- */
 .wx-table > thead > tr > th.wx-table-drag-column {
-    width: 1.1em;            /* keep in sync with colgroup width */
-    min-width: 1.1em;
+    width: 1.1em;
+    min-width: 1.1em; /* keep in sync with colgroup width */
     padding: 0;
     text-align: center;
-    cursor: default;         /* no sort on handle column */
-}
-
-/* --- Images & Icons --- */
-.wx-table > thead > tr > th > div > img,
-.wx-table > tbody > tr > td > div > img {
-    max-height: 1.2em;
-    width: auto;
-    object-fit: contain;
-}
-
-/* --- Hover States --- */
-.wx-table > thead > tr > th:hover {
-    background-color: var(--bs-light);
-    cursor: pointer;
-}
-
-[data-bs-theme=dark] .wx-table > thead > tr > th:hover {
-    background-color: var(--bs-dark);
-    color: var(--bs-light);
+    cursor: default;
 }
 
 /* --- Sorting Indicators --- */
@@ -83,26 +62,16 @@
     opacity: 0.7;
     line-height: 1;
 }
+
 .wx-table > thead > tr > th.wx-sort-asc::after { content: "▲"; }
 .wx-table > thead > tr > th.wx-sort-desc::after { content: "▼"; }
 
 /* --- Actions Column (Dropdown) --- */
 .wx-table > thead > tr > th.wx-table-actions {
-    padding: 0;
-    width: 2.5rem;
-    min-width: 2.5rem;
+    width: 1.5rem;
+    min-width: 1.5rem;
     text-align: center;
-    
-    /* Sticky positioning for the actions column */
-    position: sticky;
-    right: 0;
-    
-    /* CRITICAL: Allow dropdown to spill out */
-    overflow: visible !important; 
-    
-    background-color: inherit;
-    border-left: 1px solid var(--bs-border-color);
-    vertical-align: top;
+    vertical-align: middle;
 }
 
 .wx-table .wx-table-actions .wx-dropdown {
@@ -116,22 +85,18 @@
 
 .wx-table .wx-table-actions .btn {
     border: none;
-    box-shadow: none;
-    width: 100%;
-    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 0;
+    color: var(--bs-color);
 }
 
 .wx-table-actions .dropdown-menu {
-    /* Force positioning */
     position: absolute;
     top: 100%;
     right: 0;
     margin-top: 1px;
-   
     overflow-y: auto;
     max-height: 60vh;
     min-width: 260px;
@@ -142,16 +107,15 @@
 
 /* --- Body Cells & Layout --- */
 .wx-table > tbody > tr > td {
-    position: relative;
     vertical-align: middle;
     padding: 0.25rem 0.5rem;
-    overflow: hidden; /* Default clip */
+    overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     border-bottom: 1px solid var(--bs-border-color);
 }
 
-/* Allow overflow for cells containing editors/popups (SmartEdit) */
+/* allow overflow for complex cell content */
 .wx-table > tbody > tr > td:has(.wx-smart-edit),
 .wx-table > tbody > tr > td:has(.dropdown-menu.show),
 .wx-table > tbody > tr > td:has(input),
@@ -159,11 +123,11 @@
     overflow: visible !important;
 }
 
-/* Standard Cell Content Wrapper */
+/* --- Content Wrappers & Images --- */
 .wx-cell-content {
     display: flex;
     align-items: center;
-    gap: 0.5em; /* Consistent spacing */
+    gap: 0.5em;
     width: 100%;
     height: 100%;
     overflow: hidden;
@@ -172,12 +136,14 @@
     text-decoration: none;
 }
 
-/* Link Styling within cell */
-a.wx-cell-content {
-    font-weight: 700;
-}
-a.wx-cell-content:hover {
-    color: var(--bs-link-hover-color, #0a58ca);
+a.wx-cell-content { font-weight: 700; }
+a.wx-cell-content:hover { color: var(--bs-link-hover-color, #0a58ca); }
+
+.wx-table > thead > tr > th > div > img,
+.wx-table > tbody > tr > td > div > img {
+    max-height: 1.2em;
+    width: auto;
+    object-fit: contain;
 }
 
 /* --- Row Drag & Drop --- */
@@ -186,29 +152,29 @@ a.wx-cell-content:hover {
     color: var(--bs-secondary);
     user-select: none;
     text-align: center;
-    width: 1.1em; /* match header/colgroup for alignment */
+    width: 1.1em;
     vertical-align: middle;
 }
+
 .wx-table .wx-table-drag-handle:active { cursor: grabbing; }
 
 /* The Row being dragged (Ghost) */
 .wx-table .wx-table-dragging {
     background-color: transparent !important;
-    opacity: 1; /* Maintain opacity to keep structure valid */
     pointer-events: none;
 }
 
 .wx-table .wx-table-dragging > td {
     border: none;
-    visibility: hidden; /* Hide content but keep box model for table layout */
+    visibility: hidden; /* hide content but keep box model */
 }
 
-/* The Insertion Placeholder Line */
+/* The Insertion Placeholder */
 .wx-table .wx-table-drag-placeholder {
     height: 4px !important;
     background-color: transparent;
     pointer-events: none;
-    display: table-row; /* Essential for fixed layout */
+    display: table-row;
 }
 
 .wx-table .wx-table-drag-placeholder > td {
@@ -219,7 +185,6 @@ a.wx-cell-content:hover {
     background-clip: padding-box;
 }
 
-/* The Visible Blue Line */
 .wx-table .wx-table-drag-placeholder > td::before {
     content: "";
     position: absolute;
@@ -227,19 +192,18 @@ a.wx-cell-content:hover {
     top: -1px;
     width: 100%;
     height: 2px;
-    background-color: var(--bs-primary);;
+    background-color: var(--bs-primary);
 }
 
-/* Arrow Indicator on left */
 .wx-table .wx-table-drag-placeholder > td::after {
     content: "";
     position: absolute;
     left: -4px;
     top: -5px;
-    width: 0; 
-    height: 0; 
+    width: 0;
+    height: 0;
     border-top: 5px solid transparent;
-    border-bottom: 5px solid transparent; 
+    border-bottom: 5px solid transparent;
     border-left: 5px solid var(--bs-primary);
 }
 
@@ -250,16 +214,13 @@ a.wx-cell-content:hover {
     border-bottom: 2px dashed var(--bs-primary) !important;
     transition: background-color 0.1s;
 }
-.wx-table tbody tr.wx-drop-target-parent > td:first-child {
-    border-left: 2px dashed var(--bs-primary) !important;
-}
-.wx-table tbody tr.wx-drop-target-parent > td:last-child {
-    border-right: 2px dashed var(--bs-primary) !important;
-}
+
+.wx-table tbody tr.wx-drop-target-parent > td:first-child { border-left: 2px dashed var(--bs-primary) !important; }
+.wx-table tbody tr.wx-drop-target-parent > td:last-child { border-right: 2px dashed var(--bs-primary) !important; }
 
 /* --- Column Resizing --- */
-/* New handle used by base class (_attachColumnResizers) */
-.wx-table .wx-col-resizer {
+.wx-table .wx-col-resizer,
+.wx-table .wx-table-column-resizer {
     position: absolute;
     top: 0;
     bottom: 0;
@@ -269,69 +230,49 @@ a.wx-cell-content:hover {
     opacity: 0;
     touch-action: none;
 }
-.wx-table .wx-col-resizer:hover { 
-    opacity: 0.5; 
-    background-color: var(--bs-primary); 
+
+/* legacy support included in selector group above */
+.wx-table .wx-table-column-resizer { right: 0; }
+
+.wx-table .wx-col-resizer:hover,
+.wx-table .wx-table-column-resizer:hover {
+    opacity: 0.5;
+    background-color: var(--bs-primary);
 }
 
-/* Backward compatible handle name (legacy) */
-.wx-table .wx-table-column-resizer {
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 6px;
-    cursor: col-resize;
-    z-index: 100;
-    opacity: 0; 
-    touch-action: none;
-}
-.wx-table .wx-table-column-resizer:hover { 
-    opacity: 0.5; 
-    background-color: var(--bs-primary); 
-}
-
-/* Global resizing cursor while dragging (applied to <body>) */
-.wx-table-resizing {
-    cursor: col-resize !important;
-    user-select: none;
-}
-
-/* Keep legacy selector for back-compat if class is set on table */
+.wx-table-resizing,
 .wx-table .wx-table-resizing {
     cursor: col-resize !important;
     user-select: none;
 }
 
-/* Column Drag Indicator */
 .wx-table .wx-table-drag-indicator {
     position: fixed;
     pointer-events: none;
     z-index: 9999;
     width: 3px;
     background-color: var(--bs-primary);
-    box-shadow: 0 0 4px rgba(0,0,0,0.3);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 }
 
 /* --- Tree / Hierarchy --- */
-.wx-table .wx-tree { 
-    display: inline-flex; 
-    align-items: center; 
-    width: 100%; 
+.wx-table .wx-tree {
+    display: inline-flex;
+    align-items: center;
+    width: 100%;
 }
 
-.wx-table .wx-tree-indent { 
-    display: inline-block; 
-    height: 1px; 
+.wx-table .wx-tree-indent {
+    display: inline-block;
+    height: 1px;
     flex-shrink: 0;
 }
 
-/* Shared dimensions for Toggle Button AND Placeholder for perfect alignment */
 .wx-table .wx-tree-toggle,
 .wx-table .wx-tree-toggle-placeholder {
-    width: 1.5rem;      /* Fixed width */
-    height: 1.5rem;     /* Fixed height */
-    min-width: 1.5rem;  /* Prevent shrinking */
+    width: 1.5rem;
+    height: 1.5rem;
+    min-width: 1.5rem;
     margin-right: 0.25rem;
     display: inline-flex;
     align-items: center;
@@ -347,27 +288,29 @@ a.wx-cell-content:hover {
     border-radius: 4px;
     color: var(--bs-body-color);
 }
-.wx-table .wx-tree-toggle:hover { background-color: rgba(0,0,0,0.05); }
 
-.wx-table .wx-tree-toggle-placeholder {
-    visibility: hidden; /* Takes up space but invisible */
-}
+.wx-table .wx-tree-toggle:hover { background-color: rgba(0, 0, 0, 0.05); }
+.wx-table .wx-tree-toggle-placeholder { visibility: hidden; }
 
 .wx-table .wx-tree-indicator-angle {
     content: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+DQo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIJdmlld0JveD0iMCAwIDEzNSAxOTAiPg0KCTxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJPCFbQ0RBVEFbDQoJCS5zdHExIHtmaWxsOiM3ZjdmN2Y7c3Ryb2tlOm5vbmU7fQ0KCV1dPg0KCTwvc3R5bGU+DQoJCTxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE4LC0xOCkiPg0KCQkJPHBhdGggZD0iTTEuNjYgMTczLjIgTDE4LjcgMTkwLjIzIEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMjYuNzIgMTkwLjIzIEw5OC44NyAxMTguMDggQTUuNjY5MjkgNS42NjkyOSAtMTgwIDAgMCA5OC44Nw0KCQkJCQkJIDExMC4wNiBMMjYuNzIgMzcuOSBBNS42NjkyOSA1LjY2OTI5IC0xODAgMCAwIDEuNjYgNjIuOTYNCgkJCQkJCSBMNDguNzYgMTEwLjA2IEE1LjY2OTI5IDUuNjY5MjkgMCAwIDEgNDguNzYgMTE4LjA2IEwxLjY2IDE2NS4xOCBBNS42NjkyOSA1LjY2OTI5IC0xODAgMCAwIDEuNjYgMTczLjIgWiINCiAgICAgICAgICAgICAgICAgICAgICAgIGNsYXNzPSJzdHEiLz4NCgkJPC9nPg0KPC9zdmc+');
-    height: 0.8rem; width: 0.8rem;
+    height: 0.8rem;
+    width: 0.8rem;
     transition: transform .15s ease;
     opacity: 0.6;
 }
+
 .wx-table .wx-tree-expand { transform: rotate(90deg); }
 
 /* --- Dropdown Drag & Drop Styles --- */
 .wx-table .wx-columns-list { padding: 0.5rem; }
+
 .wx-table .wx-columns-list .wx-col-item {
     border-radius: 4px;
     margin-bottom: 2px;
     border: 1px solid transparent;
 }
+
 .wx-table .wx-columns-list .wx-col-item:hover { background-color: var(--bs-light); }
 
 .wx-table .wx-columns-list .wx-col-placeholder {
@@ -382,6 +325,7 @@ a.wx-cell-content:hover {
     cursor: grab;
     padding: 0 4px;
 }
+
 .wx-table .wx-col-drag-handle:active { cursor: grabbing; }
 
 .wx-table .wx-columns-list .wx-col-item.dragging {
@@ -390,8 +334,15 @@ a.wx-cell-content:hover {
 }
 
 /* --- Flash Animations --- */
-@keyframes wx-change-flash { 0% { background-color: rgba(var(--bs-warning-rgb), 0.4); } 100% { background-color: transparent; } }
-@keyframes wx-new-flash { 0% { background-color: rgba(var(--bs-success-rgb), 0.4); } 100% { background-color: transparent; } }
+@keyframes wx-change-flash {
+    0% { background-color: rgba(var(--bs-warning-rgb), 0.4); }
+    100% { background-color: transparent; }
+}
+
+@keyframes wx-new-flash {
+    0% { background-color: rgba(var(--bs-success-rgb), 0.4); }
+    100% { background-color: transparent; }
+}
 
 .wx-table tr.wx-change-flash > td { animation: wx-change-flash 1s ease-out; }
 .wx-table tr.wx-new-flash > td { animation: wx-new-flash 1s ease-out; }

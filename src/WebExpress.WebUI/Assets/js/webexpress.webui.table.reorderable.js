@@ -1,25 +1,32 @@
 /**
- * Reorderable table control providing column mutation and row drag.
- * bietet:
- * - Spaltenreihenfolge per Drag & Drop
- * - Spaltensichtbarkeit
- * - Zeilen verschieben (flach + hierarchisch)
- * - Persistenz (Spalten + Baumzustand)
- * - Options-Dropdown mit Spaltensuche
+ * Reorderable table control providing column mutation and row moving.
+ * Features:
+ * - reorder columns via drag & drop (header and dynamic modal panels)
+ * - toggle column visibility
+ * - move rows (flat and hierarchical, configurable via data attributes)
+ * - persist columns (order, visibility, width), sort, and tree collapsed state
+ * - actions modal panels including column search and inline reordering via DialogPanels
  *
- * Events:
- *  - webexpress.webui.Event.TABLE_SORT_EVENT
- *  - webexpress.webui.Event.COLUMN_REORDER_EVENT
- *  - webexpress.webui.Event.COLUMN_VISIBILITY_EVENT
- *  - webexpress.webui.Event.COLUMN_SEARCH_EVENT
- *  - webexpress.webui.Event.ROW_REORDER_EVENT
- *  - webexpress.webui.Event.CHANGE_VISIBILITY_EVENT
+ * Configuration via data attributes on host element:
+ * - data-movable-row="true|false": enable row move handles and moving
+ * - data-allow-column-remove="true|false": reserved for future column removal
+ * - data-persist-key="string": key for cookie persistence
+ * - data-tree-enabled="true|false": enable tree view (indent + toggle) when nested rows exist
+ * - data-tree-move-enabled="true|false": allow hierarchical moving (drop as child)
+ * - data-columns-modal-key="string": optional DialogPanels key for external column panels (default: "table-columns")
+ *
+ * Emitted events:
+ * - webexpress.webui.Event.TABLE_SORT_EVENT
+ * - webexpress.webui.Event.COLUMN_REORDER_EVENT
+ * - webexpress.webui.Event.COLUMN_VISIBILITY_EVENT
+ * - webexpress.webui.Event.COLUMN_SEARCH_EVENT
+ * - webexpress.webui.Event.ROW_REORDER_EVENT
+ * - webexpress.webui.Event.CHANGE_VISIBILITY_EVENT
  */
 webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl {
-   
     /**
-     * constructor
-     * @param {HTMLElement} element
+     * Constructor.
+     * @param {HTMLElement} element Host element.
      */
     constructor(element) {
         super(element);
@@ -27,8 +34,8 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
     }
 
     /**
-     * setup dom extended
-     * @param {HTMLElement} element
+     * Set up DOM for reorderable features (modal, indicators) and config.
+     * @param {HTMLElement} element Host element.
      */
     _setupDom(element) {
         super._setupDom(element);
@@ -38,75 +45,46 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         this._allowColumnRemove = ds.allowColumnRemove === "true";
         this._persistKey = ds.persistKey || element.id || null;
 
-        this._menu = document.createElement("div");
-        this._menu.id = "actions";
-        this._table.appendChild(this._menu);
+        // tree configuration via data attributes
+        this._treeEnabled = ds.treeEnabled !== "false"; // default true
+        this._treeMoveEnabled = ds.treeMoveEnabled !== "false"; // default true
 
+        // header drag indicator
         this._dragColumnIndicator = document.createElement("div");
         this._dragColumnIndicator.className = "wx-table-drag-indicator";
         this._dragColumnIndicator.setAttribute("aria-hidden", "true");
         this._dragColumnIndicator.style.display = "none";
         this._table.appendChild(this._dragColumnIndicator);
 
-        // pre-bind handlers for row drag
-        this._onTbodyDragOverHandler = this._onTbodyDragOver.bind(this);
-        this._onTbodyDropHandler = (e) => { e.preventDefault(); if (this._rowDragActive) { this._finalizeRowDrag(); } };
+        // modal is created lazily in _openColumnsModal
     }
 
     /**
-     * parse extended config cleanup
-     * @param {HTMLElement} element
+     * Parse extended config and cleanup custom data attributes on host.
+     * @param {HTMLElement} element Host element.
      */
     _parseConfig(element) {
         super._parseConfig(element);
-        ["data-movable-row", "data-persist-key", "data-allow-column-remove"]
+        ["data-movable-row", "data-persist-key", "data-allow-column-remove", "data-tree-enabled", "data-tree-move-enabled", "data-columns-modal-key"]
             .forEach((attr) => { element.removeAttribute(attr); });
     }
 
     /**
-     * init extended listeners
+     * Initialize listeners. Row handles are bound after render in _bindRowHandles().
      */
     _initEventListeners() {
         super._initEventListeners();
-
-        // row drag start über Griff-Spalte
-        if (this._movableRow) {
-            this._body.addEventListener("dragstart", (e) => {
-                const handle = e.target.closest(".wx-table-drag-handle");
-                if (!handle) { e.preventDefault(); return; }
-                const tr = handle.closest("tr");
-                if (tr && tr._dataRowRef) {
-                    e.dataTransfer.effectAllowed = "move";
-                    e.dataTransfer.setData("text/plain", tr._dataRowRef.id || "row");
-                    if (!this._dragImage) {
-                        this._dragImage = document.createElement("canvas");
-                        this._dragImage.width = 1;
-                        this._dragImage.height = 1;
-                    }
-                    e.dataTransfer.setDragImage(this._dragImage, 0, 0);
-                    setTimeout(() => this._startRowDrag(tr, tr._dataRowRef), 0);
-                }
-            });
-
-            this._body.addEventListener("dragend", (e) => {
-                if (this._rowDragActive) {
-                    this._cleanupRowDrag();
-                    const tr = e.target.closest("tr");
-                    if (tr) { tr.classList.remove("wx-table-dragging"); }
-                }
-            });
-        }
     }
 
     /**
-     * override render to ensure subclass column rendering
+     * Override render to ensure subclass column rendering, row handle binding.
      */
     render() {
         const currentStates = this._collectCurrentRowStates();
         const changedIds = new Set();
         const newIds = new Set();
 
-        if (this._initialized && this._highlightChanges && !this._suppressFlashOnce) {
+        if (this._initialized && this._highlightChanges && !this._suppressFlashOnce && this._prevRowState.size > 0) {
             for (const entry of currentStates) {
                 const oldSig = this._prevRowState.get(entry.key);
                 if (oldSig === undefined) { newIds.add(entry.key); }
@@ -116,11 +94,13 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
 
         this._rebuildColumnIndexCache();
 
-        this._renderColumns(); // inline comment: use subclass implementation
+        this._renderColumns();
         this._renderRows(changedIds, newIds);
         this._renderFooter();
         this._syncColumnWidths();
-        this._attachColumnResizers(); // inline comment: base class attaches resize handles
+        this._attachColumnResizers();
+
+        this._bindRowHandles();
 
         this._suppressFlashOnce = false;
         this._updateSnapshot(currentStates);
@@ -128,7 +108,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
     }
 
     /**
-     * render columns mit linker Griff-Spalte und rechter Actions-Zelle
+     * Render columns including optional left handle column and right actions cell.
      */
     _renderColumns() {
         const headFragment = document.createDocumentFragment();
@@ -137,19 +117,21 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         headFragment.appendChild(headRow);
 
         if (!this._suppressHeaders) {
-            // linke Griff-Spalte für Zeilenverschiebung
+            // left handle column for row moving
             if (this._movableRow) {
                 const th = document.createElement("th");
                 th.className = "wx-table-drag-column";
-                th.style.width = "1.1em";
+                th.style.width = "1.25rem";
+                th.setAttribute("aria-hidden", "true");
                 headRow.appendChild(th);
 
                 const c = document.createElement("col");
-                c.style.width = "1.1em";
+                c.className = "wx-table-drag-col";
+                c.style.width = "1.25rem";
                 colFragment.appendChild(c);
             }
 
-            // datenspalten
+            // data columns
             for (const col of this._columns) {
                 if (!col.visible) { continue; }
 
@@ -163,12 +145,13 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                 if (col.sort) { th.classList.add(col.sort === "asc" ? "wx-sort-asc" : "wx-sort-desc"); }
 
                 const inner = document.createElement("div");
+                inner.className = "wx-col-inner";
                 if (col.icon) { inner.appendChild(this._createIcon(col.icon)); }
                 if (col.image) { inner.appendChild(this._createImage(col.image)); }
                 inner.appendChild(document.createTextNode(col.label));
                 th.appendChild(inner);
 
-                // spalten-drag aktivieren
+                // column reorder via header drag
                 th.draggable = true;
                 this._enableDragAndDropColumn(th, col);
 
@@ -180,7 +163,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                 colFragment.appendChild(cg);
             }
 
-            // rechte actions-zelle mit dropdown
+            // right actions cell with custom toggle (opens dynamic modal panels)
             this._renderActionsHeader(headRow, colFragment);
         }
 
@@ -190,168 +173,189 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         this._col.textContent = "";
         this._col.appendChild(colFragment);
     }
-    
-    /**
-     * Wrapper to execute an action that re-renders the table while keeping the dropdown open.
-     * @param {Function} action - The function to execute (e.g. toggling visibility).
-     */
-    _runWithDropdownPreservation(action) {
-        // 1. capture state
-        const btn = this._head.querySelector(".wx-table-actions .dropdown-toggle");
-        const isOpen = btn && btn.classList.contains("show");
-        const list = this._head.querySelector(".wx-columns-list");
-        const scrollTop = list ? list.scrollTop : 0;
-        const activeElement = document.activeElement;
-        let focusSelector = null;
-
-        // try to generate a selector for the focused element to restore it later
-        if (isOpen && list && list.contains(activeElement)) {
-            if (activeElement.id) {
-                focusSelector = `#${activeElement.id}`;
-            } else if (activeElement.tagName === 'INPUT') {
-                // fallback for search input
-                focusSelector = 'input[type="text"]';
-            }
-        }
-
-        // 2. execute action (trigger re-render)
-        action();
-
-        // 3. restore state
-        if (isOpen) {
-             // wait for the microtask/render to complete
-             setTimeout(() => {
-                 const newBtn = this._head.querySelector(".wx-table-actions .dropdown-toggle");
-                 if (newBtn && window.bootstrap?.Dropdown) {
-                     const inst = bootstrap.Dropdown.getOrCreateInstance(newBtn);
-                     inst.show();
-
-                     const newList = this._head.querySelector(".wx-columns-list");
-                     if (newList) {
-                         newList.scrollTop = scrollTop;
-                     }
-
-                     if (focusSelector) {
-                         const toFocus = this._head.querySelector(`.wx-table-actions ${focusSelector}`);
-                         if (toFocus) toFocus.focus();
-                     }
-                 }
-             }, 0);
-        }
-    }
 
     /**
-     * actions-header mit Dropdown (Suche, Sichtbarkeit, Reihenfolge)
-     * @param {HTMLElement} headRow
-     * @param {DocumentFragment} colFrag
+     * Render actions header: provides a button to open the dynamic columns modal.
+     * @param {HTMLElement} headRow Header row element to append actions th.
+     * @param {DocumentFragment} colFrag Colgroup fragment to append actions col.
      */
     _renderActionsHeader(headRow, colFrag) {
         const th = document.createElement("th");
         th.className = "wx-table-actions";
         th.style.position = "relative";
 
-        const wrapper = document.createElement("div");
-        wrapper.className = "wx-dropdown";
-
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.className = "btn dropdown-toggle";
-        btn.setAttribute("data-bs-toggle", "dropdown");
-        btn.setAttribute("data-bs-target", "#actions");
-        btn.setAttribute("aria-expanded", "false");
-        btn.setAttribute("data-bs-auto-close", "outside");
-        btn.title = "Spalten verwalten";
+        btn.className = "btn btn-sm";
+        btn.title = this._i18n("webexpress.webui:table.manage.columns");
         btn.textContent = "≡";
-
-        this._menu.innerHTML = "";
-        this._menu.className = "dropdown-menu";
-
-        // suche
-        const searchGrp = document.createElement("div");
-        searchGrp.className = "mb-2 px-2";
-        const searchInput = document.createElement("input");
-        searchInput.type = "text";
-        searchInput.className = "form-control form-control-sm";
-        searchInput.placeholder = "Suche Spalten…";
-        searchInput.value = this._columnFilterTerm || "";
-        searchInput.onmousedown = (e) => e.stopPropagation();
-        searchInput.addEventListener("input", (e) => { this._columnFilterTerm = e.target.value.trim(); this._applyColumnFilter(menu); });
-        searchGrp.appendChild(searchInput);
-        this._menu.appendChild(searchGrp);
-
-        // spaltenliste mit checkbox und drag handle
-        const listContainer = document.createElement("div");
-        listContainer.className = "wx-columns-list";
-        listContainer.style.maxHeight = "300px";
-        listContainer.style.overflowY = "auto";
-
-        const uidBase = `wx_${this._persistKey || "tbl"}_${Math.random().toString(36).slice(2, 8)}`;
-
-        this._columns.forEach((c, idx) => {
-            const item = document.createElement("div");
-            item.className = "dropdown-item px-1 py-1 wx-col-item";
-            item.dataset.columnId = c.id;
-            item.dataset.index = String(idx);
-            item.draggable = false;
-
-            const line = document.createElement("div");
-            line.className = "d-flex align-items-center gap-2";
-
-            const handle = document.createElement("span");
-            handle.className = "wx-col-drag-handle";
-            handle.textContent = "⠿";
-            handle.title = "Spalte ziehen (Dropdown)";
-            handle.onmousedown = () => { item.draggable = true; };
-            handle.onmouseup = () => { item.draggable = false; };
-
-            const formCheck = document.createElement("div");
-            formCheck.className = "form-check m-0 flex-grow-1";
-
-            const cb = document.createElement("input");
-            cb.type = "checkbox";
-            cb.className = "form-check-input";
-            cb.id = `${uidBase}_${idx}`;
-            cb.checked = c.visible;
-
-            cb.onmousedown = (e) => e.stopPropagation();
-            cb.addEventListener("change", (ev) => {
-                ev.preventDefault();
-                if (!cb.checked && this._getVisibleColumns().length <= 1) { cb.checked = true; return; }
-                this._runWithDropdownPreservation(() => { this.setColumnVisibility(c.id, cb.checked); });
-            });
-
-            const label = document.createElement("label");
-            label.className = "form-check-label";
-            label.setAttribute("for", cb.id);
-            label.textContent = c.label;
-            label.onmousedown = (e) => e.stopPropagation();
-
-            formCheck.append(cb, label);
-            line.append(handle, formCheck);
-            item.appendChild(line);
-            listContainer.appendChild(item);
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this._openColumnsModal();
         });
 
-        this._menu.appendChild(listContainer);
-
-        // drag-sort im dropdown aktivieren
-        this._enableDropdownColumnDrag(listContainer, btn);
-
-        wrapper.append(btn);
-        th.appendChild(wrapper);
+        th.appendChild(btn);
         headRow.appendChild(th);
 
         const cg = document.createElement("col");
         cg.style.width = "2.5rem";
         colFrag.appendChild(cg);
-
-        if (this._columnFilterTerm) { this._applyColumnFilter(menu); }
     }
 
     /**
-     * spalten-drag im header
-     * @param {HTMLElement} th
-     * @param {Object} column
+     * Create dynamic modal host for columns, backed by ModalSidebarPanel and DialogPanels.
+     * Panels can be registered externally under "table-columns".
+     */
+    _createColumnsModal() {
+        const id = "wx-table-columns-msp-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+
+        const el = document.createElement("div");
+        el.id = id;
+        el.setAttribute("aria-labelledby", id + "-label");
+        el.setAttribute("aria-hidden", "true");
+        el.setAttribute("data-key", "table-columns");
+        el.setAttribute("data-submit-id", "apply-columns");
+        el.setAttribute("data-validate-active-only", "true");
+
+        const title = this._i18n("webexpress.webui:table.columns.title");
+
+        // minimal chrome: header + footer + submit button
+        el.innerHTML = [
+            `<div class="wx-modal-header">${title}</div>`,
+            `<div class="wx-modal-footer"></div>`
+        ].join("");
+
+        // ensure a content container exists for ModalSidebarPanel body rendering
+        const footer = el.querySelector(".wx-modal-footer");
+        const content = document.createElement("div");
+        content.className = "wx-modal-content";
+        if (footer && footer.parentNode) {
+            footer.parentNode.insertBefore(content, footer);
+        } else {
+            el.appendChild(content);
+        }
+
+        // mount element once to body
+        document.body.appendChild(el);
+
+        // instantiate panel
+        const modalCtrl = new webexpress.webui.ModalSidebarPanel(el);
+        modalCtrl._tableCtrl = this; // expose controller context
+
+        // expose helpers to panels
+        modalCtrl.getColumns = () => {
+            // return deep copy to avoid accidental external mutation
+            return this._columns.map((c) => ({ id: c.id, label: c.label, visible: c.visible, width: c.width, sort: c.sort, color: c.color }));
+        };
+        modalCtrl.applyVisibility = (columnId, visible) => {
+            // toggle column visibility and preserve modal state
+            this._runWithModalPreservation(() => {
+                const col = this._columns.find((c) => c.id === columnId);
+                if (col) {
+                    col.visible = !!visible;
+                    this._schedulePersist();
+                    this.render();
+                }
+            });
+            this._dispatch(webexpress.webui.Event.COLUMN_VISIBILITY_EVENT, { sender: this._element, columnId, visible: !!visible });
+        };
+        modalCtrl.applyOrder = (orderedIds) => {
+            // reorder columns according to given id list
+            const map = new Map(this._columns.map((c) => [c.id, c]));
+            const newOrder = [];
+            orderedIds.forEach((id) => { const col = map.get(id); if (col) { newOrder.push(col); } });
+            this._columns.forEach((c) => { if (!newOrder.includes(c)) { newOrder.push(c); } });
+            // update row cells order
+            const oldIndexById = new Map(this._columns.map((c, i) => [c.id, i]));
+            this._columns = newOrder;
+            const reorderCells = (rows) => {
+                for (const row of rows) {
+                    const newCells = [];
+                    for (let i = 0; i < this._columns.length; i++) {
+                        const cid = this._columns[i].id;
+                        const srcIdx = oldIndexById.get(cid);
+                        newCells[i] = row.cells[srcIdx];
+                    }
+                    row.cells = newCells;
+                    if (row.children) { reorderCells(row.children); }
+                }
+            };
+            this._runWithModalPreservation(() => {
+                reorderCells(this._rows);
+                this._schedulePersist();
+                this.render();
+            });
+            this._dispatch(webexpress.webui.Event.COLUMN_REORDER_EVENT, { sender: this._element, sourceIndex: -1, targetIndex: -1 });
+        };
+        modalCtrl.applyWidth = (columnId, widthPx) => {
+            // set width in pixels if valid
+            const col = this._columns.find((c) => c.id === columnId);
+            if (!col) { return; }
+            const w = parseInt(widthPx, 10);
+            if (!isNaN(w) && w > 0) { col.width = w; }
+            this._runWithModalPreservation(() => {
+                this._schedulePersist();
+                this.render();
+            });
+        };
+        modalCtrl.applySort = (columnId, dir) => {
+            // toggle sort direction on a column and clear others
+            this._columns.forEach((c) => { if (c.id === columnId) { c.sort = dir === "asc" || dir === "desc" ? dir : null; } else { c.sort = null; } });
+            this._runWithModalPreservation(() => {
+                this._schedulePersist();
+                this.render();
+            });
+            this._dispatch(webexpress.webui.Event.TABLE_SORT_EVENT, { sender: this._element, columnId, dir });
+        };
+
+        // cache refs
+        this._columnsModalEl = el;
+        this._columnsSidebarPanel = modalCtrl;
+    }
+
+    /**
+     * Open the columns modal and pass context data for panels.
+     */
+    _openColumnsModal() {
+        if (!this._columnsModalEl) { this._createColumnsModal(); }
+        if (this._columnsSidebarPanel) {
+            // provide current state to panels
+            this._columnsSidebarPanel._tableCtrl = this;
+            this._columnsSidebarPanel._columnsPrefill = {
+                columns: this._columns.map((c) => ({ id: c.id, label: c.label, visible: c.visible, width: c.width, sort: c.sort })),
+                filterTerm: this._columnFilterTerm || ""
+            };
+            if (typeof this._columnsSidebarPanel.show === "function") { this._columnsSidebarPanel.show(); }
+        }
+    }
+
+    /**
+     * Preserve modal state (open + scroll) across actions and re-render.
+     * @param {Function} action Function to execute.
+     */
+    _runWithModalPreservation(action) {
+        // try to preserve side pane scroll state if visible
+        const modal = this._columnsSidebarPanel;
+        const content = modal ? modal._contentEl || this._columnsModalEl.querySelector(".wx-modal-content") : null;
+        const list = content ? content.querySelector(".wx-columns-list") : null;
+        const scroll = list ? list.scrollTop : 0;
+        const wasOpen = modal && typeof modal.isShown === "function" ? modal.isShown() : false;
+
+        action();
+
+        // let panels re-render themselves via DialogPanels; if needed, re-show
+        if (wasOpen && modal && typeof modal.show === "function") {
+            modal.show();
+            const list2 = (modal._contentEl || this._columnsModalEl.querySelector(".wx-modal-content"))?.querySelector(".wx-columns-list");
+            if (list2) { list2.scrollTop = scroll; }
+        }
+    }
+
+    /**
+     * Enable header column drag and drop reordering with insertion indicator.
+     * @param {HTMLElement} th Header cell element.
+     * @param {Object} column Column descriptor.
      */
     _enableDragAndDropColumn(th, column) {
         th.addEventListener("dragstart", (e) => {
@@ -390,7 +394,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             const moved = this._columns.splice(sourceIndex, 1)[0];
             this._columns.splice(adjusted, 0, moved);
 
-            // zellenordnung in allen zeilen anpassen
+            // update cell order in all rows
             const reorderCells = (rows) => {
                 for (const row of rows) {
                     if (row.cells && row.cells.length > sourceIndex) {
@@ -400,115 +404,27 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                     if (row.children) { reorderCells(row.children); }
                 }
             };
-            reorderCells(this._rows);
-
-            this._dragColumnIndicator.style.display = "none";
-            this._draggedColumn = null;
-            this._schedulePersist();
-            this.render();
+            this._runWithModalPreservation(() => {
+                reorderCells(this._rows);
+                this._schedulePersist();
+                this.render();
+            });
 
             this._dispatch(webexpress.webui.Event.COLUMN_REORDER_EVENT, { sender: this._element, sourceIndex, targetIndex: adjusted });
         });
     }
 
     /**
-     * drag-sort im dropdown
-     * @param {HTMLElement} listContainer
-     * @param {HTMLElement} trigger
-     */
-    _enableDropdownColumnDrag(listContainer, trigger) {
-        this._ddDragPlaceholder = document.createElement("div");
-        this._ddDragPlaceholder.className = "wx-col-placeholder";
-        this._ddDragPlaceholder.style.cssText = "height: 2px; background: var(--bs-primary, #0d6efd); margin: 2px 0;";
-
-        const items = () => Array.from(listContainer.querySelectorAll(".wx-col-item"));
-
-        const handleDragStart = (e) => {
-            if (e.target.getAttribute("draggable") !== "true") { e.preventDefault(); return; }
-            const item = e.currentTarget;
-            this._ddDragSourceIndex = parseInt(item.dataset.index, 10);
-            item.classList.add("dragging");
-            e.dataTransfer.effectAllowed = "move";
-            e.dataTransfer.setData("text/plain", item.dataset.columnId);
-        };
-
-        const handleDragEnd = (e) => {
-            const item = e.currentTarget;
-            item.classList.remove("dragging");
-            item.draggable = false;
-            if (this._ddDragPlaceholder.parentNode) { this._ddDragPlaceholder.remove(); }
-            items().forEach((it, idx) => { it.dataset.index = String(idx); });
-            this._ddDragSourceIndex = null;
-        };
-
-        const handleDragOver = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const draggingItem = listContainer.querySelector(".wx-col-item.dragging");
-            if (!draggingItem) { return; }
-            const siblings = items().filter((i) => i !== draggingItem);
-            let nextSibling = siblings.find((sibling) => {
-                const rect = sibling.getBoundingClientRect();
-                const mid = rect.top + rect.height / 2;
-                return e.clientY < mid;
-            });
-            if (nextSibling) { listContainer.insertBefore(this._ddDragPlaceholder, nextSibling); }
-            else { listContainer.appendChild(this._ddDragPlaceholder); }
-        };
-
-        const handleDrop = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (this._ddDragSourceIndex === null) { return; }
-
-            const allChildren = Array.from(listContainer.children);
-            const placeholderIndex = allChildren.indexOf(this._ddDragPlaceholder);
-            let adjustedIndex = 0;
-            for (let i = 0; i < placeholderIndex; i++) {
-                const child = allChildren[i];
-                if (child.classList.contains("wx-col-item") && !child.classList.contains("dragging")) { adjustedIndex++; }
-            }
-
-            if (this._ddDragSourceIndex !== adjustedIndex) {
-                this._runWithDropdownPreservation(() => {
-                    const moved = this._columns.splice(this._ddDragSourceIndex, 1)[0];
-                    this._columns.splice(adjustedIndex, 0, moved);
-
-                    const reorderCells = (rows) => {
-                        for (const row of rows) {
-                            if (row.cells && row.cells.length > this._ddDragSourceIndex) {
-                                const c = row.cells.splice(this._ddDragSourceIndex, 1)[0];
-                                row.cells.splice(adjustedIndex, 0, c);
-                            }
-                            if (row.children) { reorderCells(row.children); }
-                        }
-                    };
-                    reorderCells(this._rows);
-
-                    this._schedulePersist();
-                    this.render();
-                });
-
-                this._dispatch(webexpress.webui.Event.COLUMN_REORDER_EVENT, { sender: this._element, sourceIndex: this._ddDragSourceIndex, targetIndex: adjustedIndex });
-            }
-        };
-
-        items().forEach((it) => { it.addEventListener("dragstart", handleDragStart); it.addEventListener("dragend", handleDragEnd); });
-        listContainer.addEventListener("dragover", handleDragOver);
-        listContainer.addEventListener("drop", handleDrop);
-    }
-
-    /**
-     * zeilen rendern inkl. linker griff-spalte und rechter options-spalte
-     * @param {Set<string>} changedIds
-     * @param {Set<string>} newIds
+     * Render rows including optional left handle column and right options column.
+     * @param {Set<string>} changedIds Row keys with modified signatures.
+     * @param {Set<string>} newIds Row keys first seen in this render.
      */
     _renderRows(changedIds, newIds) {
         const fragment = document.createDocumentFragment();
         const renderList = (rows, depth) => {
             for (const r of rows) {
                 this._addRow(r, depth, fragment, changedIds, newIds);
-                if (r.children?.length && r.expanded) { renderList(r.children, depth + 1); }
+                if (this._treeEnabled && r.children?.length && r.expanded) { renderList(r.children, depth + 1); }
             }
         };
         if (this._rows.length) { renderList(this._rows, 0); }
@@ -517,7 +433,12 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
     }
 
     /**
-     * einzelne zeile hinzufügen mit griff- und options-zelle
+     * Add a single row with handle and options cell.
+     * @param {Object} row Row descriptor.
+     * @param {number} depth Current nesting depth.
+     * @param {DocumentFragment} fragment Target fragment.
+     * @param {Set<string>} changedIds Changed row keys.
+     * @param {Set<string>} newIds New row keys.
      */
     _addRow(row, depth, fragment, changedIds, newIds) {
         const tr = document.createElement("tr");
@@ -535,14 +456,15 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         row._anchorTr = tr;
         row._depth = depth;
 
-        // griff-spalte links
+        // left handle cell
         if (this._movableRow) {
             const tdDrag = document.createElement("td");
             tdDrag.className = "wx-table-drag-handle";
             tdDrag.textContent = "⠿";
             tdDrag.tabIndex = 0;
             tdDrag.setAttribute("role", "button");
-            tdDrag.draggable = true;
+            tdDrag.style.userSelect = "none";
+            tdDrag.style.cursor = "grab";
             tr.appendChild(tdDrag);
         }
 
@@ -566,7 +488,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                 if (firstVisible && (row.uri || row.icon)) {
                     const wrap = row.uri ? document.createElement("a") : document.createElement("span");
                     wrap.className = "wx-cell-content";
-                    if (row.uri) { wrap.href = row.uri; if (row.target) { wrap.target = row.target; } }
+                    if (row.uri) { wrap.href = row.uri; if (row.target) { wrap.target = row.target; } wrap.rel = "noopener noreferrer"; }
                     if (row.icon) { const icon = document.createElement("i"); icon.className = row.icon; wrap.appendChild(icon); }
                     if (content instanceof Node) { wrap.appendChild(content); } else { wrap.appendChild(document.createTextNode(String(content ?? ""))); }
                     content = wrap;
@@ -578,7 +500,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             firstVisible = false;
         }
 
-        // options-zelle rechts
+        // right options cell
         const tdOpt = document.createElement("td");
         if (row.options?.length || this._options?.length) {
             const div = document.createElement("div");
@@ -592,124 +514,204 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         }
         tr.appendChild(tdOpt);
 
-        if (this._isTree) { this._injectTreeToggle(tr, row, depth); }
+        if (this._treeEnabled && this._isTree) { this._injectTreeToggle(tr, row, depth); }
         fragment.appendChild(tr);
     }
 
     /**
-     * zeilen-drag: start
-     * @param {HTMLTableRowElement} tr
-     * @param {Object} row
+     * Bind pointer-based move interaction handlers to row handles.
      */
-    _startRowDrag(tr, row) {
-        this._draggedRow = row;
-        this._draggedRowParent = row.parent || null;
-        this._rowDragActive = true;
-        this._dropTargetState = null;
+    _bindRowHandles() {
+        if (!this._movableRow) { return; }
+        const handles = this._body.querySelectorAll(".wx-table-drag-handle");
+        handles.forEach((handle) => {
+            if (handle._wxBoundPtr) { return; }
+            handle._wxBoundPtr = true;
 
-        tr.classList.add("wx-table-dragging");
+            const onDown = (e) => {
+                if (e.button !== 0) { return; }
+                const tr = handle.closest("tr");
+                if (!tr || !tr._dataRowRef) { return; }
+                e.preventDefault();
 
-        this._rowPlaceholder = document.createElement("tr");
-        this._rowPlaceholder.className = "wx-table-drag-placeholder";
-        this._rowPlaceholder.style.height = "4px";
+                this._beginRowMove(tr._dataRowRef, tr, e.clientX, e.clientY);
+                document.addEventListener("mousemove", onMove);
+                document.addEventListener("mouseup", onUp);
+            };
 
-        const td = document.createElement("td");
-        let colCount = this._columns.filter((c) => c.visible).length;
-        if (this._movableRow) { colCount++; }
-        colCount++; // options-spalte
-        td.colSpan = colCount || 100;
+            const onMove = (e) => {
+                if (!this._rowMoveActive) { return; }
+                e.preventDefault();
+                this._updateRowMove(e.clientX, e.clientY);
+            };
 
-        this._rowPlaceholder.appendChild(td);
-        tr.after(this._rowPlaceholder);
+            const onUp = (e) => {
+                if (!this._rowMoveActive) { return; }
+                e.preventDefault();
+                document.removeEventListener("mousemove", onMove);
+                document.removeEventListener("mouseup", onUp);
+                this._finalizeRowMove();
+            };
 
-        this._body.addEventListener("dragover", this._onTbodyDragOverHandler);
-        this._body.addEventListener("drop", this._onTbodyDropHandler);
+            handle.addEventListener("mousedown", onDown);
+        });
     }
 
     /**
-     * zeilen-drag: dragover in tbody
-     * @param {DragEvent} e
+     * Begin a pointer-based row move session: create ghost and placeholder.
+     * @param {Object} row Source row data object.
+     * @param {HTMLTableRowElement} tr Source row element.
+     * @param {number} startX Initial pointer X.
+     * @param {number} startY Initial pointer Y.
      */
-    _onTbodyDragOver(e) {
-        if (!this._rowDragActive) { return; }
-        e.preventDefault();
-        e.dataTransfer.dropEffect = "move";
+    _beginRowMove(row, tr, startX, startY) {
+        this._rowMoveActive = true;
+        this._rowMoveSourceRow = row;
+        this._rowMoveSourceParent = row.parent || null;
+        this._rowMoveTarget = null;
 
-        const tr = e.target.closest("tr");
+        const ghost = document.createElement("div");
+        ghost.className = "wx-row-ghost";
+        ghost.style.position = "fixed";
+        ghost.style.left = `${startX + 8}px`;
+        ghost.style.top = `${startY + 8}px`;
+        ghost.style.pointerEvents = "none";
+        ghost.style.padding = "2px 6px";
+        ghost.style.background = "rgba(33, 150, 243, 0.15)";
+        ghost.style.border = "1px solid rgba(33, 150, 243, 0.6)";
+        ghost.style.borderRadius = "4px";
+        ghost.style.fontSize = "12px";
+        ghost.style.zIndex = "2147483647";
+        ghost.textContent = (row.id ? `Row: ${row.id}` : "Row") + " moving";
+        document.body.appendChild(ghost);
+        this._rowMoveGhost = ghost;
 
-        if (this._lastHoveredTr && this._lastHoveredTr !== tr) {
-            this._lastHoveredTr.classList.remove("wx-drop-target-parent");
+        const ph = document.createElement("tr");
+        ph.className = "wx-row-move-placeholder";
+        ph.style.height = "4px";
+        const td = document.createElement("td");
+        let colCount = this._columns.filter((c) => c.visible).length;
+        if (this._movableRow) { colCount++; }
+        colCount++; // options column
+        td.colSpan = Math.max(colCount, 1);
+        td.style.background = "var(--bs-primary, #0d6efd)";
+        td.style.opacity = "0.35";
+        ph.appendChild(td);
+        tr.after(ph);
+        this._rowMovePlaceholder = ph;
+
+        this._body.addEventListener("mousemove", this._onBodyHoverMoveBound = this._onBodyHoverMove.bind(this));
+    }
+
+    /**
+     * Update ghost position and recompute target based on hover position.
+     * @param {number} x Pointer clientX.
+     * @param {number} y Pointer clientY.
+     */
+    _updateRowMove(x, y) {
+        if (this._rowMoveGhost) {
+            this._rowMoveGhost.style.left = `${x + 8}px`;
+            this._rowMoveGhost.style.top = `${y + 8}px`;
         }
-        this._lastHoveredTr = tr;
+    }
 
-        if (!tr || !tr._dataRowRef || tr._dataRowRef === this._draggedRow) {
-            this._rowPlaceholder.style.display = "";
-            this._dropTargetState = null;
+    /**
+     * Compute current hover target and move placeholder accordingly.
+     * @param {MouseEvent} e Mouse move event over tbody.
+     */
+    _onBodyHoverMove(e) {
+        const tr = e.target.closest("tr");
+        if (this._lastHoverTr && this._lastHoverTr !== tr) {
+            this._lastHoverTr.classList.remove("wx-drop-target-parent");
+        }
+        this._lastHoverTr = tr;
+
+        if (!tr || !tr._dataRowRef || tr._dataRowRef === this._rowMoveSourceRow) {
+            this._rowMovePlaceholder.style.display = "";
+            this._rowMoveTarget = null;
             return;
         }
 
-        if (this._isDescendant(tr._dataRowRef, this._draggedRow)) { return; }
+        if (this._isDescendant(tr._dataRowRef, this._rowMoveSourceRow)) { return; }
 
         const rect = tr.getBoundingClientRect();
         const relY = e.clientY - rect.top;
         const height = rect.height;
-
         const zoneTop = height * 0.25;
         const zoneBottom = height * 0.75;
 
-        if (relY > zoneTop && relY < zoneBottom) {
-            this._dropTargetState = { mode: "child", row: tr._dataRowRef };
-            this._rowPlaceholder.style.display = "none";
+        if (this._treeMoveEnabled && relY > zoneTop && relY < zoneBottom) {
+            this._rowMoveTarget = { mode: "child", row: tr._dataRowRef };
+            this._rowMovePlaceholder.style.display = "none";
             tr.classList.add("wx-drop-target-parent");
         } else {
-            this._dropTargetState = null;
             tr.classList.remove("wx-drop-target-parent");
-            this._rowPlaceholder.style.display = "";
-            if (relY <= zoneTop) { tr.before(this._rowPlaceholder); } else { tr.after(this._rowPlaceholder); }
+            this._rowMovePlaceholder.style.display = "";
+            this._rowMoveTarget = { mode: relY <= zoneTop ? "before" : "after", row: tr._dataRowRef };
+            if (this._rowMoveTarget.mode === "before") { tr.before(this._rowMovePlaceholder); }
+            else { tr.after(this._rowMovePlaceholder); }
         }
     }
 
     /**
-     * zeilen-drag: abschluss
+     * Finalize the row move: perform atomic data update and re-render.
      */
-    _finalizeRowDrag() {
+    _finalizeRowMove() {
+        if (this._onBodyHoverMoveBound) {
+            this._body.removeEventListener("mousemove", this._onBodyHoverMoveBound);
+            this._onBodyHoverMoveBound = null;
+        }
+
+        if (this._rowMoveGhost) { this._rowMoveGhost.remove(); this._rowMoveGhost = null; }
+        if (this._rowMovePlaceholder) { this._rowMovePlaceholder.remove(); this._rowMovePlaceholder = null; }
+
+        const moving = this._rowMoveSourceRow;
+        if (!moving) { this._rowMoveActive = false; return; }
+
         let targetParent = null;
         let insertIndex = 0;
 
-        if (this._dropTargetState && this._dropTargetState.mode === "child") {
-            const targetRow = this._dropTargetState.row;
+        if (this._rowMoveTarget && this._rowMoveTarget.mode === "child" && this._treeMoveEnabled) {
+            const targetRow = this._rowMoveTarget.row;
+            if (targetRow === moving) { this._rowMoveActive = false; return; }
             targetParent = targetRow;
-            if (!targetParent.children) { targetParent.children = []; }
+            if (!Array.isArray(targetParent.children)) { targetParent.children = []; }
             insertIndex = targetParent.children.length;
             targetParent.expanded = true;
+        } else if (this._rowMoveTarget && (this._rowMoveTarget.mode === "before" || this._rowMoveTarget.mode === "after")) {
+            const targetRow = this._rowMoveTarget.row;
+            const siblings = targetRow.parent ? targetRow.parent.children : this._rows;
+            const baseIndex = siblings.indexOf(targetRow);
+            insertIndex = this._rowMoveTarget.mode === "before" ? baseIndex : baseIndex + 1;
+            targetParent = targetRow.parent || null;
         } else {
-            let prev = this._rowPlaceholder.previousElementSibling;
-            while (prev && (prev.classList.contains("wx-table-drag-placeholder") || prev.classList.contains("wx-table-dragging"))) {
-                prev = prev.previousElementSibling;
-            }
-            if (prev && prev._dataRowRef) {
-                targetParent = prev._dataRowRef.parent || null;
-                const siblings = targetParent ? targetParent.children : this._rows;
-                insertIndex = siblings.indexOf(prev._dataRowRef) + 1;
-            } else {
-                targetParent = null;
-                insertIndex = 0;
-            }
+            targetParent = null;
+            insertIndex = 0;
         }
 
-        const oldParent = this._draggedRowParent;
+        if (targetParent && this._isDescendant(targetParent, moving)) { this._rowMoveActive = false; return; }
+
+        const oldParent = this._rowMoveSourceParent;
         const oldSiblings = oldParent ? oldParent.children : this._rows;
-        const oldIndex = oldSiblings.indexOf(this._draggedRow);
-        if (oldIndex > -1) { oldSiblings.splice(oldIndex, 1); }
+        const oldIndex = oldSiblings.indexOf(moving);
+        if (oldIndex === -1) { this._rowMoveActive = false; return; }
+
+        const [removed] = oldSiblings.splice(oldIndex, 1);
+        if (!removed) { this._rowMoveActive = false; return; }
 
         const newSiblings = targetParent ? targetParent.children : this._rows;
         if (oldSiblings === newSiblings && oldIndex < insertIndex) { insertIndex--; }
         if (insertIndex < 0) { insertIndex = 0; }
+        if (insertIndex > newSiblings.length) { insertIndex = newSiblings.length; }
 
-        newSiblings.splice(insertIndex, 0, this._draggedRow);
-        this._draggedRow.parent = targetParent;
+        newSiblings.splice(insertIndex, 0, removed);
+        removed.parent = targetParent;
 
-        this._cleanupRowDrag();
+        this._rowMoveActive = false;
+        this._rowMoveSourceRow = null;
+        this._rowMoveSourceParent = null;
+        this._rowMoveTarget = null;
+
         this._schedulePersist();
         this.render();
 
@@ -717,35 +719,21 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             sender: this._element,
             newOrder: newSiblings,
             parentId: targetParent ? targetParent.id : null,
-            rowId: this._draggedRow?.id
+            rowId: removed.id
         });
     }
 
     /**
-     * zeilen-drag: cleanup
-     */
-    _cleanupRowDrag() {
-        this._body.removeEventListener("dragover", this._onTbodyDragOverHandler);
-        this._body.removeEventListener("drop", this._onTbodyDropHandler);
-        if (this._lastHoveredTr) { this._lastHoveredTr.classList.remove("wx-drop-target-parent"); this._lastHoveredTr = null; }
-        this._rowDragActive = false;
-        if (this._rowPlaceholder) { this._rowPlaceholder.remove(); }
-        this._draggedRow = null;
-        this._draggedRowParent = null;
-        this._dropTargetState = null;
-    }
-
-    /**
-     * helpers
+     * Helpers.
      */
     _getVisibleColumns() { return this._columns.filter((c) => c.visible); }
 
-    _applyColumnFilter(menu) {
+    _applyColumnFilter(menuEl) {
         const term = (this._columnFilterTerm || "").toLowerCase();
-        const items = menu.querySelectorAll(".wx-col-item");
+        const items = menuEl.querySelectorAll(".wx-col-item");
         items.forEach((it) => {
             const id = it.dataset.columnId || "";
-            const label = it.querySelector(".form-check-label")?.textContent || "";
+            const label = it.querySelector(".wx-form-check span")?.textContent || "";
             const hay = `${id} ${label}`.toLowerCase();
             it.style.display = (!term || hay.includes(term)) ? "" : "none";
         });
@@ -754,7 +742,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
     _schedulePersist() {
         if (!this._persistKey) { return; }
         if (this._saveDebounceTimer) { clearTimeout(this._saveDebounceTimer); }
-        this._saveDebounceTimer = setTimeout(() => this._persistState(), 300);
+        this._saveDebounceTimer = setTimeout(() => { this._persistState(); }, 300);
     }
 
     _persistState() {
@@ -805,7 +793,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                 obj.cols.forEach((s) => {
                     const c = colMap.get(s.id);
                     if (c) {
-                        if (typeof s.visible === 'boolean') { c.visible = s.visible; }
+                        if (typeof s.visible === "boolean") { c.visible = s.visible; }
                         if (s.width) { c.width = parseInt(s.width, 10); }
                     }
                 });
@@ -829,10 +817,10 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
     }
 
     /**
-     * strukturprüfung
-     * @param {Object} candidate
-     * @param {Object} ancestor
-     * @returns {boolean}
+     * Structure check: is candidate a descendant of ancestor?
+     * @param {Object} candidate Potential descendant row.
+     * @param {Object} ancestor Potential ancestor row.
+     * @returns {boolean} True when candidate is a descendant of ancestor.
      */
     _isDescendant(candidate, ancestor) {
         let p = candidate.parent;

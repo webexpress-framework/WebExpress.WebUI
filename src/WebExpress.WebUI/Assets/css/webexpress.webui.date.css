@@ -2,7 +2,6 @@
  * Styles for the wx-webui-date date picker control.
  */
 .wx-date {
-    position: relative;
     display: block;
     min-width: 220px;
     width: 100%;

@@ -79,6 +79,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/syntax/xml.js")]
     [Asset("/assets/js/panels/webexpress.webapp.panel.editor.image.js")]
     [Asset("/assets/js/panels/webexpress.webapp.panel.editor.link.js")]
+    [Asset("/assets/js/panels/webexpress.webapp.panel.table.columns.js")]
     public sealed class IncludeJavaScript : IInclude
     {
 

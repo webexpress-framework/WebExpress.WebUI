@@ -53,7 +53,12 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "avatar.placeholder": "Bild auswählen durch Ziehen oder Doppelklick.",
     
     "page.contentNotLoaded.label": "Der Inhalt konnte nicht geladen werden.",
-    "page.contentNotLoaded.details": "Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie die Seite erneut zu laden. Falls das Problem weiterhin besteht, könnte die angeforderte Ressource momentan nicht verfügbar sein oder ein technischer Fehler vorliegen. Sie können auch versuchen, die Seite zu aktualisieren oder sich an den technischen Support wenden, falls Unterstützung benötigt wird."
+    "page.contentNotLoaded.details": "Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie die Seite erneut zu laden. Falls das Problem weiterhin besteht, könnte die angeforderte Ressource momentan nicht verfügbar sein oder ein technischer Fehler vorliegen. Sie können auch versuchen, die Seite zu aktualisieren oder sich an den technischen Support wenden, falls Unterstützung benötigt wird.",
     
-    
+    "table.columns.manage": "Spalten verwalten",
+    "table.columns.title": "Spalten",
+    "page.table.columns.desc": "Sichtbarkeit umschalten und Reihenfolge per Ziehen ändern.",
+    "page.table.columns.search": "Suche Spalten…",
+    "page.table.columns.drag": "Spalte ziehen",
+    "page.table.columns.default": "Spalte"   
 });
