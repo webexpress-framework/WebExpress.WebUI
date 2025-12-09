@@ -164,7 +164,10 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             }
 
             // right actions cell with custom toggle (opens dynamic modal panels)
-            this._renderActionsHeader(headRow, colFragment);
+            // Condition: Either we have options OR column removal is allowed
+            if (this._hasOptions || this._allowColumnRemove) {
+                this._renderActionsHeader(headRow, colFragment);
+            }
         }
 
         this._head.textContent = "";
@@ -173,7 +176,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         this._col.textContent = "";
         this._col.appendChild(colFragment);
     }
-
+    
     /**
      * Render actions header: provides a button to open the dynamic columns modal.
      * @param {HTMLElement} headRow Header row element to append actions th.
@@ -182,7 +185,6 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
     _renderActionsHeader(headRow, colFrag) {
         const th = document.createElement("th");
         th.className = "wx-table-actions";
-        th.style.position = "relative";
 
         const btn = document.createElement("button");
         btn.type = "button";
@@ -199,7 +201,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         headRow.appendChild(th);
 
         const cg = document.createElement("col");
-        cg.style.width = "2.5rem";
+        cg.style.width = "1.5rem";
         colFrag.appendChild(cg);
     }
 
@@ -464,7 +466,6 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             tdDrag.tabIndex = 0;
             tdDrag.setAttribute("role", "button");
             tdDrag.style.userSelect = "none";
-            tdDrag.style.cursor = "grab";
             tr.appendChild(tdDrag);
         }
 
@@ -501,18 +502,25 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         }
 
         // right options cell
-        const tdOpt = document.createElement("td");
-        if (row.options?.length || this._options?.length) {
-            const div = document.createElement("div");
-            div.className = "wx-row-options-trigger";
-            div.dataset.icon = "fas fa-cog";
-            div.dataset.size = "btn-sm";
-            div.dataset.border = "false";
-            tdOpt.appendChild(div);
-            const items = row.options?.length ? row.options : this._options;
-            new webexpress.webui.DropdownCtrl(div).items = items;
+        // Check if global options or column removal is enabled
+        if (this._hasOptions || this._allowColumnRemove) {
+            const tdOpt = document.createElement("td");
+            tdOpt.className = "wx-table-actions";
+            
+            // Check if THIS specific row (or global options) actually has items
+            const effectiveOptions = (row.options && row.options.length) ? row.options : this._options;
+            
+            if (effectiveOptions && effectiveOptions.length > 0) {
+                const div = document.createElement("div");
+                div.dataset.icon = "fas fa-cog";
+                div.dataset.size = "btn-sm";
+                div.dataset.border = "false";
+                tdOpt.appendChild(div);
+                const items = row.options?.length ? row.options : this._options;
+                new webexpress.webui.DropdownCtrl(div).items = items;
+            }
+            tr.appendChild(tdOpt);
         }
-        tr.appendChild(tdOpt);
 
         if (this._treeEnabled && this._isTree) { this._injectTreeToggle(tr, row, depth); }
         fragment.appendChild(tr);
@@ -719,7 +727,8 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             sender: this._element,
             newOrder: newSiblings,
             parentId: targetParent ? targetParent.id : null,
-            rowId: removed.id
+            rowId: removed.id,
+            toIndex: insertIndex
         });
     }
 

@@ -271,7 +271,10 @@ webexpress.webui.DialogPanels.register("table-columns", {
         const search = content.querySelector(".wx-search");
         if (search) {
             search.focus();
-            search.select();
+            // inline comment: guard against missing select method
+            if (typeof search.select === "function") {
+                search.select();
+            }
         }
         if (modal && typeof modal.fitSidePaneToContent === "function") {
             requestAnimationFrame(() => {

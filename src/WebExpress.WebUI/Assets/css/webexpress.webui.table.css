@@ -1,5 +1,6 @@
 /* --- Base Table Layout --- */
 .wx-table {
+    table-layout: fixed;
     caption-side: bottom;
     border-collapse: separate; /* better for sticky headers than collapse */
     border-spacing: 0;
@@ -66,43 +67,15 @@
 .wx-table > thead > tr > th.wx-sort-asc::after { content: "▲"; }
 .wx-table > thead > tr > th.wx-sort-desc::after { content: "▼"; }
 
-/* --- Actions Column (Dropdown) --- */
-.wx-table > thead > tr > th.wx-table-actions {
-    width: 1.5rem;
-    min-width: 1.5rem;
+/* --- Actions Column (Dropdown) ---*/
+.wx-table .wx-table-actions {
     text-align: center;
-    vertical-align: middle;
-}
-
-.wx-table .wx-table-actions .wx-dropdown {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    width: 100%;
+    padding: 0;
+    margin: 0;
 }
 
 .wx-table .wx-table-actions .btn {
     border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 0;
-    color: var(--bs-color);
-}
-
-.wx-table-actions .dropdown-menu {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 1px;
-    overflow-y: auto;
-    max-height: 60vh;
-    min-width: 260px;
-    padding: 0.5rem 0;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    border-radius: 4px;
 }
 
 /* --- Body Cells & Layout --- */
@@ -154,6 +127,7 @@ a.wx-cell-content:hover { color: var(--bs-link-hover-color, #0a58ca); }
     text-align: center;
     width: 1.1em;
     vertical-align: middle;
+    text-overflow: clip;
 }
 
 .wx-table .wx-table-drag-handle:active { cursor: grabbing; }
@@ -339,13 +313,7 @@ a.wx-cell-content:hover { color: var(--bs-link-hover-color, #0a58ca); }
     100% { background-color: transparent; }
 }
 
-@keyframes wx-new-flash {
-    0% { background-color: rgba(var(--bs-success-rgb), 0.4); }
-    100% { background-color: transparent; }
-}
-
 .wx-table tr.wx-change-flash > td { animation: wx-change-flash 1s ease-out; }
-.wx-table tr.wx-new-flash > td { animation: wx-new-flash 1s ease-out; }
 
 @media print {
     .wx-table-actions, .wx-table-drag-handle { display: none !important; }

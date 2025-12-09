@@ -58,7 +58,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
             } else if (elem.classList.contains("wx-dropdown-header")) {
                 items.push({
                     type: "header",
-                    content: elem.textContent,
+                    text: elem.textContent,
                     icon: elem.dataset.icon || null,
                 });
             } else {
@@ -96,7 +96,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                     uri: elem.dataset.uri || "javascript:void(0);",
                     image: elem.dataset.image || null,
                     icon: elem.dataset.icon || null,
-                    content: elem.textContent || null,
+                    text: elem.textContent || null,
                     color: elem.dataset.color || null,
                     backgroundColor: itemClasses
                         .filter(cls => cls !== "wx-dropdown-item")
@@ -134,7 +134,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                 icon.className = item.icon;
                 header.appendChild(icon);
             }
-            header.append(item.content);
+            header.append(item.text);
             li.appendChild(header);
         } else if (item.type === "divider") {
             // create a divider element
@@ -151,7 +151,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                 if (item.image) {
                     const img = document.createElement("img");
                     img.src = item.image;
-                    img.alt = item.content;
+                    img.alt = item.text;
                     img.className = "wx-icon";
                     link.appendChild(img);
                 }
@@ -161,7 +161,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                     link.appendChild(icon);
                 }
                 const span = document.createElement("span");
-                span.textContent = item.content;
+                span.textContent = item.text;
                 link.appendChild(span);
                 
                 if (item.role) { link.setAttribute("role", item.role); }
@@ -200,7 +200,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                     icon.className = item.icon;
                     disabledItem.appendChild(icon);
                 }
-                disabledItem.append(item.content);
+                disabledItem.append(item.text);
                 li.appendChild(disabledItem);
             }
         }

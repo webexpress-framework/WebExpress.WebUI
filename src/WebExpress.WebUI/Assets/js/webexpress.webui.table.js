@@ -30,6 +30,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     _highlightChanges = true;
     _suppressFlashOnce = false;
     _columnResizeEnabled = true;
+    _hasOptions = false;
 
     // caches for performance and diffing
     _prevRowState = new Map();
@@ -94,6 +95,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         this._rows = this._parseRows(element.querySelectorAll(":scope > .wx-table-row"));
         this._footer = this._parseFooter(element.querySelector(":scope > .wx-table-footer"));
 
+        this._recalculateHasOptions(); // Check initially
+
         element.textContent = "";
         element.appendChild(this._table);
 
@@ -141,6 +144,28 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
      * Disable column resizing behavior via header resizer handles.
      */
     disableColumnResize() { this._columnResizeEnabled = false; }
+
+    /**
+     * Recalculates the _hasOptions flag.
+     * Returns true if global options exist OR if ANY row has specific options.
+     */
+    _recalculateHasOptions() {
+        if (this._options && this._options.length > 0) {
+            this._hasOptions = true;
+            return;
+        }
+
+        // Deep search for row options
+        const hasRowOptions = (rows) => {
+            for (const r of rows) {
+                if (r.options && r.options.length > 0) return true;
+                if (r.children && hasRowOptions(r.children)) return true;
+            }
+            return false;
+        };
+
+        this._hasOptions = hasRowOptions(this._rows);
+    }
 
     /**
      * Replace the current column definitions.
@@ -240,6 +265,11 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         if (index == null || index < 0 || index > siblings.length) { index = siblings.length; }
         siblings.splice(index, 0, row);
 
+        // Check if the new row introduced options, potentially enabling the column
+        if (!this._hasOptions && row.options && row.options.length > 0) {
+            this._hasOptions = true;
+        }
+
         this.render();
         return row;
     }
@@ -253,7 +283,11 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     deleteRow(rowId) {
         if (!rowId) { return false; }
         const removed = this._removeRowRecursive(rowId, this._rows);
-        if (removed) { this.render(); }
+        if (removed) { 
+            // If the removed row might have been the last one with options, recalculate
+            this._recalculateHasOptions();
+            this.render(); 
+        }
         return removed;
     }
 
@@ -335,6 +369,11 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 if (col.width) { cg.style.width = `${col.width}px`; }
                 colFragment.appendChild(cg);
             }
+            
+            // right actions cell with custom toggle (opens dynamic modal panels)
+            if (this._hasOptions) {
+                this._renderActionsHeader(headRow, colFragment);
+            }
         }
 
         this._head.textContent = "";
@@ -342,6 +381,22 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
         this._col.textContent = "";
         this._col.appendChild(colFragment);
+    }
+    
+    /**
+     * Render actions header: provides a button to open the dynamic columns modal.
+     * @param {HTMLElement} headRow Header row element to append actions th.
+     * @param {DocumentFragment} colFrag Colgroup fragment to append actions col.
+     */
+    _renderActionsHeader(headRow, colFrag) {
+        const th = document.createElement("th");
+        th.className = "wx-table-actions";
+
+        headRow.appendChild(th);
+
+        const cg = document.createElement("col");
+        cg.style.width = "1.5rem";
+        colFrag.appendChild(cg);
     }
 
     /**
@@ -428,6 +483,25 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
             tr.appendChild(td);
             firstVisible = false;
+        }
+        
+        // right options cell (only if needed)
+        if (this._hasOptions) {
+            const tdOpt = document.createElement("td");
+            tdOpt.className = "wx-table-actions";
+            
+            // Check if this specific row has options OR global options exist
+            const effectiveOptions = (row.options && row.options.length) ? row.options : this._options;
+            
+            if (effectiveOptions && effectiveOptions.length > 0) {
+                const div = document.createElement("div");
+                div.dataset.icon = "fas fa-cog";
+                div.dataset.size = "btn-sm";
+                div.dataset.border = "false";
+                tdOpt.appendChild(div);
+                new webexpress.webui.DropdownCtrl(div).items = effectiveOptions;
+            }
+            tr.appendChild(tdOpt);
         }
 
         // inline comment: no actions/options cell in base controller
@@ -640,8 +714,12 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         if (!div) { return []; }
         return Array.from(div.children).map((el) => {
             const cls = el.classList;
-            if (cls.contains("wx-dropdown-divider") || cls.contains("wx-dropdownbutton-divider")) { return { type: "divider" }; }
-            if (cls.contains("wx-dropdown-header")) { return { type: "header", content: el.textContent.trim(), icon: el.dataset.icon }; }
+            if (cls.contains("wx-dropdown-divider") || cls.contains("wx-dropdownbutton-divider")) { 
+                return { type: "divider" }; 
+            }
+            if (cls.contains("wx-dropdown-header")) { 
+                return { type: "header", content: el.textContent.trim(), icon: el.dataset.icon }; 
+            }
             return {
                 content: el.textContent.trim(),
                 id: el.id,
@@ -792,7 +870,12 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
      * Update the snapshot of row signatures used for change detection in subsequent renders.
      * @param {Array<{key: string|number, signature: string}>} states Row signatures to persist.
      */
-    _updateSnapshot(states) { this._prevRowState.clear(); for (const s of states) { this._prevRowState.set(s.key, s.signature); } }
+    _updateSnapshot(states) { 
+        this._prevRowState.clear(); 
+        for (const s of states) { 
+            this._prevRowState.set(s.key, s.signature); 
+        } 
+    }
 
     /**
      * Dispatch a custom event with bubbling to notify external consumers.
