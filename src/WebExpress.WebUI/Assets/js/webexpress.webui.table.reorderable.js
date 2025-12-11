@@ -15,7 +15,7 @@
  * - data-tree-move-enabled="true|false": allow hierarchical moving (drop as child)
  * - data-columns-modal-key="string": optional DialogPanels key for external column panels (default: "table-columns")
  *
- * Emitted events:
+ * The following events are triggered:
  * - webexpress.webui.Event.TABLE_SORT_EVENT
  * - webexpress.webui.Event.COLUMN_REORDER_EVENT
  * - webexpress.webui.Event.COLUMN_VISIBILITY_EVENT
@@ -45,18 +45,14 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         this._allowColumnRemove = ds.allowColumnRemove === "true";
         this._persistKey = ds.persistKey || element.id || null;
 
-        // tree configuration via data attributes
-        this._treeEnabled = ds.treeEnabled !== "false"; // default true
-        this._treeMoveEnabled = ds.treeMoveEnabled !== "false"; // default true
+        this._treeEnabled = ds.treeEnabled !== "false";
+        this._treeMoveEnabled = ds.treeMoveEnabled !== "false";
 
-        // header drag indicator
         this._dragColumnIndicator = document.createElement("div");
         this._dragColumnIndicator.className = "wx-table-drag-indicator";
         this._dragColumnIndicator.setAttribute("aria-hidden", "true");
         this._dragColumnIndicator.style.display = "none";
         this._table.appendChild(this._dragColumnIndicator);
-
-        // modal is created lazily in _openColumnsModal
     }
 
     /**
@@ -92,12 +88,16 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             }
         }
 
+        this._isTree = this._detectTree(this._rows);
+
         this._rebuildColumnIndexCache();
+
+        // inline comment: sync widths first to set CSS variables for Grid
+        this._syncColumnWidths();
 
         this._renderColumns();
         this._renderRows(changedIds, newIds);
         this._renderFooter();
-        this._syncColumnWidths();
         this._attachColumnResizers();
 
         this._bindRowHandles();
@@ -109,36 +109,33 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
 
     /**
      * Render columns including optional left handle column and right actions cell.
+     * Uses Div structure for Grid Layout.
      */
     _renderColumns() {
         const headFragment = document.createDocumentFragment();
-        const colFragment = document.createDocumentFragment();
-        const headRow = document.createElement("tr");
+        
+        // inline comment: use div with wx-grid-row class
+        const headRow = document.createElement("div");
+        headRow.className = "wx-grid-row wx-grid-head-row";
+        headRow.setAttribute("role", "row");
         headFragment.appendChild(headRow);
 
         if (!this._suppressHeaders) {
-            // left handle column for row moving
             if (this._movableRow) {
-                const th = document.createElement("th");
+                const th = document.createElement("div");
                 th.className = "wx-table-drag-column";
-                th.style.width = "1.25rem";
+                th.setAttribute("role", "columnheader");
                 th.setAttribute("aria-hidden", "true");
                 headRow.appendChild(th);
-
-                const c = document.createElement("col");
-                c.className = "wx-table-drag-col";
-                c.style.width = "1.25rem";
-                colFragment.appendChild(c);
             }
 
-            // data columns
             for (const col of this._columns) {
                 if (!col.visible) { continue; }
 
-                const th = document.createElement("th");
+                const th = document.createElement("div");
                 th.dataset.columnId = col.id;
-                th.setAttribute("scope", "col");
-                th.classList.add("wx-col-header");
+                th.setAttribute("role", "columnheader");
+                th.className = "wx-grid-header-cell wx-col-header";
                 th.style.position = "relative";
                 this._addClasses(th, col.color);
 
@@ -151,40 +148,29 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                 inner.appendChild(document.createTextNode(col.label));
                 th.appendChild(inner);
 
-                // column reorder via header drag
                 th.draggable = true;
                 this._enableDragAndDropColumn(th, col);
 
                 headRow.appendChild(th);
-
-                const cg = document.createElement("col");
-                cg.dataset.columnId = col.id;
-                if (col.width) { cg.style.width = `${col.width}px`; }
-                colFragment.appendChild(cg);
             }
 
-            // right actions cell with custom toggle (opens dynamic modal panels)
-            // Condition: Either we have options OR column removal is allowed
             if (this._hasOptions || this._allowColumnRemove) {
-                this._renderActionsHeader(headRow, colFragment);
+                this._renderActionsHeader(headRow);
             }
         }
 
         this._head.textContent = "";
         this._head.appendChild(headFragment);
-
-        this._col.textContent = "";
-        this._col.appendChild(colFragment);
     }
     
     /**
      * Render actions header: provides a button to open the dynamic columns modal.
-     * @param {HTMLElement} headRow Header row element to append actions th.
-     * @param {DocumentFragment} colFrag Colgroup fragment to append actions col.
+     * @param {HTMLElement} headRow Header row element to append actions cell.
      */
-    _renderActionsHeader(headRow, colFrag) {
-        const th = document.createElement("th");
-        th.className = "wx-table-actions";
+    _renderActionsHeader(headRow) {
+        const th = document.createElement("div");
+        th.className = "wx-grid-header-cell wx-table-actions";
+        th.setAttribute("role", "columnheader");
 
         const btn = document.createElement("button");
         btn.type = "button";
@@ -199,15 +185,10 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
 
         th.appendChild(btn);
         headRow.appendChild(th);
-
-        const cg = document.createElement("col");
-        cg.style.width = "1.5rem";
-        colFrag.appendChild(cg);
     }
 
     /**
      * Create dynamic modal host for columns, backed by ModalSidebarPanel and DialogPanels.
-     * Panels can be registered externally under "table-columns".
      */
     _createColumnsModal() {
         const id = "wx-table-columns-msp-" + Date.now() + "-" + Math.random().toString(36).slice(2);
@@ -222,13 +203,11 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
 
         const title = this._i18n("webexpress.webui:table.columns.title");
 
-        // minimal chrome: header + footer + submit button
         el.innerHTML = [
             `<div class="wx-modal-header">${title}</div>`,
             `<div class="wx-modal-footer"></div>`
         ].join("");
 
-        // ensure a content container exists for ModalSidebarPanel body rendering
         const footer = el.querySelector(".wx-modal-footer");
         const content = document.createElement("div");
         content.className = "wx-modal-content";
@@ -238,20 +217,15 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             el.appendChild(content);
         }
 
-        // mount element once to body
         document.body.appendChild(el);
 
-        // instantiate panel
         const modalCtrl = new webexpress.webui.ModalSidebarPanel(el);
-        modalCtrl._tableCtrl = this; // expose controller context
+        modalCtrl._tableCtrl = this;
 
-        // expose helpers to panels
         modalCtrl.getColumns = () => {
-            // return deep copy to avoid accidental external mutation
             return this._columns.map((c) => ({ id: c.id, label: c.label, visible: c.visible, width: c.width, sort: c.sort, color: c.color }));
         };
         modalCtrl.applyVisibility = (columnId, visible) => {
-            // toggle column visibility and preserve modal state
             this._runWithModalPreservation(() => {
                 const col = this._columns.find((c) => c.id === columnId);
                 if (col) {
@@ -263,12 +237,10 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             this._dispatch(webexpress.webui.Event.COLUMN_VISIBILITY_EVENT, { sender: this._element, columnId, visible: !!visible });
         };
         modalCtrl.applyOrder = (orderedIds) => {
-            // reorder columns according to given id list
             const map = new Map(this._columns.map((c) => [c.id, c]));
             const newOrder = [];
             orderedIds.forEach((id) => { const col = map.get(id); if (col) { newOrder.push(col); } });
             this._columns.forEach((c) => { if (!newOrder.includes(c)) { newOrder.push(c); } });
-            // update row cells order
             const oldIndexById = new Map(this._columns.map((c, i) => [c.id, i]));
             this._columns = newOrder;
             const reorderCells = (rows) => {
@@ -291,7 +263,6 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             this._dispatch(webexpress.webui.Event.COLUMN_REORDER_EVENT, { sender: this._element, sourceIndex: -1, targetIndex: -1 });
         };
         modalCtrl.applyWidth = (columnId, widthPx) => {
-            // set width in pixels if valid
             const col = this._columns.find((c) => c.id === columnId);
             if (!col) { return; }
             const w = parseInt(widthPx, 10);
@@ -302,7 +273,6 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             });
         };
         modalCtrl.applySort = (columnId, dir) => {
-            // toggle sort direction on a column and clear others
             this._columns.forEach((c) => { if (c.id === columnId) { c.sort = dir === "asc" || dir === "desc" ? dir : null; } else { c.sort = null; } });
             this._runWithModalPreservation(() => {
                 this._schedulePersist();
@@ -311,7 +281,6 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             this._dispatch(webexpress.webui.Event.TABLE_SORT_EVENT, { sender: this._element, columnId, dir });
         };
 
-        // cache refs
         this._columnsModalEl = el;
         this._columnsSidebarPanel = modalCtrl;
     }
@@ -322,7 +291,6 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
     _openColumnsModal() {
         if (!this._columnsModalEl) { this._createColumnsModal(); }
         if (this._columnsSidebarPanel) {
-            // provide current state to panels
             this._columnsSidebarPanel._tableCtrl = this;
             this._columnsSidebarPanel._columnsPrefill = {
                 columns: this._columns.map((c) => ({ id: c.id, label: c.label, visible: c.visible, width: c.width, sort: c.sort })),
@@ -337,7 +305,6 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
      * @param {Function} action Function to execute.
      */
     _runWithModalPreservation(action) {
-        // try to preserve side pane scroll state if visible
         const modal = this._columnsSidebarPanel;
         const content = modal ? modal._contentEl || this._columnsModalEl.querySelector(".wx-modal-content") : null;
         const list = content ? content.querySelector(".wx-columns-list") : null;
@@ -346,7 +313,6 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
 
         action();
 
-        // let panels re-render themselves via DialogPanels; if needed, re-show
         if (wasOpen && modal && typeof modal.show === "function") {
             modal.show();
             const list2 = (modal._contentEl || this._columnsModalEl.querySelector(".wx-modal-content"))?.querySelector(".wx-columns-list");
@@ -363,10 +329,8 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         th.addEventListener("dragstart", (e) => {
             if (!e.ctrlKey) { e.preventDefault(); return; }
             this._draggedColumn = column;
-            th.classList.add("wx-table-dragging");
         });
         th.addEventListener("dragend", () => {
-            th.classList.remove("wx-table-dragging");
             this._dragColumnIndicator.style.display = "none";
             this._draggedColumn = null;
         });
@@ -396,7 +360,6 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             const moved = this._columns.splice(sourceIndex, 1)[0];
             this._columns.splice(adjusted, 0, moved);
 
-            // update cell order in all rows
             const reorderCells = (rows) => {
                 for (const row of rows) {
                     if (row.cells && row.cells.length > sourceIndex) {
@@ -436,6 +399,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
 
     /**
      * Add a single row with handle and options cell.
+     * Uses Div structure for Grid Layout.
      * @param {Object} row Row descriptor.
      * @param {number} depth Current nesting depth.
      * @param {DocumentFragment} fragment Target fragment.
@@ -443,7 +407,10 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
      * @param {Set<string>} newIds New row keys.
      */
     _addRow(row, depth, fragment, changedIds, newIds) {
-        const tr = document.createElement("tr");
+        const tr = document.createElement("div");
+        tr.className = "wx-grid-row";
+        tr.setAttribute("role", "row");
+        
         this._addClasses(tr, row.color);
         this._addClasses(tr, row.class);
         if (row.style) { tr.style.cssText = row.style; }
@@ -458,10 +425,10 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         row._anchorTr = tr;
         row._depth = depth;
 
-        // left handle cell
         if (this._movableRow) {
-            const tdDrag = document.createElement("td");
-            tdDrag.className = "wx-table-drag-handle";
+            const tdDrag = document.createElement("div");
+            tdDrag.className = "wx-grid-cell wx-table-drag-handle";
+            tdDrag.setAttribute("role", "gridcell");
             tdDrag.textContent = "⠿";
             tdDrag.tabIndex = 0;
             tdDrag.setAttribute("role", "button");
@@ -469,20 +436,25 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             tr.appendChild(tdDrag);
         }
 
-        let firstVisible = true;
         const len = this._columns.length;
+        let firstVisible = true;
 
         for (let i = 0; i < len; i++) {
             const colDef = this._columns[i];
             if (!colDef.visible) { continue; }
 
-            const td = document.createElement("td");
+            const td = document.createElement("div");
+            td.className = "wx-grid-cell";
+            td.setAttribute("role", "gridcell");
+            
+            td.style.overflow = "hidden";
+
             const cell = row.cells[i];
 
             if (cell) {
                 this._addClasses(td, cell.color);
                 this._addClasses(td, cell.class);
-                if (cell.style) { td.style.cssText = cell.style; }
+                if (cell.style) { td.style.cssText += (td.style.cssText ? "; " : "") + cell.style; }
 
                 let content = this._renderCell(row, colDef, cell, firstVisible);
 
@@ -496,18 +468,18 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                 }
 
                 if (content instanceof Node) { td.appendChild(content); } else { td.textContent = String(content ?? ""); }
+            } else {
+                td.textContent = "";
             }
             tr.appendChild(td);
             firstVisible = false;
         }
 
-        // right options cell
-        // Check if global options or column removal is enabled
         if (this._hasOptions || this._allowColumnRemove) {
-            const tdOpt = document.createElement("td");
-            tdOpt.className = "wx-table-actions";
+            const tdOpt = document.createElement("div");
+            tdOpt.className = "wx-grid-cell wx-table-actions";
+            tdOpt.setAttribute("role", "gridcell");
             
-            // Check if THIS specific row (or global options) actually has items
             const effectiveOptions = (row.options && row.options.length) ? row.options : this._options;
             
             if (effectiveOptions && effectiveOptions.length > 0) {
@@ -525,6 +497,59 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         if (this._treeEnabled && this._isTree) { this._injectTreeToggle(tr, row, depth); }
         fragment.appendChild(tr);
     }
+    
+    /**
+     * Apply configured column widths by setting grid-template-columns variable.
+     * Enforces fixed width for drag-handle (first) and actions (last).
+     * Enforces last regular column to not be user-resizable (flexible filler).
+     */
+    _syncColumnWidths() {
+        const parts = [];
+        
+        if (this._movableRow) { parts.push("1.25rem"); }
+        
+        const visibleCols = this._columns.filter((c) => c.visible);
+        const lastVisibleId = visibleCols.length > 0 ? visibleCols[visibleCols.length - 1].id : null;
+
+        for (const c of this._columns) {
+            if (!c.visible) { continue; }
+
+            if (c.id === lastVisibleId) {
+                const min = c.minWidth || `${webexpress.webui.TableCtrl.MIN_COL_WIDTH}px`;
+                parts.push(`minmax(${min}, 1fr)`);
+                continue;
+            }
+
+            let val = "1fr";
+
+            if (c.width !== null && c.width !== "") {
+                const wStr = String(c.width).trim();
+                if (wStr === "auto") {
+                    val = "auto";
+                } else if (wStr.endsWith("%") || wStr.endsWith("fr") || wStr.endsWith("rem") || wStr.endsWith("px")) {
+                    val = wStr;
+                } else if (!isNaN(Number(wStr))) {
+                    val = `${wStr}px`;
+                } else {
+                    val = wStr;
+                }
+            }
+
+            const min = c.minWidth || `${webexpress.webui.TableCtrl.MIN_COL_WIDTH}px`;
+            const max = c.maxWidth || "1fr";
+
+            if (c.width && c.width !== "auto") {
+                 parts.push(val);
+            } else {
+                 parts.push(`minmax(${min}, ${max})`);
+            }
+        }
+        
+        if (this._hasOptions || this._allowColumnRemove) { parts.push("1.5rem"); }
+        
+        const template = parts.length > 0 ? parts.join(" ") : "auto";
+        this._table.style.setProperty("--wx-grid-template", template);
+    }
 
     /**
      * Bind pointer-based move interaction handlers to row handles.
@@ -538,7 +563,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
 
             const onDown = (e) => {
                 if (e.button !== 0) { return; }
-                const tr = handle.closest("tr");
+                const tr = handle.closest(".wx-grid-row");
                 if (!tr || !tr._dataRowRef) { return; }
                 e.preventDefault();
 
@@ -568,7 +593,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
     /**
      * Begin a pointer-based row move session: create ghost and placeholder.
      * @param {Object} row Source row data object.
-     * @param {HTMLTableRowElement} tr Source row element.
+     * @param {HTMLElement} tr Source row element (div).
      * @param {number} startX Initial pointer X.
      * @param {number} startY Initial pointer Y.
      */
@@ -577,6 +602,10 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         this._rowMoveSourceRow = row;
         this._rowMoveSourceParent = row.parent || null;
         this._rowMoveTarget = null;
+        this._rowMoveDerivedTargetParent = null;
+        this._rowMoveDerivedInsertIndex = null;
+        this._rowMoveSourceEl = tr;
+        this._applyDragSourceVisual(true);
 
         const ghost = document.createElement("div");
         ghost.className = "wx-row-ghost";
@@ -594,16 +623,17 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         document.body.appendChild(ghost);
         this._rowMoveGhost = ghost;
 
-        const ph = document.createElement("tr");
-        ph.className = "wx-row-move-placeholder";
+        const ph = document.createElement("div");
+        ph.className = "wx-row-move-placeholder wx-grid-row";
         ph.style.height = "4px";
-        const td = document.createElement("td");
-        let colCount = this._columns.filter((c) => c.visible).length;
-        if (this._movableRow) { colCount++; }
-        colCount++; // options column
-        td.colSpan = Math.max(colCount, 1);
+        
+        const td = document.createElement("div");
+        td.className = "wx-grid-cell";
+        td.style.gridColumn = "1 / -1";
         td.style.background = "var(--bs-primary, #0d6efd)";
         td.style.opacity = "0.35";
+        td.style.height = "100%";
+        
         ph.appendChild(td);
         tr.after(ph);
         this._rowMovePlaceholder = ph;
@@ -625,20 +655,32 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
 
     /**
      * Compute current hover target and move placeholder accordingly.
+     * Highlights target row and dims source row. Expands collapsed rows with children after hover delay.
      * @param {MouseEvent} e Mouse move event over tbody.
      */
     _onBodyHoverMove(e) {
-        const tr = e.target.closest("tr");
+        const tr = e.target.closest(".wx-grid-row");
+        const switchedTarget = this._lastHoverTr !== tr;
+
         if (this._lastHoverTr && this._lastHoverTr !== tr) {
-            this._lastHoverTr.classList.remove("wx-drop-target-parent");
+            this._lastHoverTr.classList.remove("wx-drag-over");
         }
+
+        if (switchedTarget && this._hoverExpandTimer) {
+            clearTimeout(this._hoverExpandTimer);
+            this._hoverExpandTimer = null;
+        }
+
         this._lastHoverTr = tr;
 
         if (!tr || !tr._dataRowRef || tr._dataRowRef === this._rowMoveSourceRow) {
-            this._rowMovePlaceholder.style.display = "";
+            if (this._rowMovePlaceholder) { this._rowMovePlaceholder.style.display = ""; }
             this._rowMoveTarget = null;
+            if (tr) { tr.classList.remove("wx-drag-over"); }
             return;
         }
+
+        tr.classList.add("wx-drag-over");
 
         if (this._isDescendant(tr._dataRowRef, this._rowMoveSourceRow)) { return; }
 
@@ -647,17 +689,25 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         const height = rect.height;
         const zoneTop = height * 0.25;
         const zoneBottom = height * 0.75;
+        const canDropAsChild = this._treeEnabled && this._treeMoveEnabled;
 
-        if (this._treeMoveEnabled && relY > zoneTop && relY < zoneBottom) {
+        if (canDropAsChild && relY > zoneTop && relY < zoneBottom) {
             this._rowMoveTarget = { mode: "child", row: tr._dataRowRef };
-            this._rowMovePlaceholder.style.display = "none";
-            tr.classList.add("wx-drop-target-parent");
+            if (this._rowMovePlaceholder) { this._rowMovePlaceholder.style.display = "none"; }
         } else {
-            tr.classList.remove("wx-drop-target-parent");
-            this._rowMovePlaceholder.style.display = "";
+            if (this._rowMovePlaceholder) { this._rowMovePlaceholder.style.display = ""; }
             this._rowMoveTarget = { mode: relY <= zoneTop ? "before" : "after", row: tr._dataRowRef };
-            if (this._rowMoveTarget.mode === "before") { tr.before(this._rowMovePlaceholder); }
-            else { tr.after(this._rowMovePlaceholder); }
+            if (this._rowMovePlaceholder) {
+                if (this._rowMoveTarget.mode === "before") { tr.before(this._rowMovePlaceholder); }
+                else { tr.after(this._rowMovePlaceholder); }
+            }
+        }
+
+        if (switchedTarget && this._treeEnabled && tr._dataRowRef?.children?.length && tr._dataRowRef.expanded === false) {
+            this._hoverExpandTimer = setTimeout(() => {
+                tr._dataRowRef.expanded = true;
+                this.render();
+            }, 2000);
         }
     }
 
@@ -670,42 +720,98 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             this._onBodyHoverMoveBound = null;
         }
 
+        if (this._hoverExpandTimer) {
+            clearTimeout(this._hoverExpandTimer);
+            this._hoverExpandTimer = null;
+        }
+
+        if (this._lastHoverTr) {
+            this._lastHoverTr.classList.remove("wx-drag-over");
+            this._lastHoverTr = null;
+        }
+
         if (this._rowMoveGhost) { this._rowMoveGhost.remove(); this._rowMoveGhost = null; }
+        const ph = this._rowMovePlaceholder;
+
+        const deriveTargetFromPlaceholder = () => {
+            if (!ph || !ph.parentNode) { return null; }
+            const prevRow = (() => {
+                let el = ph.previousElementSibling;
+                while (el && !el.classList.contains("wx-grid-row")) { el = el.previousElementSibling; }
+                return el && el.classList.contains("wx-grid-row") ? el : null;
+            })();
+            const nextRow = (() => {
+                let el = ph.nextElementSibling;
+                while (el && !el.classList.contains("wx-grid-row")) { el = el.nextElementSibling; }
+                return el && el.classList.contains("wx-grid-row") ? el : null;
+            })();
+
+            let targetParent = null;
+            if (prevRow && prevRow._dataRowRef) { targetParent = prevRow._dataRowRef.parent || null; }
+            else if (nextRow && nextRow._dataRowRef) { targetParent = nextRow._dataRowRef.parent || null; }
+
+            const siblings = targetParent ? targetParent.children : this._rows;
+            if (!Array.isArray(siblings)) { return null; }
+
+            if (prevRow && prevRow._dataRowRef) {
+                const idxPrev = siblings.indexOf(prevRow._dataRowRef);
+                if (idxPrev >= 0) { return { targetParent, insertIndex: idxPrev + 1 }; }
+            }
+            if (nextRow && nextRow._dataRowRef) {
+                const idxNext = siblings.indexOf(nextRow._dataRowRef);
+                if (idxNext >= 0) { return { targetParent, insertIndex: idxNext }; }
+            }
+            return { targetParent, insertIndex: 0 };
+        };
+
+        if (!this._rowMoveTarget) {
+            const derived = deriveTargetFromPlaceholder();
+            if (derived) {
+                this._rowMoveTarget = { mode: "derived", row: null };
+                this._rowMoveDerivedTargetParent = derived.targetParent;
+                this._rowMoveDerivedInsertIndex = derived.insertIndex;
+            }
+        }
+
         if (this._rowMovePlaceholder) { this._rowMovePlaceholder.remove(); this._rowMovePlaceholder = null; }
 
         const moving = this._rowMoveSourceRow;
-        if (!moving) { this._rowMoveActive = false; return; }
+        if (!moving) { this._applyDragSourceVisual(false); this._rowMoveActive = false; return; }
 
         let targetParent = null;
         let insertIndex = 0;
 
-        if (this._rowMoveTarget && this._rowMoveTarget.mode === "child" && this._treeMoveEnabled) {
+        if (this._rowMoveTarget && this._rowMoveTarget.mode === "child" && this._treeMoveEnabled && this._treeEnabled) {
             const targetRow = this._rowMoveTarget.row;
-            if (targetRow === moving) { this._rowMoveActive = false; return; }
+            if (targetRow === moving) { this._applyDragSourceVisual(false); this._rowMoveActive = false; return; }
             targetParent = targetRow;
             if (!Array.isArray(targetParent.children)) { targetParent.children = []; }
             insertIndex = targetParent.children.length;
             targetParent.expanded = true;
+            this._isTree = true;
         } else if (this._rowMoveTarget && (this._rowMoveTarget.mode === "before" || this._rowMoveTarget.mode === "after")) {
             const targetRow = this._rowMoveTarget.row;
             const siblings = targetRow.parent ? targetRow.parent.children : this._rows;
             const baseIndex = siblings.indexOf(targetRow);
             insertIndex = this._rowMoveTarget.mode === "before" ? baseIndex : baseIndex + 1;
             targetParent = targetRow.parent || null;
+        } else if (this._rowMoveTarget && this._rowMoveTarget.mode === "derived") {
+            targetParent = this._rowMoveDerivedTargetParent || null;
+            insertIndex = this._rowMoveDerivedInsertIndex || 0;
         } else {
             targetParent = null;
             insertIndex = 0;
         }
 
-        if (targetParent && this._isDescendant(targetParent, moving)) { this._rowMoveActive = false; return; }
+        if (targetParent && this._isDescendant(targetParent, moving)) { this._applyDragSourceVisual(false); this._rowMoveActive = false; return; }
 
         const oldParent = this._rowMoveSourceParent;
         const oldSiblings = oldParent ? oldParent.children : this._rows;
         const oldIndex = oldSiblings.indexOf(moving);
-        if (oldIndex === -1) { this._rowMoveActive = false; return; }
+        if (oldIndex === -1) { this._applyDragSourceVisual(false); this._rowMoveActive = false; return; }
 
         const [removed] = oldSiblings.splice(oldIndex, 1);
-        if (!removed) { this._rowMoveActive = false; return; }
+        if (!removed) { this._applyDragSourceVisual(false); this._rowMoveActive = false; return; }
 
         const newSiblings = targetParent ? targetParent.children : this._rows;
         if (oldSiblings === newSiblings && oldIndex < insertIndex) { insertIndex--; }
@@ -719,7 +825,10 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         this._rowMoveSourceRow = null;
         this._rowMoveSourceParent = null;
         this._rowMoveTarget = null;
+        this._rowMoveDerivedTargetParent = null;
+        this._rowMoveDerivedInsertIndex = null;
 
+        this._applyDragSourceVisual(false);
         this._schedulePersist();
         this.render();
 
@@ -732,11 +841,19 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         });
     }
 
-    /**
-     * Helpers.
-     */
+	/**
+	 * Returns all columns that are currently marked as visible.
+	 *
+	 * @returns {Array<Object>} The list of visible columns.
+	 */
     _getVisibleColumns() { return this._columns.filter((c) => c.visible); }
 
+	/**
+	 * Applies a text-based filter to the column selection menu.
+	 * Hides menu items whose ID or label does not match the filter term.
+	 *
+	 * @param {HTMLElement} menuEl - The menu element containing column items.
+	 */
     _applyColumnFilter(menuEl) {
         const term = (this._columnFilterTerm || "").toLowerCase();
         const items = menuEl.querySelectorAll(".wx-col-item");
@@ -748,12 +865,20 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         });
     }
 
+	/**
+	 * Schedules a debounced persistence update. Ensures that state is not
+	 * written to the cookie too frequently.
+	 */
     _schedulePersist() {
         if (!this._persistKey) { return; }
         if (this._saveDebounceTimer) { clearTimeout(this._saveDebounceTimer); }
         this._saveDebounceTimer = setTimeout(() => { this._persistState(); }, 300);
     }
 
+	/**
+	 * Persists the current table state (column order, visibility, widths,
+	 * sort configuration, and collapsed tree nodes) into a cookie.
+	 */
     _persistState() {
         const collapsed = [];
         const stack = [...this._rows];
@@ -777,6 +902,10 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         document.cookie = `${this._persistKey}=${encodeURIComponent(JSON.stringify(state))}; path=/; SameSite=Lax; max-age=31536000`;
     }
 
+	/**
+	 * Loads a previously persisted table state from a cookie and applies it
+	 * to the current column configuration, sort state, and tree expansion.
+	 */
     _loadStateFromCookie() {
         if (!this._persistKey) { return; }
         const match = document.cookie.match(new RegExp(`(^| )${this._persistKey}=([^;]+)`));
@@ -836,7 +965,22 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         while (p) { if (p === ancestor) { return true; } p = p.parent; }
         return false;
     }
+
+    /**
+     * Set or reset visual state for drag source row.
+     * @param {boolean} active Whether dragging is active.
+     */
+    _applyDragSourceVisual(active) {
+        if (!this._rowMoveSourceEl) { return; }
+        if (active) {
+            this._rowMoveSourceEl.classList.add("wx-dragging");
+        } else {
+            this._rowMoveSourceEl.classList.remove("wx-dragging");
+            this._rowMoveSourceEl.style.opacity = "";
+            this._rowMoveSourceEl = null;
+        }
+    }
 };
 
-// register
+// Register the class in the controller
 webexpress.webui.Controller.registerClass("wx-webui-table-reorderable", webexpress.webui.TableCtrlReorderable);

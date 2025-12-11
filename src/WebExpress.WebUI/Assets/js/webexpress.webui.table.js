@@ -1,30 +1,23 @@
 /**
  * Table controller providing declarative parsing, sorting, rendering, and optional column resizing.
- * Responsibilities:
- * - parse column, row, footer, and option structures from markup
- * - render colgroup, header, body, and footer using document fragments to minimize reflows
- * - provide column sort interactions and stable sorting behavior
- * - column resizing via header-attached resizer handles
+ * Refactored to use CSS Grid instead of HTML Tables.
+ * Supports advanced width configuration via data attributes.
  *
- * Emitted events:
+ * The following events are triggered:
  * - webexpress.webui.Event.TABLE_SORT_EVENT
  */
 webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
-    // core elements created once and appended to host
-    _table = document.createElement("table");
-    _col = document.createElement("colgroup");
-    _head = document.createElement("thead");
-    _body = document.createElement("tbody");
-    _foot = null; // create on demand only
-
-    // data models mirroring parsed configuration
+    _table = document.createElement("div");
+    _head = document.createElement("div");
+    _body = document.createElement("div");
+    _foot = null;
     _columns = [];
     _rows = [];
     _footer = [];
     _options = [];
 
-    // feature flags controlling behavior
+    // feature flags
     _isTree = false;
     _suppressHeaders = false;
     _highlightChanges = true;
@@ -32,15 +25,12 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     _columnResizeEnabled = true;
     _hasOptions = false;
 
-    // caches for performance and diffing
+    // caches
     _prevRowState = new Map();
     _colIndexCache = new Map();
 
-    // render batching to avoid redundant renders within a microtask
     _renderScheduled = false;
-
-    // interaction state flags
-    _isResizing = false; // inline comment: lock to suppress sort during resize
+    _isResizing = false;
 
     static MIN_COL_WIDTH = 30;
     static NUMERIC_RX = /^-?\d+(?:\.\d+)?$/;
@@ -51,8 +41,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
      */
     constructor(element) {
         super(element);
-        this._initialized = false; // inline comment: ensure first render is treated as initial
-        this._suppressFlashOnce = true; // inline comment: suppress flash for initial render
+        this._initialized = false;
+        this._suppressFlashOnce = true;
         this._setupDom(element);
         this._parseConfig(element);
         this._initEventListeners();
@@ -62,29 +52,31 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Build base DOM structure and apply initial classes from dataset.
-     * Enforces fixed table layout so column widths from colgroup are respected.
+     * Sets ARIA roles for accessibility.
      * @param {HTMLElement} element Host element.
      */
     _setupDom(element) {
-        this._table.className = "wx-table table table-hover table-sm";
+        this._table.className = "wx-table";
+        this._table.setAttribute("role", "table");
+        
         const ds = element.dataset;
         if (ds.color) { this._table.classList.add(ds.color); }
         if (ds.border) { this._table.classList.add(ds.border); }
-        if (ds.striped) { this._table.classList.add(...ds.striped.split(' ')); }
+        if (ds.striped) { this._table.classList.add(...ds.striped.split(" ")); }
 
-        // enforce fixed layout to allow shrinking columns below content width
-        this._table.style.tableLayout = "fixed"; // inline comment: honor colgroup widths for sizing
-        this._table.style.width = "100%"; // inline comment: ensure stable layout width
+        this._head.className = "wx-table-header-group";
+        this._head.setAttribute("role", "rowgroup");
+        
+        this._body.className = "wx-table-body-group";
+        this._body.setAttribute("role", "rowgroup");
 
         const frag = document.createDocumentFragment();
-        frag.append(this._col, this._head, this._body);
-        // inline comment: tfoot is appended only when footer exists
+        frag.append(this._head, this._body);
         this._table.appendChild(frag);
     }
 
     /**
      * Parse declarative configuration from child nodes of the host element.
-     * Cleans host inner content and mounts the constructed table.
      * @param {HTMLElement} element Host element.
      */
     _parseConfig(element) {
@@ -95,7 +87,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         this._rows = this._parseRows(element.querySelectorAll(":scope > .wx-table-row"));
         this._footer = this._parseFooter(element.querySelector(":scope > .wx-table-footer"));
 
-        this._recalculateHasOptions(); // Check initially
+        this._recalculateHasOptions();
 
         element.textContent = "";
         element.appendChild(this._table);
@@ -105,17 +97,16 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Register event listeners for header interactions (sorting).
-     * Suppresses sort when a resize gesture just occurred.
      */
     _initEventListeners() {
         this._head.addEventListener("click", (e) => {
-            const th = e.target.closest("th");
-            if (!th) { return; }
+            const headerCell = e.target.closest(".wx-col-header");
+            if (!headerCell) { return; }
             if (this._isResizing) { return; }
-            const colId = th.dataset.columnId;
+            const colId = headerCell.dataset.columnId;
             if (!colId || !this._colIndexCache.has(colId)) { return; }
             const col = this._columns[this._colIndexCache.get(colId)];
-            if (col) { this._handleSortClick(th, col); }
+            if (col) { this._handleSortClick(headerCell, col); }
         }, { passive: true });
     }
 
@@ -126,52 +117,47 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     _beforeInitParse(element) { }
 
     /**
-     * Enable change flash highlighting for modified and newly added rows.
+     * Enable change flash highlighting.
      */
     enableChangeFlash() { this._highlightChanges = true; }
 
     /**
-     * Disable change flash highlighting for modified and newly added rows.
+     * Disable change flash highlighting.
      */
     disableChangeFlash() { this._highlightChanges = false; }
 
     /**
-     * Enable column resizing behavior via header resizer handles.
+     * Enable column resizing behavior.
      */
     enableColumnResize() { this._columnResizeEnabled = true; }
 
     /**
-     * Disable column resizing behavior via header resizer handles.
+     * Disable column resizing behavior.
      */
     disableColumnResize() { this._columnResizeEnabled = false; }
 
     /**
-     * Recalculates the _hasOptions flag.
-     * Returns true if global options exist OR if ANY row has specific options.
+     * Recalculates the _hasOptions flag based on rows and global options.
      */
     _recalculateHasOptions() {
         if (this._options && this._options.length > 0) {
             this._hasOptions = true;
             return;
         }
-
-        // Deep search for row options
         const hasRowOptions = (rows) => {
             for (const r of rows) {
-                if (r.options && r.options.length > 0) return true;
-                if (r.children && hasRowOptions(r.children)) return true;
+                if (r.options && r.options.length > 0) { return true; }
+                if (r.children && hasRowOptions(r.children)) { return true; }
             }
             return false;
         };
-
         this._hasOptions = hasRowOptions(this._rows);
     }
 
     /**
      * Replace the current column definitions.
-     * When preserveExisting is true, remaps existing row cells to the new column ids.
-     * @param {Array<Object>} columns Column descriptors parsed or provided programmatically.
-     * @param {boolean} [preserveExisting=true] Preserve existing row cell mapping where possible.
+     * @param {Array<Object>} columns Column descriptors.
+     * @param {boolean} [preserveExisting=true] Preserve row mappings.
      */
     setColumns(columns, preserveExisting = true) {
         if (!Array.isArray(columns) || !columns.length) { return; }
@@ -188,6 +174,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             image: c.image || null,
             color: c.color || null,
             width: c.width || null,
+            minWidth: c.minWidth || null,
+            resizable: typeof c.resizable === "boolean" ? c.resizable : true,
             sort: null,
             visible: typeof c.visible === "boolean" ? c.visible : true,
             rendererType: c.rendererType || null,
@@ -221,12 +209,11 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Insert a new row at the given position, optionally under a parent row for tree structures.
-     * Automatically pads cells to match the current column count.
-     * @param {Object|Array} rowData Row data object or array of cell values.
-     * @param {string|null} [parentId=null] Parent row id for hierarchical insertion.
-     * @param {number|null} [index=null] Target index among siblings; appends when out of bounds.
-     * @returns {Object|null} The inserted row object or null if parent not found.
+     * Insert a new row at the given position.
+     * @param {Object|Array} rowData Row data object.
+     * @param {string|null} [parentId=null] Parent row id.
+     * @param {number|null} [index=null] Target index.
+     * @returns {Object|null} The inserted row.
      */
     insertRow(rowData, parentId = null, index = null) {
         const buildRow = (data) => {
@@ -265,7 +252,6 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         if (index == null || index < 0 || index > siblings.length) { index = siblings.length; }
         siblings.splice(index, 0, row);
 
-        // Check if the new row introduced options, potentially enabling the column
         if (!this._hasOptions && row.options && row.options.length > 0) {
             this._hasOptions = true;
         }
@@ -275,16 +261,14 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Delete a row by its id. Performs a deep search across the hierarchy.
-     * Triggers re-render upon successful removal.
+     * Delete a row by its id.
      * @param {string} rowId Target row id.
-     * @returns {boolean} True when a row was removed, false otherwise.
+     * @returns {boolean} True when a row was removed.
      */
     deleteRow(rowId) {
         if (!rowId) { return false; }
         const removed = this._removeRowRecursive(rowId, this._rows);
         if (removed) { 
-            // If the removed row might have been the last one with options, recalculate
             this._recalculateHasOptions();
             this.render(); 
         }
@@ -292,8 +276,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Render the table. Uses microtask batching to coalesce multiple rapid updates.
-     * Performs header, body, and footer updates in a single transaction and refreshes caches.
+     * Render the table using microtask batching.
      */
     render() {
         if (this._renderScheduled) { return; }
@@ -306,7 +289,6 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             const changedIds = new Set();
             const newIds = new Set();
 
-            // inline comment: suppress flash when not initialized yet or snapshot is empty or explicitly suppressed
             const shouldHighlight = this._initialized && this._highlightChanges && !this._suppressFlashOnce && this._prevRowState.size > 0;
             if (shouldHighlight) {
                 for (const entry of currentStates) {
@@ -316,16 +298,16 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 }
             }
 
-            this._rebuildColumnIndexCache();
+            this._isTree = this._detectTree(this._rows);
 
-            // single DOM update transaction with minimal reflows
+            this._rebuildColumnIndexCache();
+            this._syncColumnWidths(); 
+
             this._renderColumns();
             this._renderRows(changedIds, newIds);
             this._renderFooter();
-            this._syncColumnWidths();
-            this._attachColumnResizers(); // inline comment: ensure resizers exist after headers
+            this._attachColumnResizers();
 
-            // inline comment: clear the one-shot suppression after render
             this._suppressFlashOnce = false;
             this._updateSnapshot(currentStates);
             this._initialized = true;
@@ -333,24 +315,26 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Render column headers and colgroup based on visibility and configured width.
-     * Applies sort indicators to matching header cells.
+     * Render header row structure.
      */
     _renderColumns() {
         const headFragment = document.createDocumentFragment();
-        const colFragment = document.createDocumentFragment();
-        const headRow = document.createElement("tr");
+        
+        const headRow = document.createElement("div");
+        headRow.className = "wx-grid-row wx-table-header";
+        headRow.setAttribute("role", "row");
+        
         headFragment.appendChild(headRow);
 
         if (!this._suppressHeaders) {
             for (const col of this._columns) {
                 if (!col.visible) { continue; }
 
-                const th = document.createElement("th");
+                const th = document.createElement("div");
+                th.className = "wx-grid-header-cell wx-col-header";
+                th.setAttribute("role", "columnheader");
                 th.dataset.columnId = col.id;
-                th.setAttribute("scope", "col");
-                th.classList.add("wx-col-header");
-                th.style.position = "relative"; // inline comment: allow absolute positioned resizer
+                
                 this._addClasses(th, col.color);
 
                 if (col.sort) { th.classList.add(col.sort === "asc" ? "wx-sort-asc" : "wx-sort-desc"); }
@@ -363,46 +347,32 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 th.appendChild(inner);
 
                 headRow.appendChild(th);
-
-                const cg = document.createElement("col");
-                cg.dataset.columnId = col.id;
-                if (col.width) { cg.style.width = `${col.width}px`; }
-                colFragment.appendChild(cg);
             }
             
-            // right actions cell with custom toggle (opens dynamic modal panels)
             if (this._hasOptions) {
-                this._renderActionsHeader(headRow, colFragment);
+                this._renderActionsHeader(headRow);
             }
         }
 
         this._head.textContent = "";
         this._head.appendChild(headFragment);
-
-        this._col.textContent = "";
-        this._col.appendChild(colFragment);
     }
     
     /**
-     * Render actions header: provides a button to open the dynamic columns modal.
-     * @param {HTMLElement} headRow Header row element to append actions th.
-     * @param {DocumentFragment} colFrag Colgroup fragment to append actions col.
+     * Render actions header cell.
+     * @param {HTMLElement} headRow Header row container.
      */
-    _renderActionsHeader(headRow, colFrag) {
-        const th = document.createElement("th");
-        th.className = "wx-table-actions";
-
+    _renderActionsHeader(headRow) {
+        const th = document.createElement("div");
+        th.className = "wx-grid-header-cell wx-table-actions";
+        th.setAttribute("role", "columnheader");
         headRow.appendChild(th);
-
-        const cg = document.createElement("col");
-        cg.style.width = "1.5rem";
-        colFrag.appendChild(cg);
     }
 
     /**
-     * Render all rows depth-first and apply change/new flash classes based on diffing.
-     * @param {Set<string>} changedIds Keys for rows with modified signatures.
-     * @param {Set<string>} newIds Keys for newly seen rows.
+     * Render body rows.
+     * @param {Set<string>} changedIds Keys of modified rows.
+     * @param {Set<string>} newIds Keys of new rows.
      */
     _renderRows(changedIds, newIds) {
         const fragment = document.createDocumentFragment();
@@ -418,17 +388,18 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Create and append a single row element including its cells and optional tree toggle control.
-     * Wraps first visible cell content with link/icon when row URI or icon is set.
-     * Also ensures cells can be narrower than content without layout overflow.
+     * Create and append a single row div.
      * @param {Object} row Row data object.
-     * @param {number} depth Current hierarchy depth used for indenting.
-     * @param {DocumentFragment} fragment Target fragment to append the row.
+     * @param {number} depth Hierarchy depth.
+     * @param {DocumentFragment} fragment Target fragment.
      * @param {Set<string>} changedIds Keys with changed signatures.
      * @param {Set<string>} newIds Keys for new rows.
      */
     _addRow(row, depth, fragment, changedIds, newIds) {
-        const tr = document.createElement("tr");
+        const tr = document.createElement("div");
+        tr.className = "wx-grid-row";
+        tr.setAttribute("role", "row");
+        
         this._addClasses(tr, row.color);
         this._addClasses(tr, row.class);
         if (row.style) { tr.style.cssText = row.style; }
@@ -450,9 +421,9 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             const colDef = this._columns[i];
             if (!colDef.visible) { continue; }
 
-            const td = document.createElement("td");
-            // allow shrinking without visual overflow
-            td.style.overflow = "hidden"; // inline comment: clip overflowing content when column is narrow
+            const td = document.createElement("div");
+            td.className = "wx-grid-cell";
+            td.setAttribute("role", "gridcell");
 
             const cell = row.cells[i];
 
@@ -469,7 +440,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                     if (row.uri) {
                         wrap.href = row.uri;
                         if (row.target) { wrap.target = row.target; }
-                        wrap.rel = "noopener noreferrer"; // inline comment: improve security of external links
+                        wrap.rel = "noopener noreferrer";
                     }
                     if (row.icon) { const icon = document.createElement("i"); icon.className = row.icon; wrap.appendChild(icon); }
                     if (content instanceof Node) { wrap.appendChild(content); } else { wrap.appendChild(document.createTextNode(String(content ?? ""))); }
@@ -485,12 +456,11 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             firstVisible = false;
         }
         
-        // right options cell (only if needed)
         if (this._hasOptions) {
-            const tdOpt = document.createElement("td");
-            tdOpt.className = "wx-table-actions";
+            const tdOpt = document.createElement("div");
+            tdOpt.className = "wx-grid-cell wx-table-actions";
+            tdOpt.setAttribute("role", "gridcell");
             
-            // Check if this specific row has options OR global options exist
             const effectiveOptions = (row.options && row.options.length) ? row.options : this._options;
             
             if (effectiveOptions && effectiveOptions.length > 0) {
@@ -504,19 +474,17 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             tr.appendChild(tdOpt);
         }
 
-        // inline comment: no actions/options cell in base controller
         if (this._isTree) { this._injectTreeToggle(tr, row, depth); }
         fragment.appendChild(tr);
     }
 
     /**
-     * Render the content for a single cell using a renderer template when available.
-     * Falls back to plain text when no renderer is defined or an error occurs.
-     * @param {Object} row Row data object.
+     * Render cell content using renderer templates if available.
+     * @param {Object} row Row data.
      * @param {Object} colDef Column definition.
-     * @param {Object} cell Cell definition.
-     * @param {boolean} isFirstVisible Whether this is the first visible column in the row.
-     * @returns {string|HTMLElement} Rendered content node or text.
+     * @param {Object} cell Cell data.
+     * @param {boolean} isFirstVisible Is first visible column.
+     * @returns {string|Node} Rendered content.
      */
     _renderCell(row, colDef, cell, isFirstVisible) {
         const type = cell?.type || colDef.rendererType;
@@ -527,7 +495,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 const opts = Object.assign({}, tmpl.options, colDef.rendererOptions || {});
                 return tmpl.fn(cell?.text, cell, row, opts);
             } catch (e) {
-                console.error("renderer error", e); // inline comment: keep errors simple
+                console.error("renderer error", e);
                 return "Error";
             }
         }
@@ -535,8 +503,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Render footer row according to configured footer cells and visible columns.
-     * When no footer is configured, removes any existing tfoot from the DOM.
+     * Render footer row.
      */
     _renderFooter() {
         if (!this._footer.length) {
@@ -546,18 +513,23 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         }
 
         if (!this._foot) {
-            this._foot = document.createElement("tfoot");
+            this._foot = document.createElement("div");
+            this._foot.className = "wx-table-footer-group";
+            this._foot.setAttribute("role", "rowgroup");
             this._table.appendChild(this._foot);
         }
 
         this._foot.textContent = "";
-        const tr = document.createElement("tr");
+        const tr = document.createElement("div");
+        tr.className = "wx-grid-row wx-table-footer";
+        tr.setAttribute("role", "row");
 
         for (let i = 0; i < this._columns.length; i++) {
             const col = this._columns[i];
             if (!col.visible) { continue; }
-            const td = document.createElement("td");
-            td.style.overflow = "hidden"; // inline comment: clip overflow like body cells
+            const td = document.createElement("div");
+            td.className = "wx-grid-cell";
+            td.setAttribute("role", "gridcell");
             if (this._footer[i] != null) { td.innerHTML = this._footer[i]; }
             tr.appendChild(td);
         }
@@ -566,13 +538,11 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Handle sort interaction for a header cell and toggle direction.
-     * Clears sort state on other columns and triggers reordering or full re-render.
-     * Dispatches a sorting event to inform external listeners.
-     * @param {HTMLElement} th Target header cell.
+     * Handle sort interaction.
+     * @param {HTMLElement} headerCell Target header div.
      * @param {Object} col Column descriptor.
      */
-    _handleSortClick(th, col) {
+    _handleSortClick(headerCell, col) {
         const next = col.sort === "asc" ? "desc" : (col.sort === "desc" ? null : "asc");
         for (const c of this._columns) { c.sort = null; }
         col.sort = next;
@@ -581,9 +551,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Order top-level rows by a column definition with stable sort semantics.
-     * Numeric columns are detected via a regex; string comparison uses localeCompare with numeric option.
-     * @param {Object} column Column descriptor containing index and sort direction.
+     * Sort rows by a specific column.
+     * @param {Object} column Sorting column descriptor.
      */
     orderRows(column) {
         const idx = column.index;
@@ -594,7 +563,6 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         });
         const dir = column.sort === "asc" ? 1 : -1;
 
-        // stable sort by decorating with original indices
         const decorated = this._rows.map((row, i) => ({ row, i }));
         decorated.sort((a, b) => {
             const va = a.row.cells[idx]?.text || "";
@@ -610,10 +578,10 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Parse column definitions from a .wx-table-columns container.
-     * Supports inline data-type and template[data-type] renderer declarations with dataset options.
-     * @param {HTMLElement|null} div Columns container element.
-     * @returns {Array<Object>} Parsed column descriptors.
+     * Parse column definitions with extended width properties.
+     * Supports data-width, data-min-width, data-resizable.
+     * @param {HTMLElement} div Columns container element.
+     * @returns {Array<Object>} Parsed columns.
      */
     _parseColumns(div) {
         if (!div) { return []; }
@@ -629,6 +597,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 const src = (typeEl.tagName === "TEMPLATE") ? typeEl.content.children : typeEl.children;
                 if (src.length) { rendererOptions.children = Array.from(src); }
             }
+            
+            const resizable = el.dataset.resizable !== "false";
 
             return {
                 id: el.id || `col_${idx}`,
@@ -638,7 +608,9 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 icon: el.dataset.icon || null,
                 image: el.dataset.image || null,
                 color: el.dataset.color || null,
-                width: el.getAttribute("width") ? parseInt(el.getAttribute("width"), 10) : null,
+                width: el.dataset.width || (el.getAttribute("width") ? parseInt(el.getAttribute("width"), 10) : null),
+                minWidth: el.dataset.minWidth || null,
+                resizable: resizable,
                 sort: el.dataset.sort || null,
                 visible: el.dataset.visible !== "false",
                 rendererType,
@@ -648,11 +620,10 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Parse rows from a collection of .wx-table-row elements, supporting nested hierarchy.
-     * Options and footer elements are ignored within row parsing.
-     * @param {HTMLCollection|Array<HTMLElement>} divs Collection of row container elements.
-     * @param {Object|null} [parent=null] Parent row object for nested rows.
-     * @returns {Array<Object>} Parsed row descriptors including children.
+     * Parse rows from config.
+     * @param {NodeList} divs Row elements.
+     * @param {Object} [parent=null] Parent row.
+     * @returns {Array<Object>} Parsed rows.
      */
     _parseRows(divs, parent = null) {
         const rows = [];
@@ -705,10 +676,9 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Parse dropdown options from a .wx-table-options container.
-     * Supports headers, dividers, and action entries with optional link/target and disabled state.
-     * @param {HTMLElement|null} div Options container element.
-     * @returns {Array<Object>} Parsed option descriptors.
+     * Parse dropdown options.
+     * @param {HTMLElement} div Options container.
+     * @returns {Array<Object>} Parsed options.
      */
     _parseOptions(div) {
         if (!div) { return []; }
@@ -734,23 +704,24 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Parse footer cells from a .wx-table-footer container.
-     * Returns the raw HTML content for each cell to allow rich markup.
-     * @param {HTMLElement|null} div Footer container element.
-     * @returns {Array<string>} Array of innerHTML snippets, one per cell.
+     * Parse footer configuration.
+     * @param {HTMLElement} div Footer container.
+     * @returns {Array<string>} Footer cell contents.
      */
     _parseFooter(div) { return div ? Array.from(div.children).map((c) => c.innerHTML.trim()) : []; }
 
     /**
-     * Inject a tree toggle control into the first cell to manage row expansion.
-     * Applies indentation proportional to depth and preserves existing cell content.
-     * @param {HTMLTableRowElement} tr Target row element.
-     * @param {Object} row Row data object.
-     * @param {number} depth Current hierarchy depth.
+     * Inject tree toggle control into the first data column (skips drag-handle cells).
+     * @param {HTMLElement} tr Row element.
+     * @param {Object} row Row data.
+     * @param {number} depth Hierarchy depth.
      */
     _injectTreeToggle(tr, row, depth) {
-        const firstContentIndex = 0;
-        const firstCell = tr.cells[firstContentIndex];
+        const firstCell = Array.from(tr.children).find((cell) => {
+            if (!cell.classList.contains("wx-grid-cell")) { return false; }
+            if (cell.classList.contains("wx-table-drag-handle")) { return false; }
+            return true;
+        });
         if (!firstCell) { return; }
 
         const wrapper = document.createElement("span");
@@ -780,17 +751,19 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             wrapper.appendChild(dummy);
         }
 
-        while (firstCell.firstChild) { wrapper.appendChild(firstCell.firstChild); }
+        while (firstCell.firstChild) { 
+			wrapper.appendChild(firstCell.firstChild); 
+		}
         firstCell.appendChild(wrapper);
     }
 
-    /**
-     * Helper to create a generic element with optional class and text content.
-     * @param {string} tag Tag name to create.
-     * @param {string} [cls] Optional className.
-     * @param {string} [text] Optional text content.
-     * @returns {HTMLElement} Created element.
-     */
+	/**
+	 * Creates a DOM element with optional class name and text content.
+	 * @param {string} tag - The HTML tag to create.
+	 * @param {string} [cls] - Optional CSS class name.
+	 * @param {string} [text] - Optional text content.
+	 * @returns {HTMLElement} The created element.
+	 */
     _createEl(tag, cls, text) {
         const el = document.createElement(tag);
         if (cls) { el.className = cls; }
@@ -798,55 +771,111 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         return el;
     }
 
-    /**
-     * Helper to create an icon element using a class name.
-     * @param {string} cls Icon class name.
-     * @returns {HTMLElement} Created <i> element.
+	/**
+	 * Creates an <i> element used for icon rendering.
+	 * @param {string} cls - CSS class name for the icon.
+	 * @returns {HTMLElement} The created icon element.
+	 */
+    _createIcon(cls) { 
+		const i = document.createElement("i"); 
+		i.className = cls; 
+		return i; 
+	}
+	
+	/**
+	 * Creates an <img> element with the default icon class.
+     * @param {string} src - Image source URL.
+     * @returns {HTMLImageElement} The created image element.
      */
-    _createIcon(cls) { const i = document.createElement("i"); i.className = cls; return i; }
+    _createImage(src) { 
+		const img = document.createElement("img"); 
+		img.className = "wx-icon"; 
+		img.src = src; 
+		img.alt = ""; 
+		return img; 
+	}
+	
+	/**
+	 * Adds one or more CSS classes to an element.
+	 * @param {HTMLElement} el - The target element.
+	 * @param {string} cls - Space-separated list of class names.
+	 */
+    _addClasses(el, cls) { 
+		if (cls) { 
+			el.classList.add(...cls.split(" ").filter((c) => c)); 
+		} 
+	}
 
-    /**
-     * Helper to create an image element with standard table icon styling.
-     * @param {string} src Image source URL.
-     * @returns {HTMLImageElement} Created <img> element.
-     */
-    _createImage(src) { const img = document.createElement("img"); img.className = "wx-icon"; img.src = src; img.alt = ""; return img; }
-
-    /**
-     * Helper to add classes from a whitespace-separated list to an element.
-     * Ignores empty entries for robustness.
-     * @param {HTMLElement} el Target element.
-     * @param {string} cls Whitespace-separated class list.
-     */
-    _addClasses(el, cls) { if (cls) { el.classList.add(...cls.split(" ").filter((c) => c)); } }
-
-    /**
-     * Rebuild the column id-to-index cache for fast lookups during interactions.
-     * Should be called after any change to _columns.
-     */
+	/**
+	 * Rebuilds the internal column index cache for fast lookup.
+	 * Maps column IDs to their current index positions.
+	 */
     _rebuildColumnIndexCache() {
         this._colIndexCache.clear();
-        for (let i = 0; i < this._columns.length; i++) { this._colIndexCache.set(this._columns[i].id, i); }
+        for (let i = 0; i < this._columns.length; i++) { 
+			this._colIndexCache.set(this._columns[i].id, i); 
+		}
     }
 
     /**
-     * Apply configured column widths to the colgroup elements for layout control.
-     * Only applies when both column is visible and a width is defined.
+     * Constructs the CSS Grid Template string and applies it to the table variable.
+     * Supports pixels, percentages, minmax, and auto/fr.
+     * Logic enforced: Last visible column is never strictly sized but flexible.
      */
     _syncColumnWidths() {
+        const parts = [];
+        
+        const visibleCols = this._columns.filter((c) => c.visible);
+        const lastVisibleId = visibleCols.length > 0 ? visibleCols[visibleCols.length - 1].id : null;
+
         for (const c of this._columns) {
-            if (c.visible && c.width) {
-                const el = this._col.querySelector(`col[data-column-id='${c.id}']`);
-                if (el) { el.style.width = `${c.width}px`; }
+            if (!c.visible) { continue; }
+            
+            if (c.id === lastVisibleId) {
+                const min = c.minWidth || `${webexpress.webui.TableCtrl.MIN_COL_WIDTH}px`;
+                parts.push(`minmax(${min}, 1fr)`);
+                continue;
             }
+
+            let val = "1fr";
+
+            if (c.width !== null && c.width !== "") {
+                const w = String(c.width);
+                if (w === "auto") {
+                    val = "auto";
+                } else if (w.endsWith("%") || w.endsWith("fr") || w.endsWith("rem") || w.endsWith("px")) {
+                    val = w;
+                } else if (!isNaN(Number(w))) {
+                    val = `${w}px`;
+                } else {
+                    val = w;
+                }
+            } 
+            
+            if (c.minWidth) {
+                val = `minmax(${c.minWidth}, ${val})`;
+            } else if (val === "1fr" || val === "auto") {
+                val = `minmax(${webexpress.webui.TableCtrl.MIN_COL_WIDTH}px, ${val})`;
+            }
+
+            parts.push(val);
         }
+        
+        if (this._hasOptions) {
+            parts.push("1.5rem");
+        }
+
+        const template = parts.length > 0 ? parts.join(" ") : "auto";
+        this._table.style.setProperty("--wx-grid-template", template);
     }
 
-    /**
-     * Collect a list of row signatures used for change detection.
-     * Each signature is a concatenation of cell text values for simplicity and speed.
-     * @returns {Array<{key: string|number, signature: string}>} Row keys with current signatures.
-     */
+	/**
+	 * Collects the current state of all rows, including hierarchical children.
+	 * Each entry contains a unique row key and a signature representing the
+	 * concatenated text content of all cells. Used for change detection.
+	 *
+	 * @returns {Array<{ key: string, signature: string }>} A flat list of row states.
+	 */
     _collectCurrentRowStates() {
         const list = [];
         const stack = [...this._rows];
@@ -859,17 +888,22 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         return list;
     }
 
-    /**
-     * Return a stable key for a row, preferring explicit id over a generated uid.
-     * @param {Object} row Row data object.
-     * @returns {string|number} Stable identifier for the row.
-     */
-    _getRowKey(row) { return row.id || (row._uid || (row._uid = `r_${Math.random().toString(36).slice(2)}`)); }
+	/**
+	 * Returns a stable key for a row. Uses the row's `id` if available;
+	 * otherwise generates and stores a unique internal identifier.
+	 *
+	 * @param {Object} row - The row object.
+	 * @returns {string} The resolved row key.
+	 */
+    _getRowKey(row) { 
+		return row.id || (row._uid || (row._uid = `r_${Math.random().toString(36).slice(2)}`)); 
+	}
 
-    /**
-     * Update the snapshot of row signatures used for change detection in subsequent renders.
-     * @param {Array<{key: string|number, signature: string}>} states Row signatures to persist.
-     */
+	/**
+	 * Updates the internal snapshot of row states used for change detection.
+	 *
+	 * @param {Array<{ key: string, signature: string }>} states - Current row states.
+	 */
     _updateSnapshot(states) { 
         this._prevRowState.clear(); 
         for (const s of states) { 
@@ -877,18 +911,12 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         } 
     }
 
-    /**
-     * Dispatch a custom event with bubbling to notify external consumers.
-     * @param {string} evtName Event type name.
-     * @param {Object} detail Event detail payload.
-     */
-    _dispatch(evtName, detail) { this._element.dispatchEvent(new CustomEvent(evtName, { bubbles: true, detail })); }
-
-    /**
-     * Find a row and its immediate parent by id using depth-first search.
-     * @param {string|number} id Row identifier.
-     * @returns {{row:Object,parent:Object|null}|null} Row and parent pair or null when not found.
-     */
+	/**
+	 * Finds a row by ID and returns both the row and its parent.
+	 *
+	 * @param {string} id - The row ID to search for.
+	 * @returns {{ row: Object, parent: Object|null } | null} The match or null.
+	 */
     _findRowAndParent(id) {
         let found = null;
         const walk = (rows, parent) => {
@@ -902,12 +930,13 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         return found;
     }
 
-    /**
-     * Remove a row recursively by id from a given row list.
-     * @param {string|number} id Row identifier to remove.
-     * @param {Array<Object>} rows List to search and mutate.
-     * @returns {boolean} True when removed, false otherwise.
-     */
+	/**
+	 * Removes a row with the given ID from a hierarchical row structure.
+	 *
+	 * @param {string} id - The ID of the row to remove.
+	 * @param {Array} rows - The row array to search within.
+	 * @returns {boolean} True if a row was removed; otherwise false.
+	 */
     _removeRowRecursive(id, rows) {
         if (!Array.isArray(rows)) { return false; }
         for (let i = 0; i < rows.length; i++) {
@@ -918,85 +947,78 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         return false;
     }
 
-    /**
-     * Traverse rows depth-first and invoke a callback for each row encountered.
-     * @param {Array<Object>} rows Root row list to traverse.
-     * @param {Function} fn Callback invoked with each row object.
-     */
+	/**
+	 * Traverses all rows (including nested children) and applies a callback.
+	 *
+	 * @param {Array} rows - The row collection to traverse.
+	 * @param {Function} fn - Callback invoked for each row.
+	 */
     _traverseRows(rows, fn) {
         if (!Array.isArray(rows)) { return; }
         for (const r of rows) { fn(r); if (r.children) { this._traverseRows(r.children, fn); } }
     }
 
     /**
-     * Attach column resizer handles to header cells when resizing is enabled.
-     * Adds double-click autosize behavior on the handle.
-     * Handles are positioned according to document direction (LTR/RTL).
-     * Events are bound for mouse and touch to initiate resize gesture.
-     * Sort suppression is ensured by stopping event propagation and setting _isResizing.
+     * Attach column resizer handles to header cells.
+     * Respects the 'resizable' flag of each column.
+     * Skips the last visible column.
      */
     _attachColumnResizers() {
         if (!this._columnResizeEnabled) { return; }
-        const headers = this._head.querySelectorAll("th.wx-col-header");
-        const isRtl = getComputedStyle(this._table).direction === "rtl";
+        const headers = this._head.querySelectorAll(".wx-col-header");
+        
+        const visibleCols = this._columns.filter((c) => c.visible);
+        const lastVisibleId = visibleCols.length > 0 ? visibleCols[visibleCols.length - 1].id : null;
 
         headers.forEach((th) => {
+            const colId = th.dataset.columnId;
+            if (!colId || !this._colIndexCache.has(colId)) { return; }
+            
+            if (colId === lastVisibleId) { return; }
+
+            const index = this._colIndexCache.get(colId);
+            const column = this._columns[index];
+
+            if (column && column.resizable === false) { return; }
+
             let handle = th.querySelector(":scope > .wx-col-resizer");
             if (!handle) {
                 handle = document.createElement("span");
                 handle.className = "wx-col-resizer";
-                handle.style.position = "absolute";
-                handle.style.top = "0";
-                handle.style[isRtl ? "left" : "right"] = "0";
-                handle.style.width = "6px";
-                handle.style.cursor = isRtl ? "w-resize" : "e-resize";
-                handle.style.userSelect = "none";
-                handle.style.height = "100%";
-                handle.style.transform = "translateX(" + (isRtl ? "-50%" : "50%") + ")";
-                handle.style.zIndex = "2";
                 th.appendChild(handle);
 
-                // pointer events on handle only
                 handle.addEventListener("mousedown", (e) => {
-                    e.stopPropagation(); // inline comment: prevent header click from firing
+                    e.stopPropagation();
                     this._beginColumnResize(e, th);
                 });
                 handle.addEventListener("touchstart", (e) => {
-                    e.stopPropagation(); // inline comment: prevent header click from firing
+                    e.stopPropagation();
                     this._beginColumnResize(e, th);
                 }, { passive: true });
 
-                // prevent synthetic click after drag on some browsers
                 handle.addEventListener("click", (e) => {
-                    e.stopPropagation(); // inline comment: block click bubbling to header
-                    e.preventDefault(); // inline comment: neutralize default click behavior
+                    e.stopPropagation();
+                    e.preventDefault();
                 });
 
-                // autosize on double click
                 handle.addEventListener("dblclick", (e) => {
-                    e.stopPropagation(); // inline comment: do not trigger header click
-                    e.preventDefault(); // inline comment: avoid selection artifacts
-                    const colId = th.dataset.columnId;
-                    if (!colId || !this._colIndexCache.has(colId)) { return; }
-                    const index = this._colIndexCache.get(colId);
-                    this._autoSizeColumn(index); // inline comment: compute and apply best-fit width
+                    e.stopPropagation();
+                    e.preventDefault();
+                    this._autoSizeColumn(index);
                 });
             }
         });
     }
 
     /**
-     * Compute best-fit width for a column based on header and visible body cells.
-     * Uses header inner width and each cell's scrollWidth/bounding box, adds padding and borders.
-     * Respects MIN_COL_WIDTH, adds a small buffer, updates colgroup and model, and schedules persistence.
-     * @param {number} index Column index in _columns (not the DOM index).
+     * Autosize a specific column.
+     * @param {number} index Column index.
      */
     _autoSizeColumn(index) {
         const column = this._columns[index];
-        if (!column || column.visible === false) { return; }
+        if (!column || column.visible === false || column.resizable === false) { return; }
 
-        // find the header th and its dom index among visible headers
-        const headers = this._head.querySelectorAll("th.wx-col-header");
+        const headers = this._head.querySelectorAll(".wx-col-header");
         let domIndex = -1;
         let headerTh = null;
         for (let i = 0; i < headers.length; i++) {
@@ -1009,7 +1031,6 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         }
         if (domIndex < 0 || !headerTh) { return; }
 
-        // measure header content width excluding resizer handle
         let maxWidth = 0;
         const inner = headerTh.querySelector(".wx-col-inner") || headerTh;
         let headerBase = Math.max(inner.scrollWidth, Math.ceil(inner.getBoundingClientRect().width));
@@ -1019,10 +1040,9 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         const headerCandidate = headerBase + thPad + thBorder;
         maxWidth = Math.max(maxWidth, headerCandidate);
 
-        // iterate visible body rows and measure the dom cell at the same dom index
-        const rows = this._body.rows;
+        const rows = this._body.querySelectorAll(".wx-grid-row");
         for (let r = 0; r < rows.length; r++) {
-            const td = rows[r].cells[domIndex];
+            const td = rows[r].children[domIndex];
             if (!td) { continue; }
             const tdBox = td.getBoundingClientRect().width;
             const tdScroll = td.scrollWidth;
@@ -1035,31 +1055,25 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         const buffer = 2;
         const newWidth = Math.max(Math.ceil(maxWidth) + buffer, webexpress.webui.TableCtrl.MIN_COL_WIDTH);
 
-        const colEl = this._col.querySelector(`col[data-column-id='${column.id}']`);
         column.width = newWidth;
-        if (colEl) { colEl.style.width = `${newWidth}px`; }
-
-        this._schedulePersistIfAvailable(); // inline comment: persist width when available
+        this._syncColumnWidths(); 
+        this._schedulePersistIfAvailable();
     }
 
     /**
-     * Begin a column resize gesture by capturing the initial pointer position.
-     * Applies minimum width and respects RTL direction for delta computation.
-     * Cleans up listeners on gesture end and optionally schedules persistence.
-     * Suppresses header sort by marking _isResizing during the gesture.
-     * @param {MouseEvent|TouchEvent} evt Initial pointer event.
-     * @param {HTMLElement} th Header cell element for the target column.
+     * Start column resize interaction.
+     * @param {Event} evt Triggering event.
+     * @param {HTMLElement} th Column header element.
      */
     _beginColumnResize(evt, th) {
-        this._isResizing = true; // inline comment: mark resizing to suppress sort
+        this._isResizing = true;
         const colId = th.dataset.columnId;
         if (!colId || !this._colIndexCache.has(colId)) { this._isResizing = false; return; }
         const index = this._colIndexCache.get(colId);
         const column = this._columns[index];
-        if (!column || column.visible === false) { this._isResizing = false; return; }
+        if (!column || column.visible === false || column.resizable === false) { this._isResizing = false; return; }
 
-        const colEl = this._col.querySelector(`col[data-column-id='${colId}']`);
-        const startWidth = Math.max(column.width || th.getBoundingClientRect().width, webexpress.webui.TableCtrl.MIN_COL_WIDTH);
+        const startWidth = Math.max(parseInt(column.width || th.getBoundingClientRect().width), webexpress.webui.TableCtrl.MIN_COL_WIDTH);
 
         const pointX = (ev) => {
             if (ev.touches && ev.touches.length) { return ev.touches[0].clientX; }
@@ -1070,13 +1084,13 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         const isRtl = getComputedStyle(this._table).direction === "rtl";
 
         const move = (e) => {
-            e.preventDefault(); // inline comment: avoid scrolling during touch move
+            e.preventDefault();
             const dx = pointX(e) - startX;
             const signed = isRtl ? -dx : dx;
             let newWidth = Math.max(startWidth + signed, webexpress.webui.TableCtrl.MIN_COL_WIDTH);
             if (column.width && newWidth === column.width) { return; }
             column.width = Math.round(newWidth);
-            if (colEl) { colEl.style.width = `${column.width}px`; }
+            this._syncColumnWidths(); 
         };
 
         const up = () => {
@@ -1084,8 +1098,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             document.removeEventListener("mouseup", up);
             document.removeEventListener("touchmove", move);
             document.removeEventListener("touchend", up);
-            setTimeout(() => { this._isResizing = false; }, 0); // inline comment: clear flag after gesture
-            this._schedulePersistIfAvailable(); // inline comment: persist width when available
+            setTimeout(() => { this._isResizing = false; }, 0);
+            this._schedulePersistIfAvailable();
         };
 
         document.addEventListener("mousemove", move);
@@ -1095,14 +1109,29 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Schedule persistence of layout state when a subclass provides _schedulePersist().
-     * Errors in the subclass hook are swallowed to avoid breaking interactions.
+     * Schedule state persistence if supported.
      */
     _schedulePersistIfAvailable() {
         const fn = this._schedulePersist;
         if (typeof fn === "function") { try { fn.call(this); } catch (e) { /* ignore */ } }
     }
+
+    /**
+     * Detect whether any row has children.
+     * @param {Array<Object>} rows Row list.
+     * @returns {boolean} True if a tree structure exists.
+     */
+    _detectTree(rows) {
+        if (!Array.isArray(rows)) { return false; }
+        const stack = [...rows];
+        while (stack.length) {
+            const r = stack.pop();
+            if (r?.children && r.children.length > 0) { return true; }
+            if (r?.children) { stack.push(...r.children); }
+        }
+        return false;
+    }
 };
 
-// class registration for declarative initialization
+// Register the class in the controller
 webexpress.webui.Controller.registerClass("wx-webui-table", webexpress.webui.TableCtrl);
