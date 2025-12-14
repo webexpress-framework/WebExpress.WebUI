@@ -96,6 +96,24 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
             }
         });
     }
+
+    /**
+     * Gets the URI used to load the modal content.
+     *
+     * @returns {string} The URI from which the modal content is retrieved.
+     */
+    get uri() {
+        return this._uri;
+    }
+
+    /**
+     * Sets the URI used to load the modal content.
+     *
+     * @param {string} value The URI from which the modal content will be retrieved.
+     */
+    set uri(value) {
+        this._uri = value;
+    }
 }
 
 // Register the class in the controller

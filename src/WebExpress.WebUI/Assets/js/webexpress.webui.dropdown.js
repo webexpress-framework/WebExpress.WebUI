@@ -85,12 +85,6 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                     })
                     .map(attr => [attr.name, attr.value]);
 
-                // add modal toggle attribute when data-modal is present
-                if (elem.dataset.modal) {
-                    dataAttributes.push(["data-wx-toggle", "modal"]);
-                    dataAttributes.push(["data-wx-target", elem.dataset.modal]);
-                }
-
                 items.push({
                     id: elem.id || null,
                     uri: elem.dataset.uri || "javascript:void(0);",
@@ -98,6 +92,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                     icon: elem.dataset.icon || null,
                     text: elem.textContent || null,
                     color: elem.dataset.color || null,
+                    modal: elem.dataset.modal || null,
                     backgroundColor: itemClasses
                         .filter(cls => cls !== "wx-dropdown-item")
                         .find(cls => cls.startsWith("wx-")) || "",
@@ -146,7 +141,15 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                 link.id = item.id;
                 link.className = "wx-link dropdown-item";
                 if (item.color) link.classList.add(item.color);
-                link.href = item.uri;
+
+                if (!item.modal) {
+                    link.href = item.uri;
+                } else {
+                    link.href = "javascript:void(0);";
+                    link.setAttribute("data-wx-toggle", "modal");
+                    link.setAttribute("data-wx-target", item.modal);
+                    link.setAttribute("data-wx-uri", item.uri);
+                }
 
                 if (item.image) {
                     const img = document.createElement("img");

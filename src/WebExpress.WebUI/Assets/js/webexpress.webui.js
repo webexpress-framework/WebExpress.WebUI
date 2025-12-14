@@ -3,9 +3,10 @@ webexpress.webui = webexpress.webui || {}
 
 /**
  * Namespace webexpress.webui
- * The Controller class monitors changes in the DOM and creates instances of registered classes
- * for new DOM elements. These instances are managed in a map and are removed from the map when the
- * corresponding DOM elements are removed.
+ * The Controller class monitors changes in the DOM and creates instances
+ * of registered classes for new DOM elements. These instances are managed 
+ * in a map and are removed from the map when the corresponding DOM 
+ * elements are removed.
  */
 webexpress.webui.Controller = new class {
     /**
@@ -14,64 +15,91 @@ webexpress.webui.Controller = new class {
     constructor() {
         this.instanceMap = new Map();
         this.classRegistry = new Map();
+        this._wxRegisteredElements = new WeakSet(); // prevent duplicate bindings
         this.observer = new MutationObserver(this.handleMutations.bind(this));
-        this.observer.observe(document, { childList: true, subtree: true });
+        this.observer.observe(document, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-wx-toggle"] });
         this.overrideCreateElement();
         this.initModalHandler();
     }
 
     /**
-     * Initializes modal handling using custom attributes (Vanilla JS version)
+     * Initializes modal handling using custom attributes.
      */
     initModalHandler() {
         // wait for DOMContentLoaded event to ensure DOM is ready
         document.addEventListener("DOMContentLoaded", () => {
-            // open modal when clicking an element with data-wx-toggle="modal"
-            document.querySelectorAll("[data-wx-toggle='modal']").forEach(el => {
-                el.addEventListener("click", () => {
-                    const target = el.getAttribute("data-wx-target");
-                    const instance = this.getInstance(target);
-                    if (instance && typeof instance.show === "function") {
-                        instance.show();
-                    }
-                });
+            document.querySelectorAll("[data-wx-toggle]").forEach(el => {
+                this._registerWxEvents(el);
             });
-            // find all elements with the attribute data-wx-toggle="split"
-            document.querySelectorAll("[data-wx-toggle='split']").forEach(el => {
-                el.addEventListener("click", () => {
-                    const target = el.getAttribute("data-wx-target");
-                    const instance = this.getInstance(target);
-                    if (instance && typeof instance.toggleSidePane === "function") {
-                        instance.toggleSidePane();
+        });
+    }
+
+    /**
+     * Registers wx-* click handlers for a single element.
+     * This method is invoked during the initial DOM setup as well as for
+     * dynamically added elements detected by the MutationObserver.
+     *
+     * @param {HTMLElement} element - The element for which wx-* event handlers should be registered.
+     */
+    _registerWxEvents(element) {
+        if (this._wxRegisteredElements.has(element)) {
+            return; // already bound
+        }
+
+        let bound = false;
+
+        // modal
+        if (element.matches("[data-wx-toggle='modal']")) {
+            element.addEventListener("click", () => {
+                const target = element.getAttribute("data-wx-target");
+                const uri = element.getAttribute("data-wx-uri");
+                const instance = this.getInstance(target);
+
+                if (instance && typeof instance.show === "function") {
+                    if (uri) {
+                        instance.uri = uri;
                     }
-                });
-                document.addEventListener(webexpress.webui.Event.HIDE_EVENT, (e) => {
-                    const target = el.getAttribute("data-wx-target");
-                    if (e.detail.sender === el) {
-                        const instance = this.getInstance(target);
-                        if (instance) {
-                            const descriptor = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(instance), "collapsed");
-                            if (descriptor && descriptor.set) {
-                                instance.collapsed = true;
-                            }
-                        }
-                    }
-                });
-                document.addEventListener(webexpress.webui.Event.SHOW_EVENT, (e) => {
-                    const target = el.getAttribute("data-wx-target");
-                    if (e.detail.sender === el) {
-                        const instance = this.getInstance(target);
-                        if (instance) {
-                            const descriptor = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(instance), "collapsed");
-                            if (descriptor && descriptor.set) {
-                                instance.collapsed = false;
-                            }
-                        }
-                    }
-                });
+                    instance.show();
+                }
+            });
+            bound = true;
+        }
+
+        // split
+        if (element.matches("[data-wx-toggle='split']")) {
+            element.addEventListener("click", () => {
+                const target = element.getAttribute("data-wx-target");
+                const instance = this.getInstance(target);
+                if (instance && typeof instance.toggleSidePane === "function") {
+                    instance.toggleSidePane();
+                }
             });
 
-        });
+            document.addEventListener(webexpress.webui.Event.HIDE_EVENT, (e) => {
+                if (e.detail.sender === element) {
+                    const target = element.getAttribute("data-wx-target");
+                    const instance = this.getInstance(target);
+                    if (instance) {
+                        instance.collapsed = true;
+                    }
+                }
+            });
+
+            document.addEventListener(webexpress.webui.Event.SHOW_EVENT, (e) => {
+                if (e.detail.sender === element) {
+                    const target = element.getAttribute("data-wx-target");
+                    const instance = this.getInstance(target);
+                    if (instance) {
+                        instance.collapsed = false;
+                    }
+                }
+            });
+            bound = true;
+        }
+
+        if (bound) {
+            this._wxRegisteredElements.add(element);
+        }
     }
 
     /**
@@ -80,6 +108,10 @@ webexpress.webui.Controller = new class {
      */
     handleMutations(mutationsList) {
         for (const mutation of mutationsList) {
+            if (mutation.type === "attributes" && mutation.target instanceof HTMLElement) {
+                this._registerWxEvents(mutation.target);
+                continue;
+            }
             // handle added nodes
             for (const node of mutation.addedNodes) {
                 if (node.nodeType === Node.ELEMENT_NODE) {
@@ -98,6 +130,9 @@ webexpress.webui.Controller = new class {
         Array.from(element.children).forEach(child => {
             this.createInstances(child);
         });
+
+        // register wx events for dynamically added elements
+        this._registerWxEvents(element);
 
         // then initialize the element itself if it matches a registered selector
         for (const [selector, ClassConstructor] of this.classRegistry.entries()) {
