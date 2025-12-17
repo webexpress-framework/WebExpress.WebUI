@@ -32,6 +32,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -54,6 +55,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -78,6 +80,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -103,6 +106,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -127,6 +131,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -151,30 +156,32 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
         /// <summary>
-        /// Tests the label property of the form selection control item.
+        /// Tests the text property of the form selection control item.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item""></div></div>")]
         [InlineData("abc", @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label=""abc""></div></div>")]
         [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label=""WebExpress.WebUI""></div></div>")]
-        public void Label(string label, string expected)
+        public void Text(string label, string expected)
         {
             // preconditions
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Label = label })
+            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Text = label })
             {
             };
 
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -198,6 +205,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -245,6 +253,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -275,6 +284,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // test execution
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -294,9 +304,10 @@ namespace WebExpress.WebUI.Test.WebControl
             };
 
             // test execution
-            control.Add(new ControlFormItemInputSelectionItem(null) { Label = "label" });
+            control.Add(new ControlFormItemInputSelectionItem(null) { Text = "label" });
             var html = control.Render(context, visualTree);
 
+            // validation
             Assert.NotEmpty(control.Options);
             AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label=""label""></div></div>", html);
         }

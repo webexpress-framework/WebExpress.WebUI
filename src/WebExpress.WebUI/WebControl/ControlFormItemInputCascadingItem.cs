@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json.Serialization;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -9,10 +10,12 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents an item in a selection input form.
+    /// Represents a cascading node for the <see cref="ControlFormItemInputCascading"/>.
     /// </summary>
-    public class ControlFormItemInputSelectionItem : IControlFormItemInputSelectionItem
+    public class ControlFormItemInputCascadingItem : IControlFormItemInputCascadingItem
     {
+        private readonly List<IControlFormItemInputCascadingItem> _children = [];
+
         /// <summary>
         /// Returns the unique identifier of the selection item.
         /// </summary>
@@ -20,7 +23,7 @@ namespace WebExpress.WebUI.WebControl
         public string Id { get; }
 
         /// <summary>
-        /// Returns or sets the text of the selection item.
+        /// Returns or sets the label of the selection item.
         /// </summary>
         [JsonPropertyName("label")]
         public string Text { get; set; }
@@ -38,12 +41,6 @@ namespace WebExpress.WebUI.WebControl
         public TypeColorSelection LabelColor { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the selection item is selected.
-        /// </summary>
-        [JsonPropertyName("selected")]
-        public bool Selected { get; set; }
-
-        /// <summary>
         /// Returns or sets a value indicating whether the selection item is disabled.
         /// </summary>
         [JsonPropertyName("disabled")]
@@ -55,29 +52,55 @@ namespace WebExpress.WebUI.WebControl
         public IControl Content { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the class with an automatically assigned ID.
+        /// Returns the child cascading items.
         /// </summary>
-        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
-        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="items">The entries.</param>
-        public ControlFormItemInputSelectionItem
-        (
-            [CallerMemberName] string instance = null,
-            [CallerFilePath] string file = null,
-            [CallerLineNumber] int? line = null
-        )
-            : this($"selectionitem_{instance}_{file}_{line}".GetHashCode().ToString("X"))
-        {
-        }
+        public IEnumerable<IControlFormItemInputCascadingItem> Children => _children;
 
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
-        /// <param name="id">The unique identifier of the selection item. Optional.</param>
-        public ControlFormItemInputSelectionItem(string id)
+        /// <param name="id">The unique identifier of the cascading node.</param>
+        /// <param name="children">The children of the cascading node.</param>
+        public ControlFormItemInputCascadingItem(string id = null, params IControlFormItemInputCascadingItem[] children)
         {
             Id = id;
+            _children.AddRange(children);
+        }
+
+        /// <summary>
+        /// Adds the specified children to the cascading node.
+        /// </summary>
+        /// <param name="children">The children to add.</param>
+        /// <returns>The current instance, allowing for method chaining.</returns>
+        public IControlFormItemInputCascadingItem Add(params IControlFormItemInputCascadingItem[] children)
+        {
+            _children.AddRange(children);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds the specified children to the cascading node.
+        /// </summary>
+        /// <param name="children">The children to add.</param>
+        /// <returns>The current instance, allowing for method chaining.</returns>
+        public IControlFormItemInputCascadingItem Add(IEnumerable<IControlFormItemInputCascadingItem> children)
+        {
+            _children.AddRange(children);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Removes the specified content or child cascading item from the cascading item.
+        /// </summary>
+        /// <param name="child">The content or child cascading item to remove.</param>
+        /// <returns>The current instance, allowing for method chaining.</returns>
+        public IControlFormItemInputCascadingItem Remove(IControlFormItemInputCascadingItem child)
+        {
+            _children.Remove(child);
+
+            return this;
         }
 
         /// <summary>
@@ -91,7 +114,7 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-selection-item"),
+                Class = Css.Concatenate("wx-cascading-item"),
             }
                 .AddUserAttribute("data-label", I18N.Translate(Text))
                 .AddUserAttribute("data-icon", Icon is Icon ? (Icon as Icon).Class : null)
@@ -101,12 +124,8 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-label-color", LabelColor != TypeColorSelection.Default
                     ? LabelColor.ToClass()
                     : null)
+                .Add(Children.Select(x => x.Render(renderContext, visualTree)))
                 .Add(Content?.Render(renderContext, visualTree));
-
-            if (Selected)
-            {
-                html.AddUserAttribute("selected");
-            }
 
             if (Disabled)
             {

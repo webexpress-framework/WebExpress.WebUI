@@ -8,29 +8,24 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a form item input control for selection.
+    /// Represents a form item input control for cascading.
     /// </summary>
     /// <remarks>
-    /// This control allows users to select one or more options from a predefined list.
+    /// This control allows users to select cascading options from a predefined tree.
     /// </remarks>
-    public class ControlFormItemInputSelection : ControlFormItemInput<ControlFormInputValueString>, IControlFormItemInputSelection
+    public class ControlFormItemInputCascading : ControlFormItemInput<ControlFormInputValueStringList>, IControlFormItemInputCascading
     {
-        private readonly List<IControlFormItemInputSelectionItem> _options = [];
+        private readonly List<IControlFormItemInputCascadingItem> _options = [];
 
         /// <summary>
         /// Returns the entries.
         /// </summary>
-        public IEnumerable<IControlFormItemInputSelectionItem> Options => _options;
+        public IEnumerable<IControlFormItemInputCascadingItem> Options => _options;
 
         /// <summary>
         /// Returns or sets the label of the selected options.
         /// </summary>
         public string Placeholder { get; set; }
-
-        /// <summary>
-        /// Allows you to select multiple items.
-        /// </summary>
-        public bool MultiSelect { get; set; }
 
         /// <summary>
         /// Returns or sets the OnChange attribute.
@@ -44,12 +39,12 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
         /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
         /// <param name="items">The entries.</param>
-        public ControlFormItemInputSelection
+        public ControlFormItemInputCascading
         (
             [CallerMemberName] string instance = null,
             [CallerFilePath] string file = null,
             [CallerLineNumber] int? line = null,
-            params IControlFormItemInputSelectionItem[] items
+            params IControlFormItemInputCascadingItem[] items
         )
             : this($"selection_{instance}_{file}_{line}".GetHashCode().ToString("X"), items)
         {
@@ -60,7 +55,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="id">The id of the control.</param>
         /// <param name="items">The entries.</param>
-        public ControlFormItemInputSelection(string id, params IControlFormItemInputSelectionItem[] items)
+        public ControlFormItemInputCascading(string id, params IControlFormItemInputCascadingItem[] items)
             : base(id)
         {
             _options.AddRange(items);
@@ -71,7 +66,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="items">The items to add to the selection options.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public virtual IControlFormItemInputSelection Add(params IControlFormItemInputSelectionItem[] items)
+        public virtual IControlFormItemInputCascading Add(params IControlFormItemInputCascadingItem[] items)
         {
             _options.AddRange(items);
 
@@ -83,7 +78,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="item">The item to remove from the selection options.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public virtual IControlFormItemInputSelection Remove(IControlFormItemInputSelectionItem item)
+        public virtual IControlFormItemInputCascading Remove(IControlFormItemInputCascadingItem item)
         {
             _options.Remove(item);
 
@@ -98,7 +93,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
-            var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
+            var value = renderContext.GetValue<ControlFormInputValueStringList>(this)?.Items;
             var classes = new List<string>();
             classes.AddRange(Classes);
 
@@ -110,13 +105,12 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-input-selection", classes),
+                Class = Css.Concatenate("wx-webui-input-cascading", classes),
                 Style = GetStyles()
             }
                 .AddUserAttribute("name", Name)
                 .AddUserAttribute("placeholder", I18N.Translate(Placeholder))
-                .AddUserAttribute("data-multiselection", MultiSelect ? "true" : null)
-                .AddUserAttribute("data-value", value)
+                .AddUserAttribute("data-value", string.Join(";", value ?? []))
                 .Add(_options.Select(x => x.Render(renderContext, visualTree)));
 
             return html;
@@ -132,9 +126,9 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>
         /// The value created from the specified string representation.
         /// </returns>
-        protected override ControlFormInputValueString CreateValue(string value, IRenderControlFormContext renderContext)
+        protected override ControlFormInputValueStringList CreateValue(string value, IRenderControlFormContext renderContext)
         {
-            return new ControlFormInputValueString(value);
+            return new ControlFormInputValueStringList(value);
         }
     }
 }
