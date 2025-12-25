@@ -166,7 +166,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="request">The context in which the control is rendered.</param>
         /// <returns>The parameters as a query string.</returns>
-        private string GetParams(Request request)
+        private string GetParams(IRequest request)
         {
             var dict = new Dictionary<string, Parameter>();
 

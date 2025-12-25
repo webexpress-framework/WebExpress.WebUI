@@ -843,5 +843,12 @@ webexpress.webui.Event = class {
     static TILE_SORT_EVENT = "webexpress.webui.tile.sort";
     // Event triggered when a responsive layout breakpoint changes.
     static BREAKPOINT_CHANGE_EVENT = "webexpress.webui.breakpoint.change";
-
+    // Event triggered when a WebSocket connection is opened.
+    static WS_OPEN_EVENT = "webexpress.webui.websocket.open";
+    // Event triggered when a WebSocket receives a message.
+    static WS_MESSAGE_EVENT = "webexpress.webui.websocket.message";
+    // Event triggered when a WebSocket connection is closed.
+    static WS_CLOSE_EVENT = "webexpress.webui.websocket.close";
+    // Event triggered when a WebSocket error occurs.
+    static WS_ERROR_EVENT = "webexpress.webui.websocket.error";
 }

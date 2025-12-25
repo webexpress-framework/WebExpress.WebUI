@@ -23,7 +23,7 @@ namespace WebExpress.WebUI.WebPage
         /// </summary>
         /// <param name="pageContext">>The page context.</param>
         /// <param name="request">The request associated with the rendering context.</param>
-        public RenderControlContext(IEndpoint endpoint, IPageContext pageContext, Request request)
+        public RenderControlContext(IEndpoint endpoint, IPageContext pageContext, IRequest request)
             : base(endpoint, pageContext, request)
         {
         }
