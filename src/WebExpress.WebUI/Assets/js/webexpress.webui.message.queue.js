@@ -77,7 +77,7 @@ webexpress.webui.MessageQueueCtrl = class extends webexpress.webui.Ctrl {
 
         this._ws.addEventListener("message", (evt) => {
             // enqueue message
-            this._enqueue(evt.data);
+            this.enqueue(evt.data);
             this._dispatch(webexpress.webui.Event.WS_MESSAGE_EVENT, { event: evt, data: evt.data });
             this.update();
         });
@@ -108,7 +108,7 @@ webexpress.webui.MessageQueueCtrl = class extends webexpress.webui.Ctrl {
      * Removes oldest messages if the queue exceeds its maximum size.
      * @param {string} msg - The new message.
      */
-    _enqueue(msg) {
+    enqueue(msg) {
         this._queue.push(msg);
         while (this._queue.length > this._queueMax) {
             this._queue.shift();
