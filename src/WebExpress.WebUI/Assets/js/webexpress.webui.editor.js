@@ -1354,6 +1354,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Ensures a hidden form input exists and syncs its content on form submission.
+     * Also, synchronizes the editor content when the hidden input field is changed externally.
      */
     _ensureFormInput() {
         let parent = this._editorElement;
@@ -1361,17 +1362,32 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             parent = parent.parentElement;
         }
         if (parent) {
-            let input = parent.querySelector(`input[type="hidden"][name="${this._formFieldName}"]`);
-            if (!input) {
-                input = document.createElement("input");
-                input.type = "hidden";
-                input.name = this._formFieldName;
-                parent.appendChild(input);
+            if (!this._formInput) {
+                this._formInput = document.createElement("input");
+                this._formInput.type = "hidden";
+                this._formInput.name = this._formFieldName;
+                parent.appendChild(this._formInput);
             }
-            this._formInput = input;
+
+            // on form submit, transfer editor content into hidden field
             parent.addEventListener("submit", () => {
                 if (this._formInput) {
                     this._formInput.value = this._editorElement.innerHTML;
+                }
+            });
+
+            // listen for external changes to hidden field and sync to editor
+            this._formInput.addEventListener("input", () => {
+                // only update if value is different from current editor content
+                if (this._editorElement.innerHTML !== this._formInput.value) {
+                    this._editorElement.innerHTML = this._formInput.value || "";
+                }
+            });
+
+            // also handle cases where value is set via assignment (fires 'change')
+            this._formInput.addEventListener("change", () => {
+                if (this._editorElement.innerHTML !== this._formInput.value) {
+                    this._editorElement.innerHTML = this._formInput.value || "";
                 }
             });
         }
