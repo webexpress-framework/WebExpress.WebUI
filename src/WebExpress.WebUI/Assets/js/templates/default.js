@@ -1,7 +1,7 @@
 // Date renderer
 webexpress.webui.TableTemplates.register("date", (val, cell, row, opts) => {
     if (!val) return "";
-    const editable = opts.editable === "true";
+    const editable = opts.editable === true || opts.editable === "true";
     const format = opts.format || "yyyy-MM-dd";
     const placeholder = opts.placeholder || null;
     const cssColor = opts.colorCss || null;
@@ -36,7 +36,7 @@ webexpress.webui.TableTemplates.register("date", (val, cell, row, opts) => {
 // Calendar renderer
 webexpress.webui.TableTemplates.register("calendar", (val, cell, row, opts) => {
     if (!val) return "";
-    const editable = opts.editable === "true";
+    const editable = opts.editable === true || opts.editable === "true";
     const format = opts.format || "yyyy-MM-dd";
     const placeholder = opts.placeholder || null;
     const cssColor = opts.colorCss || null;
@@ -71,7 +71,7 @@ webexpress.webui.TableTemplates.register("calendar", (val, cell, row, opts) => {
 // Tag renderer
 webexpress.webui.TableTemplates.register("tag", (val, cell, row, opts) => {
     if (!val) return "";
-    const editable = opts.editable === "true";
+    const editable = opts.editable === true || opts.editable === "true";
     const container = document.createElement("div");
     const cssColor = opts.colorCss || null;
     const styleColor = opts.colorStyle || null;
@@ -105,7 +105,7 @@ webexpress.webui.TableTemplates.register("selection", (val, cell, row, opts) => 
     }
 
     const container = document.createElement("div");
-    const editable = opts.editable === "true";
+    const editable = opts.editable === true || opts.editable === "true";
     let options = [];
 
     if (opts.children && opts.children.length > 0) {
@@ -150,7 +150,7 @@ webexpress.webui.TableTemplates.register("combo", (val, cell, row, opts) => {
     }
 
     const container = document.createElement("div");
-    const editable = opts.editable === "true";
+    const editable = opts.editable === true || opts.editable === "true";
     let options = [];
 
     // parse Generic Children
@@ -196,7 +196,7 @@ webexpress.webui.TableTemplates.register("combo", (val, cell, row, opts) => {
 // and a plain text node in read-only mode.
 webexpress.webui.TableTemplates.register("text", (val, cell, row, opts) => {
     const container = document.createElement("div");
-    const editable = opts && opts.editable === "true";
+    const editable = opts.editable === true || opts && opts.editable === "true";
 
     if (editable) {
         // create native text input for editing
@@ -234,7 +234,7 @@ webexpress.webui.TableTemplates.register("numeric", (val, cell, row, opts) => {
     const container = document.createElement("div");
 
     // determine if field should be editable
-    const editable = opts && opts.editable === "true";
+    const editable = opts && (opts.editable === true ||  opts.editable === "true");
 
     if (editable) {
         // create native number input for editing
@@ -291,7 +291,7 @@ webexpress.webui.TableTemplates.register("move", (val, cell, row, opts) => {
     }
 
     const container = document.createElement("div");
-    const editable = opts.editable === "true";
+    const editable = opts.editable === true || opts.editable === "true";
     let options = [];
 
     if (opts.children && opts.children.length > 0) {
@@ -336,7 +336,7 @@ webexpress.webui.TableTemplates.register("rating", (val, cell, row, opts) => {
     }
 
     const container = document.createElement("div");
-    const editable = opts.editable === "true";
+    const editable = opts.editable === true || opts.editable === "true";
     const stars = opts.stars || 5;
 
     if (editable) {
@@ -366,7 +366,7 @@ webexpress.webui.TableTemplates.register("editor", (val, cell, row, opts) => {
     }
 
     const container = document.createElement("div");
-    const editable = opts.editable === "true";
+    const editable = opts.editable === true || opts.editable === "true";
 
     if (editable) {
         const editor = document.createElement("div");
