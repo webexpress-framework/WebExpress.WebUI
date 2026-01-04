@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("btn", GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
-                Href = Uri?.ToString(),
+                Href = string.IsNullOrEmpty(Modal) ? Uri?.ToString() : null,
                 Title = Tooltip,
                 OnClick = OnClick?.ToString()
             };
@@ -87,6 +87,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 html.AddUserAttribute("data-wx-toggle", "modal");
                 html.AddUserAttribute("data-wx-target", $"#{Modal}");
+                html.AddUserAttribute("data-wx-uri", Uri?.ToString());
             }
 
             return html;
