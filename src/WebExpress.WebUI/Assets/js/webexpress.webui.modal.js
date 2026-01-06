@@ -111,6 +111,14 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
             closeButton.removeEventListener("click", this.hide);
             closeButton.addEventListener("click", () => this.hide()); // Bind click event
         }
+
+        // remove all known size classes
+        this._dialogDiv.classList.remove("modal-sm", "modal-md", "modal-lg", "modal-xl", "modal-fullscreen");
+
+        if (this._size) {
+            // apply modal size class
+            this._dialogDiv.classList.add(this._size);
+        }
     }
 
     /**

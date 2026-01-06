@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns the size configuration for the modal dialog.
         /// </summary>
-        TypeModalSize Size { get; }
+        string Size { get; }
 
         /// <summary>
         /// Applies user-defined attributes to the specified HTML node.

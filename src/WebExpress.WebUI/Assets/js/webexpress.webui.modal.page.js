@@ -69,6 +69,14 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
             button.addEventListener("click", () => this.hide());
         });
 
+        // remove all known size classes
+        this._dialogDiv.classList.remove("modal-sm", "modal-md", "modal-lg", "modal-xl", "modal-fullscreen");
+
+        if (this._size) {
+            // apply modal size class
+            this._dialogDiv.classList.add(this._size);
+        }
+
         const modalInstance = bootstrap.Modal.getOrCreateInstance(this._element);
         modalInstance.show(); // opens the modal
 
