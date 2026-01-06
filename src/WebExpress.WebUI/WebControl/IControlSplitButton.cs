@@ -45,9 +45,9 @@ namespace WebExpress.WebUI.WebControl
         TypeActive Active { get; set; }
 
         /// <summary>
-        /// Returns or sets the id of a modal dialogue.
+        /// Returns the target of a modal dialogue.
         /// </summary>
-        string Modal { get; set; }
+        IModalTarget Modal { get; }
 
         /// <summary>
         /// Adds one or more items to the split button.

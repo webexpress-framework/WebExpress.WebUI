@@ -43,9 +43,9 @@ namespace WebExpress.WebUI.WebControl
         public TypeTarget Target { get; set; }
 
         /// <summary>
-        /// Returns or sets the id of a modal dialogue.
+        /// Returns or sets the target of a modal dialogue.
         /// </summary>
-        public string Modal { get; set; }
+        public IModalTarget Modal { get; set; }
 
         /// <summary>
         /// Returns or sets the icon.
@@ -102,7 +102,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-uri", Uri?.ToString())
                 .AddUserAttribute("data-target", Target.ToStringValue())
-                .AddUserAttribute("data-modal", Modal)
+                .AddUserAttribute("data-modal", Modal?.Id)
                 .AddUserAttribute("data-title", I18N.Translate(renderContext, Tooltip))
                 .AddUserAttribute("data-color-css", Color?.ToClass())
                 .AddUserAttribute("data-color-style", Color?.ToStyle())

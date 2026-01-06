@@ -56,9 +56,9 @@ namespace WebExpress.WebUI.WebControl
         public bool Active { get; set; }
 
         /// <summary>
-        /// Returns or sets the id of a modal dialogue.
+        /// Returns or sets the target of a modal dialogue.
         /// </summary>
-        public string Modal { get; set; }
+        public IModalTarget Modal { get; set; }
 
         /// <summary>
         /// Returns or sets the link color.
@@ -143,7 +143,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-label", I18N.Translate(Text))
                 .AddUserAttribute("data-expand", Expand ? "true" : null)
                 .AddUserAttribute("data-active", Active ? "true" : null)
-                .AddUserAttribute("data-modal", Modal)
+                .AddUserAttribute("data-modal", Modal?.Id)
                 .AddUserAttribute("data-color", Color.ToClass())
                 .AddUserAttribute("data-tooltip", Tooltip)
                 .AddUserAttribute("data-uri", Uri?.ToString())

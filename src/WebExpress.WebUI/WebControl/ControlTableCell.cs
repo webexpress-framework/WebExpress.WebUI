@@ -53,9 +53,9 @@ namespace WebExpress.WebUI.WebControl
         public virtual TypeTarget Target { get; set; }
 
         /// <summary>
-        /// Returns or sets the id of a modal dialogue.
+        /// Returns or sets the target of a modal dialogue.
         /// </summary>
-        public virtual string Modal { get; set; }
+        public virtual IModalTarget Modal { get; set; }
 
         /// <summary>
         /// Returns or sets the content associated with this cell.
@@ -90,7 +90,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-color", Color.ToClass())
                 .AddUserAttribute("data-uri", Uri?.ToString())
                 .AddUserAttribute("data-target", Target.ToStringValue())
-                .AddUserAttribute("data-modal", Modal);
+                .AddUserAttribute("data-modal", Modal?.Id);
 
             return html;
         }

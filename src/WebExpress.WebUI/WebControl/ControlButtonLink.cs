@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("btn", GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
-                Href = string.IsNullOrEmpty(Modal) ? Uri?.ToString() : null,
+                Href = Modal is null ? Uri?.ToString() : null,
                 Title = Tooltip,
                 OnClick = OnClick?.ToString()
             };
@@ -83,10 +83,9 @@ namespace WebExpress.WebUI.WebControl
                 html.AddUserAttribute("data-bs-toggle", "tooltip");
             }
 
-            if (!string.IsNullOrWhiteSpace(Modal))
+            if (Modal is not null)
             {
-                html.AddUserAttribute("data-wx-toggle", "modal");
-                html.AddUserAttribute("data-wx-target", $"#{Modal}");
+                Modal?.ApplyUserAttributes(html);
                 html.AddUserAttribute("data-wx-uri", Uri?.ToString());
             }
 

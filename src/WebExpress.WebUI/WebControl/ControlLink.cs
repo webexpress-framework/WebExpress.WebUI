@@ -65,9 +65,9 @@ namespace WebExpress.WebUI.WebControl
         public TypeTarget Target { get; set; }
 
         /// <summary>
-        /// Returns or sets the id of a modal dialogue.
+        /// Returns or sets the target of a modal dialogue.
         /// </summary>
-        public string Modal { get; set; }
+        public IModalTarget Modal { get; set; }
 
         /// <summary>
         /// Returns or sets the icon.
@@ -232,11 +232,7 @@ namespace WebExpress.WebUI.WebControl
                 html.AddUserAttribute("data-bs-toggle", "tooltip");
             }
 
-            if (!string.IsNullOrWhiteSpace(Modal))
-            {
-                html.AddUserAttribute("data-wx-toggle", "modal");
-                html.AddUserAttribute("data-wx-target", $"#{Modal}");
-            }
+            Modal?.ApplyUserAttributes(html);
 
             return html;
         }

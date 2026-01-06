@@ -149,6 +149,24 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
 
         modalInstance?.hide();
     }
+
+    /**
+     * Gets the size of the modal.
+     *
+     * @returns {string} The size.
+     */
+    get size() {
+        return this._size;
+    }
+
+    /**
+     * Sets the size of the modal.
+     *
+     * @param {string} value The size.
+     */
+    set size(value) {
+        this._size = value;
+    }
 };
 
 // Register the class in the controller

@@ -183,7 +183,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div></div>")]
-        [InlineData("modal", @"<div data-modal=""modal""></div>")]
+        [InlineData("modal", @"<div data-modal=""#modal""></div>")]
         public void Modal(string modal, string expected)
         {
             // preconditions
@@ -192,7 +192,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableCell()
             {
-                Modal = modal
+                Modal = new ModalTarget(modal)
             };
 
             // test execution

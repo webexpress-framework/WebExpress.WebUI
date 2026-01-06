@@ -141,7 +141,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-sidebar-link""></div>")]
-        [InlineData("id", @"<div class=""wx-sidebar-link"" data-modal=""id""></div>")]
+        [InlineData("id", @"<div class=""wx-sidebar-link"" data-modal=""#id""></div>")]
         public void Modal(string modal, string expected)
         {
             // preconditions
@@ -150,7 +150,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSidebarItemLink()
             {
-                Modal = modal
+                Modal = new ModalTarget(modal)
             };
 
             // test execution

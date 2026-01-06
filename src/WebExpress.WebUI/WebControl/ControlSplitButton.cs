@@ -70,9 +70,9 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the id of a modal dialogue.
+        /// Returns or sets the target of a modal dialogue.
         /// </summary>
-        public string Modal { get; set; }
+        public IModalTarget Modal { get; set; }
 
         /// <summary>
         /// Returns or sets the content.
@@ -185,11 +185,7 @@ namespace WebExpress.WebUI.WebControl
                 button.Add(new HtmlText(Text));
             }
 
-            if (!string.IsNullOrWhiteSpace(Modal))
-            {
-                button.AddUserAttribute("data-wx-toggle", "modal");
-                button.AddUserAttribute("data-wx-target", $"#{Modal}");
-            }
+            Modal?.ApplyUserAttributes(button);
 
             var dropdownButton = new HtmlElementFieldButton(new HtmlElementTextSemanticsSpan() { Class = "caret" })
             {

@@ -145,7 +145,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemButton()
             {
-                Modal = modal
+                Modal = new ModalTarget(modal)
             };
 
             // test execution

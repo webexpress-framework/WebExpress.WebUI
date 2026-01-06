@@ -92,7 +92,10 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                     icon: elem.dataset.icon || null,
                     text: elem.textContent || null,
                     color: elem.dataset.color || null,
-                    modal: elem.dataset.modal || null,
+                    modal: {
+                        id: elem.dataset.modal || null,
+                        size: elem.dataset.modalsize || null
+                    },
                     backgroundColor: itemClasses
                         .filter(cls => cls !== "wx-dropdown-item")
                         .find(cls => cls.startsWith("wx-")) || "",
@@ -142,12 +145,13 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                 link.className = "wx-link dropdown-item";
                 if (item.color) link.classList.add(item.color);
 
-                if (!item.modal) {
+                if (!item.modal?.id) {
                     link.href = item.uri;
                 } else {
                     link.href = "javascript:void(0);";
                     link.setAttribute("data-wx-toggle", "modal");
-                    link.setAttribute("data-wx-target", item.modal);
+                    link.setAttribute("data-wx-target", item.modal.id);
+                    link.setAttribute("data-wx-modalsize", item.modal.size);
                     link.setAttribute("data-wx-uri", item.uri);
                 }
 

@@ -49,9 +49,9 @@ namespace WebExpress.WebUI.WebControl
         TypeActive Active { get; set; }
 
         /// <summary>
-        /// Returns or sets the id of a modal dialogue.
+        /// Returns or sets the modal dialogue target.
         /// </summary>
-        string Modal { get; set; }
+        IModalTarget Modal { get; }
 
         /// <summary>
         /// Adds one or more controls to the content.

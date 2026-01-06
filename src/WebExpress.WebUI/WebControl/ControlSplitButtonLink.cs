@@ -73,11 +73,7 @@ namespace WebExpress.WebUI.WebControl
                 button.Add(new HtmlText(I18N.Translate(renderContext.Request?.Culture, Text)));
             }
 
-            if (!string.IsNullOrWhiteSpace(Modal))
-            {
-                button.AddUserAttribute("data-wx-toggle", "modal");
-                button.AddUserAttribute("data-wx-target", $"#{Modal}");
-            }
+            Modal?.ApplyUserAttributes(button);
 
             var dropdownButton = new HtmlElementTextSemanticsSpan(new HtmlElementTextSemanticsSpan() { Class = "caret" })
             {

@@ -53,9 +53,15 @@ webexpress.webui.Controller = new class {
             element.addEventListener("click", () => {
                 const target = element.getAttribute("data-wx-target");
                 const uri = element.getAttribute("data-wx-uri");
+                const size = element.getAttribute("data-wx-modalsize");
                 const instance = this.getInstance(target);
 
-                if (instance && typeof instance.show === "function") {
+                if (!instance) {
+
+                } else if (typeof instance.show === "function") {
+                    if (size) {
+                        instance.size = size;
+                    }
                     if (uri) {
                         instance.uri = uri;
                     }
