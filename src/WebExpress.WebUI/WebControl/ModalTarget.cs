@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     /// functionality.
     public class ModalTarget : IModalTarget
     {
-        private readonly TypeModalSize _size;
+        private readonly TypeModalSize? _size;
 
         /// <summary>
         /// Returns the unique identifier for this modal.
@@ -18,7 +18,19 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns the size configuration for the modal dialog.
         /// </summary>
-        public string Size => _size.ToClass();
+        public string Size => _size?.ToClass();
+
+        /// <summary>
+        /// Initializes a new instance of the class with the specified identifier.
+        /// </summary>
+        /// <param name="id">
+        /// The unique identifier for the modal target. Cannot be null.
+        /// </param>
+        /// <param name="size">The size configuration for the modal dialog.</param>
+        public ModalTarget(string id)
+        {
+            Id = !string.IsNullOrWhiteSpace(id) ? $"#{id}" : null;
+        }
 
         /// <summary>
         /// Initializes a new instance of the class with the specified identifier.
@@ -50,9 +62,9 @@ namespace WebExpress.WebUI.WebControl
             htmlNode?.AddUserAttribute("data-wx-toggle", "modal");
             htmlNode?.AddUserAttribute("data-wx-target", Id);
 
-            if (_size != TypeModalSize.Default)
+            if (_size.HasValue)
             {
-                htmlNode?.AddUserAttribute("data-wx-modalsize", Size);
+                htmlNode?.AddUserAttribute("data-wx-size", Size);
             }
 
             return this;

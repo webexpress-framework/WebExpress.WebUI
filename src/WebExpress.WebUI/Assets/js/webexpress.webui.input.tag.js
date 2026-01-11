@@ -90,6 +90,11 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
             }
         });
 
+        // also handle cases where value is set via assignment (fires 'change')
+        this._hidden.addEventListener("change", () => {
+            this.value = this._hidden.value;
+        });
+
         element.appendChild(this._input);
     }
 

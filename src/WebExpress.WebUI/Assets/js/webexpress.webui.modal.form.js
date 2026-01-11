@@ -37,6 +37,11 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
 
             this._form = form;
 
+            // remove all classes except those starting with "wx"
+            this._form.className = [...this._form.classList]
+                .filter(cls => cls.startsWith("wx"))
+                .join(" ");
+
             const buttons = Array.from(form.querySelectorAll("button[type='submit'], button[type='reset']"))
                 .map(btn => this._detachElement(btn));
 
@@ -127,7 +132,6 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
             this._form.prepend(alert);
         }
     }
-
 }
 
 // Register the class in the controller

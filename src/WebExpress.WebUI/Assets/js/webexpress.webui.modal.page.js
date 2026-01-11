@@ -16,6 +16,27 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
         // cleanup the DOM element
         element.removeAttribute("data-uri");
         element.removeAttribute("data-selector");
+
+        // load content dynamically after the modal is shown
+        this._element.addEventListener("shown.bs.modal", () => {
+            // trigger event when data is requested
+            this._dispatch(webexpress.webui.Event.DATA_REQUESTED_EVENT, {});
+
+            if (this._uri) {
+                fetch(this._uri)
+                    .then(response => response.text())
+                    .then(data => {
+                        this._update(data);
+
+                        // trigger event when data has successfully arrived
+                        this._element.dispatchEvent(new CustomEvent(webexpress.webui.Event.DATA_ARRIVED_EVENT, {
+                            detail: { sender: this._element, id: this._element.id, response: data }
+                        }));
+                    });
+            } else {
+                this._update(this._element.innerHTML);
+            }
+        });
     }
 
     /**
@@ -82,27 +103,6 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
 
         // trigger custom event for showing the modal
         this._dispatch(webexpress.webui.Event.MODAL_SHOW_EVENT, {});
-
-        // load content dynamically after the modal is shown
-        this._element.addEventListener("shown.bs.modal", () => {
-            // trigger event when data is requested
-            this._dispatch(webexpress.webui.Event.DATA_REQUESTED_EVENT, {});
-
-            if (this._uri) {
-                fetch(this._uri)
-                    .then(response => response.text())
-                    .then(data => {
-                        this._update(data);
-
-                        // trigger event when data has successfully arrived
-                        this._element.dispatchEvent(new CustomEvent(webexpress.webui.Event.DATA_ARRIVED_EVENT, {
-                            detail: { sender: this._element, id: this._element.id, response: data }
-                        }));
-                    });
-            } else {
-                this._update(this._element.innerHTML);
-            }
-        });
     }
 
     /**
