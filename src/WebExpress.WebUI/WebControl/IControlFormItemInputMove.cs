@@ -15,12 +15,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the label displayed for the selected options list.
         /// </summary>
-        string SelectedHeader { get; set; }
+        string SelectedHeader { get; }
 
         /// <summary>
         /// Returns or sets the label displayed for the available options list.
         /// </summary>
-        string AvailableHeader { get; set; }
+        string AvailableHeader { get; }
 
         /// <summary>
         /// Adds one or more items to the available options list.

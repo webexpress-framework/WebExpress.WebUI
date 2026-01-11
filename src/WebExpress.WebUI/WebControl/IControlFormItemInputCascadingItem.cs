@@ -35,7 +35,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the content of the selection item.
         /// </summary>
-        public IControl Content { get; set; }
+        public IControl Content { get; }
 
         /// <summary>
         /// Returns the child cascading items.

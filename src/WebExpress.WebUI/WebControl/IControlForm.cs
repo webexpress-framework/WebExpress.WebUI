@@ -28,17 +28,17 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the name of the form.
         /// </summary>
-        string Name { get; set; }
+        string Name { get; }
 
         /// <summary>
         /// Returns or sets the target URI.
         /// </summary>
-        IUri Uri { get; set; }
+        IUri Uri { get; }
 
         /// <summary>
         /// Returns or sets the redirect URI.
         /// </summary>
-        IUri RedirectUri { get; set; }
+        IUri RedirectUri { get; }
 
         /// <summary>
         /// Returns or sets the form items.
@@ -48,23 +48,23 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the request method.
         /// </summary>
-        RequestMethod Method { get; set; }
+        RequestMethod Method { get; }
 
         /// <summary>
         /// Returns or sets the confirmation control that is displayed 
         /// instead of the form after the form has been successfully submitted.
         /// </summary>
-        IControl Conformation { get; set; }
+        IControl Conformation { get; }
 
         /// <summary>
         /// Returns or sets the form layout.
         /// </summary>
-        TypeLayoutForm FormLayout { get; set; }
+        TypeLayoutForm FormLayout { get; }
 
         /// <summary>
         /// Returns or sets the item layout.
         /// </summary>
-        TypeLayoutFormItem ItemLayout { get; set; }
+        TypeLayoutFormItem ItemLayout { get; }
 
         /// <summary>
         /// Return the current state of the form.

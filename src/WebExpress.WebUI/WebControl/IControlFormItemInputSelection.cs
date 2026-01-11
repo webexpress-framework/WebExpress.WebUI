@@ -16,12 +16,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the label of the selected options.
         /// </summary>
-        public string Placeholder { get; set; }
+        public string Placeholder { get; }
 
         /// <summary>
         /// Allows you to select multiple items.
         /// </summary>
-        public bool MultiSelect { get; set; }
+        public bool MultiSelect { get; }
 
         /// <summary>
         /// Adds one or more items to the selection options.

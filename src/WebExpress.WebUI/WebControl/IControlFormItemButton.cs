@@ -13,42 +13,42 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the color of the button.
         /// </summary>
-        PropertyColorButton Color { get; set; }
+        PropertyColorButton Color { get; }
 
         /// <summary>
         /// Returns or sets the size.
         /// </summary>
-        TypeSizeButton Size { get; set; }
+        TypeSizeButton Size { get; }
 
         /// <summary>
         /// Returns or sets the Outline property.
         /// </summary>
-        bool Outline { get; set; }
+        bool Outline { get; }
 
         /// <summary>
         /// Returns or sets whether the button should take up the full width.
         /// </summary>
-        TypeBlockButton Block { get; set; }
+        TypeBlockButton Block { get; }
 
         /// <summary>
         /// Returns or sets whether the button is disabled.
         /// </summary>
-        bool Disabled { get; set; }
+        bool Disabled { get; }
 
         /// <summary>
         /// Returns or sets the text.
         /// </summary>
-        string Text { get; set; }
+        string Text { get; }
 
         /// <summary>
         /// Returns or sets the type. (button, submit, reset)
         /// </summary>
-        TypeButton Type { get; set; }
+        TypeButton Type { get; }
 
         /// <summary>
         /// Returns or sets the icon.
         /// </summary>
-        IIcon Icon { get; set; }
+        IIcon Icon { get; }
 
         /// <summary>
         /// Adds one or more controls to the content.

@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the label of the cascading options.
         /// </summary>
-        public string Placeholder { get; set; }
+        public string Placeholder { get; }
 
         /// <summary>
         /// Adds one or more items to the selection options.

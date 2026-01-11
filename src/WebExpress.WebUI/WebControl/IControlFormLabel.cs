@@ -8,6 +8,6 @@
         /// <summary>
         /// Returns or sets the label.
         /// </summary>
-        string Label { get; set; }
+        string Label { get; }
     }
 }

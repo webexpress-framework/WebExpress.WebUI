@@ -9,7 +9,7 @@
         /// Returns or sets the name of the input field.
         /// This name is used to identify the form item in the context of form submissions.
         /// </summary>
-        string Name { get; set; }
+        string Name { get; }
 
         /// <summary>
         /// Initializes the form element with the specified render context and form state.
