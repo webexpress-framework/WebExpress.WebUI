@@ -1,5 +1,5 @@
 // Date renderer
-webexpress.webui.TableTemplates.register("date", (val, cell, row, opts) => {
+webexpress.webui.TableTemplates.register("date", (val, table, row, cell, name, opts) => {
     if (!val) return "";
     const editable = opts.editable === true || opts.editable === "true";
     const format = opts.format || "yyyy-MM-dd";
@@ -34,7 +34,7 @@ webexpress.webui.TableTemplates.register("date", (val, cell, row, opts) => {
 });
 
 // Calendar renderer
-webexpress.webui.TableTemplates.register("calendar", (val, cell, row, opts) => {
+webexpress.webui.TableTemplates.register("calendar", (val, table, row, cell, name, opts) => {
     if (!val) return "";
     const editable = opts.editable === true || opts.editable === "true";
     const format = opts.format || "yyyy-MM-dd";
@@ -69,7 +69,7 @@ webexpress.webui.TableTemplates.register("calendar", (val, cell, row, opts) => {
 });
 
 // Tag renderer
-webexpress.webui.TableTemplates.register("tag", (val, cell, row, opts) => {
+webexpress.webui.TableTemplates.register("tag", (val, table, row, cell, name, opts) => {
     if (!val) return "";
     const editable = opts.editable === true || opts.editable === "true";
     const container = document.createElement("div");
@@ -79,6 +79,7 @@ webexpress.webui.TableTemplates.register("tag", (val, cell, row, opts) => {
     
     if (editable) {
         const editor = document.createElement("div");
+        editor.setAttribute("name", name);
         const inputCtrl = new webexpress.webui.InputTagCtrl(editor);
         editor._wx_controller = inputCtrl;
         inputCtrl._colorCss = cssColor;
@@ -86,8 +87,12 @@ webexpress.webui.TableTemplates.register("tag", (val, cell, row, opts) => {
         inputCtrl._placeholderText = placeholder;
         inputCtrl.value = val;
         if (row.id) container.dataset.objectId = row.id;
+        container.id = `${row.id}_${name}`;
         container.appendChild(editor);
+        container.setAttribute("data-form-method", "PATCH");
+        container.setAttribute("data-form-action", row.restApi);
         new webexpress.webui.SmartEditCtrl(container);
+       
     } else {
         const ctrl = new webexpress.webui.TagCtrl(container);
         ctrl._colorCss = cssColor;
@@ -99,7 +104,7 @@ webexpress.webui.TableTemplates.register("tag", (val, cell, row, opts) => {
 });
 
 // Selection renderer
-webexpress.webui.TableTemplates.register("selection", (val, cell, row, opts) => {
+webexpress.webui.TableTemplates.register("selection", (val, table, row, cell, name, opts) => {
     if ((val === null || val === undefined || val === "") && !opts.editable) {
         return "";
     }
@@ -144,7 +149,7 @@ webexpress.webui.TableTemplates.register("selection", (val, cell, row, opts) => 
 });
 
 // Combo renderer
-webexpress.webui.TableTemplates.register("combo", (val, cell, row, opts) => {
+webexpress.webui.TableTemplates.register("combo", (val, table, row, cell, name, opts) => {
     if ((val === null || val === undefined || val === "") && !opts.editable) {
         return "";
     }
@@ -194,7 +199,7 @@ webexpress.webui.TableTemplates.register("combo", (val, cell, row, opts) => {
 // Text renderer
 // Registers a simple text renderer that shows a native input[type="text"] in edit mode
 // and a plain text node in read-only mode.
-webexpress.webui.TableTemplates.register("text", (val, cell, row, opts) => {
+webexpress.webui.TableTemplates.register("text", (val, table, row, cell, name, opts) => {
     const container = document.createElement("div");
     const editable = opts.editable === true || opts && opts.editable === "true";
 
@@ -229,7 +234,7 @@ webexpress.webui.TableTemplates.register("text", (val, cell, row, opts) => {
 // Numeric renderer
 // Registers a simple numeric renderer that shows a native input[type="number"] in edit mode
 // and a plain text node in read-only mode.
-webexpress.webui.TableTemplates.register("numeric", (val, cell, row, opts) => {
+webexpress.webui.TableTemplates.register("numeric", (val, table, row, cell, name, opts) => {
     // container for renderer output
     const container = document.createElement("div");
 
@@ -285,7 +290,7 @@ webexpress.webui.TableTemplates.register("numeric", (val, cell, row, opts) => {
 });
 
 // Move renderer
-webexpress.webui.TableTemplates.register("move", (val, cell, row, opts) => {
+webexpress.webui.TableTemplates.register("move", (val, table, row, cell, name, opts) => {
     if ((val === null || val === undefined || val === "") && !opts.editable) {
         return "";
     }
@@ -330,7 +335,7 @@ webexpress.webui.TableTemplates.register("move", (val, cell, row, opts) => {
 });
 
 // Rating renderer
-webexpress.webui.TableTemplates.register("rating", (val, cell, row, opts) => {
+webexpress.webui.TableTemplates.register("rating", (val, table, row, cell, name, opts) => {
     if ((val === null || val === undefined || val === "") && !opts.editable) {
         return "";
     }
@@ -360,7 +365,7 @@ webexpress.webui.TableTemplates.register("rating", (val, cell, row, opts) => {
 });
 
 // Editor renderer
-webexpress.webui.TableTemplates.register("editor", (val, cell, row, opts) => {
+webexpress.webui.TableTemplates.register("editor", (val, table, row, cell, name, opts) => {
     if ((val === null || val === undefined || val === "") && !opts.editable) {
         return "";
     }

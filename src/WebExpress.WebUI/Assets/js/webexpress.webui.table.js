@@ -638,6 +638,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 image: div.dataset.image,
                 icon: div.dataset.icon,
                 uri: div.dataset.uri || div.dataset.url,
+                restApi: div.dataset.restApi || div.dataset.editApi,
                 target: div.dataset.target,
                 cells: [],
                 options: null,

@@ -346,7 +346,7 @@ namespace WebExpress.WebUI.WebControl
                 Method = (Method == RequestMethod.NONE
                     ? RequestMethod.POST
                     : Method).ToString(),
-                Enctype = TypeEnctype.None,
+                Enctype = TypeEnctype.Multipart,
                 Name = Name
             };
 

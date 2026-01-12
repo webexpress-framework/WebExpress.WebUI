@@ -367,19 +367,25 @@ namespace WebExpress.WebUI.WebControl
                 content.Add(elements);
                 footer.Add(buttons);
 
-                modal.AddUserAttribute("data-auto-show", State != TypeFormState.Default ? "true" : null);
+                modal.AddUserAttribute("data-auto-show", State != TypeFormState.Default
+                    ? "true"
+                    : null);
 
                 var html = new HtmlElementFormForm()
                 {
                     Id = !string.IsNullOrWhiteSpace(Id) ? $"{Id}-form" : null,
-                    Class = _form.FormLayout == TypeLayoutForm.Inline ? Css.Concatenate("wx-form-inline", GetClasses()) : GetClasses(),
+                    Class = _form.FormLayout == TypeLayoutForm.Inline
+                        ? Css.Concatenate("wx-form-inline", GetClasses())
+                        : GetClasses(),
                     Role = _form.Role,
                     Action = Uri?.ToString() ?? renderContext.Request.Uri?.ToString(),
-                    Method = (Method == RequestMethod.NONE ? RequestMethod.POST : Method).ToString(),
-                    Enctype = TypeEnctype.None,
+                    Method = (Method == RequestMethod.NONE
+                        ? RequestMethod.POST
+                        : Method).ToString(),
+                    Enctype = TypeEnctype.Multipart,
                     Name = Name
                 }
-                .Add(modal);
+                    .Add(modal);
 
                 return html;
             }

@@ -494,7 +494,6 @@ webexpress.webui.DialogPanels = new class {
  */
 webexpress.webui.TableTemplates = new class {
     constructor() {
-        /** @type {{[key: string]: {fn: Function, options: Object}}} internal registry */
         this._templates = {};
     }
 
@@ -502,7 +501,7 @@ webexpress.webui.TableTemplates = new class {
      * Registers a renderer function for a specific type.
      * Overwrites existing renderers if the same type is registered again.
      * @param {string} type - unique template key (e.g., "date", "move", "currency").
-     * @param {Function} rendererFn - function(val, cell, row, opts) => Node|String.
+     * @param {Function} rendererFn - function(val, table, row, cell, name, opts) => Node|String.
      * @param {object} [defaultOptions={}] - optional default options merged with column options.
      * @returns {this} the registry instance for chaining.
      */
