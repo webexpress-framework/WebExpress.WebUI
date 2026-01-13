@@ -151,7 +151,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                     link.href = "javascript:void(0);";
                     link.setAttribute("data-wx-toggle", "modal");
                     link.setAttribute("data-wx-target", item.modal.id);
-                    link.setAttribute("data-wx-modalsize", item.modal.size);
+                    link.setAttribute("data-wx-size", item.modal.size);
                     link.setAttribute("data-wx-uri", item.uri);
                 }
 
