@@ -76,7 +76,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Text)))
+            var html = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Text)))
             {
                 Id = Id,
                 Class = "wx-dropdown-item"
@@ -84,11 +84,21 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("id", Id)
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
                 .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-uri", Uri?.ToString())
-                .AddUserAttribute("data-target", Target.ToStringValue())
-                .AddUserAttribute("data-modal", Modal?.Id)
                 .AddUserAttribute("data-tooltip", Tooltip)
                 .AddUserAttribute("data-color", Color.ToClass());
+
+            if (Modal is not null)
+            {
+                Modal?.ApplyUserAttributes(html);
+                html.AddUserAttribute("data-wx-uri", Uri?.ToString());
+            }
+            else
+            {
+                html.AddUserAttribute("data-uri", Uri?.ToString());
+                html.AddUserAttribute("data-target", Target.ToStringValue());
+            }
+
+            return html;
         }
     }
 }

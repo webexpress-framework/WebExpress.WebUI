@@ -140,7 +140,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-dropdown-item""></div>")]
-        [InlineData("a", @"<div class=""wx-dropdown-item"" data-modal=""#a""></div>")]
+        [InlineData("a", @"<div class=""wx-dropdown-item"" data-wx-toggle=""modal"" data-wx-target=""#a""></div>")]
         public void Modal(string modal, string expected)
         {
             // preconditions
