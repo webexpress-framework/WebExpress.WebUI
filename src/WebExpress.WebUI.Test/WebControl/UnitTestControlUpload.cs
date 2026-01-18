@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("03C6031F-04A9-451F-B817-EBD6D32F8B0C", @"<div id=""03C6031F-04A9-451F-B817-EBD6D32F8B0C"" class=""wx-webui-upload"" data-uri=""*"" name=""*""></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -28,7 +28,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -43,7 +43,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("http://www.example.com", @"<div class=""wx-webui-upload"" data-uri=""http://www.example.com/"" name=""*""></div>")]
         public void Uri(string uri, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -54,7 +54,7 @@ namespace WebExpress.WebUI.Test.WebControl
                     : null
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -69,7 +69,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"<div class=""wx-webui-upload"" data-uri=""*"" name=""*""></div>")]
         public void Multiple(bool multiple, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -78,7 +78,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Multiple = multiple
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -94,7 +94,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("*/*", @"<div class=""wx-webui-upload"" data-uri=""*"" name=""*""></div>")]
         public void Accept(string accept, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -103,7 +103,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Accept = accept
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -118,7 +118,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"<div class=""wx-webui-upload"" data-uri=""*"" data-autoupload=""true"" name=""*""></div>")]
         public void AutoUpload(bool autoupload, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -127,7 +127,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 AutoUpload = autoupload
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -142,7 +142,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"<div class=""wx-webui-upload"" data-uri=""*"" data-fullscreen-dropzone=""true"" name=""*""></div>")]
         public void FullScreenDropzone(bool fullScreenDropzone, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -151,7 +151,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 FullScreenDropzone = fullScreenDropzone
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -167,7 +167,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-upload"" data-uri=""*"" placeholder=""WebExpress.WebUI"" name=""*""></div>")]
         public void Placeholder(string placeholder, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -176,7 +176,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Placeholder = placeholder
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation

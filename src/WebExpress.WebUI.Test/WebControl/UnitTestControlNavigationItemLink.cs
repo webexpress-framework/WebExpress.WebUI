@@ -22,7 +22,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<a id=""id"" class=""wx-link""></a>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -30,7 +30,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -46,7 +46,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.webui:plugin.name", @"<a class=""wx-link"">WebExpress.WebUI</a>")]
         public void Text(string text, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -55,7 +55,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Text = text,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -71,7 +71,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("/a/b", @"<a class=""wx-link"" href=""/a/b""></a>")]
         public void Uri(string uri, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -80,7 +80,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Uri = uri is not null ? new UriEndpoint(uri) : null,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -96,7 +96,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("b", @"<a class=""wx-link"" title=""b""></a>")]
         public void Title(string title, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -105,7 +105,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Title = title,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -123,7 +123,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeTarget.Framename, @"<a class=""wx-link"" target=""_framename""></a>")]
         public void Target(TypeTarget target, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -132,7 +132,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Target = target,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -149,7 +149,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("a<br/>b", @"<a class=""wx-link"" title=""a<br/>b"" data-bs-toggle=""tooltip""></a>")]
         public void Tooltip(string tooltip, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -158,7 +158,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Tooltip = tooltip
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -173,7 +173,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(typeof(IconStar), @"<a class=""wx-link""><i class=""fas fa-star""></i></a>")]
         public void Icon(Type icon, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -182,7 +182,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -197,7 +197,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"<a class=""wx-link text-nowrap""></a>")]
         public void NoWrap(bool noWrap, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -206,7 +206,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 NoWrap = noWrap
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -219,7 +219,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Fact]
         public void Content()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -227,7 +227,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control2 = new ControlNavigationItemLink(null, [new ControlIcon() { Icon = new IconStar() }]);
             var control3 = new ControlNavigationItemLink(null, new List<ControlIcon>([new ControlIcon() { Icon = new IconStar() }]).ToArray());
 
-            // test execution
+            // act
             var html1 = control1.Render(context, visualTree);
             var html2 = control2.Render(context, visualTree);
             var html3 = control3.Render(context, visualTree);

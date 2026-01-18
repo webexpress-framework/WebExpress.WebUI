@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<div id=""id"" class=""form-check""><input name=""id"" type=""checkbox"" class=""form-check-input""><label class=""form-check-label"" for=""id""></label></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -40,7 +40,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(@"<div id=""*"" class=""form-check""><input name=""*"" type=""checkbox"" class=""form-check-input""><label class=""form-check-label"" for=""*""></label></div>")]
         public void AutoId(string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -63,7 +63,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"<div class=""form-check form-check-inline""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
         public void Inline(bool inline, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -73,7 +73,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Inline = inline
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -88,7 +88,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.WebUI:plugin.name", @"<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label"">WebExpress.WebUI</label></div>")]
         public void Description(string description, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -98,7 +98,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Description = description
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -112,7 +112,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeLayoutCheck.Switch, @"<div class=""form-check form-switch""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
         public void Layout(TypeLayoutCheck layout, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -122,7 +122,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Layout = layout
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -137,7 +137,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"*<div class=""form-check""><input type=""checkbox"" class=""form-check-input"" checked><label class=""form-check-label""></label></div>*")]
         public void ValueForm(bool? value, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -147,7 +147,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 renderContext.SetValue(control, new ControlFormInputValueBool(value ?? false));
             });
 
-            // test execution
+            // act
             var html = form.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -162,7 +162,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"*<div class=""form-check""><input type=""checkbox"" class=""form-check-input"" checked><label class=""form-check-label""></label></div>*")]
         public void ValueItem(bool? value, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -172,7 +172,7 @@ namespace WebExpress.WebUI.Test.WebControl
             });
             var form = new ControlForm().Add(control);
 
-            // test execution
+            // act
             var html = form.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);

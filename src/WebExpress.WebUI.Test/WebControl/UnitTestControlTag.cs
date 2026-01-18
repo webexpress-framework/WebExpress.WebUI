@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<div id=""id"" class=""wx-webui-tag"" role=""tag""></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -26,7 +26,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -41,7 +41,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"<div class=""wx-webui-tag"" role=""tag"" data-value=""abc""></div>")]
         public void Value(string text, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Value = text
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorTag.Dark, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-dark""></div>")]
         public void SystemColor(TypeColorTag color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -81,7 +81,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Color = new PropertyColorTag(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -98,7 +98,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("gold", @"<div class=""wx-webui-tag"" role=""tag"" data-color-style=""background: gold;""></div>")]
         public void UserColor(string color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -107,7 +107,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Color = new PropertyColorTag(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation

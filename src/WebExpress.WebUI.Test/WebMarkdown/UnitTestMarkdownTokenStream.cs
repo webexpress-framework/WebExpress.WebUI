@@ -19,11 +19,11 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         public void Peek_WithTokenType(
             MarkdownTokenType firstType, string firstValue, MarkdownTokenType queryType, bool expected)
         {
-            // preconditions
+            // arrange
             var tokens = CreateTokens((firstType, firstValue, 0));
             var stream = new MarkdownTokenStream(tokens, "foo#foo");
 
-            // test execution
+            // act
             var peek = stream.Peek(queryType);
 
             // validation
@@ -36,14 +36,14 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [Fact]
         public void Peek_ReturnsTrueForMatchingTokenType()
         {
-            // preconditions
+            // arrange
             var firstType = MarkdownTokenType.Text;
             var firstValue = "foo";
             var queryTypes = new MarkdownTokenType[] { MarkdownTokenType.Text, MarkdownTokenType.Hash };
             var tokens = CreateTokens((firstType, firstValue, 0));
             var stream = new MarkdownTokenStream(tokens, "foo");
 
-            // test execution
+            // act
             var peek = stream.Peek(queryTypes);
 
             // validation
@@ -56,14 +56,14 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [Fact]
         public void Peek_ReturnsFalseForNonMatchingTokenType()
         {
-            // preconditions
+            // arrange
             var firstType = MarkdownTokenType.Text;
             var firstValue = "foo";
             var queryTypes = new MarkdownTokenType[] { MarkdownTokenType.Hash };
             var tokens = CreateTokens((firstType, firstValue, 0));
             var stream = new MarkdownTokenStream(tokens, "foo");
 
-            // test execution
+            // act
             var peek = stream.Peek(queryTypes);
 
             // validation
@@ -76,12 +76,12 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [Fact]
         public void Peek_AtEnd()
         {
-            // preconditions
+            // arrange
             var tokens = CreateTokens();
             var stream = new MarkdownTokenStream(tokens, "");
             stream.Skip();
 
-            // test execution
+            // act
             var peek = stream.Peek();
 
             // validation
@@ -100,11 +100,11 @@ namespace WebExpress.WebUI.Test.WebMarkdown
             MarkdownTokenType secondType, string secondValue,
             MarkdownTokenType queryType, bool expected)
         {
-            // preconditions
+            // arrange
             var tokens = CreateTokens((firstType, firstValue, 0), (secondType, secondValue, 1));
             var stream = new MarkdownTokenStream(tokens, "");
 
-            // test execution
+            // act
             var peekNext = stream.PeekNext(queryType);
 
             // validation
@@ -117,11 +117,11 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [Fact]
         public void PeekNext_NoNextToken()
         {
-            // preconditions
+            // arrange
             var tokens = CreateTokens();
             var stream = new MarkdownTokenStream(tokens, "");
 
-            // test execution
+            // act
             var peekNext = stream.PeekNext();
 
             // validation
@@ -137,11 +137,11 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         public void Consume_IfMatches(
             MarkdownTokenType firstType, string firstValue, MarkdownTokenType queryType, bool expectNotNull)
         {
-            // preconditions
+            // arrange
             var tokens = CreateTokens((firstType, firstValue, 0));
             var stream = new MarkdownTokenStream(tokens, "");
 
-            // test execution
+            // act
             var result = stream.Consume(queryType);
 
             // validation
@@ -161,11 +161,11 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [Fact]
         public void Peek_WithoutAdvancing()
         {
-            // preconditions
+            // arrange
             var tokens = CreateTokens((MarkdownTokenType.Text, "foo", 0), (MarkdownTokenType.EOL, "", 1), (MarkdownTokenType.EOF, "", 2));
             var stream = new MarkdownTokenStream(tokens, "foo");
 
-            // test execution
+            // act
             var peek1 = stream.Peek();
             var peek2 = stream.Peek();
 
@@ -182,11 +182,11 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [Fact]
         public void Consume()
         {
-            // preconditions
+            // arrange
             var tokens = CreateTokens((MarkdownTokenType.Text, "foo", 0), (MarkdownTokenType.EOL, "", 1), (MarkdownTokenType.EOF, "", 2));
             var stream = new MarkdownTokenStream(tokens, "foo");
 
-            // test execution
+            // act
             var token = stream.Consume();
 
             // validation
@@ -200,11 +200,11 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [Fact]
         public void Consume_AtEnd()
         {
-            // preconditions
+            // arrange
             var tokens = CreateTokens();
             var stream = new MarkdownTokenStream(tokens, "");
 
-            // test execution
+            // act
             var consume = stream.Consume();
 
             // validation
@@ -223,13 +223,13 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("< < < < <#", 1)]
         public void ConsumeLine(string input, int expectedCount)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
             var inputTokens = tokenizer.Tokenize();
             var stream = new MarkdownTokenStream(inputTokens, input);
             var count = 0;
 
-            // test execution
+            // act
             do
             {
                 stream.ConsumeLine();
@@ -246,7 +246,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [Fact]
         public void Skip()
         {
-            // preconditions
+            // arrange
             var tokens = CreateTokens
             (
                 (MarkdownTokenType.Text, "foo", 0),
@@ -255,7 +255,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
             );
             var stream = new MarkdownTokenStream(tokens, "foo");
 
-            // test execution
+            // act
             stream.Skip();
 
             // validation
@@ -274,11 +274,11 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("||||*", MarkdownTokenType.Pipe, 4, MarkdownTokenType.Star)]
         public void Skip_While(string input, MarkdownTokenType skipTokenType, int expectedPosition, MarkdownTokenType expectedTokenType)
         {
-            // preconditions
+            // arrange
             var tokens = new MarkdownTokenizer(input).Tokenize();
             var stream = new MarkdownTokenStream(tokens, input);
 
-            // test execution
+            // act
             stream.Skip(skipTokenType);
 
             // validation
@@ -297,7 +297,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData(5, 3, null)]
         public void SkipCount(int count, int expectedPosition, MarkdownTokenType? expectedNextTokenType)
         {
-            // preconditions
+            // arrange
             var tokens = CreateTokens(
                 (MarkdownTokenType.Text, "foo", 0),
                 (MarkdownTokenType.EOL, "", 1),
@@ -305,7 +305,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
             );
             var stream = new MarkdownTokenStream(tokens, "foo");
 
-            // test execution
+            // act
             stream.Skip(count);
 
             // validation
@@ -328,11 +328,11 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [Fact]
         public void Skip_AtEnd()
         {
-            // preconditions
+            // arrange
             var tokens = CreateTokens();
             var stream = new MarkdownTokenStream(tokens, "");
 
-            // test execution
+            // act
             stream.Skip();
 
             // validation
@@ -345,11 +345,11 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [Fact]
         public void IsAtEnd()
         {
-            // preconditions
+            // arrange
             var tokens = CreateTokens((MarkdownTokenType.Text, "foo", 0), (MarkdownTokenType.EOF, "", 1));
             var stream = new MarkdownTokenStream(tokens, "foo");
 
-            // test execution
+            // act
             var isAtEnd1 = stream.IsAtEnd();
             stream.Consume(); // consume "foo"
             var isAtEnd2 = stream.IsAtEnd();
@@ -370,11 +370,11 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData(3, MarkdownTokenType.EOF, "")]
         public void Seek(int position, MarkdownTokenType expectedType, string expectedText)
         {
-            // preconditions
+            // arrange
             var tokens = new MarkdownTokenizer("Hello\nWorld").Tokenize();
             var stream = new MarkdownTokenStream(tokens, "Hello\nWorld");
 
-            // test execution
+            // act
             var success = stream.Seek(position);
             var token = stream.Peek();
 
@@ -393,11 +393,11 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData(100)]
         public void Seek_Invalid(int invalidPos)
         {
-            // preconditions
+            // arrange
             var tokens = new MarkdownTokenizer("Hello\nWorld").Tokenize();
             var stream = new MarkdownTokenStream(tokens, "Hello\nWorld");
 
-            // test execution
+            // act
             var result = stream.Seek(invalidPos);
 
             // validation
@@ -425,11 +425,11 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("", 1, MarkdownTokenType.Pipe)] // Empty input with pipe delimiter
         public void Split(string input, int expectedSegments, params MarkdownTokenType[] stopTokens)
         {
-            // preconditions
+            // arrange
             var tokens = new MarkdownTokenizer(input).Tokenize();
             var tokenStream = new MarkdownTokenStream(tokens, input);
 
-            // test execution
+            // act
             var result = tokenStream.Split(stopTokens);
 
             // validation
@@ -449,7 +449,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [Fact]
         public void Reverse()
         {
-            // preconditions
+            // arrange
             var tokens = new List<MarkdownToken>
             {
                 new(MarkdownTokenType.Text, "Token1", 0),
@@ -459,7 +459,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
             var source = "TestSource";
             var tokenStream = new MarkdownTokenStream(tokens, source);
 
-            // test execution
+            // act
             var reversedStream = tokenStream.Reverse();
 
             // validation
@@ -480,12 +480,12 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("foo ** ", null, 5)]
         public void Preview(string input, MarkdownTokenType? stopToken, int? expectedCount)
         {
-            // preconditions
+            // arrange
             var tokens = new MarkdownTokenizer(input).Tokenize();
             var tokenStream = new MarkdownTokenStream(tokens, input);
             var originalPosition = tokenStream.Position;
 
-            // test execution
+            // act
             var previewedTokenStram = stopToken is not null ? tokenStream.Preview(stopToken.Value) : tokenStream.Preview();
 
             // validation
@@ -502,11 +502,11 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData(null, 1)]
         public void Count(string input, int expectedCount)
         {
-            // preconditions
+            // arrange
             var tokens = new MarkdownTokenizer(input).Tokenize();
             var stream = new MarkdownTokenStream(tokens, input);
 
-            // test execution
+            // act
             int result = stream.Count();
 
             // validation
@@ -519,11 +519,11 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [Fact]
         public void Count_EmptyStream()
         {
-            // preconditions
+            // arrange
             var tokens = new List<MarkdownToken>();
             var stream = new MarkdownTokenStream(tokens, "");
 
-            // test execution
+            // act
             int result = stream.Count();
 
             // validation
@@ -537,12 +537,12 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("This is a sample text for tokens.", "This is a sample text for tokens.")]
         public void GetSource(string sourceText, string expected)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(sourceText);
             var tokens = tokenizer.Tokenize();
             var stream = new MarkdownTokenStream(tokens, sourceText);
 
-            // test execution
+            // act
             var result = stream.GetSource();
 
             // validation
@@ -556,7 +556,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData(4, 14, "# Title\nCode line 1\nCode line 2", "Code line 1\nCode line 2")]
         public void GetSource_StartEnd(int startIndex, int endIndex, string source, string expected)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(source);
             var tokens = tokenizer.Tokenize().ToList();
             var stream = new MarkdownTokenStream(tokens, source);
@@ -564,7 +564,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
             var startToken = tokens[startIndex];
             var endToken = tokens[endIndex];
 
-            // test execution
+            // act
             string result = stream.GetSource(startToken, endToken);
 
             // validation
@@ -579,7 +579,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData(2, 100)]
         public void GetSource_Invalid(int startIndex, int endIndex)
         {
-            // preconditions
+            // arrange
             string source = "# Title\nCode line 1\nCode line 2";
             var tokenizer = new MarkdownTokenizer(source);
             var tokens = tokenizer.Tokenize().ToList();
@@ -588,7 +588,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
             MarkdownToken start = (startIndex >= 0 && startIndex < tokens.Count) ? tokens[startIndex] : null;
             MarkdownToken end = (endIndex >= 0 && endIndex < tokens.Count) ? tokens[endIndex] : null;
 
-            // test execution
+            // act
             string result = stream.GetSource(start, end);
 
             // validation
@@ -608,13 +608,13 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData(6, 6)]
         public void Tokens(int position, int expectedCount)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer("Start Middle End");
             var tokens = tokenizer.Tokenize().ToList();
             var stream = new MarkdownTokenStream(tokens, "Start Middle End");
             stream.Seek(position); // set the position
 
-            // test execution
+            // act
             var remaining = stream.Tokens.ToList();
 
             // validation
@@ -627,7 +627,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [Fact]
         public void AsEnumerable()
         {
-            // preconditions
+            // arrange
             var tokens = new List<MarkdownToken>
             {
                 new(MarkdownTokenType.Tab, "\t", 0),
@@ -639,7 +639,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
             var stream = new MarkdownTokenStream(tokens, "source");
             stream.Skip(1); // advance to second token
 
-            // test execution
+            // act
             var result = stream.AsEnumerable().ToList();
 
             // validation

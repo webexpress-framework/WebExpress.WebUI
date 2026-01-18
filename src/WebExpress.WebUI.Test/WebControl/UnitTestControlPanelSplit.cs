@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<div id=""id"" class=""wx-webui-split"" data-orientation=""horizontal"">*</div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -26,7 +26,7 @@ namespace WebExpress.WebUI.Test.WebControl
             control.AddSidePanel(new ControlText() { Text = "p1" });
             control.AddMainPanel(new ControlText() { Text = "p2" });
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -40,7 +40,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeOrientationSplit.Vertical, @"<div class=""wx-webui-split"" data-orientation=""vertical"">*</div>")]
         public void Orientation(TypeOrientationSplit orientation, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -51,7 +51,7 @@ namespace WebExpress.WebUI.Test.WebControl
             control.AddSidePanel(new ControlText() { Text = "p1" });
             control.AddMainPanel(new ControlText() { Text = "p2" });
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -71,7 +71,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Transparent, @"<div * data-splitter-class=""bg-transparent"">*</div>")]
         public void SplitterColor(TypeColorBackground splitterColor, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -82,7 +82,7 @@ namespace WebExpress.WebUI.Test.WebControl
             control.AddSidePanel(new ControlText() { Text = "p1" });
             control.AddMainPanel(new ControlText() { Text = "p2" });
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -100,7 +100,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(typeof(ControlImage), typeof(ControlImage), @"<div class=""wx-webui-split"" data-orientation=""horizontal""><div id=""-p1"" class=""wx-side-pane""><img></div><div id=""-p2"" class=""wx-main-pane""><img></div></div>")]
         public void Add(Type child1, Type child2, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -108,7 +108,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var childInstance2 = child2 is not null ? Activator.CreateInstance(child2, [null]) as IControl : null;
             var control = new ControlPanelSplit();
 
-            // test execution
+            // act
             if (childInstance1 is not null)
             {
                 control.AddSidePanel(childInstance1);
@@ -133,7 +133,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(100, @"<div * data-min-side=""100"">*</div>")]
         public void SidePanelMinSize(int size, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -144,7 +144,7 @@ namespace WebExpress.WebUI.Test.WebControl
             control.AddSidePanel(new ControlText() { Text = "p1" });
             control.AddMainPanel(new ControlText() { Text = "p2" });
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -159,7 +159,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(100, @"<div * data-max-side=""100"">*</div>")]
         public void SidePanelMaxSize(int size, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -170,7 +170,7 @@ namespace WebExpress.WebUI.Test.WebControl
             control.AddSidePanel(new ControlText() { Text = "p1" });
             control.AddMainPanel(new ControlText() { Text = "p2" });
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -185,7 +185,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(100, @"<div * data-size=""100"">*</div>")]
         public void SidePanelInitialSize(int size, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -196,7 +196,7 @@ namespace WebExpress.WebUI.Test.WebControl
             control.AddSidePanel(new ControlText() { Text = "p1" });
             control.AddMainPanel(new ControlText() { Text = "p2" });
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -211,7 +211,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(100, @"<div * data-splitter-size=""100"">*</div>")]
         public void SplitterSize(int size, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -222,7 +222,7 @@ namespace WebExpress.WebUI.Test.WebControl
             control.AddSidePanel(new ControlText() { Text = "p1" });
             control.AddMainPanel(new ControlText() { Text = "p2" });
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -237,7 +237,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeSplitOrder.MainSide, @"<div * data-order=""main-side"">*</div>")]
         public void Order(TypeSplitOrder order, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -248,7 +248,7 @@ namespace WebExpress.WebUI.Test.WebControl
             control.AddSidePanel(new ControlText() { Text = "p1" });
             control.AddMainPanel(new ControlText() { Text = "p2" });
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -265,7 +265,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeSizeUnit.Rem, @"<div * data-unit=""rem"">*</div>")]
         public void Unit(TypeSizeUnit unit, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -276,7 +276,7 @@ namespace WebExpress.WebUI.Test.WebControl
             control.AddSidePanel(new ControlText() { Text = "p1" });
             control.AddMainPanel(new ControlText() { Text = "p2" });
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);

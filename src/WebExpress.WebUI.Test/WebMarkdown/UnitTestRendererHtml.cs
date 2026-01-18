@@ -35,12 +35,12 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("Text[^1]", @"<p>Text <sup>1</sup></p>")]
         public void ConvertInlineElements(string markdown, string expectedHtml)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var document = MarkdownParser.Parse(markdown);
 
-            // test execution
+            // act
             var html = document.ConvertToHtml(renderContext);
 
             // validation
@@ -63,12 +63,12 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("Welcome to **WebExpress**! Build your own `WebExpress` application.", @"<p>Welcome to  <strong>WebExpress</strong>! Build your own  <code>WebExpress</code> application.</p>")]
         public void ConvertParagraph(string markdown, string expectedHtml)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var document = MarkdownParser.Parse(markdown);
 
-            // test execution
+            // act
             var html = document.ConvertToHtml(renderContext);
 
             // validation
@@ -94,12 +94,12 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("###### Title 6", @"<h6>Title 6</h6>")]
         public void ConvertHeader(string markdown, string expectedHtml)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var document = MarkdownParser.Parse(markdown);
 
-            // test execution
+            // act
             var html = document.ConvertToHtml(renderContext);
 
             // validation
@@ -122,12 +122,12 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("------------", @"<hr>")]
         public void ConvertHorizontalLine(string markdown, string expectedHtml)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var document = MarkdownParser.Parse(markdown);
 
-            // test execution
+            // act
             var html = document.ConvertToHtml(renderContext);
 
             // validation
@@ -149,12 +149,12 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("> > This is a nested quote.", @"<blockquote><blockquote><p>This is a nested quote.</p></blockquote></blockquote>")]
         public void ConvertQuote(string markdown, string expectedHtml)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var document = MarkdownParser.Parse(markdown);
 
-            // test execution
+            // act
             var html = document.ConvertToHtml(renderContext);
 
             // validation
@@ -176,12 +176,12 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("\tThis is a simple indent.", @"<div style=""text-indent: 2em;""><p>This is a simple indent.</p></div>")]
         public void ConvertIndent(string markdown, string expectedHtml)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var document = MarkdownParser.Parse(markdown);
 
-            // test execution
+            // act
             var html = document.ConvertToHtml(renderContext);
 
             // validation
@@ -205,10 +205,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData(">* Success", @"<div class=""wx-callout wx-callout-success""><div class=""wx-callout-body""><p>Success</p></div></div>")]
         public void ConvertCallout(string markdown, string expectedHtml)
         {
-            // preconditions
+            // arrange
             var document = MarkdownParser.Parse(markdown);
 
-            // test execution
+            // act
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var html = document.ConvertToHtml(renderContext);
@@ -242,12 +242,12 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("a. First\n  - Sub", @"<ol type=""a""><li><p>First</p></li><ul><li><p>Sub</p></li></ul></ol>")]
         public void ConvertList(string markdown, string expectedHtml)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var document = MarkdownParser.Parse(markdown);
 
-            // test execution
+            // act
             var html = document.ConvertToHtml(renderContext);
 
             // validation
@@ -268,10 +268,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("|Name|City\r\n|---|---|---|\r\n|Mario|Mushroom", @"<div class=""wx-webui-table""><div class=""wx-table-columns""><div data-label=""Name""></div><div data-label=""City""></div></div><div class=""wx-table-row""><div>Mario</div><div>Mushroom</div></div></div>")]
         public void ConvertTable(string markdown, string expectedHtml)
         {
-            // preconditions
+            // arrange
             var document = MarkdownParser.Parse(markdown);
 
-            // test execution
+            // act
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var html = document.ConvertToHtml(renderContext);

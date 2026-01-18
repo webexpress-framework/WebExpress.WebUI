@@ -19,13 +19,13 @@ namespace WebExpress.WebUI.Test.WebPage
         [Fact]
         public void GetResponse200()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTreeContext = new VisualTreeContext(context);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
 
-            // test execution
+            // act
             var response = visualTree.GetResponse(visualTreeContext);
 
             // validation
@@ -40,7 +40,7 @@ namespace WebExpress.WebUI.Test.WebPage
         [Fact]
         public void GetResponse201()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTreeContext = new VisualTreeContext(context);
@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebPage
                 StatusCode = 201
             };
 
-            // test execution
+            // act
             var response = visualTree.GetResponse(visualTreeContext);
 
             // validation
@@ -64,7 +64,7 @@ namespace WebExpress.WebUI.Test.WebPage
         [Fact]
         public void GetResponse204()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTreeContext = new VisualTreeContext(context);
@@ -73,7 +73,7 @@ namespace WebExpress.WebUI.Test.WebPage
                 StatusCode = 204
             };
 
-            // test execution
+            // act
             var response = visualTree.GetResponse(visualTreeContext);
 
             // validation
@@ -88,7 +88,7 @@ namespace WebExpress.WebUI.Test.WebPage
         [Fact]
         public void GetResponse301()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTreeContext = new VisualTreeContext(context);
@@ -97,7 +97,7 @@ namespace WebExpress.WebUI.Test.WebPage
                 StatusCode = 301
             };
 
-            // test execution
+            // act
             var response = visualTree.GetResponse(visualTreeContext);
 
             // validation
@@ -112,7 +112,7 @@ namespace WebExpress.WebUI.Test.WebPage
         [Fact]
         public void GetResponse302()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTreeContext = new VisualTreeContext(context);
@@ -121,7 +121,7 @@ namespace WebExpress.WebUI.Test.WebPage
                 StatusCode = 302
             };
 
-            // test execution
+            // act
             var response = visualTree.GetResponse(visualTreeContext);
 
             // validation
@@ -136,7 +136,7 @@ namespace WebExpress.WebUI.Test.WebPage
         [Fact]
         public void GetResponse400()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTreeContext = new VisualTreeContext(context);
@@ -145,7 +145,7 @@ namespace WebExpress.WebUI.Test.WebPage
                 StatusCode = 400
             };
 
-            // test execution
+            // act
             var response = visualTree.GetResponse(visualTreeContext);
 
             // validation
@@ -160,7 +160,7 @@ namespace WebExpress.WebUI.Test.WebPage
         [Fact]
         public void GetResponse401()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTreeContext = new VisualTreeContext(context);
@@ -169,7 +169,7 @@ namespace WebExpress.WebUI.Test.WebPage
                 StatusCode = 401
             };
 
-            // test execution
+            // act
             var response = visualTree.GetResponse(visualTreeContext);
 
             // validation
@@ -184,7 +184,7 @@ namespace WebExpress.WebUI.Test.WebPage
         [Fact]
         public void GetResponse404()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTreeContext = new VisualTreeContext(context);
@@ -193,7 +193,7 @@ namespace WebExpress.WebUI.Test.WebPage
                 StatusCode = 404
             };
 
-            // test execution
+            // act
             var response = visualTree.GetResponse(visualTreeContext);
 
             // validation
@@ -208,7 +208,7 @@ namespace WebExpress.WebUI.Test.WebPage
         [Fact]
         public void GetResponse422()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTreeContext = new VisualTreeContext(context);
@@ -217,7 +217,7 @@ namespace WebExpress.WebUI.Test.WebPage
                 StatusCode = 422
             };
 
-            // test execution
+            // act
             var response = visualTree.GetResponse(visualTreeContext);
 
             // validation
@@ -232,7 +232,7 @@ namespace WebExpress.WebUI.Test.WebPage
         [Fact]
         public void GetResponse500()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTreeContext = new VisualTreeContext(context);
@@ -241,7 +241,7 @@ namespace WebExpress.WebUI.Test.WebPage
                 StatusCode = 500
             };
 
-            // test execution
+            // act
             var response = visualTree.GetResponse(visualTreeContext);
 
             // validation
@@ -256,7 +256,7 @@ namespace WebExpress.WebUI.Test.WebPage
         [InlineData("/route")]
         public void Base(string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var applicationContext = new ApplicationContext();
             var routeProperty = typeof(ApplicationContext).GetProperty("Route");
@@ -265,7 +265,7 @@ namespace WebExpress.WebUI.Test.WebPage
             var visualTreeContext = new VisualTreeContext(context);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
 
-            // test execution
+            // act
             var response = visualTree.GetResponse(visualTreeContext);
 
             // validation

@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<div id=""id"" class=""wx-webui-date"" data-format=""yyyy-MM-dd""></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -26,7 +26,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -41,7 +41,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("yyyy-mm-dd", @"<div class=""wx-webui-date"" data-format=""yyyy-mm-dd""></div>")]
         public void Format(string format, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Format = format
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -65,7 +65,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("", @"<div class=""wx-webui-date"" data-format=""yyyy-MM-dd""></div>")]
         public void Date(string date, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Date = string.IsNullOrWhiteSpace(date) ? default : DateTime.Parse(date)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -96,7 +96,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorDate.Dark, @"<div class=""wx-webui-date"" data-color-css=""bg-dark"" data-format=""yyyy-MM-dd""></div>")]
         public void SystemColor(TypeColorDate color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -105,7 +105,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Color = new PropertyColorDate(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -122,7 +122,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("gold", @"<div class=""wx-webui-date"" data-color-style=""background: gold;"" data-format=""yyyy-MM-dd""></div>")]
         public void UserColor(string color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -131,7 +131,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Color = new PropertyColorDate(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation

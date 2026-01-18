@@ -17,7 +17,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [Fact]
         public void EmptyInput()
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse("");
 
             // validation
@@ -35,7 +35,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData(" \t \n")]
         public void WhitespaceOnly(string input)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -59,7 +59,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("####### Header Over", 6, "Header Over")] // Level 7 should also be parsed as level 6
         public void Header(string input, int expectedLevel, string expectedText)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -84,7 +84,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("\tMultiline\n\tIndent", "Multiline Indent", 1)]
         public void Indent(string input, string expected, int count)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -113,7 +113,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("A multiline\n paragraph.\n\nAnother paragraph.", "A multiline paragraph.")]
         public void Paragraph(string input, string expected)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -135,7 +135,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("> Multiline\n> quote\n> \n> Another quote", "Multiline quote")]
         public void Quote(string input, string expected)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -152,7 +152,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("> > Nested blockquote content.")]
         public void Quote_Nested(string input)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -167,7 +167,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData(">> Nested blockquote content.")]
         public void Quote_Nested_Invalid(string input)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -191,7 +191,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData(">!! Multiline\n> error\n> \n>!! Another error", "Multiline error", MarkdownCalloutType.Danger)]
         public void Callout(string input, string expected, MarkdownCalloutType expectedType)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -217,7 +217,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("~~~~~~~")]
         public void HorizontalRule(string input)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -239,7 +239,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("~~~***___---")]
         public void HorizontalRule_Invalid(string input)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -259,7 +259,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("```csharp\nnested```\n```", "nested```", "csharp")] // nested fence
         public void CodeBlock(string input, string expectedCode, string expectedLang)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -280,7 +280,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("```csharp\nConsole.WriteLine(\"Hello\");")] // no closing fence
         public void CodeBlock_Invalid(string input)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation: No code elements should be created
@@ -302,7 +302,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("- **Feature**: A", "Feature : A", 1, 1, 0)]
         public void List(string input, string firstItemText, int expectedCount, int listCount, int skipCount)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -324,7 +324,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("1. Item 1\n\n1. Item 2", 1, "Item 1", 2)]
         public void OrderedList(string input, int expectedCount, string firstItemText, int listCount)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -345,7 +345,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("Paragraph A.\n\nParagraph B.\n\nParagraph C.", 3)]
         public void MultiParagraphs(string input, int expected)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -363,10 +363,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("WebExpress.WebUI.Test.Data.TableExample3.md", 4, 3, 0)]
         public void Table(string fileName, int expectedColumnCount, int expectedRowCount, int expectedFooterCount)
         {
-            // preconditions
+            // arrange
             var markdown = LoadEmbeddedResource(fileName);
 
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(markdown);
 
             // validation

@@ -21,10 +21,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("WebExpress.WebUI.Test.Data.ComplexExample3.md", 9)]
         public void ParsesComplexDocument(string fileName, int elementsCount)
         {
-            // preconditions
+            // arrange
             var markdown = LoadEmbeddedResource(fileName);
 
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(markdown);
 
             // validation

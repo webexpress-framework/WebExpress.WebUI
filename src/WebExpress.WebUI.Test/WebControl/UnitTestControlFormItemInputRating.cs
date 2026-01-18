@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<div id=""id"" class=""wx-webui-input-rating"" name=""id""></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -29,7 +29,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -43,7 +43,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(@"<div id=""*"" class=""wx-webui-input-rating"" name=""*""></div>")]
         public void AutoId(string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -52,7 +52,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -67,7 +67,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"<div class=""wx-webui-input-rating"" name=""abc""></div>")]
         public void Name(string name, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -77,7 +77,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Name = name
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -92,7 +92,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(5, @"*<div class=""wx-webui-input-rating"" data-value=""5""></div>*")]
         public void Value(uint value, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -102,7 +102,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 renderContext.SetValue(control, new ControlFormInputValueUInt(value));
             });
 
-            // test execution
+            // act
             var html = form.Render(context, visualTree);
 
             // validation
@@ -117,7 +117,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(5, @"<div class=""wx-webui-input-rating"" data-stars=""5""></div>")]
         public void MaxRating(uint value, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -127,7 +127,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 MaxRating = value
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -143,7 +143,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-input-rating""></div>")]
         public void Label(string label, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -153,7 +153,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Label = label
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -168,7 +168,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(typeof(IconFolder), @"<div class=""wx-webui-input-rating""></div>")]
         public void Icon(Type iconType, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -179,7 +179,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Icon = icon
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation

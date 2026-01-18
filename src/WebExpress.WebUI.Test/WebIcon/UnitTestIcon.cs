@@ -18,13 +18,13 @@ namespace WebExpress.WebUI.Test.WebIcon
         [InlineData(typeof(IconHome), @"<i class=""fas fa-home""></i>")]
         public void Id(Type iconType, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
             var icon = Activator.CreateInstance(iconType) as IIcon;
 
-            // test execution
+            // act
             var html = icon.Render(renderContext, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);

@@ -19,7 +19,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<input id=""id"" name=""id"" type=""text"" class=""form-control"">")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -28,7 +28,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -41,7 +41,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(@"<input id=""*"" name=""*"" type=""text"" class=""form-control"">")]
         public void AutoId(string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -64,7 +64,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"<input name=""abc"" type=""text"" class=""form-control"">")]
         public void Name(string name, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Name = name
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -89,7 +89,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeEditTextFormat.Wysiwyg, @"<div class=""wx-webui-editor form-control""></div>")]
         public void Format(TypeEditTextFormat format, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -99,7 +99,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Format = format
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -113,7 +113,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"<input type=""text"" class=""form-control"">")]
         public void Description(string description, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -123,7 +123,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Description = description
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -138,7 +138,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.webui:plugin.name", @"<input type=""text"" class=""form-control"" placeholder=""WebExpress.WebUI"">")]
         public void Placeholder(string placeholder, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -148,7 +148,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Placeholder = placeholder
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -163,7 +163,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(10u, @"<input minlength=""10"" type=""text"" class=""form-control"">")]
         public void MinLength(uint? minLength, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -173,7 +173,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 MinLength = minLength
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -188,7 +188,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(10u, @"<input maxlength=""10"" type=""text"" class=""form-control"">")]
         public void MaxLength(uint? maxLength, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -198,7 +198,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 MaxLength = maxLength
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -212,7 +212,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"<input required type=""text"" class=""form-control"">")]
         public void Required(bool required, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -222,7 +222,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Required = required
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -236,7 +236,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc.*", @"<input pattern=""abc.*"" type=""text"" class=""form-control"">")]
         public void Pattern(string pattern, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -246,7 +246,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Pattern = pattern
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -261,7 +261,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(10u, @"<textarea class=""form-control"" rows=""10""></textarea>")]
         public void Rows(uint? rows, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -272,7 +272,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Format = TypeEditTextFormat.Multiline
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -286,7 +286,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"*<input value=""abc"" type=""text"" class=""form-control"">*")]
         public void ValueForm(string value, string expected)
         {
-            // preconditions
+            // arrange
             var initialized = false;
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
@@ -299,7 +299,7 @@ namespace WebExpress.WebUI.Test.WebControl
                     initialized = true;
                 });
 
-            // test execution
+            // act
             var html = form.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -314,7 +314,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"*<input value=""abc"" type=""text"" class=""form-control"">*")]
         public void ValueItem(string value, string expected)
         {
-            // preconditions
+            // arrange
             var initialized = false;
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
@@ -327,7 +327,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 });
             var form = new ControlForm().Add(control);
 
-            // test execution
+            // act
             var html = form.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -342,7 +342,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"*<input id=""text-box"" value=""abc"" name=""text-box"" type=""text"" class=""form-control"">*")]
         public void ValidateForm(string value, string expected)
         {
-            // preconditions
+            // arrange
             var validated = false;
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
@@ -368,7 +368,7 @@ namespace WebExpress.WebUI.Test.WebControl
             context.Request.AddParameter(new Parameter(form.Id, context.Request?.Session.Id.ToString(), ParameterScope.Parameter));
             context.Request.AddParameter(new Parameter("text-box", value, ParameterScope.Parameter));
 
-            // test execution
+            // act
             var html = form.Render(context, visualTree);
 
             // validation
@@ -384,7 +384,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"*<input id=""text-box"" value=""abc"" name=""text-box"" type=""text"" class=""form-control"">*")]
         public void ValidateItem(string value, string expected)
         {
-            // preconditions
+            // arrange
             var validated = false;
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
@@ -407,7 +407,7 @@ namespace WebExpress.WebUI.Test.WebControl
             context.Request.AddParameter(new Parameter(form.Id, context.Request?.Session.Id.ToString(), ParameterScope.Parameter));
             context.Request.AddParameter(new Parameter("text-box", value, ParameterScope.Parameter));
 
-            // test execution
+            // act
             var html = form.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -422,7 +422,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"*<input id=""text-box"" value=""abc"" name=""text-box"" type=""text"" class=""form-control"">*")]
         public void ProcessForm(string value, string expected)
         {
-            // preconditions
+            // arrange
             var processed = false;
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
@@ -445,7 +445,7 @@ namespace WebExpress.WebUI.Test.WebControl
             context.Request.AddParameter(new Parameter(form.Id, context.Request?.Session.Id.ToString(), ParameterScope.Parameter));
             context.Request.AddParameter(new Parameter("text-box", value, ParameterScope.Parameter));
 
-            // test execution
+            // act
             var html = form.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -460,7 +460,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"*<input id=""text-box"" value=""abc"" name=""text-box"" type=""text"" class=""form-control"">*")]
         public void ProcessItem(string value, string expected)
         {
-            // preconditions
+            // arrange
             var processed = false;
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
@@ -474,7 +474,7 @@ namespace WebExpress.WebUI.Test.WebControl
             context.Request.AddParameter(new Parameter(form.Id, context.Request?.Session.Id.ToString(), ParameterScope.Parameter));
             context.Request.AddParameter(new Parameter("text-box", value, ParameterScope.Parameter));
 
-            // test execution
+            // act
             var html = form.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);

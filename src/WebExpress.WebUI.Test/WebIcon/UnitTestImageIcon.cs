@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.Test.WebIcon
         [InlineData(typeof(ImageIconWebExpress), null, @"<img style=""width: 16px; height: 16px;"" src=""/assets/img/webexpress.svg"">")]
         public void Id(Type iconType, string uri, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
@@ -30,7 +30,7 @@ namespace WebExpress.WebUI.Test.WebIcon
                 ? Activator.CreateInstance(iconType, [size, renderContext.PageContext.ApplicationContext]) as IIcon
                 : Activator.CreateInstance(iconType, [new UriEndpoint(uri), size,]) as IIcon;
 
-            // test execution
+            // act
             var html = icon.Render(renderContext, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);

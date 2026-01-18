@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.Test.WebStemap
         [InlineData("http://localhost:8080/server/app/test", "webexpress.webui.test.testpage")]
         public void SearchResource(string uri, string id)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateHttpContextMock();
             var httpServerContext = UnitTestControlFixture.CreateHttpServerContextMock();
@@ -26,7 +26,7 @@ namespace WebExpress.WebUI.Test.WebStemap
             typeof(SearchContext).GetProperty("Culture").SetValue(searchContext, httpServerContext.Culture);
             typeof(SearchContext).GetProperty("HttpContext").SetValue(searchContext, context);
 
-            // test execution
+            // act
             var searchResult = componentHub.SitemapManager.SearchResource(new Uri(uri), searchContext);
 
             var response = componentHub.EndpointManager.HandleRequest(UnitTestControlFixture.CrerateRequestMock(), searchResult.EndpointContext);

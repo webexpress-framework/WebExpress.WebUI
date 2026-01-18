@@ -15,11 +15,11 @@ namespace WebExpress.WebUI.Test.WebPage
         [InlineData(typeof(TestApplication), typeof(TestPage), "webexpress.webui.test.testpage")]
         public void Id(Type applicationType, Type pageType, string id)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(applicationType).FirstOrDefault();
 
-            // test execution
+            // act
             var page = componentHub.PageManager.GetPages(pageType, application);
 
             if (id is null)

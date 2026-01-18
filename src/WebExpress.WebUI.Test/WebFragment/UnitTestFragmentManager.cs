@@ -19,11 +19,11 @@ namespace WebExpress.WebUI.Test.WebFragment
         [InlineData(typeof(TestApplication), typeof(TestFragmentControlLink), "webexpress.webui.test.testfragmentcontrollink")]
         public void Id(Type applicationType, Type fragmentType, string id)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(applicationType).FirstOrDefault();
 
-            // test execution
+            // act
             var fragment = componentHub.FragmentManager.GetFragments(application, fragmentType);
 
             if (id is null)
@@ -43,13 +43,13 @@ namespace WebExpress.WebUI.Test.WebFragment
             @"<p id=""webexpress-webui-test-testfragmentcontroltext"">TestFragmentControlText</p>")]
         public void Render_TestSectionFragmentControlText(Type applicationType, Type scopeType, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(applicationType).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [scopeType]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
-            // test execution
+            // act
             var html = componentHub.FragmentManager.Render
             (
                 renderContext,

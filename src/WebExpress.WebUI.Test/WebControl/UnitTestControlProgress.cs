@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<progress id=""id"" min=""0"" max=""100"" value=""0"">0%</progress>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -26,7 +26,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -42,7 +42,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeFormatProgress.Animated, @"<div class=""progress""><div role=""progressbar"" class=""progress-bar progress-bar progress-bar-striped progress-bar-animated"" style=""width: 0%;"" aria-valuenow=""0"" aria-valuemin=""0"" aria-valuemax=""100""></div></div>")]
         public void Format(TypeFormatProgress format, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -51,7 +51,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Format = format
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -68,7 +68,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeSizeProgress.ExtraLarge, @"<div class=""progress"" style=""height:40px;"">*</div>")]
         public void Size(TypeSizeProgress size, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -78,7 +78,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Format = TypeFormatProgress.Colored
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -93,7 +93,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.webui:plugin.name", @"<div class=""progress""><div role=""progressbar"" class=""progress-bar"" style=""width: 0%;"" aria-valuenow=""0"" aria-valuemin=""0"" aria-valuemax=""100"">WebExpress.WebUI</div></div>")]
         public void Text(string text, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -103,7 +103,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Format = TypeFormatProgress.Colored
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -123,7 +123,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorProgress.White, @"<div class=""progress""><* class=""progress-bar bg-white"" */div>")]
         public void Color(TypeColorProgress color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -133,7 +133,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Format = TypeFormatProgress.Colored
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -154,7 +154,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Muted, @"<div class=""progress""><* class=""progress-bar text-muted"" */div>")]
         public void TextColor(TypeColorText textColor, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -164,7 +164,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Format = TypeFormatProgress.Colored
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -178,7 +178,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(100u, @"<progress min=""100"" max=""100"" value=""0"">0%</progress>")]
         public void Min(uint min, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = UnitTestControlFixture.CreateRenderContextMock();
@@ -188,7 +188,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Min = min
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -202,7 +202,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(100u, @"<progress min=""0"" max=""100"" value=""0"">0%</progress>")]
         public void Max(uint max, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = UnitTestControlFixture.CreateRenderContextMock();
@@ -212,7 +212,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Max = max
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -226,7 +226,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(100u, @"<progress min=""0"" max=""100"" value=""100"">100%</progress>")]
         public void Value(uint value, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = UnitTestControlFixture.CreateRenderContextMock();
@@ -236,7 +236,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Value = value
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);

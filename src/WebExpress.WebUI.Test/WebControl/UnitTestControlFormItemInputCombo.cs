@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<select id=""id"" name=""id"" class=""form-select""></select>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -29,7 +29,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -42,7 +42,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(@"<select id=""*"" name=""*"" class=""form-select""></select>")]
         public void AutoId(string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -51,7 +51,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -65,7 +65,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(typeof(IconStar), @"<select class=""form-select""></select>")]
         public void Icon(Type icon, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -89,7 +89,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("label", @"<select class=""form-select""></select>")]
         public void Label(string label, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -99,7 +99,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Label = label
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -113,7 +113,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("help", @"<select class=""form-select""></select>")]
         public void Help(string help, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -123,7 +123,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Help = help
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -137,7 +137,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"<select class=""form-select"" disabled></select>")]
         public void Disabled(bool disabled, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -147,7 +147,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Disabled = disabled
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -159,7 +159,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Fact]
         public void Prepend()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -167,7 +167,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFormItemInputCombo(null);
             control.AddPrepend(new ControlText { Text = "prepend" });
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             var expected = @"<select class=""form-select""></select>";
@@ -180,7 +180,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Fact]
         public void Append()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -188,7 +188,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFormItemInputCombo(null);
             control.AddPrepend(new ControlText { Text = "append" });
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             var expected = @"<select class=""form-select""></select>";
@@ -203,7 +203,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("tag", @"<select class=""form-select""></select>")]
         public void Tag(object tag, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -213,7 +213,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Tag = tag
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
