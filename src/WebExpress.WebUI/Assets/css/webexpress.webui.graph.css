@@ -1,0 +1,146 @@
+.wx-graph-editor {
+    display: inline-block;
+    user-select: none;
+    width: 100%;
+}
+
+.wx-graph-editor .btn-group-sm > .btn {
+    padding-inline: 0.6rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.wx-graph-editor .btn i {
+    line-height: 1;
+}
+
+.wx-graph-editor .small.text-muted {
+    align-self: center;
+}
+
+/* SVG workflow canvas */
+.wx-graph-svg {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    touch-action: none;
+    width: 100%;
+    height: 520px;
+    cursor: default;
+}
+
+/* Transition lines */
+.wx-graph-edge {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.wx-graph-edge:hover {
+    stroke: #0d6efd;
+}
+
+/* State nodes */
+.wx-graph-node-rect {
+    stroke: #0d6efd;
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
+}
+.wx-graph-node-rect:hover {
+    stroke-width: 3;
+}
+.wx-graph-node-label {
+    font: 600 14px/1.2 "Inter", "Segoe UI", Arial, sans-serif;
+    fill: #0d0d0d;
+    pointer-events: none;
+}
+.wx-graph-node-icon {
+    font: 16px/1.2 "Inter", "Segoe UI Emoji", "Segoe UI Symbol";
+    pointer-events: none;
+}
+
+/* Waypoints: visible only when the corresponding transition is selected */
+.wx-graph-waypoint {
+    fill: #0b5ed7;
+    cursor: grab;
+}
+.wx-graph-waypoint:hover {
+    fill: #0b5ed7;
+    stroke: #ffffff;
+    stroke-width: 3;
+}
+
+.wx-graph-viewer .bg-primary {
+    fill: var(--bs-primary);
+}
+
+.wx-graph-viewer .bg-secondary {
+    fill: var(--bs-secondary);
+}
+
+.wx-graph-viewer .bg-success {
+    fill: var(--bs-success);
+}
+
+.wx-graph-viewer .bg-info {
+    fill: var(--bs-info);
+}
+
+.wx-graph-viewer .bg-warning {
+    fill: var(--bs-warning);
+}
+
+.wx-graph-viewer .bg-danger {
+    fill: var(--bs-danger);
+}
+
+.wx-graph-viewer .bg-light {
+    fill: var(--bs-light);
+}
+
+.wx-graph-viewer .bg-dark {
+    fill: var(--bs-dark);
+}
+
+.wx-graph-viewer .bg-body {
+    fill: var(--bs-body-bg);
+}
+
+.wx-graph-viewer .bg-white {
+    fill: var(--bs-white);
+}
+
+.wx-graph-viewer .primary {
+    stroke: var(--bs-primary);
+}
+
+.wx-graph-viewer .secondary {
+    stroke: var(--bs-secondary);
+}
+
+.wx-graph-viewer .success {
+    stroke: var(--bs-success);
+}
+
+.wx-graph-viewer .info {
+    stroke: var(--bs-info);
+}
+
+.wx-graph-viewer .warning {
+    stroke: var(--bs-warning);
+}
+
+.wx-graph-viewer .danger {
+    stroke: var(--bs-danger);
+}
+
+.wx-graph-viewer .light {
+    stroke: var(--bs-light);
+}
+
+.wx-graph-viewer .dark {
+    stroke: var(--bs-dark);
+}
+
+.wx-graph-viewer .white {
+    stroke: var(--bs-white);
+}

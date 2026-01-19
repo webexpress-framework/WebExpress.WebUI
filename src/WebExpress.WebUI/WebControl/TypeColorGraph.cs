@@ -3,76 +3,76 @@
     /// <summary>
     /// The standard colors.
     /// </summary>
-    public enum TypeColorLine
+    public enum TypeColorGraph
     {
         /// <summary>
-        /// Default background color.
+        /// Default color.
         /// </summary>
         Default = 0,
 
         /// <summary>
-        /// Primary background color.
+        /// Primary color.
         /// </summary>
         Primary = 1,
 
         /// <summary>
-        /// Secondary background color.
+        /// Secondary color.
         /// </summary>
         Secondary = 2,
 
         /// <summary>
-        /// Success background color.
+        /// Success color.
         /// </summary>
         Success = 3,
 
         /// <summary>
-        /// Info background color.
+        /// Info color.
         /// </summary>
         Info = 4,
 
         /// <summary>
-        /// Warning background color.
+        /// Warning color.
         /// </summary>
         Warning = 5,
 
         /// <summary>
-        /// Danger background color.
+        /// Danger color.
         /// </summary>
         Danger = 6,
 
         /// <summary>
-        /// Dark background color.
+        /// Dark color.
         /// </summary>
         Dark = 7,
 
         /// <summary>
-        /// Light background color.
+        /// Light color.
         /// </summary>
         Light = 8
     }
 
     /// <summary>
-    /// Extension methods for the <see cref="TypeColorLine"/> enum.
+    /// Extension methods for the <see cref="TypeColorGraph"/> enum.
     /// </summary>
-    public static class TypeColorLineExtensions
+    public static class TypeColorGraphExtensions
     {
         /// <summary>
         /// Converts the background color to a CSS class.
         /// </summary>
         /// <param name="color">The background color to be converted.</param>
         /// <returns>The CSS class corresponding to the background color.</returns>
-        public static string ToClass(this TypeColorLine color)
+        public static string ToClass(this TypeColorGraph color)
         {
             return color switch
             {
-                TypeColorLine.Primary => "text-primary",
-                TypeColorLine.Secondary => "text-secondary",
-                TypeColorLine.Success => "text-success",
-                TypeColorLine.Info => "text-info",
-                TypeColorLine.Warning => "text-warning",
-                TypeColorLine.Danger => "text-danger",
-                TypeColorLine.Light => "text-light",
-                TypeColorLine.Dark => "text-dark",
+                TypeColorGraph.Primary => "primary",
+                TypeColorGraph.Secondary => "secondary",
+                TypeColorGraph.Success => "success",
+                TypeColorGraph.Info => "info",
+                TypeColorGraph.Warning => "warning",
+                TypeColorGraph.Danger => "danger",
+                TypeColorGraph.Light => "light",
+                TypeColorGraph.Dark => "dark",
                 _ => string.Empty,
             };
         }
