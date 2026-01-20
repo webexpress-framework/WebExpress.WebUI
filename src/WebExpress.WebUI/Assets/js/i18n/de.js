@@ -12,6 +12,7 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "available": "Verfügbar",
     "search": "Suche",
     "rating": "Bewertung",
+    "fit": "Ansicht anpassen",
 
     "calendar.select_date": "Datum auswählen",
     "calendar.select_range": "Zeitraum auswählen",

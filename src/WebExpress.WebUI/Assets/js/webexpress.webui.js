@@ -780,6 +780,8 @@ webexpress.webui.Event = class {
     static CHANGE_VISIBILITY_EVENT = "webexpress.webui.change.visibility";
     // Event triggered when an element is clicked.
     static CLICK_EVENT = "webexpress.webui.click";
+    // Event triggered when an element is double-clicked.
+    static DOUBLE_CLICK_EVENT = "webexpress.webui.dbclick";
     // Event triggered when a filter changes, typically in search or filter controls.
     static CHANGE_FILTER_EVENT = "webexpress.webui.change.filter";
     // Event triggered when a dropdown menu is shown.
@@ -856,4 +858,6 @@ webexpress.webui.Event = class {
     static WS_CLOSE_EVENT = "webexpress.webui.websocket.close";
     // Event triggered when a WebSocket error occurs.
     static WS_ERROR_EVENT = "webexpress.webui.websocket.error";
+    
+    static GRAPH_
 }

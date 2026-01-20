@@ -19,6 +19,16 @@ namespace WebExpress.WebUI.WebControl
         IEnumerable<IControlGraphItemEdge> Edges { get; }
 
         /// <summary>
+        /// Returns the style used to render nodes the type graph.
+        /// </summary>
+        TypeStyleGraphNode NodeStyle { get; }
+
+        /// <summary>
+        /// Returns the style used to render edges in the type graph.
+        /// </summary>
+        TypeStyleGraphEdge EdgeStyle { get; }
+
+        /// <summary>
         /// Adds one or more control graph nodes to the viewer.
         /// </summary>
         /// <param name="nodes">

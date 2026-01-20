@@ -1,4 +1,5 @@
-﻿using WebExpress.WebUI.Test.Fixture;
+﻿using System.Drawing;
+using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
 
@@ -152,6 +153,39 @@ namespace WebExpress.WebUI.Test.WebControl
             {
                 Color = new PropertyColorGraph(color)
             };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the waypoints property of the graph edge item.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-graph-edge""></div>")]
+        [InlineData("500,280;640,320", @"<div class=""wx-graph-edge"" data-waypoints=""[{""x"":500,""y"":280},{""x"":640,""y"":320}]""></div>")]
+        [InlineData("100,100", @"<div class=""wx-graph-edge"" data-waypoints=""[{""x"":100,""y"":100}]""></div>")]
+        public void Waypoints(string waypointString, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlGraphItemEdge();
+
+            if (!string.IsNullOrWhiteSpace(waypointString))
+            {
+                control.Add(waypointString
+                    .Split(';')
+                    .Select(s =>
+                    {
+                        var parts = s.Split(',');
+                        return new Point(int.Parse(parts[0]), int.Parse(parts[1]));
+                    }));
+            }
 
             // act
             var html = control.Render(context, visualTree);

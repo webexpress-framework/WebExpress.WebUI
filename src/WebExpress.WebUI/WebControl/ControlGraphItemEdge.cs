@@ -1,4 +1,8 @@
-﻿using WebExpress.WebCore.Internationalization;
+﻿using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Text.Json;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -10,6 +14,8 @@ namespace WebExpress.WebUI.WebControl
     /// </summary>
     public class ControlGraphItemEdge : IControlGraphItemEdge
     {
+        private readonly List<Point> _waypoints = [];
+
         /// <summary>
         /// Returns the unique identifier of the edge.
         /// </summary>
@@ -36,12 +42,49 @@ namespace WebExpress.WebUI.WebControl
         public PropertyColorGraph Color { get; set; }
 
         /// <summary>
+        /// Returns the collection of waypoints that define the path.
+        /// </summary>
+        public IEnumerable<Point> Waypoints => _waypoints;
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
         public ControlGraphItemEdge(string id = null)
         {
             Id = id;
+        }
+
+        /// <summary>
+        /// Adds one or more waypoints to the edge.
+        /// </summary>
+        /// <param name="waypoints">
+        /// An array of points representing the waypoints to add.
+        /// </param>
+        /// <returns>
+        /// The current instance with the added waypoints.
+        /// </returns>
+        public IControlGraphItemEdge Add(params Point[] waypoints)
+        {
+            _waypoints.AddRange(waypoints);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds one or more waypoints to the edge.
+        /// </summary>
+        /// <param name="waypoints">
+        /// An array of points representing the waypoints to add.
+        /// </param>
+        /// <returns>
+        /// The current instance with the added waypoints.
+        /// </returns>
+        public IControlGraphItemEdge Add(IEnumerable<Point> waypoints)
+        {
+            _waypoints.AddRange(waypoints);
+
+            return this;
         }
 
         /// <summary>
@@ -52,6 +95,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var waypoints = JsonSerializer.Serialize(_waypoints.Select(p => new { x = p.X, y = p.Y }));
+
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
@@ -60,12 +105,9 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, Label))
                 .AddUserAttribute("data-from", Source)
                 .AddUserAttribute("data-to", Target)
-                .AddUserAttribute("data-color-css", Color is not null
-                    ? Color.ToClass()
-                    : null)
-                .AddUserAttribute("data-color", Color is not null
-                    ? Color.ToStyle()
-                    : null);
+                .AddUserAttribute("data-color-css", Color?.ToClass())
+                .AddUserAttribute("data-color", Color?.ToStyle())
+                .AddUserAttribute("data-waypoints", _waypoints.Count > 0 ? waypoints : null);
         }
     }
 }

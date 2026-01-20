@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebControl
     /// Represents a visual component capable of displaying a graph consisting of 
     /// nodes and edges.
     /// </summary>
-    public class ControlGraphViewer : Control
+    public class ControlGraphViewer : Control, IControlGraphViewer
     {
         private readonly List<IControlGraphItemNode> _nodes = [];
         private readonly List<IControlGraphItemEdge> _edges = [];
@@ -23,6 +23,16 @@ namespace WebExpress.WebUI.WebControl
         /// Returns the collection of edges displayed in the graph.
         /// </summary>
         public IEnumerable<IControlGraphItemEdge> Edges => _edges;
+
+        /// <summary>
+        /// Returns or sets the style used to render nodes the type graph.
+        /// </summary>
+        public TypeStyleGraphNode NodeStyle { get; set; } = TypeStyleGraphNode.Default;
+
+        /// <summary>
+        /// Returns or sets the style used to render edges in the type graph.
+        /// </summary>
+        public TypeStyleGraphEdge EdgeStyle { get; set; } = TypeStyleGraphEdge.Default;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -43,7 +53,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>
         /// The current instance to allow method chaining.
         /// </returns>
-        public ControlGraphViewer Add(params IControlGraphItemNode[] nodes)
+        public IControlGraphViewer Add(params IControlGraphItemNode[] nodes)
         {
             _nodes.AddRange(nodes);
 
@@ -60,7 +70,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>
         /// The current instance, enabling method chaining.
         /// </returns>
-        public ControlGraphViewer Add(params IControlGraphItemEdge[] edges)
+        public IControlGraphViewer Add(params IControlGraphItemEdge[] edges)
         {
             _edges.AddRange(edges);
 
@@ -82,6 +92,8 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(),
                 Role = "region"
             }
+                .AddUserAttribute("data-node-style", NodeStyle != TypeStyleGraphNode.Default ? NodeStyle.ToValue() : null)
+                .AddUserAttribute("data-edge-style", EdgeStyle != TypeStyleGraphEdge.Default ? EdgeStyle.ToValue() : null)
                 .Add(_nodes.Select(x => x.Render(renderContext, visualTree)))
                 .Add(_edges.Select(x => x.Render(renderContext, visualTree)));
         }

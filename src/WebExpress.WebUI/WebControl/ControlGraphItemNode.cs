@@ -1,6 +1,8 @@
 ﻿using System.Drawing;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebIcon;
+using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -24,7 +26,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the coordinates of the point for the node.
         /// </summary>
-        public Point Point { get; set; }
+        public Point? Point { get; set; }
 
         /// <summary>
         /// Returns or sets the color for the node.
@@ -35,6 +37,16 @@ namespace WebExpress.WebUI.WebControl
         /// Returns or sets the background color for the node.
         /// </summary>
         public PropertyColorBackgroundGraph BackgroundColor { get; set; }
+
+        /// <summary>
+        /// Returns or sets the shape type associated with this node.
+        /// </summary>
+        public TypeShapeGraphNode Shape { get; set; }
+
+        /// <summary>
+        /// Returns or sets the icon associated with this node.
+        /// </summary>
+        public IIcon Icon { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -59,12 +71,15 @@ namespace WebExpress.WebUI.WebControl
                 Class = "wx-graph-node"
             }
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, Label))
-                .AddUserAttribute("data-x", Point.X.ToString())
-                .AddUserAttribute("data-y", Point.Y.ToString())
+                .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
+                .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-x", Point.HasValue ? Point.Value.X.ToString() : null)
+                .AddUserAttribute("data-y", Point.HasValue ? Point.Value.Y.ToString() : null)
                 .AddUserAttribute("data-foreground-css", Color?.ToClass())
                 .AddUserAttribute("data-foreground-color", Color?.ToStyle())
                 .AddUserAttribute("data-background-css", BackgroundColor?.ToClass())
-                .AddUserAttribute("data-background-color", BackgroundColor?.ToStyle());
+                .AddUserAttribute("data-background-color", BackgroundColor?.ToStyle())
+                .AddUserAttribute("data-shape", Shape != TypeShapeGraphNode.Default ? Shape.ToValue() : null);
         }
     }
 }

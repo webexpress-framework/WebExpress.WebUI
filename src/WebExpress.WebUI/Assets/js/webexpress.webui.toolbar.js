@@ -31,9 +31,147 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
         });
         this._resizeObserver.observe(element);
     }
+    
+    /**
+     * Adds a generic item descriptor to the toolbar and re-renders.
+     * @param {object} item - The item descriptor (see _parseItems for structure).
+     */
+    addItem(item) {
+        if (!item || !item.type) {
+            console.error("ToolbarCtrl.addItem: Invalid item descriptor", item);
+            return;
+        }
+        
+        // ensure element is created if not provided (for programmatic addition)
+        if (!item.element) {
+            item.element = this._createItemElement(item);
+        }
+
+        this._items.push(item);
+        this._renderToolbar();
+        this._updateToolbarLayout();
+    }
 
     /**
-     * parses toolbar child elements and stores as item descriptors
+     * Add a button programmatically.
+     * @param {object} opts - { id, label, icon, image, title, align, disabled, active, colorCss, modal }
+     */
+    addButton(opts) {
+        this.addItem({
+            type: "button",
+            id: opts.id || null,
+            label: opts.label || null,
+            icon: opts.icon || null,
+            image: opts.image || null,
+            title: opts.title || null,
+            modal: opts.modal || null,
+            colorCss: opts.colorCss || null,
+            colorStyle: opts.colorStyle || null,
+            align: opts.align || "left",
+            disabled: !!opts.disabled,
+            active: !!opts.active,
+            overflow: opts.overflow || ""
+        });
+    }
+
+    /**
+     * Add a separator programmatically.
+     * @param {string} [align="left"] 
+     */
+    addSeparator(align = "left") {
+        this.addItem({
+            type: "separator",
+            align: align,
+            overflow: "hide"
+        });
+    }
+
+    /**
+     * Add a label programmatically.
+     * @param {object} opts - { content, title, align, colorCss } 
+     */
+    addLabel(opts) {
+        this.addItem({
+            type: "label",
+            content: opts.content || "",
+            title: opts.title || null,
+            colorCss: opts.colorCss || null,
+            align: opts.align || "left",
+            disabled: !!opts.disabled,
+            overflow: "hide"
+        });
+    }
+
+    /**
+     * Add a dropdown programmatically.
+     * @param {object} opts - { title, toggle, align, colorCss, element } 
+     */
+    addDropdown(opts) {
+        let el = opts.element;
+        if (!el) {
+            el = document.createElement("div");
+            el.className = "wx-toolbar-dropdown";
+        }
+        
+        this.addItem({
+            type: "dropdown",
+            colorCss: opts.colorCss || null,
+            colorStyle: opts.colorStyle || null,
+            toggle: !!opts.toggle,
+            title: opts.title || null,
+            align: opts.align || "left",
+            disabled: !!opts.disabled,
+            active: !!opts.active,
+            overflow: opts.overflow || "",
+            element: el
+        });
+    }
+
+    /**
+     * Removes an item by its ID.
+     * @param {string} id 
+     */
+    removeItem(id) {
+        const idx = this._items.findIndex(item => item.id === id || (item.element && item.element.id === id));
+        if (idx > -1) {
+            this._items.splice(idx, 1);
+            this._renderToolbar();
+            this._updateToolbarLayout();
+        }
+    }
+    
+    /**
+     * Creates the DOM element for an item descriptor if it doesn't exist yet.
+     * Used when adding items programmatically via add* methods.
+     * @param {object} item 
+     * @returns {HTMLElement}
+     */
+    _createItemElement(item) {
+        if (item.type === "separator") {
+            const el = document.createElement("div");
+            el.className = "wx-toolbar-separator";
+            return el;
+        } else if (item.type === "label") {
+            const el = document.createElement("span");
+            el.className = "wx-toolbar-label";
+            if (item.content) el.dataset.label = item.content;
+            return el;
+        } else if (item.type === "button") {
+            const el = document.createElement("button");
+            el.className = "wx-toolbar-button";
+            if (item.id) el.id = item.id;
+            return el;
+        } else if (item.type === "combo") {
+            const el = document.createElement("div");
+            el.className = "wx-toolbar-combo";
+            return el;
+        }
+        // fallback generic
+        return document.createElement("div");
+    }
+
+    /**
+     * Parses toolbar child elements and stores as item descriptors
      * @param {HTMLElement[]} elements - items to parse
      */
     _parseItems(elements) {
@@ -115,7 +253,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * parses the More area as a dropdown menu
+     * Parses the More area as a dropdown menu
      * @param {HTMLElement} element - element to parse
      */
     _parseMoreDropdown(element) {
@@ -135,7 +273,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * checks if More dropdown contains usable entries
+     * Checks if "More" dropdown contains usable entries.
      * @returns {boolean}
      */
     _hasMoreDropdownItems() {
@@ -152,7 +290,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * renders toolbar in flex layout
+     * Renders toolbar in flex layout.
      */
     _renderToolbar() {
         const container = this._element;
@@ -200,7 +338,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * updates toolbar layout on resize and initial render
+     * Updates toolbar layout on resize and initial render
      * hides button labels individually (only if an icon/image is present) before triggering overflow.
      * when expanding, restores items from overflow before showing labels again individually as space allows.
      */
@@ -239,7 +377,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * renders a single toolbar item as DOM node
+     * Renders a single toolbar item as DOM node.
      * @param {object} item
      * @returns {HTMLElement}
      */
@@ -425,8 +563,8 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * creates the More dropdown using DropdownCtrl with ... icon and all contained items as entries
-     * @returns {HTMLElement} dropdown root element
+     * Creates the More dropdown using DropdownCtrl with ... icon and all contained items as entries.
+     * @returns {HTMLElement} dropdown root element.
      */
     _createMoreDropdownWithController() {
         const items = [];
@@ -470,7 +608,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * returns the overflow root element
+     * Returns the overflow root element.
      * @returns {HTMLElement|null}
      */
     _getOverflowRoot() {
@@ -483,7 +621,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * ensures that a pre-existing button element has detection attributes/classes
+     * Ensures that a pre-existing button element has detection attributes/classes.
      * @param {HTMLElement} buttonEl
      */
     _ensureButtonDetectionAttributes(buttonEl) {
@@ -501,7 +639,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * finds the label span for a given button element
+     * Finds the label span for a given button element.
      * @param {HTMLElement} buttonEl
      * @returns {HTMLElement|null}
      */
@@ -515,7 +653,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * returns whether a button's label can be hidden (icon present and label currently visible)
+     * Returns whether a button's label can be hidden (icon present and label currently visible).
      * @param {HTMLElement} buttonEl
      * @returns {boolean}
      */
@@ -539,7 +677,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * hides a single button label and marks the state
+     * Hides a single button label and marks the state.
      * @param {HTMLElement} buttonEl
      */
     _hideButtonLabel(buttonEl) {
@@ -552,7 +690,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * tries to show a single button label; reverts if it causes overflow
+     * Tries to show a single button label; reverts if it causes overflow.
      * @param {HTMLElement} buttonEl
      * @param {HTMLElement} overflowRoot
      * @returns {boolean} true if label was shown and kept, false if reverted
@@ -578,7 +716,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * finds the next button whose label should be hidden (right-to-left)
+     * Finds the next button whose label should be hidden (right-to-left).
      * @param {HTMLElement} overflowRoot
      * @returns {HTMLElement|null}
      */
@@ -594,7 +732,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * shows labels one-by-one (left-to-right) as long as there is enough space
+     * Shows labels one-by-one (left-to-right) as long as there is enough space.
      * @param {HTMLElement} overflowRoot
      */
     _showLabelsAsSpaceAllows(overflowRoot) {
@@ -619,7 +757,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * cleans up resources
+     * Cleans up resources
      */
     destroy() {
         if (this._resizeObserver) {
