@@ -127,7 +127,13 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
      * Shows the calendar popup and dispatches event.
      */
     _showCalendarPopup() {
-        this._dropdownmenu.style.display = "flex";
+        if (typeof this._dropdownmenu.show === "function") {
+            // wenn PopperMenu.show existiert, benutzen (richtiger Popper.js-Ablauf)
+            this._dropdownmenu.show();
+        } else {
+            // fallback, falls nicht initialisiert
+            this._dropdownmenu.style.display = "flex";
+        }
         this._dispatch(webexpress.webui.Event.DROPDOWN_SHOW_EVENT, {});
         this._input.focus();
     }
