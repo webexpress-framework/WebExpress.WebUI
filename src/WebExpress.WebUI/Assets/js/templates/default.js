@@ -1,13 +1,18 @@
 // Date renderer
 webexpress.webui.TableTemplates.register("date", (val, table, row, cell, name, opts) => {
-    if (!val) return "";
+    // ensure opts is an object to prevent runtime errors
+    opts = opts || {};
+    
+    if (!val) {
+        return "";
+    }
     const editable = opts.editable === true || opts.editable === "true";
     const format = opts.format || "yyyy-MM-dd";
     const placeholder = opts.placeholder || null;
     const cssColor = opts.colorCss || null;
     const styleColor = opts.colorStyle || null;
     const container = document.createElement("div");
-    
+
     if (editable) {
         const editor = document.createElement("div");
         const inputCtrl = new webexpress.webui.InputDateCtrl(editor);
@@ -16,7 +21,9 @@ webexpress.webui.TableTemplates.register("date", (val, table, row, cell, name, o
         inputCtrl._placeholderText = placeholder;
         inputCtrl.value = val;
         container.appendChild(editor);
-        if (row.id) container.dataset.objectId = row.id;
+        if (row.id) {
+            container.dataset.objectId = row.id;
+        }
         new webexpress.webui.SmartEditCtrl(container);
     } else {
         if (cssColor) {
@@ -29,20 +36,25 @@ webexpress.webui.TableTemplates.register("date", (val, table, row, cell, name, o
         ctrl.format = format;
         ctrl.value = val;
     }
-    
+
     return container;
 });
 
 // Calendar renderer
 webexpress.webui.TableTemplates.register("calendar", (val, table, row, cell, name, opts) => {
-    if (!val) return "";
+    // ensure opts is an object
+    opts = opts || {};
+
+    if (!val) {
+        return "";
+    }
     const editable = opts.editable === true || opts.editable === "true";
     const format = opts.format || "yyyy-MM-dd";
     const placeholder = opts.placeholder || null;
     const cssColor = opts.colorCss || null;
     const styleColor = opts.colorStyle || null;
     const container = document.createElement("div");
-    
+
     if (editable) {
         const editor = document.createElement("div");
         const inputCtrl = new webexpress.webui.InputCalendarCtrl(editor);
@@ -50,7 +62,9 @@ webexpress.webui.TableTemplates.register("calendar", (val, table, row, cell, nam
         inputCtrl.format = format;
         inputCtrl._placeholderText = placeholder;
         inputCtrl.value = val;
-        if (row.id) container.dataset.objectId = row.id;
+        if (row.id) {
+            container.dataset.objectId = row.id;
+        }
         container.appendChild(editor);
         new webexpress.webui.SmartEditCtrl(container);
     } else {
@@ -64,19 +78,23 @@ webexpress.webui.TableTemplates.register("calendar", (val, table, row, cell, nam
         ctrl.format = format;
         ctrl.value = val;
     }
-    
+
     return container;
 });
 
 // Tag renderer
 webexpress.webui.TableTemplates.register("tag", (val, table, row, cell, name, opts) => {
-    if (!val) return "";
+    opts = opts || {};
+
+    if (!val) {
+        return "";
+    }
     const editable = opts.editable === true || opts.editable === "true";
     const container = document.createElement("div");
     const cssColor = opts.colorCss || null;
     const styleColor = opts.colorStyle || null;
     const placeholder = opts.placeholder || null;
-    
+
     if (editable) {
         const editor = document.createElement("div");
         editor.setAttribute("name", name);
@@ -86,25 +104,29 @@ webexpress.webui.TableTemplates.register("tag", (val, table, row, cell, name, op
         inputCtrl._colorStyle = styleColor;
         inputCtrl._placeholderText = placeholder;
         inputCtrl.value = val;
-        if (row.id) container.dataset.objectId = row.id;
+        if (row.id) {
+            container.dataset.objectId = row.id;
+        }
         container.id = `${row.id}_${name}`;
         container.appendChild(editor);
         container.setAttribute("data-form-method", "PATCH");
         container.setAttribute("data-form-action", row.restApi);
         new webexpress.webui.SmartEditCtrl(container);
-       
+
     } else {
         const ctrl = new webexpress.webui.TagCtrl(container);
         ctrl._colorCss = cssColor;
         ctrl._colorStyle = styleColor;
         ctrl.value = val;
     }
-    
+
     return container;
 });
 
 // Selection renderer
 webexpress.webui.TableTemplates.register("selection", (val, table, row, cell, name, opts) => {
+    opts = opts || {};
+
     if ((val === null || val === undefined || val === "") && !opts.editable) {
         return "";
     }
@@ -114,18 +136,24 @@ webexpress.webui.TableTemplates.register("selection", (val, table, row, cell, na
     let options = [];
 
     if (opts.children && opts.children.length > 0) {
-        options = opts.children.map(child => ({
-            id: child.getAttribute("id") || null,
-            label: child.dataset.label || child.textContent.trim(),
-            labelColor: child.dataset.labelColor || null,
-            icon: child.dataset.icon || null,
-            image: child.dataset.image || null,
-            // keep original rich content if needed later
-            content: child.innerHTML || "",
-            disabled: child.hasAttribute("disabled")
-        }));
+        options = opts.children.map((child) => {
+            return {
+                id: child.getAttribute("id") || null,
+                label: child.dataset.label || child.textContent.trim(),
+                labelColor: child.dataset.labelColor || null,
+                icon: child.dataset.icon || null,
+                image: child.dataset.image || null,
+                // keep original rich content if needed later
+                content: child.innerHTML || "",
+                disabled: child.hasAttribute("disabled")
+            };
+        });
     } else if (opts.options) {
-        try { options = JSON.parse(opts.options); } catch (e) {}
+        try {
+            options = JSON.parse(opts.options);
+        } catch (e) {
+            // ignore parse error
+        }
     }
 
     if (editable) {
@@ -136,20 +164,24 @@ webexpress.webui.TableTemplates.register("selection", (val, table, row, cell, na
         inputCtrl.value = val;
         editor._wx_controller = inputCtrl;
         container.appendChild(editor);
-        if (row.id) container.dataset.objectId = row.id;
+        if (row.id) {
+            container.dataset.objectId = row.id;
+        }
         new webexpress.webui.SmartEditCtrl(container);
     } else {
         // read-only
         const ctrl = new webexpress.webui.SelectionCtrl(container);
         ctrl.options = options;
-        ctrl.value = val; 
+        ctrl.value = val;
     }
-    
+
     return container;
 });
 
 // Combo renderer
 webexpress.webui.TableTemplates.register("combo", (val, table, row, cell, name, opts) => {
+    opts = opts || {};
+
     if ((val === null || val === undefined || val === "") && !opts.editable) {
         return "";
     }
@@ -158,22 +190,28 @@ webexpress.webui.TableTemplates.register("combo", (val, table, row, cell, name, 
     const editable = opts.editable === true || opts.editable === "true";
     let options = [];
 
-    // parse Generic Children
+    // parse generic children
     if (opts.children && opts.children.length > 0) {
-        options = opts.children.map(child => ({
-            value: child.value || child.id || child.text,
-            text: child.text
-        }));
+        options = opts.children.map((child) => {
+            return {
+                value: child.value || child.id || child.text,
+                text: child.text
+            };
+        });
     } else if (opts.options) {
-        try { options = JSON.parse(opts.options); } catch (e) {}
+        try {
+            options = JSON.parse(opts.options);
+        } catch (e) {
+            // ignore parse error
+        }
     }
 
     if (editable) {
         const select = document.createElement("select");
-        select.className = "form-select"; 
+        select.className = "form-select";
         select.id = "wx_" + Math.random().toString(36).slice(2, 7);
 
-        options.forEach(opt => {
+        options.forEach((opt) => {
             const optionEl = document.createElement("option");
             optionEl.value = opt.value;
             optionEl.textContent = opt.text;
@@ -184,15 +222,19 @@ webexpress.webui.TableTemplates.register("combo", (val, table, row, cell, name, 
             select.appendChild(optionEl);
         });
         container.appendChild(select);
-        if (row.id) container.dataset.objectId = row.id;
+        if (row.id) {
+            container.dataset.objectId = row.id;
+        }
         new webexpress.webui.SmartEditCtrl(container);
     } else {
-        // read-Only
+        // read-only
         const valStr = String(val ?? "");
-        const match = options.find(o => String(o.value) === valStr);
+        const match = options.find((o) => {
+            return String(o.value) === valStr;
+        });
         container.textContent = match ? (match.text || match.label) : valStr;
     }
-    
+
     return container;
 });
 
@@ -200,8 +242,10 @@ webexpress.webui.TableTemplates.register("combo", (val, table, row, cell, name, 
 // Registers a simple text renderer that shows a native input[type="text"] in edit mode
 // and a plain text node in read-only mode.
 webexpress.webui.TableTemplates.register("text", (val, table, row, cell, name, opts) => {
+    opts = opts || {};
+
     const container = document.createElement("div");
-    const editable = opts.editable === true || opts && opts.editable === "true";
+    const editable = opts.editable === true || opts.editable === "true";
 
     if (editable) {
         // create native text input for editing
@@ -219,7 +263,7 @@ webexpress.webui.TableTemplates.register("text", (val, table, row, cell, name, o
             container.dataset.objectId = row.id;
         }
 
-        // initialize SmartEditCtrl so inline-edit lifecycle is available
+        // initialize smarteditctrl so inline-edit lifecycle is available
         new webexpress.webui.SmartEditCtrl(container);
     } else {
         // create simple text view for read-only mode
@@ -235,11 +279,13 @@ webexpress.webui.TableTemplates.register("text", (val, table, row, cell, name, o
 // Registers a simple numeric renderer that shows a native input[type="number"] in edit mode
 // and a plain text node in read-only mode.
 webexpress.webui.TableTemplates.register("numeric", (val, table, row, cell, name, opts) => {
+    opts = opts || {};
+
     // container for renderer output
     const container = document.createElement("div");
 
     // determine if field should be editable
-    const editable = opts && (opts.editable === true ||  opts.editable === "true");
+    const editable = opts.editable === true || opts.editable === "true";
 
     if (editable) {
         // create native number input for editing
@@ -256,16 +302,14 @@ webexpress.webui.TableTemplates.register("numeric", (val, table, row, cell, name
         }
 
         // set optional numeric attributes from options (if provided)
-        if (opts) {
-            if (typeof opts.min !== "undefined") {
-                input.setAttribute("min", String(opts.min));
-            }
-            if (typeof opts.max !== "undefined") {
-                input.setAttribute("max", String(opts.max));
-            }
-            if (typeof opts.step !== "undefined") {
-                input.setAttribute("step", String(opts.step));
-            }
+        if (typeof opts.min !== "undefined") {
+            input.setAttribute("min", String(opts.min));
+        }
+        if (typeof opts.max !== "undefined") {
+            input.setAttribute("max", String(opts.max));
+        }
+        if (typeof opts.step !== "undefined") {
+            input.setAttribute("step", String(opts.step));
         }
 
         // append input to container
@@ -276,7 +320,7 @@ webexpress.webui.TableTemplates.register("numeric", (val, table, row, cell, name
             container.dataset.objectId = row.id;
         }
 
-        // initialize SmartEditCtrl so inline-edit lifecycle is available
+        // initialize smarteditctrl so inline-edit lifecycle is available
         new webexpress.webui.SmartEditCtrl(container);
 
     } else {
@@ -291,6 +335,8 @@ webexpress.webui.TableTemplates.register("numeric", (val, table, row, cell, name
 
 // Move renderer
 webexpress.webui.TableTemplates.register("move", (val, table, row, cell, name, opts) => {
+    opts = opts || {};
+
     if ((val === null || val === undefined || val === "") && !opts.editable) {
         return "";
     }
@@ -300,18 +346,24 @@ webexpress.webui.TableTemplates.register("move", (val, table, row, cell, name, o
     let options = [];
 
     if (opts.children && opts.children.length > 0) {
-        options = opts.children.map(child => ({
-            id: child.getAttribute("id") || null,
-            label: child.dataset.label || child.textContent.trim(),
-            labelColor: child.dataset.labelColor || null,
-            icon: child.dataset.icon || null,
-            image: child.dataset.image || null,
-            // keep original rich content if needed later
-            content: child.innerHTML || "",
-            disabled: child.hasAttribute("disabled")
-        }));
+        options = opts.children.map((child) => {
+            return {
+                id: child.getAttribute("id") || null,
+                label: child.dataset.label || child.textContent.trim(),
+                labelColor: child.dataset.labelColor || null,
+                icon: child.dataset.icon || null,
+                image: child.dataset.image || null,
+                // keep original rich content if needed later
+                content: child.innerHTML || "",
+                disabled: child.hasAttribute("disabled")
+            };
+        });
     } else if (opts.options) {
-        try { options = JSON.parse(opts.options); } catch (e) {}
+        try {
+            options = JSON.parse(opts.options);
+        } catch (e) {
+            // ignore parse error
+        }
     }
 
     if (editable) {
@@ -322,20 +374,24 @@ webexpress.webui.TableTemplates.register("move", (val, table, row, cell, name, o
         inputCtrl.value = val;
         editor._wx_controller = inputCtrl;
         container.appendChild(editor);
-        if (row.id) container.dataset.objectId = row.id;
+        if (row.id) {
+            container.dataset.objectId = row.id;
+        }
         new webexpress.webui.SmartEditCtrl(container);
     } else {
         // read-only
         const ctrl = new webexpress.webui.MoveCtrl(container);
         ctrl.options = options;
-        ctrl.value = val; 
+        ctrl.value = val;
     }
-    
+
     return container;
 });
 
 // Rating renderer
 webexpress.webui.TableTemplates.register("rating", (val, table, row, cell, name, opts) => {
+    opts = opts || {};
+
     if ((val === null || val === undefined || val === "") && !opts.editable) {
         return "";
     }
@@ -352,20 +408,24 @@ webexpress.webui.TableTemplates.register("rating", (val, table, row, cell, name,
         inputCtrl.value = val;
         editor._wx_controller = inputCtrl;
         container.appendChild(editor);
-        if (row.id) container.dataset.objectId = row.id;
+        if (row.id) {
+            container.dataset.objectId = row.id;
+        }
         new webexpress.webui.SmartEditCtrl(container);
     } else {
         // read-only
         const ctrl = new webexpress.webui.RatingCtrl(container);
         ctrl.stars = stars;
-        ctrl.value = val; 
+        ctrl.value = val;
     }
-    
+
     return container;
 });
 
 // Editor renderer
 webexpress.webui.TableTemplates.register("editor", (val, table, row, cell, name, opts) => {
+    opts = opts || {};
+
     if ((val === null || val === undefined || val === "") && !opts.editable) {
         return "";
     }
@@ -380,12 +440,14 @@ webexpress.webui.TableTemplates.register("editor", (val, table, row, cell, name,
         inputCtrl.value = val;
         editor._wx_controller = inputCtrl;
         container.appendChild(editor);
-        if (row.id) container.dataset.objectId = row.id;
+        if (row.id) {
+            container.dataset.objectId = row.id;
+        }
         new webexpress.webui.SmartEditCtrl(container);
     } else {
         // read-only
         container.innerHTML = val;
     }
-    
+
     return container;
 });

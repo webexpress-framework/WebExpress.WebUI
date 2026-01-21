@@ -62,7 +62,9 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
     _parseConfig(element) {
         super._parseConfig(element);
         ["data-movable-row", "data-persist-key", "data-allow-column-remove", "data-tree-enabled", "data-tree-move-enabled", "data-columns-modal-key"]
-            .forEach((attr) => { element.removeAttribute(attr); });
+            .forEach((attr) => {
+                element.removeAttribute(attr);
+            });
     }
 
     /**
@@ -83,8 +85,11 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         if (this._initialized && this._highlightChanges && !this._suppressFlashOnce && this._prevRowState.size > 0) {
             for (const entry of currentStates) {
                 const oldSig = this._prevRowState.get(entry.key);
-                if (oldSig === undefined) { newIds.add(entry.key); }
-                else if (oldSig !== entry.signature) { changedIds.add(entry.key); }
+                if (oldSig === undefined) {
+                    newIds.add(entry.key);
+                } else if (oldSig !== entry.signature) {
+                    changedIds.add(entry.key);
+                }
             }
         }
 
@@ -92,7 +97,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
 
         this._rebuildColumnIndexCache();
 
-        // inline comment: sync widths first to set CSS variables for Grid
+        // sync widths first to set css variables for grid
         this._syncColumnWidths();
 
         this._renderColumns();
@@ -114,7 +119,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
     _renderColumns() {
         const headFragment = document.createDocumentFragment();
         
-        // inline comment: use div with wx-grid-row class
+        // use div with wx-grid-row class
         const headRow = document.createElement("div");
         headRow.className = "wx-grid-row wx-grid-head-row";
         headRow.setAttribute("role", "row");
@@ -130,7 +135,9 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             }
 
             for (const col of this._columns) {
-                if (!col.visible) { continue; }
+                if (!col.visible) {
+                    continue;
+                }
 
                 const th = document.createElement("div");
                 th.dataset.columnId = col.id;
@@ -139,12 +146,18 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                 th.style.position = "relative";
                 this._addClasses(th, col.color);
 
-                if (col.sort) { th.classList.add(col.sort === "asc" ? "wx-sort-asc" : "wx-sort-desc"); }
+                if (col.sort) {
+                    th.classList.add(col.sort === "asc" ? "wx-sort-asc" : "wx-sort-desc");
+                }
 
                 const inner = document.createElement("div");
                 inner.className = "wx-col-inner";
-                if (col.icon) { inner.appendChild(this._createIcon(col.icon)); }
-                if (col.image) { inner.appendChild(this._createImage(col.image)); }
+                if (col.icon) {
+                    inner.appendChild(this._createIcon(col.icon));
+                }
+                if (col.image) {
+                    inner.appendChild(this._createImage(col.image));
+                }
                 inner.appendChild(document.createTextNode(col.label));
                 th.appendChild(inner);
 
@@ -223,11 +236,15 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         modalCtrl._tableCtrl = this;
 
         modalCtrl.getColumns = () => {
-            return this._columns.map((c) => ({ id: c.id, label: c.label, visible: c.visible, width: c.width, sort: c.sort, color: c.color }));
+            return this._columns.map((c) => {
+                return { id: c.id, label: c.label, visible: c.visible, width: c.width, sort: c.sort, color: c.color };
+            });
         };
         modalCtrl.applyVisibility = (columnId, visible) => {
             this._runWithModalPreservation(() => {
-                const col = this._columns.find((c) => c.id === columnId);
+                const col = this._columns.find((c) => {
+                    return c.id === columnId;
+                });
                 if (col) {
                     col.visible = !!visible;
                     this._schedulePersist();
@@ -237,11 +254,24 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             this._dispatch(webexpress.webui.Event.COLUMN_VISIBILITY_EVENT, { sender: this._element, columnId, visible: !!visible });
         };
         modalCtrl.applyOrder = (orderedIds) => {
-            const map = new Map(this._columns.map((c) => [c.id, c]));
+            const map = new Map(this._columns.map((c) => {
+                return [c.id, c];
+            }));
             const newOrder = [];
-            orderedIds.forEach((id) => { const col = map.get(id); if (col) { newOrder.push(col); } });
-            this._columns.forEach((c) => { if (!newOrder.includes(c)) { newOrder.push(c); } });
-            const oldIndexById = new Map(this._columns.map((c, i) => [c.id, i]));
+            orderedIds.forEach((id) => {
+                const col = map.get(id);
+                if (col) {
+                    newOrder.push(col);
+                }
+            });
+            this._columns.forEach((c) => {
+                if (!newOrder.includes(c)) {
+                    newOrder.push(c);
+                }
+            });
+            const oldIndexById = new Map(this._columns.map((c, i) => {
+                return [c.id, i];
+            }));
             this._columns = newOrder;
             const reorderCells = (rows) => {
                 for (const row of rows) {
@@ -252,7 +282,9 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                         newCells[i] = row.cells[srcIdx];
                     }
                     row.cells = newCells;
-                    if (row.children) { reorderCells(row.children); }
+                    if (row.children) {
+                        reorderCells(row.children);
+                    }
                 }
             };
             this._runWithModalPreservation(() => {
@@ -263,17 +295,29 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             this._dispatch(webexpress.webui.Event.COLUMN_REORDER_EVENT, { sender: this._element, sourceIndex: -1, targetIndex: -1 });
         };
         modalCtrl.applyWidth = (columnId, widthPx) => {
-            const col = this._columns.find((c) => c.id === columnId);
-            if (!col) { return; }
+            const col = this._columns.find((c) => {
+                return c.id === columnId;
+            });
+            if (!col) {
+                return;
+            }
             const w = parseInt(widthPx, 10);
-            if (!isNaN(w) && w > 0) { col.width = w; }
+            if (!isNaN(w) && w > 0) {
+                col.width = w;
+            }
             this._runWithModalPreservation(() => {
                 this._schedulePersist();
                 this.render();
             });
         };
         modalCtrl.applySort = (columnId, dir) => {
-            this._columns.forEach((c) => { if (c.id === columnId) { c.sort = dir === "asc" || dir === "desc" ? dir : null; } else { c.sort = null; } });
+            this._columns.forEach((c) => {
+                if (c.id === columnId) {
+                    c.sort = dir === "asc" || dir === "desc" ? dir : null;
+                } else {
+                    c.sort = null;
+                }
+            });
             this._runWithModalPreservation(() => {
                 this._schedulePersist();
                 this.render();
@@ -289,14 +333,20 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
      * Open the columns modal and pass context data for panels.
      */
     _openColumnsModal() {
-        if (!this._columnsModalEl) { this._createColumnsModal(); }
+        if (!this._columnsModalEl) {
+            this._createColumnsModal();
+        }
         if (this._columnsSidebarPanel) {
             this._columnsSidebarPanel._tableCtrl = this;
             this._columnsSidebarPanel._columnsPrefill = {
-                columns: this._columns.map((c) => ({ id: c.id, label: c.label, visible: c.visible, width: c.width, sort: c.sort })),
+                columns: this._columns.map((c) => {
+                    return { id: c.id, label: c.label, visible: c.visible, width: c.width, sort: c.sort };
+                }),
                 filterTerm: this._columnFilterTerm || ""
             };
-            if (typeof this._columnsSidebarPanel.show === "function") { this._columnsSidebarPanel.show(); }
+            if (typeof this._columnsSidebarPanel.show === "function") {
+                this._columnsSidebarPanel.show();
+            }
         }
     }
 
@@ -316,7 +366,9 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         if (wasOpen && modal && typeof modal.show === "function") {
             modal.show();
             const list2 = (modal._contentEl || this._columnsModalEl.querySelector(".wx-modal-content"))?.querySelector(".wx-columns-list");
-            if (list2) { list2.scrollTop = scroll; }
+            if (list2) {
+                list2.scrollTop = scroll;
+            }
         }
     }
 
@@ -327,7 +379,10 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
      */
     _enableDragAndDropColumn(th, column) {
         th.addEventListener("dragstart", (e) => {
-            if (!e.ctrlKey) { e.preventDefault(); return; }
+            if (!e.ctrlKey) {
+                e.preventDefault();
+                return;
+            }
             this._draggedColumn = column;
         });
         th.addEventListener("dragend", () => {
@@ -335,7 +390,9 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             this._draggedColumn = null;
         });
         th.addEventListener("dragover", (e) => {
-            if (!this._draggedColumn) { return; }
+            if (!this._draggedColumn) {
+                return;
+            }
             e.preventDefault();
             const rect = th.getBoundingClientRect();
             const leftSide = e.clientX < rect.left + th.offsetWidth / 2;
@@ -346,16 +403,23 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         });
         th.addEventListener("drop", (e) => {
             e.preventDefault();
-            if (!this._draggedColumn || this._draggedColumn === column) { return; }
+            if (!this._draggedColumn || this._draggedColumn === column) {
+                return;
+            }
 
             const sourceIndex = this._columns.indexOf(this._draggedColumn);
             const targetIndex = this._columns.indexOf(column);
             const rect = th.getBoundingClientRect();
             const insertBefore = e.clientX < rect.left + th.offsetWidth / 2;
             let adjusted = targetIndex;
-            if (insertBefore && sourceIndex < targetIndex) { adjusted -= 1; }
-            else if (!insertBefore && sourceIndex > targetIndex) { adjusted += 1; }
-            if (sourceIndex === adjusted) { return; }
+            if (insertBefore && sourceIndex < targetIndex) {
+                adjusted -= 1;
+            } else if (!insertBefore && sourceIndex > targetIndex) {
+                adjusted += 1;
+            }
+            if (sourceIndex === adjusted) {
+                return;
+            }
 
             const moved = this._columns.splice(sourceIndex, 1)[0];
             this._columns.splice(adjusted, 0, moved);
@@ -366,7 +430,9 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                         const c = row.cells.splice(sourceIndex, 1)[0];
                         row.cells.splice(adjusted, 0, c);
                     }
-                    if (row.children) { reorderCells(row.children); }
+                    if (row.children) {
+                        reorderCells(row.children);
+                    }
                 }
             };
             this._runWithModalPreservation(() => {
@@ -389,10 +455,14 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         const renderList = (rows, depth) => {
             for (const r of rows) {
                 this._addRow(r, depth, fragment, changedIds, newIds);
-                if (this._treeEnabled && r.children?.length && r.expanded) { renderList(r.children, depth + 1); }
+                if (this._treeEnabled && r.children?.length && r.expanded) {
+                    renderList(r.children, depth + 1);
+                }
             }
         };
-        if (this._rows.length) { renderList(this._rows, 0); }
+        if (this._rows.length) {
+            renderList(this._rows, 0);
+        }
         this._body.textContent = "";
         this._body.appendChild(fragment);
     }
@@ -413,12 +483,17 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         
         this._addClasses(tr, row.color);
         this._addClasses(tr, row.class);
-        if (row.style) { tr.style.cssText = row.style; }
+        if (row.style) {
+            tr.style.cssText = row.style;
+        }
 
         const key = this._getRowKey(row);
         if (key) {
-            if (changedIds.has(key)) { tr.classList.add("wx-change-flash"); }
-            else if (newIds.has(key)) { tr.classList.add("wx-new-flash"); }
+            if (changedIds.has(key)) {
+                tr.classList.add("wx-change-flash");
+            } else if (newIds.has(key)) {
+                tr.classList.add("wx-new-flash");
+            }
         }
 
         tr._dataRowRef = row;
@@ -441,7 +516,9 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
 
         for (let i = 0; i < len; i++) {
             const colDef = this._columns[i];
-            if (!colDef.visible) { continue; }
+            if (!colDef.visible) {
+                continue;
+            }
 
             const td = document.createElement("div");
             td.className = "wx-grid-cell";
@@ -454,20 +531,40 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             if (cell) {
                 this._addClasses(td, cell.color);
                 this._addClasses(td, cell.class);
-                if (cell.style) { td.style.cssText += (td.style.cssText ? "; " : "") + cell.style; }
+                if (cell.style) {
+                    td.style.cssText += (td.style.cssText ? "; " : "") + cell.style;
+                }
 
                 let content = this._renderCell(row, colDef, cell, firstVisible);
 
                 if (firstVisible && (row.uri || row.icon)) {
                     const wrap = row.uri ? document.createElement("a") : document.createElement("span");
                     wrap.className = "wx-cell-content";
-                    if (row.uri) { wrap.href = row.uri; if (row.target) { wrap.target = row.target; } wrap.rel = "noopener noreferrer"; }
-                    if (row.icon) { const icon = document.createElement("i"); icon.className = row.icon; wrap.appendChild(icon); }
-                    if (content instanceof Node) { wrap.appendChild(content); } else { wrap.appendChild(document.createTextNode(String(content ?? ""))); }
+                    if (row.uri) {
+                        wrap.href = row.uri;
+                        if (row.target) {
+                            wrap.target = row.target;
+                        }
+                        wrap.rel = "noopener noreferrer";
+                    }
+                    if (row.icon) {
+                        const icon = document.createElement("i");
+                        icon.className = row.icon;
+                        wrap.appendChild(icon);
+                    }
+                    if (content instanceof Node) {
+                        wrap.appendChild(content);
+                    } else {
+                        wrap.appendChild(document.createTextNode(String(content ?? "")));
+                    }
                     content = wrap;
                 }
 
-                if (content instanceof Node) { td.appendChild(content); } else { td.textContent = String(content ?? ""); }
+                if (content instanceof Node) {
+                    td.appendChild(content);
+                } else {
+                    td.textContent = String(content ?? "");
+                }
             } else {
                 td.textContent = "";
             }
@@ -494,7 +591,9 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             tr.appendChild(tdOpt);
         }
 
-        if (this._treeEnabled && this._isTree) { this._injectTreeToggle(tr, row, depth); }
+        if (this._treeEnabled && this._isTree) {
+            this._injectTreeToggle(tr, row, depth);
+        }
         fragment.appendChild(tr);
     }
     
@@ -506,13 +605,19 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
     _syncColumnWidths() {
         const parts = [];
         
-        if (this._movableRow) { parts.push("1.25rem"); }
+        if (this._movableRow) {
+            parts.push("1.25rem");
+        }
         
-        const visibleCols = this._columns.filter((c) => c.visible);
+        const visibleCols = this._columns.filter((c) => {
+            return c.visible;
+        });
         const lastVisibleId = visibleCols.length > 0 ? visibleCols[visibleCols.length - 1].id : null;
 
         for (const c of this._columns) {
-            if (!c.visible) { continue; }
+            if (!c.visible) {
+                continue;
+            }
 
             if (c.id === lastVisibleId) {
                 const min = c.minWidth || `${webexpress.webui.TableCtrl.MIN_COL_WIDTH}px`;
@@ -545,7 +650,9 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             }
         }
         
-        if (this._hasOptions || this._allowColumnRemove) { parts.push("1.5rem"); }
+        if (this._hasOptions || this._allowColumnRemove) {
+            parts.push("1.5rem");
+        }
         
         const template = parts.length > 0 ? parts.join(" ") : "auto";
         this._table.style.setProperty("--wx-grid-template", template);
@@ -553,41 +660,59 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
 
     /**
      * Bind pointer-based move interaction handlers to row handles.
+     * Uses event delegation on the body for better performance.
      */
     _bindRowHandles() {
-        if (!this._movableRow) { return; }
-        const handles = this._body.querySelectorAll(".wx-table-drag-handle");
-        handles.forEach((handle) => {
-            if (handle._wxBoundPtr) { return; }
-            handle._wxBoundPtr = true;
+        if (!this._movableRow) {
+            return;
+        }
 
-            const onDown = (e) => {
-                if (e.button !== 0) { return; }
-                const tr = handle.closest(".wx-grid-row");
-                if (!tr || !tr._dataRowRef) { return; }
-                e.preventDefault();
+        if (this._rowHandlesBound) {
+            return;
+        }
+        
+        // bind event delegation to body only once
+        this._body.addEventListener("mousedown", (e) => {
+            const handle = e.target.closest(".wx-table-drag-handle");
+            if (!handle) {
+                return;
+            }
 
-                this._beginRowMove(tr._dataRowRef, tr, e.clientX, e.clientY);
-                document.addEventListener("mousemove", onMove);
-                document.addEventListener("mouseup", onUp);
+            if (e.button !== 0) {
+                return;
+            }
+            
+            const tr = handle.closest(".wx-grid-row");
+            if (!tr || !tr._dataRowRef) {
+                return;
+            }
+            e.preventDefault();
+
+            this._beginRowMove(tr._dataRowRef, tr, e.clientX, e.clientY);
+            
+            const onMove = (ev) => {
+                if (!this._rowMoveActive) {
+                    return;
+                }
+                ev.preventDefault();
+                this._updateRowMove(ev.clientX, ev.clientY);
             };
 
-            const onMove = (e) => {
-                if (!this._rowMoveActive) { return; }
-                e.preventDefault();
-                this._updateRowMove(e.clientX, e.clientY);
-            };
-
-            const onUp = (e) => {
-                if (!this._rowMoveActive) { return; }
-                e.preventDefault();
+            const onUp = (ev) => {
+                if (!this._rowMoveActive) {
+                    return;
+                }
+                ev.preventDefault();
                 document.removeEventListener("mousemove", onMove);
                 document.removeEventListener("mouseup", onUp);
                 this._finalizeRowMove();
             };
 
-            handle.addEventListener("mousedown", onDown);
+            document.addEventListener("mousemove", onMove);
+            document.addEventListener("mouseup", onUp);
         });
+        
+        this._rowHandlesBound = true;
     }
 
     /**
@@ -674,15 +799,21 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         this._lastHoverTr = tr;
 
         if (!tr || !tr._dataRowRef || tr._dataRowRef === this._rowMoveSourceRow) {
-            if (this._rowMovePlaceholder) { this._rowMovePlaceholder.style.display = ""; }
+            if (this._rowMovePlaceholder) {
+                this._rowMovePlaceholder.style.display = "";
+            }
             this._rowMoveTarget = null;
-            if (tr) { tr.classList.remove("wx-drag-over"); }
+            if (tr) {
+                tr.classList.remove("wx-drag-over");
+            }
             return;
         }
 
         tr.classList.add("wx-drag-over");
 
-        if (this._isDescendant(tr._dataRowRef, this._rowMoveSourceRow)) { return; }
+        if (this._isDescendant(tr._dataRowRef, this._rowMoveSourceRow)) {
+            return;
+        }
 
         const rect = tr.getBoundingClientRect();
         const relY = e.clientY - rect.top;
@@ -693,13 +824,20 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
 
         if (canDropAsChild && relY > zoneTop && relY < zoneBottom) {
             this._rowMoveTarget = { mode: "child", row: tr._dataRowRef };
-            if (this._rowMovePlaceholder) { this._rowMovePlaceholder.style.display = "none"; }
+            if (this._rowMovePlaceholder) {
+                this._rowMovePlaceholder.style.display = "none";
+            }
         } else {
-            if (this._rowMovePlaceholder) { this._rowMovePlaceholder.style.display = ""; }
+            if (this._rowMovePlaceholder) {
+                this._rowMovePlaceholder.style.display = "";
+            }
             this._rowMoveTarget = { mode: relY <= zoneTop ? "before" : "after", row: tr._dataRowRef };
             if (this._rowMovePlaceholder) {
-                if (this._rowMoveTarget.mode === "before") { tr.before(this._rowMovePlaceholder); }
-                else { tr.after(this._rowMovePlaceholder); }
+                if (this._rowMoveTarget.mode === "before") {
+                    tr.before(this._rowMovePlaceholder);
+                } else {
+                    tr.after(this._rowMovePlaceholder);
+                }
             }
         }
 
@@ -730,36 +868,54 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             this._lastHoverTr = null;
         }
 
-        if (this._rowMoveGhost) { this._rowMoveGhost.remove(); this._rowMoveGhost = null; }
+        if (this._rowMoveGhost) {
+            this._rowMoveGhost.remove();
+            this._rowMoveGhost = null;
+        }
         const ph = this._rowMovePlaceholder;
 
         const deriveTargetFromPlaceholder = () => {
-            if (!ph || !ph.parentNode) { return null; }
+            if (!ph || !ph.parentNode) {
+                return null;
+            }
             const prevRow = (() => {
                 let el = ph.previousElementSibling;
-                while (el && !el.classList.contains("wx-grid-row")) { el = el.previousElementSibling; }
+                while (el && !el.classList.contains("wx-grid-row")) {
+                    el = el.previousElementSibling;
+                }
                 return el && el.classList.contains("wx-grid-row") ? el : null;
             })();
             const nextRow = (() => {
                 let el = ph.nextElementSibling;
-                while (el && !el.classList.contains("wx-grid-row")) { el = el.nextElementSibling; }
+                while (el && !el.classList.contains("wx-grid-row")) {
+                    el = el.nextElementSibling;
+                }
                 return el && el.classList.contains("wx-grid-row") ? el : null;
             })();
 
             let targetParent = null;
-            if (prevRow && prevRow._dataRowRef) { targetParent = prevRow._dataRowRef.parent || null; }
-            else if (nextRow && nextRow._dataRowRef) { targetParent = nextRow._dataRowRef.parent || null; }
+            if (prevRow && prevRow._dataRowRef) {
+                targetParent = prevRow._dataRowRef.parent || null;
+            } else if (nextRow && nextRow._dataRowRef) {
+                targetParent = nextRow._dataRowRef.parent || null;
+            }
 
             const siblings = targetParent ? targetParent.children : this._rows;
-            if (!Array.isArray(siblings)) { return null; }
+            if (!Array.isArray(siblings)) {
+                return null;
+            }
 
             if (prevRow && prevRow._dataRowRef) {
                 const idxPrev = siblings.indexOf(prevRow._dataRowRef);
-                if (idxPrev >= 0) { return { targetParent, insertIndex: idxPrev + 1 }; }
+                if (idxPrev >= 0) {
+                    return { targetParent, insertIndex: idxPrev + 1 };
+                }
             }
             if (nextRow && nextRow._dataRowRef) {
                 const idxNext = siblings.indexOf(nextRow._dataRowRef);
-                if (idxNext >= 0) { return { targetParent, insertIndex: idxNext }; }
+                if (idxNext >= 0) {
+                    return { targetParent, insertIndex: idxNext };
+                }
             }
             return { targetParent, insertIndex: 0 };
         };
@@ -773,19 +929,32 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             }
         }
 
-        if (this._rowMovePlaceholder) { this._rowMovePlaceholder.remove(); this._rowMovePlaceholder = null; }
+        if (this._rowMovePlaceholder) {
+            this._rowMovePlaceholder.remove();
+            this._rowMovePlaceholder = null;
+        }
 
         const moving = this._rowMoveSourceRow;
-        if (!moving) { this._applyDragSourceVisual(false); this._rowMoveActive = false; return; }
+        if (!moving) {
+            this._applyDragSourceVisual(false);
+            this._rowMoveActive = false;
+            return;
+        }
 
         let targetParent = null;
         let insertIndex = 0;
 
         if (this._rowMoveTarget && this._rowMoveTarget.mode === "child" && this._treeMoveEnabled && this._treeEnabled) {
             const targetRow = this._rowMoveTarget.row;
-            if (targetRow === moving) { this._applyDragSourceVisual(false); this._rowMoveActive = false; return; }
+            if (targetRow === moving) {
+                this._applyDragSourceVisual(false);
+                this._rowMoveActive = false;
+                return;
+            }
             targetParent = targetRow;
-            if (!Array.isArray(targetParent.children)) { targetParent.children = []; }
+            if (!Array.isArray(targetParent.children)) {
+                targetParent.children = [];
+            }
             insertIndex = targetParent.children.length;
             targetParent.expanded = true;
             this._isTree = true;
@@ -803,20 +972,38 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             insertIndex = 0;
         }
 
-        if (targetParent && this._isDescendant(targetParent, moving)) { this._applyDragSourceVisual(false); this._rowMoveActive = false; return; }
+        if (targetParent && this._isDescendant(targetParent, moving)) {
+            this._applyDragSourceVisual(false);
+            this._rowMoveActive = false;
+            return;
+        }
 
         const oldParent = this._rowMoveSourceParent;
         const oldSiblings = oldParent ? oldParent.children : this._rows;
         const oldIndex = oldSiblings.indexOf(moving);
-        if (oldIndex === -1) { this._applyDragSourceVisual(false); this._rowMoveActive = false; return; }
+        if (oldIndex === -1) {
+            this._applyDragSourceVisual(false);
+            this._rowMoveActive = false;
+            return;
+        }
 
         const [removed] = oldSiblings.splice(oldIndex, 1);
-        if (!removed) { this._applyDragSourceVisual(false); this._rowMoveActive = false; return; }
+        if (!removed) {
+            this._applyDragSourceVisual(false);
+            this._rowMoveActive = false;
+            return;
+        }
 
         const newSiblings = targetParent ? targetParent.children : this._rows;
-        if (oldSiblings === newSiblings && oldIndex < insertIndex) { insertIndex--; }
-        if (insertIndex < 0) { insertIndex = 0; }
-        if (insertIndex > newSiblings.length) { insertIndex = newSiblings.length; }
+        if (oldSiblings === newSiblings && oldIndex < insertIndex) {
+            insertIndex--;
+        }
+        if (insertIndex < 0) {
+            insertIndex = 0;
+        }
+        if (insertIndex > newSiblings.length) {
+            insertIndex = newSiblings.length;
+        }
 
         newSiblings.splice(insertIndex, 0, removed);
         removed.parent = targetParent;
@@ -841,19 +1028,23 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         });
     }
 
-	/**
-	 * Returns all columns that are currently marked as visible.
-	 *
-	 * @returns {Array<Object>} The list of visible columns.
-	 */
-    _getVisibleColumns() { return this._columns.filter((c) => c.visible); }
+    /**
+     * Returns all columns that are currently marked as visible.
+     *
+     * @returns {Array<Object>} The list of visible columns.
+     */
+    _getVisibleColumns() { 
+        return this._columns.filter((c) => {
+            return c.visible;
+        }); 
+    }
 
-	/**
-	 * Applies a text-based filter to the column selection menu.
-	 * Hides menu items whose ID or label does not match the filter term.
-	 *
-	 * @param {HTMLElement} menuEl - The menu element containing column items.
-	 */
+    /**
+     * Applies a text-based filter to the column selection menu.
+     * Hides menu items whose ID or label does not match the filter term.
+     *
+     * @param {HTMLElement} menuEl - The menu element containing column items.
+     */
     _applyColumnFilter(menuEl) {
         const term = (this._columnFilterTerm || "").toLowerCase();
         const items = menuEl.querySelectorAll(".wx-col-item");
@@ -865,36 +1056,52 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         });
     }
 
-	/**
-	 * Schedules a debounced persistence update. Ensures that state is not
-	 * written to the cookie too frequently.
-	 */
+    /**
+     * Schedules a debounced persistence update. Ensures that state is not
+     * written to the cookie too frequently.
+     */
     _schedulePersist() {
-        if (!this._persistKey) { return; }
-        if (this._saveDebounceTimer) { clearTimeout(this._saveDebounceTimer); }
-        this._saveDebounceTimer = setTimeout(() => { this._persistState(); }, 300);
+        if (!this._persistKey) {
+            return;
+        }
+        if (this._saveDebounceTimer) {
+            clearTimeout(this._saveDebounceTimer);
+        }
+        this._saveDebounceTimer = setTimeout(() => {
+            this._persistState();
+        }, 300);
     }
 
-	/**
-	 * Persists the current table state (column order, visibility, widths,
-	 * sort configuration, and collapsed tree nodes) into a cookie.
-	 */
+    /**
+     * Persists the current table state (column order, visibility, widths,
+     * sort configuration, and collapsed tree nodes) into a cookie.
+     */
     _persistState() {
         const collapsed = [];
         const stack = [...this._rows];
         while (stack.length) {
             const r = stack.pop();
             if (r.id && r.children?.length) {
-                if (!r.expanded) { collapsed.push(r.id); }
-                for (let i = 0; i < r.children.length; i++) { stack.push(r.children[i]); }
+                if (!r.expanded) {
+                    collapsed.push(r.id);
+                }
+                for (let i = 0; i < r.children.length; i++) {
+                    stack.push(r.children[i]);
+                }
             }
         }
 
-        const sortCol = this._columns.find((c) => c.sort);
+        const sortCol = this._columns.find((c) => {
+            return c.sort;
+        });
         const state = {
             v: 1,
-            cols: this._columns.map((c) => ({ id: c.id, visible: c.visible, width: c.width })),
-            order: this._columns.map((c) => c.id),
+            cols: this._columns.map((c) => {
+                return { id: c.id, visible: c.visible, width: c.width };
+            }),
+            order: this._columns.map((c) => {
+                return c.id;
+            }),
             sort: sortCol ? { id: sortCol.id, dir: sortCol.sort } : null,
             tree: { collapsed }
         };
@@ -902,28 +1109,42 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         document.cookie = `${this._persistKey}=${encodeURIComponent(JSON.stringify(state))}; path=/; SameSite=Lax; max-age=31536000`;
     }
 
-	/**
-	 * Loads a previously persisted table state from a cookie and applies it
-	 * to the current column configuration, sort state, and tree expansion.
-	 */
+    /**
+     * Loads a previously persisted table state from a cookie and applies it
+     * to the current column configuration, sort state, and tree expansion.
+     */
     _loadStateFromCookie() {
-        if (!this._persistKey) { return; }
+        if (!this._persistKey) {
+            return;
+        }
         const match = document.cookie.match(new RegExp(`(^| )${this._persistKey}=([^;]+)`));
-        if (!match) { return; }
+        if (!match) {
+            return;
+        }
 
         try {
             const obj = JSON.parse(decodeURIComponent(match[2]));
-            if (!obj || obj.v !== 1) { return; }
+            if (!obj || obj.v !== 1) {
+                return;
+            }
 
-            const colMap = new Map(this._columns.map((c) => [c.id, c]));
+            const colMap = new Map(this._columns.map((c) => {
+                return [c.id, c];
+            }));
 
             if (Array.isArray(obj.order)) {
                 const newOrder = [];
                 obj.order.forEach((id) => {
                     const col = colMap.get(id);
-                    if (col) { newOrder.push(col); }
+                    if (col) {
+                        newOrder.push(col);
+                    }
                 });
-                this._columns.forEach((c) => { if (!newOrder.includes(c)) { newOrder.push(c); } });
+                this._columns.forEach((c) => {
+                    if (!newOrder.includes(c)) {
+                        newOrder.push(c);
+                    }
+                });
                 this._columns = newOrder;
             }
 
@@ -931,15 +1152,21 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                 obj.cols.forEach((s) => {
                     const c = colMap.get(s.id);
                     if (c) {
-                        if (typeof s.visible === "boolean") { c.visible = s.visible; }
-                        if (s.width) { c.width = parseInt(s.width, 10); }
+                        if (typeof s.visible === "boolean") {
+                            c.visible = s.visible;
+                        }
+                        if (s.width) {
+                            c.width = parseInt(s.width, 10);
+                        }
                     }
                 });
             }
 
             if (obj.sort?.id) {
                 const c = colMap.get(obj.sort.id);
-                if (c) { c.sort = obj.sort.dir; }
+                if (c) {
+                    c.sort = obj.sort.dir;
+                }
             }
 
             if (obj.tree?.collapsed) {
@@ -947,8 +1174,12 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                 const stack2 = [...this._rows];
                 while (stack2.length) {
                     const r = stack2.pop();
-                    if (set.has(r.id)) { r.expanded = false; }
-                    if (r.children) { stack2.push(...r.children); }
+                    if (set.has(r.id)) {
+                        r.expanded = false;
+                    }
+                    if (r.children) {
+                        stack2.push(...r.children);
+                    }
                 }
             }
         } catch (e) { /* ignore */ }
@@ -962,7 +1193,12 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
      */
     _isDescendant(candidate, ancestor) {
         let p = candidate.parent;
-        while (p) { if (p === ancestor) { return true; } p = p.parent; }
+        while (p) {
+            if (p === ancestor) {
+                return true;
+            }
+            p = p.parent;
+        }
         return false;
     }
 
@@ -971,7 +1207,9 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
      * @param {boolean} active Whether dragging is active.
      */
     _applyDragSourceVisual(active) {
-        if (!this._rowMoveSourceEl) { return; }
+        if (!this._rowMoveSourceEl) {
+            return;
+        }
         if (active) {
             this._rowMoveSourceEl.classList.add("wx-dragging");
         } else {
@@ -982,5 +1220,5 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
     }
 };
 
-// Register the class in the controller
+// register the class in the controller
 webexpress.webui.Controller.registerClass("wx-webui-table-reorderable", webexpress.webui.TableCtrlReorderable);

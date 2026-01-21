@@ -1,10 +1,10 @@
 /**
  * A split control for resizable container panels.
+ * Persists side size and collapsed state via a single cookie (when the element has an id).
  * The following events are triggered:
  * - webexpress.webui.Event.SIZE_CHANGE_EVENT
  * - webexpress.webui.Event.HIDE_EVENT
  * - webexpress.webui.Event.SHOW_EVENT
- * Persists side size and collapsed state via a single cookie (when the element has an id).
  */
 webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     _sidePaneCollapsed = false;
@@ -13,7 +13,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Constructor
-     * @param {HTMLElement} element - the DOM element for the split control.
+     * @param {HTMLElement} element - The DOM element for the split control.
      */
     constructor(element) {
         super(element);
@@ -27,12 +27,14 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         this._splitStyle = element.getAttribute("data-splitter-style") || null;
         this._splitterSize = element.getAttribute("data-splitter-size") || null;
         this._paneOrder = element.getAttribute("data-order") || "side-main";
+        
         // read unit from data-unit attribute, values can be: 'px', 'em', 'rem', '%', default is 'px'
         this._unit = element.getAttribute("data-unit") || "px";
 
         // detect ratio mode when initial attribute uses '%'
         this._sideRatioMode = false;
         this._initialRatio = null;
+        
         if (typeof this._initialSideAttr === "string") {
             const s = this._initialSideAttr.trim();
             if (s.endsWith("%")) {
@@ -44,27 +46,33 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
             }
         }
 
-        // get panes from DOM
-        this._sidePane = Array.from(element.children).find((child) => {
+        // get panes from dom
+        const children = Array.from(element.children);
+        this._sidePane = children.find((child) => {
             return child.classList.contains("wx-side-pane");
-        });
-        this._detachElement(this._sidePane);
+        }) || children[0]; // fallback to first child
+        
+        if (this._sidePane) {
+            this._detachElement(this._sidePane);
+        }
 
-        this._mainPane = Array.from(element.children).find((child) => {
+        this._mainPane = children.find((child) => {
             return child.classList.contains("wx-main-pane");
-        });
-        this._detachElement(this._mainPane);
+        }) || children[1]; // fallback to second child
+        
+        if (this._mainPane) {
+            this._detachElement(this._mainPane);
+        }
 
-        // cleanup DOM attributes
-        element.removeAttribute("data-orientation");
-        element.removeAttribute("data-min-side");
-        element.removeAttribute("data-max-side");
-        element.removeAttribute("data-size");
-        element.removeAttribute("data-splitter-class");
-        element.removeAttribute("data-splitter-style");
-        element.removeAttribute("data-splitter-size");
-        element.removeAttribute("data-order");
-        element.removeAttribute("data-unit");
+        // cleanup dom attributes
+        const attrsToRemove = [
+            "data-orientation", "data-min-side", "data-max-side", "data-size",
+            "data-splitter-class", "data-splitter-style", "data-splitter-size",
+            "data-order", "data-unit"
+        ];
+        attrsToRemove.forEach((attr) => {
+            element.removeAttribute(attr);
+        });
 
         // set base classes
         element.classList.remove("wx-webui-split");
@@ -92,15 +100,15 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
 
         this._splitter.appendChild(indicator);
 
-        // arrange panes and splitter in correct order in DOM
+        // arrange panes and splitter in correct order in dom
         if (this._paneOrder === "main-side") {
-            element.appendChild(this._mainPane);
+            if (this._mainPane) { element.appendChild(this._mainPane); }
             element.appendChild(this._splitter);
-            element.appendChild(this._sidePane);
+            if (this._sidePane) { element.appendChild(this._sidePane); }
         } else {
-            element.appendChild(this._sidePane);
+            if (this._sidePane) { element.appendChild(this._sidePane); }
             element.appendChild(this._splitter);
-            element.appendChild(this._mainPane);
+            if (this._mainPane) { element.appendChild(this._mainPane); }
         }
 
         // set splitter class if data-splitter-class is set
@@ -130,6 +138,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
 
         // set initial side size: cookie.size > data-size > minSide > half, respect min/max
         let initialSide = (state && typeof state.size === "number") ? state.size : this._parseInitialSideSize(this._initialSideAttr);
+        
         if (initialSide == null) {
             initialSide = Math.floor((this._orientation === "vertical" ? element.clientHeight : element.clientWidth) / 2);
         }
@@ -139,6 +148,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         if (this._maxSide !== null) {
             initialSide = Math.min(initialSide, this._maxSide);
         }
+        
         this._sideSize = initialSide;
         this._setPaneSizes(this._sideSize);
 
@@ -163,6 +173,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
 
             const rect = this._element.getBoundingClientRect();
             let offset;
+            
             if (this._orientation === "vertical") {
                 if (this._paneOrder === "main-side") {
                     offset = (rect.bottom - e.clientY) - this._sidePane.offsetHeight;
@@ -181,19 +192,20 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
                 if (!this._dragging) {
                     return;
                 }
-                const rect = this._element.getBoundingClientRect();
+                const currentRect = this._element.getBoundingClientRect();
                 let newSideSize;
+                
                 if (this._orientation === "vertical") {
                     if (this._paneOrder === "main-side") {
-                        newSideSize = rect.bottom - ev.clientY - offset;
+                        newSideSize = currentRect.bottom - ev.clientY - offset;
                     } else {
-                        newSideSize = ev.clientY - rect.top - offset;
+                        newSideSize = ev.clientY - currentRect.top - offset;
                     }
                 } else {
                     if (this._paneOrder === "main-side") {
-                        newSideSize = rect.right - ev.clientX - offset;
+                        newSideSize = currentRect.right - ev.clientX - offset;
                     } else {
-                        newSideSize = ev.clientX - rect.left - offset;
+                        newSideSize = ev.clientX - currentRect.left - offset;
                     }
                 }
 
@@ -260,9 +272,11 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
             this._handleResize();
         };
         window.addEventListener("resize", this._onWindowResize);
+        
         this._resizeObserver = new ResizeObserver(() => {
             this._handleResize();
         });
+        
         try {
             this._resizeObserver.observe(this._element);
         } catch (err) {
@@ -272,23 +286,26 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Handles container resize and reapplies pane sizes.
-     * keeps the side pane size stable in px or proportional if ratio mode is enabled.
-     * @returns {void}
+     * Keeps the side pane size stable in px or proportional if ratio mode is enabled.
      */
     _handleResize() {
         const total = this._orientation === "vertical" ? this._element.clientHeight : this._element.clientWidth;
         if (total <= 0) {
             return;
         }
+        
         const splitterSize = this._getSplitterSize();
+        
         if (this._sidePaneCollapsed) {
             // when collapsed, layout uses css calc and adapts automatically
             return;
         }
+        
         let sideSize = this._sideSize;
         if (this._sideRatioMode && typeof this._initialRatio === "number") {
             sideSize = Math.round(this._initialRatio * total);
         }
+        
         // respect constraints
         if (this._minSide !== null) {
             sideSize = Math.max(this._minSide, sideSize);
@@ -296,6 +313,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         if (this._maxSide !== null) {
             sideSize = Math.min(this._maxSide, sideSize);
         }
+        
         // do not allow side to exceed available space
         const maxSideByTotal = Math.max(0, total - splitterSize);
         sideSize = Math.min(sideSize, maxSideByTotal);
@@ -307,7 +325,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Reads split state from a single cookie (version 1).
      * Only loads the state if a cookie name exists (i.e., if an id is set on the element).
-     * @returns {{v:number,size:number|null,collapsed:boolean|null}|null} returns the parsed state or null.
+     * @returns {{v:number,size:number|null,collapsed:boolean|null}|null} Returns the parsed state or null.
      */
     _getStateFromCookie() {
         if (!this._cookieName) {
@@ -315,6 +333,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         }
         const name = this._cookieName + "=";
         const ca = document.cookie.split(";");
+        
         for (let c of ca) {
             c = c.trim();
             if (c.indexOf(name) === 0) {
@@ -339,8 +358,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Stores split state in a single cookie (version 1) for 30 days.
      * Only saves the state if a cookie name exists (i.e., if an id is set on the element).
-     * @param {{size:number,collapsed:boolean}} state - the state to store.
-     * @returns {void}
+     * @param {{size:number,collapsed:boolean}} state - The state to store.
      */
     _setStateCookie(state) {
         if (!this._cookieName) {
@@ -353,14 +371,14 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         };
         const d = new Date();
         d.setTime(d.getTime() + (30 * 24 * 60 * 60 * 1000));
-        document.cookie = this._cookieName + "=" + encodeURIComponent(JSON.stringify(payload)) + ";expires=" + d.toUTCString() + ";path=/";
+        document.cookie = this._cookieName + "=" + encodeURIComponent(JSON.stringify(payload)) + ";expires=" + d.toUTCString() + ";path=/; SameSite=Lax";
     }
 
     /**
      * Parses the data-size attribute and returns the size in the correct unit.
      * Supports values in px, em, rem, %, or plain number (interpreted according to data-unit, default px).
-     * @param {string} attr - the value of the data-size attribute.
-     * @returns {number|null} returns the value in pixels if valid, otherwise null.
+     * @param {string} attr - The value of the data-size attribute.
+     * @returns {number|null} Returns the value in pixels if valid, otherwise null.
      */
     _parseInitialSideSize(attr) {
         if (!attr) {
@@ -418,7 +436,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Returns the current splitter size (width or height).
      * If a value for data-splitter-size is set, uses that.
-     * @returns {number} splitter size in pixels.
+     * @returns {number} Splitter size in pixels.
      */
     _getSplitterSize() {
         if (this._splitterSize) {
@@ -436,10 +454,9 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Sets the size of both panes and stores the current side size.
-     * clamps sizes within available container bounds and min/max constraints.
-     * @param {number} sideSize - size of the side pane in px.
-     * @param {boolean} fireEvent - whether to fire a size change event.
-     * @returns {void}
+     * Clamps sizes within available container bounds and min/max constraints.
+     * @param {number} sideSize - Size of the side pane in px.
+     * @param {boolean} fireEvent - Whether to fire a size change event.
      */
     _setPaneSizes(sideSize, fireEvent = false) {
         const total = this._orientation === "vertical" ? this._element.clientHeight : this._element.clientWidth;
@@ -453,10 +470,11 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
             sideSize = Math.min(this._maxSide, sideSize);
         }
         sideSize = Math.max(0, sideSize);
+        
         const maxSideByTotal = Math.max(0, total - splitterSize);
         sideSize = Math.min(sideSize, maxSideByTotal);
 
-        let mainSize = Math.max(0, total - sideSize - splitterSize);
+        const mainSize = Math.max(0, total - sideSize - splitterSize);
 
         if (this._orientation === "vertical") {
             if (this._sidePane) {
@@ -501,7 +519,6 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Collapses the side pane and hides it, but respects minSide if set.
      * Fires HIDE_EVENT when side-pane is collapsed.
-     * @returns {void}
      */
     collapseSidePane() {
         if (this._sidePaneCollapsed) {
@@ -545,22 +562,24 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Expands the side pane and shows it again.
      * Fires SHOW_EVENT when side-pane is expanded.
-     * @param {number} [size] - optional size to restore or set for the side pane.
-     * @returns {void}
+     * @param {number} [size] - Optional size to restore or set for the side pane.
      */
     expandSidePane(size) {
         if (!this._sidePaneCollapsed) {
             return;
         }
         this._sidePaneCollapsed = false;
+        
         const total = this._orientation === "vertical" ? this._element.clientHeight : this._element.clientWidth;
         let sideSize = size || this._sidePanePrevSize || Math.floor(total / 2);
+        
         if (this._minSide !== null) {
             sideSize = Math.max(this._minSide, sideSize);
         }
         if (this._maxSide !== null) {
             sideSize = Math.min(this._maxSide, sideSize);
         }
+        
         this._sidePane.style.display = "";
         this._setPaneSizes(sideSize, true);
 
@@ -573,10 +592,8 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Toggles the side pane between collapsed and expanded state.
-     * @returns {void}
      */
     toggleSidePane() {
-        // toggle collapse/expand
         if (this._sidePaneCollapsed) {
             this.expandSidePane();
         } else {
@@ -589,7 +606,6 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
      * Measures the content of the side pane and resizes the side pane accordingly,
      * respecting min/max constraints and the available container space. Expands the
      * side pane when it is currently collapsed.
-     * @returns {void}
      */
     fitSidePaneToContent() {
         if (!this._sidePane) {
@@ -646,8 +662,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Forces a recomputation of pane sizes based on the current container size.
-     * keeps current side size unless ratio mode is active.
-     * @returns {void}
+     * Keeps current side size unless ratio mode is active.
      */
     refresh() {
         this._handleResize();

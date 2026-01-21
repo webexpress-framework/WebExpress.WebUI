@@ -8,7 +8,7 @@
  */
 webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
     _holidays = [];
-    _dateFormat = null; // stores the format for both display and value
+    _dateFormat = null;
 
     /**
      * Initializes the date control, sets up DOM and event bindings.
@@ -25,15 +25,10 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         this._rangeMode = element.getAttribute("data-range") === "true";
 
         // clean up element attributes and prepare DOM structure
-        element.removeAttribute("name");
-        element.removeAttribute("placeholder");
-        element.removeAttribute("data-holidays");
-        element.removeAttribute("data-value");
-        element.removeAttribute("data-format");
-        element.removeAttribute("data-range");
+        ["name", "placeholder", "data-holidays", "data-value", "data-format", "data-range"].forEach(attr => element.removeAttribute(attr));
         element.innerHTML = "";
         element.classList.add("wx-date");
-        
+
         if (this._rangeMode && value && value.includes(" - ")) {
             const [start, end] = value.split(" - ").map(date => this._parseDate(date.trim(), this._dateFormat));
             this._rangeStart = start || null;
@@ -42,26 +37,24 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
             this._rangeStart = null;
             this._rangeEnd = null;
         }
-
         if (holidaysAttr) {
-            this._holidays = holidaysAttr.split(",").map(x => x.trim()).filter(x => x.length > 0);
+            this._holidays = holidaysAttr.split(",").map(x => x.trim()).filter(Boolean);
         }
-        
+
         this._viewDate = value ? this._parseDate(value, this._dateFormat) : null;
         this._dropdown = this._createDropdown();
         this._dropdownmenu = this._createDropdownMenu();
-        
+
         element.appendChild(this._dropdown);
         element.appendChild(this._dropdownmenu);
-        
         this._initializePopper(this._dropdown, this._dropdownmenu);
-        
+
         this.value = this._rangeMode ? { start: this._rangeStart, end: this._rangeEnd } : this._viewDate;
     }
 
     /**
      * Creates the dropdown container, text input, and calendar icon.
-     * @returns {HTMLDivElement} Dropdown element.
+     * @returns {HTMLDivElement}
      */
     _createDropdown() {
         const dropdown = document.createElement("div");
@@ -75,26 +68,30 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         this._input.name = this._name || "";
         this._input.type = "text";
         this._input.className = "wx-date-input";
-        this._input.style.flex = "1 1 auto";
-        this._input.style.border = "none";
-        this._input.style.outline = "none";
-        this._input.style.background = "transparent";
-        this._input.style.padding = "0";
+        Object.assign(this._input.style, {
+            flex: "1 1 auto",
+            border: "none",
+            outline: "none",
+            background: "transparent",
+            padding: "0"
+        });
         this._input.placeholder = this._placeholder;
         this._input.autocomplete = "off";
         this._input.value = "";
 
-        // always show popup when clicking on the icon or control, regardless of focus
         this._input.addEventListener("input", () => this._onInputLive());
         this._input.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-                this._onInputChange();
-            }
+            if (e.key === "Enter") { this._onInputChange(); }
         });
+
         this._input.addEventListener("blur", () => {
-            this._dropdownmenu.style.display = "flex";
-            this._dropdownmenu.dispatchEvent(new Event("show"));
-            this._dropdownmenu.blur();
+            // close only if not inside popup
+            setTimeout(() => {
+                if (!this._dropdownmenu.matches(":hover")) {
+                    this._dropdownmenu.style.display = "none";
+                    this._dispatch(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {});
+                }
+            }, 100);
         });
 
         dropdown.appendChild(this._input);
@@ -105,28 +102,21 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         icon.style.marginLeft = "0.5em";
         dropdown.appendChild(icon);
 
-        // always open popup when clicking the calendar icon
         icon.addEventListener("click", (e) => {
             e.stopPropagation();
-            this._dropdownmenu.style.display = "flex";
-            this._dropdownmenu.dispatchEvent(new Event("show"));
-            this._dropdownmenu.blur();
+            this._showCalendarPopup();
         });
 
-        // always open popup when clicking the control (not just icon)
         dropdown.addEventListener("click", (e) => {
             e.stopPropagation();
-            this._dropdownmenu.style.display = "flex";
-            this._dropdownmenu.dispatchEvent(new Event("show"));
-            this._dropdownmenu.blur();
+            this._showCalendarPopup();
         });
 
         // hide popup on outside click
-        document.addEventListener("click", (e) => {
+        document.addEventListener("mousedown", (e) => {
             if (!dropdown.contains(e.target) && !this._dropdownmenu.contains(e.target)) {
-                this._dropdownmenu.dispatchEvent(new Event("hide"));
                 this._dropdownmenu.style.display = "none";
-                this._input.blur();
+                this._dispatch(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {});
             }
         });
 
@@ -134,7 +124,16 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * Live validation and popup sync for manual text input.
+     * Shows the calendar popup and dispatches event.
+     */
+    _showCalendarPopup() {
+        this._dropdownmenu.style.display = "flex";
+        this._dispatch(webexpress.webui.Event.DROPDOWN_SHOW_EVENT, {});
+        this._input.focus();
+    }
+
+    /**
+     * Handles live validation and popup sync for manual text input.
      */
     _onInputLive() {
         const inputValue = this._input.value.trim();
@@ -157,7 +156,7 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * Commits input value on blur or enter; updates selected date if valid.
+     * Commits input value; updates selected date if valid.
      */
     _onInputChange() {
         const inputValue = this._input.value.trim();
@@ -168,11 +167,7 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
             return;
         }
         const parsed = this._parseDate(inputValue, this._dateFormat);
-        if (
-            parsed &&
-            !isNaN(parsed.getTime()) &&
-            this._formatDateString(parsed, this._dateFormat) === inputValue
-        ) {
+        if (parsed && !isNaN(parsed.getTime()) && this._formatDateString(parsed, this._dateFormat) === inputValue) {
             this.value = parsed;
             this._input.setCustomValidity("");
             this._input.classList.remove("is-invalid");
@@ -184,19 +179,18 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
 
     /**
      * Creates the dropdown menu (calendar popup) and "Today" button.
-     * @returns {HTMLDivElement} Dropdown menu element.
+     * @returns {HTMLDivElement}
      */
     _createDropdownMenu() {
-        const viewDate = this._viewDate ? this._viewDate : new Date();
         const dropdownMenu = document.createElement("div");
         dropdownMenu.classList.add("dropdown-menu");
         dropdownMenu.style.minWidth = "280px";
         dropdownMenu.style.display = "none";
-                        
+
         // header with navigation
         const header = document.createElement("div");
         header.classList.add("wx-calendar-header");
-        
+
         const btnPrevYear = this._createNavButton("«", () => this._changeView(-1, "year"));
         const btnPrevMonth = this._createNavButton("‹", () => this._changeView(-1, "month"));
         const btnNextMonth = this._createNavButton("›", () => this._changeView(1, "month"));
@@ -210,7 +204,7 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         header.appendChild(btnNextYear);
 
         dropdownMenu.appendChild(header);
-        
+
         this._calendarContainer = document.createElement("div");
         this._calendarContainer.classList.add("wx-calendar");
         dropdownMenu.appendChild(this._calendarContainer);
@@ -223,38 +217,34 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         todayBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             const now = new Date();
-            
             if (this._rangeMode) {
                 this.value = { start: now, end: now };
             } else {
                 this.value = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             }
-
             setTimeout(() => {
                 this._dropdownmenu.style.display = "none";
-                this._dispatch(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, { });
+                this._dispatch(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {});
             }, 0);
         });
         dropdownMenu.appendChild(todayBtn);
-
         return dropdownMenu;
     }
 
     /**
      * Renders the input and calendar according to state.
+     * @public
      */
     render() {
-        const viewDate = this._viewDate ? this._viewDate : new Date();
-        this._monthYear.textContent = viewDate?.getFullYear() 
-            + " - " 
-            + this._i18n(`webexpress.webui:calendar.${this._getMonthKey(viewDate?.getMonth())}`);
+        const viewDate = this._viewDate || new Date();
+        this._monthYear.textContent = viewDate.getFullYear() + " - " + this._i18n(`webexpress.webui:calendar.${this._getMonthKey(viewDate.getMonth())}`);
         this._calendarContainer.innerHTML = "";
         this._calendarContainer.appendChild(this._renderCalendar());
     }
 
     /**
-     * Gets the current value (single date or range).
-     * @returns {Date|Object|null} Single date or {start, end} object in range mode.
+     * Returns the selected value.
+     * @returns {Date|Object|null}
      */
     get value() {
         return this._rangeMode
@@ -263,12 +253,13 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * Sets the selected date, triggers render and change event.
-     * @param {Date|null} date - Date to set as selected.
+     * Sets the selected date, updates control and dispatches events if needed.
+     * @param {Date|Object|string|null|Array} input - Single date, range object, string or array.
      */
     set value(input) {
-        const prevSerialized = this._input ? this._input.value : "";
+        let changed = false;
 
+        // normalization for range and single mode
         if (input == null) {
             if (this._rangeMode) {
                 this._rangeStart = null;
@@ -277,69 +268,49 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
                 this._selectedDate = null;
             }
         } else if (this._rangeMode) {
-            // normalize range inputs
-            let start = null;
-            let end = null;
-
+            let start = null, end = null;
             if (Array.isArray(input)) {
                 [start, end] = input;
-                if (typeof end === "undefined") {
-                    // missing (not null) means single-day
-                    end = start;
-                }
+                if (typeof end === "undefined") { end = start; }
             } else if (input instanceof Date) {
-                start = input;
-                end = input;
+                start = input; end = input;
             } else if (typeof input === "string") {
                 if (input.includes(" - ")) {
                     const parts = input.split(" - ");
-                    start = parts[0];
-                    end = parts[1];
+                    start = parts[0]; end = parts[1];
                 } else {
-                    start = input;
-                    end = input;
+                    start = input; end = input;
                 }
             } else if (typeof input === "object") {
-                // explicit properties
                 if (Object.prototype.hasOwnProperty.call(input, "start")) {
                     start = input.start;
                 }
                 if (Object.prototype.hasOwnProperty.call(input, "end")) {
-                    end = input.end; // may be null
+                    end = input.end;
                 } else if (start != null) {
-                    // implicit single day (end missing)
                     end = start;
                 }
             }
-
-            // parse strings
-            if (typeof start === "string") start = this._parseDate(start.trim(), this._dateFormat);
-            if (typeof end === "string") end = this._parseDate(end.trim(), this._dateFormat);
-
-            // normalize to midnight date objects
+            if (typeof start === "string") { start = this._parseDate(start.trim(), this._dateFormat); }
+            if (typeof end === "string") { end = this._parseDate(end.trim(), this._dateFormat); }
             start = start instanceof Date ? new Date(start.getFullYear(), start.getMonth(), start.getDate()) : null;
-            if (end instanceof Date) {
-                end = new Date(end.getFullYear(), end.getMonth(), end.getDate());
-            } else if (end !== null) {
-                end = null; // any non-date non-null fallback
+            end = end instanceof Date ? new Date(end.getFullYear(), end.getMonth(), end.getDate()) : null;
+
+            if (start && end && end < start) {
+                [start, end] = [end, start];
             }
 
-            // swap if reversed and closed range
-            if (start && end && end < start) {
-                const tmp = start;
-                start = end;
-                end = tmp;
+            if (this._rangeStart?.getTime() !== start?.getTime() || this._rangeEnd?.getTime() !== end?.getTime()) {
+                changed = true;
             }
 
             this._rangeStart = start;
             this._rangeEnd = end;
             this._selectedDate = null;
-
             if (this._rangeStart) {
                 this._viewDate = new Date(this._rangeStart);
             }
         } else {
-            // single date mode
             let date = null;
             if (input instanceof Date) {
                 date = input;
@@ -350,9 +321,12 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
                     ? input.start
                     : (typeof input.start === "string" ? this._parseDate(input.start.trim(), this._dateFormat) : null);
             }
-            this._selectedDate = date instanceof Date
-                ? new Date(date.getFullYear(), date.getMonth(), date.getDate())
-                : null;
+            date = date instanceof Date ? new Date(date.getFullYear(), date.getMonth(), date.getDate()) : null;
+
+            if (this._selectedDate?.getTime() !== date?.getTime()) {
+                changed = true;
+            }
+            this._selectedDate = date;
             this._rangeStart = null;
             this._rangeEnd = null;
             if (this._selectedDate) {
@@ -360,26 +334,20 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
             }
         }
 
-        // build serialized value
+        // serialized value for input field
         let newSerialized = "";
         if (this._rangeMode) {
             if (this._rangeStart && this._rangeEnd) {
-                newSerialized =
-                    this._formatDateString(this._rangeStart, this._dateFormat) +
-                    " - " +
-                    this._formatDateString(this._rangeEnd, this._dateFormat);
+                newSerialized = this._formatDateString(this._rangeStart, this._dateFormat) + " - " + this._formatDateString(this._rangeEnd, this._dateFormat);
             } else if (this._rangeStart && !this._rangeEnd) {
-                // open or single start (open range)
                 newSerialized = this._formatDateString(this._rangeStart, this._dateFormat);
             }
         } else if (this._selectedDate) {
             newSerialized = this._formatDateString(this._selectedDate, this._dateFormat);
         }
 
-        // update input and dispatch change if changed
         if (this._input && this._input.value !== newSerialized) {
             this._input.value = newSerialized;
-            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: newSerialized });
         }
 
         // update view date if available
@@ -392,21 +360,24 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         }
 
         this.render();
+
+        // dispatch if changed
+        if (changed) {
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: newSerialized });
+        }
     }
     
     /**
-     * Gets current format string.
-     * Supports: "short" | "medium" | "long" | "full" | token patterns like "DD.MM.YYYY".
-     * @returns {string} Current format.
+     * Gets current date format string.
+     * @returns {string}
      */
     get format() {
         return this._dateFormat;
     }
 
     /**
-     * Sets format and re-renders.
-     * Accepts: "short" | "medium" | "long" | "full" | token patterns like "DD.MM.YYYY".
-     * @param {string} fmt New format.
+     * Sets date format.
+     * @param {string} fmt
      */
     set format(fmt) {
         const next = typeof fmt === "string" && fmt.trim().length > 0 ? fmt.trim() : "short";
@@ -417,49 +388,39 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * Formats a date for input display.
-     * @param {Date} date - Date to format.
-     * @returns {string} Formatted date string.
+     * Formats a date object using format string.
+     * @param {Date} date
+     * @returns {string}
      */
     _formatDate(date) {
-        if (this._dateFormat && typeof this._dateFormat === "string") {
-            return this._formatDateString(date, this._dateFormat);
-        }
-        return date.toLocaleDateString("en-US");
+        return this._dateFormat ? this._formatDateString(date, this._dateFormat) : date.toLocaleDateString("en-US");
     }
 
     /**
      * Formats a Date object according to the given format (YYYY-MM-DD etc).
-     * @param {Date} date - Date to format.
-     * @param {string} format - Format string.
-     * @returns {string} Formatted string.
+     * @param {Date} date
+     * @param {string} format
+     * @returns {string}
      */
     _formatDateString(date, format) {
+        // see original for detailed doc
         const yyyy = String(date.getFullYear());
         const mm = String(date.getMonth() + 1).padStart(2, "0");
         const dd = String(date.getDate()).padStart(2, "0");
         const mNoPad = String(date.getMonth() + 1);
         const dNoPad = String(date.getDate());
-
-        // determine localized full month name if requested
-        // inline comments inside functions are lowercase per project rules
         let monthName = null;
         if (webexpress.webui && webexpress.webui.I18N) {
             monthName = this._i18n(`webexpress.webui:calendar.${this._getMonthKey(date.getMonth())}`);
         } else {
             monthName = this._getMonthKey(date.getMonth());
         }
-
-        // tokenize the format and replace tokens in a single pass to avoid accidental replacements
         const tokenRe = /(YYYY|mmmm|MM|DD|M|D)/gi;
         let out = "";
-        let lastIndex = 0;
-        let m;
+        let lastIndex = 0, m;
         while ((m = tokenRe.exec(format)) !== null) {
-            // append literal part between tokens
             out += format.substring(lastIndex, m.index);
             const tok = m[0];
-            // replace known tokens (case-insensitive handling)
             if (/^mmmm$/i.test(tok)) {
                 out += monthName;
             } else if (/^YYYY$/i.test(tok)) {
@@ -473,73 +434,42 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
             } else if (/^D$/i.test(tok)) {
                 out += dNoPad;
             } else {
-                // unknown token: keep as-is
                 out += tok;
             }
             lastIndex = tokenRe.lastIndex;
         }
-        // append remaining literal suffix
         out += format.substring(lastIndex);
         return out;
     }
 
     /**
      * Parses a date string according to the given format.
-     * Supports multiple formats such as "yyyy-MM-dd", "dd.MM.yyyy", "MM/dd/yyyy", "M/d/yyyy", etc.
-     * @param {string} value - Input string.
-     * @param {string} format - Format string.
-     * @returns {Date|null} Parsed Date or null.
-     * @private
+     * @param {string} value
+     * @param {string} format
+     * @returns {Date|null}
      */
     _parseDate(value, format) {
         const normalizedFormat = format.toLowerCase();
-
         let year, month, day;
-
         if (normalizedFormat === "yyyy-mm-dd") {
             const m = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-            if (m) {
-                year = parseInt(m[1], 10);
-                month = parseInt(m[2], 10) - 1;
-                day = parseInt(m[3], 10);
-            }
+            if (m) { year = parseInt(m[1]); month = parseInt(m[2]) - 1; day = parseInt(m[3]); }
         } else if (normalizedFormat === "dd.mm.yyyy") {
             const m = value.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
-            if (m) {
-                day = parseInt(m[1], 10);
-                month = parseInt(m[2], 10) - 1;
-                year = parseInt(m[3], 10);
-            }
+            if (m) { day = parseInt(m[1]); month = parseInt(m[2]) - 1; year = parseInt(m[3]); }
         } else if (normalizedFormat === "mm/dd/yyyy") {
             const m = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-            if (m) {
-                month = parseInt(m[1], 10) - 1;
-                day = parseInt(m[2], 10);
-                year = parseInt(m[3], 10);
-            }
+            if (m) { month = parseInt(m[1]) - 1; day = parseInt(m[2]); year = parseInt(m[3]); }
         } else if (normalizedFormat === "m/d/yyyy") {
             const m = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-            if (m) {
-                month = parseInt(m[1], 10) - 1;
-                day = parseInt(m[2], 10);
-                year = parseInt(m[3], 10);
-            }
+            if (m) { month = parseInt(m[1]) - 1; day = parseInt(m[2]); year = parseInt(m[3]); }
         } else if (normalizedFormat === "mmmm dd, yyyy") {
             const m = value.match(/^([a-zA-Z]+) (\d{2}), (\d{4})$/);
-            if (m) {
-                month = this._parseMonth(m[1]);
-                day = parseInt(m[2], 10);
-                year = parseInt(m[3], 10);
-            }
+            if (m) { month = this._parseMonth(m[1]); day = parseInt(m[2]); year = parseInt(m[3]); }
         } else if (normalizedFormat === "dddd, mmmm dd, yyyy") {
             const m = value.match(/^[a-zA-Z]+, ([a-zA-Z]+) (\d{2}), (\d{4})$/);
-            if (m) {
-                month = this._parseMonth(m[1]);
-                day = parseInt(m[2], 10);
-                year = parseInt(m[3], 10);
-            }
+            if (m) { month = this._parseMonth(m[1]); day = parseInt(m[2]); year = parseInt(m[3]); }
         }
-
         if (year && month >= 0 && day) {
             const d = new Date(year, month, day);
             if (d.getFullYear() === year && d.getMonth() === month && d.getDate() === day) {
@@ -547,15 +477,13 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
             }
             return null;
         }
-
         return null;
     }
 
     /**
-     * Helper function to parse month names (e.g., "January", "Feb").
-     * @param {string} monthStr - Month string.
-     * @returns {number|null} Month index (0-based) or null.
-     * @private
+     * Parses a textual month.
+     * @param {string} monthStr
+     * @returns {number|null}
      */
     _parseMonth(monthStr) {
         const months = [
@@ -568,9 +496,9 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
 
     /**
      * Creates a navigation button for the calendar header.
-     * @param {string} text - Button text (e.g. « or ›).
-     * @param {function} onclick - Click handler function.
-     * @returns {HTMLButtonElement} Navigation button.
+     * @param {string} text
+     * @param {function} onclick
+     * @returns {HTMLButtonElement}
      */
     _createNavButton(text, onclick) {
         const btn = document.createElement("button");
@@ -586,8 +514,8 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
 
     /**
      * Changes the calendar view (month or year).
-     * @param {number} step - Step size (e.g. -1 for previous).
-     * @param {"month"|"year"} mode - Navigation mode.
+     * @param {number} step
+     * @param {"month"|"year"} mode
      */
     _changeView(step, mode) {
         if (mode === "month") {
@@ -595,18 +523,16 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         } else if (mode === "year") {
             this._viewDate.setFullYear(this._viewDate.getFullYear() + step);
         }
-        
         this.render();
     }
 
     /**
      * Renders the calendar view for the current month.
-     * @returns {HTMLDivElement} Calendar element.
+     * @returns {HTMLDivElement}
      */
     _renderCalendar() {
         const dateButtonMap = new Map();
-        const viewDate = this._viewDate ? this._viewDate : new Date();
-        // table for calendar days
+        const viewDate = this._viewDate || new Date();
         const table = document.createElement("table");
         table.classList.add("wx-calendar-table");
         const thead = document.createElement("thead");
@@ -615,7 +541,6 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         thKW.textContent = this._i18n("webexpress.webui:calendar.calendar_week");
         trHead.appendChild(thKW);
 
-        // weekdays header (monday start)
         for (let i = 1; i <= 7; i++) {
             const th = document.createElement("th");
             th.textContent = this._i18n(`webexpress.webui:calendar.${this._getWeekdayKey(i % 7)}`);
@@ -624,7 +549,6 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         thead.appendChild(trHead);
         table.appendChild(thead);
 
-        // body with days
         const tbody = document.createElement("tbody");
         const year = viewDate.getFullYear();
         const month = viewDate.getMonth();
@@ -659,8 +583,8 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
                 // grayout days not in this month
                 if (date.getMonth() !== month) {
                     button.classList.add("wx-calendar-out");
-                } 
-                
+                }
+
                 if (this._rangeMode) {
                     const t = date.getTime();
                     const s = this._rangeStart?.setHours(0,0,0,0);
@@ -681,25 +605,24 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
                 ) {
                     button.classList.add("selected");
                 }
-                
+
                 const currentDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-                
+
                 button.addEventListener("click", (e) => {
                     e.stopPropagation();
                     if (this._rangeMode) {
                         if (this._rangeStart && this._rangeEnd == null) {
-                            if (currentDate < this._rangeStart) {                               
+                            if (currentDate < this._rangeStart) {
                                 this.value = { start: currentDate, end: this._rangeStart };
                             } else {
                                 this.value = { start: this._rangeStart, end: currentDate };
                             }
                             setTimeout(() => {
                                 this._dropdownmenu.style.display = "none";
-                                this._dispatch(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, { });
+                                this._dispatch(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {});
                                 this._input.blur();
                             }, 0);
                         } else {
-                            //this.value = { start: currentDate, end: null };
                             this._rangeStart = currentDate;
                             this._rangeEnd = null;
                             this.render();
@@ -713,43 +636,38 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
                         }, 0);
                     }
                 });
-                               
+
                 if (this._rangeMode && this._rangeStart && this._rangeEnd == null) {
                     button.addEventListener("mouseenter", (e) => {
                         e.preventDefault();
                         const start = this._rangeStart?.setHours(0,0,0,0);
                         const end = currentDate?.setHours(0,0,0,0);
-
                         const min = Math.min(start, end);
                         const max = Math.max(start, end);
-
                         for (const [d, b] of dateButtonMap.entries()) {
                             const c = d.setHours(0,0,0,0);
                             if (c >= min && c <= max) {
-                              b.classList.add("preview");
+                                b.classList.add("preview");
                             } else {
-                              b.classList.remove("preview");
+                                b.classList.remove("preview");
                             }
                         }
                     });
                 }
-                
                 td.appendChild(button);
                 tr.appendChild(td);
                 date.setDate(date.getDate() + 1);
             }
             tbody.appendChild(tr);
         }
-
         table.appendChild(tbody);
-
         return table;
     }
 
     /**
      * Returns the i18n month key for a given month index.
      * @param {number} month - 0-based month index.
-     * @returns {string} Month key.
+     * @returns {string}
      */
     _getMonthKey(month) {
         const keys = [
@@ -762,7 +680,7 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
     /**
      * Returns the i18n weekday key for a given weekday index.
      * @param {number} day - 1=Mo to 7=Su.
-     * @returns {string} Weekday key.
+     * @returns {string}
      */
     _getWeekdayKey(day) {
         const keys = ["sun","mon","tue","wed","thu","fri","sat"];
@@ -770,9 +688,9 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * Calculates the ISO-8601 calendar week number for the given date.
-     * @param {Date} date - Date for calculation.
-     * @returns {number} Calendar week number.
+     * Calculates the ISO-8601 calendar week for the given date.
+     * @param {Date} date
+     * @returns {number}
      */
     _getCalendarWeek(date) {
         const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
@@ -783,5 +701,5 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
     }
 };
 
-// Register the class in the controller
+// register the class in the controller
 webexpress.webui.Controller.registerClass("wx-webui-input-date", webexpress.webui.InputDateCtrl);

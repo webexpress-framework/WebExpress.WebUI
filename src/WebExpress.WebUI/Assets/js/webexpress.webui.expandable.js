@@ -1,19 +1,19 @@
 /**
- * A container for showing and hiding content. 
- * This class extends the base Control class to create an expandable/collapsible UI component.
+ * A container for showing and hiding content (expand/collapse).
+ * Extends the base Control class for an expandable/collapsible UI component.
  * Triggers the following events:
  * - webexpress.webui.Event.CHANGE_VISIBILITY_EVENT
  * - webexpress.webui.Event.CLICK_EVENT
  */
 webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
     /**
-     * Constructor to initialize the expandable container.
+     * Initializes the expandable container.
      * @param {HTMLElement} element - The DOM element associated with the expandable instance.
      */
     constructor(element) {
         super(element);
 
-        // Initialize properties from data attributes and element content
+        // configuration from data attributes
         this._iconOpen = element.dataset.iconOpened || element.dataset.icon || null;
         this._iconClose = element.dataset.iconClosed || element.dataset.icon || null;
         this._imageOpen = element.dataset.imageOpened || element.dataset.image || null;
@@ -21,31 +21,27 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
         this._colorClass = element.dataset.color || "";
         this._headerText = element.dataset.header || "";
         this._headerCss = element.dataset.headercss || "text-primary";
-        this._expand = element.dataset.expanded === "true" || false;
-        // Save the content 
+        this._expand = (element.dataset.expanded === "true" || element.dataset.expanded === true);
+
+        // extract content nodes or html
         this._contentHtml = Array.from(element.childNodes).map(node => this._detachElement(node));
 
-        // Clean up the DOM
+        // clean up
         element.innerHTML = "";
-        element.removeAttribute("data-icon");
-        element.removeAttribute("data-icon-opened");
-        element.removeAttribute("data-icon-closed");
-        element.removeAttribute("data-image");
-        element.removeAttribute("data-image-opened");
-        element.removeAttribute("data-image-closed");
-        element.removeAttribute("data-color");
-        element.removeAttribute("data-header");
-        element.removeAttribute("data-headercss");
-        element.removeAttribute("data-expanded");
-        element.classList.add("wx-expandableable");
+        [
+            "data-icon", "data-icon-opened", "data-icon-closed",
+            "data-image", "data-image-opened", "data-image-closed",
+            "data-color", "data-header", "data-headercss", "data-expanded"
+        ].forEach(attr => element.removeAttribute(attr));
+        element.classList.add("wx-expandable");
 
-        // Create UI elements
+        // create UI elements
         this._expander = this._createExpander();
         this._icon = this._createIcon();
         this._img = this._createImage();
         this._header = this._createHeader();
 
-        // Create the content container
+        // create the content container
         this._content = document.createElement("div");
         if (Array.isArray(this._contentHtml)) {
             this._contentHtml.forEach(node => this._content.appendChild(node));
@@ -56,10 +52,10 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
             this._content.classList.add("hide");
         }
 
-        // Append elements to the DOM container
+        // append elements to DOM container
         element.appendChild(this._expander);
-        if (this._img) element.appendChild(this._img);
-        if (this._icon) element.appendChild(this._icon);
+        if (this._img) { element.appendChild(this._img); }
+        if (this._icon) { element.appendChild(this._icon); }
         element.appendChild(this._header);
         element.appendChild(this._content);
     }
@@ -72,36 +68,37 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Getter for the expand state.
-     * @returns {boolean} True if the container is expanded, false if it is collapsed.
+     * Returns true if expanded, false if collapsed.
+     * @returns {boolean}
      */
     get expand() {
         return this._expand;
     }
 
     /**
-     * Setter for the expand state. Updates the UI and triggers an event when the state changes.
-     * @param {boolean} value - The desired expand state (true to expand, false to collapse).
+     * Sets expand/collapse state; rerenders and dispatches event if state changes.
+     * @param {boolean} value - True for expanded, false for collapsed.
      */
     set expand(value) {
-        if (this._expand !== value) {
-            this._expand = value;
-            this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, { value: value });
+        const newValue = !!value;
+        if (this._expand !== newValue) {
+            this._expand = newValue;
+            this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, { value: newValue });
             this.render();
         }
     }
 
     /**
-     * Getter for the header text.
-     * @returns {string} The text displayed in the header.
+     * Gets header text.
+     * @returns {string}
      */
     get header() {
         return this._headerText;
     }
 
     /**
-     * Setter for the header text. Updates the header and re-renders the component.
-     * @param {string} value - The new header text.
+     * Sets header text and rerenders component.
+     * @param {string} value
      */
     set header(value) {
         this._headerText = value;
@@ -109,16 +106,16 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Getter for the content HTML.
-     * @returns {Array|String} The HTML content inside the container.
+     * Gets the content as html nodes or string.
+     * @returns {Array|String}
      */
     get contentHtml() {
         return this._contentHtml;
     }
 
     /**
-     * Setter for the content HTML. Updates the container content and re-renders.
-     * @param {Array|String} html - The new HTML content.
+     * Sets content and rerenders.
+     * @param {Array|String} html
      */
     set contentHtml(html) {
         this._contentHtml = html;
@@ -126,15 +123,14 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Renders the expandable container.
-     * Updates the DOM based on the current properties.
+     * Renders the expandable container and all subelements in their current state.
      */
     render() {
-        // Update expander arrow classes
-        this._expander.classList.toggle("wx-expandableable-angle-down", this._expand);
-        this._expander.classList.toggle("wx-expandableable-angle-down-animation", this._expand);
+        // handle expander/arrow
+        this._expander.classList.toggle("wx-expandable-angle-down", this._expand);
+        this._expander.classList.toggle("wx-expandable-angle-down-animation", this._expand);
 
-        // Update icon classes
+        // handle icon
         if (this._icon) {
             this._icon.className = this._colorClass ? this._colorClass : "";
             if (this._expand && this._iconOpen) {
@@ -144,18 +140,18 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
             }
         }
 
-        // Update image source
+        // update image if present
         if (this._img) {
             this._img.src = this._expand ? this._imageOpen : this._imageClose;
         }
 
-        // Update header
+        // update header
         if (this._header) {
             this._header.textContent = this._headerText;
             this._header.setAttribute("aria-label", this._headerText);
         }
 
-        // Update content
+        // content node re-render, supports array of nodes or plain string
         if (this._content) {
             this._content.innerHTML = "";
             if (Array.isArray(this._contentHtml)) {
@@ -168,31 +164,31 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Creates the expander button (toggle arrow).
-     * @returns {HTMLElement} The expander element.
+     * Creates the expander (arrow clickable handle).
+     * @returns {HTMLElement}
      */
     _createExpander() {
         const expander = document.createElement("a");
-        expander.className = "wx-expandableable-angle me-2";
+        expander.className = "wx-expandable-angle me-2";
         expander.href = "javascript:void(0);";
         if (this._expand) {
-            expander.classList.add("wx-expandableable-angle-down");
+            expander.classList.add("wx-expandable-angle-down");
         }
         expander.addEventListener("click", () => {
             this.toggleExpand();
-            this._dispatch(webexpress.webui.Event.CLICK_EVENT, { });
+            this._dispatch(webexpress.webui.Event.CLICK_EVENT, {});
         });
         return expander;
     }
 
     /**
      * Creates the icon element for the header.
-     * @returns {HTMLElement|null} The icon element or null if no icon is defined.
+     * @returns {HTMLElement|null}
      */
     _createIcon() {
-        if (!this._iconOpen && !this._iconClose) return null;
+        if (!this._iconOpen && !this._iconClose) { return null; }
         const icon = document.createElement("i");
-        if (this._colorClass) icon.classList.add(this._colorClass);
+        if (this._colorClass) { icon.classList.add(this._colorClass); }
         if (this._expand && this._iconOpen) {
             icon.classList.add(...this._iconOpen.split(" ").filter(Boolean));
         } else if (!this._expand && this._iconClose) {
@@ -207,10 +203,10 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Creates the image element for the header.
-     * @returns {HTMLElement|null} The image element or null if no image is defined.
+     * @returns {HTMLElement|null}
      */
     _createImage() {
-        if (!this._imageOpen && !this._imageClose) return null;
+        if (!this._imageOpen && !this._imageClose) { return null; }
         const img = document.createElement("img");
         img.src = this._expand ? this._imageOpen : this._imageClose;
         img.addEventListener("click", () => {
@@ -222,7 +218,7 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Creates the header text element.
-     * @returns {HTMLElement} The header element.
+     * @returns {HTMLElement}
      */
     _createHeader() {
         const span = document.createElement("span");
@@ -237,5 +233,5 @@ webexpress.webui.ExpandableCtrl = class extends webexpress.webui.Ctrl {
     }
 };
 
-// Register the class in the controller
+// register the class in the controller registry
 webexpress.webui.Controller.registerClass("wx-webui-expandable", webexpress.webui.ExpandableCtrl);

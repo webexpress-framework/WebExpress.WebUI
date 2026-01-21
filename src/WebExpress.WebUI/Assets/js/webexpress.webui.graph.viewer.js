@@ -667,23 +667,14 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             const h = from.rectHeight || from.height || 40;
             
             // adjust offset based on layout to avoid overlapping with text/icon
-            const isIconBelow = (from.data.layout === "label-below");
-            const loopOffset = isIconBelow ? 28 : 20;
+            const isLabelBelow = (from.data.layout === "label-below");
+            const loopOffset = isLabelBelow ? 28 : 20;
                        
-            // p1: start point (top edge, offset right)
             const p1 = { x: srcC.x + w/4, y: srcC.y - h/2 };
-            
-            // p2: corner 1 (top-right-ish)
-            const p2 = { x: srcC.x + w/2, y: srcC.y - h/2 - loopOffset };
-            
-            // p3: mid-corner (pure corner)
-            const p3 = { x: srcC.x + w/2 + loopOffset, y: srcC.y - h/2 };
-            
-            // p4: corner 2 (right-top-ish)
+            const p2 = { x: srcC.x + w/4, y: srcC.y - h/2 - loopOffset };
+            const p3 = { x: srcC.x + w/2 + loopOffset, y: srcC.y - h/2 - loopOffset};
             const p4 = { x: srcC.x + w/2 + loopOffset, y: srcC.y - h/4 };
-            
-            // p5: end point (right edge, offset top)
-            const p5 = { x: srcC.x + w/2, y: srcC.y - h/4 };
+            const p5 = { x: srcC.x + w/2 + 5, y: srcC.y - h/8 };
             
             return [p1, p2, p3, p4, p5];
         }

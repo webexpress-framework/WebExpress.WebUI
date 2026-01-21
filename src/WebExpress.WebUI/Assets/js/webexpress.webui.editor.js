@@ -8,6 +8,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     _editorElement = null;
     _savedRange = null;
     _tableToolbarShownOnce = false;
+    
     _colors = [
         // basic colors
         "#000000", "#FF0000", "#008000", "#0000FF", "#FFFF00",
@@ -23,22 +24,15 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         "#483D8B", "#8B0000", "#9400D3", "#FF4500", "#DC143C"
     ];
 
-    // bootstrap modal references (created lazily) - now backed by ModalSidebarPanel
+    // modal references
     _linkModalEl = null;
-    _linkModal = null;
-    _linkModal = null;
-    _linkUrlInput = null;
-    _linkTextInput = null;
-
+    _linkSidebarPanel = null;
     _imageModalEl = null;
-    _imageModal = null;
     _imageSidebarPanel = null;
-    _imageWebUrlInput = null;
-    _imageWebAltInput = null;
-    _imageSiteAltInput = null;
-    _imageUploadCtrl = null;
-    _imageFileListCtrl = null;
-    _selectedSiteImage = null;
+
+    // image configuration
+    _imageUploadUri = "";
+    _imageBaseUri = "";
 
     /**
      * Constructor to initialize the editor.
@@ -47,12 +41,14 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     constructor(element) {
         super(element);
         const content = element.innerHTML;
-        this._formFieldName = element.getAttribute('name') || null;
-        element.removeAttribute('name');
-        element.innerHTML = '';
-        element.classList.add('wx-editor');
+        this._formFieldName = element.getAttribute("name") || null;
+        
+        // clean up host element
+        element.removeAttribute("name");
+        element.innerHTML = "";
+        element.classList.add("wx-editor");
 
-        // optional: read image integration endpoints from dataset
+        // read configuration
         this._imageUploadUri = element.dataset.imageUploadUri || "";
         this._imageBaseUri = element.dataset.imageBaseUri || "";
 
@@ -60,22 +56,26 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         this._createEditorArea(element, content);
         this._createStatusBar(element);
         this._enableTableTabNavigation();
+
         if (this._formFieldName) {
             this._ensureFormInput();
         }
-        const toolbar = element.querySelector('.wx-editor-toolbar');
+
+        const toolbar = element.querySelector(".wx-editor-toolbar");
         if (toolbar) {
-            toolbar.addEventListener('mousedown', () => {
+            toolbar.addEventListener("mousedown", () => {
                 const sel = window.getSelection();
                 if (sel && sel.rangeCount > 0) {
                     this._savedRange = sel.getRangeAt(0).cloneRange();
                 }
             }, true);
         }
-        this._editorElement.addEventListener('input', () => {
+
+        this._editorElement.addEventListener("input", () => {
             if (this._formInput) {
                 this._formInput.value = this._editorElement.innerHTML;
             }
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this._editorElement.innerHTML });
         });
     }
 
@@ -86,37 +86,42 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     _createToolbar(element) {
         const toolbar = document.createElement("div");
         toolbar.classList.add("wx-editor-toolbar");
-        this._tableToolbar = this._createTableToolbar(element);
-        toolbar.appendChild(this._createFormatToolbar(element));
+        
+        this._tableToolbar = this._createTableToolbar();
+        
+        toolbar.appendChild(this._createFormatToolbar());
         toolbar.appendChild(this._tableToolbar);
+        
         element.appendChild(toolbar);
     }
 
     /**
      * Creates the format toolbar section.
-     * @param {HTMLElement} element - The container element.
      * @returns {HTMLElement} The format toolbar element.
      */
-    _createFormatToolbar(element) {
+    _createFormatToolbar() {
         const toolbar = document.createElement("div");
         toolbar.classList.add("wx-editor-format-toolbar");
-        toolbar.appendChild(this._createFormatDropdown());
-        toolbar.appendChild(this._createSeparator());
-        toolbar.appendChild(this._createFormattingButtons());
-        toolbar.appendChild(this._createStyleDropdown());
-        toolbar.appendChild(this._createColorDropdown());
-        toolbar.appendChild(this._createSeparator());
-        toolbar.appendChild(this._createListButtons());
-        toolbar.appendChild(this._createSeparator());
-        toolbar.appendChild(this._createIndentButtons());
-        toolbar.appendChild(this._createSeparator());
-        toolbar.appendChild(this._createAlignButtons());
-        toolbar.appendChild(this._createSeparator());
-        // link + image buttons
-        toolbar.appendChild(this._createLinkButton());
-        toolbar.appendChild(this._createImageButton());
-        toolbar.appendChild(this._createSeparator());
-        toolbar.appendChild(this._createTableInsertButton());
+        
+        const fragment = document.createDocumentFragment();
+        fragment.appendChild(this._createFormatDropdown());
+        fragment.appendChild(this._createSeparator());
+        fragment.appendChild(this._createFormattingButtons());
+        fragment.appendChild(this._createStyleDropdown());
+        fragment.appendChild(this._createColorDropdown());
+        fragment.appendChild(this._createSeparator());
+        fragment.appendChild(this._createListButtons());
+        fragment.appendChild(this._createSeparator());
+        fragment.appendChild(this._createIndentButtons());
+        fragment.appendChild(this._createSeparator());
+        fragment.appendChild(this._createAlignButtons());
+        fragment.appendChild(this._createSeparator());
+        fragment.appendChild(this._createLinkButton());
+        fragment.appendChild(this._createImageButton());
+        fragment.appendChild(this._createSeparator());
+        fragment.appendChild(this._createTableInsertButton());
+        
+        toolbar.appendChild(fragment);
         return toolbar;
     }
 
@@ -128,20 +133,24 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         const tableToolbar = document.createElement("div");
         tableToolbar.className = "wx-editor-table-toolbar";
         tableToolbar.style.display = "none";
-        tableToolbar.appendChild(this._createInsertRowAboveButton());
-        tableToolbar.appendChild(this._createInsertRowBelowButton());
-        tableToolbar.appendChild(this._createDeleteRowButton());
-        tableToolbar.appendChild(this._createSeparator());
-        tableToolbar.appendChild(this._createInsertColumnLeftButton());
-        tableToolbar.appendChild(this._createInsertColumnRightButton());
-        tableToolbar.appendChild(this._createDeleteColumnButton());
-        tableToolbar.appendChild(this._createSeparator());
-        tableToolbar.appendChild(this._createMergeCellsButton());
-        tableToolbar.appendChild(this._createSplitCellButton());
-        tableToolbar.appendChild(this._createSeparator());
-        tableToolbar.appendChild(this._createCellBackgroundColorButton());
-        tableToolbar.appendChild(this._createSeparator());
-        tableToolbar.appendChild(this._createDeleteTableButton());
+        
+        const fragment = document.createDocumentFragment();
+        fragment.appendChild(this._createInsertRowAboveButton());
+        fragment.appendChild(this._createInsertRowBelowButton());
+        fragment.appendChild(this._createDeleteRowButton());
+        fragment.appendChild(this._createSeparator());
+        fragment.appendChild(this._createInsertColumnLeftButton());
+        fragment.appendChild(this._createInsertColumnRightButton());
+        fragment.appendChild(this._createDeleteColumnButton());
+        fragment.appendChild(this._createSeparator());
+        fragment.appendChild(this._createMergeCellsButton());
+        fragment.appendChild(this._createSplitCellButton());
+        fragment.appendChild(this._createSeparator());
+        fragment.appendChild(this._createCellBackgroundColorButton());
+        fragment.appendChild(this._createSeparator());
+        fragment.appendChild(this._createDeleteTableButton());
+        
+        tableToolbar.appendChild(fragment);
         return tableToolbar;
     }
 
@@ -152,14 +161,17 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     _createFormatDropdown() {
         const container = document.createElement("div");
         container.className = "wx-editor-btn-group";
+        
         const button = document.createElement("button");
         button.className = "wx-editor-btn dropdown-toggle";
         button.setAttribute("data-bs-toggle", "dropdown");
         const buttonText = document.createElement("span");
         buttonText.textContent = "Paragraph";
         button.appendChild(buttonText);
+        
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu";
+        
         const formatOptions = [
             { command: "p", label: "Paragraph" },
             { command: "h1", label: "Heading 1" },
@@ -168,21 +180,27 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             { command: "blockquote", label: "Quote" },
             { command: "pre", label: "Code Block" }
         ];
-        formatOptions.forEach(option => {
+
+        formatOptions.forEach((option) => {
             const item = document.createElement("li");
             const optionButton = document.createElement("button");
             optionButton.className = "dropdown-item";
             optionButton.textContent = option.label;
             optionButton.dataset.command = option.command;
+            
             optionButton.addEventListener("click", () => {
                 document.execCommand("formatBlock", false, option.command);
                 buttonText.textContent = option.label;
+                this._editorElement.focus();
             });
+            
             item.appendChild(optionButton);
             menu.appendChild(item);
         });
+
         container.appendChild(button);
         container.appendChild(menu);
+
         const updateDropdownText = () => {
             const selection = window.getSelection();
             if (!selection || !selection.rangeCount) {
@@ -195,10 +213,11 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             }
             if (node && this._editorElement && this._editorElement.contains(node)) {
                 const currentFormat = document.queryCommandValue("formatBlock") || "p";
-                const foundOption = formatOptions.find(opt => { return opt.command === currentFormat; });
+                const foundOption = formatOptions.find((opt) => { return opt.command === currentFormat; });
                 buttonText.textContent = foundOption ? foundOption.label : "Paragraph";
             }
         };
+        
         document.addEventListener("selectionchange", updateDropdownText);
         return container;
     }
@@ -214,8 +233,12 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             { command: "italic", icon: "fas fa-italic", label: "Italic" },
             { command: "underline", icon: "fas fa-underline", label: "Underline" }
         ]);
-        document.addEventListener("selectionchange", () => { this._updateButtonStates(); });
-        buttons.forEach(button => {
+        
+        document.addEventListener("selectionchange", () => { 
+            this._updateButtonStates(); 
+        });
+        
+        buttons.forEach((button) => {
             fragment.appendChild(button);
         });
         return fragment;
@@ -228,29 +251,36 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     _createStyleDropdown() {
         const container = document.createElement("div");
         container.className = "wx-editor-btn-group";
+        
         const button = document.createElement("button");
         button.className = "wx-editor-btn dropdown-toggle";
         button.setAttribute("data-bs-toggle", "dropdown");
         button.innerHTML = '<i class="fas fa-text-height"></i>';
+        
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu";
+        
         const options = [
             { command: "strikethrough", label: "Strikethrough", icon: "fas fa-strikethrough" },
             { command: "superscript", label: "Superscript", icon: "fas fa-superscript" },
             { command: "subscript", label: "Subscript", icon: "fas fa-subscript" }
         ];
-        options.forEach(option => {
+
+        options.forEach((option) => {
             const item = document.createElement("li");
             const optionButton = document.createElement("button");
             optionButton.className = "dropdown-item";
             optionButton.innerHTML = `<i class="${option.icon}"></i> ${option.label}`;
             optionButton.dataset.command = option.command;
+            
             optionButton.addEventListener("click", () => {
                 this._execCommand(option.command);
             });
+            
             item.appendChild(optionButton);
             menu.appendChild(item);
         });
+
         container.appendChild(button);
         container.appendChild(menu);
         return container;
@@ -263,12 +293,15 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     _createColorDropdown() {
         const container = document.createElement("div");
         container.className = "wx-editor-btn-group";
+        
         const button = document.createElement("button");
         button.className = "wx-editor-btn dropdown-toggle";
         button.type = "button";
         button.setAttribute("data-bs-toggle", "dropdown");
+        
         const icon = document.createElement("i");
         icon.className = "fas fa-palette";
+        
         const updateIconColor = () => {
             const selection = window.getSelection();
             if (!selection || !selection.rangeCount) {
@@ -284,13 +317,17 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                 icon.style.color = color;
             }
         };
+        
         updateIconColor();
         button.appendChild(icon);
+        
         const menu = document.createElement("div");
         menu.className = "dropdown-menu";
+        
         const colorPickerContainer = document.createElement("ul");
         colorPickerContainer.className = "wx-editor-color-picker";
-        this._colors.forEach(color => {
+        
+        this._colors.forEach((color) => {
             const item = document.createElement("li");
             const colorButton = document.createElement("button");
             colorButton.className = "dropdown-item p-2";
@@ -301,17 +338,21 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             colorButton.style.border = "none";
             colorButton.style.cursor = "pointer";
             colorButton.style.display = "inline-block";
+            
             colorButton.addEventListener("click", () => {
                 document.execCommand("foreColor", false, color);
                 icon.style.color = color;
                 this._restoreSavedRange();
             });
+            
             item.appendChild(colorButton);
             colorPickerContainer.appendChild(item);
         });
+
         menu.appendChild(colorPickerContainer);
         container.appendChild(button);
         container.appendChild(menu);
+        
         document.addEventListener("selectionchange", updateIconColor);
         return container;
     }
@@ -326,8 +367,12 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             { command: "insertUnorderedList", icon: "fas fa-list-ul", label: "Bullet List" },
             { command: "insertOrderedList", icon: "fas fa-list-ol", label: "Numbered List" }
         ]);
-        document.addEventListener("selectionchange", () => { this._updateButtonStates(); });
-        buttons.forEach(button => {
+        
+        document.addEventListener("selectionchange", () => { 
+            this._updateButtonStates(); 
+        });
+        
+        buttons.forEach((button) => {
             fragment.appendChild(button);
         });
         return fragment;
@@ -343,8 +388,12 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             { command: "outdent", icon: "fas fa-outdent", label: "Decrease Indent" },
             { command: "indent", icon: "fas fa-indent", label: "Increase Indent" }
         ]);
-        document.addEventListener("selectionchange", () => { this._updateButtonStates(); });
-        buttons.forEach(button => {
+        
+        document.addEventListener("selectionchange", () => { 
+            this._updateButtonStates(); 
+        });
+        
+        buttons.forEach((button) => {
             fragment.appendChild(button);
         });
         return fragment;
@@ -362,15 +411,19 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             { command: "justifyRight", icon: "fas fa-align-right", label: "Align Right" },
             { command: "justifyFull", icon: "fas fa-align-justify", label: "Justify Text" }
         ]);
-        document.addEventListener("selectionchange", () => { this._updateButtonStates(); });
-        buttons.forEach(button => {
+        
+        document.addEventListener("selectionchange", () => { 
+            this._updateButtonStates(); 
+        });
+        
+        buttons.forEach((button) => {
             fragment.appendChild(button);
         });
         return fragment;
     }
 
     /**
-     * Creates a button to insert a hyperlink using a ModalSidebarPanel (fallback to prompts if unavailable).
+     * Creates a button to insert a hyperlink using a ModalSidebarPanel.
      * @returns {HTMLElement} The button element.
      */
     _createLinkButton() {
@@ -386,7 +439,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Creates a button to insert an image using a ModalSidebarPanel (fallback to prompts if unavailable).
+     * Creates a button to insert an image using a ModalSidebarPanel.
      * @returns {HTMLElement} The button element.
      */
     _createImageButton() {
@@ -402,57 +455,33 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Sanitizes a URL to reduce risk of XSS via javascript: schemes.
-     * @param {string} url - raw url
-     * @returns {string|null} sanitized url or null if invalid
-     */
-    _sanitizeUrl(url) {
-        const trimmed = String(url).trim();
-        if (trimmed === "") {
-            return null;
-        }
-        if (/^javascript:/i.test(trimmed)) {
-            return null;
-        }
-        return trimmed;
-    }
-
-    /**
-     * Escapes HTML special characters in text nodes.
-     * @param {string} str - raw string
-     * @returns {string} escaped string
-     */
-    _escapeHtml(str) {
-        return String(str)
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#39;");
-    }
-
-    /**
      * Creates the table insertion button with a size selection grid.
      * @returns {HTMLElement} The button group container.
      */
     _createTableInsertButton() {
         const container = document.createElement("div");
         container.className = "wx-editor-btn-group";
+        
         const button = document.createElement("button");
         button.className = "wx-editor-btn dropdown-toggle";
         button.type = "button";
         button.setAttribute("data-bs-toggle", "dropdown");
         button.innerHTML = '<i class="fas fa-table"></i>';
+        
         const menu = document.createElement("div");
         menu.className = "dropdown-menu p-3";
+        
         const grid = document.createElement("div");
         grid.className = "wx-editor-insertable-grid";
+        
         const sizeDisplay = document.createElement("div");
         sizeDisplay.className = "wx-editor-table-size-display";
         sizeDisplay.textContent = "1 × 1";
+        
         const INITIAL_ROWS = 5;
         const INITIAL_COLS = 5;
         const ABS_MAX = 18;
+        
         let maxRows = INITIAL_ROWS;
         let maxCols = INITIAL_COLS;
         let matrix = [];
@@ -484,6 +513,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             matrix = [];
             grid.style.gridTemplateColumns = `repeat(${cols}, 24px)`;
             grid.style.gridTemplateRows = `repeat(${rows}, 24px)`;
+            
             for (let r = 0; r < rows; r++) {
                 matrix[r] = [];
                 for (let c = 0; c < cols; c++) {
@@ -492,11 +522,13 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                     cell.dataset.row = r + 1;
                     cell.dataset.col = c + 1;
                     matrix[r][c] = cell;
+                    
                     cell.addEventListener("mouseenter", () => {
                         selectedRows = r + 1;
                         selectedCols = c + 1;
                         highlightCells(selectedRows, selectedCols, rows, cols);
                         updateSizeDisplay(selectedRows, selectedCols);
+                        
                         if ((selectedRows === maxRows || selectedCols === maxCols) && (maxRows < ABS_MAX || maxCols < ABS_MAX)) {
                             if (maxRows < ABS_MAX && selectedRows === maxRows) {
                                 maxRows = Math.min(maxRows + 1, ABS_MAX);
@@ -509,6 +541,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                             updateSizeDisplay(selectedRows, selectedCols);
                         }
                     });
+                    
                     cell.addEventListener("click", (e) => {
                         this._insertTable(selectedRows, selectedCols);
                         if (menu.classList.contains("show")) {
@@ -518,6 +551,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                         e.preventDefault();
                         e.stopPropagation();
                     });
+                    
                     grid.appendChild(cell);
                 }
             }
@@ -545,7 +579,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             }
         });
 
-        button.addEventListener('click', () => {
+        button.addEventListener("click", () => {
             setTimeout(() => {
                 resetGrid();
             }, 0);
@@ -662,18 +696,23 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     _createCellBackgroundColorButton() {
         const container = document.createElement("div");
         container.className = "wx-editor-btn-group";
+        
         const button = document.createElement("button");
         button.className = "wx-editor-btn dropdown-toggle";
         button.type = "button";
         button.setAttribute("data-bs-toggle", "dropdown");
+        
         const icon = document.createElement("i");
         icon.className = "wx-icon cell-background";
         button.appendChild(icon);
+        
         const menu = document.createElement("div");
         menu.className = "dropdown-menu";
+        
         const colorPickerContainer = document.createElement("ul");
         colorPickerContainer.className = "wx-editor-color-picker";
-        this._colors.forEach(color => {
+        
+        this._colors.forEach((color) => {
             const item = document.createElement("li");
             const colorButton = document.createElement("button");
             colorButton.className = "dropdown-item p-2";
@@ -684,6 +723,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             colorButton.style.border = "none";
             colorButton.style.cursor = "pointer";
             colorButton.style.display = "inline-block";
+            
             colorButton.addEventListener("click", () => {
                 const selection = window.getSelection();
                 if (!selection.rangeCount) {
@@ -693,14 +733,16 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                 if (cell.nodeType !== Node.ELEMENT_NODE) {
                     cell = cell.parentElement;
                 }
-                cell = cell.closest('td,th');
+                cell = cell.closest("td,th");
                 if (cell) {
                     cell.style.backgroundColor = color;
                 }
             });
+            
             item.appendChild(colorButton);
             colorPickerContainer.appendChild(item);
         });
+
         menu.appendChild(colorPickerContainer);
         container.appendChild(button);
         container.appendChild(menu);
@@ -748,15 +790,17 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      * @returns {HTMLElement[]} An array of button elements.
      */
     _createButtons(buttons) {
-        return buttons.map(btn => {
+        return buttons.map((btn) => {
             const button = document.createElement("button");
             button.className = "wx-editor-btn";
             button.type = "button";
             button.title = btn.label;
             button.dataset.command = btn.command;
+            
             const icon = document.createElement("i");
             icon.className = btn.icon;
             button.appendChild(icon);
+            
             button.addEventListener("click", () => {
                 document.execCommand(btn.command);
                 this._updateButtonStates();
@@ -789,7 +833,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      */
     _updateButtonStates() {
         const buttons = document.querySelectorAll(".wx-editor-btn");
-        buttons.forEach(button => {
+        buttons.forEach((button) => {
             const isActive = button.dataset.command ? document.queryCommandState(button.dataset.command) : false;
             button.classList.toggle("active", isActive);
         });
@@ -803,13 +847,16 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     _createEditorArea(element, content) {
         this.editorContainer = document.createElement("div");
         this.editorContainer.classList.add("wx-editor-container");
+        
         this._editorElement = document.createElement("div");
         this._editorElement.classList.add("wx-editor-content");
         this._editorElement.setAttribute("contenteditable", "true");
         this._editorElement.style.minHeight = "200px";
+        
         if (content) {
             this._editorElement.innerHTML = content;
         }
+        
         this.editorContainer.appendChild(this._editorElement);
         element.appendChild(this.editorContainer);
     }
@@ -852,40 +899,40 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      */
     _insertHtmlAtCursor(html) {
         this._restoreSavedRange();
-        let sel = window.getSelection();
+        const sel = window.getSelection();
+        
         if (sel && sel.rangeCount) {
-            let range = sel.getRangeAt(0);
+            const range = sel.getRangeAt(0);
+            
+            // ensure we are inserting inside the editor
             if (!this._editorElement.contains(range.startContainer)) {
                 this._editorElement.innerHTML += html;
                 return;
             }
+            
             range.deleteContents();
-            let el = document.createElement("div");
+            
+            const el = document.createElement("div");
             el.innerHTML = html;
-            const marker = document.createElement("span");
-            marker.id = "wx-editor-marker-" + Date.now() + "-" + Math.random();
-            marker.style.display = "inline-block";
-            marker.style.width = "0";
-            marker.style.height = "0";
-            marker.style.overflow = "hidden";
-            let frag = document.createDocumentFragment();
+            
+            const frag = document.createDocumentFragment();
             let node;
             let lastNode;
             while ((node = el.firstChild)) {
                 lastNode = frag.appendChild(node);
             }
-            frag.appendChild(marker);
+            
             range.insertNode(frag);
-            const newRange = document.createRange();
-            newRange.setStartAfter(marker);
-            newRange.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(newRange);
-            marker.parentNode.removeChild(marker);
-            if (lastNode && typeof lastNode.scrollIntoView === "function") {
-                lastNode.scrollIntoView({ block: "nearest" });
+            
+            // move cursor after insertion
+            if (lastNode) {
+                range.setStartAfter(lastNode);
+                range.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(range);
             }
         } else {
+            // fallback: append to end
             this._editorElement.innerHTML += html;
         }
     }
@@ -895,20 +942,11 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      */
     _restoreSavedRange() {
         if (this._savedRange) {
-            let sel = window.getSelection();
+            const sel = window.getSelection();
             sel.removeAllRanges();
             sel.addRange(this._savedRange);
-            this._savedRange = null;
+            this._savedRange = null; // consume
         }
-    }
-
-    /**
-     * Applies a block style tag (e.g., 'p', 'h1') to the selection.
-     * @param {string} style - The tag name of the style to apply.
-     */
-    _applyTextStyle(style) {
-        document.execCommand("formatBlock", false, style);
-        this._restoreSavedRange();
     }
 
     /**
@@ -936,12 +974,12 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         if (!node) {
             return null;
         }
-        const cell = node.closest('td,th');
+        const cell = node.closest("td,th");
         if (!cell) {
             return null;
         }
         const row = cell.parentElement;
-        const table = cell.closest('table');
+        const table = cell.closest("table");
         if (!row || !table) {
             return null;
         }
@@ -956,6 +994,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         if (!el) {
             return;
         }
+        el.focus();
         const range = document.createRange();
         range.selectNodeContents(el);
         range.collapse(true);
@@ -970,7 +1009,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      * @returns {HTMLTableRowElement} new row
      */
     _insertRowAbove(row) {
-        const table = row.closest('table');
+        const table = row.closest("table");
         if (!table) {
             return null;
         }
@@ -990,7 +1029,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      * @returns {HTMLTableRowElement} new row
      */
     _insertRowBelow(row) {
-        const table = row.closest('table');
+        const table = row.closest("table");
         if (!table) {
             return null;
         }
@@ -1014,7 +1053,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      * @returns {number} new cell index
      */
     _insertColumnLeft(cell) {
-        const table = cell.closest('table');
+        const table = cell.closest("table");
         if (!table) {
             return -1;
         }
@@ -1022,7 +1061,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         for (let r = 0; r < table.rows.length; r++) {
             const row = table.rows[r];
             const ref = row.cells[idx];
-            const newCell = document.createElement(ref ? ref.tagName.toLowerCase() : 'td');
+            const newCell = document.createElement(ref ? ref.tagName.toLowerCase() : "td");
             newCell.innerHTML = "<br>";
             row.insertBefore(newCell, ref);
         }
@@ -1035,7 +1074,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      * @returns {number} new cell index
      */
     _insertColumnRight(cell) {
-        const table = cell.closest('table');
+        const table = cell.closest("table");
         if (!table) {
             return -1;
         }
@@ -1043,7 +1082,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         for (let r = 0; r < table.rows.length; r++) {
             const row = table.rows[r];
             const ref = row.cells[idx];
-            const newCell = document.createElement(ref ? ref.tagName.toLowerCase() : 'td');
+            const newCell = document.createElement(ref ? ref.tagName.toLowerCase() : "td");
             newCell.innerHTML = "<br>";
             if (ref && ref.nextSibling) {
                 row.insertBefore(newCell, ref.nextSibling);
@@ -1059,7 +1098,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      * @param {HTMLTableRowElement} row - row to delete
      */
     _deleteRow(row) {
-        const table = row.closest('table');
+        const table = row.closest("table");
         if (!table) {
             return;
         }
@@ -1080,12 +1119,12 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      * @param {HTMLTableCellElement} cell - reference cell
      */
     _deleteColumn(cell) {
-        const table = cell.closest('table');
+        const table = cell.closest("table");
         if (!table) {
             return;
         }
         const idx = cell.cellIndex;
-        let remainingCols = table.rows[0].cells.length;
+        const remainingCols = table.rows[0].cells.length;
         if (remainingCols <= 1) {
             table.remove();
             return;
@@ -1107,8 +1146,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Modifies the table structure according to the given action.
-     * Supported: insertRowAbove, insertRowBelow, insertColumnLeft, insertColumnRight, deleteRow, deleteColumn,
-     * legacy: insertRow (below), insertColumn (right).
+     * Supported: insertRowAbove, insertRowBelow, insertColumnLeft, insertColumnRight, deleteRow, deleteColumn.
      * @param {string} action - action identifier
      */
     _modifyTable(action) {
@@ -1177,14 +1215,17 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         const range = selection.getRangeAt(0);
         let startCell = range.startContainer;
         let endCell = range.endContainer;
-        while (startCell && startCell.nodeType !== 1) {
+        
+        while (startCell && startCell.nodeType !== Node.ELEMENT_NODE) {
             startCell = startCell.parentElement;
         }
-        while (endCell && endCell.nodeType !== 1) {
+        while (endCell && endCell.nodeType !== Node.ELEMENT_NODE) {
             endCell = endCell.parentElement;
         }
-        startCell = startCell.closest('td,th');
-        endCell = endCell.closest('td,th');
+        
+        startCell = startCell.closest("td,th");
+        endCell = endCell.closest("td,th");
+        
         if (!startCell || !endCell) {
             return;
         }
@@ -1195,18 +1236,23 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         const cells = Array.from(row.children);
         const startIdx = cells.indexOf(startCell);
         const endIdx = cells.indexOf(endCell);
+        
         if (startIdx === -1 || endIdx === -1 || startIdx === endIdx) {
             return;
         }
+        
         const minIdx = Math.min(startIdx, endIdx);
         const maxIdx = Math.max(startIdx, endIdx);
-        let mergedContent = '';
+        
+        let mergedContent = "";
         for (let i = minIdx; i <= maxIdx; i++) {
-            mergedContent += cells[i].innerHTML + ' ';
+            mergedContent += cells[i].innerHTML + " ";
         }
         mergedContent = mergedContent.trim();
+        
         cells[minIdx].innerHTML = mergedContent;
-        cells[minIdx].setAttribute('colspan', maxIdx - minIdx + 1);
+        cells[minIdx].setAttribute("colspan", maxIdx - minIdx + 1);
+        
         for (let i = maxIdx; i > minIdx; i--) {
             row.removeChild(cells[i]);
         }
@@ -1225,18 +1271,18 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         if (cell.nodeType !== Node.ELEMENT_NODE) {
             cell = cell.parentElement;
         }
-        cell = cell.closest('td,th');
+        cell = cell.closest("td,th");
         if (!cell) {
             return;
         }
-        let colspan = parseInt(cell.getAttribute('colspan') || 1, 10);
+        const colspan = parseInt(cell.getAttribute("colspan") || 1, 10);
         if (colspan <= 1) {
             return;
         }
-        cell.removeAttribute('colspan');
+        cell.removeAttribute("colspan");
         for (let i = 1; i < colspan; i++) {
             const newCell = cell.cloneNode(false);
-            newCell.innerHTML = '<br>';
+            newCell.innerHTML = "<br>";
             cell.parentElement.insertBefore(newCell, cell.nextSibling);
         }
         this._placeCaret(cell);
@@ -1270,20 +1316,19 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      * Enables Tab and Shift+Tab navigation within tables.
      */
     _enableTableTabNavigation() {
-        this._editorElement.addEventListener('keydown', function (e) {
-            if (e.key === 'Tab') {
+        this._editorElement.addEventListener("keydown", (e) => {
+            if (e.key === "Tab") {
                 const sel = window.getSelection();
                 if (!sel.rangeCount) {
                     return;
                 }
                 let cell = sel.anchorNode;
-                while (cell && cell.nodeType !== 1) {
+                while (cell && cell.nodeType !== Node.ELEMENT_NODE) {
                     cell = cell.parentElement;
                 }
-                while (cell && !/^TD|TH$/i.test(cell.nodeName)) {
-                    cell = cell.parentElement;
-                }
-                if (cell && (cell.nodeName === 'TD' || cell.nodeName === 'TH')) {
+                cell = cell.closest("td,th");
+                
+                if (cell) {
                     e.preventDefault();
                     let targetCell;
                     if (e.shiftKey) {
@@ -1291,7 +1336,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                     } else {
                         targetCell = getNextCell(cell);
                         if (!targetCell) {
-                            const table = cell.closest('table');
+                            const table = cell.closest("table");
                             if (table) {
                                 const rows = Array.from(table.rows);
                                 const lastRow = rows[rows.length - 1];
@@ -1300,7 +1345,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                                     const colCount = lastRow.cells.length;
                                     const newRow = table.insertRow(rows.length);
                                     for (let c = 0; c < colCount; c++) {
-                                        newRow.insertCell(c).innerHTML = '...';
+                                        newRow.insertCell(c).innerHTML = "<br>";
                                     }
                                     targetCell = newRow.cells[0];
                                 }
@@ -1308,48 +1353,41 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                         }
                     }
                     if (targetCell) {
-                        placeCaretInCell(targetCell);
+                        this._placeCaret(targetCell);
                     }
                 }
             }
-            function getNextCell(cell) {
-                let next = cell.nextElementSibling;
-                if (next) {
-                    return next;
-                }
-                let row = cell.parentElement.nextElementSibling;
-                while (row && row.nodeName !== 'TR') {
-                    row = row.nextElementSibling;
-                }
-                if (row && row.children.length > 0) {
-                    return row.children[0];
-                }
-                return null;
-            }
-            function getPrevCell(cell) {
-                let prev = cell.previousElementSibling;
-                if (prev) {
-                    return prev;
-                }
-                let row = cell.parentElement.previousElementSibling;
-                while (row && row.nodeName !== 'TR') {
-                    row = row.previousElementSibling;
-                }
-                if (row && row.children.length > 0) {
-                    return row.children[row.children.length - 1];
-                }
-                return null;
-            }
-            function placeCaretInCell(cell) {
-                cell.focus();
-                let range = document.createRange();
-                range.selectNodeContents(cell);
-                range.collapse(true);
-                let sel = window.getSelection();
-                sel.removeAllRanges();
-                sel.addRange(range);
-            }
         });
+
+        function getNextCell(cell) {
+            const next = cell.nextElementSibling;
+            if (next) {
+                return next;
+            }
+            let row = cell.parentElement.nextElementSibling;
+            while (row && row.nodeName !== "TR") {
+                row = row.nextElementSibling;
+            }
+            if (row && row.children.length > 0) {
+                return row.children[0];
+            }
+            return null;
+        }
+
+        function getPrevCell(cell) {
+            const prev = cell.previousElementSibling;
+            if (prev) {
+                return prev;
+            }
+            let row = cell.parentElement.previousElementSibling;
+            while (row && row.nodeName !== "TR") {
+                row = row.previousElementSibling;
+            }
+            if (row && row.children.length > 0) {
+                return row.children[row.children.length - 1];
+            }
+            return null;
+        }
     }
 
     /**
@@ -1378,13 +1416,11 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
             // listen for external changes to hidden field and sync to editor
             this._formInput.addEventListener("input", () => {
-                // only update if value is different from current editor content
                 if (this._editorElement.innerHTML !== this._formInput.value) {
                     this._editorElement.innerHTML = this._formInput.value || "";
                 }
             });
 
-            // also handle cases where value is set via assignment (fires 'change')
             this._formInput.addEventListener("change", () => {
                 if (this._editorElement.innerHTML !== this._formInput.value) {
                     this._editorElement.innerHTML = this._formInput.value || "";
@@ -1394,22 +1430,22 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * opens the link modal using ModalSidebarPanel and autoloads pages via DialogPanels
+     * Opens the link modal using ModalSidebarPanel and autoloads pages via DialogPanels.
      */
     _openLinkModal() {
         if (!this._linkModalEl) {
             this._createLinkModal();
         }
 
-        // compute prefill from current selection
         let selectedText = "";
         let selectedUrl = "";
         const sel = window.getSelection();
+        
         if (sel && sel.rangeCount && !sel.isCollapsed) {
             selectedText = sel.toString();
             let node = sel.getRangeAt(0).startContainer;
             if (node && node.nodeType !== Node.ELEMENT_NODE) {
-                node = node.parentElement; // fix: use correct parentElement
+                node = node.parentElement;
             }
             if (node) {
                 const anchor = node.closest("a[href]");
@@ -1422,7 +1458,6 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             }
         }
 
-        // pass prefill to modal state for the page to consume
         if (this._linkSidebarPanel) {
             this._linkSidebarPanel._editor = this;
             this._linkSidebarPanel._linkPrefill = { url: selectedUrl, text: selectedText };
@@ -1433,12 +1468,11 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * creates the link modal and sets up autoload of pages by key
+     * Creates the link modal and sets up autoload of pages by key.
      */
     _createLinkModal() {
         const id = "wx-editor-link-msp-" + Date.now() + "-" + Math.random().toString(36).slice(2);
 
-        // create host element; data-key enables DialogPanels autoload
         const el = document.createElement("div");
         el.id = id;
         el.setAttribute("aria-labelledby", id + "-label");
@@ -1447,39 +1481,32 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         el.setAttribute("data-submit-id", "insert-link");
         el.setAttribute("data-validate-active-only", "true");
 
-        // minimal dom as requested: header + footer + submit button
         el.innerHTML = [
             '<div class="wx-modal-header">Insert-Link</div>',
             '<div class="wx-modal-footer"><button id="insert-link" class="btn btn-primary">Insert</button></div>'
         ].join("");
 
-        // ensure a content container exists for ModalSidebarPanel body rendering
         const footer = el.querySelector(".wx-modal-footer");
         const content = document.createElement("div");
         content.className = "wx-modal-content";
+        
         if (footer && footer.parentNode) {
             footer.parentNode.insertBefore(content, footer);
         } else {
             el.appendChild(content);
         }
 
-        // wire submit button id for ModalSidebarPanel
-        el.setAttribute("data-submit-id", "insert-link");
-
-        // mount element
         document.body.appendChild(el);
 
-        // instantiate sidebar panel with element and store editor context
         const modalCtrl = new webexpress.webui.ModalSidebarPanel(el);
         modalCtrl._editor = this;
 
-        // cache refs
         this._linkModalEl = el;
         this._linkSidebarPanel = modalCtrl;
     }
 
     /**
-     * opens the image modal using ModalSidebarPanel and autoloads pages via DialogPanels
+     * Opens the image modal using ModalSidebarPanel and autoloads pages via DialogPanels.
      */
     _openImageModal() {
         if (!this._imageModalEl) {
@@ -1495,12 +1522,11 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * creates the image modal and sets up autoload of pages by key
+     * Creates the image modal and sets up autoload of pages by key.
      */
     _createImageModal() {
         const id = "wx-editor-image-msp-" + Date.now() + "-" + Math.random().toString(36).slice(2);
 
-        // create host element; data-key enables DialogPanels autoload
         const el = document.createElement("div");
         el.id = id;
         el.setAttribute("aria-labelledby", id + "-label");
@@ -1509,33 +1535,26 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         el.setAttribute("data-submit-id", "insert-image");
         el.setAttribute("data-validate-active-only", "true");
 
-        // minimal dom: header + footer + submit button
         el.innerHTML = [
             '<div class="wx-modal-header">Insert-Image</div>',
             '<div class="wx-modal-footer"><button id="insert-image" class="btn btn-primary">Insert</button></div>'
         ].join("");
 
-        // ensure a content container exists for ModalSidebarPanel body rendering
         const footer = el.querySelector(".wx-modal-footer");
         const content = document.createElement("div");
         content.className = "wx-modal-content";
+        
         if (footer && footer.parentNode) {
             footer.parentNode.insertBefore(content, footer);
         } else {
             el.appendChild(content);
         }
 
-        // wire submit button id for ModalSidebarPanel
-        el.setAttribute("data-submit-id", "insert-image");
-
-        // mount element
         document.body.appendChild(el);
 
-        // instantiate sidebar panel with element and store editor context
         const modalCtrl = new webexpress.webui.ModalSidebarPanel(el);
         modalCtrl._editor = this;
 
-        // cache refs
         this._imageModalEl = el;
         this._imageSidebarPanel = modalCtrl;
     }
@@ -1555,6 +1574,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     set value(html) {
         const newHtml = html != null ? String(html) : "";
         const oldHtml = this._editorElement ? this._editorElement.innerHTML : "";
+        
         if (this._editorElement) {
             this._editorElement.innerHTML = newHtml;
         }
@@ -1567,5 +1587,5 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 };
 
-// Register the class in the controller
+// register the class in the controller
 webexpress.webui.Controller.registerClass("wx-webui-editor", webexpress.webui.EditorCtrl);

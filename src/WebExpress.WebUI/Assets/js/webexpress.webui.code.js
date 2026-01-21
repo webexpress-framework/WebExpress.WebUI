@@ -1,141 +1,131 @@
 /**
- * A field to display code with copy functionality, optional line numbers, and an optional header showing the language.
- * It supports syntax highlighting by modular and extendable JavaScript files for different programming languages.
+ * A field to display code with copy functionality, optional line numbers, and language header.
+ * Supports syntax highlighting by modular and extendable JavaScript files for different programming languages.
  */
 webexpress.webui.CodeCtrl = class extends webexpress.webui.Ctrl {
     /**
-     * Constructor
+     * Creates a new code control with copy button and optional syntax highlighting.
      * @param {HTMLElement} element - The DOM element for the code display control.
      */
     constructor(element) {
         super(element);
 
-        // Extract configuration from DOM attributes
+        // read configuration from attributes
         const language = element.getAttribute("data-language") || null;
         const lineNumbers = element.dataset.lineNumbers === "true";
         const isBase64 = element.dataset.base64 === "true";
 
-        // Extract code directly from the HTML structure
-        let rawCode = element?.innerHTML?.trim() ?? "";
-        this._code = isBase64 ? atob(rawCode) : rawCode;
+        // Extract code from innerHTML and normalize line endings
+        let rawCode = (element?.innerHTML ?? "").trim().replace(/\r\n/g, "\n");
+        this._code = isBase64 && rawCode ? atob(rawCode) : rawCode;
 
-        // Build the UI for the code display
-        this._copyButton = this._createCopyButton();
-        this._codeheader = this._createHeader(language);
-        this._codeBox = this._createCodeBox(this._code, language, lineNumbers);
-
-        // Clean up DOM and append built elements
+        // clean up and add styling class
         element.innerHTML = "";
         element.classList.add("wx-code");
-        
-        const container = document.createElement("div");
-                
+
+        // create main structure using fragments for performance
+        const fragment = document.createDocumentFragment();
         if (language) {
-            container.appendChild(this._codeheader);
+            fragment.appendChild(this._createHeader(language));
         }
-        container.appendChild(this._codeBox);
-        
-        element.appendChild(container);
+
+        this._codeBox = this._createCodeBox(language, lineNumbers);
+        fragment.appendChild(this._codeBox);
+
+        element.appendChild(fragment);
+        this._copyButton = this._createCopyButton();
         element.appendChild(this._copyButton);
 
-        // Highlight syntax if a language is provided
-        this._highlightSyntax(language);
+        // apply syntax highlighting and fill content
+        this._highlightSyntax(language, lineNumbers);
+    }
+
+    /**
+     * Creates the code box for display.
+     * @param {string|null} language - The programming language.
+     * @param {boolean} lineNumbers - Whether to show line numbers.
+     * @returns {HTMLElement} Code element to display code.
+     */
+    _createCodeBox(language, lineNumbers) {
+        const codeElement = document.createElement("code");
+        codeElement.className = lineNumbers ? "wx-code-line-numbers" : "wx-code-line";
+        if (language) {
+            codeElement.classList.add(`language-${language}`);
+        }
+        return codeElement;
     }
 
     /**
      * Creates the header structure for the code box.
      * @param {string|null} language - The programming language.
-     * @returns {HTMLElement} The header for the code box.
+     * @returns {HTMLElement} The header element for the code box.
      */
     _createHeader(language) {
         const header = document.createElement("div");
-        header.className = "wx-code-header"; 
-
-        header.textContent = language ? language : "";
-
+        header.className = "wx-code-header";
+        header.textContent = language;
         return header;
     }
 
     /**
-     * Creates the code box.
-     * @param {string} code - The code to be displayed.
-     * @param {string|null} language - The programming language.
-     * @param {boolean} lineNumbers - Whether to show line numbers.
-     * @returns {HTMLElement} The code box.
-     */
-    _createCodeBox(code, language, lineNumbers) {
-        const codeElement = document.createElement("code");
-
-        if (lineNumbers) {
-            codeElement.classList.add("wx-code-line-numbers"); 
-        } else {
-            codeElement.classList.add("wx-code-line");
-        }
-
-        if (language) {
-            codeElement.classList.add(`language-${language}`); // Add the language class dynamically
-        }
-
-        return codeElement; // Return the constructed pre element
-    }
-
-    /**
-     * Creates the copy button.
-     * @returns {HTMLElement} The copy button.
+     * Creates the copy button with icon.
+     * @returns {HTMLElement} The ready-to-use copy button.
      */
     _createCopyButton() {
         const copyButton = document.createElement("button");
         const icon = document.createElement("i");
-        icon.className = "fas fa-copy"; // FontAwesome icon for copy
-
+        icon.className = "fas fa-copy";
         copyButton.classList.add("btn", "btn-sm");
-        copyButton.title = this._i18n("webexpress.webui:copy");
-        
+        copyButton.title = this._i18n("webexpress.webui:copy", "Copy");
         copyButton.appendChild(icon);
-        copyButton.addEventListener("click", () => {
-            this._copyCode();
-        });
-
+        copyButton.addEventListener("click", () => this._copyCode());
         return copyButton;
     }
 
     /**
-     * Copies the current code to the clipboard.
+     * Copies the current code to the clipboard using Clipboard API.
      */
-    _copyCode() {       
-        // use the Clipboard API to copy the code
-        navigator.clipboard.writeText(this._code)
-            .then(() => {
-            })
-            .catch(err => {
+    _copyCode() {
+        if (navigator.clipboard && this._code) {
+            navigator.clipboard.writeText(this._code).catch(err => {
                 console.error("Failed to copy code to clipboard:", err);
             });
+        }
     }
 
     /**
-     * Applies syntax highlighting to the code in the code box element.
-     * Processes each line individually if line numbers are enabled, or applies highlighting to the whole code otherwise.
-     * This implementation builds native DOM elements instead of manipulating HTML strings to ensure correctness and security.
+     * Applies syntax highlighting.
+     * If language function available, use it; otherwise, display code as plain text, with line numbers when enabled.
+     * @param {string|null} language - Programming language (highlight mode)
+     * @param {boolean} lineNumbers - Whether to show line numbers.
      */
-    _highlightSyntax(language) {
-        // retrieve syntax configuration for the specified language
-        const syntaxFunction = webexpress.webui.Syntax.get(language);
-               
-        if (syntaxFunction) {
+    _highlightSyntax(language, lineNumbers) {
+        // try language-specific syntax highlighter if available
+        const syntaxFunction = webexpress.webui.Syntax?.get?.(language);
+
+        this._codeBox.innerHTML = "";
+        if (typeof syntaxFunction === "function") {
             this._codeBox.innerHTML = syntaxFunction(this._code);
-        }
-        else {
+        } else {
+            // use plain text, preserve lines and optionally add line numbers
             const lines = this._code.split("\n");
-            
-            // create individual span elements for each line and append them manually
-            lines.forEach((line) => {
+            lines.forEach((line, idx) => {
                 const lineSpan = document.createElement("span");
                 lineSpan.textContent = line;
-                this._codeBox.appendChild(lineSpan); 
+                if (lineNumbers) {
+                    const nr = document.createElement("span");
+                    nr.textContent = (idx + 1) + ". ";
+                    nr.className = "wx-code-linenr";
+                    lineSpan.prepend(nr);
+                }
+                this._codeBox.appendChild(lineSpan);
+                if (idx < lines.length - 1) {
+                    this._codeBox.appendChild(document.createTextNode("\n"));
+                }
             });
         }
     }
 };
 
-// Register the class in the controller
+// register the class in the controller
 webexpress.webui.Controller.registerClass("wx-webui-code", webexpress.webui.CodeCtrl);

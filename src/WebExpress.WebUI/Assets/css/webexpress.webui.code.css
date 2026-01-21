@@ -1,245 +1,237 @@
 /**
- * Styles for the Code Control.
+ * Styles for the Code Control, including syntax highlighting classes.
+ * Optimiert für Lesbarkeit, Barrierefreiheit und modernes Layout.
  */
+
 .wx-code {
-    border-radius: 4px; /* Rounded corners */
-    background-color: var(--bs-light); /* Background color using Bootstrap body background */
-    margin-bottom: 1.5rem; /* Spacing below the code block */
-    overflow: hidden; /* Ensures content stays within the boundaries */
-    color: var(--bs-body-color); /* Text color using Bootstrap body color */
-    display: flex; /* Use flexbox for alignment */
-    justify-content: space-between; /* Space between elements */
-    align-items: flex-start;
+    border-radius: 6px;
+    background-color: var(--bs-light, #f8f9fa);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    color: var(--bs-body-color, #282828);
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem 0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+    font-size: 1rem;
 }
 
+/* Header above the code block */
 .wx-code-header {
-    font-size: 16px; /* Adjust header font size */
-    font-weight: bold; /* Make header text bold */
-    padding: 0.2em 0.5em; /* Adjust padding for header */
-    color: var(--bs-body-color); /* Header text color using Bootstrap white */
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 0.55em 1em 0.25em 1em;
+    color: var(--bs-body-color, #212529);
+    background-color: transparent;
+    letter-spacing: 0.03em;
+    border-bottom: 1px solid var(--bs-border-color, #e2e2e2);
+    margin-bottom: 0;
+    user-select: text;
 }
 
-.wx-code .wx-code-line {
-    padding-left: 0.2em; /* Add space for line numbers */
+/* Code content area */
+.wx-code code {
+    display: block;
+    overflow-x: auto;
+    padding: 1.2em 1em 1em 1em;
+    color: var(--bs-body-color, #212529);
+    background: none;
+    font-size: inherit;
+    font-family: inherit;
+    line-height: 1.5;
+    border: none;
 }
 
-.wx-code .wx-code-line > span {
-    display: block; /* Display lines as block elements */
-    position: relative; /* Required for line number positioning */
-    padding-left: 2rem; /* Add padding for line numbers */
-    color: var(--bs-body-color);
-}
-
+.wx-code .wx-code-line,
 .wx-code .wx-code-line-numbers {
-    counter-reset: line; /* Reset line counter */
+    min-width: 100%;
+    box-sizing: border-box;
+    background: none;
 }
 
+.wx-code .wx-code-line > span,
 .wx-code .wx-code-line-numbers > span {
-    counter-increment: line; /* Increment line counter */
-    display: block; /* Display lines as block elements */
-    position: relative; /* Required for line number positioning */
-    padding-left: 2rem; /* Add padding for line numbers */
-    color: var(--bs-body-color);
+    display: block;
+    position: relative;
+    white-space: pre;
+    padding-left: 2.5rem;
+    color: inherit;
+}
+
+/* Optionale Zeilennummerierung */
+.wx-code .wx-code-line-numbers {
+    counter-reset: line;
+}
+.wx-code .wx-code-line-numbers > span {
+    counter-increment: line;
     height: 1.1em;
 }
-
 .wx-code .wx-code-line-numbers > span::before {
-    content: counter(line); /* Display line counter */
-    position: absolute; /* Position line numbers */
-    left: 0; /* Align to the left */
-    top: 0; /* Align to the top */
-    width: 1.5rem; /* Width for line numbers */
-    text-align: right; /* Align text to the right */
-    color: var(--bs-secondary);
+    content: counter(line);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 2rem;
+    text-align: right;
+    color: var(--bs-secondary, #adb5bd);
+    opacity: 0.7;
+    font-size: 0.99em;
+    user-select: none;
+    pointer-events: none;
 }
 
-.wx-code code {
-    display: block; /* Block display for code */
-    overflow-x: auto; /* Enable horizontal scrolling */
-    padding: 1em; /* Add padding to code block */
-    color: var(--bs-body-color);
+/* Highlighting Klassen */
+
+/* Keywords, Control-Flow */
+.wx-code .keyword,
+.wx-code .access,
+.wx-code .type,
+.wx-code .tag,
+.wx-code .heading {
+    color: var(--bs-primary, #006cff);
+    font-weight: bold;
 }
 
-/* Style for keywords (e.g., if, for, class) */
-.wx-code .keyword {
-    color: var(--bs-primary);
+/* Strings, Values */
+.wx-code .string,
+.wx-code .value,
+.wx-code .image {
+    color: var(--bs-danger, #d63384);
 }
 
-/* Style for strings (e.g., "hello world") */
-.wx-code .string {
-    color: var(--bs-danger);
-}
-
-/* Style for comments (e.g., // comment) */
-.wx-code .comment {
-    color: var(--bs-success);
+/* Kommentar */
+.wx-code .comment,
+.wx-code .blockquote,
+.wx-code .shebang,
+.wx-code .doctype,
+.wx-code .pi,
+.wx-code .cdata {
+    color: var(--bs-success, #198754);
     font-style: italic;
 }
 
-/* Style for numbers (e.g., 123, 45.6) */
 .wx-code .number {
-    color: var(--bs-warning);
+    color: var(--bs-warning, #f3c73a);
 }
 
-/* Style for operators (e.g., +, =, ==) */
-.wx-code .operator {
-    color: var(--bs-info);
+.wx-code .operator,
+.wx-code .constant,
+.wx-code .separator {
+    color: var(--bs-info, #75b2f5);
 }
 
-/* Style for brackets, parentheses, and braces */
-.wx-code .bracket {
+.wx-code .bracket,
+.wx-code .blockCode {
     color: #996515;
     font-weight: bold;
 }
 
-/* Style for variables (e.g., $var in PHP, %VAR% in CMD) */
-.wx-code .variable {
-    color: #9cdcfe; /* A light blue for variables */
+.wx-code .variable,
+.wx-code .link {
+    color: #9cdcfe;
 }
 
-/* Style for constants (e.g., true, false, __FILE__) */
-.wx-code .constant {
-    color: var(--bs-info);
-}
-
-/* Style for built-in functions or commands (e.g., echo, print) */
 .wx-code .builtin,
-.wx-code .command {
-    color: #dcdcaa; /* A yellowish color for built-in functions */
+.wx-code .command,
+.wx-code .decorator {
+    color: #dcdcaa;
 }
 
-/* C++/C# specific: Preprocessor directives (e.g., #include) */
-.wx-code .preprocessor {
-    color: #808080; /* Gray for preprocessor directives */
+.wx-code .key,
+.wx-code .attribute,
+.wx-code .formatting-bold {
+    color: #c586c0;
+    font-weight: bold;
 }
 
-/* C++/C# specific: Access modifiers (e.g., public, private) */
-.wx-code .access {
-    color: #569cd6; /* Blue for access modifiers, similar to keywords */
-}
-
-/* C++/C#/PowerShell specific: Type names (e.g., int, string) */
-.wx-code .type {
-    color: #4ec9b0; /* A teal color for type names */
-}
-
-/* C# specific: Methods */
 .wx-code .method {
     color: gold;
 }
 
-/* Python specific: Decorators (e.g., @mydecorator) */
-.wx-code .decorator {
-    color: #dcdcaa; /* Same as built-ins */
-}
-
-/* Bash specific: Shebang (e.g., #!/bin/bash) */
-.wx-code .shebang {
-    color: #808080; /* Gray, similar to comments or preprocessor */
-}
-
-/* CMD/BASIC specific: Labels or line numbers */
 .wx-code .label,
 .wx-code .linenumber {
-    color: #c586c0; /* Same as keywords */
+    color: #c586c0;
 }
 
-/* .properties specific: Key */
-.wx-code .key {
-    color: purple;
-}
-
-/* .properties specific: Separator (= or :) */
-.wx-code .separator {
-    color: #ffd700; /* Gold, same as brackets */
-}
-
-/* .properties specific: Value */
-.wx-code .value {
-    color: #ce9178;
-}
-
-/* XML specific: Tag names (e.g., <tag>) */
 .wx-code .tag {
-    color: #569cd6; /* Blue for tag names */
+    color: #569cd6;
 }
 
-/* XML specific: Attribute names (e.g., attr="value") */
-.wx-code .attribute {
-    color: purple;
-}
-
-/* XML specific: CDATA sections */
-.wx-code .cdata {
-    color: #c0c0c0; /* A light gray for CDATA content */
-}
-
-/* XML specific: DOCTYPE and Processing Instructions */
-.wx-code .doctype,
-.wx-code .pi {
-    color: #808080; /* Gray, similar to comments */
-}
-
-/* Style for headings (e.g., # Heading, ## Heading) */
-.wx-code .heading {
-    color: #569cd6; /* Blue for headings */
-    font-weight: bold; /* Bold text for emphasis */
-}
-
-/* Style for lists (e.g., - Item, 1. Item) */
-.wx-code .list {
-    color: #4ec9b0; /* Teal for list items */
-}
-
-/* Style for links (e.g., [text](url)) */
-.wx-code .link {
-    color: #9cdcfe; /* Light blue for links */
-    text-decoration: underline; /* Underline links */
-}
-
-/* Style for images (e.g., ![alt text](url)) */
-.wx-code .image {
-    color: #ce9178; /* Orange for images */
-    font-style: italic; /* Italic text for alt text */
-}
-
-/* Style for inline code (e.g., `code`) */
 .wx-code .inlineCode {
-    color: #dcdcaa; /* Yellow for inline code */
-    background-color: #333333; /* Dark background for code blocks */
-    font-family: monospace; /* Monospaced font for code */
+    color: #dcdcaa;
+    background-color: #333333;
+    font-family: inherit;
 }
 
-/* Style for block code (e.g., ```code```) */
+/* Block Code */
 .wx-code .blockCode {
-    color: #dcdcaa; /* Yellow for block code */
-    background-color: #333333; /* Dark background for code blocks */
-    padding: 10px; /* Add padding for better readability */
-    font-family: monospace; /* Monospaced font for code */
-    border-radius: 4px; /* Rounded corners */
+    background-color: #2e2e2e;
+    border-radius: 4px;
+    padding: 0.35em 1em;
+    color: #dcdcaa;
+    font-family: inherit;
 }
 
-/* Style for blockquotes (e.g., > Quote) */
+/* Headings */
+.wx-code .heading {
+    font-weight: bold;
+    color: #569cd6;
+}
+
+.wx-code .list {
+    color: #4ec9b0;
+}
+
+.wx-code .link {
+    text-decoration: underline;
+}
+
+.wx-code .image {
+    font-style: italic;
+}
+
 .wx-code .blockquote {
-    color: #6a9955; /* Green for blockquotes */
-    font-style: italic; /* Italic text for quotes */
-    border-left: 4px solid #6a9955; /* Add a green border on the left */
-    padding-left: 10px; /* Indent the text */
+    border-left: 3px solid #6a9955;
+    padding-left: 10px;
 }
 
-/* Style for bold text (e.g., **bold**) */
+/* Inline Formatierungen: Fett und Kursiv */
 .wx-code .formatting-bold {
-    color: #c586c0; /* Purple for bold text */
-    font-weight: bold; /* Bold text for emphasis */
+    font-weight: bold;
 }
-
-/* Style for italic text (e.g., *italic* or _italic_) */
 .wx-code .formatting-italic {
-    color: #c586c0; /* Purple for italic text */
-    font-style: italic; /* Italic text for emphasis */
+    font-style: italic;
 }
 
-/* Support for dark mode */
+/* Dark-Mode Unterstützung */
 [data-bs-theme="dark"] .wx-code {
-    background-color: var(--bs-gray-800); /* Dark background */
+    background-color: var(--bs-gray-900, #212529);
+    color: var(--bs-gray-100, #f8f9fa);
+}
+
+[data-bs-theme="dark"] .wx-code-header {
+    border-bottom: 1px solid var(--bs-gray-800, #343a40);
+    color: var(--bs-gray-100, #f8f9fa);
+}
+
+/* Kopier-Button */
+.wx-code button.btn {
+    position: absolute;
+    top: 0.5em;
+    right: 1.2em;
+    z-index: 2;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    background: var(--bs-white, #fff);
+    border: 1px solid var(--bs-gray-300, #dee2e6);
+    border-radius: 4px;
+}
+.wx-code button.btn:hover, .wx-code button.btn:focus {
+    opacity: 1;
+}
+
+/* Utility für Ausblenden */
+.hide {
+    display: none !important;
 }

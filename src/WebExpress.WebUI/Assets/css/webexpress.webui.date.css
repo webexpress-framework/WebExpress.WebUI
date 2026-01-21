@@ -52,7 +52,6 @@
 
 /* Calendar icon at the end of the input */
 .wx-date .form-control .wx-date-calendar-icon {
-    font-family: "Font Awesome 6 Free";
     font-weight: 900;
     font-size: 1.15em;
     color: var(--bs-secondary-color, #6c757d);
@@ -116,4 +115,3 @@
 [data-bs-theme="dark"] .wx-date-today-btn:hover {
     background: var(--bs-primary, #0d6efd);
 }
-

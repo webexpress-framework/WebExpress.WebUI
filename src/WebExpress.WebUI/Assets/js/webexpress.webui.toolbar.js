@@ -1,33 +1,46 @@
 /**
  * Controller for rendering and managing a responsive toolbar with overflow logic.
  * The toolbar supports different child types (buttons, separators, dropdowns, combos, labels, more menu).
- * overflow handling is delegated to OverflowCtrl, which can be explicitly controlled to ensure that
+ * Overflow handling is delegated to OverflowCtrl, which can be explicitly controlled to ensure that
  * button labels with icons are hidden individually before moving items into overflow,
  * and restored from overflow before showing labels again when space increases.
  */
 webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
+    _resizeObserver = null;
+    _overflowCtrl = null;
+    _items = [];
+    _moreRaw = null;
+    _more = null;
+    _layoutFrame = null;
+
     /**
-     * creates a new toolbar controller instance
-     * @param {HTMLElement} element - toolbar container element
+     * Creates a new toolbar controller instance.
+     * @param {HTMLElement} element - The toolbar container element.
      */
     constructor(element) {
         super(element);
-        // parse toolbar items from DOM
+        
+        // parse toolbar items from dom
         this._parseItems(Array.from(element.querySelectorAll(
             ".wx-toolbar-button, .wx-toolbar-separator, .wx-toolbar-dropdown, .wx-toolbar-combo, .wx-toolbar-label"
         )));
-        // parse More dropdown if available
+        
+        // parse more dropdown if available
         this._parseMoreDropdown(element.querySelector(".wx-toolbar-more"));
-        // prepare toolbar DOM
+        
+        // prepare toolbar dom
         element.innerHTML = "";
         element.classList.add("wx-toolbar");
+        
         // render toolbar
         this._renderToolbar();
+        
         // always update layout after rendering
-        this._updateToolbarLayout();
-        // use ResizeObserver for responsive label hiding and overflow logic
+        this._scheduleLayoutUpdate();
+        
+        // use resizeobserver for responsive label hiding and overflow logic
         this._resizeObserver = new ResizeObserver(() => {
-            this._updateToolbarLayout();
+            this._scheduleLayoutUpdate();
         });
         this._resizeObserver.observe(element);
     }
@@ -49,7 +62,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
 
         this._items.push(item);
         this._renderToolbar();
-        this._updateToolbarLayout();
+        this._scheduleLayoutUpdate();
     }
 
     /**
@@ -76,7 +89,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Add a separator programmatically.
-     * @param {string} [align="left"] 
+     * @param {string} [align="left"] - Alignment of the separator.
      */
     addSeparator(align = "left") {
         this.addItem({
@@ -129,22 +142,24 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Removes an item by its ID.
-     * @param {string} id 
+     * @param {string} id - The ID of the item to remove.
      */
     removeItem(id) {
-        const idx = this._items.findIndex(item => item.id === id || (item.element && item.element.id === id));
+        const idx = this._items.findIndex((item) => {
+            return item.id === id || (item.element && item.element.id === id);
+        });
         if (idx > -1) {
             this._items.splice(idx, 1);
             this._renderToolbar();
-            this._updateToolbarLayout();
+            this._scheduleLayoutUpdate();
         }
     }
     
     /**
      * Creates the DOM element for an item descriptor if it doesn't exist yet.
      * Used when adding items programmatically via add* methods.
-     * @param {object} item 
-     * @returns {HTMLElement}
+     * @param {object} item - The item descriptor.
+     * @returns {HTMLElement} The created DOM element.
      */
     _createItemElement(item) {
         if (item.type === "separator") {
@@ -154,12 +169,16 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
         } else if (item.type === "label") {
             const el = document.createElement("span");
             el.className = "wx-toolbar-label";
-            if (item.content) el.dataset.label = item.content;
+            if (item.content) {
+                el.dataset.label = item.content;
+            }
             return el;
         } else if (item.type === "button") {
             const el = document.createElement("button");
             el.className = "wx-toolbar-button";
-            if (item.id) el.id = item.id;
+            if (item.id) {
+                el.id = item.id;
+            }
             return el;
         } else if (item.type === "combo") {
             const el = document.createElement("div");
@@ -171,21 +190,22 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Parses toolbar child elements and stores as item descriptors
-     * @param {HTMLElement[]} elements - items to parse
+     * Parses toolbar child elements and stores as item descriptors.
+     * @param {HTMLElement[]} elements - Items to parse.
      */
     _parseItems(elements) {
         this._items = elements.map((el) => {
             const align = el.dataset.align || "left";
             const disabled = el.hasAttribute("disabled");
             const active = el.hasAttribute("active");
+            
             if (el.classList.contains("wx-toolbar-separator")) {
                 el.setAttribute("data-overflow", "hide");
                 return {
                     type: "separator",
                     align: align,
                     overflow: "hide",
-                    el: el
+                    element: el
                 };
             } else if (el.classList.contains("wx-toolbar-combo")) {
                 return {
@@ -196,7 +216,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                     icon: el.dataset.icon || null,
                     image: el.dataset.image || null,
                     title: el.dataset.title || null,
-                    options: Array.from(el.querySelectorAll("option")).map(function (opt) {
+                    options: Array.from(el.querySelectorAll("option")).map((opt) => {
                         return { text: opt.textContent, value: opt.value };
                     }),
                     align: align,
@@ -249,12 +269,13 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                     element: el
                 };
             }
-        });
+            return null; // fallback
+        }).filter((item) => { return item !== null; }); // remove invalid items
     }
 
     /**
-     * Parses the More area as a dropdown menu
-     * @param {HTMLElement} element - element to parse
+     * Parses the More area as a dropdown menu.
+     * @param {HTMLElement} element - Element to parse.
      */
     _parseMoreDropdown(element) {
         this._moreRaw = element;
@@ -274,7 +295,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Checks if "More" dropdown contains usable entries.
-     * @returns {boolean}
+     * @returns {boolean} True if items exist.
      */
     _hasMoreDropdownItems() {
         if (this._more && this._more.children.length > 0) {
@@ -308,33 +329,55 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
         overflowRoot.style.width = "100%";
         overflowRoot.dataset.overflowCutoff = "false";
 
-        for (const item of this._items) {
-            if (item.align !== "right") {
-                overflowRoot.appendChild(this._renderItem(item));
+        // append left items
+        this._items.filter((i) => { return i.align !== "right"; }).forEach((item) => {
+            const rendered = this._renderItem(item);
+            if (rendered) {
+                overflowRoot.appendChild(rendered);
             }
-        }
+        });
+
         overflowRoot.appendChild(spring);
-        for (const item of this._items) {
-            if (item.align === "right") {
-                overflowRoot.appendChild(this._renderItem(item));
+
+        // append right items
+        this._items.filter((i) => { return i.align === "right"; }).forEach((item) => {
+            const rendered = this._renderItem(item);
+            if (rendered) {
+                overflowRoot.appendChild(rendered);
             }
-        }
+        });
 
         container.appendChild(overflowRoot);
 
         this._overflowCtrl = new webexpress.webui.OverflowCtrl(overflowRoot);
         this._overflowCtrl.setAutoDistribute(false);
 
+        // central click handler
         overflowRoot.addEventListener("click", (e) => {
             const item = e.target.closest(".wx-toolbar-button, .wx-toolbar-combo, .wx-toolbar-dropdown");
             if (item) {
-                this._dispatch(webexpress.webui.Event.CLICK_EVENT, { element: item });
+                // find corresponding data object if possible
+                const dataItem = this._items.find((i) => { return i.element === item; });
+                this._dispatch(webexpress.webui.Event.CLICK_EVENT, { element: item, item: dataItem });
             }
         });
 
         if (this._hasMoreDropdownItems()) {
             container.appendChild(this._more);
         }
+    }
+
+    /**
+     * Schedules a layout update for the next animation frame.
+     */
+    _scheduleLayoutUpdate() {
+        if (this._layoutFrame) {
+            cancelAnimationFrame(this._layoutFrame);
+        }
+        this._layoutFrame = requestAnimationFrame(() => {
+            this._updateToolbarLayout();
+            this._layoutFrame = null;
+        });
     }
 
     /**
@@ -378,8 +421,8 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Renders a single toolbar item as DOM node.
-     * @param {object} item
-     * @returns {HTMLElement}
+     * @param {object} item - The item descriptor.
+     * @returns {HTMLElement} The rendered element.
      */
     _renderItem(item) {
         if (item.type === "separator") {
@@ -397,6 +440,10 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             }
             item.element.classList.add("btn");
             item.element.type = "button";
+            
+            // clear content to rebuild (safe for non-controller elements)
+            item.element.innerHTML = "";
+            
             let hasIconOrImage = false;
             if (item.image) {
                 const img = document.createElement("img");
@@ -417,12 +464,10 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 span.textContent = item.label;
                 item.element.appendChild(span);
             }
-            if (hasIconOrImage) {
-                item.element.dataset.hasIcon = "true";
-            } else {
-                item.element.dataset.hasIcon = "false";
-            }
+            
+            item.element.dataset.hasIcon = hasIconOrImage ? "true" : "false";
             item.element.dataset.labelHidden = "false";
+            
             if (item.colorCss) {
                 item.element.classList.add(item.colorCss);
             }
@@ -436,9 +481,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 item.element.setAttribute("data-wx-toggle", "modal");
                 item.element.setAttribute("data-wx-target", item.modal);
             }
-            item.element.addEventListener("click", () => {
-                this._dispatch(webexpress.webui.Event.CLICK_EVENT, { item: item });
-            });
+            // click listener handled by delegation in _renderToolbar
             return item.element;
         }
         if (item.type === "dropdown") {
@@ -528,7 +571,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             if (item.active) {
                 select.classList.add("active");
             }
-            item.options.forEach(function (opt) {
+            item.options.forEach((opt) => {
                 const o = document.createElement("option");
                 o.textContent = opt.text;
                 o.setAttribute("value", opt.value);
@@ -564,12 +607,12 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Creates the More dropdown using DropdownCtrl with ... icon and all contained items as entries.
-     * @returns {HTMLElement} dropdown root element.
+     * @returns {HTMLElement} Dropdown root element.
      */
     _createMoreDropdownWithController() {
         const items = [];
         if (this._moreRaw) {
-            Array.from(this._moreRaw.children).forEach(function (child) {
+            Array.from(this._moreRaw.children).forEach((child) => {
                 if (child.classList.contains("wx-dropdown-header")) {
                     items.push({
                         type: "header",
@@ -757,12 +800,16 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Cleans up resources
+     * Cleans up resources.
      */
     destroy() {
         if (this._resizeObserver) {
             this._resizeObserver.disconnect();
             this._resizeObserver = null;
+        }
+        if (this._layoutFrame) {
+            cancelAnimationFrame(this._layoutFrame);
+            this._layoutFrame = null;
         }
     }
 };

@@ -1,5 +1,5 @@
 /**
- * Read-only avatar display with name and hover info provided as a child element. 
+ * Read-only avatar display with name and hover info provided as a child element.
  */
 webexpress.webui.AvatarCtrl = class extends webexpress.webui.Ctrl {
 
@@ -21,18 +21,20 @@ webexpress.webui.AvatarCtrl = class extends webexpress.webui.Ctrl {
         this._placement = this._element.dataset.placement || "top"; // top|right|bottom|left
         this._badge = this._element.dataset.badge || "";
 
-        // capture existing hover info child before DOM rebuild
+        // track previous src to avoid flicker
+        this._lastRenderedSrc = null;
+
+        // capture existing hover info child before DOM reb
         const existingInfo = this._element.querySelector(".wx-avatar-info");
         this._infoSource = existingInfo ? existingInfo.cloneNode(true) : null;
 
-        // dom and events
         this._initDOM();
         this._bindEvents();
         this._render();
     }
 
     /**
-     * Initializes DOM structure.
+     * Initializes DOM structure for the avatar.
      */
     _initDOM() {
         // cleanup host content
@@ -48,30 +50,30 @@ webexpress.webui.AvatarCtrl = class extends webexpress.webui.Ctrl {
         this._root.className = "wx-avatar-root";
         this._element.appendChild(this._root);
 
-        // thumbnail
+        // thumbnail / image wrapper
         this._thumb = document.createElement("div");
         this._thumb.className = "wx-avatar-thumb";
         this._thumb.setAttribute("role", "img");
         this._thumb.setAttribute("aria-label", this._displayName ? ("Avatar of " + this._displayName) : "Avatar");
         this._root.appendChild(this._thumb);
 
-        // image
+        // user img
         this._img = document.createElement("img");
         this._img.className = "wx-avatar-img";
         this._img.alt = this._displayName || "Avatar";
         this._thumb.appendChild(this._img);
 
-        // initials fallback
+        // fallback initials if no img or img fails
         this._fallback = document.createElement("span");
         this._fallback.className = "wx-avatar-initials";
         this._thumb.appendChild(this._fallback);
 
-        // optional badge
+        // badge
         this._badgeEl = document.createElement("span");
         this._badgeEl.className = "wx-avatar-badge";
         this._thumb.appendChild(this._badgeEl);
 
-        // text block
+        // text (name, subtitle)
         this._text = document.createElement("div");
         this._text.className = "wx-avatar-text";
         this._root.appendChild(this._text);
@@ -113,7 +115,6 @@ webexpress.webui.AvatarCtrl = class extends webexpress.webui.Ctrl {
         if (this._infoSource) {
             this._cardBody.appendChild(this._infoSource);
         } else if (this._subtitle) {
-            // fallback text when no info child provided
             const p = document.createElement("div");
             p.className = "wx-avatar-card-empty";
             p.textContent = this._subtitle;
@@ -122,36 +123,24 @@ webexpress.webui.AvatarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Binds hover/focus and layout events.
+     * Binds hover, focus and layout events.
      */
     _bindEvents() {
         // hover show/hide
-        this._element.addEventListener("mouseenter", () => {
-            this._showCard();
-        });
-        this._element.addEventListener("mouseleave", () => {
-            this._hideCard();
-        });
+        this._element.addEventListener("mouseenter", () => this._showCard());
+        this._element.addEventListener("mouseleave", () => this._hideCard());
 
         // keyboard focus show/hide
-        this._element.addEventListener("focusin", () => {
-            this._showCard();
-        });
+        this._element.addEventListener("focusin", () => this._showCard());
         this._element.addEventListener("focusout", () => {
-            window.setTimeout(() => {
-                this._hideCard();
-            }, 80);
+            setTimeout(() => this._hideCard(), 80);
         });
 
         // reposition on viewport changes
-        window.addEventListener("resize", () => {
-            this._positionCard();
-        });
-        window.addEventListener("scroll", () => {
-            this._positionCard();
-        }, { passive: true });
+        window.addEventListener("resize", () => this._positionCard());
+        window.addEventListener("scroll", () => this._positionCard(), { passive: true });
 
-        // image load/error handling
+        // handle image load/fail
         this._img.onload = () => {
             this._img.style.display = "block";
             this._fallback.style.display = "none";
@@ -163,49 +152,52 @@ webexpress.webui.AvatarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Renders the avatar visuals and card content.
+     * Renders the avatar visuals and hover card.
      */
     _render() {
-        // shape and size
+        // shape, size
         const sizePx = this._size + "px";
         this._thumb.style.width = sizePx;
         this._thumb.style.height = sizePx;
+        this._thumb.style.borderRadius = (this._shape === "rect") ? "0.24em" : "50%";
         this._thumb.classList.toggle("rect", this._shape === "rect");
 
-        // name and subtitle
+        // Name/Subtitel
         this._nameEl.textContent = this._displayName || "";
         this._subtitleEl.textContent = this._subtitle || "";
         this._subtitleEl.style.display = this._subtitle ? "block" : "none";
 
-        // badge
+        // Badge
         this._badgeEl.textContent = this._badge || "";
         this._badgeEl.style.display = this._badge ? "inline-block" : "none";
 
-        // image or initials fallback
+        // image or initials
         this._updateImage(this._src);
 
-        // hover card title
+        // Card Titel
         this._cardTitle.textContent = this._displayName || "";
 
-        // position card
+        // position hover card
         this._positionCard();
     }
 
     /**
      * Updates the image source with a fallback to initials.
-     * @param {string} src Image URL.
+     * @param {string} src
      */
     _updateImage(src) {
-        if (src) {
+        if (src && src !== this._lastRenderedSrc) {
             this._fallback.textContent = this._initials || "";
             this._fallback.style.display = "flex";
             this._img.style.display = "none";
             this._img.src = src;
-        } else {
+            this._lastRenderedSrc = src;
+        } else if (!src) {
             this._img.removeAttribute("src");
             this._img.style.display = "none";
             this._fallback.style.display = "flex";
             this._fallback.textContent = this._initials || "";
+            this._lastRenderedSrc = null;
         }
     }
 
@@ -227,16 +219,15 @@ webexpress.webui.AvatarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Positions the hover card around the host according to placement.
+     * Positions the hover card according to placement.
      */
     _positionCard() {
         const rect = this._element.getBoundingClientRect();
         const cardRect = this._card.getBoundingClientRect();
-        const offset = 8;
+        const offset = 10;
+        let top = 0, left = 0;
 
-        let top = 0;
-        let left = 0;
-
+        // Ensure card is always inside viewport
         if (this._placement === "top") {
             top = rect.top - cardRect.height - offset;
             left = rect.left + (rect.width - cardRect.width) / 2;
@@ -246,63 +237,52 @@ webexpress.webui.AvatarCtrl = class extends webexpress.webui.Ctrl {
         } else if (this._placement === "bottom") {
             top = rect.bottom + offset;
             left = rect.left + (rect.width - cardRect.width) / 2;
-        } else {
-            // left
+        } else { // left
             top = rect.top + (rect.height - cardRect.height) / 2;
             left = rect.left - cardRect.width - offset;
         }
-
+        // Clamp to viewport
         const docTop = window.scrollY || window.pageYOffset || 0;
         const docLeft = window.scrollX || window.pageXOffset || 0;
+        const maxLeft = Math.max(0, Math.min(left + docLeft, window.innerWidth - cardRect.width));
+        const maxTop = Math.max(0, Math.min(top + docTop, window.innerHeight - cardRect.height));
 
-        this._card.style.top = Math.max(0, top + docTop) + "px";
-        this._card.style.left = Math.max(0, left + docLeft) + "px";
+        this._card.style.top = maxTop + "px";
+        this._card.style.left = maxLeft + "px";
     }
 
     /**
      * Derives initials from a name string.
-     * @param {string} name Full name.
-     * @returns {string} Initials (up to 2 letters).
+     * @param {string} name
+     * @returns {string}
      */
     _deriveInitials(name) {
-        if (!name) {
-            return "";
-        }
-        const parts = name.trim().split(/\s+/).filter(p => p.length > 0);
-        if (parts.length === 0) {
-            return "";
-        }
-        if (parts.length === 1) {
-            return parts[0].substring(0, 2).toUpperCase();
-        }
+        if (!name) return "";
+        const parts = name.trim().split(/\s+/).filter(Boolean);
+        if (parts.length === 0) return "";
+        if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
         return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
 
     /**
      * Parses a numeric data attribute with clamping.
-     * @param {string|undefined} v Raw value.
-     * @param {number} fallback Default value.
-     * @param {number} min Minimum.
-     * @param {number} max Maximum.
-     * @returns {number} Parsed and clamped number.
+     * @param {string|undefined} v
+     * @param {number} fallback
+     * @param {number} min
+     * @param {number} max
+     * @returns {number}
      */
     _parseNumber(v, fallback, min, max) {
         const n = (v !== undefined) ? Number(v) : NaN;
-        if (!Number.isFinite(n)) {
-            return fallback;
-        }
-        if (n < min) {
-            return min;
-        }
-        if (n > max) {
-            return max;
-        }
+        if (!Number.isFinite(n)) return fallback;
+        if (n < min) return min;
+        if (n > max) return max;
         return n;
     }
 
     /**
      * Public API: updates the display name and re-renders.
-     * @param {string} name Display name.
+     * @param {string} name
      */
     set name(name) {
         this._displayName = name || "";
@@ -315,7 +295,7 @@ webexpress.webui.AvatarCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Public API: updates the image source and re-renders.
-     * @param {string} src Image URL.
+     * @param {string} src
      */
     set src(src) {
         this._src = src || "";
@@ -326,5 +306,5 @@ webexpress.webui.AvatarCtrl = class extends webexpress.webui.Ctrl {
     }
 };
 
-// register the class with the controller
+// register the class in the controller
 webexpress.webui.Controller.registerClass("wx-webui-avatar", webexpress.webui.AvatarCtrl);

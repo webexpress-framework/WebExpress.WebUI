@@ -3,24 +3,29 @@
  * Each level is rendered as webexpress.webui.InputSelectionCtrl.
  */
 webexpress.webui.InputCascadingCtrl = class extends webexpress.webui.Ctrl {
+    _placeholder = "";
+    _tree = [];
+    _path = [];
+
     /**
      * Constructor initializes the cascading control and builds the static option tree
      * from the given DOM element. Only the root level is rendered initially.
-     * @param {HTMLElement} element - the host element containing .wx-cascading-item children
+     * @param {HTMLElement} element - The host element containing .wx-cascading-item children.
      */
     constructor(element) {
         super(element);
 
         const name = element.getAttribute("name");
         this._placeholder = element.getAttribute("placeholder") || this._i18n("webexpress.webui:selection.placeholder", "Select an option");
+
         // hidden input for form submission
         this._hidden = this._createHiddenInput(name);
-        // container that will hold per-level InputSelection hosts
+
+        // container that will hold per-level inputselection hosts
         this._levelsContainer = document.createElement("div");
         this._levelsContainer.classList.add("wx-cascading-levels");
 
-        // parse the option tree from the original DOM (static read, no observers)
-        // parse the tree before clearing the source element
+        // parse the option tree from the original dom (static read, no observers)
         this._tree = this._parseTree(element);
         this._path = [];
 
@@ -39,8 +44,8 @@ webexpress.webui.InputCascadingCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Creates hidden input for form submission.
-     * @param {string} name - input name attribute
-     * @returns {HTMLInputElement} the created hidden input
+     * @param {string} name - Input name attribute.
+     * @returns {HTMLInputElement} The created hidden input.
      */
     _createHiddenInput(name) {
         const hiddenInput = document.createElement("input");
@@ -50,14 +55,14 @@ webexpress.webui.InputCascadingCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * extracts only text nodes that are direct children (no nested selection-item text).
-     * @param {HTMLElement} elem - element to extract text from
-     * @returns {string} trimmed direct-text content
+     * Extracts only text nodes that are direct children (no nested selection-item text).
+     * @param {HTMLElement} elem - Element to extract text from.
+     * @returns {string} Trimmed direct-text content.
      */
     _extractOwnText(elem) {
         // collect only direct text nodes to avoid nested item text
         let text = "";
-        const nodes = Array.prototype.slice.call(elem.childNodes);
+        const nodes = Array.from(elem.childNodes);
         nodes.forEach((node) => {
             if (node.nodeType === Node.TEXT_NODE) {
                 text += node.textContent;
@@ -68,13 +73,13 @@ webexpress.webui.InputCascadingCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Extracts the inner html of the element excluding its nested .wx-cascading-item children.
-     * @param {HTMLElement} elem - element to extract html from
-     * @returns {string} html string containing only this element's own markup
+     * @param {HTMLElement} elem - Element to extract html from.
+     * @returns {string} HTML string containing only this element's own markup.
      */
     _extractOwnHtml(elem) {
         // clone and remove direct child selection items to keep only own markup
         const clone = elem.cloneNode(true);
-        const children = Array.prototype.slice.call(clone.children);
+        const children = Array.from(clone.children);
         children.forEach((ch) => {
             if (ch.classList && ch.classList.contains("wx-cascading-item")) {
                 clone.removeChild(ch);
@@ -85,13 +90,13 @@ webexpress.webui.InputCascadingCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Parses DOM hierarchy into an option tree using direct children only.
-     * @param {HTMLElement} root - element containing .wx-cascading-item children
-     * @returns {Array} array of node objects {id,label,content,children,...}
+     * @param {HTMLElement} root - Element containing .wx-cascading-item children.
+     * @returns {Array} Array of node objects {id,label,content,children,...}.
      */
     _parseTree(root) {
         // iterate direct children only; recursion builds the whole static tree
         const nodes = [];
-        const children = Array.prototype.slice.call(root.children || []);
+        const children = Array.from(root.children || []);
         children.forEach((child) => {
             if (child.classList && child.classList.contains("wx-cascading-item")) {
                 const node = {
@@ -112,22 +117,27 @@ webexpress.webui.InputCascadingCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Renders a single level using InputSelectionCtrl.
-     * @param {number} level - depth level (0 = root)
-     * @param {Array} nodes - array of node objects for this level
+     * Recurses if a path value is already present for this level.
+     * Ensures subsequent levels are removed if nodes are empty or selection changes.
+     * @param {number} level - Depth level (0 = root).
+     * @param {Array} nodes - Array of node objects for this level.
      */
     _renderLevel(level, nodes) {
         // remove any deeper levels beyond current level and detach their listeners
+        // this ensures that if we re-render level 1, level 2 and 3 are removed first
         while (this._levelsContainer.children.length > level) {
             const last = this._levelsContainer.lastChild;
-            if (last && last.__wx_doc_handler) {
-                document.removeEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, last.__wx_doc_handler);
-                delete last.__wx_doc_handler;
+            if (last) {
+                if (last.__wx_doc_handler) {
+                    document.removeEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, last.__wx_doc_handler);
+                    delete last.__wx_doc_handler;
+                }
+                if (last.__wx_click_handler) {
+                    last.removeEventListener("click", last.__wx_click_handler);
+                    delete last.__wx_click_handler;
+                }
+                this._levelsContainer.removeChild(last);
             }
-            if (last && last.__wx_click_handler) {
-                last.removeEventListener("click", last.__wx_click_handler);
-                delete last.__wx_click_handler;
-            }
-            this._levelsContainer.removeChild(last);
         }
 
         if (!nodes || nodes.length === 0) {
@@ -135,8 +145,7 @@ webexpress.webui.InputCascadingCtrl = class extends webexpress.webui.Ctrl {
             return;
         }
 
-        // create host element and instantiate InputSelectionCtrl for this level
-        // host must exist so the control can attach itself; options are provided afterwards
+        // create host element and instantiate inputselectionctrl for this level
         const selectionHost = document.createElement("div");
         selectionHost.setAttribute("data-multiselection", "false");
         selectionHost.setAttribute("placeholder", this._placeholder);
@@ -145,8 +154,7 @@ webexpress.webui.InputCascadingCtrl = class extends webexpress.webui.Ctrl {
 
         const selectionCtrl = new webexpress.webui.InputSelectionCtrl(selectionHost);
 
-        // map parsed nodes to the options format expected by InputSelectionCtrl
-        // include value property to ensure the selection widget returns comparable values
+        // map parsed nodes to the options format expected by inputselectionctrl
         const items = nodes.map((node) => {
             return {
                 value: node.id,
@@ -160,12 +168,21 @@ webexpress.webui.InputCascadingCtrl = class extends webexpress.webui.Ctrl {
             };
         });
 
-        // set options via API (this will trigger render on the selectionCtrl)
         selectionCtrl.options = items;
+
+        // if there is a known value for this level in the path, apply it and recurse
+        let preSelectedId = null;
+        if (this._path.length > level) {
+            preSelectedId = this._path[level];
+            if (preSelectedId) {
+                // set value as array because inputselectionctrl expects it
+                selectionCtrl.value = [preSelectedId];
+            }
+        }
 
         // common handler used both for dispatched change events and click fallback
         const handleSelectionChange = () => {
-            // inline comment: normalize possible return shapes (primitive or object with value)
+            // normalize possible return shapes (primitive or object with value)
             let selected = null;
             if (selectionCtrl.value && selectionCtrl.value.length > 0) {
                 const first = selectionCtrl.value[0];
@@ -175,38 +192,42 @@ webexpress.webui.InputCascadingCtrl = class extends webexpress.webui.Ctrl {
                     selected = first;
                 }
             }
-            // truncate path at current level
+
+            // truncate path to current level, removing all subsequent selections
             this._path = this._path.slice(0, level);
+            
+            // push new selection if valid
             if (selected) {
-                this._path[level] = selected;
+                this._path.push(selected);
             }
+
             const childNodes = this._findChildren(nodes, selected);
-            // render next level only when a selection was made and children exist
+
+            // render next level
+            // if selected is null (reset), childNodes is null, causing next level to be cleared
             this._renderLevel(level + 1, childNodes);
+
             // dispatch a value change for the whole cascading path
             this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: [...this._path] });
         };
 
         // document-level listener: filter events so only those originating from this host are processed
-        const docHandler = function (evt) {
-            // inline comment: filter events to this host (evt.detail.sender OR evt.target may indicate origin)
+        const docHandler = (evt) => {
             if (!evt || !evt.detail) {
                 return;
             }
-            const sender = evt.detail && evt.detail.sender ? evt.detail.sender : evt.target;
+            const sender = evt.detail.sender ? evt.detail.sender : evt.target;
             if (sender === selectionHost || selectionHost.contains(sender)) {
                 handleSelectionChange();
             }
         };
 
-        // attach document listener and keep reference on the host for later removal
         document.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, docHandler);
         selectionHost.__wx_doc_handler = docHandler;
 
-        // fallback: also listen for clicks inside the host and evaluate value after a tick
-        // inline comment: ensure compatibility if custom event isn't propagated in some environments
-        const clickHandler = function () {
-            setTimeout(function () {
+        // fallback: also listen for clicks inside the host
+        const clickHandler = () => {
+            setTimeout(() => {
                 handleSelectionChange();
             }, 0);
         };
@@ -214,13 +235,19 @@ webexpress.webui.InputCascadingCtrl = class extends webexpress.webui.Ctrl {
         selectionHost.__wx_click_handler = clickHandler;
 
         this._updateHidden();
+
+        // if we pre-selected a value during render (e.g. from set value), we must manually trigger recursion
+        if (preSelectedId) {
+            const childNodes = this._findChildren(nodes, preSelectedId);
+            this._renderLevel(level + 1, childNodes);
+        }
     }
 
     /**
      * Finds children for a given id inside nodes.
-     * @param {Array} nodes - nodes to search
-     * @param {string|null} id - id to find
-     * @returns {Array|null} child nodes array or null
+     * @param {Array} nodes - Nodes to search.
+     * @param {string|null} id - ID to find.
+     * @returns {Array|null} Child nodes array or null.
      */
     _findChildren(nodes, id) {
         if (!id) {
@@ -237,14 +264,17 @@ webexpress.webui.InputCascadingCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Updates hidden input with the selected path.
+     * @private
      */
     _updateHidden() {
-        this._hidden.value = this._path.join(";");
+        if (this._hidden) {
+            this._hidden.value = this._path.join(";");
+        }
     }
 
     /**
      * Gets current path selection.
-     * @returns {Array} selected path as array of ids
+     * @returns {Array} Selected path as array of IDs.
      */
     get value() {
         return this._path;
@@ -253,29 +283,28 @@ webexpress.webui.InputCascadingCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Sets path selection and re-renders levels accordingly.
      * Accepts Array, semicolon-separated string or null.
-     * @param {Array|string|null|undefined} values - new selection path
+     * @param {Array|string|null|undefined} values - New selection path.
      */
     set value(values) {
         let normalized = [];
-        if (values == null) {
+        if (values === null || values === undefined) {
             normalized = [];
         } else if (Array.isArray(values)) {
             normalized = values;
         } else if (typeof values === "string") {
             const trimmed = values.trim();
             if (trimmed.length > 0) {
-                normalized = trimmed.includes(";")
-                    ? trimmed.split(";").map(function (v) { return v.trim(); }).filter(function (v) { return v.length > 0; })
-                    : [trimmed];
+                if (trimmed.includes(";")) {
+                    normalized = trimmed.split(";").map((v) => { return v.trim(); }).filter((v) => { return v.length > 0; });
+                } else {
+                    normalized = [trimmed];
+                }
             }
-        } else {
-            normalized = [];
         }
+
+        // clean duplicates if any, though path usually shouldn't have them
         normalized = [...new Set(normalized)];
-        // cascading control uses single selection per level; keep first if multiple provided
-        if (normalized.length > 1) {
-            normalized = [normalized[0]];
-        }
+
         this._path = normalized;
         this._renderLevel(0, this._tree);
     }
