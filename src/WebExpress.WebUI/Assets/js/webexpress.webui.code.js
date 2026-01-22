@@ -15,7 +15,7 @@ webexpress.webui.CodeCtrl = class extends webexpress.webui.Ctrl {
         const lineNumbers = element.dataset.lineNumbers === "true";
         const isBase64 = element.dataset.base64 === "true";
 
-        // Extract code from innerHTML and normalize line endings
+        // extract code from innerHTML and normalize line endings
         let rawCode = (element?.innerHTML ?? "").trim().replace(/\r\n/g, "\n");
         this._code = isBase64 && rawCode ? atob(rawCode) : rawCode;
 
@@ -23,16 +23,14 @@ webexpress.webui.CodeCtrl = class extends webexpress.webui.Ctrl {
         element.innerHTML = "";
         element.classList.add("wx-code");
 
-        // create main structure using fragments for performance
-        const fragment = document.createDocumentFragment();
+        // create header, codebox, and copy button directly
         if (language) {
-            fragment.appendChild(this._createHeader(language));
+            element.appendChild(this._createHeader(language));
         }
 
         this._codeBox = this._createCodeBox(language, lineNumbers);
-        fragment.appendChild(this._codeBox);
+        element.appendChild(this._codeBox);
 
-        element.appendChild(fragment);
         this._copyButton = this._createCopyButton();
         element.appendChild(this._copyButton);
 

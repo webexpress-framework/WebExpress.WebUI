@@ -1,9 +1,10 @@
 /**
  * Styles for the Code Control, including syntax highlighting classes.
- * Optimiert für Lesbarkeit, Barrierefreiheit und modernes Layout.
+ * Optimized for readability, accessibility, and modern layout.
  */
 
 .wx-code {
+    position: relative; /* container for the copy button */
     border-radius: 6px;
     background-color: var(--bs-light, #f8f9fa);
     margin-bottom: 1.5rem;
@@ -17,7 +18,7 @@
     font-size: 1rem;
 }
 
-/* Header above the code block */
+/* header above the code block */
 .wx-code-header {
     font-size: 1rem;
     font-weight: bold;
@@ -30,7 +31,7 @@
     user-select: text;
 }
 
-/* Code content area */
+/* code content area */
 .wx-code code {
     display: block;
     overflow-x: auto;
@@ -43,6 +44,47 @@
     border: none;
 }
 
+/* dark mode support */
+[data-bs-theme="dark"] .wx-code {
+    background-color: var(--bs-gray-900, #212529);
+    color: var(--bs-gray-100, #f8f9fa);
+}
+
+[data-bs-theme="dark"] .wx-code-header {
+    border-bottom: 1px solid var(--bs-gray-800, #343a40);
+    color: var(--bs-gray-100, #f8f9fa);
+}
+
+/* copy button */
+.wx-code button.btn {
+    position: absolute;
+    top: 0.25em;
+    right: 0.25em;
+    z-index: 2;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    background: var(--bs-white, #fff);
+    border: 1px solid var(--bs-gray-300, #dee2e6);
+    border-radius: 4px;
+}
+
+.wx-code button.btn:hover, .wx-code button.btn:focus {
+    opacity: 1;
+}
+
+[data-bs-theme="dark"] .wx-code button.btn {
+    background: var(--bs-gray-900, #212529);
+    border: 1px solid var(--bs-gray-700, #495057);
+    color: var(--bs-gray-100, #f8f9fa);
+}
+
+[data-bs-theme="dark"] .wx-code button.btn:hover,
+[data-bs-theme="dark"] .wx-code button.btn:focus {
+    background: var(--bs-gray-800, #343a40);
+    border-color: var(--bs-gray-600, #6c757d);
+    color: var(--bs-white, #fff);
+}
+
 .wx-code .wx-code-line,
 .wx-code .wx-code-line-numbers {
     min-width: 100%;
@@ -50,40 +92,40 @@
     background: none;
 }
 
-.wx-code .wx-code-line > span,
-.wx-code .wx-code-line-numbers > span {
-    display: block;
-    position: relative;
-    white-space: pre;
-    padding-left: 2.5rem;
-    color: inherit;
-}
+    .wx-code .wx-code-line > span,
+    .wx-code .wx-code-line-numbers > span {
+        display: block;
+        position: relative;
+        white-space: pre;
+        padding-left: 2.5rem;
+        color: inherit;
+    }
 
-/* Optionale Zeilennummerierung */
+/* optional line numbering */
 .wx-code .wx-code-line-numbers {
     counter-reset: line;
 }
-.wx-code .wx-code-line-numbers > span {
-    counter-increment: line;
-    height: 1.1em;
-}
-.wx-code .wx-code-line-numbers > span::before {
-    content: counter(line);
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 2rem;
-    text-align: right;
-    color: var(--bs-secondary, #adb5bd);
-    opacity: 0.7;
-    font-size: 0.99em;
-    user-select: none;
-    pointer-events: none;
-}
 
-/* Highlighting Klassen */
+    .wx-code .wx-code-line-numbers > span {
+        counter-increment: line;
+        height: 1.1em;
+    }
 
-/* Keywords, Control-Flow */
+        .wx-code .wx-code-line-numbers > span::before {
+            content: counter(line);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 2rem;
+            text-align: right;
+            color: var(--bs-secondary, #adb5bd);
+            opacity: 0.7;
+            font-size: 0.99em;
+            user-select: none;
+            pointer-events: none;
+        }
+
+/* keywords, control-flow */
 .wx-code .keyword,
 .wx-code .access,
 .wx-code .type,
@@ -93,14 +135,14 @@
     font-weight: bold;
 }
 
-/* Strings, Values */
+/* strings, values */
 .wx-code .string,
 .wx-code .value,
 .wx-code .image {
     color: var(--bs-danger, #d63384);
 }
 
-/* Kommentar */
+/* comments */
 .wx-code .comment,
 .wx-code .blockquote,
 .wx-code .shebang,
@@ -164,7 +206,7 @@
     font-family: inherit;
 }
 
-/* Block Code */
+/* block code */
 .wx-code .blockCode {
     background-color: #2e2e2e;
     border-radius: 4px;
@@ -173,7 +215,7 @@
     font-family: inherit;
 }
 
-/* Headings */
+/* headings */
 .wx-code .heading {
     font-weight: bold;
     color: #569cd6;
@@ -196,42 +238,16 @@
     padding-left: 10px;
 }
 
-/* Inline Formatierungen: Fett und Kursiv */
+/* inline formatting: bold and italic */
 .wx-code .formatting-bold {
     font-weight: bold;
 }
+
 .wx-code .formatting-italic {
     font-style: italic;
 }
 
-/* Dark-Mode Unterstützung */
-[data-bs-theme="dark"] .wx-code {
-    background-color: var(--bs-gray-900, #212529);
-    color: var(--bs-gray-100, #f8f9fa);
-}
-
-[data-bs-theme="dark"] .wx-code-header {
-    border-bottom: 1px solid var(--bs-gray-800, #343a40);
-    color: var(--bs-gray-100, #f8f9fa);
-}
-
-/* Kopier-Button */
-.wx-code button.btn {
-    position: absolute;
-    top: 0.5em;
-    right: 1.2em;
-    z-index: 2;
-    opacity: 0.7;
-    transition: opacity 0.2s;
-    background: var(--bs-white, #fff);
-    border: 1px solid var(--bs-gray-300, #dee2e6);
-    border-radius: 4px;
-}
-.wx-code button.btn:hover, .wx-code button.btn:focus {
-    opacity: 1;
-}
-
-/* Utility für Ausblenden */
+/* utility for hiding elements */
 .hide {
     display: none !important;
 }
