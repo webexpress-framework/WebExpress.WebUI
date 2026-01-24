@@ -93,7 +93,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                     text: elem.textContent || null,
                     color: elem.dataset.color || null,
                     modal: {
-                        id: elem.dataset.modal || null,
+                        id: elem.dataset.wxTarget || null,
                         size: elem.dataset.modalsize || null
                     },
                     backgroundColor: itemClasses

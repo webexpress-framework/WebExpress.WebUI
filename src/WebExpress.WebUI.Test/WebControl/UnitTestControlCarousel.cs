@@ -29,6 +29,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -60,6 +61,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -89,6 +91,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -112,6 +115,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             control.Add(item);
 
+            // validation
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);

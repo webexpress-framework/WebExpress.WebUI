@@ -146,3 +146,51 @@
 .wx-sidebar .hide {
     display: none;
 }
+
+.wx-sidebar-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    padding: 1em;
+}
+
+.wx-sidebar-icon-graphic.wx-icon, .wx-sidebar-icon-graphic {
+    transition: font-size 0.2s, width 0.2s, height 0.2s;
+}
+
+.wx-sidebar-icon-small .wx-sidebar-icon-graphic {
+    font-size: 1.3em !important;
+    width: 1.6em !important;
+    height: 1.6em !important;
+}
+
+.wx-sidebar-icon-large .wx-sidebar-icon-graphic {
+    font-size: 2.6em !important;
+    width: 2.6em !important;
+    height: 2.6em !important;
+}
+
+.wx-sidebar-icon-edit {
+    position: absolute;
+    top: 0.25em;
+    right: 0.25em;
+    background: transparent;
+    color: var(--bs-secondary);
+    border: none;
+    cursor: pointer;
+    display: none;
+}
+
+.wx-sidebar-icon-text {
+    margin-top: 0.2em;
+    font-size: 90%;
+    text-align: center;
+    line-height: 1.1;
+}
+
+.wx-sidebar-icon:not(.wx-sidebar-icon-small):hover .wx-sidebar-icon-edit, 
+.wx-sidebar-icon:not(.wx-sidebar-icon-small):focus .wx-sidebar-icon-edit {
+    display: inline-block;
+}
