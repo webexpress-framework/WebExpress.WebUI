@@ -281,7 +281,6 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 url: elem.dataset.uri || null,
                 target: elem.dataset.target || null,
                 tooltip: elem.dataset.tooltip || null,
-                render: elem.dataset.render || null,
                 parent: parent
             };
             // recursively parse children
@@ -384,21 +383,9 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 labelContainer.appendChild(icon);
             }
 
-            // render label
-            if (typeof node.render === "string") {
-                // custom render logic
-                const render = new Function("node", node.render);
-                const renderResult = render(node);
-                if (renderResult instanceof Node) {
-                    labelContainer.appendChild(renderResult);
-                } else if (typeof renderResult === "string") {
-                    labelContainer.innerHTML += renderResult;
-                }
-            } else {
-                const span = document.createElement("span");
-                span.textContent = node.label;
-                labelContainer.appendChild(span);
-            }
+            const span = document.createElement("span");
+            span.textContent = node.label;
+            labelContainer.appendChild(span);
 
             // set link attributes if present
             if (node.url) {

@@ -178,6 +178,24 @@
     animation: wx-tile-flash .7s linear 2;
 }
 
+.wx-tile-picker {
+    display: block;
+    background: var(--bs-body-bg, #fff);
+    padding: 1.2rem 1.5rem;
+    min-height: 180px;
+}
+
+/* Tile picker grid */
+.wx-tile-picker-tiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    align-items: stretch;
+    justify-content: flex-start;
+    margin-bottom: 1rem;
+    padding: 0;
+}
+
 @keyframes wx-tile-flash {
     0% { box-shadow: 0 0 0 0 var(--bs-warning); }
     50% { box-shadow: 0 0 10px 5px var(--bs-warning); }
