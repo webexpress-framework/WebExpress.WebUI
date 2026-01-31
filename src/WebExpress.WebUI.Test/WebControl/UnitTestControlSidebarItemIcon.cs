@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlSidebarItemIcon()
             {
                 Icon = !string.IsNullOrWhiteSpace(iconImage)
-                    ? new ImageIcon(new UriEndpoint(iconImage))
+                    ? ImageIcon.FromString(iconImage)
                     : null
             };
 

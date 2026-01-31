@@ -24,7 +24,7 @@ namespace WebExpress.WebUI.WebIcon
         public IUri Uri { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ImageIcon"/> class.
+        /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="uri">The URI of the icon.</param>
         public ImageIcon(IUri uri)
@@ -33,7 +33,7 @@ namespace WebExpress.WebUI.WebIcon
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ImageIcon"/> class.
+        /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="uri">The URI of the icon.</param>
         /// <param name="size">The size of the icon.</param>
@@ -44,7 +44,7 @@ namespace WebExpress.WebUI.WebIcon
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ImageIcon"/> class.
+        /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="uri">The URI of the icon.</param>
         /// <param name="size">The size of the icon.</param>
@@ -64,6 +64,21 @@ namespace WebExpress.WebUI.WebIcon
                     : uri;
 
             Size = size;
+        }
+
+        /// <summary>
+        /// Creates a new ImageIcon instance from the specified URI string.
+        /// </summary>
+        /// <param name="uri">
+        /// The URI string that identifies the image resource to be used for the 
+        /// icon. Must be a valid URI format.
+        /// </param>
+        /// <returns>
+        /// An ImageIcon representing the image located at the specified URI.
+        /// </returns>
+        public static ImageIcon FromString(string uri)
+        {
+            return new ImageIcon(new UriEndpoint(uri));
         }
 
         /// <summary>
