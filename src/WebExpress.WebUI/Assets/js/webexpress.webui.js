@@ -858,6 +858,4 @@ webexpress.webui.Event = class {
     static WS_CLOSE_EVENT = "webexpress.webui.websocket.close";
     // Event triggered when a WebSocket error occurs.
     static WS_ERROR_EVENT = "webexpress.webui.websocket.error";
-    
-    static GRAPH_
 }

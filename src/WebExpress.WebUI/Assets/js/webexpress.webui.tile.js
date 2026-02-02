@@ -1,24 +1,12 @@
 /**
- * TileCtrl
  * Controller for interactive tile board: parsing markup, drag & drop reordering,
  * visibility toggling, searching, sorting and persistence (order + visibility).
  *
- * Public API (unchanged):
- *  - insertTile(tileData, index = null)
- *  - deleteTile(tileId)
- *  - setTileVisibility(idOrIndex, visible)
- *  - hideTile(idOrIndex)
- *  - showTile(idOrIndex)
- *  - toggleTile(idOrIndex)
- *  - getVisibleTiles()
- *  - searchTiles(term)
- *  - orderTiles(property = "label", direction = "asc")
- *  - render()
  * Events:
- *  - MOVE_EVENT
- *  - CHANGE_VISIBILITY_EVENT
- *  - TILE_SEARCH_EVENT
- *  - TILE_SORT_EVENT
+ *  - webexpress.webui.Event.MOVE_EVENT
+ *  - webexpress.webui.Event.CHANGE_VISIBILITY_EVENT
+ *  - webexpress.webui.Event.TILE_SEARCH_EVENT
+ *  - webexpress.webui.Event.TILE_SORT_EVENT
  */
 webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
@@ -47,6 +35,9 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
     // cached lowercase fields for search speed
     _searchCacheDirty = true;
 
+    // large icon mode
+    _largeIcon = false;
+
     /**
      * Creates a tile controller for the root element.
      * @param {HTMLElement} element Root node containing .wx-tile-card children.
@@ -57,6 +48,14 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         this._movable = ds.movable === "true";
         this._allowRemove = ds.allowRemove === "true";
         this._persistKey = ds.persistKey || element.id || null;
+
+        // check for large icon option
+        this._largeIcon = ds.largeIcon === "true";
+        if (this._largeIcon) {
+            element.classList.add("wx-tile-picker-largeicon");
+        } else {
+            element.classList.remove("wx-tile-picker-largeicon");
+        }
 
         this._tiles = this._parseInitialTiles(element);
         this._loadState();
@@ -73,6 +72,12 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         el.classList.add("wx-tile");
         if (this._allowRemove) {
             el.classList.add("wx-tile-removable");
+        }
+        // toggle large icon class on root depending on option
+        if (this._largeIcon) {
+            el.classList.add("wx-tile-picker-largeicon");
+        } else {
+            el.classList.remove("wx-tile-picker-largeicon");
         }
         if (this._searchCacheDirty) {
             this._rebuildSearchCache();
@@ -279,6 +284,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Builds a tile card element.
+     * Adds support for large icons if option enabled.
      * @param {Object} tile Tile model.
      * @returns {HTMLElement} Card element.
      */
@@ -299,6 +305,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         }
         card.setAttribute("role", "group");
 
+        // add remove button if removable
         if (this._allowRemove) {
             const btn = document.createElement("button");
             btn.type = "button";
@@ -315,12 +322,17 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
             card.appendChild(btn);
         }
 
+        // render header with icon/image/label and supporting large icons
         if (tile.label || tile.icon || tile.image) {
             const header = document.createElement("h5");
             header.className = "card-title";
             if (tile.icon) {
                 const icon = document.createElement("i");
                 icon.className = tile.icon;
+                // add large icon class if enabled
+                if (this._largeIcon) {
+                    icon.classList.add("wx-tile-icon-large");
+                }
                 header.appendChild(icon);
                 header.append(document.createTextNode(" "));
             }
@@ -329,6 +341,10 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
                 img.className = "wx-icon";
                 img.src = tile.image;
                 img.alt = "";
+                // add large icon class if enabled
+                if (this._largeIcon) {
+                    img.classList.add("wx-tile-icon-large");
+                }
                 header.appendChild(img);
                 header.append(document.createTextNode(" "));
             }
@@ -339,10 +355,11 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         const body = document.createElement("div");
         body.className = "card-body";
         if (tile.html) {
-            body.innerHTML = tile.html; // html trusted upstream
+            body.innerHTML = tile.html;
         }
         card.appendChild(body);
 
+        // add drag and drop support if movable
         if (this._movable) {
             card.setAttribute("draggable", "true");
             card.addEventListener("dragstart", e => this._onDragStart(e, tile, card));

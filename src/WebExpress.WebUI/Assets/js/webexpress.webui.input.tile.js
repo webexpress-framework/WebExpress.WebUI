@@ -12,6 +12,7 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
     _tileList = null;
     _multiselect = false;
     _lastSelectedIdx = null;
+    _largeIcon = false;
 
     /**
      * Constructs the tile picker input field.
@@ -24,13 +25,16 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         // check for multiselect option
         this._multiselect = element.dataset.multiselect === "true";
 
+        // check for large icon option
+        this._largeIcon = element.dataset.largeIcon === "true";
+
         this._hidden = this._createHiddenInput();
         if (name) {
             this._hidden.name = name;
         }
 
         // load tile data
-        this._tiles = this._parseTiles(element.querySelectorAll(".wx-tile-card"));;
+        this._tiles = this._parseTiles(element.querySelectorAll(".wx-tile-card"));
 
         // initialize value (single: string; multi: array)
         const value = element.dataset.value || null;
@@ -46,7 +50,12 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         }
         element.classList.add("wx-tile-picker");
 
-        // **Jetzt erst Value setzen, damit _tileList initialisiert ist!**
+        if (this._largeIcon) {
+            element.classList.add("wx-tile-picker-largeicon");
+        } else {
+            element.classList.remove("wx-tile-picker-largeicon");
+        }
+
         if (this._multiselect) {
             this._value = [];
             if (value) {
@@ -81,6 +90,35 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
             this._multiselect = next;
             // re-initialize value based on mode
             this._value = next ? [] : null;
+            this.render();
+        }
+    }
+
+    /**
+     * Indicates whether large‑icon mode is enabled.
+     * @returns {boolean} True if large icons are used.
+     */
+    get largeIcon() {
+        return this._largeIcon;
+    }
+
+    /**
+     * Enables or disables the large‑icon option.
+     * @param {boolean} val - True for large icons, false for the standard size.
+     */
+    set largeIcon(val) {
+        const next = !!val;
+        if (next !== this._largeIcon) {
+            this._largeIcon = next;
+
+            if (this._tileList && this._tileList.parentElement) {
+                if (this._largeIcon) {
+                    this._tileList.parentElement.classList.add("wx-tile-picker-largeicon");
+                } else {
+                    this._tileList.parentElement.classList.remove("wx-tile-picker-largeicon");
+                }
+            }
+
             this.render();
         }
     }
@@ -171,18 +209,26 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
             arr = arr.filter((id, i) => validIds.has(id) && arr.indexOf(id) === i);
             const prev = (this._value || []).join(";");
             const next = arr.join(";");
-            if (prev === next) return;
+            if (prev === next) {
+                return;
+            }
             this._value = arr;
-            if (this._hidden) this._hidden.value = arr.join(";");
+            if (this._hidden) {
+                this._hidden.value = arr.join(";");
+            }
             this.render();
             this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: arr.join(";") });
         } else {
             const id = typeof input === "string" ? input : (input && input.id) || "";
-            if (id === this._value) return;
+            if (id === this._value) {
+                return;
+            }
             const exist = this._tiles.find(t => t.id === id);
             if (exist) {
                 this._value = id;
-                if (this._hidden) this._hidden.value = id;
+                if (this._hidden) {
+                    this._hidden.value = id;
+                }
                 this.render();
                 this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: id });
             }
@@ -192,6 +238,7 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Constructs a tile card element with selection highlighting and event listeners.
      * Handles proper background class assignment for selection.
+     * Fügt große Icon-Option hinzu, falls aktiviert.
      * @param {Object} tile - The tile data.
      * @param {number} idx - The tile index in the list.
      * @returns {HTMLDivElement} The complete tile card element.
@@ -199,17 +246,27 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
     _createTileCard(tile, idx) {
         const card = document.createElement("div");
         card.className = "wx-tile-card";
-        if (tile.id) card.dataset.tileId = tile.id;
-        if (tile.class) card.classList.add(...tile.class.split(/\s+/).filter(Boolean));
-        if (tile.colorCss) card.classList.add(...tile.colorCss.split(/\s+/).filter(Boolean));
-        if (tile.colorStyle) card.style.cssText = tile.colorStyle;
+        if (tile.id) {
+            card.dataset.tileId = tile.id;
+        }
+        if (tile.class) {
+            card.classList.add(...tile.class.split(/\s+/).filter(Boolean));
+        }
+        if (tile.colorCss) {
+            card.classList.add(...tile.colorCss.split(/\s+/).filter(Boolean));
+        }
+        if (tile.colorStyle) {
+            card.style.cssText = tile.colorStyle;
+        }
         card.setAttribute("role", "group");
         card.tabIndex = 0;
 
         // remove all possible bg-* classes before (re-)applying selection
         const removeBackgroundClasses = () => {
             for (const cls of Array.from(card.classList)) {
-                if (/^bg-/.test(cls)) card.classList.remove(cls);
+                if (/^bg-/.test(cls)) {
+                    card.classList.remove(cls);
+                }
             }
         };
 
@@ -225,7 +282,9 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
             card.classList.add("bg-primary", "text-white");
         } else {
             removeBackgroundClasses();
-            if (tile.colorCss) card.classList.add(...tile.colorCss.split(/\s+/).filter(Boolean));
+            if (tile.colorCss) {
+                card.classList.add(...tile.colorCss.split(/\s+/).filter(Boolean));
+            }
             card.classList.remove("bg-primary", "text-white");
         }
 
@@ -236,12 +295,22 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
             if (tile.icon) {
                 const icon = document.createElement("i");
                 icon.className = tile.icon;
+
+                if (this._largeIcon) {
+                    icon.classList.add("wx-tile-icon-large");
+                }
+
                 header.appendChild(icon);
                 header.append(document.createTextNode(" "));
             }
             if (tile.image) {
                 const img = document.createElement("img");
                 img.className = "wx-icon";
+
+                if (this._largeIcon) {
+                    img.classList.add("wx-tile-icon-large");
+                }
+
                 img.src = tile.image;
                 img.alt = "";
                 header.appendChild(img);
@@ -253,7 +322,9 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         // add card body (main HTML content)
         const body = document.createElement("div");
         body.className = "card-body";
-        if (tile.html) body.innerHTML = tile.html;
+        if (tile.html) {
+            body.innerHTML = tile.html;
+        }
         card.appendChild(body);
 
         // handle click and keyboard selection (support for Ctrl and Shift)
@@ -263,8 +334,11 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
                 if (e.ctrlKey || e.metaKey) {
                     // toggle current tile
                     const pos = arr.indexOf(tile.id);
-                    if (pos === -1) arr.push(tile.id);
-                    else arr.splice(pos, 1);
+                    if (pos === -1) {
+                        arr.push(tile.id);
+                    } else {
+                        arr.splice(pos, 1);
+                    }
                     this._lastSelectedIdx = idx;
                 } else if (e.shiftKey && arr.length) {
                     // select range using last selection
@@ -292,8 +366,11 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
                 if (this._multiselect) {
                     let arr = Array.isArray(this._value) ? this._value.slice() : [];
                     const pos = arr.indexOf(tile.id);
-                    if (pos === -1) arr.push(tile.id);
-                    else arr.splice(pos, 1);
+                    if (pos === -1) {
+                        arr.push(tile.id);
+                    } else {
+                        arr.splice(pos, 1);
+                    }
                     this.value = arr;
                     this._dispatch(webexpress.webui.Event.CLICK_EVENT, { item: tile, selected: arr.includes(tile.id) });
                 } else {
@@ -313,8 +390,9 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
      * Rebuilds and replaces all child nodes.
      */
     render() {
-        while (this._tileList.firstChild)
+        while (this._tileList.firstChild) {
             this._tileList.removeChild(this._tileList.firstChild);
+        }
         this._tiles.forEach((tile, idx) => {
             this._tileList.appendChild(this._createTileCard(tile, idx));
         });
