@@ -2,7 +2,7 @@
 webexpress.webui.TableTemplates.register("date", (val, table, row, cell, name, opts) => {
     // ensure opts is an object to prevent runtime errors
     opts = opts || {};
-    
+
     if (!val) {
         return "";
     }
@@ -447,6 +447,49 @@ webexpress.webui.TableTemplates.register("editor", (val, table, row, cell, name,
     } else {
         // read-only
         container.innerHTML = val;
+    }
+
+    return container;
+});
+
+// Color renderer
+webexpress.webui.TableTemplates.register("color", (val, table, row, cell, name, opts) => {
+    opts = opts || {};
+
+    if ((val === null || val === undefined || val === "") && !opts.editable) {
+        return "";
+    }
+
+    const container = document.createElement("div");
+    const editable = opts.editable === true || opts.editable === "true";
+
+    if (editable) {
+        const editor = document.createElement("div");
+        editor.id = "wx_" + Math.random().toString(36).slice(2, 7);
+
+        // set name for form submission if available
+        if (name) {
+            editor.setAttribute("name", name);
+        }
+
+        const inputCtrl = new webexpress.webui.InputColorCtrl(editor);
+        inputCtrl.value = val;
+
+        editor._wx_controller = inputCtrl;
+        container.appendChild(editor);
+
+        if (row.id) {
+            container.dataset.objectId = row.id;
+        }
+        new webexpress.webui.SmartEditCtrl(container);
+    } else {
+        // read-only view
+        if (opts.tooltip) {
+            container.dataset.tooltip = opts.tooltip;
+        }
+
+        const ctrl = new webexpress.webui.ColorCtrl(container);
+        ctrl.value = val;
     }
 
     return container;

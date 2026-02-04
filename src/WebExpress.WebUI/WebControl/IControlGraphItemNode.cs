@@ -1,5 +1,6 @@
 ﻿using System.Drawing;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -9,6 +10,11 @@ namespace WebExpress.WebUI.WebControl
     /// </summary>
     public interface IControlGraphItemNode : IControlGraphItem
     {
+        /// <summary>
+        /// Returns the URI associated with the resource.
+        /// </summary>
+        IUri Uri { get; }
+
         /// <summary>
         /// Returns or sets an optional label for the node.
         /// </summary>

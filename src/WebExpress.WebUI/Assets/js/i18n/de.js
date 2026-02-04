@@ -63,5 +63,7 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "page.table.columns.desc": "Sichtbarkeit umschalten und Reihenfolge per Ziehen ändern.",
     "page.table.columns.search": "Suche Spalten…",
     "page.table.columns.drag": "Spalte ziehen",
-    "page.table.columns.default": "Spalte"   
+    "page.table.columns.default": "Spalte",
+
+    "color.custom": "Benutzerdefinierte Farbe"
 });

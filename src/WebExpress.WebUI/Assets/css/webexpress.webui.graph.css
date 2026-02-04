@@ -138,6 +138,15 @@
     pointer-events: none;
 }
 
+.wx-graph-node-link {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.wx-graph-node-link:hover {
+    opacity: 0.8;
+}
+
 /* Visible only when the corresponding transition is selected or edited */
 .wx-graph-waypoint {
     fill: #0b5ed7;

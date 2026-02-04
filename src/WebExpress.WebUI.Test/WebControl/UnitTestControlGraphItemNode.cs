@@ -1,4 +1,5 @@
 ﻿using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebIcon;
@@ -50,6 +51,30 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlGraphItemNode()
             {
                 Label = label
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the uri property of the graph node item.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-graph-node""></div>")]
+        [InlineData("/abc", @"<div class=""wx-graph-node"" data-uri=""/abc""></div>")]
+        public void Uri(string uri, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlGraphItemNode()
+            {
+                Uri = !string.IsNullOrEmpty(uri) ? new UriEndpoint(uri) : null
             };
 
             // act

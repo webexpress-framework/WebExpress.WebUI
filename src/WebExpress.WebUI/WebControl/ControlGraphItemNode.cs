@@ -2,6 +2,7 @@
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
@@ -22,6 +23,11 @@ namespace WebExpress.WebUI.WebControl
         /// Returns or sets an optional label for the node.
         /// </summary>
         public string Label { get; set; }
+
+        /// <summary>
+        /// Returns or sets the URI associated with the resource.
+        /// </summary>
+        public IUri Uri { get; set; }
 
         /// <summary>
         /// Returns or sets the coordinates of the point for the node.
@@ -71,6 +77,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = "wx-graph-node"
             }
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, Label))
+                .AddUserAttribute("data-uri", Uri?.ToString())
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
                 .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-x", Point.HasValue ? Point.Value.X.ToString() : null)

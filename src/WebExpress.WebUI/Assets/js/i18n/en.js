@@ -63,6 +63,7 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "page.table.columns.desc": "Toggle visibility and drag to reorder columns.",
     "page.table.columns.search": "Search columns…",
     "page.table.columns.drag": "Drag column",
-    "page.table.columns.default": "Column"
-    
+    "page.table.columns.default": "Column",
+
+    "color.custom": "Custom color"
 });

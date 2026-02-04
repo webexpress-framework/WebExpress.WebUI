@@ -65,6 +65,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("a", @"<a class=""btn"" title=""a"" data-bs-toggle=""tooltip""></a>")]
         [InlineData("b", @"<a class=""btn"" title=""b"" data-bs-toggle=""tooltip""></a>")]
         [InlineData("a<br/>b", @"<a class=""btn"" title=""a<br/>b"" data-bs-toggle=""tooltip""></a>")]
+        [InlineData("webexpress.WebUI:plugin.name", @"<a class=""btn"" title=""WebExpress.WebUI"" data-bs-toggle=""tooltip""></a>")]
         public void Tooltip(string tooltip, string expected)
         {
             // arrange

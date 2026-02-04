@@ -374,6 +374,11 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             const rating = new webexpress.webui.RatingCtrl(container);
             rating.value = value;
             return container;
+        } else if (ctrl instanceof webexpress.webui.InputColorCtrl) {
+            const container = document.createElement("div");
+            const color = new webexpress.webui.ColorCtrl(container);
+            color.value = value;
+            return container;
         } else if (ctrl instanceof webexpress.webui.EditorCtrl) {
             const span = document.createElement('span');
             span.innerHTML = value ?? '';

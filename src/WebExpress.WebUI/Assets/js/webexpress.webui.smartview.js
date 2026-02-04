@@ -95,7 +95,8 @@ webexpress.webui.SmartViewCtrl = class extends webexpress.webui.Ctrl {
                 ctrl instanceof webexpress.webui.SelectionCtrl ||
                 ctrl instanceof webexpress.webui.MoveCtrl ||
                 ctrl instanceof webexpress.webui.TagCtrl ||
-                ctrl instanceof webexpress.webui.EditorCtrl) {
+                ctrl instanceof webexpress.webui.EditorCtrl ||
+                ctrl instanceof webexpress.webui.ColorCtrl) {
                 ctrl.value = value;
             }
         } else if (this._view?.tagName === 'SELECT') {

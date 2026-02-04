@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(),
                 Role = Role,
                 Href = Modal is null ? Uri?.ToString() : null,
-                Title = Tooltip,
+                Title = I18N.Translate(renderContext, Tooltip),
                 OnClick = OnClick?.ToString()
             };
 

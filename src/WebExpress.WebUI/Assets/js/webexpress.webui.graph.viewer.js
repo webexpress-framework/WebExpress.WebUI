@@ -279,7 +279,8 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                     icon: typeof s.icon === "string" ? s.icon : "",
                     image: typeof s.image === "string" ? s.image : "",
                     shape: typeof s.shape === "string" ? s.shape.toLowerCase() : (typeof s.nodeShape === "string" ? s.nodeShape.toLowerCase() : ""),
-                    layout
+                    layout,
+                    uri: typeof s.uri === "string" ? s.uri : ""
                 };
             });
 
@@ -345,7 +346,8 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                 icon: el.dataset.icon || "",
                 image: el.dataset.image || "",
                 shape: (el.dataset.shape || el.dataset.nodeShape || "").toLowerCase(),
-                layout: (el.dataset.nodeStyle || this._nodeStyle || "").toLowerCase()
+                layout: (el.dataset.nodeStyle || this._nodeStyle || "").toLowerCase(),
+                uri: el.dataset.uri || ""
             };
         });
 
@@ -873,6 +875,11 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             if (n.data.foregroundColor) {
                 text.setAttribute("fill", n.data.foregroundColor);
             }
+            
+            // if uri is present, add underline style class
+            if (n.data.uri) {
+                text.classList.add("wx-graph-node-link");
+            }
 
             if (layout === "label-below") {
                 const centerX = n.x;
@@ -908,6 +915,13 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
 
             g.addEventListener("click", (e) => {
                 e.stopPropagation();
+                
+                // if ctrl + click and uri is present, open url
+                if (e.ctrlKey && n.data.uri) {
+                    window.open(n.data.uri, "_self");
+                    return;
+                }
+                
                 const detail = { id: n.id, data: n.data };
                 this._dispatch(webexpress.webui.Event.CLICK_EVENT, { detail, bubbles: true });
             });
@@ -915,6 +929,12 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             g.addEventListener("dblclick", (e) => {
                 e.stopPropagation();
                 const detail = { id: n.id, data: n.data };
+                
+                // if uri is present, navigate to it on double click
+                if (n.data.uri) {
+                    window.open(n.data.uri, "_self");
+                }
+                
                 this._dispatch(webexpress.webui.Event.DOUBLE_CLICK_EVENT, { detail, bubbles: true });
             });
 
@@ -931,6 +951,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                 n.fixed = true;
                 n.vx = 0;
                 n.vy = 0;
+                n._wasDragged = false;
                 this._drag = {
                     node: n,
                     offsetX: n.x - p.x,
@@ -979,6 +1000,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             this._drag.node.vy = 0;
 
             if (dx !== 0 || dy !== 0) {
+                this._drag.node._wasDragged = true;
                 this._model.edges.forEach(edge => {
                     const isSelfLoop = (edge.from === this._drag.node.id && edge.to === this._drag.node.id);
                     const isSource = (edge.from === this._drag.node.id);
@@ -1266,6 +1288,14 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             }
 
             text.className.baseVal = ["wx-graph-node-label", n.data.foregroundCss || ""].filter(Boolean).join(" ");
+            
+            // if uri is present, add link style
+            if (n.data.uri) {
+                text.classList.add("wx-graph-node-link");
+            } else {
+                text.classList.remove("wx-graph-node-link");
+            }
+
             if (n.data.foregroundColor) {
                 text.setAttribute("fill", n.data.foregroundColor);
             } else {
