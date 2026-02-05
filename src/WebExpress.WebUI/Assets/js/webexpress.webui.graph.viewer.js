@@ -1206,6 +1206,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             // determine the size actually used for centering logic
             const currentIconSize = n.data.image ? imgSize : iconBoxSize;
 
+            // Update shape position and size
             if (n.shape === "circle") {
                 shapeEl.setAttribute("cx", n.x);
                 shapeEl.setAttribute("cy", n.y);
@@ -1217,11 +1218,26 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                 shapeEl.setAttribute("height", rectH);
             }
 
+            // Handle visual hover highlights (for Editor/Interactive use)
+            if (g.classList.contains("wx-graph-node-hover")) {
+                shapeEl.classList.add("hover-highlight");
+            } else {
+                shapeEl.classList.remove("hover-highlight");
+            }
+
             const rectClasses = ["wx-graph-node-rect"];
             if (n.data.backgroundCss) {
                 rectClasses.push(n.data.backgroundCss);
             }
+            // preserve existing classes on the shape (like hover-highlight added above or via classList manipulation elsewhere)
+            const existingClasses = shapeEl.getAttribute("class") || "";
+            if (existingClasses.includes("hover-highlight")) {
+                rectClasses.push("hover-highlight");
+            }
+            
+            // reset base class but keep dynamic ones
             shapeEl.setAttribute("class", rectClasses.join(" "));
+            
             if (n.data.backgroundColor) {
                 shapeEl.setAttribute("fill", n.data.backgroundColor);
             } else {

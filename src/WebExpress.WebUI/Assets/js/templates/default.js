@@ -133,6 +133,7 @@ webexpress.webui.TableTemplates.register("selection", (val, table, row, cell, na
 
     const container = document.createElement("div");
     const editable = opts.editable === true || opts.editable === "true";
+    const multiselection = opts.multiselection || null;
     let options = [];
 
     if (opts.children && opts.children.length > 0) {
@@ -161,6 +162,7 @@ webexpress.webui.TableTemplates.register("selection", (val, table, row, cell, na
         editor.id = "wx_" + Math.random().toString(36).slice(2, 7);
         const inputCtrl = new webexpress.webui.InputSelectionCtrl(editor);
         inputCtrl.options = options;
+        inputCtrl.multiSelect = multiselection;
         inputCtrl.value = val;
         editor._wx_controller = inputCtrl;
         container.appendChild(editor);

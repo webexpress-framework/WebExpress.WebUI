@@ -391,6 +391,33 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
     }
 
     /**
+     * Gets whether multi-select mode is enabled.
+     * @returns {boolean} True if multiple values can be selected.
+     */
+    get multiSelect() {
+        return this._multiselect;
+    }
+
+    /**
+     * Sets whether multi-select mode is enabled.
+     * Adjusts the current value structure if needed.
+     * @param {boolean} enabled True to allow multiple selections.
+     */
+    set multiSelect(enabled) {
+        this._multiselect = Boolean(enabled);
+
+        // normalize current values depending on mode
+        if (this._multiselect === false) {
+            // collapse to a single value if multiple exist
+            if (Array.isArray(this._values) && this._values.length > 1) {
+                this._values = [this._values[0]];
+            }
+        }
+
+        this.render(); // optional UI refresh
+    }
+
+    /**
      * Gets the current value(s) of the selection.
      * @returns {Array} The currently selected values.
      */

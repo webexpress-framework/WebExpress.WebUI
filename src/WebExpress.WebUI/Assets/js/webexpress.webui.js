@@ -401,6 +401,40 @@ webexpress.webui.Syntax = new class {
 };
 
 /**
+ * Registry for editor plugins.
+ * Allows decoupling of functionality into separate files.
+ */
+webexpress.webui.EditorPlugins = new class {
+    constructor() {
+        /** @type {Array<object>} internal list of registered plugins */
+        this._plugins = [];
+    }
+
+    /**
+     * Registers a new editor plugin.
+     * @param {string} name - The unique name of the plugin.
+     * @param {object} definition - The plugin definition object containing init and toolbar factory methods.
+     * @returns {this} The registry instance.
+     */
+    register(name, definition) {
+        if (!name || !definition) return this;
+        this._plugins.push({ 
+            name: name, 
+            definition: definition 
+        });
+        return this;
+    }
+
+    /**
+     * Returns all registered plugins.
+     * @returns {Array<object>} List of plugin definitions.
+     */
+    getAll() {
+        return this._plugins.map((p) => { return p.definition; });
+    }
+};
+
+/**
  * Stores panel definitions by key, optionally scoped via a modalId property on the panel object.
  * A "panel definition" is a plain object that may contain metadata and render/onShow/onSubmit hooks.
  */

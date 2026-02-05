@@ -112,14 +112,18 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             const isForce = attr === "force";
             const isNever = attr === "never";
             const isHideOnly = attr === "hide";
-            const isDropdown = el.classList.contains("wx-dropdown");
+            // detect if it is a standard dropdown that can be converted to a submenu
+            const isDropdown = el.classList.contains("wx-dropdown") || el.classList.contains("dropdown");
+            // ignore custom toolpanels for submenu conversion, keep them as atomic blocks
+            const isCustom = el.classList.contains("wx-toolpanel") || el.classList.contains("wx-toolbar-custom");
 
             let menuStructure = null;
             let buttonContentNodes = [];
 
             el.removeAttribute("data-overflow");
 
-            if (isDropdown) {
+            // only parse inner menu structure if it is a standard dropdown and NOT a custom complex element
+            if (isDropdown && !isCustom) {
                 const dropdownMenu = el.querySelector(".dropdown-menu");
                 if (dropdownMenu) {
                     const allElements = Array.from(dropdownMenu.querySelectorAll(
@@ -135,7 +139,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
                         }
                     });
                 }
-                const dropdownButton = el.querySelector("button");
+                const dropdownButton = el.querySelector("button, .btn, .dropdown-toggle");
                 if (dropdownButton) {
                     buttonContentNodes = Array.from(dropdownButton.childNodes).map(function(n) { return n.cloneNode(true); });
                 }
@@ -237,7 +241,13 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             const inSubmenuPanel = !!self._element.querySelector(".wx-overflow-subpanel") &&
                 Array.from(self._element.querySelectorAll(".wx-overflow-subpanel")).some(function(p) { return p.contains(e.target); });
             const isMoreButton = self._moreButton.contains(e.target);
-            if (!inMainMenu && !inSubmenuPanel && !isMoreButton) {
+            
+            // check if click is inside a custom element that might be in overflow or main bar
+            // and has its own dropdown logic (prevent closing the main overflow menu if interacting with custom item internals)
+            const targetEl = e.target;
+            const isInsideCustom = targetEl.closest(".wx-toolpanel, .wx-toolbar-custom");
+            
+            if (!inMainMenu && !inSubmenuPanel && !isMoreButton && !isInsideCustom) {
                 self._closeAllSubmenus();
             }
         });
@@ -300,7 +310,9 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
         const selectors = [
             ".wx-overflow-menu-item > button:not([disabled])",
             ".wx-overflow-menu-item > a",
-            ".wx-overflow-submenu .btn"
+            ".wx-overflow-submenu .btn",
+            ".wx-overflow-menu-item input",
+            ".wx-overflow-menu-item select"
         ].join(",");
         return Array.from(this._menu.querySelectorAll(selectors)).filter(function(el) { return el.offsetParent !== null; });
     }
@@ -566,6 +578,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
      */
     _representInOverflow(item) {
         if (item.submenu) {
+            // submenu logic remains same logic as before
             const wrapper = document.createElement("div");
             wrapper.className = "wx-overflow-menu-item";
             wrapper.setAttribute("role", "none");
@@ -587,43 +600,55 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             button.setAttribute("aria-haspopup", "true");
             button.setAttribute("aria-expanded", "false");
             button.dataset.itemId = item.id;
-
+            
             const icon = document.createElement("i");
             icon.className = "fas fa-chevron-right";
             button.appendChild(icon);
 
-            label.addEventListener("click", (e) => {
-                e.stopPropagation();
-                this._openSubmenu(item, button);
-            });
-            button.addEventListener("click", (e) => {
-                e.stopPropagation();
-                this._openSubmenu(item, button);
-            });
-            button.addEventListener("keydown", (e) => {
-                if (e.key === "Enter" || e.key === " " || e.key === "ArrowRight") {
-                    e.preventDefault();
-                    this._openSubmenu(item, button, () => { this._focusFirstInSubmenu(item); });
-                } else if (e.key === "ArrowLeft" || e.key === "Escape") {
-                    if (button.getAttribute("aria-expanded") === "true") {
-                        e.preventDefault();
-                        this._closeSubmenu(item, button);
-                        button.focus();
-                    }
-                }
-            });
+            // event listeners for submenu
+             label.addEventListener("click", (e) => { e.stopPropagation(); this._openSubmenu(item, button); });
+            button.addEventListener("click", (e) => { e.stopPropagation(); this._openSubmenu(item, button); });
 
             triggerRow.appendChild(label);
             triggerRow.appendChild(button);
             wrapper.appendChild(triggerRow);
             this._insertOverflowOrdered(wrapper, item.index);
             item.inOverflowAsTrigger = true;
+            
         } else {
             const wrapper2 = document.createElement("div");
             wrapper2.className = "wx-overflow-menu-item";
             wrapper2.setAttribute("role", "none");
 
+            // check if the element needs a text label in overflow
+            const el = item.element;
+            const hasVisibleText = el.textContent && el.textContent.trim().length > 0;
+            const isIconOnly = el.querySelector("i, img, svg") && !hasVisibleText;
+            
+            // try to find a fallback text from attributes
+            let fallbackText = null;
+            if (isIconOnly || !hasVisibleText) {
+                fallbackText = el.getAttribute("title") || 
+                               el.getAttribute("aria-label") || 
+                               el.dataset.label || 
+                               el.dataset.originalTitle; // bootstrap tooltips sometimes move title here
+            }
+
+            // move the element
             wrapper2.appendChild(item.element);
+
+            if (fallbackText) {
+                // create a label specifically for the overflow view
+                const textSpan = document.createElement("span");
+                textSpan.className = "wx-overflow-fallback-label ms-2"; // add margin-start
+                textSpan.textContent = fallbackText;
+
+                wrapper2.appendChild(textSpan);
+                item.overflowLabelSpan = textSpan;
+                item.originalDisplay = item.element.style.display;
+                item.element.style.display = "inline-flex";
+            }
+
             this._insertOverflowOrdered(wrapper2, item.index);
         }
         this._moreButton.style.display = "inline-flex";
@@ -643,6 +668,21 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             this._closeSubmenu(item, null);
         } else {
             const parent = item.element.parentElement;
+            
+            // remove the fallback label span if we created one
+            if (item.overflowLabelSpan) {
+                if (item.overflowLabelSpan.parentElement === parent) {
+                    parent.removeChild(item.overflowLabelSpan);
+                }
+                item.overflowLabelSpan = null;
+            }
+            
+            // restore original display style
+            if (item.originalDisplay !== undefined) {
+                item.element.style.display = item.originalDisplay;
+                delete item.originalDisplay;
+            }
+
             if (parent && parent.classList.contains("wx-overflow-menu-item")) {
                 parent.parentElement && parent.parentElement.removeChild(parent);
             }
@@ -996,35 +1036,6 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             "[tabindex]:not([tabindex='-1'])"
         ].join(",");
         return Array.from(panel.querySelectorAll(selectors)).filter(el => el.offsetParent !== null);
-    }
-
-    /**
-     * Sets up resize handling with debounce.
-     */
-    _setupResizeHandling() {
-        function debounce(fn, delay) {
-            let t = null;
-            return function() {
-                const args = arguments;
-                if (t) {
-                    clearTimeout(t);
-                }
-                t = setTimeout(function() { fn.apply(null, args); }, delay);
-            };
-        }
-        const onResize = debounce(() => {
-            this.reflow();
-            if (this._submenuPopper) {
-                this._submenuPopper.update();
-            }
-        }, 80);
-
-        if (typeof ResizeObserver === "function") {
-            this._resizeObserver = new ResizeObserver(onResize);
-            this._resizeObserver.observe(this._element);
-        } else {
-            window.addEventListener("resize", onResize);
-        }
     }
 
     /**

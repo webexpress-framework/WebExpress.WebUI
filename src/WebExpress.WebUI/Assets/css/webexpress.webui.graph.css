@@ -147,6 +147,23 @@
     opacity: 0.8;
 }
 
+.wx-graph-node-hover rect, 
+.wx-graph-node-hover circle,
+.hover-highlight {
+    stroke: #28a745 !important; 
+    stroke-width: 3px !important;
+    stroke-dasharray: 6, 3; 
+    fill: rgba(40, 167, 69, 0.1); 
+    transition: all 0.1s ease;
+}
+
+.wx-graph-node-source rect, 
+.wx-graph-node-source circle {
+    stroke: #ffc107 !important;
+    stroke-width: 3px !important;
+    stroke-dasharray: 4, 2;
+}
+
 /* Visible only when the corresponding transition is selected or edited */
 .wx-graph-waypoint {
     fill: #0b5ed7;

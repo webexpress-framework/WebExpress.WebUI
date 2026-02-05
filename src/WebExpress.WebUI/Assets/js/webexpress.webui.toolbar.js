@@ -1,9 +1,7 @@
 /**
  * Controller for rendering and managing a responsive toolbar with overflow logic.
- * The toolbar supports different child types (buttons, separators, dropdowns, combos, labels, more menu).
- * Overflow handling is delegated to OverflowCtrl, which can be explicitly controlled to ensure that
- * button labels with icons are hidden individually before moving items into overflow,
- * and restored from overflow before showing labels again when space increases.
+ * The toolbar supports different child types (buttons, separators, dropdowns, combos, labels, custom items, modal triggers, more menu).
+ * Overflow handling is delegated to OverflowCtrl.
  */
 webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     _resizeObserver = null;
@@ -12,6 +10,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     _moreRaw = null;
     _more = null;
     _layoutFrame = null;
+    _modalInstances = {}; // cache for modal instances
 
     /**
      * Creates a new toolbar controller instance.
@@ -22,7 +21,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
         
         // parse toolbar items from dom
         this._parseItems(Array.from(element.querySelectorAll(
-            ".wx-toolbar-button, .wx-toolbar-separator, .wx-toolbar-dropdown, .wx-toolbar-combo, .wx-toolbar-label"
+            ".wx-toolbar-button, .wx-toolbar-separator, .wx-toolbar-dropdown, .wx-toolbar-combo, .wx-toolbar-label, .wx-toolbar-custom, .wx-toolbar-modal-btn"
         )));
         
         // parse more dropdown if available
@@ -83,6 +82,52 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             align: opts.align || "left",
             disabled: !!opts.disabled,
             active: !!opts.active,
+            overflow: opts.overflow || ""
+        });
+    }
+
+    /**
+     * Adds a custom item (generic wrapper) programmatically.
+     * @param {object} opts - { element, align, overflow }
+     */
+    addCustom(opts) {
+        let el = opts.element;
+        if (!el) {
+            console.error("ToolbarCtrl.addCustom: 'element' is required");
+            return;
+        }
+        // ensure wrapper class for styling
+        if (!el.classList.contains("wx-toolbar-custom")) {
+            const wrapper = document.createElement("div");
+            wrapper.className = "wx-toolbar-custom";
+            wrapper.appendChild(el);
+            el = wrapper;
+        }
+        
+        this.addItem({
+            type: "custom",
+            align: opts.align || "left",
+            overflow: opts.overflow || "",
+            element: el
+        });
+    }
+
+    /**
+     * Adds a modal trigger button programmatically.
+     * @param {object} opts - { id, label, icon, modalKey, modalTitle, align, disabled, colorCss }
+     */
+    addModalButton(opts) {
+        this.addItem({
+            type: "modal-button",
+            id: opts.id || null,
+            label: opts.label || null,
+            icon: opts.icon || null,
+            modalKey: opts.modalKey,
+            modalTitle: opts.modalTitle || "Dialog",
+            modalSubmitId: opts.modalSubmitId,
+            colorCss: opts.colorCss || null,
+            align: opts.align || "left",
+            disabled: !!opts.disabled,
             overflow: opts.overflow || ""
         });
     }
@@ -180,9 +225,21 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 el.id = item.id;
             }
             return el;
+        } else if (item.type === "modal-button") {
+            const el = document.createElement("button");
+            el.className = "wx-toolbar-modal-btn";
+            if (item.id) {
+                el.id = item.id;
+            }
+            return el;
         } else if (item.type === "combo") {
             const el = document.createElement("div");
             el.className = "wx-toolbar-combo";
+            return el;
+        } else if (item.type === "custom") {
+            // custom element should usually be provided via opts.element, but fallback here
+            const el = document.createElement("div");
+            el.className = "wx-toolbar-custom";
             return el;
         }
         // fallback generic
@@ -205,6 +262,28 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                     type: "separator",
                     align: align,
                     overflow: "hide",
+                    element: el
+                };
+            } else if (el.classList.contains("wx-toolbar-custom")) {
+                return {
+                    type: "custom",
+                    align: align,
+                    overflow: el.dataset.overflow || "",
+                    element: el
+                };
+            } else if (el.classList.contains("wx-toolbar-modal-btn")) {
+                return {
+                    type: "modal-button",
+                    id: el.id,
+                    label: el.dataset.label || el.textContent.trim() || null,
+                    icon: el.dataset.icon || null,
+                    modalKey: el.dataset.modalKey,
+                    modalTitle: el.dataset.modalTitle || "Dialog",
+                    modalSubmitId: el.dataset.modalSubmitId,
+                    colorCss: el.getAttribute("data-color-css") || null,
+                    align: align,
+                    disabled: disabled,
+                    overflow: el.dataset.overflow || "",
                     element: el
                 };
             } else if (el.classList.contains("wx-toolbar-combo")) {
@@ -354,6 +433,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
 
         // central click handler
         overflowRoot.addEventListener("click", (e) => {
+            // handle buttons, combos, dropdowns
             const item = e.target.closest(".wx-toolbar-button, .wx-toolbar-combo, .wx-toolbar-dropdown");
             if (item) {
                 // find corresponding data object if possible
@@ -430,6 +510,45 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             el.className = "wx-toolbar-separator";
             el.dataset.overflow = "hide";
             return el;
+        }
+        if (item.type === "custom") {
+            // custom item: preserve element, add wrapper class if needed
+            if (!item.element.classList.contains("wx-toolbar-custom")) {
+                item.element.classList.add("wx-toolbar-custom");
+            }
+            return item.element;
+        }
+        if (item.type === "modal-button") {
+            item.element.classList.add("btn", "wx-toolbar-modal-btn");
+            item.element.type = "button";
+            item.element.innerHTML = ""; // clear
+            
+            if (item.icon) {
+                const icon = document.createElement("i");
+                icon.className = item.icon;
+                item.element.appendChild(icon);
+            }
+            if (item.label) {
+                const span = document.createElement("span");
+                span.className = "wx-toolbar-button-label";
+                span.textContent = item.label;
+                item.element.appendChild(span);
+            }
+            if (item.colorCss) {
+                item.element.classList.add(item.colorCss);
+            }
+            
+            // attach specific listener for modal opening
+            item.element.addEventListener("click", (e) => {
+                e.preventDefault();
+                this._openModal(item.modalKey, item.modalTitle, item.modalSubmitId);
+            });
+            
+            // attributes for detection logic
+            item.element.dataset.hasIcon = item.icon ? "true" : "false";
+            item.element.dataset.labelHidden = "false";
+            
+            return item.element;
         }
         if (item.type === "button") {
             const instance = webexpress.webui.Controller.getInstanceByElement(item.element);
@@ -606,6 +725,63 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Creates and opens a ModalSidebarPanel for the given key.
+     * Reuses existing instances.
+     * @param {string} key - The registration key for DialogPanels.
+     * @param {string} title - Title for the modal.
+     * @param {string} submitId - ID for the submit button.
+     */
+    _openModal(key, title, submitId) {
+        if (!key) {
+            return;
+        }
+        
+        let modalInstance = this._modalInstances[key];
+        
+        if (!modalInstance) {
+            const id = "wx-toolbar-msp-" + key + "-" + Date.now();
+            const el = document.createElement("div");
+            el.id = id;
+            el.setAttribute("aria-labelledby", id + "-label");
+            el.setAttribute("aria-hidden", "true");
+            el.setAttribute("data-key", key);
+            if (submitId) {
+                el.setAttribute("data-submit-id", submitId);
+            }
+            el.setAttribute("data-validate-active-only", "true");
+
+            const submitBtnId = submitId || ("submit-" + id);
+            
+            el.innerHTML = [
+                '<div class="wx-modal-header">' + (title || "Dialog") + '</div>',
+                '<div class="wx-modal-footer">',
+                `<button id="' + submitBtnId + '" class="btn btn-primary">${this._i18n("webexpress.webui:apply")}</button>`,
+                '</div>'
+            ].join("");
+
+            const footer = el.querySelector(".wx-modal-footer");
+            const content = document.createElement("div");
+            content.className = "wx-modal-content";
+            
+            if (footer && footer.parentNode) {
+                footer.parentNode.insertBefore(content, footer);
+            } else {
+                el.appendChild(content);
+            }
+
+            document.body.appendChild(el);
+            
+            modalInstance = new webexpress.webui.ModalSidebarPanel(el);
+            modalInstance._toolbar = this; // link back reference
+            this._modalInstances[key] = modalInstance;
+        }
+        
+        if (modalInstance && typeof modalInstance.show === "function") {
+            modalInstance.show();
+        }
+    }
+
+    /**
      * Creates the More dropdown using DropdownCtrl with ... icon and all contained items as entries.
      * @returns {HTMLElement} Dropdown root element.
      */
@@ -701,7 +877,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
      * @returns {boolean}
      */
     _canHideLabel(buttonEl) {
-        if (!buttonEl || !buttonEl.classList.contains("wx-toolbar-button")) {
+        if (!buttonEl || !buttonEl.classList.contains("wx-toolbar-button") && !buttonEl.classList.contains("wx-toolbar-modal-btn")) {
             return false;
         }
         const labelSpan = this._findLabelSpan(buttonEl);
@@ -764,7 +940,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
      * @returns {HTMLElement|null}
      */
     _findNextLabelToHide(overflowRoot) {
-        const buttons = Array.from(overflowRoot.querySelectorAll(".wx-toolbar-button"));
+        const buttons = Array.from(overflowRoot.querySelectorAll(".wx-toolbar-button, .wx-toolbar-modal-btn"));
         for (let i = buttons.length - 1; i >= 0; i--) {
             const btn = buttons[i];
             if (this._canHideLabel(btn)) {
@@ -779,7 +955,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
      * @param {HTMLElement} overflowRoot
      */
     _showLabelsAsSpaceAllows(overflowRoot) {
-        const buttons = Array.from(overflowRoot.querySelectorAll(".wx-toolbar-button"));
+        const buttons = Array.from(overflowRoot.querySelectorAll(".wx-toolbar-button, .wx-toolbar-modal-btn"));
         for (let i = 0; i < buttons.length; i++) {
             const btn = buttons[i];
             const isHidden = btn.dataset.labelHidden === "true";
@@ -811,6 +987,17 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             cancelAnimationFrame(this._layoutFrame);
             this._layoutFrame = null;
         }
+        // cleanup created modals
+        Object.keys(this._modalInstances).forEach((key) => {
+            const modal = this._modalInstances[key];
+            // assume modal has destroy, if not, remove element
+            if (modal && typeof modal.destroy === "function") {
+                modal.destroy();
+            } else if (modal && modal._element && modal._element.parentNode) {
+                modal._element.parentNode.removeChild(modal._element);
+            }
+        });
+        this._modalInstances = {};
     }
 };
 
