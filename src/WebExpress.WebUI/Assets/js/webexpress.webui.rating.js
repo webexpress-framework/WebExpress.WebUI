@@ -79,6 +79,29 @@ webexpress.webui.RatingCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Get stars.
+     * @returns {number} Current star.
+     */
+    get stars() {
+        return this._total;
+    }
+
+    /**
+     * Set stars.
+     * @param { number | string | null | undefined } v New value.
+     */
+    set stars(v) {
+        this._total = this._normalizeValue(v);
+
+        // clamp current value to new total
+        if (this._value > this._total) {
+            this._value = this._total;
+        }
+
+        this._renderStars();
+    }
+
+    /**
      * Get value.
      * @returns {number} Current rating
      */
