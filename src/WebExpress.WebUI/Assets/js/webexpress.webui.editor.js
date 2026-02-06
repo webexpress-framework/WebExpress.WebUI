@@ -49,7 +49,8 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      * Attaches all necessary event handlers to the editor and toolbar.
      */
     _attachEventHandlers() {
-        const toolbar = this.element.querySelector(".wx-editor-toolbar");
+        // fix: use this._element instead of this.element
+        const toolbar = this._element.querySelector(".wx-editor-toolbar");
         if (toolbar) {
             toolbar.addEventListener("mousedown", () => {
                 this._saveCurrentSelection();
@@ -162,8 +163,9 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      * Updates the enabled/disabled state of undo and redo buttons.
      */
     _updateUndoRedoStates() {
-        const undoBtn = this.element.querySelector('button[data-command="undo"]');
-        const redoBtn = this.element.querySelector('button[data-command="redo"]');
+        // fix: use this._element instead of this.element
+        const undoBtn = this._element.querySelector('button[data-command="undo"]');
+        const redoBtn = this._element.querySelector('button[data-command="redo"]');
 
         if (undoBtn) {
             const canUndo = document.queryCommandEnabled("undo");
@@ -656,4 +658,5 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 };
 
+// register the class in the controller system
 webexpress.webui.Controller.registerClass("wx-webui-editor", webexpress.webui.EditorCtrl);

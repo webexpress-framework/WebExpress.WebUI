@@ -434,6 +434,88 @@ webexpress.webui.EditorPlugins = new class {
     }
 };
 
+/*
+ * Registry for editor add-ons.
+ * Manages the collection of available add-ons that can be inserted via the editor plugin.
+ */
+webexpress.webui.EditorAddOns = new class {
+    constructor() {
+        /** 
+         * @type {Array<object>} 
+         * @private 
+         * Internal list of registered add-on definitions.
+         */
+        this._addOns = [];
+    }
+
+    /**
+     * Registers a new add-on.
+     * @param {string} id - Unique identifier for the add-on.
+     * @param {object} definition - The add-on definition object.
+     * @param {string} definition.label - Display name used in the UI.
+     * @param {string} definition.icon - Icon CSS class (e.g., 'fas fa-star').
+     * @param {string} [definition.category] - Category group (e.g., 'Widgets', 'Layout'). Defaults to 'General'.
+     * @param {string} [definition.type] - Layout type: 'block' (default) or 'inline'.
+     * @param {boolean} [definition.isContainer] - If true, the body is editable (for nesting).
+     * @param {string} [definition.content] - Static HTML content (used if no renderer is provided).
+     * @param {string} [definition.description] - Optional description text shown in the picker.
+     * @param {Array<object>} [definition.properties] - Array of property definitions for the settings dialog.
+     * @param {Function} [definition.renderer] - Function(data) returning HTML string based on properties.
+     * @returns {this} The registry instance for chaining.
+     */
+    register(id, definition) {
+        if (!id || !definition) return this;
+
+        // ensure the ID is included in the definition object for downstream usage
+        definition.id = id;
+
+        this._addOns.push({ 
+            id: id, 
+            definition: definition 
+        });
+        return this;
+    }
+
+    /**
+     * Retrieves a specific add-on definition by ID.
+     * @param {string} id - The add-on ID.
+     * @returns {object|undefined} The add-on definition or undefined if not found.
+     */
+    get(id) {
+        const entry = this._addOns.find(item => item.id === id);
+        return entry ? entry.definition : undefined;
+    }
+
+    /**
+     * Returns all registered add-ons as an array.
+     * @returns {Array<object>} List of all add-on definitions.
+     */
+    getAll() {
+        return this._addOns.map((item) => { return item.definition; });
+    }
+
+    /**
+     * Unregisters an add-on.
+     * @param {string} id - The add-on ID to remove.
+     * @returns {boolean} True if removed, false otherwise.
+     */
+    unregister(id) {
+        const idx = this._addOns.findIndex(item => item.id === id);
+        if (idx !== -1) {
+            this._addOns.splice(idx, 1);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Clears all registered add-ons.
+     */
+    clear() {
+        this._addOns = [];
+    }
+};
+
 /**
  * Stores panel definitions by key, optionally scoped via a modalId property on the panel object.
  * A "panel definition" is a plain object that may contain metadata and render/onShow/onSubmit hooks.

@@ -53,6 +53,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    font-size: 0.8em;
 }
 
 .wx-editor-btn i {
@@ -213,4 +214,108 @@
 /* Delete Table */
 .wx-icon.delete-table::before {
   content: url('data:image/svg+xml;utf8,<svg width="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M 0 0 L 0 5 L 5 5 L 5 0 L 0 0 z M 6 0 L 6 5 L 8.7558594 5 L 11.962891 1.7929688 L 11.962891 0 L 6 0 z M 13 0 L 13 0.75585938 L 13.755859 0 L 13 0 z M 16.070312 0.92773438 C 15.814693 0.92773437 15.55915 1.0267877 15.363281 1.2226562 L 1.2226562 15.363281 C 0.83091909 15.755018 0.83091909 16.385607 1.2226562 16.777344 C 1.6143934 17.169081 2.2449816 17.169081 2.6367188 16.777344 L 16.777344 2.6367188 C 17.169081 2.2449816 17.169081 1.6143934 16.777344 1.2226562 C 16.581475 1.0267877 16.325932 0.92773438 16.070312 0.92773438 z M 18 4.2441406 L 17.244141 5 L 18 5 L 18 4.2441406 z M 6 5.9628906 L 6 7.7558594 L 7.7929688 5.9628906 L 6 5.9628906 z M 0 6 L 0 11.962891 L 1.7929688 11.962891 L 5 8.7558594 L 5 6 L 0 6 z M 16.207031 6.0371094 L 13 9.2441406 L 13 12 L 18 12 L 18 6.0371094 L 16.207031 6.0371094 z M 12 10.244141 L 10.244141 12 L 12 12 L 12 10.244141 z M 0 13 L 0 13.755859 L 0.75585938 13 L 0 13 z M 9.2441406 13 L 6.0371094 16.207031 L 6.0371094 18 L 12 18 L 12 13 L 9.2441406 13 z M 13 13 L 13 18 L 18 18 L 18 13 L 13 13 z M 5 17.244141 L 4.2441406 18 L 5 18 L 5 17.244141 z"/></svg>');
+}
+
+.wx-addon-frame {
+    cursor: default;
+}
+
+.wx-addon-header {
+    user-select: none;
+    cursor: grab;
+    background-color: #f8f9fa;
+}
+
+.wx-addon-header:active {
+    cursor: grabbing;
+}
+
+.wx-addon-body-container,
+.wx-addon-body-widget {
+    cursor: text;
+    user-select: text; 
+}
+
+.wx-addon-body-container {
+    cursor: text;
+}
+
+.wx-addon-body-widget {
+    cursor: default;
+}
+
+.wx-addon-inline-frame {
+    display: inline-block;
+    vertical-align: middle;
+    cursor: grab;
+    margin: 0 2px;
+}
+
+.wx-addon-inline-frame:active {
+    cursor: grabbing;
+}
+
+.wx-addon-drag-handle,
+.wx-addon-settings-btn {
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.wx-addon-drag-handle {
+    cursor: grab;
+    margin-right: 0.5rem;
+}
+
+.wx-addon-settings-btn {
+    cursor: pointer;
+    margin-left: 0.5rem;
+}
+
+.wx-addon-drag-handle:hover,
+.wx-addon-settings-btn:hover {
+    opacity: 1;
+}
+
+.wx-drop-marker {
+    display: inline-block;
+    width: 2px;
+    height: 1.2em;
+    background-color: #0d6efd;
+    vertical-align: middle;
+    position: relative;
+    margin: 0 -1px;
+    pointer-events: none;
+}
+
+.wx-drop-marker::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    width: 8px;
+    height: 2px;
+    background-color: #0d6efd;
+}
+
+.wx-drop-marker::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: -3px;
+    width: 8px;
+    height: 2px;
+    background-color: #0d6efd;
+}
+
+.wx-addon-modal {
+    z-index: 1055;
+}
+
+.wx-prop-modal {
+    z-index: 1060;
+}
+
+.wx-addon-tile-list {
+    max-height: 400px;
+    overflow-y: auto;
 }

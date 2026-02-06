@@ -1,9 +1,10 @@
 /**
- * Plugin for basic text formatting (bold, italic, colors, fonts).
+ * Plugin for basic text formatting.
+ * Provides toolbar controls for bold, italic, underline, fonts, colors, lists, 
+ * alignment, and block formatting options.
  */
 webexpress.webui.EditorPlugins.register("formatting", {
-    _lastColor: "#000000", // Stores the current active color
-
+    _lastColor: "#000000",
     _colors: [
         // basic colors
         "#000000", "#FF0000", "#008000", "#0000FF", "#FFFF00",
@@ -19,12 +20,22 @@ webexpress.webui.EditorPlugins.register("formatting", {
         "#483D8B", "#8B0000", "#9400D3", "#FF4500", "#DC143C"
     ],
 
+    /**
+     * Initializes the plugin.
+     * Sets up listeners to update button states based on cursor selection.
+     * @param {object} editor - The editor instance.
+     */
     init: function(editor) {
         document.addEventListener("selectionchange", () => { 
             this._updateButtonStates(editor); 
         });
     },
 
+    /**
+     * Creates the main toolbar for formatting controls.
+     * @param {object} editor - The editor instance.
+     * @returns {HTMLElement} The toolbar container.
+     */
     createToolbar: function(editor) {
         const toolbar = document.createElement("div");
         toolbar.classList.add("wx-editor-format-toolbar");
@@ -46,6 +57,11 @@ webexpress.webui.EditorPlugins.register("formatting", {
         return toolbar;
     },
 
+    /**
+     * Updates the active state of buttons based on current selection style.
+     * @param {object} editor - The editor instance.
+     * @private
+     */
     _updateButtonStates: function(editor) {
         const buttons = document.querySelectorAll(".wx-editor-btn");
         buttons.forEach((button) => {
@@ -54,12 +70,23 @@ webexpress.webui.EditorPlugins.register("formatting", {
         });
     },
 
+    /**
+     * Creates a visual separator element.
+     * @returns {HTMLElement} The separator element.
+     * @private
+     */
     _createSeparator: function() {
         const s = document.createElement("span");
         s.className = "wx-editor-separator";
         return s;
     },
 
+    /**
+     * Creates the block format dropdown (Paragraph, Heading 1-3, etc.).
+     * @param {object} editor - The editor instance.
+     * @returns {HTMLElement} The dropdown button group.
+     * @private
+     */
     _createFormatDropdown: function(editor) {
         const container = document.createElement("div");
         container.className = "wx-editor-btn-group";
@@ -98,6 +125,12 @@ webexpress.webui.EditorPlugins.register("formatting", {
         return container;
     },
 
+    /**
+     * Creates basic formatting buttons (Bold, Italic, Underline).
+     * @param {object} editor - The editor instance.
+     * @returns {DocumentFragment} Fragment containing the buttons.
+     * @private
+     */
     _createBasicButtons: function(editor) {
         const frag = document.createDocumentFragment();
         const defs = [
@@ -105,10 +138,18 @@ webexpress.webui.EditorPlugins.register("formatting", {
             { cmd: "italic", icon: "fas fa-italic", tip: "Italic" },
             { cmd: "underline", icon: "fas fa-underline", tip: "Underline" }
         ];
-        defs.forEach((d) => { frag.appendChild(this._createBtn(editor, d)); });
+        defs.forEach((d) => { 
+            frag.appendChild(this._createBtn(editor, d)); 
+        });
         return frag;
     },
 
+    /**
+     * Creates the extended style dropdown (Strikethrough, Sub/Superscript, Clear Format).
+     * @param {object} editor - The editor instance.
+     * @returns {HTMLElement} The dropdown group.
+     * @private
+     */
     _createStyleDropdown: function(editor) {
         const container = document.createElement("div");
         container.className = "wx-editor-btn-group";
@@ -123,28 +164,46 @@ webexpress.webui.EditorPlugins.register("formatting", {
         const opts = [
             { cmd: "strikethrough", icon: "fas fa-strikethrough", lbl: "Strike" },
             { cmd: "superscript", icon: "fas fa-superscript", lbl: "Super" },
-            { cmd: "subscript", icon: "fas fa-subscript", lbl: "Sub" }
+            { cmd: "subscript", icon: "fas fa-subscript", lbl: "Sub" },
+            { separator: true },
+            { cmd: "removeFormat", icon: "fas fa-eraser", lbl: "Clear Format" }
         ];
+
         opts.forEach((o) => {
-            const li = document.createElement("li");
-            const b = document.createElement("button");
-            b.className = "dropdown-item";
-            b.innerHTML = `<i class="${o.icon}"></i> ${o.lbl}`;
-            b.addEventListener("click", () => { editor.execCommand(o.cmd); });
-            li.appendChild(b);
-            menu.appendChild(li);
+            if (o.separator) {
+                const sep = document.createElement("div");
+                sep.className = "dropdown-divider";
+                menu.appendChild(sep);
+            } else {
+                const li = document.createElement("li");
+                const b = document.createElement("button");
+                b.className = "dropdown-item";
+                b.innerHTML = `<i class="${o.icon}"></i> ${o.lbl}`;
+                b.addEventListener("click", () => { 
+                    editor.execCommand(o.cmd); 
+                });
+                li.appendChild(b);
+                menu.appendChild(li);
+            }
         });
         container.appendChild(btn);
         container.appendChild(menu);
         return container;
     },
 
+    /**
+     * Creates the color picker split-button.
+     * Left side applies last color, right side opens selection dropdown.
+     * @param {object} editor - The editor instance.
+     * @returns {HTMLElement} The button group.
+     * @private
+     */
     _createColorDropdown: function(editor) {
         const container = document.createElement("div");
         container.className = "wx-editor-btn-group";
         container.style.gap = "0"; 
 
-        // 1. Action Button (Apply current color)
+        // 1. action button (apply current color)
         const actionBtn = document.createElement("button");
         actionBtn.className = "wx-editor-btn";
         actionBtn.type = "button";
@@ -160,7 +219,7 @@ webexpress.webui.EditorPlugins.register("formatting", {
             editor.execCommand("foreColor", this._lastColor);
         });
 
-        // 2. Dropdown Toggle Button (Select new color)
+        // 2. dropdown toggle button (select new color)
         const toggleBtn = document.createElement("button");
         toggleBtn.className = "wx-editor-btn dropdown-toggle dropdown-toggle-split";
         toggleBtn.type = "button";
@@ -186,6 +245,7 @@ webexpress.webui.EditorPlugins.register("formatting", {
             picker.appendChild(li);
         });
 
+        // custom color picker option
         const customLi = document.createElement("li");
         const customLabel = document.createElement("label");
         customLabel.className = "dropdown-item p-0 d-flex align-items-center justify-content-center";
@@ -223,24 +283,46 @@ webexpress.webui.EditorPlugins.register("formatting", {
         return container;
     },
 
+    /**
+     * Creates list buttons (ordered/unordered).
+     * @param {object} editor - The editor instance.
+     * @returns {DocumentFragment} Fragment containing buttons.
+     * @private
+     */
     _createListButtons: function(editor) {
         const frag = document.createDocumentFragment();
         [
             { cmd: "insertUnorderedList", icon: "fas fa-list-ul", tip: "Bullet" },
             { cmd: "insertOrderedList", icon: "fas fa-list-ol", tip: "Number" }
-        ].forEach((d) => { frag.appendChild(this._createBtn(editor, d)); });
+        ].forEach((d) => { 
+            frag.appendChild(this._createBtn(editor, d)); 
+        });
         return frag;
     },
 
+    /**
+     * Creates indentation buttons.
+     * @param {object} editor - The editor instance.
+     * @returns {DocumentFragment} Fragment containing buttons.
+     * @private
+     */
     _createIndentButtons: function(editor) {
         const frag = document.createDocumentFragment();
         [
             { cmd: "outdent", icon: "fas fa-outdent", tip: "Less" },
             { cmd: "indent", icon: "fas fa-indent", tip: "More" }
-        ].forEach((d) => { frag.appendChild(this._createBtn(editor, d)); });
+        ].forEach((d) => { 
+            frag.appendChild(this._createBtn(editor, d)); 
+        });
         return frag;
     },
 
+    /**
+     * Creates alignment buttons (left, center, right, justify).
+     * @param {object} editor - The editor instance.
+     * @returns {DocumentFragment} Fragment containing buttons.
+     * @private
+     */
     _createAlignButtons: function(editor) {
         const frag = document.createDocumentFragment();
         [
@@ -248,10 +330,19 @@ webexpress.webui.EditorPlugins.register("formatting", {
             { cmd: "justifyCenter", icon: "fas fa-align-center", tip: "Center" },
             { cmd: "justifyRight", icon: "fas fa-align-right", tip: "Right" },
             { cmd: "justifyFull", icon: "fas fa-align-justify", tip: "Justify" }
-        ].forEach((d) => { frag.appendChild(this._createBtn(editor, d)); });
+        ].forEach((d) => { 
+            frag.appendChild(this._createBtn(editor, d)); 
+        });
         return frag;
     },
 
+    /**
+     * Helper factory to create a standard command button.
+     * @param {object} editor - The editor instance.
+     * @param {object} def - Button definition (cmd, icon, tip).
+     * @returns {HTMLElement} The button element.
+     * @private
+     */
     _createBtn: function(editor, def) {
         const btn = document.createElement("button");
         btn.className = "wx-editor-btn";

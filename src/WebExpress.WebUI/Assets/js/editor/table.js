@@ -1,12 +1,12 @@
 /**
  * Plugin for table operations.
- * Implements getContextMenuItems to provide table-specific actions including background color dropdown.
+ * Wraps tables in frames for consistent handling and provides table-specific actions
+ * and enhanced navigation (Tab key).
  */
 webexpress.webui.EditorPlugins.register("table", {
     _tableToolbar: null,
     _tableToolbarShownOnce: false,
-    _lastCellColor: "#FFFF00", 
-
+    _lastCellColor: "#FFFF00",
     _colors: [
         "#000000", "#FF0000", "#008000", "#0000FF", "#FFFF00",
         "#FFA500", "#800080", "#A52A2A", "#00FFFF", "#808080",
@@ -19,6 +19,11 @@ webexpress.webui.EditorPlugins.register("table", {
         "#FFFFFF"
     ],
 
+    /**
+     * Plugin initialization hook.
+     * registers table navigation and monitors selection changes to toggle context toolbar.
+     * @param {object} editor - editor instance
+     */
     init: function(editor) {
         this._enableTabNav(editor);
         document.addEventListener("selectionchange", () => {
@@ -40,6 +45,108 @@ webexpress.webui.EditorPlugins.register("table", {
         });
     },
 
+    /**
+     * Enables Tab / Shift+Tab navigation inside tables.
+     * Tab moves forward and inserts a new row at the end of the table when necessary.
+     * Shift+Tab moves backward without inserting rows.
+     * @param {object} editor - editor instance
+     */
+    _enableTabNav: function(editor) {
+        editor.getEditorElement().addEventListener("keydown", (e) => {
+            if (e.key === "Tab") {
+                const sel = window.getSelection();
+                if (!sel.rangeCount) return;
+                
+                let cell = sel.anchorNode;
+                if (cell.nodeType !== Node.ELEMENT_NODE) cell = cell.parentElement;
+                cell = cell.closest("td,th");
+                
+                if (cell) {
+                    const row = cell.parentElement;
+                    const table = row.closest("table");
+                    
+                    e.preventDefault(); // prevent default tab behavior (blur or inserting tab char)
+
+                    if (e.shiftKey) {
+                        // move to previous sibling cell or last cell of previous row
+                        let prev = cell.previousElementSibling;
+                        if (prev) {
+                            this._focusCell(prev);
+                        } else {
+                            // start of row, move to last cell of previous row
+                            let prevRow = row.previousElementSibling;
+                            // skip thead if currently in tbody
+                            if (!prevRow && row.parentElement.nodeName === 'TBODY') {
+                                const thead = table.tHead;
+                                if (thead && thead.rows.length > 0) {
+                                    prevRow = thead.rows[thead.rows.length - 1];
+                                }
+                            }
+
+                            if (prevRow) {
+                                const lastCell = prevRow.cells[prevRow.cells.length - 1];
+                                this._focusCell(lastCell);
+                            }
+                        }
+                    } else {
+                        // move to next sibling cell or first cell of next row
+                        let next = cell.nextElementSibling;
+                        if (next) {
+                            this._focusCell(next);
+                        } else {
+                            // end of row, move to first cell of next row
+                            let nextRow = row.nextElementSibling;
+                            
+                            // if currently in THEAD, jump to TBODY first row if available
+                            if (!nextRow && row.parentElement.nodeName === 'THEAD') {
+                                if (table.tBodies.length > 0 && table.tBodies[0].rows.length > 0) {
+                                    nextRow = table.tBodies[0].rows[0];
+                                }
+                            }
+
+                            if (nextRow) {
+                                const firstCell = nextRow.cells[0];
+                                this._focusCell(firstCell);
+                            } else {
+                                // end of table: insert new row at tbody end when appropriate
+                                if (row.parentElement.nodeName === 'TBODY' || !table.tHead) {
+                                    const cols = row.cells.length;
+                                    const newRow = table.insertRow(); // defaults to end of tbody
+                                    for (let i = 0; i < cols; i++) {
+                                        newRow.insertCell(i).innerHTML = "<br>";
+                                    }
+                                    this._focusCell(newRow.cells[0]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    },
+
+    /**
+     * Sets caret inside a specific cell at the start.
+     * @param {HTMLElement} cell - target cell element (td or th)
+     * @private
+     */
+    _focusCell: function(cell) {
+        if (!cell) return;
+        const range = document.createRange();
+        range.selectNodeContents(cell);
+        range.collapse(true); // collapse to start
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    },
+
+    /**
+     * Returns context menu items for table cell actions.
+     * Includes color submenu with predefined palette and custom picker.
+     * @param {object} editor - editor instance
+     * @param {HTMLElement} target - the element that triggered the context menu
+     * @returns {Array<object>} context menu descriptor array
+     */
     getContextMenuItems: function(editor, target) {
         const cell = target.closest("td, th");
         if (!cell || !editor.getEditorElement().contains(cell)) {
@@ -53,7 +160,6 @@ webexpress.webui.EditorPlugins.register("table", {
         sel.removeAllRanges();
         sel.addRange(range);
 
-        // Generate color items for submenu
         const colorItems = this._colors.map(c => ({
             type: 'color',
             value: c,
@@ -63,8 +169,6 @@ webexpress.webui.EditorPlugins.register("table", {
             }
         }));
 
-        // Add custom picker item to submenu
-        // We create a custom DOM element that mimics the grid item but contains the input
         const customLi = document.createElement("li");
         customLi.style.display = "inline-block";
         const customLabel = document.createElement("label");
@@ -107,7 +211,7 @@ webexpress.webui.EditorPlugins.register("table", {
                 label: "Cell Background", 
                 icon: "wx-icon cell-background",
                 submenu: colorItems,
-                submenuClass: "wx-editor-color-picker" // Forces grid layout
+                submenuClass: "wx-editor-color-picker"
             },
             { separator: true },
             { label: "Delete Row", action: () => this._modifyTable(editor, "deleteRow"), icon: "wx-icon delete-row" },
@@ -116,6 +220,11 @@ webexpress.webui.EditorPlugins.register("table", {
         ];
     },
 
+    /**
+     * Creates toolbar fragment containing table insertion controls.
+     * @param {object} editor - editor instance
+     * @returns {DocumentFragment} toolbar fragment
+     */
     createToolbar: function(editor) {
         const frag = document.createDocumentFragment();
         const sep = document.createElement("span");
@@ -127,8 +236,12 @@ webexpress.webui.EditorPlugins.register("table", {
         return frag;
     },
 
+    /**
+     * Creates the insert table dropdown with an interactive grid to pick dimensions.
+     * @param {object} editor - editor instance
+     * @returns {HTMLElement} insert button group
+     */
     _createInsertButton: function(editor) {
-        // ... (unchanged insert button logic) ...
         const container = document.createElement("div");
         container.className = "wx-editor-btn-group";
         const button = document.createElement("button");
@@ -190,6 +303,7 @@ webexpress.webui.EditorPlugins.register("table", {
                     matrix[r][c] = cell;
                     
                     cell.addEventListener("mouseenter", () => {
+                        // update selection matrix and display
                         selectedRows = r + 1;
                         selectedCols = c + 1;
                         highlightCells(selectedRows, selectedCols, rows, cols);
@@ -204,6 +318,7 @@ webexpress.webui.EditorPlugins.register("table", {
                     });
                     
                     cell.addEventListener("click", (e) => {
+                        // insert table with chosen dimensions
                         this._insertTable(editor, selectedRows, selectedCols);
                         if (menu.classList.contains("show")) menu.classList.remove("show");
                         resetGrid();
@@ -235,19 +350,56 @@ webexpress.webui.EditorPlugins.register("table", {
         return container;
     },
 
+    /**
+     * Inserts an HTML table wrapped in a draggable frame.
+     * The table body is editable to allow inline editing and navigation.
+     * @param {object} editor - editor instance
+     * @param {number} rows - number of rows
+     * @param {number} cols - number of columns
+     */
     _insertTable: function(editor, rows, cols) {
-        let html = "<table class='wx-editor-table' border='1'><thead><tr>";
-        for (let c = 0; c < cols; c++) html += "<th><br></th>";
-        html += "</tr></thead><tbody>";
+        let tableHtml = "<table class='wx-editor-table' border='1' style='width:100%;'><thead><tr>";
+        for (let c = 0; c < cols; c++) tableHtml += "<th><br></th>";
+        tableHtml += "</tr></thead><tbody>";
         for (let r = 1; r < rows; r++) {
-            html += "<tr>";
-            for (let c = 0; c < cols; c++) html += "<td><br></td>";
-            html += "</tr>";
+            tableHtml += "<tr>";
+            for (let c = 0; c < cols; c++) tableHtml += "<td><br></td>";
+            tableHtml += "</tr>";
         }
-        html += "</tbody></table>";
-        editor.insertHtmlAtCursor(html);
+        tableHtml += "</tbody></table>";
+
+        const uniqueId = "table-" + Date.now();
+        const dragHandle = `<span class="wx-addon-drag-handle"><i class="fas fa-grip-vertical"></i></span>`;
+
+        const frameHtml = `
+            <div class="wx-addon-frame card my-3 shadow-sm" 
+                 contenteditable="false" 
+                 draggable="true"
+                 data-addon-id="${uniqueId}"
+                 data-type="table">
+                
+                <div class="card-header wx-addon-header py-1 px-2 d-flex justify-content-between align-items-center">
+                    <div class="small text-muted fw-bold d-flex align-items-center">
+                        ${dragHandle}
+                        <i class="fas fa-table me-2"></i> 
+                        <span>Table</span>
+                    </div>
+                </div>
+                
+                <div class="card-body p-2 wx-addon-body-container" 
+                     contenteditable="true">
+                    ${tableHtml}
+                </div>
+            </div><p><br></p>`;
+
+        editor.insertHtmlAtCursor(frameHtml);
     },
 
+    /**
+     * Creates context toolbar with table actions.
+     * @param {object} editor - editor instance
+     * @returns {HTMLElement} toolbar element
+     */
     _createContextToolbar: function(editor) {
         const tb = document.createElement("div");
         tb.className = "wx-editor-table-toolbar";
@@ -283,6 +435,12 @@ webexpress.webui.EditorPlugins.register("table", {
         return tb;
     },
     
+    /**
+     * Creates the cell background control with preset colors and a custom picker.
+     * @param {object} editor - editor instance
+     * @param {string} iconClass - icon class for the action button
+     * @returns {HTMLElement} button group element
+     */
     _createCellBackgroundButton: function(editor, iconClass) {
         const group = document.createElement("div");
         group.className = "wx-editor-btn-group";
@@ -357,6 +515,11 @@ webexpress.webui.EditorPlugins.register("table", {
         return group;
     },
 
+    /**
+     * Detects whether the current selection is inside a table.
+     * @param {object} editor - editor instance
+     * @returns {boolean} true if selection is inside a table
+     */
     _detectTableSelection: function(editor) {
         const sel = window.getSelection();
         if (!sel.rangeCount) return false;
@@ -365,6 +528,12 @@ webexpress.webui.EditorPlugins.register("table", {
         return editor.getEditorElement().contains(node) && node.closest("table");
     },
     
+    /**
+     * Sets the background color of the current cell selection.
+     * uses editor.restoreSavedRange to ensure the selection is available.
+     * @param {object} editor - editor instance
+     * @param {string} color - css color string
+     */
     _setCellBackground: function(editor, color) {
         editor.restoreSavedRange();
         const sel = window.getSelection();
@@ -375,6 +544,12 @@ webexpress.webui.EditorPlugins.register("table", {
         if (cell) cell.style.backgroundColor = color;
     },
 
+    /**
+     * Performs table modification actions such as insert/delete rows/columns, merge/split cells.
+     * Actions operate on the cell containing the current selection.
+     * @param {object} editor - editor instance
+     * @param {string} action - action identifier
+     */
     _modifyTable: function(editor, action) {
         const sel = window.getSelection();
         if (!sel.rangeCount) return;
@@ -385,35 +560,40 @@ webexpress.webui.EditorPlugins.register("table", {
         
         const row = cell.parentElement;
         const table = cell.closest("table");
+        const frame = table.closest('.wx-addon-frame');
 
         if (action === "deleteRow") {
             row.remove();
-            if (table.rows.length === 0) table.remove();
+            if (table.rows.length === 0) {
+                if (frame) frame.remove(); else table.remove();
+            }
         } else if (action === "deleteColumn") {
             const idx = cell.cellIndex;
             for (let r = 0; r < table.rows.length; r++) {
                 if (table.rows[r].cells[idx]) table.rows[r].deleteCell(idx);
             }
-            if (table.rows[0] && table.rows[0].cells.length === 0) table.remove();
+            if (table.rows[0] && table.rows[0].cells.length === 0) {
+                if (frame) frame.remove(); else table.remove();
+            }
         } else if (action === "insertRowAbove") {
             const newRow = table.insertRow(row.rowIndex);
-            for(let i = 0; i < row.cells.length; i++) newRow.insertCell(i).innerHTML = "<br>";
+            for (let i = 0; i < row.cells.length; i++) newRow.insertCell(i).innerHTML = "<br>";
         } else if (action === "insertRowBelow") {
             const newRow = table.insertRow(row.rowIndex + 1);
-            for(let i = 0; i < row.cells.length; i++) newRow.insertCell(i).innerHTML = "<br>";
+            for (let i = 0; i < row.cells.length; i++) newRow.insertCell(i).innerHTML = "<br>";
         } else if (action === "insertColumnLeft") {
             const idx = cell.cellIndex;
-            for(let r = 0; r < table.rows.length; r++) table.rows[r].insertCell(idx).innerHTML = "<br>";
+            for (let r = 0; r < table.rows.length; r++) table.rows[r].insertCell(idx).innerHTML = "<br>";
         } else if (action === "insertColumnRight") {
             const idx = cell.cellIndex + 1;
-            for(let r = 0; r < table.rows.length; r++) table.rows[r].insertCell(idx).innerHTML = "<br>";
+            for (let r = 0; r < table.rows.length; r++) table.rows[r].insertCell(idx).innerHTML = "<br>";
         } else if (action === "deleteTable") {
-            table.remove();
+            if (frame) frame.remove(); else table.remove();
         } else if (action === "mergeCells") {
             const next = cell.nextElementSibling;
             if (next) {
                 const content = next.innerHTML;
-                const colspan = (parseInt(cell.getAttribute("colspan")||1)) + (parseInt(next.getAttribute("colspan")||1));
+                const colspan = (parseInt(cell.getAttribute("colspan") || 1)) + (parseInt(next.getAttribute("colspan") || 1));
                 cell.innerHTML += " " + content;
                 cell.setAttribute("colspan", colspan);
                 next.remove();
@@ -422,34 +602,11 @@ webexpress.webui.EditorPlugins.register("table", {
             const colspan = parseInt(cell.getAttribute("colspan") || 1);
             if (colspan > 1) {
                 cell.setAttribute("colspan", 1);
-                for(let i=1; i<colspan; i++) {
+                for (let i = 1; i < colspan; i++) {
                     const c = row.insertCell(cell.cellIndex + 1);
                     c.innerHTML = "<br>";
                 }
             }
         }
-    },
-
-    _enableTabNav: function(editor) {
-        editor.getEditorElement().addEventListener("keydown", (e) => {
-            if (e.key === "Tab") {
-                const sel = window.getSelection();
-                if (!sel.rangeCount) return;
-                let cell = sel.anchorNode;
-                if (cell.nodeType !== Node.ELEMENT_NODE) cell = cell.parentElement;
-                cell = cell.closest("td,th");
-                if (cell) {
-                    e.preventDefault();
-                    const next = cell.nextElementSibling;
-                    if (next) {
-                         const r = document.createRange();
-                         r.selectNodeContents(next);
-                         r.collapse(true);
-                         sel.removeAllRanges();
-                         sel.addRange(r);
-                    }
-                }
-            }
-        });
     }
 });

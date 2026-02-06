@@ -30,6 +30,9 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
         // prepare toolbar dom
         element.innerHTML = "";
         element.classList.add("wx-toolbar");
+        element.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+        });
         
         // render toolbar
         this._renderToolbar();
