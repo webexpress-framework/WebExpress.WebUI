@@ -252,6 +252,24 @@ webexpress.webui.Controller = new class {
         }
         return null;
     }
+
+    /**
+     * Retrieves the closest instance by traversing up the DOM tree from the given element.
+     * @param {HTMLElement} element - The starting DOM element.
+     * @param {Function} [ClassConstructor] - (Optional) The constructor of the expected class instance.
+     * @returns {Object|null} - The closest instance found, or null if none exists.
+     */
+    getClosestInstance(element, ClassConstructor) {
+        let current = element;
+        while (current) {
+            const instance = this.getInstanceByElement(current, ClassConstructor);
+            if (instance) {
+                return instance;
+            }
+            current = current.parentElement;
+        }
+        return null;
+    }
 }
 
 /**

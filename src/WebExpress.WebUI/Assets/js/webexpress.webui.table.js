@@ -224,7 +224,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 const newCells = new Array(normalized.length);
                 for (let i = 0; i < normalized.length; i++) {
                     const oldIdx = prevIndexMap.get(normalized[i].id);
-                    newCells[i] = (oldIdx != null && row.cells[oldIdx]) ? row.cells[oldIdx] : { text: "" };
+                    newCells[i] = (oldIdx != null && row.cells[oldIdx]) ? row.cells[oldIdx] : { content: "" };
                 }
                 row.cells = newCells;
                 if (row.children) {
@@ -241,7 +241,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                     r.cells.length = normalized.length;
                 }
                 while (r.cells.length < normalized.length) {
-                    r.cells.push({ text: "" });
+                    r.cells.push({ content: "" });
                 }
                 if (r.children) {
                     r.children.forEach(resizeRow);
@@ -264,7 +264,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     insertRow(rowData, parentId = null, index = null) {
         const buildRow = (data) => {
             if (Array.isArray(data)) {
-                return { id: null, cells: data.map((v) => { return { text: String(v ?? "") }; }), children: [], parent: null, expanded: true, options: null };
+                return { id: null, cells: data.map((v) => { return { content: String(v ?? "") }; }), children: [], parent: null, expanded: true, options: null };
             }
             return {
                 id: data.id || null,
@@ -275,7 +275,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 icon: data.icon || null,
                 uri: data.uri || data.url || null,
                 target: data.target || null,
-                cells: Array.isArray(data.cells) ? data.cells.map((c) => { return (c && typeof c === "object" ? c : { text: String(c ?? "") }); }) : [],
+                cells: Array.isArray(data.cells) ? data.cells.map((c) => { return (c && typeof c === "object" ? c : { content: String(c ?? "") }); }) : [],
                 options: Array.isArray(data.options) ? data.options : null,
                 children: [],
                 parent: null,
@@ -285,7 +285,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
         const row = buildRow(rowData);
         while (row.cells.length < this._columns.length) {
-            row.cells.push({ text: "" });
+            row.cells.push({ content: "" });
         }
 
         let siblings = this._rows;
@@ -592,13 +592,13 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             try {
                 const opts = Object.assign({}, tmpl.options, colDef.rendererOptions || {});
                 // call with correct signature: (val, table, row, cell, name, opts)
-                return tmpl.fn(cell?.text, this, row, cell, colDef.name || colDef.id, opts);
+                return tmpl.fn(cell?.content, this, row, cell, colDef.name || colDef.id, opts);
             } catch (e) {
                 console.error("renderer error", e);
                 return "Error";
             }
         }
-        return cell?.text ?? "";
+        return cell?.content ?? "";
     }
 
     /**
@@ -677,8 +677,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             return { row, i };
         });
         decorated.sort((a, b) => {
-            const va = a.row.cells[idx]?.text || "";
-            const vb = b.row.cells[idx]?.text || "";
+            const va = a.row.cells[idx]?.content || "";
+            const vb = b.row.cells[idx]?.content || "";
             
             const cmp = collator.compare(va, vb);
             
@@ -780,7 +780,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                     row.options = this._parseOptions(child);
                 } else if (!child.classList.contains("wx-table-footer")) {
                     row.cells.push({
-                        text: child.textContent.trim(),
+                        content: child.textContent.trim(),
                         id: child.id,
                         class: child.className,
                         style: child.getAttribute("style"),
@@ -1036,7 +1036,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             const r = stack.pop();
             const key = this._getRowKey(r);
             if (key) {
-                list.push({ key, signature: r.cells.map((c) => { return c.text; }).join("|") });
+                list.push({ key, signature: r.cells.map((c) => { return c.content; }).join("|") });
             }
             if (r.children) {
                 stack.push(...r.children);
