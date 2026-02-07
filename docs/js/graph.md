@@ -40,6 +40,7 @@ Nodes are defined by elements with the class `.wx-graph-node`.
 |-----------------------|------------------------------------------------------------------------------------
 |`id`                   |**Required**. Unique identifier for the node.
 |`data-label`           |The text label displayed on the node. Defaults to the ID if omitted.
+|`data-uri`             |URL or path associated with the node.
 |`data-x` / `data-y`    |Explicit coordinates. If omitted, the node will be positioned by the physics engine.
 |`data-shape`           |The shape of the node background. Options: `rect` (default), `circle`.
 |`data-icon`            |A CSS class string for a font icon (e.g., `fas fa-server`).
