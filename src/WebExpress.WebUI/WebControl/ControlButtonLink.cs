@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
@@ -39,7 +40,59 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var text = I18N.Translate(Text);
+            return Render(renderContext, visualTree, Text, Uri, Tooltip, Modal, Icon, [.. Content]);
+        }
+
+        /// <summary>
+        /// Renders a button element as an HTML node with optional icon, text, tooltip, modal behavior, 
+        /// and additional content.
+        /// </summary>
+        /// <param name="renderContext">
+        /// The rendering context that provides information and services required during control 
+        /// rendering.
+        /// </param>
+        /// <param name="visualTree">
+        /// The visual tree context used to resolve control hierarchies and relationships during 
+        /// rendering.
+        /// </param>
+        /// <param name="text">
+        /// The text label to display within the button. This value is localized before 
+        /// rendering. Can be null or empty.
+        /// </param>
+        /// <param name="uri">
+        /// The URI to navigate to when the button is clicked. Ignored if a modal is specified.
+        /// </param>
+        /// <param name="tooltip">
+        /// The tooltip text to display when the user hovers over the button. This value is 
+        /// localized before rendering. Can be null or empty.
+        /// </param>
+        /// <param name="modal">
+        /// The modal target to display when the button is clicked. If specified, the button 
+        /// will trigger the modal instead of navigation.
+        /// </param>
+        /// <param name="icon">
+        /// The icon to display within the button. Can be null if no icon is required.
+        /// </param>
+        /// <param name="content">
+        /// Additional controls to render as child content within the button. Can be empty.
+        /// </param>
+        /// <returns>
+        /// An <see cref="IHtmlNode"/> representing the rendered button element, including any 
+        /// specified icon, text, tooltip, modal attributes, and child content.
+        /// </returns>
+        public virtual IHtmlNode Render
+        (
+            IRenderControlContext renderContext,
+            IVisualTreeControl visualTree,
+            string text,
+            IUri uri,
+            string tooltip,
+            IModalTarget modal,
+            IIcon icon,
+            params IControl[] content
+        )
+        {
+            text = I18N.Translate(text);
 
             var html = new HtmlElementTextSemanticsA()
             {
@@ -47,8 +100,8 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("btn", GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
-                Href = Modal is null ? Uri?.ToString() : null,
-                Title = I18N.Translate(renderContext, Tooltip),
+                Href = modal is null ? uri?.ToString() : null,
+                Title = I18N.Translate(renderContext, tooltip),
                 OnClick = OnClick?.ToString()
             };
 
@@ -73,20 +126,20 @@ namespace WebExpress.WebUI.WebControl
                 html.Add(new HtmlText(text));
             }
 
-            if (Content.Any())
+            if (content.Length != 0)
             {
-                html.Add(Content.Select(x => x.Render(renderContext, visualTree)).ToArray());
+                html.Add(content.Select(x => x.Render(renderContext, visualTree)).ToArray());
             }
 
-            if (!string.IsNullOrWhiteSpace(Tooltip))
+            if (!string.IsNullOrWhiteSpace(tooltip))
             {
                 html.AddUserAttribute("data-bs-toggle", "tooltip");
             }
 
-            if (Modal is not null)
+            if (modal is not null)
             {
                 Modal?.ApplyUserAttributes(html);
-                html.AddUserAttribute("data-wx-uri", Uri?.ToString());
+                html.AddUserAttribute("data-wx-uri", uri?.ToString());
             }
 
             return html;
