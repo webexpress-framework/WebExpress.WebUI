@@ -3,7 +3,7 @@
  * Provides a categorized selection modal (ModalSidebarPanel), real-time search,
  * drag-and-drop placement within the editor, and a property editor dialog.
  */
-webexpress.webui.EditorPlugins.register("addons", {
+webexpress.webui.EditorPlugins.register("addons", 4000, {
     _selectionModal: null,
     _propModal: null,
     _currentEditor: null,
@@ -195,6 +195,7 @@ webexpress.webui.EditorPlugins.register("addons", {
 
         const btn = document.createElement("button");
         btn.className = "wx-editor-btn";
+        btn.type = "button"
         btn.title = "Insert AddOn";
         btn.innerHTML = '<i class="fas fa-puzzle-piece"></i>';
         
@@ -244,6 +245,7 @@ webexpress.webui.EditorPlugins.register("addons", {
 
         this._insertBtn = document.createElement("button");
         this._insertBtn.className = "btn btn-primary ms-2";
+        this._insertBtn.type = "button";
         this._insertBtn.textContent = "Insert";
         this._insertBtn.disabled = true;
         

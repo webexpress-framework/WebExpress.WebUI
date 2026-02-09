@@ -11,3 +11,29 @@
 
 .wx-button > i {
 }
+
+.wx-button-close { 
+    padding: calc(var(--bs-modal-header-padding-y) * .5) calc(var(--bs-modal-header-padding-x) * .5);
+    margin-top: calc(-.5 * var(--bs-modal-header-padding-y));
+    margin-right: calc(-.5 * var(--bs-modal-header-padding-x));
+    margin-bottom: calc(-.5 * var(--bs-modal-header-padding-y));
+    margin-left: auto;
+}
+
+.wx-button-close:hover { 
+    color: var(--bs-secondary);
+    outline: none;
+}
+
+.wx-button-fullscreen { 
+    padding: calc(var(--bs-modal-header-padding-y) * .5) calc(var(--bs-modal-header-padding-x) * .5);
+    margin-top: calc(-.5 * var(--bs-modal-header-padding-y));
+    margin-right: calc(-.5 * var(--bs-modal-header-padding-x));
+    margin-bottom: calc(-.5 * var(--bs-modal-header-padding-y));
+    margin-left: auto;
+}
+
+.wx-button-fullscreen:hover { 
+    color: var(--bs-secondary);
+    outline: none;
+}

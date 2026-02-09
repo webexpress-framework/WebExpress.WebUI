@@ -3,7 +3,7 @@
  * Provides toolbar controls for bold, italic, underline, fonts, colors, lists, 
  * alignment, and block formatting options.
  */
-webexpress.webui.EditorPlugins.register("formatting", {
+webexpress.webui.EditorPlugins.register("formatting", 0, {
     _lastColor: "#000000",
     _colors: [
         // basic colors
@@ -93,6 +93,7 @@ webexpress.webui.EditorPlugins.register("formatting", {
         
         const button = document.createElement("button");
         button.className = "wx-editor-btn dropdown-toggle";
+        button.type = "button";
         button.setAttribute("data-bs-toggle", "dropdown");
         const buttonText = document.createElement("span");
         buttonText.textContent = "Paragraph";
@@ -112,6 +113,7 @@ webexpress.webui.EditorPlugins.register("formatting", {
             const btn = document.createElement("button");
             btn.className = "dropdown-item";
             btn.textContent = opt.lbl;
+            btn.type = "button";
             btn.addEventListener("click", () => {
                 document.execCommand("formatBlock", false, opt.cmd);
                 buttonText.textContent = opt.lbl;
@@ -155,6 +157,7 @@ webexpress.webui.EditorPlugins.register("formatting", {
         container.className = "wx-editor-btn-group";
         const btn = document.createElement("button");
         btn.className = "wx-editor-btn dropdown-toggle";
+        btn.type = "button";
         btn.innerHTML = '<i class="fas fa-text-height"></i>';
         btn.setAttribute("data-bs-toggle", "dropdown");
         
@@ -177,6 +180,7 @@ webexpress.webui.EditorPlugins.register("formatting", {
             } else {
                 const li = document.createElement("li");
                 const b = document.createElement("button");
+                b.type = "button";
                 b.className = "dropdown-item";
                 b.innerHTML = `<i class="${o.icon}"></i> ${o.lbl}`;
                 b.addEventListener("click", () => { 
@@ -210,7 +214,7 @@ webexpress.webui.EditorPlugins.register("formatting", {
         actionBtn.title = "Text Color";
         
         const icon = document.createElement("i");
-        icon.className = "fas fa-palette";
+        icon.className = "fas fa-a";
         icon.style.color = this._lastColor;
         icon.style.borderBottom = `2px solid ${this._lastColor}`;
         actionBtn.appendChild(icon);
@@ -234,6 +238,7 @@ webexpress.webui.EditorPlugins.register("formatting", {
             const li = document.createElement("li");
             const b = document.createElement("button");
             b.className = "dropdown-item p-2";
+            b.type = "button";
             b.style.backgroundColor = c;
             b.addEventListener("click", () => {
                 this._lastColor = c;
@@ -348,6 +353,7 @@ webexpress.webui.EditorPlugins.register("formatting", {
         btn.className = "wx-editor-btn";
         btn.title = def.tip;
         btn.dataset.command = def.cmd;
+        btn.type = "button";
         btn.innerHTML = `<i class="${def.icon}"></i>`;
         btn.addEventListener("click", () => {
             editor.execCommand(def.cmd);

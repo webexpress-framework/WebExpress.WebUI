@@ -2,7 +2,7 @@
  * Plugin for link and image insertion using ModalSidebarPanel.
  * Provides toolbar buttons to open dedicated modal panels for inserting links and images.
  */
-webexpress.webui.EditorPlugins.register("media", {
+webexpress.webui.EditorPlugins.register("media", 1000, {
     linkModal: null,
     imageModal: null,
 
@@ -32,6 +32,7 @@ webexpress.webui.EditorPlugins.register("media", {
         // link button
         const btnLink = document.createElement("button");
         btnLink.className = "wx-editor-btn";
+        btnLink.type = "button";
         btnLink.innerHTML = '<i class="fas fa-link"></i>';
         btnLink.addEventListener("click", () => {
             this._openLinkModal(editor);
@@ -41,6 +42,7 @@ webexpress.webui.EditorPlugins.register("media", {
         // image button
         const btnImg = document.createElement("button");
         btnImg.className = "wx-editor-btn";
+        btnImg.type = "button";
         btnImg.innerHTML = '<i class="fas fa-image"></i>';
         btnImg.addEventListener("click", () => {
             this._openImageModal(editor);

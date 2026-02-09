@@ -10,16 +10,23 @@ webexpress.webui = webexpress.webui || {}
  */
 webexpress.webui.Controller = new class {
     /**
-     * Constructor
+     * Creates a new instance of the class.
      */
     constructor() {
         this.instanceMap = new Map();
         this.classRegistry = new Map();
         this._wxRegisteredElements = new WeakSet(); // prevent duplicate bindings
         this.observer = new MutationObserver(this.handleMutations.bind(this));
-        this.observer.observe(document, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-wx-toggle"] });
+        // observe attribute changes for both toggle and dismiss attributes
+        this.observer.observe(document, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-wx-toggle", "data-wx-dismiss"] });
         this.overrideCreateElement();
         this.initModalHandler();
+
+        // re-added native fullscreen listeners
+        document.addEventListener("fullscreenchange", () => { this._onFullscreenChange(); });
+        document.addEventListener("webkitfullscreenchange", () => { this._onFullscreenChange(); });
+        document.addEventListener("mozfullscreenchange", () => { this._onFullscreenChange(); });
+        document.addEventListener("MSFullscreenChange", () => { this._onFullscreenChange(); });
     }
 
     /**
@@ -28,7 +35,8 @@ webexpress.webui.Controller = new class {
     initModalHandler() {
         // wait for DOMContentLoaded event to ensure DOM is ready
         document.addEventListener("DOMContentLoaded", () => {
-            document.querySelectorAll("[data-wx-toggle]").forEach(el => {
+            // register both toggle and dismiss elements initially
+            document.querySelectorAll("[data-wx-toggle], [data-wx-dismiss]").forEach(el => {
                 this._registerWxEvents(el);
             });
         });
@@ -38,7 +46,6 @@ webexpress.webui.Controller = new class {
      * Registers wx-* click handlers for a single element.
      * This method is invoked during the initial DOM setup as well as for
      * dynamically added elements detected by the MutationObserver.
-     *
      * @param {HTMLElement} element - The element for which wx-* event handlers should be registered.
      */
     _registerWxEvents(element) {
@@ -99,6 +106,74 @@ webexpress.webui.Controller = new class {
                         instance.collapsed = false;
                     }
                 }
+            });
+            bound = true;
+        }
+        
+        // css fullscreen toggle support
+        if (element.matches("[data-wx-toggle='fullscreen']")) {
+            element.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation(); // stop bubbling to prevent parent handlers (like editor modals) from closing
+
+                const targetSelector = element.getAttribute("data-wx-target");
+                // default to body if no target is specified, as styling the body is more reliable for 'light' fullscreen
+                const targetEl = targetSelector ? document.querySelector(targetSelector) : document.body;
+                
+                if (targetEl) {
+                    this.toggleFullscreen(targetEl);
+                } else {
+                    console.warn("Fullscreen target not found:", targetSelector);
+                }
+            });
+            element.setAttribute("aria-pressed", "false");
+            bound = true;
+        }
+        
+        // css fullscreen dismiss support
+        if (element.matches("[data-wx-dismiss='fullscreen']")) {
+            element.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // check for a specific target, otherwise try to find the active fullscreen element
+                const targetSelector = element.getAttribute("data-wx-target");
+                let targetEl = targetSelector ? document.querySelector(targetSelector) : document.querySelector(".wx-fullscreen-active");
+                
+                // if no specific target is active, we might be inside the fullscreen element itself
+                if (!targetEl) {
+                    targetEl = element.closest(".wx-fullscreen-active");
+                }
+
+                if (targetEl && this._isCssFullscreenElement(targetEl)) {
+                    this.toggleFullscreen(targetEl); // toggling while active exits it
+                }
+            });
+            bound = true;
+        }
+
+        // native browser fullscreen toggle support
+        if (element.matches("[data-wx-toggle='native-fullscreen']")) {
+            element.addEventListener("click", (e) => {
+                e.preventDefault();
+                const targetSelector = element.getAttribute("data-wx-target") || null;
+                const targetEl = targetSelector ? document.querySelector(targetSelector) : document.documentElement;
+                
+                if (targetEl) {
+                    this.toggleNativeFullscreen(targetEl);
+                }
+            });
+            element.setAttribute("aria-pressed", "false");
+            bound = true;
+        }
+
+        // native fullscreen dismiss support
+        if (element.matches("[data-wx-dismiss='native-fullscreen']")) {
+            element.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                // native exit is global on the document, so no specific target is needed
+                this._exitNativeFullscreen(); 
             });
             bound = true;
         }
@@ -270,6 +345,161 @@ webexpress.webui.Controller = new class {
         }
         return null;
     }
+    
+    /**
+     * Toggles "light" fullscreen state (CSS based) for the provided element.
+     * @param {HTMLElement} el - target element to toggle fullscreen for
+     */
+    toggleFullscreen(el) {
+        if (!el) { return; }
+        
+        const isFullscreen = el.classList.toggle("wx-fullscreen-active");
+
+        if (isFullscreen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            const anyFullscreen = document.querySelector(".wx-fullscreen-active");
+            if (!anyFullscreen) {
+                document.body.style.overflow = "";
+            }
+        }
+
+        this._onFullscreenChange(el);
+    }
+
+    /**
+     * Toggles "native" browser fullscreen for the provided element.
+     * @param {HTMLElement} el - target element
+     */
+    toggleNativeFullscreen(el) {
+        if (!el) { return; }
+        if (this._isNativeFullscreenElement(el)) {
+            this._exitNativeFullscreen();
+        } else {
+            this._enterNativeFullscreen(el);
+        }
+    }
+
+    /**
+     * Returns whether the provided element is currently in "light" (CSS) fullscreen.
+     * @param {HTMLElement} el - element to test
+     * @returns {boolean} true when element is fullscreen
+     */
+    _isCssFullscreenElement(el) {
+        return el.classList.contains("wx-fullscreen-active");
+    }
+
+    /**
+     * Returns whether the provided element is currently the native fullscreen element.
+     * @param {HTMLElement} el - element to test
+     * @returns {boolean} true when element is native fullscreen
+     */
+    _isNativeFullscreenElement(el) {
+        const fs = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement || null;
+        return fs === el;
+    }
+
+    /**
+     * Requests native fullscreen for an element with vendor fallbacks.
+     * @param {HTMLElement} el - target element
+     */
+    _enterNativeFullscreen(el) {
+        if (el.requestFullscreen) {
+            el.requestFullscreen().catch(() => { /* ignore user-denied errors */ });
+        } else if (el.webkitRequestFullscreen) {
+            el.webkitRequestFullscreen();
+        } else if (el.mozRequestFullScreen) {
+            el.mozRequestFullScreen();
+        } else if (el.msRequestFullscreen) {
+            el.msRequestFullscreen();
+        }
+    }
+
+    /**
+     * Exits native fullscreen (document-level) with vendor fallbacks.
+     */
+    _exitNativeFullscreen() {
+        if (document.exitFullscreen) {
+            document.exitFullscreen().catch(() => { /* ignore */ });
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+    }
+
+    /**
+     * Handler for global fullscreen change event (both native and simulated).
+     * Updates all fullscreen toggle buttons' aria-pressed state to reflect current status.
+     * @param {HTMLElement} [changedEl] - The element that changed state (for CSS fullscreen)
+     */
+    _onFullscreenChange(changedEl) {
+        const nativeFsEl = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement || null;
+        
+        // update CSS-based fullscreen buttons
+        document.querySelectorAll("[data-wx-toggle='fullscreen']").forEach(btn => {
+            const targetSelector = btn.getAttribute("data-wx-target") || null;
+            const target = targetSelector ? document.querySelector(targetSelector) : document.documentElement;
+            
+            const active = target && this._isCssFullscreenElement(target);
+            this._updateButtonState(btn, active);
+        });
+
+        // update native fullscreen buttons
+        document.querySelectorAll("[data-wx-toggle='native-fullscreen']").forEach(btn => {
+            const targetSelector = btn.getAttribute("data-wx-target") || null;
+            const target = targetSelector ? document.querySelector(targetSelector) : document.documentElement;
+            
+            const active = target && (nativeFsEl === target);
+            this._updateButtonState(btn, active);
+        });
+
+        // dispatch a framework event for consumers
+        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.SIZE_CHANGE_EVENT, {
+            detail: {
+                sender: document,
+                fullscreenElement: nativeFsEl || changedEl
+            },
+            bubbles: true,
+            composed: true
+        }));
+    }
+
+    /**
+     * Helper to update button visual state (aria, data attr, icons).
+     * @param {HTMLElement} btn - The button element
+     * @param {boolean} active - Whether the state is active
+     */
+    _updateButtonState(btn, active) {
+        btn.setAttribute("aria-pressed", active ? "true" : "false");
+        
+        if (active) {
+            btn.setAttribute("data-wx-fullscreen-active", "true");
+            const icon = btn.querySelector("i");
+            if (icon) {
+                if (icon.classList.contains("fa-expand")) {
+                    icon.classList.replace("fa-expand", "fa-compress");
+                    // store original title if needed, or just toggle text
+                    if (btn.title && btn.title.includes("Toggle")) {
+                        btn.title = "Exit Fullscreen";
+                    }
+                }
+            }
+        } else {
+            btn.removeAttribute("data-wx-fullscreen-active");
+            const icon = btn.querySelector("i");
+            if (icon) {
+                if (icon.classList.contains("fa-compress")) {
+                    icon.classList.replace("fa-compress", "fa-expand");
+                     if (btn.title && btn.title.includes("Exit")) {
+                        btn.title = "Toggle Fullscreen";
+                    }
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -305,7 +535,6 @@ webexpress.webui.I18N = new class {
     /**
      * Registers translation values for a specific language and module.
      * Ensures existing translations are preserved and extended.
-     *
      * @param {string} lang - Language code (e.g. "en")
      * @param {string} module - Namespace/module name (e.g. "webexpress.webui")
      * @param {object} values - Key-value map of translations
@@ -332,7 +561,6 @@ webexpress.webui.I18N = new class {
      * Supports optional module prefix (e.g. 'webexpress.webui:calendar.may').
      * Falls back to English if the key is not found in the current language.
      * Returns the key itself if no translation is available.
-     *
      * @param {string} key - The translation key to look up.
      * @returns {string}
      */
@@ -342,14 +570,14 @@ webexpress.webui.I18N = new class {
         let module = null;
         let localKey = key;
 
-        // Extract namespace prefix if present
+        // extract namespace prefix if present
         if (key.includes(":")) {
             const split = key.split(":");
             module = split[0];
             localKey = split[1];
         }
 
-        // Attempt module-prefixed lookup
+        // attempt module-prefixed lookup
         if (module && this.translations[lang]?.[module]?.[localKey]) {
             return this.translations[lang][module][localKey];
         }
@@ -375,6 +603,9 @@ webexpress.webui.I18N = new class {
  * Each language can have its own set of keywords, types, operators, and regex rules for syntax highlighting.
  */
 webexpress.webui.Syntax = new class {
+    /**
+     * Creates a new instance of the class.
+     */
     constructor() {
         // initialize the syntax object to store language-specific configurations
         this.syntax = {};
@@ -382,7 +613,6 @@ webexpress.webui.Syntax = new class {
 
     /**
      * Registers syntax values for a specific language and alias.
-     *
      * @param {string} language - Language code (e.g., "csharp").
      * @param {string} alias - Alias for the language (e.g., "c#").
      * @param {object|function} syntax - Syntax highlighting configuration or function.
@@ -403,7 +633,6 @@ webexpress.webui.Syntax = new class {
 
     /**
      * Retrieves the syntax configuration for a specific language.
-     *
      * @param {string} language - The language code (e.g., "csharp").
      * @returns {object|null} The syntax configuration for the language, or null if not registered.
      */
@@ -423,28 +652,50 @@ webexpress.webui.Syntax = new class {
  * Allows decoupling of functionality into separate files.
  */
 webexpress.webui.EditorPlugins = new class {
+    /**
+     * Creates a new instance of the class.
+     */
     constructor() {
-        /** @type {Array<object>} internal list of registered plugins */
         this._plugins = [];
     }
 
     /**
      * Registers a new editor plugin.
+     * Supports optional positioning.
+     * Overloads:
+     * register(name, definition) - Default position (10)
+     * register(name, position, definition) - Explicit position
      * @param {string} name - The unique name of the plugin.
-     * @param {object} definition - The plugin definition object containing init and toolbar factory methods.
+     * @param {number|object} arg2 - The position (number) or the definition (object).
+     * @param {object} [arg3] - The definition object if arg2 is the position.
      * @returns {this} The registry instance.
      */
-    register(name, definition) {
+    register(name, arg2, arg3) {
+        let position = 10; // default priority
+        let definition = arg2;
+
+        // check for overload register(name, position, definition)
+        if (typeof arg2 === "number") {
+            position = arg2;
+            definition = arg3;
+        }
+
         if (!name || !definition) return this;
+
         this._plugins.push({ 
             name: name, 
+            position: position,
             definition: definition 
         });
+
+        // ensure plugins are sorted by position
+        this._plugins.sort((a, b) => a.position - b.position);
+
         return this;
     }
 
     /**
-     * Returns all registered plugins.
+     * Returns all registered plugins sorted by position.
      * @returns {Array<object>} List of plugin definitions.
      */
     getAll() {
@@ -457,12 +708,10 @@ webexpress.webui.EditorPlugins = new class {
  * Manages the collection of available add-ons that can be inserted via the editor plugin.
  */
 webexpress.webui.EditorAddOns = new class {
+    /**
+     * Creates a new instance of the class.
+     */
     constructor() {
-        /** 
-         * @type {Array<object>} 
-         * @private 
-         * Internal list of registered add-on definitions.
-         */
         this._addOns = [];
     }
 
@@ -539,15 +788,16 @@ webexpress.webui.EditorAddOns = new class {
  * A "panel definition" is a plain object that may contain metadata and render/onShow/onSubmit hooks.
  */
 webexpress.webui.DialogPanels = new class {
+    /**
+     * Creates a new instance of the class.
+     */
     constructor() {
-        /** @type {{[key: string]: Array<object>}} internal registry */
         this._panels = {};
     }
 
     /**
      * Registers one or multiple panels by modal key. Multiple panels per key are supported.
      * Optional modal scoping can be expressed by setting `modalId` on the panel object itself.
-     *
      * @param {string} modalKey - unique panel key used for lookup/autoload (e.g., data-key).
      * @param {object} panel - panel definition.
      * @returns {this} the registry instance for chaining.
@@ -575,7 +825,6 @@ webexpress.webui.DialogPanels = new class {
 
     /**
      * Retrieves all panels registered under a key.
-     *
      * @param {string} modalKey - panel key.
      * @returns {Array<object>} array of panel definitions (shallow-copied entries).
      */
@@ -597,7 +846,6 @@ webexpress.webui.DialogPanels = new class {
 
     /**
      * Unregisters all panels by key.
-     *
      * @param {string} modalKey - panel key.
      * @returns {void}
      */
@@ -627,6 +875,9 @@ webexpress.webui.DialogPanels = new class {
  * Stores renderer functions and their default options by type key.
  */
 webexpress.webui.TableTemplates = new class {
+    /**
+     * Creates a new instance of the class.
+     */
     constructor() {
         this._templates = {};
     }
@@ -753,7 +1004,7 @@ webexpress.webui.Ctrl = class {
      * This method should be overridden to remove event listeners or perform other cleanup tasks.
      */
     destroy() {
-        // Cleanup code, e.g., for event listeners
+        // cleanup code, e.g., for event listeners
     }
 
     /**
@@ -811,34 +1062,34 @@ webexpress.webui.PopperCtrl = class extends webexpress.webui.Ctrl {
      * @param {HTMLElement} dropdownmenu - The menu box element (as HTMLElement, not jQuery).
      */
     _initializePopper(container, dropdownmenu) {
-        // Map to track the visibility state of each menu
+        // map to track the visibility state of each menu
         this._menuVisibilityMap = this._menuVisibilityMap || new Map();
 
-        // Popper.js instance for positioning
+        // popper.js instance for positioning
         const popperInstance = Popper.createPopper(container, dropdownmenu, {
             placement: "bottom-start",
             modifiers: [
                 {
                     name: "offset",
                     options: {
-                        offset: [0, 4], // Offset the suggestion box slightly
+                        offset: [0, 4], // offset the suggestion box slightly
                     },
                 },
                 {
                     name: "preventOverflow",
                     options: {
-                        boundary: "viewport", // Ensure the suggestion box stays within the viewport
+                        boundary: "viewport", // ensure the suggestion box stays within the viewport
                     },
                 },
             ],
         });
 
-        // Hide the suggestion box when clicking outside of it
+        // hide the suggestion box when clicking outside of it
         document.addEventListener("click", (event) => {
             if (!this._element.contains(event.target)) {
                 if (this._menuVisibilityMap.get(dropdownmenu)) {
                     this._menuVisibilityMap.delete(dropdownmenu);
-                    // Trigger the DROPDOWN_HIDDEN_EVENT when the suggestion box is hidden
+                    // trigger the DROPDOWN_HIDDEN_EVENT when the suggestion box is hidden
                     document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
                         detail: {
                             sender: this._element,
@@ -851,13 +1102,13 @@ webexpress.webui.PopperCtrl = class extends webexpress.webui.Ctrl {
             }
         });
 
-        // Register the ESC key to close the suggestion menu
+        // register the ESC key to close the suggestion menu
         document.addEventListener("keydown", (event) => {
             if (event.key === "Escape") {
                 dropdownmenu.style.display = "none";
                 if (this._menuVisibilityMap.get(dropdownmenu)) {
                     this._menuVisibilityMap.delete(dropdownmenu);
-                    // Trigger the DROPDOWN_HIDDEN_EVENT when the suggestion box is hidden
+                    // trigger the DROPDOWN_HIDDEN_EVENT when the suggestion box is hidden
                     document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
                         detail: {
                             sender: this._element,
@@ -868,14 +1119,14 @@ webexpress.webui.PopperCtrl = class extends webexpress.webui.Ctrl {
             }
         });
 
-        // Show and hide methods for the dropdownmenu (simulate .on('show')/.on('hide'))
+        // show and hide methods for the dropdownmenu (simulate .on('show')/.on('hide'))
         dropdownmenu.show = () => {
             dropdownmenu.style.display = "flex";
-            // Set width to match the element, if needed
+            // set width to match the element, if needed
             dropdownmenu.style.width = this._element.offsetWidth + "px";
             popperInstance.update();
             this._menuVisibilityMap.set(dropdownmenu, true);
-            // Trigger show event
+            // trigger show event
             document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_SHOW_EVENT, {
                 detail: {
                     sender: this._element,
@@ -896,7 +1147,7 @@ webexpress.webui.PopperCtrl = class extends webexpress.webui.Ctrl {
             }
         };
 
-        // Listen for custom 'show' and 'hide' events
+        // listen for custom 'show' and 'hide' events
         dropdownmenu.addEventListener("show", () => {
             dropdownmenu.show();
         });

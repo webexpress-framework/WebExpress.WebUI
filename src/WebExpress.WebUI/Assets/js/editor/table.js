@@ -3,7 +3,7 @@
  * Wraps tables in frames for consistent handling and provides table-specific actions
  * and enhanced navigation (Tab key).
  */
-webexpress.webui.EditorPlugins.register("table", {
+webexpress.webui.EditorPlugins.register("table", 3000, {
     _tableToolbar: null,
     _tableToolbarShownOnce: false,
     _lastCellColor: "#FFFF00",
@@ -422,14 +422,15 @@ webexpress.webui.EditorPlugins.register("table", {
             if (a.cmd === "cellBackground") {
                  tb.appendChild(this._createCellBackgroundButton(editor, a.icon));
             } else {
-                 const b = document.createElement("button");
-                 b.className = "wx-editor-btn";
-                 b.innerHTML = `<i class="${a.icon}"></i>`;
-                 b.addEventListener("click", () => {
-                     this._modifyTable(editor, a.cmd);
-                     editor.restoreSavedRange();
-                 });
-                 tb.appendChild(b);
+                const b = document.createElement("button");
+                b.className = "wx-editor-btn";
+                b.type = "button";
+                b.innerHTML = `<i class="${a.icon}"></i>`;
+                b.addEventListener("click", () => {
+                    this._modifyTable(editor, a.cmd);
+                    editor.restoreSavedRange();
+                });
+                tb.appendChild(b);
             }
         });
         return tb;
@@ -449,6 +450,7 @@ webexpress.webui.EditorPlugins.register("table", {
         const actionBtn = document.createElement("button");
         actionBtn.className = "wx-editor-btn";
         actionBtn.title = "Cell Background";
+        actionBtn.type = "button";
         const icon = document.createElement("i");
         icon.className = iconClass;
         actionBtn.style.borderBottom = `3px solid ${this._lastCellColor}`;
@@ -460,6 +462,7 @@ webexpress.webui.EditorPlugins.register("table", {
 
         const toggleBtn = document.createElement("button");
         toggleBtn.className = "wx-editor-btn dropdown-toggle dropdown-toggle-split";
+        toggleBtn.type = "button";
         toggleBtn.setAttribute("data-bs-toggle", "dropdown");
         
         const menu = document.createElement("div");
@@ -470,6 +473,7 @@ webexpress.webui.EditorPlugins.register("table", {
         this._colors.forEach((c) => {
             const li = document.createElement("li");
             const colorBtn = document.createElement("button");
+            colorBtn.type = "button";
             colorBtn.style.backgroundColor = c;
             colorBtn.addEventListener("click", () => {
                 this._lastCellColor = c;

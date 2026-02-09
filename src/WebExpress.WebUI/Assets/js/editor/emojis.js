@@ -2,7 +2,7 @@
  * Plugin for inserting emojis.
  * Provides a categorized dropdown picker for common emojis.
  */
-webexpress.webui.EditorPlugins.register("emojis", {
+webexpress.webui.EditorPlugins.register("emojis", 2000, {
     _dropdown: null,
     _emojis: {
         "Faces": ["😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "😊", "😇", "🙂", "🙃", "😉", "😌", "😍", "😘", "😗", "😙", "😋", "😛", "😝", "😜", "🤓", "😎", "😒", "😞", "😔"],

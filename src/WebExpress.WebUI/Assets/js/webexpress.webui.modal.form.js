@@ -41,6 +41,7 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
             this._form.className = [...this._form.classList]
                 .filter(cls => cls.startsWith("wx"))
                 .join(" ");
+            this._form.style.display = "contents";
 
             const buttons = Array.from(form.querySelectorAll("button[type='submit'], button[type='reset']"))
                 .map(btn => this._detachElement(btn));
