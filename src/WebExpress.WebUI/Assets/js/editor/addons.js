@@ -489,37 +489,55 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
     },
 
     /**
-     * Creates and caches the property editor modal DOM structure.
+     * Creates and caches the property editor modal using the ModalCtrl.
+     * Replaces manual DOM construction with the framework's modal controller.
      */
-    _createPropertyModal: function() {
-        this._propModal = document.createElement("div");
-        this._propModal.className = "modal fade wx-prop-modal";
-        this._propModal.innerHTML = `
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Properties</h5>
-                        <button type="button" class="btn-close close-prop"></button>
-                    </div>
-                    <div class="modal-body"></div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary close-prop">Cancel</button>
-                        <button type="button" class="btn btn-primary save-prop">Apply</button>
-                    </div>
-                </div>
-            </div>`;
+        _createPropertyModal: function() {
+        if (this._propModalCtrl) {
+            return; // already initialized
+        }
+
+        // 1. Create host element
+        // WICHTIG: "wx-webui-modal" entfernt, damit der globale Controller nicht automatisch eingreift!
+        this._propModal = document.createElement("div"); 
+        this._propModal.className = "wx-prop-modal"; 
+        
+        // 2. Set attributes
+        this._propModal.setAttribute("data-close-label", "Cancel");
+        this._propModal.setAttribute("data-wx-fullscreen", "false");
+
+        // 3. Create structure
+        
+        // Header
+        const headerSpan = document.createElement("span");
+        headerSpan.className = "wx-modal-header";
+        headerSpan.textContent = "Properties";
+        this._propModal.appendChild(headerSpan);
+
+        // Body
+        this._propBody = document.createElement("div");
+        this._propBody.className = "wx-modal-content";
+        this._propModal.appendChild(this._propBody);
+
+        // Footer
+        const footerDiv = document.createElement("div");
+        footerDiv.className = "wx-modal-footer";
+
+        // Save Button
+        const saveBtn = document.createElement("button");
+        saveBtn.className = "btn btn-primary save-prop";
+        saveBtn.type = "button";
+        saveBtn.innerHTML = "Apply";
+        saveBtn.addEventListener("click", () => this._handlePropertySave());
+        
+        footerDiv.appendChild(saveBtn);
+        this._propModal.appendChild(footerDiv);
+
+        // 4. Append to document
         document.body.appendChild(this._propModal);
 
-        const closeBtns = this._propModal.querySelectorAll(".close-prop");
-        const saveBtn = this._propModal.querySelectorAll(".save-prop")[0];
-
-        closeBtns.forEach(b => b.addEventListener("click", () => {
-            this._propModal.style.display = "none";
-            this._propModal.classList.remove("show");
-            this._removeBackdrop();
-        }));
-
-        saveBtn.addEventListener("click", () => this._handlePropertySave());
+        // 5. Initialize Controller (Manually only)
+        this._propModalCtrl = new webexpress.webui.ModalCtrl(this._propModal);
     },
 
     /**

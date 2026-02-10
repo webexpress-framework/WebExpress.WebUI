@@ -676,7 +676,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             "th": ["colspan", "rowspan"],
             "td": ["colspan", "rowspan"],
             "table": ["border", "cellpadding", "cellspacing"],
-            "*": ["class", "id", "title", "role", "tabindex"]
+            "*": ["class", "id", "title", "role", "tabindex", "style"] // style often needed for editors
         };
 
         /**
@@ -689,69 +689,72 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                 const el = node;
                 const tag = el.tagName.toLowerCase();
 
-                // remove disallowed elements by unwrapping or removing
-                if (!allowedTags.has(tag)) {
-                    // unwrap allowed children to preserve text where sensible
-                    const parent = el.parentNode;
-                    if (parent) {
-                        while (el.firstChild) {
-                            parent.insertBefore(el.firstChild, el);
+                // special case: skip check for body itself, only sanitize its content
+                if (tag !== "body") {
+                    // remove disallowed elements by unwrapping or removing
+                    if (!allowedTags.has(tag)) {
+                        // unwrap allowed children to preserve text where sensible
+                        const parent = el.parentNode;
+                        if (parent) {
+                            while (el.firstChild) {
+                                parent.insertBefore(el.firstChild, el);
+                            }
+                            parent.removeChild(el);
+                        } else {
+                            // fallback: remove node completely
+                            el.remove();
                         }
-                        parent.removeChild(el);
-                    } else {
-                        // fallback: remove node completely
-                        el.remove();
-                    }
-                    return;
-                }
-
-                // iterate attributes and remove unsafe ones
-                const attrs = Array.from(el.attributes);
-                attrs.forEach((attr) => {
-                    const name = attr.name.toLowerCase();
-                    const value = attr.value;
-
-                    // allow data-* and aria-* always
-                    if (name.startsWith("data-") || name.startsWith("aria-")) {
+                        // since node is removed/unwrapped, we don't recurse on it directly here
+                        // (children were moved to parent, they will be checked if we started high enough)
                         return;
                     }
 
-                    // allow only whitelisted attributes
-                    const allowedForTag = allowedAttrs[tag] || [];
-                    const allowedGlobal = allowedAttrs["*"] || [];
-                    const isAllowed = allowedForTag.indexOf(name) !== -1 || allowedGlobal.indexOf(name) !== -1;
+                    // iterate attributes and remove unsafe ones
+                    const attrs = Array.from(el.attributes);
+                    attrs.forEach((attr) => {
+                        const name = attr.name.toLowerCase();
+                        const value = attr.value;
 
-                    if (!isAllowed) {
-                        // remove event handlers, styles, and any non-whitelisted attributes
-                        el.removeAttribute(attr.name);
-                        return;
-                    }
+                        // allow data-* and aria-* always
+                        if (name.startsWith("data-") || name.startsWith("aria-")) {
+                            return;
+                        }
 
-                    // if attribute is href or src, ensure protocol is safe
-                    if ((name === "href" || name === "src") && value) {
-                        // lowercased value for checking
-                        const trimmed = value.trim();
-                        try {
-                            // construct url relative to document base
-                            const resolved = new URL(trimmed, location.href);
-                            const proto = resolved.protocol.toLowerCase();
-                            if (proto !== "http:" && proto !== "https:" && proto !== "mailto:" && proto !== "tel:") {
+                        // allow only whitelisted attributes
+                        const allowedForTag = allowedAttrs[tag] || [];
+                        const allowedGlobal = allowedAttrs["*"] || [];
+                        const isAllowed = allowedForTag.indexOf(name) !== -1 || allowedGlobal.indexOf(name) !== -1;
+
+                        if (!isAllowed) {
+                            el.removeAttribute(attr.name);
+                            return;
+                        }
+
+                        // if attribute is href or src, ensure protocol is safe
+                        if ((name === "href" || name === "src") && value) {
+                            const trimmed = value.trim();
+                            // allow relative links, anchors, and specific protocols
+                            if (!trimmed.match(/^(http|https|mailto|tel|\/|#|\.)/i)) {
+                                // potential javascript: or data: alert -> remove
                                 el.removeAttribute(attr.name);
                                 return;
                             }
+                            
                             // for anchors opening in new tab, enforce rel
                             if (name === "href" && el.tagName.toLowerCase() === "a") {
                                 if (!el.getAttribute("rel") && el.getAttribute("target") === "_blank") {
                                     el.setAttribute("rel", "noopener noreferrer");
                                 }
                             }
-                        } catch (e) {
-                            // invalid url -> remove attribute
-                            el.removeAttribute(attr.name);
-                            return;
                         }
-                    }
-                });
+                        // sanitize style attribute to prevent xss via url()
+                        if (name === "style" && value) {
+                             if (value.toLowerCase().includes("javascript:") || value.toLowerCase().includes("expression(")) {
+                                 el.removeAttribute("style");
+                             }
+                        }
+                    });
+                }
             }
 
             // recurse children (use snapshot because children may change)
@@ -761,8 +764,13 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             });
         }
 
-        sanitizeNode(doc.body);
-        return doc.body.innerHTML;
+        // start sanitization on body, but the logic inside now skips the tag check for 'body'
+        if (doc.body) {
+            sanitizeNode(doc.body);
+            return doc.body.innerHTML;
+        }
+        
+        return "";
     }
 
     /**

@@ -3,7 +3,7 @@ webexpress.webui.EditorAddOns.register("game-of-life", {
     label: "Game of Life",
     icon: "fas fa-gamepad",
     type: "block",
-    isContainer: false, // Canvas handles its own interaction
+    isContainer: false, // canvas handles its own interaction
     description: "Interactive Game of Life simulation.",
     properties: [
         { name: "cellSize", label: "Cell Size (px)", type: "number", default: 10 },
