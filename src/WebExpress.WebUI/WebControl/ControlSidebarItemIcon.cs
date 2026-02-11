@@ -41,9 +41,16 @@ namespace WebExpress.WebUI.WebControl
         public bool IconEdit { get; set; }
 
         /// <summary>
-        /// Returns or sets the modal target used for editing icons.
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// click to open a modal or similar target.
         /// </summary>
-        public IModalTarget Modal { get; set; }
+        public IAction PrimaryAction { get; set; }
+
+        /// <summary>
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// double‑click to open a modal or similar target.
+        /// </summary>
+        public IAction SecondaryAction { get; set; }
 
         /// <summary>
         /// Returns or sets the display mode of the type sidebar.
@@ -92,17 +99,11 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-icon", icon is Icon css ? css.Class : null)
                 .AddUserAttribute("data-image", icon is ImageIcon image ? image.Uri.ToString() : null)
                 .AddUserAttribute("data-icon-edit", IconEdit ? "true" : null)
-                .AddUserAttribute("data-icon-text", I18N.Translate(renderContext, Text));
+                .AddUserAttribute("data-icon-text", I18N.Translate(renderContext, Text))
+                .AddUserAttribute("data-uri", uri?.ToString());
 
-            if (Modal is not null)
-            {
-                Modal?.ApplyUserAttributes(html);
-                html.AddUserAttribute("data-wx-uri", uri?.ToString());
-            }
-            else
-            {
-                html.AddUserAttribute("data-uri", uri?.ToString());
-            }
+            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

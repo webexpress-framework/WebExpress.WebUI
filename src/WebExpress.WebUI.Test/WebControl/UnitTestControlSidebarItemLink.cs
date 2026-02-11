@@ -137,12 +137,12 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the modal property of the sidebar item link control.
+        /// Tests the primary action property of the sidebar item link control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-sidebar-link""></div>")]
-        [InlineData("id", @"<div class=""wx-sidebar-link"" data-modal=""#id""></div>")]
-        public void Modal(string modal, string expected)
+        [InlineData("id", @"<div class=""wx-sidebar-link"" data-wx-primary-action=""modal"" data-wx-primary-target=""#id""></div>")]
+        public void PrimaryAction(string modal, string expected)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -150,7 +150,31 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSidebarItemLink()
             {
-                Modal = new ModalTarget(modal)
+                PrimaryAction = new ActionModal(modal)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
+        }
+
+        /// <summary>
+        /// Tests the primary action property of the sidebar item link control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-sidebar-link""></div>")]
+        [InlineData("id", @"<div class=""wx-sidebar-link"" data-wx-secondary-action=""modal"" data-wx-secondary-target=""#id""></div>")]
+        public void SecondaryAction(string modal, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlSidebarItemLink()
+            {
+                SecondaryAction = new ActionModal(modal)
             };
 
             // act

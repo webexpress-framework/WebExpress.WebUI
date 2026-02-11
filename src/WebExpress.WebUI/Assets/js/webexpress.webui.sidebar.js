@@ -287,8 +287,8 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             editBtn.title = this._i18n("webexpress.webui:edit", "Edit");
             editBtn.innerHTML = '<i class="fas fa-pen"></i>';
             if (item.modal.id) {
-                editBtn.setAttribute("data-wx-toggle", "modal");
-                editBtn.setAttribute("data-wx-target", item.modal.id);
+                editBtn.setAttribute("data-wx-primary-action", "modal");
+                editBtn.setAttribute("data-wx-primary-target", item.modal.id);
             }
             if (item.modal.size) {
                 editBtn.setAttribute("data-wx-size", item.modal.size);

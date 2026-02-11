@@ -24,6 +24,27 @@
  * - webexpress.webui.Event.CHANGE_VISIBILITY_EVENT
  */
 webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl {
+    
+    // config properties
+    _movableRow = false;
+    _allowColumnRemove = false;
+    _persistKey = null;
+    _treeEnabled = true;
+    _treeMoveEnabled = true;
+
+    // drag state
+    _dragColumnIndicator = null;
+    _draggedColumn = null;
+    _rowMoveActive = false;
+    _rowMoveSourceRow = null;
+    _rowMoveGhost = null;
+    _rowMovePlaceholder = null;
+    _rowHandlesBound = false;
+
+    // modal state
+    _columnsModalEl = null;
+    _columnsSidebarPanel = null;
+
     /**
      * Constructor.
      * @param {HTMLElement} element Host element.
@@ -38,6 +59,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
      * @param {HTMLElement} element Host element.
      */
     _setupDom(element) {
+        // call super first to setup base table structure
         super._setupDom(element);
 
         const ds = element.dataset;
@@ -48,6 +70,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         this._treeEnabled = ds.treeEnabled !== "false";
         this._treeMoveEnabled = ds.treeMoveEnabled !== "false";
 
+        // create drag indicator if not exists
         this._dragColumnIndicator = document.createElement("div");
         this._dragColumnIndicator.className = "wx-table-drag-indicator";
         this._dragColumnIndicator.setAttribute("aria-hidden", "true");
@@ -61,10 +84,15 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
      */
     _parseConfig(element) {
         super._parseConfig(element);
-        ["data-movable-row", "data-persist-key", "data-allow-column-remove", "data-tree-enabled", "data-tree-move-enabled", "data-columns-modal-key"]
-            .forEach((attr) => {
-                element.removeAttribute(attr);
-            });
+        const attrsToRemove = [
+            "data-movable-row", 
+            "data-persist-key", 
+            "data-allow-column-remove", 
+            "data-tree-enabled", 
+            "data-tree-move-enabled", 
+            "data-columns-modal-key"
+        ];
+        attrsToRemove.forEach(attr => element.removeAttribute(attr));
     }
 
     /**
@@ -72,6 +100,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
      */
     _initEventListeners() {
         super._initEventListeners();
+        // specific listeners for reorderable features are bound dynamically or during render
     }
 
     /**
@@ -119,7 +148,6 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
     _renderColumns() {
         const headFragment = document.createDocumentFragment();
         
-        // use div with wx-grid-row class
         const headRow = document.createElement("div");
         headRow.className = "wx-grid-row wx-grid-head-row";
         headRow.setAttribute("role", "row");
@@ -143,8 +171,11 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                 th.dataset.columnId = col.id;
                 th.setAttribute("role", "columnheader");
                 th.className = "wx-grid-header-cell wx-col-header";
-                th.style.position = "relative";
-                this._addClasses(th, col.color);
+                th.style.position = "relative"; // vital for drag indicator positioning
+                
+                if (col.color) {
+                    this._addClasses(th, col.color);
+                }
 
                 if (col.sort) {
                     th.classList.add(col.sort === "asc" ? "wx-sort-asc" : "wx-sort-desc");
@@ -161,6 +192,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                 inner.appendChild(document.createTextNode(col.label));
                 th.appendChild(inner);
 
+                // enable column d&d
                 th.draggable = true;
                 this._enableDragAndDropColumn(th, col);
 
@@ -172,8 +204,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             }
         }
 
-        this._head.textContent = "";
-        this._head.appendChild(headFragment);
+        this._head.replaceChildren(headFragment);
     }
     
     /**
@@ -188,7 +219,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "btn btn-sm";
-        btn.title = this._i18n("webexpress.webui:table.manage.columns");
+        btn.title = this._i18n("webexpress.webui:table.manage.columns", "Manage Columns");
         btn.textContent = "≡";
         btn.addEventListener("click", (e) => {
             e.preventDefault();
@@ -201,106 +232,122 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
     }
 
     /**
-     * Create dynamic modal host for columns, backed by ModalSidebarPanel and DialogPanels.
+     * Create dynamic modal host for columns, backed by ModalSidebarPanel.
      */
     _createColumnsModal() {
-        const id = "wx-table-columns-msp-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+        const id = `wx-table-columns-msp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
         const el = document.createElement("div");
         el.id = id;
-        el.setAttribute("aria-labelledby", id + "-label");
+        el.setAttribute("aria-labelledby", `${id}-label`);
         el.setAttribute("aria-hidden", "true");
-        el.setAttribute("data-key", "table-columns");
-        el.setAttribute("data-submit-id", "apply-columns");
-        el.setAttribute("data-validate-active-only", "true");
+        el.dataset.key = "table-columns";
+        el.dataset.submitId = "apply-columns";
+        el.dataset.validateActiveOnly = "true";
 
-        const title = this._i18n("webexpress.webui:table.columns.title");
-
-        el.innerHTML = [
-            `<div class="wx-modal-header">${title}</div>`,
-            `<div class="wx-modal-footer"></div>`
-        ].join("");
-
-        const footer = el.querySelector(".wx-modal-footer");
+        // build structure safely
+        const header = document.createElement("div");
+        header.className = "wx-modal-header";
+        header.textContent = this._i18n("webexpress.webui:table.columns.title", "Columns");
+        
         const content = document.createElement("div");
         content.className = "wx-modal-content";
-        if (footer && footer.parentNode) {
-            footer.parentNode.insertBefore(content, footer);
-        } else {
-            el.appendChild(content);
-        }
+        
+        const footer = document.createElement("div");
+        footer.className = "wx-modal-footer";
 
+        el.append(header, content, footer);
         document.body.appendChild(el);
 
         const modalCtrl = new webexpress.webui.ModalSidebarPanel(el);
         modalCtrl._tableCtrl = this;
 
+        // bridge modal actions to table control methods
+        this._bindModalActions(modalCtrl);
+
+        this._columnsModalEl = el;
+        this._columnsSidebarPanel = modalCtrl;
+    }
+
+    /**
+     * Helper to bind modal callback actions.
+     * @param {Object} modalCtrl Modal controller instance.
+     */
+    _bindModalActions(modalCtrl) {
         modalCtrl.getColumns = () => {
-            return this._columns.map((c) => {
-                return { id: c.id, label: c.label, visible: c.visible, width: c.width, sort: c.sort, color: c.color };
-            });
+            return this._columns.map(c => ({ 
+                id: c.id, 
+                label: c.label, 
+                visible: c.visible, 
+                width: c.width, 
+                sort: c.sort, 
+                color: c.color 
+            }));
         };
+
         modalCtrl.applyVisibility = (columnId, visible) => {
             this._runWithModalPreservation(() => {
-                const col = this._columns.find((c) => {
-                    return c.id === columnId;
-                });
+                const col = this._columns.find(c => c.id === columnId);
                 if (col) {
                     col.visible = !!visible;
                     this._schedulePersist();
                     this.render();
                 }
             });
-            this._dispatch(webexpress.webui.Event.COLUMN_VISIBILITY_EVENT, { sender: this._element, columnId, visible: !!visible });
+            this._dispatch(webexpress.webui.Event.COLUMN_VISIBILITY_EVENT, { 
+                sender: this._element, 
+                columnId, 
+                visible: !!visible 
+            });
         };
+
         modalCtrl.applyOrder = (orderedIds) => {
-            const map = new Map(this._columns.map((c) => {
-                return [c.id, c];
-            }));
+            const map = new Map(this._columns.map(c => [c.id, c]));
             const newOrder = [];
-            orderedIds.forEach((id) => {
+            
+            orderedIds.forEach(id => {
                 const col = map.get(id);
-                if (col) {
-                    newOrder.push(col);
-                }
+                if (col) newOrder.push(col);
             });
-            this._columns.forEach((c) => {
-                if (!newOrder.includes(c)) {
-                    newOrder.push(c);
-                }
+            
+            // append any missing columns (sanity check)
+            this._columns.forEach(c => {
+                if (!newOrder.includes(c)) newOrder.push(c);
             });
-            const oldIndexById = new Map(this._columns.map((c, i) => {
-                return [c.id, i];
-            }));
+
+            // remap cell data to match new column order
+            const oldIndexById = new Map(this._columns.map((c, i) => [c.id, i]));
             this._columns = newOrder;
+
             const reorderCells = (rows) => {
                 for (const row of rows) {
-                    const newCells = [];
+                    const newCells = new Array(this._columns.length);
                     for (let i = 0; i < this._columns.length; i++) {
                         const cid = this._columns[i].id;
                         const srcIdx = oldIndexById.get(cid);
-                        newCells[i] = row.cells[srcIdx];
+                        newCells[i] = row.cells[srcIdx] || { content: "" };
                     }
                     row.cells = newCells;
-                    if (row.children) {
-                        reorderCells(row.children);
-                    }
+                    if (row.children) reorderCells(row.children);
                 }
             };
+
             this._runWithModalPreservation(() => {
                 reorderCells(this._rows);
                 this._schedulePersist();
                 this.render();
             });
-            this._dispatch(webexpress.webui.Event.COLUMN_REORDER_EVENT, { sender: this._element, sourceIndex: -1, targetIndex: -1 });
-        };
-        modalCtrl.applyWidth = (columnId, widthPx) => {
-            const col = this._columns.find((c) => {
-                return c.id === columnId;
+            this._dispatch(webexpress.webui.Event.COLUMN_REORDER_EVENT, { 
+                sender: this._element, 
+                sourceIndex: -1, 
+                targetIndex: -1 
             });
-            if (!col) {
-                return;
-            }
+        };
+
+        modalCtrl.applyWidth = (columnId, widthPx) => {
+            const col = this._columns.find(c => c.id === columnId);
+            if (!col) return;
+            
             const w = parseInt(widthPx, 10);
             if (!isNaN(w) && w > 0) {
                 col.width = w;
@@ -310,23 +357,21 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                 this.render();
             });
         };
+
         modalCtrl.applySort = (columnId, dir) => {
-            this._columns.forEach((c) => {
-                if (c.id === columnId) {
-                    c.sort = dir === "asc" || dir === "desc" ? dir : null;
-                } else {
-                    c.sort = null;
-                }
+            this._columns.forEach(c => {
+                c.sort = (c.id === columnId && (dir === "asc" || dir === "desc")) ? dir : null;
             });
             this._runWithModalPreservation(() => {
                 this._schedulePersist();
                 this.render();
             });
-            this._dispatch(webexpress.webui.Event.TABLE_SORT_EVENT, { sender: this._element, columnId, dir });
+            this._dispatch(webexpress.webui.Event.TABLE_SORT_EVENT, { 
+                sender: this._element, 
+                columnId, 
+                dir 
+            });
         };
-
-        this._columnsModalEl = el;
-        this._columnsSidebarPanel = modalCtrl;
     }
 
     /**
@@ -339,9 +384,13 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         if (this._columnsSidebarPanel) {
             this._columnsSidebarPanel._tableCtrl = this;
             this._columnsSidebarPanel._columnsPrefill = {
-                columns: this._columns.map((c) => {
-                    return { id: c.id, label: c.label, visible: c.visible, width: c.width, sort: c.sort };
-                }),
+                columns: this._columns.map(c => ({ 
+                    id: c.id, 
+                    label: c.label, 
+                    visible: c.visible, 
+                    width: c.width, 
+                    sort: c.sort 
+                })),
                 filterTerm: this._columnFilterTerm || ""
             };
             if (typeof this._columnsSidebarPanel.show === "function") {
@@ -356,7 +405,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
      */
     _runWithModalPreservation(action) {
         const modal = this._columnsSidebarPanel;
-        const content = modal ? modal._contentEl || this._columnsModalEl.querySelector(".wx-modal-content") : null;
+        const content = modal ? (modal._contentEl || this._columnsModalEl.querySelector(".wx-modal-content")) : null;
         const list = content ? content.querySelector(".wx-columns-list") : null;
         const scroll = list ? list.scrollTop : 0;
         const wasOpen = modal && typeof modal.isShown === "function" ? modal.isShown() : false;
@@ -365,10 +414,13 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
 
         if (wasOpen && modal && typeof modal.show === "function") {
             modal.show();
-            const list2 = (modal._contentEl || this._columnsModalEl.querySelector(".wx-modal-content"))?.querySelector(".wx-columns-list");
-            if (list2) {
-                list2.scrollTop = scroll;
-            }
+            // restore scroll position after modal re-renders
+            requestAnimationFrame(() => {
+                const list2 = (modal._contentEl || this._columnsModalEl.querySelector(".wx-modal-content"))?.querySelector(".wx-columns-list");
+                if (list2) {
+                    list2.scrollTop = scroll;
+                }
+            });
         }
     }
 
@@ -379,69 +431,85 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
      */
     _enableDragAndDropColumn(th, column) {
         th.addEventListener("dragstart", (e) => {
-            if (!e.ctrlKey) {
-                e.preventDefault();
-                return;
+            // Require Ctrl key for dragging columns to prevent accidental moves
+            // or if a specific handle isn't used.
+            if (!e.ctrlKey && !e.target.closest(".wx-col-drag-handle")) {
+                // optional: allow if we introduce a dedicated handle later
+                // for now require ctrl key or let it be strict
+                if (!e.ctrlKey) {
+                    e.preventDefault();
+                    return;
+                }
             }
             this._draggedColumn = column;
+            e.dataTransfer.effectAllowed = "move";
         });
+
         th.addEventListener("dragend", () => {
             this._dragColumnIndicator.style.display = "none";
             this._draggedColumn = null;
         });
+
         th.addEventListener("dragover", (e) => {
-            if (!this._draggedColumn) {
-                return;
-            }
+            if (!this._draggedColumn) return;
+            
             e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+
             const rect = th.getBoundingClientRect();
             const leftSide = e.clientX < rect.left + th.offsetWidth / 2;
+            
             this._dragColumnIndicator.style.top = `${rect.top}px`;
             this._dragColumnIndicator.style.left = `${(leftSide ? rect.left - 1 : rect.left + th.offsetWidth - 1)}px`;
             this._dragColumnIndicator.style.height = `${rect.height}px`;
             this._dragColumnIndicator.style.display = "block";
         });
+
         th.addEventListener("drop", (e) => {
             e.preventDefault();
-            if (!this._draggedColumn || this._draggedColumn === column) {
-                return;
-            }
+            if (!this._draggedColumn || this._draggedColumn === column) return;
 
             const sourceIndex = this._columns.indexOf(this._draggedColumn);
             const targetIndex = this._columns.indexOf(column);
+            
             const rect = th.getBoundingClientRect();
             const insertBefore = e.clientX < rect.left + th.offsetWidth / 2;
+            
             let adjusted = targetIndex;
             if (insertBefore && sourceIndex < targetIndex) {
                 adjusted -= 1;
             } else if (!insertBefore && sourceIndex > targetIndex) {
                 adjusted += 1;
             }
-            if (sourceIndex === adjusted) {
-                return;
-            }
+            
+            if (sourceIndex === adjusted) return;
 
+            // Move column in definition
             const moved = this._columns.splice(sourceIndex, 1)[0];
             this._columns.splice(adjusted, 0, moved);
 
+            // Reorder actual cell data in rows to match definition
             const reorderCells = (rows) => {
                 for (const row of rows) {
                     if (row.cells && row.cells.length > sourceIndex) {
                         const c = row.cells.splice(sourceIndex, 1)[0];
                         row.cells.splice(adjusted, 0, c);
                     }
-                    if (row.children) {
-                        reorderCells(row.children);
-                    }
+                    if (row.children) reorderCells(row.children);
                 }
             };
+
             this._runWithModalPreservation(() => {
                 reorderCells(this._rows);
                 this._schedulePersist();
                 this.render();
             });
 
-            this._dispatch(webexpress.webui.Event.COLUMN_REORDER_EVENT, { sender: this._element, sourceIndex, targetIndex: adjusted });
+            this._dispatch(webexpress.webui.Event.COLUMN_REORDER_EVENT, { 
+                sender: this._element, 
+                sourceIndex, 
+                targetIndex: adjusted 
+            });
         });
     }
 
@@ -463,8 +531,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         if (this._rows.length) {
             renderList(this._rows, 0);
         }
-        this._body.textContent = "";
-        this._body.appendChild(fragment);
+        this._body.replaceChildren(fragment);
     }
 
     /**
@@ -481,10 +548,20 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         tr.className = "wx-grid-row";
         tr.setAttribute("role", "row");
         
-        this._addClasses(tr, row.color);
-        this._addClasses(tr, row.class);
+        if (row.color) {
+            this._addClasses(tr, row.color);
+        }
+        if (row.class) {
+            this._addClasses(tr, row.class);
+        }
         if (row.style) {
             tr.style.cssText = row.style;
+        }
+
+        // restore selection state (if base controller supports selectedRow)
+        if (this._selectedRow === row) {
+            tr.classList.add("active");
+            tr.setAttribute("aria-selected", "true");
         }
 
         const key = this._getRowKey(row);
@@ -507,6 +584,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             tdDrag.textContent = "⠿";
             tdDrag.tabIndex = 0;
             tdDrag.setAttribute("role", "button");
+            tdDrag.style.cursor = "grab";
             tdDrag.style.userSelect = "none";
             tr.appendChild(tdDrag);
         }
@@ -524,27 +602,22 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             td.className = "wx-grid-cell";
             td.setAttribute("role", "gridcell");
             
-            td.style.overflow = "hidden";
-
             const cell = row.cells[i];
 
             if (cell) {
-                this._addClasses(td, cell.color);
-                this._addClasses(td, cell.class);
-                if (cell.style) {
-                    td.style.cssText += (td.style.cssText ? "; " : "") + cell.style;
-                }
+                if (cell.color) this._addClasses(td, cell.color);
+                if (cell.class) this._addClasses(td, cell.class);
+                if (cell.style) td.style.cssText += (td.style.cssText ? "; " : "") + cell.style;
 
                 let content = this._renderCell(row, colDef, cell, firstVisible);
 
+                // wrap content if first column has link/icon
                 if (firstVisible && (row.uri || row.icon)) {
                     const wrap = row.uri ? document.createElement("a") : document.createElement("span");
                     wrap.className = "wx-cell-content";
                     if (row.uri) {
                         wrap.href = row.uri;
-                        if (row.target) {
-                            wrap.target = row.target;
-                        }
+                        if (row.target) wrap.target = row.target;
                         wrap.rel = "noopener noreferrer";
                     }
                     if (row.icon) {
@@ -585,8 +658,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                 div.dataset.size = "btn-sm";
                 div.dataset.border = "false";
                 tdOpt.appendChild(div);
-                const items = row.options?.length ? row.options : this._options;
-                new webexpress.webui.DropdownCtrl(div).items = items;
+                new webexpress.webui.DropdownCtrl(div).items = effectiveOptions;
             }
             tr.appendChild(tdOpt);
         }
@@ -606,19 +678,16 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         const parts = [];
         
         if (this._movableRow) {
-            parts.push("1.25rem");
+            parts.push("1.5rem"); // Handle width
         }
         
-        const visibleCols = this._columns.filter((c) => {
-            return c.visible;
-        });
+        const visibleCols = this._columns.filter(c => c.visible);
         const lastVisibleId = visibleCols.length > 0 ? visibleCols[visibleCols.length - 1].id : null;
 
         for (const c of this._columns) {
-            if (!c.visible) {
-                continue;
-            }
+            if (!c.visible) continue;
 
+            // Last column takes remaining space
             if (c.id === lastVisibleId) {
                 const min = c.minWidth || `${webexpress.webui.TableCtrl.MIN_COL_WIDTH}px`;
                 parts.push(`minmax(${min}, 1fr)`);
@@ -626,7 +695,6 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             }
 
             let val = "1fr";
-
             if (c.width !== null && c.width !== "") {
                 const wStr = String(c.width).trim();
                 if (wStr === "auto") {
@@ -651,7 +719,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         }
         
         if (this._hasOptions || this._allowColumnRemove) {
-            parts.push("1.5rem");
+            parts.push("1.5rem"); // Actions width
         }
         
         const template = parts.length > 0 ? parts.join(" ") : "auto";
@@ -663,22 +731,14 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
      * Uses event delegation on the body for better performance.
      */
     _bindRowHandles() {
-        if (!this._movableRow) {
-            return;
-        }
-
-        if (this._rowHandlesBound) {
+        if (!this._movableRow || this._rowHandlesBound) {
             return;
         }
         
         // bind event delegation to body only once
         this._body.addEventListener("mousedown", (e) => {
             const handle = e.target.closest(".wx-table-drag-handle");
-            if (!handle) {
-                return;
-            }
-
-            if (e.button !== 0) {
+            if (!handle || e.button !== 0) {
                 return;
             }
             
@@ -686,22 +746,18 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             if (!tr || !tr._dataRowRef) {
                 return;
             }
+            
             e.preventDefault();
-
             this._beginRowMove(tr._dataRowRef, tr, e.clientX, e.clientY);
             
             const onMove = (ev) => {
-                if (!this._rowMoveActive) {
-                    return;
-                }
+                if (!this._rowMoveActive) return;
                 ev.preventDefault();
                 this._updateRowMove(ev.clientX, ev.clientY);
             };
 
             const onUp = (ev) => {
-                if (!this._rowMoveActive) {
-                    return;
-                }
+                if (!this._rowMoveActive) return;
                 ev.preventDefault();
                 document.removeEventListener("mousemove", onMove);
                 document.removeEventListener("mouseup", onUp);
@@ -734,17 +790,19 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
 
         const ghost = document.createElement("div");
         ghost.className = "wx-row-ghost";
-        ghost.style.position = "fixed";
-        ghost.style.left = `${startX + 8}px`;
-        ghost.style.top = `${startY + 8}px`;
-        ghost.style.pointerEvents = "none";
-        ghost.style.padding = "2px 6px";
-        ghost.style.background = "rgba(33, 150, 243, 0.15)";
-        ghost.style.border = "1px solid rgba(33, 150, 243, 0.6)";
-        ghost.style.borderRadius = "4px";
-        ghost.style.fontSize = "12px";
-        ghost.style.zIndex = "2147483647";
-        ghost.textContent = (row.id ? `Row: ${row.id}` : "Row") + " moving";
+        ghost.style.cssText = `
+            position: fixed;
+            left: ${startX + 8}px;
+            top: ${startY + 8}px;
+            pointer-events: none;
+            padding: 2px 6px;
+            background: rgba(var(--bs-primary-rgb), 0.15);
+            border: 1px solid rgba(var(--bs-primary-rgb), 0.6);
+            border-radius: 4px;
+            font-size: 12px;
+            z-index: 2147483647;
+        `;
+        ghost.textContent = row.id ? `Row: ${row.id}` : this._i18n("webexpress.webui:table.moving_item", "Moving Item");
         document.body.appendChild(ghost);
         this._rowMoveGhost = ghost;
 
@@ -799,13 +857,9 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         this._lastHoverTr = tr;
 
         if (!tr || !tr._dataRowRef || tr._dataRowRef === this._rowMoveSourceRow) {
-            if (this._rowMovePlaceholder) {
-                this._rowMovePlaceholder.style.display = "";
-            }
+            if (this._rowMovePlaceholder) this._rowMovePlaceholder.style.display = "";
             this._rowMoveTarget = null;
-            if (tr) {
-                tr.classList.remove("wx-drag-over");
-            }
+            if (tr) tr.classList.remove("wx-drag-over");
             return;
         }
 
@@ -824,14 +878,11 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
 
         if (canDropAsChild && relY > zoneTop && relY < zoneBottom) {
             this._rowMoveTarget = { mode: "child", row: tr._dataRowRef };
-            if (this._rowMovePlaceholder) {
-                this._rowMovePlaceholder.style.display = "none";
-            }
+            if (this._rowMovePlaceholder) this._rowMovePlaceholder.style.display = "none";
         } else {
-            if (this._rowMovePlaceholder) {
-                this._rowMovePlaceholder.style.display = "";
-            }
+            if (this._rowMovePlaceholder) this._rowMovePlaceholder.style.display = "";
             this._rowMoveTarget = { mode: relY <= zoneTop ? "before" : "after", row: tr._dataRowRef };
+            
             if (this._rowMovePlaceholder) {
                 if (this._rowMoveTarget.mode === "before") {
                     tr.before(this._rowMovePlaceholder);
@@ -845,7 +896,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             this._hoverExpandTimer = setTimeout(() => {
                 tr._dataRowRef.expanded = true;
                 this.render();
-            }, 2000);
+            }, 1000);
         }
     }
 
@@ -872,61 +923,32 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             this._rowMoveGhost.remove();
             this._rowMoveGhost = null;
         }
+        
         const ph = this._rowMovePlaceholder;
+        let derivedTarget = null;
 
-        const deriveTargetFromPlaceholder = () => {
-            if (!ph || !ph.parentNode) {
-                return null;
-            }
-            const prevRow = (() => {
-                let el = ph.previousElementSibling;
-                while (el && !el.classList.contains("wx-grid-row")) {
-                    el = el.previousElementSibling;
-                }
-                return el && el.classList.contains("wx-grid-row") ? el : null;
-            })();
-            const nextRow = (() => {
-                let el = ph.nextElementSibling;
-                while (el && !el.classList.contains("wx-grid-row")) {
-                    el = el.nextElementSibling;
-                }
-                return el && el.classList.contains("wx-grid-row") ? el : null;
-            })();
+        // Try to guess target from placeholder position if explicit target is missing
+        if (!this._rowMoveTarget && ph && ph.parentNode) {
+            const getRow = (node) => node && node.classList.contains("wx-grid-row") ? node : null;
+            const prevRow = getRow(ph.previousElementSibling);
+            const nextRow = getRow(ph.nextElementSibling);
 
             let targetParent = null;
+            let insertIndex = 0;
+
             if (prevRow && prevRow._dataRowRef) {
                 targetParent = prevRow._dataRowRef.parent || null;
+                const siblings = targetParent ? targetParent.children : this._rows;
+                const idx = siblings.indexOf(prevRow._dataRowRef);
+                if (idx >= 0) insertIndex = idx + 1;
             } else if (nextRow && nextRow._dataRowRef) {
                 targetParent = nextRow._dataRowRef.parent || null;
+                const siblings = targetParent ? targetParent.children : this._rows;
+                const idx = siblings.indexOf(nextRow._dataRowRef);
+                if (idx >= 0) insertIndex = idx;
             }
-
-            const siblings = targetParent ? targetParent.children : this._rows;
-            if (!Array.isArray(siblings)) {
-                return null;
-            }
-
-            if (prevRow && prevRow._dataRowRef) {
-                const idxPrev = siblings.indexOf(prevRow._dataRowRef);
-                if (idxPrev >= 0) {
-                    return { targetParent, insertIndex: idxPrev + 1 };
-                }
-            }
-            if (nextRow && nextRow._dataRowRef) {
-                const idxNext = siblings.indexOf(nextRow._dataRowRef);
-                if (idxNext >= 0) {
-                    return { targetParent, insertIndex: idxNext };
-                }
-            }
-            return { targetParent, insertIndex: 0 };
-        };
-
-        if (!this._rowMoveTarget) {
-            const derived = deriveTargetFromPlaceholder();
-            if (derived) {
-                this._rowMoveTarget = { mode: "derived", row: null };
-                this._rowMoveDerivedTargetParent = derived.targetParent;
-                this._rowMoveDerivedInsertIndex = derived.insertIndex;
-            }
+            
+            derivedTarget = { targetParent, insertIndex };
         }
 
         if (this._rowMovePlaceholder) {
@@ -936,88 +958,65 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
 
         const moving = this._rowMoveSourceRow;
         if (!moving) {
-            this._applyDragSourceVisual(false);
-            this._rowMoveActive = false;
+            this._resetMoveState();
             return;
         }
 
         let targetParent = null;
         let insertIndex = 0;
 
-        if (this._rowMoveTarget && this._rowMoveTarget.mode === "child" && this._treeMoveEnabled && this._treeEnabled) {
+        if (this._rowMoveTarget && this._rowMoveTarget.mode === "child") {
             const targetRow = this._rowMoveTarget.row;
             if (targetRow === moving) {
-                this._applyDragSourceVisual(false);
-                this._rowMoveActive = false;
+                this._resetMoveState();
                 return;
             }
             targetParent = targetRow;
-            if (!Array.isArray(targetParent.children)) {
-                targetParent.children = [];
-            }
+            if (!Array.isArray(targetParent.children)) targetParent.children = [];
             insertIndex = targetParent.children.length;
             targetParent.expanded = true;
             this._isTree = true;
-        } else if (this._rowMoveTarget && (this._rowMoveTarget.mode === "before" || this._rowMoveTarget.mode === "after")) {
+        } else if (this._rowMoveTarget) {
             const targetRow = this._rowMoveTarget.row;
             const siblings = targetRow.parent ? targetRow.parent.children : this._rows;
             const baseIndex = siblings.indexOf(targetRow);
             insertIndex = this._rowMoveTarget.mode === "before" ? baseIndex : baseIndex + 1;
             targetParent = targetRow.parent || null;
-        } else if (this._rowMoveTarget && this._rowMoveTarget.mode === "derived") {
-            targetParent = this._rowMoveDerivedTargetParent || null;
-            insertIndex = this._rowMoveDerivedInsertIndex || 0;
-        } else {
-            targetParent = null;
-            insertIndex = 0;
+        } else if (derivedTarget) {
+            targetParent = derivedTarget.targetParent;
+            insertIndex = derivedTarget.insertIndex;
         }
 
+        // prevent dropping into own descendants
         if (targetParent && this._isDescendant(targetParent, moving)) {
-            this._applyDragSourceVisual(false);
-            this._rowMoveActive = false;
+            this._resetMoveState();
             return;
         }
 
+        // remove from old position
         const oldParent = this._rowMoveSourceParent;
         const oldSiblings = oldParent ? oldParent.children : this._rows;
         const oldIndex = oldSiblings.indexOf(moving);
+        
         if (oldIndex === -1) {
-            this._applyDragSourceVisual(false);
-            this._rowMoveActive = false;
+            this._resetMoveState();
             return;
         }
 
         const [removed] = oldSiblings.splice(oldIndex, 1);
-        if (!removed) {
-            this._applyDragSourceVisual(false);
-            this._rowMoveActive = false;
-            return;
-        }
-
+        
+        // adjust index if staying in same list and moving down
         const newSiblings = targetParent ? targetParent.children : this._rows;
         if (oldSiblings === newSiblings && oldIndex < insertIndex) {
             insertIndex--;
         }
-        if (insertIndex < 0) {
-            insertIndex = 0;
-        }
-        if (insertIndex > newSiblings.length) {
-            insertIndex = newSiblings.length;
-        }
+        
+        // clamp index
+        insertIndex = Math.max(0, Math.min(insertIndex, newSiblings.length));
 
+        // insert at new position
         newSiblings.splice(insertIndex, 0, removed);
         removed.parent = targetParent;
-
-        this._rowMoveActive = false;
-        this._rowMoveSourceRow = null;
-        this._rowMoveSourceParent = null;
-        this._rowMoveTarget = null;
-        this._rowMoveDerivedTargetParent = null;
-        this._rowMoveDerivedInsertIndex = null;
-
-        this._applyDragSourceVisual(false);
-        this._schedulePersist();
-        this.render();
 
         this._dispatch(webexpress.webui.Event.ROW_REORDER_EVENT, {
             sender: this._element,
@@ -1026,44 +1025,39 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             rowId: removed.id,
             toIndex: insertIndex
         });
+
+        this._resetMoveState();
+        this._schedulePersist();
+        this.render();
+    }
+
+    /**
+     * Resets internal move state flags.
+     */
+    _resetMoveState() {
+        this._applyDragSourceVisual(false);
+        this._rowMoveActive = false;
+        this._rowMoveSourceRow = null;
+        this._rowMoveSourceParent = null;
+        this._rowMoveTarget = null;
+        this._rowMoveDerivedTargetParent = null;
+        this._rowMoveDerivedInsertIndex = null;
     }
 
     /**
      * Returns all columns that are currently marked as visible.
-     *
      * @returns {Array<Object>} The list of visible columns.
      */
     _getVisibleColumns() { 
-        return this._columns.filter((c) => {
-            return c.visible;
-        }); 
+        return this._columns.filter(c => c.visible); 
     }
 
     /**
-     * Applies a text-based filter to the column selection menu.
-     * Hides menu items whose ID or label does not match the filter term.
-     *
-     * @param {HTMLElement} menuEl - The menu element containing column items.
-     */
-    _applyColumnFilter(menuEl) {
-        const term = (this._columnFilterTerm || "").toLowerCase();
-        const items = menuEl.querySelectorAll(".wx-col-item");
-        items.forEach((it) => {
-            const id = it.dataset.columnId || "";
-            const label = it.querySelector(".wx-form-check span")?.textContent || "";
-            const hay = `${id} ${label}`.toLowerCase();
-            it.style.display = (!term || hay.includes(term)) ? "" : "none";
-        });
-    }
-
-    /**
-     * Schedules a debounced persistence update. Ensures that state is not
-     * written to the cookie too frequently.
+     * Schedules a debounced persistence update.
      */
     _schedulePersist() {
-        if (!this._persistKey) {
-            return;
-        }
+        if (!this._persistKey) return;
+        
         if (this._saveDebounceTimer) {
             clearTimeout(this._saveDebounceTimer);
         }
@@ -1073,8 +1067,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
     }
 
     /**
-     * Persists the current table state (column order, visibility, widths,
-     * sort configuration, and collapsed tree nodes) into a cookie.
+     * Persists the current table state into a cookie.
      */
     _persistState() {
         const collapsed = [];
@@ -1082,104 +1075,80 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         while (stack.length) {
             const r = stack.pop();
             if (r.id && r.children?.length) {
-                if (!r.expanded) {
-                    collapsed.push(r.id);
-                }
+                if (!r.expanded) collapsed.push(r.id);
                 for (let i = 0; i < r.children.length; i++) {
                     stack.push(r.children[i]);
                 }
             }
         }
 
-        const sortCol = this._columns.find((c) => {
-            return c.sort;
-        });
+        const sortCol = this._columns.find(c => c.sort);
         const state = {
             v: 1,
-            cols: this._columns.map((c) => {
-                return { id: c.id, visible: c.visible, width: c.width };
-            }),
-            order: this._columns.map((c) => {
-                return c.id;
-            }),
+            cols: this._columns.map(c => ({ id: c.id, visible: c.visible, width: c.width })),
+            order: this._columns.map(c => c.id),
             sort: sortCol ? { id: sortCol.id, dir: sortCol.sort } : null,
             tree: { collapsed }
         };
 
+        // SameSite=Lax is standard, max-age 1 year
         document.cookie = `${this._persistKey}=${encodeURIComponent(JSON.stringify(state))}; path=/; SameSite=Lax; max-age=31536000`;
     }
 
     /**
-     * Loads a previously persisted table state from a cookie and applies it
-     * to the current column configuration, sort state, and tree expansion.
+     * Loads a previously persisted table state from a cookie.
      */
     _loadStateFromCookie() {
-        if (!this._persistKey) {
-            return;
-        }
+        if (!this._persistKey) return;
+        
         const match = document.cookie.match(new RegExp(`(^| )${this._persistKey}=([^;]+)`));
-        if (!match) {
-            return;
-        }
+        if (!match) return;
 
         try {
             const obj = JSON.parse(decodeURIComponent(match[2]));
-            if (!obj || obj.v !== 1) {
-                return;
-            }
+            if (!obj || obj.v !== 1) return;
 
-            const colMap = new Map(this._columns.map((c) => {
-                return [c.id, c];
-            }));
+            const colMap = new Map(this._columns.map(c => [c.id, c]));
 
+            // Restore Order
             if (Array.isArray(obj.order)) {
                 const newOrder = [];
-                obj.order.forEach((id) => {
+                obj.order.forEach(id => {
                     const col = colMap.get(id);
-                    if (col) {
-                        newOrder.push(col);
-                    }
+                    if (col) newOrder.push(col);
                 });
-                this._columns.forEach((c) => {
-                    if (!newOrder.includes(c)) {
-                        newOrder.push(c);
-                    }
+                // append unknown new columns
+                this._columns.forEach(c => {
+                    if (!newOrder.includes(c)) newOrder.push(c);
                 });
                 this._columns = newOrder;
             }
 
+            // Restore Settings (visibility, width)
             if (obj.cols) {
-                obj.cols.forEach((s) => {
+                obj.cols.forEach(s => {
                     const c = colMap.get(s.id);
                     if (c) {
-                        if (typeof s.visible === "boolean") {
-                            c.visible = s.visible;
-                        }
-                        if (s.width) {
-                            c.width = parseInt(s.width, 10);
-                        }
+                        if (typeof s.visible === "boolean") c.visible = s.visible;
+                        if (s.width) c.width = parseInt(s.width, 10);
                     }
                 });
             }
 
+            // Restore Sort
             if (obj.sort?.id) {
                 const c = colMap.get(obj.sort.id);
-                if (c) {
-                    c.sort = obj.sort.dir;
-                }
+                if (c) c.sort = obj.sort.dir;
             }
 
+            // Restore Tree state
             if (obj.tree?.collapsed) {
                 const set = new Set(obj.tree.collapsed);
-                const stack2 = [...this._rows];
-                while (stack2.length) {
-                    const r = stack2.pop();
-                    if (set.has(r.id)) {
-                        r.expanded = false;
-                    }
-                    if (r.children) {
-                        stack2.push(...r.children);
-                    }
+                const stack = [...this._rows];
+                while (stack.length) {
+                    const r = stack.pop();
+                    if (set.has(r.id)) r.expanded = false;
+                    if (r.children) stack.push(...r.children);
                 }
             }
         } catch (e) { /* ignore */ }
@@ -1194,9 +1163,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
     _isDescendant(candidate, ancestor) {
         let p = candidate.parent;
         while (p) {
-            if (p === ancestor) {
-                return true;
-            }
+            if (p === ancestor) return true;
             p = p.parent;
         }
         return false;
@@ -1207,9 +1174,8 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
      * @param {boolean} active Whether dragging is active.
      */
     _applyDragSourceVisual(active) {
-        if (!this._rowMoveSourceEl) {
-            return;
-        }
+        if (!this._rowMoveSourceEl) return;
+        
         if (active) {
             this._rowMoveSourceEl.classList.add("wx-dragging");
         } else {

@@ -1,15 +1,43 @@
 /**
  * A split control for resizable container panels.
  * Persists side size and collapsed state via a single cookie (when the element has an id).
+ * 
+ * Features:
+ * - Supports horizontal and vertical orientation.
+ * - Persistent state via cookies.
+ * - Min/Max constraints.
+ * - Collapsible side pane (double click or drag beyond threshold).
+ * - Automatic resizing via ResizeObserver.
+ * 
  * The following events are triggered:
  * - webexpress.webui.Event.SIZE_CHANGE_EVENT
  * - webexpress.webui.Event.HIDE_EVENT
  * - webexpress.webui.Event.SHOW_EVENT
  */
 webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
+    
+    // config
+    _orientation = "horizontal";
+    _minSide = null;
+    _maxSide = null;
+    _paneOrder = "side-main";
+    _unit = "px";
+    
+    // state
+    _sideSize = 0;
     _sidePaneCollapsed = false;
     _sidePanePrevSize = null;
-    _collapseThreshold = 10; // collapse 10px before reaching minimum
+    _collapseThreshold = 20; 
+    _dragging = false;
+    _sideRatioMode = false;
+    _initialRatio = null;
+    _cookieName = null;
+
+    // elements
+    _sidePane = null;
+    _mainPane = null;
+    _splitter = null;
+    _resizeObserver = null;
 
     /**
      * Constructor
@@ -18,654 +46,475 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     constructor(element) {
         super(element);
 
-        // read configuration from attributes
-        this._orientation = element.getAttribute("data-orientation") === "vertical" ? "vertical" : "horizontal";
-        this._minSide = element.hasAttribute("data-min-side") ? parseInt(element.getAttribute("data-min-side"), 10) : null;
-        this._maxSide = element.hasAttribute("data-max-side") ? parseInt(element.getAttribute("data-max-side"), 10) : null;
-        this._initialSideAttr = element.getAttribute("data-size");
-        this._splitClass = element.getAttribute("data-splitter-class") || null;
-        this._splitStyle = element.getAttribute("data-splitter-style") || null;
-        this._splitterSize = element.getAttribute("data-splitter-size") || null;
-        this._paneOrder = element.getAttribute("data-order") || "side-main";
+        this._readConfig(element);
+        this._setupDom(element);
+        this._initEvents();
         
-        // read unit from data-unit attribute, values can be: 'px', 'em', 'rem', '%', default is 'px'
-        this._unit = element.getAttribute("data-unit") || "px";
+        // restore state or set initial defaults
+        this._restoreState(element);
+    }
 
-        // detect ratio mode when initial attribute uses '%'
-        this._sideRatioMode = false;
-        this._initialRatio = null;
+    /**
+     * Reads configuration from data attributes.
+     * @param {HTMLElement} element Host element.
+     */
+    _readConfig(element) {
+        this._orientation = element.getAttribute("data-orientation") === "vertical" ? "vertical" : "horizontal";
+        this._minSide = this._parseAttrInt(element, "data-min-side");
+        this._maxSide = this._parseAttrInt(element, "data-max-side");
+        this._paneOrder = element.getAttribute("data-order") || "side-main";
+        this._unit = element.getAttribute("data-unit") || "px";
         
-        if (typeof this._initialSideAttr === "string") {
-            const s = this._initialSideAttr.trim();
-            if (s.endsWith("%")) {
-                const p = parseFloat(s);
-                if (!isNaN(p)) {
-                    this._sideRatioMode = true;
-                    this._initialRatio = Math.max(0, p) / 100;
-                }
+        // parse initial size
+        const sizeAttr = element.getAttribute("data-size");
+        if (typeof sizeAttr === "string" && sizeAttr.trim().endsWith("%")) {
+            const p = parseFloat(sizeAttr);
+            if (!isNaN(p)) {
+                this._sideRatioMode = true;
+                this._initialRatio = Math.max(0, p) / 100;
             }
         }
+        this._initialSideAttr = sizeAttr; // Store raw for fallback parsing
 
-        // get panes from dom
-        const children = Array.from(element.children);
-        this._sidePane = children.find((child) => {
-            return child.classList.contains("wx-side-pane");
-        }) || children[0]; // fallback to first child
-        
-        if (this._sidePane) {
-            this._detachElement(this._sidePane);
-        }
+        // determine cookie name
+        this._cookieName = element.id ? `wx-split-${element.id}` : null;
 
-        this._mainPane = children.find((child) => {
-            return child.classList.contains("wx-main-pane");
-        }) || children[1]; // fallback to second child
-        
-        if (this._mainPane) {
-            this._detachElement(this._mainPane);
-        }
-
-        // cleanup dom attributes
-        const attrsToRemove = [
+        // cleanup attributes
+        const attrs = [
             "data-orientation", "data-min-side", "data-max-side", "data-size",
             "data-splitter-class", "data-splitter-style", "data-splitter-size",
             "data-order", "data-unit"
         ];
-        attrsToRemove.forEach((attr) => {
-            element.removeAttribute(attr);
-        });
+        attrs.forEach(attr => element.removeAttribute(attr));
+    }
 
-        // set base classes
+    /**
+     * Set up the DOM structure (panes, splitter).
+     * @param {HTMLElement} element Host element.
+     */
+    _setupDom(element) {
+        // identify panes
+        const children = Array.from(element.children);
+        this._sidePane = children.find(c => c.classList.contains("wx-side-pane")) || children[0];
+        this._mainPane = children.find(c => c.classList.contains("wx-main-pane")) || children.find(c => c !== this._sidePane);
+
+        // apply base classes
         element.classList.remove("wx-webui-split");
-        element.classList.add("wx-split");
-        if (this._orientation === "vertical") {
-            element.classList.add("wx-split-vertical");
-        } else {
-            element.classList.add("wx-split-horizontal");
-        }
+        element.classList.add("wx-split", `wx-split-${this._orientation}`);
 
-        // create splitter and insert between panes
+        // create splitter
         this._splitter = document.createElement("div");
-        this._splitter.classList.add("wx-splitter");
+        this._splitter.className = `wx-splitter wx-splitter-${this._orientation}`;
+        
         const indicator = document.createElement("div");
-        indicator.classList.add("wx-splitter-indicator");
-
-        // set the correct splitter orientation class
-        if (this._orientation === "vertical") {
-            this._splitter.classList.add("wx-splitter-vertical");
-            indicator.classList.add("wx-splitter-indicator-vertical");
-        } else {
-            this._splitter.classList.add("wx-splitter-horizontal");
-            indicator.classList.add("wx-splitter-indicator-horizontal");
-        }
-
+        indicator.className = `wx-splitter-indicator wx-splitter-indicator-${this._orientation}`;
         this._splitter.appendChild(indicator);
 
-        // arrange panes and splitter in correct order in dom
+        // apply custom splitter styles
+        const customClass = element.getAttribute("data-splitter-class");
+        if (customClass) this._splitter.classList.add(...customClass.split(/\s+/));
+        
+        const customStyle = element.getAttribute("data-splitter-style");
+        if (customStyle) this._splitter.style.cssText += customStyle;
+
+        const customSize = element.getAttribute("data-splitter-size");
+        if (customSize) {
+            const prop = this._orientation === "vertical" ? "height" : "width";
+            this._splitter.style[prop] = `${customSize}px`;
+        }
+
+        // reorder dom
+        const fragment = document.createDocumentFragment();
         if (this._paneOrder === "main-side") {
-            if (this._mainPane) { element.appendChild(this._mainPane); }
-            element.appendChild(this._splitter);
-            if (this._sidePane) { element.appendChild(this._sidePane); }
+            if (this._mainPane) fragment.appendChild(this._mainPane);
+            fragment.appendChild(this._splitter);
+            if (this._sidePane) fragment.appendChild(this._sidePane);
         } else {
-            if (this._sidePane) { element.appendChild(this._sidePane); }
-            element.appendChild(this._splitter);
-            if (this._mainPane) { element.appendChild(this._mainPane); }
+            if (this._sidePane) fragment.appendChild(this._sidePane);
+            fragment.appendChild(this._splitter);
+            if (this._mainPane) fragment.appendChild(this._mainPane);
         }
+        element.replaceChildren(fragment);
 
-        // set splitter class if data-splitter-class is set
-        if (this._splitClass) {
-            this._splitter.classList.add(...this._splitClass.split(/\s+/));
-        }
+        // scroll settings
+        if (this._mainPane) this._mainPane.style.overflow = "auto";
+    }
 
-        // set splitter style if data-splitter-style is set
-        if (this._splitStyle) {
-            this._splitter.style.cssText += ";" + this._splitStyle;
-        }
-
-        // set splitter size if data-splitter-size is set
-        if (this._splitterSize) {
-            if (this._orientation === "vertical") {
-                this._splitter.style.height = `${this._splitterSize}px`;
-            } else {
-                this._splitter.style.width = `${this._splitterSize}px`;
-            }
-        }
-
-        // single cookie name unique per element (only if id exists)
-        this._cookieName = element.id ? ("wx-split-" + element.id) : null;
-
-        // read initial state from cookie v1 (no migration)
+    /**
+     * Restore state from cookie or calculate initial values.
+     * @param {HTMLElement} element Host element.
+     */
+    _restoreState(element) {
         const state = this._getStateFromCookie();
+        
+        let initialSide = (state && typeof state.size === "number") 
+            ? state.size 
+            : this._parseInitialSideSize(this._initialSideAttr);
 
-        // set initial side size: cookie.size > data-size > minSide > half, respect min/max
-        let initialSide = (state && typeof state.size === "number") ? state.size : this._parseInitialSideSize(this._initialSideAttr);
-        
+        // default fallback: 50%
         if (initialSide == null) {
-            initialSide = Math.floor((this._orientation === "vertical" ? element.clientHeight : element.clientWidth) / 2);
+            const dim = this._orientation === "vertical" ? element.clientHeight : element.clientWidth;
+            initialSide = Math.floor(dim / 2);
         }
-        if (this._minSide !== null) {
-            initialSide = Math.max(initialSide, this._minSide);
-        }
-        if (this._maxSide !== null) {
-            initialSide = Math.min(initialSide, this._maxSide);
-        }
-        
+
+        // apply constraints immediately
+        if (this._minSide !== null) initialSide = Math.max(this._minSide, initialSide);
+        if (this._maxSide !== null) initialSide = Math.min(this._maxSide, initialSide);
+
         this._sideSize = initialSide;
         this._setPaneSizes(this._sideSize);
 
-        // restore collapsed state from cookie if available
+        // apply collapse state
         if (state && state.collapsed === true) {
-            // collapse after initial sizing so previous size can be captured
             this.collapseSidePane();
-        }
-
-        // make panes scrollable only if content is too large
-        if (this._mainPane) {
-            this._mainPane.style.overflow = "auto";
-        }
-
-        // handle splitter drag
-        this._splitter.addEventListener("mousedown", (e) => {
-            e.preventDefault();
-            this._dragging = true;
-            // disable ratio mode once the user interacts manually
-            this._sideRatioMode = false;
-            document.body.classList.add("wx-split-noselect");
-
-            const rect = this._element.getBoundingClientRect();
-            let offset;
-            
-            if (this._orientation === "vertical") {
-                if (this._paneOrder === "main-side") {
-                    offset = (rect.bottom - e.clientY) - this._sidePane.offsetHeight;
-                } else {
-                    offset = e.clientY - (rect.top + this._sidePane.offsetHeight);
-                }
-            } else {
-                if (this._paneOrder === "main-side") {
-                    offset = (rect.right - e.clientX) - this._sidePane.offsetWidth;
-                } else {
-                    offset = e.clientX - (rect.left + this._sidePane.offsetWidth);
-                }
-            }
-
-            const onDrag = (ev) => {
-                if (!this._dragging) {
-                    return;
-                }
-                const currentRect = this._element.getBoundingClientRect();
-                let newSideSize;
-                
-                if (this._orientation === "vertical") {
-                    if (this._paneOrder === "main-side") {
-                        newSideSize = currentRect.bottom - ev.clientY - offset;
-                    } else {
-                        newSideSize = ev.clientY - currentRect.top - offset;
-                    }
-                } else {
-                    if (this._paneOrder === "main-side") {
-                        newSideSize = currentRect.right - ev.clientX - offset;
-                    } else {
-                        newSideSize = ev.clientX - currentRect.left - offset;
-                    }
-                }
-
-                // check collapse threshold before applying min clamp
-                let willCollapse = false;
-                if (this._minSide !== null) {
-                    if (newSideSize <= (this._minSide + this._collapseThreshold)) {
-                        willCollapse = true;
-                    }
-                } else {
-                    if (newSideSize <= this._collapseThreshold) {
-                        willCollapse = true;
-                    }
-                }
-
-                if (willCollapse) {
-                    if (!this._sidePaneCollapsed) {
-                        this.collapseSidePane();
-                    }
-                    this._setStateCookie({ size: this._sideSize, collapsed: true });
-                    return;
-                }
-
-                // apply constraints when not collapsing
-                if (this._minSide !== null) {
-                    newSideSize = Math.max(this._minSide, newSideSize);
-                }
-                if (this._maxSide !== null) {
-                    newSideSize = Math.min(this._maxSide, newSideSize);
-                }
-                newSideSize = Math.max(0, newSideSize);
-
-                if (this._sidePaneCollapsed && newSideSize > 0) {
-                    this.expandSidePane(newSideSize);
-                } else {
-                    this._setPaneSizes(newSideSize, true);
-                    this._setStateCookie({ size: newSideSize, collapsed: this._sidePaneCollapsed });
-                }
-            };
-
-            const onStopDrag = () => {
-                this._dragging = false;
-                document.body.classList.remove("wx-split-noselect");
-                window.removeEventListener("mousemove", onDrag);
-                window.removeEventListener("mouseup", onStopDrag);
-            };
-
-            window.addEventListener("mousemove", onDrag);
-            window.addEventListener("mouseup", onStopDrag);
-        });
-
-        // handle double click on splitter: collapse or expand side-pane, but never smaller than minSide
-        this._splitter.addEventListener("dblclick", (e) => {
-            e.preventDefault();
-            if (!this._sidePaneCollapsed) {
-                this.collapseSidePane();
-            } else {
-                this.expandSidePane();
-            }
-        });
-
-        // observe size changes of the split container to adjust content automatically
-        this._onWindowResize = () => {
-            this._handleResize();
-        };
-        window.addEventListener("resize", this._onWindowResize);
-        
-        this._resizeObserver = new ResizeObserver(() => {
-            this._handleResize();
-        });
-        
-        try {
-            this._resizeObserver.observe(this._element);
-        } catch (err) {
-            // ignore observer errors
         }
     }
 
     /**
-     * Handles container resize and reapplies pane sizes.
-     * Keeps the side pane size stable in px or proportional if ratio mode is enabled.
+     * Initialize event listeners.
+     */
+    _initEvents() {
+        // splitter drag interaction
+        this._splitter.addEventListener("mousedown", (e) => this._onDragStart(e));
+        
+        // double click toggle
+        this._splitter.addEventListener("dblclick", (e) => {
+            e.preventDefault();
+            this._sidePaneCollapsed ? this.expandSidePane() : this.collapseSidePane();
+        });
+
+        // resize observer
+        this._resizeObserver = new ResizeObserver(() => this._handleResize());
+        this._resizeObserver.observe(this._element);
+    }
+
+    /**
+     * Handle start of drag operation.
+     * @param {MouseEvent} e Mouse event.
+     */
+    _onDragStart(e) {
+        if (e.button !== 0) return; // only left click
+        e.preventDefault();
+        
+        this._dragging = true;
+        this._sideRatioMode = false; // disable ratio mode on manual interaction
+        document.body.classList.add("wx-split-noselect");
+
+        const rect = this._element.getBoundingClientRect();
+        const isVert = this._orientation === "vertical";
+        const isMainSide = this._paneOrder === "main-side";
+        const sideDim = isVert ? this._sidePane.offsetHeight : this._sidePane.offsetWidth;
+
+        // calculate constant offset based on layout
+        let offset;
+        if (isVert) {
+            offset = isMainSide 
+                ? (rect.bottom - e.clientY) - sideDim 
+                : e.clientY - (rect.top + sideDim);
+        } else {
+            offset = isMainSide 
+                ? (rect.right - e.clientX) - sideDim 
+                : e.clientX - (rect.left + sideDim);
+        }
+
+        // bind global listeners
+        const onDrag = (ev) => this._onDragMove(ev, rect, offset);
+        const onStop = () => {
+            this._dragging = false;
+            document.body.classList.remove("wx-split-noselect");
+            window.removeEventListener("mousemove", onDrag);
+            window.removeEventListener("mouseup", onStop);
+        };
+
+        window.addEventListener("mousemove", onDrag);
+        window.addEventListener("mouseup", onStop);
+    }
+
+    /**
+     * Handle mouse move during drag.
+     * @param {MouseEvent} ev Event.
+     * @param {DOMRect} rect Container rect.
+     * @param {number} offset pre-calculated offset.
+     */
+    _onDragMove(ev, rect, offset) {
+        if (!this._dragging) return;
+
+        // recalculate rect in case of scrolling/layout shifts during drag
+        const currentRect = this._element.getBoundingClientRect();
+        const isVert = this._orientation === "vertical";
+        const isMainSide = this._paneOrder === "main-side";
+
+        let newSideSize;
+        if (isVert) {
+            newSideSize = isMainSide 
+                ? currentRect.bottom - ev.clientY - offset 
+                : ev.clientY - currentRect.top - offset;
+        } else {
+            newSideSize = isMainSide 
+                ? currentRect.right - ev.clientX - offset 
+                : ev.clientX - currentRect.left - offset;
+        }
+
+        // collapse check
+        const effectiveMin = this._minSide !== null ? this._minSide : 0;
+        if (newSideSize <= (effectiveMin + this._collapseThreshold) && effectiveMin === 0) {
+             // only auto-collapse via drag if min is 0 or very small
+             // or if logic dictates allowing collapse below min
+        }
+        
+        // Simpler collapse logic: if dragged below threshold (absolute or relative to min)
+        if (newSideSize <= Math.max(0, (this._minSide || 0) - this._collapseThreshold)) {
+             // dragged to "close"
+             if (!this._sidePaneCollapsed) {
+                 this.collapseSidePane();
+                 this._setStateCookie({ size: this._sideSize, collapsed: true });
+             }
+             return;
+        } else if (newSideSize <= this._collapseThreshold && this._minSide === null) {
+             // dragged near 0 without minside
+             if (!this._sidePaneCollapsed) {
+                 this.collapseSidePane();
+                 this._setStateCookie({ size: this._sideSize, collapsed: true });
+             }
+             return;
+        }
+
+        // if explicitly expanded via drag
+        if (this._sidePaneCollapsed) {
+            this.expandSidePane(newSideSize);
+            return;
+        }
+
+        // apply constraints
+        if (this._minSide !== null) newSideSize = Math.max(this._minSide, newSideSize);
+        if (this._maxSide !== null) newSideSize = Math.min(this._maxSide, newSideSize);
+        newSideSize = Math.max(0, newSideSize);
+
+        this._setPaneSizes(newSideSize, true);
+        this._setStateCookie({ size: newSideSize, collapsed: false });
+    }
+
+    /**
+     * Handles container resize.
      */
     _handleResize() {
-        const total = this._orientation === "vertical" ? this._element.clientHeight : this._element.clientWidth;
-        if (total <= 0) {
-            return;
-        }
-        
+        const isVert = this._orientation === "vertical";
+        const total = isVert ? this._element.clientHeight : this._element.clientWidth;
+        if (total <= 0) return;
+
+        if (this._sidePaneCollapsed) return;
+
         const splitterSize = this._getSplitterSize();
-        
-        if (this._sidePaneCollapsed) {
-            // when collapsed, layout uses css calc and adapts automatically
-            return;
-        }
-        
         let sideSize = this._sideSize;
+
+        // ratio mode adjustment
         if (this._sideRatioMode && typeof this._initialRatio === "number") {
             sideSize = Math.round(this._initialRatio * total);
         }
-        
-        // respect constraints
-        if (this._minSide !== null) {
-            sideSize = Math.max(this._minSide, sideSize);
-        }
-        if (this._maxSide !== null) {
-            sideSize = Math.min(this._maxSide, sideSize);
-        }
-        
-        // do not allow side to exceed available space
-        const maxSideByTotal = Math.max(0, total - splitterSize);
-        sideSize = Math.min(sideSize, maxSideByTotal);
-        sideSize = Math.max(0, sideSize);
+
+        // constraints
+        if (this._minSide !== null) sideSize = Math.max(this._minSide, sideSize);
+        if (this._maxSide !== null) sideSize = Math.min(this._maxSide, sideSize);
+
+        // fit to container
+        const maxAvail = Math.max(0, total - splitterSize);
+        sideSize = Math.min(sideSize, maxAvail);
 
         this._setPaneSizes(sideSize);
     }
 
     /**
-     * Reads split state from a single cookie (version 1).
-     * Only loads the state if a cookie name exists (i.e., if an id is set on the element).
-     * @returns {{v:number,size:number|null,collapsed:boolean|null}|null} Returns the parsed state or null.
-     */
-    _getStateFromCookie() {
-        if (!this._cookieName) {
-            return null;
-        }
-        const name = this._cookieName + "=";
-        const ca = document.cookie.split(";");
-        
-        for (let c of ca) {
-            c = c.trim();
-            if (c.indexOf(name) === 0) {
-                const raw = c.substring(name.length, c.length);
-                try {
-                    const json = decodeURIComponent(raw);
-                    const obj = JSON.parse(json);
-                    if (obj && obj.v === 1) {
-                        const size = (typeof obj.size === "number" && isFinite(obj.size)) ? obj.size : null;
-                        const collapsed = (obj.collapsed === 1 || obj.collapsed === true) ? true : (obj.collapsed === 0 || obj.collapsed === false ? false : null);
-                        return { v: 1, size: size, collapsed: collapsed };
-                    }
-                } catch (e) {
-                    // ignore parse errors
-                }
-                return null;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Stores split state in a single cookie (version 1) for 30 days.
-     * Only saves the state if a cookie name exists (i.e., if an id is set on the element).
-     * @param {{size:number,collapsed:boolean}} state - The state to store.
-     */
-    _setStateCookie(state) {
-        if (!this._cookieName) {
-            return;
-        }
-        const payload = {
-            v: 1,
-            size: Math.round(typeof state.size === "number" ? state.size : this._sideSize || 0),
-            collapsed: state.collapsed ? 1 : 0
-        };
-        const d = new Date();
-        d.setTime(d.getTime() + (30 * 24 * 60 * 60 * 1000));
-        document.cookie = this._cookieName + "=" + encodeURIComponent(JSON.stringify(payload)) + ";expires=" + d.toUTCString() + ";path=/; SameSite=Lax";
-    }
-
-    /**
-     * Parses the data-size attribute and returns the size in the correct unit.
-     * Supports values in px, em, rem, %, or plain number (interpreted according to data-unit, default px).
-     * @param {string} attr - The value of the data-size attribute.
-     * @returns {number|null} Returns the value in pixels if valid, otherwise null.
-     */
-    _parseInitialSideSize(attr) {
-        if (!attr) {
-            return null;
-        }
-        if (attr.endsWith("px")) {
-            return parseInt(attr, 10);
-        }
-        if (attr.endsWith("em")) {
-            const em = parseFloat(attr);
-            if (isNaN(em)) {
-                return null;
-            } else {
-                return Math.round(em * 16);
-            }
-        }
-        if (attr.endsWith("rem")) {
-            const rem = parseFloat(attr);
-            if (isNaN(rem)) {
-                return null;
-            } else {
-                return Math.round(rem * 16);
-            }
-        }
-        if (attr.endsWith("%")) {
-            const percent = parseFloat(attr);
-            if (isNaN(percent)) {
-                return null;
-            }
-            const total = this._orientation === "vertical" ? this._element.clientHeight : this._element.clientWidth;
-            return Math.round((percent / 100) * total);
-        }
-        const n = parseFloat(attr);
-        if (!isNaN(n)) {
-            switch (this._unit) {
-                case "em": {
-                    return Math.round(n * 16);
-                }
-                case "rem": {
-                    return Math.round(n * 16);
-                }
-                case "%": {
-                    const total = this._orientation === "vertical" ? this._element.clientHeight : this._element.clientWidth;
-                    return Math.round((n / 100) * total);
-                }
-                case "px":
-                default: {
-                    return Math.round(n);
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Returns the current splitter size (width or height).
-     * If a value for data-splitter-size is set, uses that.
-     * @returns {number} Splitter size in pixels.
-     */
-    _getSplitterSize() {
-        if (this._splitterSize) {
-            const v = parseInt(this._splitterSize, 10);
-            if (!isNaN(v)) {
-                return v;
-            }
-        }
-        if (this._orientation === "vertical") {
-            return this._splitter.offsetHeight || 6;
-        } else {
-            return this._splitter.offsetWidth || 6;
-        }
-    }
-
-    /**
-     * Sets the size of both panes and stores the current side size.
-     * Clamps sizes within available container bounds and min/max constraints.
-     * @param {number} sideSize - Size of the side pane in px.
-     * @param {boolean} fireEvent - Whether to fire a size change event.
+     * Sets the size of both panes.
+     * @param {number} sideSize Pixel size of side pane.
+     * @param {boolean} fireEvent Fire change event.
      */
     _setPaneSizes(sideSize, fireEvent = false) {
-        const total = this._orientation === "vertical" ? this._element.clientHeight : this._element.clientWidth;
+        const isVert = this._orientation === "vertical";
+        const total = isVert ? this._element.clientHeight : this._element.clientWidth;
         const splitterSize = this._getSplitterSize();
 
-        // clamp side size to constraints and available space
-        if (this._minSide !== null) {
-            sideSize = Math.max(this._minSide, sideSize);
-        }
-        if (this._maxSide !== null) {
-            sideSize = Math.min(this._maxSide, sideSize);
-        }
-        sideSize = Math.max(0, sideSize);
-        
-        const maxSideByTotal = Math.max(0, total - splitterSize);
-        sideSize = Math.min(sideSize, maxSideByTotal);
-
+        // safety clamp
+        const maxSide = Math.max(0, total - splitterSize);
+        sideSize = Math.min(Math.max(0, sideSize), maxSide);
         const mainSize = Math.max(0, total - sideSize - splitterSize);
 
-        if (this._orientation === "vertical") {
-            if (this._sidePane) {
-                this._sidePane.style.height = sideSize + "px";
-                this._sidePane.style.width = "";
-            }
-            if (this._mainPane) {
-                this._mainPane.style.height = mainSize + "px";
-                this._mainPane.style.width = "";
-            }
-        } else {
-            if (this._sidePane) {
-                this._sidePane.style.width = sideSize + "px";
-                this._sidePane.style.height = "";
-            }
-            if (this._mainPane) {
-                this._mainPane.style.width = mainSize + "px";
-                this._mainPane.style.height = "";
-            }
-        }
+        const prop = isVert ? "height" : "width";
+        
         if (this._sidePane) {
+            this._sidePane.style[prop] = `${sideSize}px`;
             this._sidePane.style.display = "";
         }
         if (this._mainPane) {
+            this._mainPane.style[prop] = `${mainSize}px`; // Explicit size often smoother than calc
             this._mainPane.style.display = "";
         }
         this._splitter.style.display = "";
 
-        // persist current side size in instance
         this._sideSize = sideSize;
 
-        // fire size change event if requested
         if (fireEvent) {
             this._dispatch(webexpress.webui.Event.SIZE_CHANGE_EVENT, {
-                mainSize: mainSize,
-                sideSize: sideSize,
+                mainSize,
+                sideSize,
                 orientation: this._orientation
             });
         }
     }
 
     /**
-     * Collapses the side pane and hides it, but respects minSide if set.
-     * Fires HIDE_EVENT when side-pane is collapsed.
+     * Collapses the side pane.
      */
     collapseSidePane() {
-        if (this._sidePaneCollapsed) {
-            return;
-        }
+        if (this._sidePaneCollapsed) return;
+        
+        const isVert = this._orientation === "vertical";
+        this._sidePanePrevSize = this._sidePane[isVert ? "offsetHeight" : "offsetWidth"];
         this._sidePaneCollapsed = true;
-        this._sidePanePrevSize = this._sidePane[this._orientation === "vertical" ? "offsetHeight" : "offsetWidth"];
 
-        let collapseTo = (this._minSide !== null) ? this._minSide : 0;
+        const collapseTo = this._minSide || 0;
+        const prop = isVert ? "height" : "width";
+        const minProp = isVert ? "minHeight" : "minWidth";
 
-        // hide only the side pane
         if (collapseTo === 0) {
             this._sidePane.style.display = "none";
         } else {
-            if (this._orientation === "vertical") {
-                this._sidePane.style.height = collapseTo + "px";
-                this._sidePane.style.minHeight = collapseTo + "px";
-            } else {
-                this._sidePane.style.width = collapseTo + "px";
-                this._sidePane.style.minWidth = collapseTo + "px";
-            }
+            this._sidePane.style[prop] = `${collapseTo}px`;
+            this._sidePane.style[minProp] = `${collapseTo}px`;
             this._sidePane.style.display = "";
         }
 
-        // main panel gets all space minus splitter
-        if (this._orientation === "vertical") {
-            this._mainPane.style.height = `calc(100% - ${this._getSplitterSize()}px)`;
-            this._mainPane.style.width = "";
-        } else {
-            this._mainPane.style.width = `calc(100% - ${this._getSplitterSize()}px)`;
-            this._mainPane.style.height = "";
+        // main pane takes remaining
+        const splitSize = this._getSplitterSize();
+        if (this._mainPane) {
+            this._mainPane.style[prop] = `calc(100% - ${splitSize}px - ${collapseTo}px)`;
         }
 
-        // persist collapsed state together with last known size
         this._setStateCookie({ size: this._sideSize, collapsed: true });
-
-        // fire HIDE_EVENT
         this._dispatch(webexpress.webui.Event.HIDE_EVENT, {});
     }
 
     /**
-     * Expands the side pane and shows it again.
-     * Fires SHOW_EVENT when side-pane is expanded.
-     * @param {number} [size] - Optional size to restore or set for the side pane.
+     * Expands the side pane.
+     * @param {number} [size] Target size.
      */
     expandSidePane(size) {
-        if (!this._sidePaneCollapsed) {
-            return;
-        }
+        if (!this._sidePaneCollapsed) return;
+        
+        const isVert = this._orientation === "vertical";
+        const total = isVert ? this._element.clientHeight : this._element.clientWidth;
+        
+        let targetSize = size || this._sidePanePrevSize || Math.floor(total / 2);
+        
+        // reset min constraints that might have been set during collapse
+        const minProp = isVert ? "minHeight" : "minWidth";
+        this._sidePane.style[minProp] = "";
+
         this._sidePaneCollapsed = false;
+        this._setPaneSizes(targetSize, true);
         
-        const total = this._orientation === "vertical" ? this._element.clientHeight : this._element.clientWidth;
-        let sideSize = size || this._sidePanePrevSize || Math.floor(total / 2);
-        
-        if (this._minSide !== null) {
-            sideSize = Math.max(this._minSide, sideSize);
-        }
-        if (this._maxSide !== null) {
-            sideSize = Math.min(this._maxSide, sideSize);
-        }
-        
-        this._sidePane.style.display = "";
-        this._setPaneSizes(sideSize, true);
-
-        // persist expanded state with current size
-        this._setStateCookie({ size: sideSize, collapsed: false });
-
-        // fire SHOW_EVENT when side-pane is expanded (via interaction)
+        this._setStateCookie({ size: targetSize, collapsed: false });
         this._dispatch(webexpress.webui.Event.SHOW_EVENT, {});
     }
 
     /**
-     * Toggles the side pane between collapsed and expanded state.
+     * Toggles side pane visibility.
      */
     toggleSidePane() {
-        if (this._sidePaneCollapsed) {
-            this.expandSidePane();
-        } else {
-            this.collapseSidePane();
-        }
+        this._sidePaneCollapsed ? this.expandSidePane() : this.collapseSidePane();
     }
 
     /**
-     * Fits the side pane size to its content size.
-     * Measures the content of the side pane and resizes the side pane accordingly,
-     * respecting min/max constraints and the available container space. Expands the
-     * side pane when it is currently collapsed.
+     * Utility: Parse integer attribute safely.
      */
-    fitSidePaneToContent() {
-        if (!this._sidePane) {
-            return;
-        }
-
-        // disable ratio mode to keep pixel size after fitting
-        this._sideRatioMode = false;
-
-        // ensure pane is visible for measuring
-        const prevDisplay = this._sidePane.style.display;
-        if (prevDisplay === "none") {
-            this._sidePane.style.display = "";
-        }
-
-        // temporarily clear explicit size to measure natural content size
-        let desired;
-        if (this._orientation === "vertical") {
-            const prevHeight = this._sidePane.style.height;
-            this._sidePane.style.height = "";
-            desired = this._sidePane.scrollHeight;
-            this._sidePane.style.height = prevHeight;
-        } else {
-            const prevWidth = this._sidePane.style.width;
-            this._sidePane.style.width = "";
-            desired = this._sidePane.scrollWidth;
-            this._sidePane.style.width = prevWidth;
-        }
-
-        // compute available container space
-        const total = this._orientation === "vertical" ? this._element.clientHeight : this._element.clientWidth;
-        const splitterSize = this._getSplitterSize();
-        const maxAvail = Math.max(0, total - splitterSize);
-
-        // clamp desired size to constraints and available space
-        let newSide = desired;
-        if (this._minSide !== null) {
-            newSide = Math.max(this._minSide, newSide);
-        }
-        if (this._maxSide !== null) {
-            newSide = Math.min(this._maxSide, newSide);
-        }
-        newSide = Math.min(newSide, maxAvail);
-        newSide = Math.max(0, newSide);
-
-        // apply size, expanding if currently collapsed
-        if (this._sidePaneCollapsed) {
-            this.expandSidePane(newSide);
-        } else {
-            this._setPaneSizes(newSide, true);
-            this._setStateCookie({ size: newSide, collapsed: this._sidePaneCollapsed });
-        }
+    _parseAttrInt(el, attr) {
+        if (!el.hasAttribute(attr)) return null;
+        const v = parseInt(el.getAttribute(attr), 10);
+        return isNaN(v) ? null : v;
     }
 
     /**
-     * Forces a recomputation of pane sizes based on the current container size.
-     * Keeps current side size unless ratio mode is active.
+     * Returns splitter dimension (width/height) based on orientation.
      */
-    refresh() {
-        this._handleResize();
+    _getSplitterSize() {
+        if (this._splitterSize) {
+            const v = parseInt(this._splitterSize, 10);
+            if (!isNaN(v)) return v;
+        }
+        return this._orientation === "vertical" ? this._splitter.offsetHeight : this._splitter.offsetWidth || 6;
+    }
+
+    /**
+     * Parses CSS size units to pixels.
+     */
+    _parseInitialSideSize(attr) {
+        if (!attr) return null;
+        const clean = attr.trim();
+        const val = parseFloat(clean);
+        if (isNaN(val)) return null;
+
+        if (clean.endsWith("px")) return Math.round(val);
+        if (clean.endsWith("em") || clean.endsWith("rem")) return Math.round(val * 16);
+        if (clean.endsWith("%")) {
+            const total = this._orientation === "vertical" ? this._element.clientHeight : this._element.clientWidth;
+            return Math.round((val / 100) * total);
+        }
+        
+        // fallback using unit
+        return this._unit === "px" ? Math.round(val) : Math.round(val * 16);
+    }
+
+    /**
+     * Cookie read helper.
+     */
+    _getStateFromCookie() {
+        if (!this._cookieName) return null;
+        const nameEQ = this._cookieName + "=";
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+            let c = cookies[i].trim();
+            if (c.indexOf(nameEQ) === 0) {
+                try {
+                    const obj = JSON.parse(decodeURIComponent(c.substring(nameEQ.length)));
+                    if (obj && obj.v === 1) return obj;
+                } catch (e) { /* ignore */ }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Cookie write helper.
+     */
+    _setStateCookie(state) {
+        if (!this._cookieName) return;
+        const payload = {
+            v: 1,
+            size: Math.round(state.size),
+            collapsed: !!state.collapsed
+        };
+        const date = new Date();
+        date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000));
+        document.cookie = `${this._cookieName}=${encodeURIComponent(JSON.stringify(payload))}; expires=${date.toUTCString()}; path=/; SameSite=Lax`;
+    }
+    
+    /**
+     * Sets minimum size for a specific pane index.
+     * @param {number} paneIndex 0 for side/first, 1 for main/second.
+     * @param {number} minSize Size in pixels.
+     */
+    setMinSize(paneIndex, minSize) {
+        const isSide = (this._paneOrder === "side-main" && paneIndex === 0) || (this._paneOrder === "main-side" && paneIndex === 1);
+        
+        if (isSide) {
+            this._minSide = minSize;
+            // re-validate current size
+            if (!this._sidePaneCollapsed) {
+                this._setPaneSizes(Math.max(this._sideSize, minSize));
+            }
+        } else {
+            // logic for main pane min-size could be added here if needed, 
+            // currently implied by maxside constraint on side pane.
+        }
     }
 };
 

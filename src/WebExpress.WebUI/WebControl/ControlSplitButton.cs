@@ -70,9 +70,16 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the target of a modal dialogue.
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// click to open a modal or similar target.
         /// </summary>
-        public IModalTarget Modal { get; set; }
+        public IAction PrimaryAction { get; set; }
+
+        /// <summary>
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// double‑click to open a modal or similar target.
+        /// </summary>
+        public IAction SecondaryAction { get; set; }
 
         /// <summary>
         /// Returns or sets the content.
@@ -185,7 +192,8 @@ namespace WebExpress.WebUI.WebControl
                 button.Add(new HtmlText(Text));
             }
 
-            Modal?.ApplyUserAttributes(button);
+            PrimaryAction?.ApplyUserAttributes(button, TypeAction.Primary);
+            SecondaryAction?.ApplyUserAttributes(button, TypeAction.Secondary);
 
             var dropdownButton = new HtmlElementFieldButton(new HtmlElementTextSemanticsSpan() { Class = "caret" })
             {

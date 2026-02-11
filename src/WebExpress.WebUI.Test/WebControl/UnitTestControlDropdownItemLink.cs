@@ -136,12 +136,12 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the modal property of the dropdown item link control.
+        /// Tests the primary action property of the dropdown item link control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-dropdown-item""></div>")]
-        [InlineData("a", @"<div class=""wx-dropdown-item"" data-wx-toggle=""modal"" data-wx-target=""#a""></div>")]
-        public void Modal(string modal, string expected)
+        [InlineData("a", @"<div class=""wx-dropdown-item"" data-wx-primary-action=""modal"" data-wx-primary-target=""#a""></div>")]
+        public void PrimaryAction(string modal, string expected)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -149,12 +149,37 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDropdownItemLink()
             {
-                Modal = new ModalTarget(modal)
+                PrimaryAction = new ActionModal(modal)
             };
 
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
+        }
+
+        /// <summary>
+        /// Tests the secondary action property of the dropdown item link control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-dropdown-item""></div>")]
+        [InlineData("a", @"<div class=""wx-dropdown-item"" data-wx-secondary-action=""modal"" data-wx-secondary-target=""#a""></div>")]
+        public void SecondaryAction(string modal, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlDropdownItemLink()
+            {
+                SecondaryAction = new ActionModal(modal)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
         }
 

@@ -73,7 +73,8 @@ namespace WebExpress.WebUI.WebControl
                 button.Add(new HtmlText(I18N.Translate(renderContext.Request?.Culture, Text)));
             }
 
-            Modal?.ApplyUserAttributes(button);
+            PrimaryAction?.ApplyUserAttributes(button, TypeAction.Primary);
+            SecondaryAction?.ApplyUserAttributes(button, TypeAction.Secondary);
 
             var dropdownButton = new HtmlElementTextSemanticsSpan(new HtmlElementTextSemanticsSpan() { Class = "caret" })
             {

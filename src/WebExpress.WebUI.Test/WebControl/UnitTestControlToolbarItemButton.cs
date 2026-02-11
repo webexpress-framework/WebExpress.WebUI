@@ -132,12 +132,12 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the modal property of the toolbar item button control.
+        /// Tests the primary action property of the toolbar item button control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-toolbar-button""></div>")]
-        [InlineData("id", @"<div class=""wx-toolbar-button"" data-modal=""#id""></div>")]
-        public void Modal(string modal, string expected)
+        [InlineData("id", @"<div class=""wx-toolbar-button"" data-wx-primary-action=""modal"" data-wx-primary-target=""#id""></div>")]
+        public void PrimaryAction(string modal, string expected)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -145,12 +145,37 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemButton()
             {
-                Modal = new ModalTarget(modal)
+                PrimaryAction = new ActionModal(modal)
             };
 
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
+        }
+
+        /// <summary>
+        /// Tests the secondary action property of the toolbar item button control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-toolbar-button""></div>")]
+        [InlineData("id", @"<div class=""wx-toolbar-button"" data-wx-secondary-action=""modal"" data-wx-secondary-target=""#id""></div>")]
+        public void SecondaryAction(string modal, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlToolbarItemButton()
+            {
+                SecondaryAction = new ActionModal(modal)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
         }
 

@@ -45,9 +45,16 @@ namespace WebExpress.WebUI.WebControl
         TypeActive Active { get; }
 
         /// <summary>
-        /// Returns the target of a modal dialogue.
+        /// Returns the secondary action, typically triggered by a 
+        /// click to open a modal or similar target.
         /// </summary>
-        IModalTarget Modal { get; }
+        IAction PrimaryAction { get; }
+
+        /// <summary>
+        /// Returns the secondary action, typically triggered by a 
+        /// double‑click to open a modal or similar target.
+        /// </summary>
+        IAction SecondaryAction { get; }
 
         /// <summary>
         /// Adds one or more items to the split button.

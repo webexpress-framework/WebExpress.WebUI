@@ -149,8 +149,8 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                     link.href = item.uri;
                 } else {
                     link.href = "javascript:void(0);";
-                    link.setAttribute("data-wx-toggle", "modal");
-                    link.setAttribute("data-wx-target", item.modal.id);
+                    link.setAttribute("data-wx-primary-action", "modal");
+                    link.setAttribute("data-wx-primary-target", item.modal.id);
                     link.setAttribute("data-wx-size", item.modal.size);
                     link.setAttribute("data-wx-uri", item.uri);
                 }

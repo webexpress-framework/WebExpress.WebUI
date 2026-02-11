@@ -160,21 +160,21 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the modal and uri property of the sidebar item icon control.
+        /// Tests the primary action of the sidebar item icon control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-sidebar-icon"" data-wx-toggle=""modal"" data-wx-target=""#modalId""></div>")]
-        [InlineData("/a/b", @"<div class=""wx-sidebar-icon"" data-wx-toggle=""modal"" data-wx-target=""#modalId"" data-wx-uri=""/a/b""></div>")]
-        public void ModalUri(string uri, string expected)
+        [InlineData(null, @"<div class=""wx-sidebar-icon"" data-wx-primary-action=""modal"" data-wx-primary-target=""#modalId""></div>")]
+        [InlineData("/a/b", @"<div class=""wx-sidebar-icon"" data-wx-primary-action=""modal"" data-wx-primary-target=""#modalId"" data-wx-primary-uri=""/a/b""></div>")]
+        public void PrimaryAction(string uri, string expected)
         {
             // arrange
+            var endpoint = uri is not null ? new UriEndpoint(uri) : null;
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSidebarItemIcon()
             {
-                Modal = new ModalTarget("modalId"),
-                Uri = uri is not null ? new UriEndpoint(uri) : null,
+                PrimaryAction = new ActionModal("modalId", endpoint)
             };
 
             // act
@@ -185,27 +185,28 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the edit property of the sidebar item icon control.
+        /// Tests the secondary action of the sidebar item icon control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-sidebar-icon""></div>")]
-        [InlineData("modalId", @"<div class=""wx-sidebar-icon"" data-wx-toggle=""modal"" data-wx-target=""#modalId""></div>")]
-        public void Modal(string iconEditModal, string expected)
+        [InlineData(null, @"<div class=""wx-sidebar-icon"" data-wx-secondary-action=""modal"" data-wx-secondary-target=""#modalId""></div>")]
+        [InlineData("/a/b", @"<div class=""wx-sidebar-icon"" data-wx-secondary-action=""modal"" data-wx-secondary-target=""#modalId"" data-wx-secondary-uri=""/a/b""></div>")]
+        public void SecondaryAction(string uri, string expected)
         {
             // arrange
+            var endpoint = uri is not null ? new UriEndpoint(uri) : null;
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSidebarItemIcon()
             {
-                Modal = new ModalTarget(iconEditModal)
+                SecondaryAction = new ActionModal("modalId", endpoint)
             };
 
             // act
             var html = control.Render(context, visualTree);
 
             // validation
-            AssertExtensions.EqualWithPlaceholders(expected, html);
+            AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
         }
 
         /// <summary>

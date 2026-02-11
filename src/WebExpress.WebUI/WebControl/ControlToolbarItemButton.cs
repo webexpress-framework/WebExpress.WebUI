@@ -43,9 +43,16 @@ namespace WebExpress.WebUI.WebControl
         public TypeTarget Target { get; set; }
 
         /// <summary>
-        /// Returns or sets the target of a modal dialogue.
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// click to open a modal or similar target.
         /// </summary>
-        public IModalTarget Modal { get; set; }
+        public IAction PrimaryAction { get; set; }
+
+        /// <summary>
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// double‑click to open a modal or similar target.
+        /// </summary>
+        public IAction SecondaryAction { get; set; }
 
         /// <summary>
         /// Returns or sets the icon.
@@ -89,7 +96,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return new HtmlElementTextContentDiv()
+            var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-toolbar-button"
@@ -98,8 +105,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
                 .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-uri", Uri?.ToString())
-                .AddUserAttribute("data-target", Target.ToStringValue())
-                .AddUserAttribute("data-modal", Modal?.Id)
+                .AddUserAttribute("data-target", Target.ToValue())
                 .AddUserAttribute("data-title", I18N.Translate(renderContext, Tooltip))
                 .AddUserAttribute("data-color-css", Color?.ToClass())
                 .AddUserAttribute("data-color-style", Color?.ToStyle())
@@ -107,6 +113,11 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute(Active == TypeActive.Disabled ? "disabled" : null)
                 .AddUserAttribute("data-align", Alignment.ToValue())
                 .AddUserAttribute("data-overflow", Overflow.ToValue());
+
+            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
+
+            return html;
         }
     }
 }

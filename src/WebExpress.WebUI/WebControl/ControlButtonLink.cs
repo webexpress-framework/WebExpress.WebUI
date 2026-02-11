@@ -40,7 +40,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return Render(renderContext, visualTree, Text, Uri, Tooltip, Modal, Icon, [.. Content]);
+            return Render(renderContext, visualTree, Text, Uri, Tooltip, PrimaryAction, SecondaryAction, Icon, [.. Content]);
         }
 
         /// <summary>
@@ -66,9 +66,12 @@ namespace WebExpress.WebUI.WebControl
         /// The tooltip text to display when the user hovers over the button. This value is 
         /// localized before rendering. Can be null or empty.
         /// </param>
-        /// <param name="modal">
-        /// The modal target to display when the button is clicked. If specified, the button 
-        /// will trigger the modal instead of navigation.
+        /// <param name="primaryAction">
+        /// The primary action to associate with the button. If specified, this action is 
+        /// invoked when the button is  activated. Can be null.
+        /// </param>
+        /// <param name="secondaryAction">
+        /// An optional secondary action to associate with the button. Can be null.
         /// </param>
         /// <param name="icon">
         /// The icon to display within the button. Can be null if no icon is required.
@@ -87,7 +90,8 @@ namespace WebExpress.WebUI.WebControl
             string text,
             IUri uri,
             string tooltip,
-            IModalTarget modal,
+            IAction primaryAction,
+            IAction secondaryAction,
             IIcon icon,
             params IControl[] content
         )
@@ -100,7 +104,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("btn", GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
-                Href = modal is null ? uri?.ToString() : null,
+                Href = PrimaryAction is null ? uri?.ToString() : null,
                 Title = I18N.Translate(renderContext, tooltip),
                 OnClick = OnClick?.ToString()
             };
@@ -136,11 +140,14 @@ namespace WebExpress.WebUI.WebControl
                 html.AddUserAttribute("data-bs-toggle", "tooltip");
             }
 
-            if (modal is not null)
-            {
-                Modal?.ApplyUserAttributes(html);
-                html.AddUserAttribute("data-wx-uri", uri?.ToString());
-            }
+            //if (modal is not null)
+            //{
+            //    Modal?.ApplyUserAttributes(html);
+            //    html.AddUserAttribute("data-wx-uri", uri?.ToString());
+            //}
+
+            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

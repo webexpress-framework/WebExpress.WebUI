@@ -224,16 +224,23 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Sets a new URI and optionally reloads the content.
-     * @param {string} uri - The new URI to fetch content from.
-     * @param {boolean} [reload=true] - When true, triggers an immediate reload.
+     * Returns the currently configured URI.
+     * @returns {string} The active URI value.
      */
-    setUri(uri, reload = true) {
+    get uri() {
+        return this._uri;
+    }
+
+    /**
+     * Updates the internal URI value without triggering a reload.
+     * Use this setter when you only want to change the URI.
+     * @param {string} value - The new URI to assign.
+     */
+    set uri(value) {
         // update internal uri and optionally reload
         this._uri = String(uri || "");
-        if (reload) {
-            this.load();
-        }
+
+        this.load();
     }
 };
 

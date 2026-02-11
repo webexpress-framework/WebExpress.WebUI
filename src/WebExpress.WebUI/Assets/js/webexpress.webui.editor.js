@@ -171,7 +171,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     _toggleFullscreen(btn) {
         // if called without button (e.g. from footer), try to find the toolbar button
         if (!btn) {
-            btn = this._element.querySelector('button[data-wx-toggle="fullscreen"]');
+            btn = this._element.querySelector('button[data-wx-primary-action="fullscreen"]');
         }
 
         const isFullscreen = this._element.classList.toggle("wx-fullscreen-active");
@@ -283,7 +283,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
         // use data attributes for controller logic
         this._fullscreenCloseBtn.setAttribute("data-wx-dismiss", "fullscreen");
-        this._fullscreenCloseBtn.setAttribute("data-wx-target", "#" + this._element.id);
+        this._fullscreenCloseBtn.setAttribute("data-wx-primary-target", "#" + this._element.id);
 
         // accessibility and tooltip
         this._fullscreenCloseBtn.setAttribute("aria-label", "Done");

@@ -18,7 +18,12 @@ webexpress.webui.Controller = new class {
         this._wxRegisteredElements = new WeakSet(); // prevent duplicate bindings
         this.observer = new MutationObserver(this.handleMutations.bind(this));
         // observe attribute changes for both toggle and dismiss attributes
-        this.observer.observe(document, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-wx-toggle", "data-wx-dismiss"] });
+        this.observer.observe(document, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ["data-wx-primary-action", "data-wx-secondary-action", "data-wx-dismiss"]
+        });
         this.overrideCreateElement();
         this.initModalHandler();
 
@@ -36,7 +41,7 @@ webexpress.webui.Controller = new class {
         // wait for DOMContentLoaded event to ensure DOM is ready
         document.addEventListener("DOMContentLoaded", () => {
             // register both toggle and dismiss elements initially
-            document.querySelectorAll("[data-wx-toggle], [data-wx-dismiss]").forEach(el => {
+            document.querySelectorAll("[data-wx-primary-action], [data-wx-secondary-action], [data-wx-dismiss]").forEach(el => {
                 this._registerWxEvents(el);
             });
         });
@@ -55,12 +60,13 @@ webexpress.webui.Controller = new class {
 
         let bound = false;
 
+        // primary actions
         // modal
-        if (element.matches("[data-wx-toggle='modal']")) {
+        if (element.matches("[data-wx-primary-action='modal']")) {
             element.addEventListener("click", () => {
-                const target = element.getAttribute("data-wx-target") || null;
-                const uri = element.getAttribute("data-wx-uri") || null;
-                const size = element.getAttribute("data-wx-size") || null;
+                const target = element.getAttribute("data-wx-primary-target") || null;
+                const uri = element.getAttribute("data-wx-primary-uri") || null;
+                const size = element.getAttribute("data-wx-primary-size") || null;
                 const instance = this.getInstance(target);
 
                 if (!instance) {
@@ -78,10 +84,28 @@ webexpress.webui.Controller = new class {
             bound = true;
         }
 
-        // split
-        if (element.matches("[data-wx-toggle='split']")) {
+        // frame
+        if (element.matches("[data-wx-primary-action='frame']")) {
             element.addEventListener("click", () => {
-                const target = element.getAttribute("data-wx-target");
+                const target = element.getAttribute("data-wx-primary-target") || null;
+                const uri = element.getAttribute("data-wx-primary-uri") || null;
+                const instance = this.getInstance(target);
+
+                if (!instance) {
+
+                } else if (typeof instance.show === "function") {
+                    if (uri) {
+                        instance.uri = uri;
+                    }
+                }
+            });
+            bound = true;
+        }
+
+        // split
+        if (element.matches("[data-wx-primary-action='split']")) {
+            element.addEventListener("click", () => {
+                const target = element.getAttribute("data-wx-primary-target");
                 const instance = this.getInstance(target);
                 if (instance && typeof instance.toggleSidePane === "function") {
                     instance.toggleSidePane();
@@ -90,7 +114,7 @@ webexpress.webui.Controller = new class {
 
             document.addEventListener(webexpress.webui.Event.HIDE_EVENT, (e) => {
                 if (e.detail.sender === element) {
-                    const target = element.getAttribute("data-wx-target");
+                    const target = element.getAttribute("data-wx-primary-target");
                     const instance = this.getInstance(target);
                     if (instance) {
                         instance.collapsed = true;
@@ -100,7 +124,7 @@ webexpress.webui.Controller = new class {
 
             document.addEventListener(webexpress.webui.Event.SHOW_EVENT, (e) => {
                 if (e.detail.sender === element) {
-                    const target = element.getAttribute("data-wx-target");
+                    const target = element.getAttribute("data-wx-primary-target");
                     const instance = this.getInstance(target);
                     if (instance) {
                         instance.collapsed = false;
@@ -111,12 +135,12 @@ webexpress.webui.Controller = new class {
         }
         
         // css fullscreen toggle support
-        if (element.matches("[data-wx-toggle='fullscreen']")) {
+        if (element.matches("[data-wx-primary-action='fullscreen']")) {
             element.addEventListener("click", (e) => {
                 e.preventDefault();
                 e.stopPropagation(); // stop bubbling to prevent parent handlers (like editor modals) from closing
 
-                const targetSelector = element.getAttribute("data-wx-target");
+                const targetSelector = element.getAttribute("data-wx-primary-target");
                 // default to body if no target is specified, as styling the body is more reliable for 'light' fullscreen
                 const targetEl = targetSelector ? document.querySelector(targetSelector) : document.body;
                 
@@ -129,7 +153,132 @@ webexpress.webui.Controller = new class {
             element.setAttribute("aria-pressed", "false");
             bound = true;
         }
-        
+
+        // native browser fullscreen toggle support
+        if (element.matches("[data-wx-primary-action='native-fullscreen']")) {
+            element.addEventListener("click", (e) => {
+                e.preventDefault();
+                const targetSelector = element.getAttribute("data-wx-primary-target") || null;
+                const targetEl = targetSelector ? document.querySelector(targetSelector) : document.documentElement;
+                
+                if (targetEl) {
+                    this.toggleNativeFullscreen(targetEl);
+                }
+            });
+            element.setAttribute("aria-pressed", "false");
+            bound = true;
+        }
+
+        // secondary actions
+        // modal
+        if (element.matches("[data-wx-secondary-action='modal']")) {
+            element.addEventListener("dblclick", () => {
+                const target = element.getAttribute("data-wx-secondary-target") || null;
+                const uri = element.getAttribute("data-wx-secondary-uri") || null;
+                const size = element.getAttribute("data-wx-secondary-size") || null;
+                const instance = this.getInstance(target);
+
+                if (!instance) {
+
+                } else if (typeof instance.show === "function") {
+                    if (size) {
+                        instance.size = size;
+                    }
+                    if (uri) {
+                        instance.uri = uri;
+                    }
+                    instance.show();
+                }
+            });
+            bound = true;
+        }
+
+        // frame
+        if (element.matches("[data-wx-secondary-action='frame']")) {
+            element.addEventListener("dblclick", () => {
+                const target = element.getAttribute("data-wx-secondary-target") || null;
+                const uri = element.getAttribute("data-wx-secondary-uri") || null;
+                const instance = this.getInstance(target);
+
+                if (!instance) {
+
+                } else if (typeof instance.show === "function") {
+                    if (uri) {
+                        instance.uri = uri;
+                    }
+                }
+            });
+            bound = true;
+        }
+
+        // split
+        if (element.matches("[data-wx-secondary-action='split']")) {
+            element.addEventListener("dblclick", () => {
+                const target = element.getAttribute("data-wx-secondary-target");
+                const instance = this.getInstance(target);
+                if (instance && typeof instance.toggleSidePane === "function") {
+                    instance.toggleSidePane();
+                }
+            });
+
+            document.addEventListener(webexpress.webui.Event.HIDE_EVENT, (e) => {
+                if (e.detail.sender === element) {
+                    const target = element.getAttribute("data-wx-secondary-target");
+                    const instance = this.getInstance(target);
+                    if (instance) {
+                        instance.collapsed = true;
+                    }
+                }
+            });
+
+            document.addEventListener(webexpress.webui.Event.SHOW_EVENT, (e) => {
+                if (e.detail.sender === element) {
+                    const target = element.getAttribute("data-wx-secondary-target");
+                    const instance = this.getInstance(target);
+                    if (instance) {
+                        instance.collapsed = false;
+                    }
+                }
+            });
+            bound = true;
+        }
+
+        // css fullscreen toggle support
+        if (element.matches("[data-wx-secondary-action='fullscreen']")) {
+            element.addEventListener("dblclick", (e) => {
+                e.preventDefault();
+                e.stopPropagation(); // stop bubbling to prevent parent handlers (like editor modals) from closing
+
+                const targetSelector = element.getAttribute("data-wx-secondary-target");
+                // default to body if no target is specified, as styling the body is more reliable for 'light' fullscreen
+                const targetEl = targetSelector ? document.querySelector(targetSelector) : document.body;
+
+                if (targetEl) {
+                    this.toggleFullscreen(targetEl);
+                } else {
+                    console.warn("Fullscreen target not found:", targetSelector);
+                }
+            });
+            element.setAttribute("aria-pressed", "false");
+            bound = true;
+        }
+
+        // native browser fullscreen toggle support
+        if (element.matches("[data-wx-secondary-action='native-fullscreen']")) {
+            element.addEventListener("dblclick", (e) => {
+                e.preventDefault();
+                const targetSelector = element.getAttribute("data-wx-secondary-target") || null;
+                const targetEl = targetSelector ? document.querySelector(targetSelector) : document.documentElement;
+
+                if (targetEl) {
+                    this.toggleNativeFullscreen(targetEl);
+                }
+            });
+            element.setAttribute("aria-pressed", "false");
+            bound = true;
+        }
+
+        // dissmiss actions
         // css fullscreen dismiss support
         if (element.matches("[data-wx-dismiss='fullscreen']")) {
             element.addEventListener("click", (e) => {
@@ -139,7 +288,7 @@ webexpress.webui.Controller = new class {
                 // check for a specific target, otherwise try to find the active fullscreen element
                 const targetSelector = element.getAttribute("data-wx-target");
                 let targetEl = targetSelector ? document.querySelector(targetSelector) : document.querySelector(".wx-fullscreen-active");
-                
+
                 // if no specific target is active, we might be inside the fullscreen element itself
                 if (!targetEl) {
                     targetEl = element.closest(".wx-fullscreen-active");
@@ -149,21 +298,6 @@ webexpress.webui.Controller = new class {
                     this.toggleFullscreen(targetEl); // toggling while active exits it
                 }
             });
-            bound = true;
-        }
-
-        // native browser fullscreen toggle support
-        if (element.matches("[data-wx-toggle='native-fullscreen']")) {
-            element.addEventListener("click", (e) => {
-                e.preventDefault();
-                const targetSelector = element.getAttribute("data-wx-target") || null;
-                const targetEl = targetSelector ? document.querySelector(targetSelector) : document.documentElement;
-                
-                if (targetEl) {
-                    this.toggleNativeFullscreen(targetEl);
-                }
-            });
-            element.setAttribute("aria-pressed", "false");
             bound = true;
         }
 
@@ -439,8 +573,8 @@ webexpress.webui.Controller = new class {
         const nativeFsEl = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement || null;
         
         // update CSS-based fullscreen buttons
-        document.querySelectorAll("[data-wx-toggle='fullscreen']").forEach(btn => {
-            const targetSelector = btn.getAttribute("data-wx-target") || null;
+        document.querySelectorAll("[data-wx-primary-action='fullscreen']").forEach(btn => {
+            const targetSelector = btn.getAttribute("data-wx-primary-target") || null;
             const target = targetSelector ? document.querySelector(targetSelector) : document.documentElement;
             
             const active = target && this._isCssFullscreenElement(target);
@@ -448,8 +582,8 @@ webexpress.webui.Controller = new class {
         });
 
         // update native fullscreen buttons
-        document.querySelectorAll("[data-wx-toggle='native-fullscreen']").forEach(btn => {
-            const targetSelector = btn.getAttribute("data-wx-target") || null;
+        document.querySelectorAll("[data-wx-primary-action='native-fullscreen']").forEach(btn => {
+            const targetSelector = btn.getAttribute("data-wx-primary-target") || null;
             const target = targetSelector ? document.querySelector(targetSelector) : document.documentElement;
             
             const active = target && (nativeFsEl === target);
@@ -1181,6 +1315,8 @@ webexpress.webui.Event = class {
     static COLUMN_SEARCH_EVENT = "webexpress.webui.table.column.search"
     // Event triggered when rows are reordered in a table control.
     static ROW_REORDER_EVENT = "webexpress.webui.table.row.reorder";
+    // Event triggered when an row is selected.
+    static SELECT_ROW_EVENT = "webexpress.webui.table.select.row";
     // Event triggered when a table is sorted.
     static TABLE_SORT_EVENT = "webexpress.webui.table.sorted";
     // Event triggered when the value of an input or control changes.
@@ -1243,4 +1379,6 @@ webexpress.webui.Event = class {
     static WS_CLOSE_EVENT = "webexpress.webui.websocket.close";
     // Event triggered when a WebSocket error occurs.
     static WS_ERROR_EVENT = "webexpress.webui.websocket.error";
+    // Event triggered when an item is selected.
+    static SELECT_ITEM_EVENT = "webexpress.webui.select.item";
 }

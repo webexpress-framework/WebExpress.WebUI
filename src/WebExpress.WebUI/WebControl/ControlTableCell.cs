@@ -53,9 +53,16 @@ namespace WebExpress.WebUI.WebControl
         public virtual TypeTarget Target { get; set; }
 
         /// <summary>
-        /// Returns or sets the target of a modal dialogue.
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// click to open a modal or similar target.
         /// </summary>
-        public virtual IModalTarget Modal { get; set; }
+        public virtual IAction PrimaryAction { get; set; }
+
+        /// <summary>
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// double‑click to open a modal or similar target.
+        /// </summary>
+        public virtual IAction SecondaryAction { get; set; }
 
         /// <summary>
         /// Returns or sets the content associated with this cell.
@@ -89,8 +96,10 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-color", Color.ToClass())
                 .AddUserAttribute("data-uri", Uri?.ToString())
-                .AddUserAttribute("data-target", Target.ToStringValue())
-                .AddUserAttribute("data-modal", Modal?.Id);
+                .AddUserAttribute("data-target", Target.ToValue());
+
+            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

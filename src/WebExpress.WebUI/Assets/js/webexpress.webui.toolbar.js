@@ -600,8 +600,8 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 item.element.title = item.title;
             }
             if (item.modal) {
-                item.element.setAttribute("data-wx-toggle", "modal");
-                item.element.setAttribute("data-wx-target", item.modal);
+                item.element.setAttribute("data-wx-primary-action", "modal");
+                item.element.setAttribute("data-wx-primary-target", item.modal);
             }
             // click listener handled by delegation in _renderToolbar
             return item.element;

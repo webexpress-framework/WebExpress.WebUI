@@ -49,9 +49,16 @@ namespace WebExpress.WebUI.WebControl
         TypeActive Active { get; }
 
         /// <summary>
-        /// Returns or sets the modal dialogue target.
+        /// Returns the secondary action, typically triggered by a 
+        /// click to open a modal or similar target.
         /// </summary>
-        IModalTarget Modal { get; }
+        IAction PrimaryAction { get; }
+
+        /// <summary>
+        /// Returns the secondary action, typically triggered by a 
+        /// double‑click to open a modal or similar target.
+        /// </summary>
+        IAction SecondaryAction { get; }
 
         /// <summary>
         /// Adds one or more controls to the content.
