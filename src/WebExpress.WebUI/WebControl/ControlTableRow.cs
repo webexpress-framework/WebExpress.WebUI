@@ -45,6 +45,18 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlTableRow> Children => _children;
 
         /// <summary>
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// click to open a modal or similar target.
+        /// </summary>
+        public IAction PrimaryAction { get; set; }
+
+        /// <summary>
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// double‑click to open a modal or similar target.
+        /// </summary>
+        public IAction SecondaryAction { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -230,6 +242,9 @@ namespace WebExpress.WebUI.WebControl
                         child => child.Render(renderContext, visualTree)
                     )
                 );
+
+            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
@@ -24,6 +23,18 @@ namespace WebExpress.WebUI.WebControl
         /// Returns the content of the tile card.
         /// </summary>
         IEnumerable<IControl> Content { get; }
+
+        /// <summary>
+        /// Returns the secondary action, typically triggered by a 
+        /// click to open a modal or similar target.
+        /// </summary>
+        IAction PrimaryAction { get; }
+
+        /// <summary>
+        /// Returns the secondary action, typically triggered by a 
+        /// double‑click to open a modal or similar target.
+        /// </summary>
+        IAction SecondaryAction { get; }
 
         /// <summary>
         /// Adds one or more items to the tile card.

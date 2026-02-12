@@ -39,6 +39,11 @@ namespace WebExpress.WebUI.WebControl
         TypeBorderTable TableBorder { get; }
 
         /// <summary>
+        /// Returns a value indicating whether the item can be selected.
+        /// </summary>
+        bool Selectable { get; }
+
+        /// <summary>
         /// Returns or sets a value indicating whether columns should be hidden.
         /// </summary>
         bool SuppressHeaders { get; }

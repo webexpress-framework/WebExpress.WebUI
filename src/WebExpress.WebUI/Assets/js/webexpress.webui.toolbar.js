@@ -69,7 +69,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Add a button programmatically.
-     * @param {object} opts - { id, label, icon, image, title, align, disabled, active, colorCss, modal }
+     * @param {object} opts - { id, label, icon, image, title, align, disabled, active, colorCss, modal, primaryAction... }
      */
     addButton(opts) {
         this.addItem({
@@ -85,7 +85,15 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             align: opts.align || "left",
             disabled: !!opts.disabled,
             active: !!opts.active,
-            overflow: opts.overflow || ""
+            overflow: opts.overflow || "",
+            
+            // action attributes
+            primaryAction: opts.primaryAction || null,
+            primaryTarget: opts.primaryTarget || null,
+            primaryUri: opts.primaryUri || null,
+            secondaryAction: opts.secondaryAction || null,
+            secondaryTarget: opts.secondaryTarget || null,
+            secondaryUri: opts.secondaryUri || null
         });
     }
 
@@ -117,7 +125,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Adds a modal trigger button programmatically.
-     * @param {object} opts - { id, label, icon, modalKey, modalTitle, align, disabled, colorCss }
+     * @param {object} opts - { id, label, icon, modalKey, modalTitle, align, disabled, colorCss, primaryAction... }
      */
     addModalButton(opts) {
         this.addItem({
@@ -131,7 +139,15 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             colorCss: opts.colorCss || null,
             align: opts.align || "left",
             disabled: !!opts.disabled,
-            overflow: opts.overflow || ""
+            overflow: opts.overflow || "",
+
+            // action attributes
+            primaryAction: opts.primaryAction || null,
+            primaryTarget: opts.primaryTarget || null,
+            primaryUri: opts.primaryUri || null,
+            secondaryAction: opts.secondaryAction || null,
+            secondaryTarget: opts.secondaryTarget || null,
+            secondaryUri: opts.secondaryUri || null
         });
     }
 
@@ -165,7 +181,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Add a dropdown programmatically.
-     * @param {object} opts - { title, toggle, align, colorCss, element } 
+     * @param {object} opts - { title, toggle, align, colorCss, element, primaryAction... } 
      */
     addDropdown(opts) {
         let el = opts.element;
@@ -184,7 +200,15 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             disabled: !!opts.disabled,
             active: !!opts.active,
             overflow: opts.overflow || "",
-            element: el
+            element: el,
+
+            // action attributes
+            primaryAction: opts.primaryAction || null,
+            primaryTarget: opts.primaryTarget || null,
+            primaryUri: opts.primaryUri || null,
+            secondaryAction: opts.secondaryAction || null,
+            secondaryTarget: opts.secondaryTarget || null,
+            secondaryUri: opts.secondaryUri || null
         });
     }
 
@@ -258,6 +282,17 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             const align = el.dataset.align || "left";
             const disabled = el.hasAttribute("disabled");
             const active = el.hasAttribute("active");
+            const dataset = el.dataset;
+
+            // common action props extraction
+            const actions = {
+                primaryAction: dataset.wxPrimaryAction || null,
+                primaryTarget: dataset.wxPrimaryTarget || null,
+                primaryUri: dataset.wxPrimaryUri || null,
+                secondaryAction: dataset.wxSecondaryAction || null,
+                secondaryTarget: dataset.wxSecondaryTarget || null,
+                secondaryUri: dataset.wxSecondaryUri || null
+            };
             
             if (el.classList.contains("wx-toolbar-separator")) {
                 el.setAttribute("data-overflow", "hide");
@@ -287,7 +322,8 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                     align: align,
                     disabled: disabled,
                     overflow: el.dataset.overflow || "",
-                    element: el
+                    element: el,
+                    ...actions
                 };
             } else if (el.classList.contains("wx-toolbar-combo")) {
                 return {
@@ -305,7 +341,8 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                     disabled: disabled,
                     active: active,
                     overflow: el.dataset.overflow || "",
-                    element: el
+                    element: el,
+                    ...actions
                 };
             } else if (el.classList.contains("wx-toolbar-dropdown")) {
                 return {
@@ -318,7 +355,8 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                     disabled: disabled,
                     active: active,
                     overflow: el.dataset.overflow || "",
-                    element: el
+                    element: el,
+                    ...actions
                 };
             } else if (el.classList.contains("wx-toolbar-button")) {
                 return {
@@ -335,7 +373,8 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                     disabled: disabled,
                     active: active,
                     overflow: el.dataset.overflow || "",
-                    element: el
+                    element: el,
+                    ...actions
                 };
             } else if (el.classList.contains("wx-toolbar-label")) {
                 el.setAttribute("data-overflow", "hide");
@@ -541,6 +580,14 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 item.element.classList.add(item.colorCss);
             }
             
+            // apply action attributes
+            if (item.primaryAction) item.element.dataset.wxPrimaryAction = item.primaryAction;
+            if (item.primaryTarget) item.element.dataset.wxPrimaryTarget = item.primaryTarget;
+            if (item.primaryUri) item.element.dataset.wxPrimaryUri = item.primaryUri;
+            if (item.secondaryAction) item.element.dataset.wxSecondaryAction = item.secondaryAction;
+            if (item.secondaryTarget) item.element.dataset.wxSecondaryTarget = item.secondaryTarget;
+            if (item.secondaryUri) item.element.dataset.wxSecondaryUri = item.secondaryUri;
+
             // attach specific listener for modal opening
             item.element.addEventListener("click", (e) => {
                 e.preventDefault();
@@ -599,10 +646,19 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             if (item.title) {
                 item.element.title = item.title;
             }
+            
+            // apply action attributes
             if (item.modal) {
                 item.element.setAttribute("data-wx-primary-action", "modal");
                 item.element.setAttribute("data-wx-primary-target", item.modal);
             }
+            if (item.primaryAction) item.element.dataset.wxPrimaryAction = item.primaryAction;
+            if (item.primaryTarget) item.element.dataset.wxPrimaryTarget = item.primaryTarget;
+            if (item.primaryUri) item.element.dataset.wxPrimaryUri = item.primaryUri;
+            if (item.secondaryAction) item.element.dataset.wxSecondaryAction = item.secondaryAction;
+            if (item.secondaryTarget) item.element.dataset.wxSecondaryTarget = item.secondaryTarget;
+            if (item.secondaryUri) item.element.dataset.wxSecondaryUri = item.secondaryUri;
+
             // click listener handled by delegation in _renderToolbar
             return item.element;
         }
@@ -630,6 +686,15 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             if (item.title) {
                 dropdownCtrl._element.title = item.title;
             }
+            
+            // apply action attributes
+            if (item.primaryAction) dropdownCtrl._element.dataset.wxPrimaryAction = item.primaryAction;
+            if (item.primaryTarget) dropdownCtrl._element.dataset.wxPrimaryTarget = item.primaryTarget;
+            if (item.primaryUri) dropdownCtrl._element.dataset.wxPrimaryUri = item.primaryUri;
+            if (item.secondaryAction) dropdownCtrl._element.dataset.wxSecondaryAction = item.secondaryAction;
+            if (item.secondaryTarget) dropdownCtrl._element.dataset.wxSecondaryTarget = item.secondaryTarget;
+            if (item.secondaryUri) dropdownCtrl._element.dataset.wxSecondaryUri = item.secondaryUri;
+
             dropdownCtrl.render();
             return dropdownCtrl._element;
         }
@@ -703,6 +768,15 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { item: item });
             });
             combo.appendChild(select);
+            
+            // apply action attributes
+            if (item.primaryAction) combo.dataset.wxPrimaryAction = item.primaryAction;
+            if (item.primaryTarget) combo.dataset.wxPrimaryTarget = item.primaryTarget;
+            if (item.primaryUri) combo.dataset.wxPrimaryUri = item.primaryUri;
+            if (item.secondaryAction) combo.dataset.wxSecondaryAction = item.secondaryAction;
+            if (item.secondaryTarget) combo.dataset.wxSecondaryTarget = item.secondaryTarget;
+            if (item.secondaryUri) combo.dataset.wxSecondaryUri = item.secondaryUri;
+
             return combo;
         }
         if (item.type === "label") {

@@ -45,6 +45,11 @@ namespace WebExpress.WebUI.WebControl
         public TypeBorderTable TableBorder { get; set; } = TypeBorderTable.Default;
 
         /// <summary>
+        /// Returns or sets a value indicating whether the item can be selected.
+        /// </summary>
+        public bool Selectable { get; set; }
+
+        /// <summary>
         /// Returns or sets a value indicating whether columns should be hidden.
         /// </summary>
         public bool SuppressHeaders { get; set; }
@@ -161,6 +166,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-color", Color.ToClass())
                 .AddUserAttribute("data-striped", Striped.ToClass())
                 .AddUserAttribute("data-border", TableBorder.ToClass())
+                .AddUserAttribute("data-selectable", Selectable ? "true" : null)
                 .Add
                 (
                     new HtmlElementTextContentDiv()

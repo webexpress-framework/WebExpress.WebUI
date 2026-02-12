@@ -5,7 +5,19 @@
     width: 100%;
     min-width: 100%;
     margin-bottom: 0;
+    /* Create a local stacking context to contain sticky headers and resizers */
+    isolation: isolate;
     --wx-grid-template: repeat(auto-fit, minmax(50px, 1fr));
+    
+    /* Default Bootstrap table variables fallback */
+    --bs-table-bg: transparent;
+    --bs-table-accent-bg: transparent;
+    --bs-table-striped-color: var(--bs-body-color);
+    --bs-table-striped-bg: rgba(0, 0, 0, 0.05);
+    --bs-table-active-color: var(--bs-body-color);
+    --bs-table-active-bg: rgba(0, 0, 0, 0.1);
+    --bs-table-hover-color: var(--bs-body-color);
+    --bs-table-hover-bg: rgba(0, 0, 0, 0.075);
 }
 
 /* --- Row Structure (Grid) --- */
@@ -15,13 +27,15 @@
     grid-template-columns: var(--wx-grid-template);
     width: 100%;
     align-items: center;
+    position: relative;
+    transition: background-color 0.15s ease-in-out;
 }
 
 /* header group */
 .wx-table-header-group {
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 1020; /* aligned with standard sticky/fixed z-indices */
     background-color: var(--bs-table-head-bg, var(--bs-body-bg, #fff));
     box-shadow: 0 1px 0 var(--bs-table-border-color, var(--bs-border-color));
     display: block;
@@ -34,6 +48,10 @@
 
 .wx-table-footer-group {
     border-top: 2px solid var(--bs-table-border-color, var(--bs-border-color));
+    position: sticky;
+    bottom: 0;
+    z-index: 1010;
+    background-color: var(--bs-body-bg, #fff);
 }
 
 /* --- Cells --- */
@@ -50,12 +68,13 @@
     align-items: center;
     min-width: 0;
     height: 100%;
+    box-sizing: border-box; /* ensure padding doesn't break grid calculations */
 }
 
 /* header cells */
 .wx-col-header,
 .wx-grid-header-cell {
-    font-weight: bold;
+    font-weight: 700;
     background-color: var(--bs-table-head-bg, var(--bs-body-bg, #fff));
     position: relative;
     user-select: none;
@@ -64,66 +83,111 @@
     transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
-/* variant header colors */
-.wx-table.table-primary .wx-table-header-group,
-.wx-table.table-primary .wx-table-header-group .wx-col-header,
-.wx-table.table-primary .wx-table-header-group .wx-grid-header-cell {
-    background-color: var(--bs-table-primary-bg, var(--bs-primary)) !important;
-    color: var(--bs-table-primary-color, #fff) !important;
+/* --- Variant Theme Management (Optimized via Variables) --- */
+.wx-table.table-primary {
+    --bs-table-color: #000;
+    --bs-table-bg: #cfe2ff;
+    --bs-table-border-color: #bacbe6;
+    --bs-table-striped-bg: #c5d7f2;
+    --bs-table-striped-color: #000;
+    --bs-table-active-bg: #bacbe6;
+    --bs-table-active-color: #000;
+    --bs-table-hover-bg: #bfd1ec;
+    --bs-table-hover-color: #000;
 }
-.wx-table.table-secondary .wx-table-header-group,
-.wx-table.table-secondary .wx-table-header-group .wx-col-header,
-.wx-table.table-secondary .wx-table-header-group .wx-grid-header-cell {
-    background-color: var(--bs-table-secondary-bg, var(--bs-secondary)) !important;
-    color: var(--bs-table-secondary-color, #fff) !important;
+.wx-table.table-secondary {
+    --bs-table-color: #000;
+    --bs-table-bg: #e2e3e5;
+    --bs-table-border-color: #cbccce;
+    --bs-table-striped-bg: #d7d8da;
+    --bs-table-striped-color: #000;
+    --bs-table-active-bg: #cbccce;
+    --bs-table-active-color: #000;
+    --bs-table-hover-bg: #d3d6d8;
+    --bs-table-hover-color: #000;
 }
-.wx-table.table-success .wx-table-header-group,
-.wx-table.table-success .wx-table-header-group .wx-col-header,
-.wx-table.table-success .wx-table-header-group .wx-grid-header-cell {
-    background-color: var(--bs-table-success-bg, var(--bs-success)) !important;
-    color: var(--bs-table-success-color, #fff) !important;
+.wx-table.table-success {
+    --bs-table-color: #000;
+    --bs-table-bg: #d1e7dd;
+    --bs-table-border-color: #bcd0c7;
+    --bs-table-striped-bg: #c7dbd2;
+    --bs-table-striped-color: #000;
+    --bs-table-active-bg: #bcd0c7;
+    --bs-table-active-color: #000;
+    --bs-table-hover-bg: #c1d6cc;
+    --bs-table-hover-color: #000;
 }
-.wx-table.table-info .wx-table-header-group,
-.wx-table.table-info .wx-table-header-group .wx-col-header,
-.wx-table.table-info .wx-table-header-group .wx-grid-header-cell {
-    background-color: var(--bs-table-info-bg, var(--bs-info)) !important;
-    color: var(--bs-table-info-color, #000) !important;
+.wx-table.table-info {
+    --bs-table-color: #000;
+    --bs-table-bg: #cff4fc;
+    --bs-table-border-color: #badce3;
+    --bs-table-striped-bg: #c5e8ef;
+    --bs-table-striped-color: #000;
+    --bs-table-active-bg: #badce3;
+    --bs-table-active-color: #000;
+    --bs-table-hover-bg: #bfe2e9;
+    --bs-table-hover-color: #000;
 }
-.wx-table.table-warning .wx-table-header-group,
-.wx-table.table-warning .wx-table-header-group .wx-col-header,
-.wx-table.table-warning .wx-table-header-group .wx-grid-header-cell {
-    background-color: var(--bs-table-warning-bg, var(--bs-warning)) !important;
-    color: var(--bs-table-warning-color, #000) !important;
+.wx-table.table-warning {
+    --bs-table-color: #000;
+    --bs-table-bg: #fff3cd;
+    --bs-table-border-color: #e6dbb9;
+    --bs-table-striped-bg: #f2e7c3;
+    --bs-table-striped-color: #000;
+    --bs-table-active-bg: #e6dbb9;
+    --bs-table-active-color: #000;
+    --bs-table-hover-bg: #ece1be;
+    --bs-table-hover-color: #000;
 }
-.wx-table.table-danger .wx-table-header-group,
-.wx-table.table-danger .wx-table-header-group .wx-col-header,
-.wx-table.table-danger .wx-table-header-group .wx-grid-header-cell {
-    background-color: var(--bs-table-danger-bg, var(--bs-danger)) !important;
-    color: var(--bs-table-danger-color, #fff) !important;
+.wx-table.table-danger {
+    --bs-table-color: #000;
+    --bs-table-bg: #f8d7da;
+    --bs-table-border-color: #dfc2c4;
+    --bs-table-striped-bg: #eccccf;
+    --bs-table-striped-color: #000;
+    --bs-table-active-bg: #dfc2c4;
+    --bs-table-active-color: #000;
+    --bs-table-hover-bg: #e5c7ca;
+    --bs-table-hover-color: #000;
 }
-.wx-table.table-light .wx-table-header-group,
-.wx-table.table-light .wx-table-header-group .wx-col-header,
-.wx-table.table-light .wx-table-header-group .wx-grid-header-cell {
-    background-color: var(--bs-table-light-bg, var(--bs-light)) !important;
-    color: var(--bs-table-light-color, #000) !important;
+.wx-table.table-light {
+    --bs-table-color: #000;
+    --bs-table-bg: #f8f9fa;
+    --bs-table-border-color: #dfe0e1;
+    --bs-table-striped-bg: #ecedee;
+    --bs-table-striped-color: #000;
+    --bs-table-active-bg: #dfe0e1;
+    --bs-table-active-color: #000;
+    --bs-table-hover-bg: #e5e6e7;
+    --bs-table-hover-color: #000;
 }
-.wx-table.table-dark .wx-table-header-group,
-.wx-table.table-dark .wx-table-header-group .wx-col-header,
-.wx-table.table-dark .wx-table-header-group .wx-grid-header-cell {
-    background-color: var(--bs-table-dark-bg, var(--bs-dark)) !important;
-    color: var(--bs-table-dark-color, #fff) !important;
+.wx-table.table-dark {
+    --bs-table-color: #fff;
+    --bs-table-bg: #212529;
+    --bs-table-border-color: #373b3e;
+    --bs-table-striped-bg: #2c3034;
+    --bs-table-striped-color: #fff;
+    --bs-table-active-bg: #373b3e;
+    --bs-table-active-color: #fff;
+    --bs-table-hover-bg: #323539;
+    --bs-table-hover-color: #fff;
+}
+
+/* Apply scoped variables to header group */
+.wx-table[class*="table-"] .wx-table-header-group,
+.wx-table[class*="table-"] .wx-table-header-group .wx-col-header,
+.wx-table[class*="table-"] .wx-table-header-group .wx-grid-header-cell {
+    background-color: var(--bs-table-bg);
+    color: var(--bs-table-color);
+    border-color: var(--bs-table-border-color);
 }
 
 /* --- Header Hover Effect --- */
 .wx-col-header:hover,
 .wx-grid-header-cell:hover {
-    box-shadow: inset 0 0 0 9999px var(--bs-table-hover-bg, rgba(0, 0, 0, 0.075));
+    background-color: var(--bs-table-hover-bg);
+    color: var(--bs-table-hover-color);
     cursor: pointer;
-}
-
-[data-bs-theme=dark] .wx-col-header:hover,
-[data-bs-theme=dark] .wx-grid-header-cell:hover {
-    box-shadow: inset 0 0 0 9999px rgba(255, 255, 255, 0.1);
 }
 
 /* Header Content Wrapper */
@@ -149,8 +213,7 @@
     vertical-align: middle;
     padding: 0.06rem 0.22rem;
     border-radius: 0.25rem;
-    background-color: rgba(255, 255, 255, 0.06);
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+    background-color: rgba(255, 255, 255, 0.1);
     max-width: 2.2em;
     white-space: nowrap;
     overflow: visible;
@@ -158,18 +221,6 @@
 
 .wx-sort-asc .wx-col-inner::after { content: "▲"; }
 .wx-sort-desc .wx-col-inner::after { content: "▼"; }
-
-[data-bs-theme=dark] .wx-sort-asc .wx-col-inner::after,
-[data-bs-theme=dark] .wx-sort-desc .wx-col-inner::after {
-    background-color: rgba(0, 0, 0, 0.24);
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
-}
-
-.wx-table-header-group .wx-sort-asc .wx-col-inner::after,
-.wx-table-header-group .wx-sort-desc .wx-col-inner::after {
-    color: var(--bs-table-head-color, currentColor);
-    opacity: 1;
-}
 
 /* --- Actions Cell ---*/
 .wx-table-actions {
@@ -179,14 +230,9 @@
 
 .wx-table-actions .btn { border: none; }
 
-.wx-table-cell:has(.wx-smart-edit),
-.wx-grid-cell:has(.wx-smart-edit),
-.wx-table-cell:has(.dropdown-menu.show),
-.wx-grid-cell:has(.dropdown-menu.show),
-.wx-table-cell:has(input),
-.wx-grid-cell:has(input),
-.wx-table-cell:has(select),
-.wx-grid-cell:has(select) {
+/* Allow overflow for specific interactive elements */
+.wx-table-cell:where(:has(.wx-smart-edit, .dropdown-menu.show, input, select)),
+.wx-grid-cell:where(:has(.wx-smart-edit, .dropdown-menu.show, input, select)) {
     overflow: visible !important;
 }
 
@@ -199,12 +245,12 @@
     height: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: var(--bs-body-color);
+    color: inherit;
     text-decoration: none;
 }
 
-a.wx-cell-content { font-weight: 700; }
-a.wx-cell-content:hover { color: var(--bs-link-hover-color, var(--bs-primary, #0a58ca)); }
+a.wx-cell-content { font-weight: 600; }
+a.wx-cell-content:hover { text-decoration: underline; color: var(--bs-link-hover-color, currentColor); }
 
 .wx-icon {
     max-height: 1.2em;
@@ -212,27 +258,18 @@ a.wx-cell-content:hover { color: var(--bs-link-hover-color, var(--bs-primary, #0
     object-fit: contain;
 }
 
-/* --- Row Drag & Drop (Refactored for Grid) --- */
+/* --- Row Drag & Drop --- */
 .wx-table-drag-handle {
     cursor: grab;
     color: var(--bs-secondary);
-    text-align: center;
+    display: flex;
     justify-content: center;
+    align-items: center;
 }
 .wx-table-drag-handle:active { cursor: grabbing; }
 
-/* drop hover highlight */
 .wx-table .wx-drag-over {
-    border-radius: 0;
-}
-
-/* --- Resizable (opt-in) --- */
-.wx-resizable {
-    padding-right: 0.5em;
-}
-.wx-resizable:hover:not(:has(:hover)) {
-    overflow: auto;
-    resize: both;
+    border-top: 2px solid var(--bs-primary);
 }
 
 /* --- Column Resizing --- */
@@ -241,23 +278,24 @@ a.wx-cell-content:hover { color: var(--bs-link-hover-color, var(--bs-primary, #0
     top: 0;
     bottom: 0;
     right: 0;
-    width: 6px;
+    width: 5px;
     cursor: col-resize;
-    z-index: 100;
+    z-index: 1030; /* Higher than sticky header */
     opacity: 0;
     touch-action: none;
-    transform: translateX(50%);
+    background-clip: content-box; /* Easier to grab */
+    border-right: 2px solid transparent; 
 }
 
 .wx-table[dir="rtl"] .wx-col-resizer {
     right: auto;
     left: 0;
-    transform: translateX(-50%);
 }
 
-.wx-col-resizer:hover {
-    opacity: 0.5;
-    background-color: var(--bs-success);
+.wx-col-resizer:hover,
+.wx-col-resizer:active {
+    opacity: 1;
+    background-color: var(--bs-primary);
 }
 
 /* --- Tree / Hierarchy --- */
@@ -274,29 +312,31 @@ a.wx-cell-content:hover { color: var(--bs-link-hover-color, var(--bs-primary, #0
     flex-shrink: 0;
 }
 
-.wx-table .wx-tree-toggle,
-.wx-table .wx-tree-toggle-placeholder {
+.wx-table .wx-tree-toggle {
     width: 1.5rem;
     height: 1.5rem;
-    min-width: 1.5rem;
     margin-right: 0.25rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-}
-
-.wx-table .wx-tree-toggle {
     background: transparent;
-    border: none;
+    border: 1px solid transparent;
     padding: 0;
     cursor: pointer;
     border-radius: 4px;
-    color: var(--bs-body-color);
+    color: inherit;
+    transition: background-color 0.1s;
 }
 
-.wx-table .wx-tree-toggle:hover { background-color: var(--bs-table-hover-bg, rgba(0, 0, 0, 0.05)); }
-.wx-table .wx-tree-toggle-placeholder { visibility: hidden; }
+.wx-table .wx-tree-toggle:hover { background-color: rgba(0, 0, 0, 0.05); }
+
+.wx-table .wx-tree-toggle-placeholder {
+    width: 1.5rem;
+    margin-right: 0.25rem;
+    visibility: hidden;
+    flex-shrink: 0;
+}
 
 .wx-table .wx-tree-indicator-angle {
     content: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+DQo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIJdmlld0JveD0iMCAwIDEzNSAxOTAiPg0KCTxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJPCFbQ0RBVEFbDQoJCS5zdHExIHtmaWxsOiM3ZjdmN2Y7c3Ryb2tlOm5vbmU7fQ0KCV1dPg0KCTwvc3R5bGU+DQoJCTxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE4LC0xOCkiPg0KCQkJPHBhdGggZD0iTTEuNjYgMTczLjIgTDE4LjcgMTkwLjIzIEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMjYuNzIgMTkwLjIzIEw5OC44NyAxMTguMDggQTUuNjY5MjkgNS42NjkyOSAtMTgwIDAgMCA5OC44Nw0KCQkJCQkJIDExMC4wNiBMMjYuNzIgMzcuOSBBNS42NjkyOSA1LjY2OTI5IC0xODAgMCAwIDEuNjYgNjIuOTYNCgkJCQkJCSBMNDguNzYgMTEwLjA2IEE1LjY2OTI5IDUuNjY5MjkgMCAwIDEgNDguNzYgMTE4LjA2IEwxLjY2IDE2NS4xOCBBNS42NjkyOSA1LjY2OTI5IC0xODAgMCAwIDEuNjYgMTczLjIgWiINCiAgICAgICAgICAgICAgICAgICAgICAgIGNsYXNzPSJzdHEiLz4NCgkJPC9nPg0KPC9zdmc+');
@@ -317,123 +357,65 @@ a.wx-cell-content:hover { color: var(--bs-link-hover-color, var(--bs-primary, #0
 .wx-change-flash > .wx-table-cell,
 .wx-change-flash > .wx-grid-cell { animation: wx-change-flash 1s ease-out; }
 
-/* --- Body rows use bootstrap table background variable --- */
-.wx-table .wx-table-body-group .wx-table-row {
-    background-color: var(--bs-table-bg, transparent);
+/* --- Striping and Hover States (Using CSS Variables for Consistency) --- */
+
+/* Striped rows */
+.wx-table.table-striped .wx-table-body-group .wx-table-row:nth-child(odd) {
+    background-color: var(--bs-table-striped-bg);
+    color: var(--bs-table-striped-color);
 }
 
-/* variant body backgrounds */
-.wx-table.table-primary {
-    --bs-table-bg: rgba(var(--bs-table-primary-rgb, 13,110,253), 0.06);
-    --bs-table-striped-bg: rgba(var(--bs-table-primary-rgb, 13,110,253), 0.08);
-}
-.wx-table.table-secondary {
-    --bs-table-bg: rgba(var(--bs-table-secondary-rgb, 108,117,125), 0.06);
-    --bs-table-striped-bg: rgba(var(--bs-table-secondary-rgb, 108,117,125), 0.08);
-}
-.wx-table.table-success {
-    --bs-table-bg: rgba(var(--bs-table-success-rgb, 25,135,84), 0.06);
-    --bs-table-striped-bg: rgba(var(--bs-table-success-rgb, 25,135,84), 0.08);
-}
-.wx-table.table-info {
-    --bs-table-bg: rgba(var(--bs-table-info-rgb, 13,202,240), 0.06);
-    --bs-table-striped-bg: rgba(var(--bs-table-info-rgb, 13,202,240), 0.08);
-}
-.wx-table.table-warning {
-    --bs-table-bg: rgba(var(--bs-table-warning-rgb, 255,193,7), 0.06);
-    --bs-table-striped-bg: rgba(var(--bs-table-warning-rgb, 255,193,7), 0.08);
-}
-.wx-table.table-danger {
-    --bs-table-bg: rgba(var(--bs-table-danger-rgb, 220,53,69), 0.06);
-    --bs-table-striped-bg: rgba(var(--bs-table-danger-rgb, 220,53,69), 0.08);
-}
-.wx-table.table-light {
-    --bs-table-bg: rgba(var(--bs-table-light-rgb, 248,249,250), 0.5);
-    --bs-table-striped-bg: rgba(var(--bs-table-light-rgb, 248,249,250), 0.6);
-}
-.wx-table.table-dark {
-    --bs-table-bg: rgba(var(--bs-table-dark-rgb, 33,37,41), 0.04);
-    --bs-table-striped-bg: rgba(var(--bs-table-dark-rgb, 33,37,41), 0.06);
+/* Hover state */
+.wx-table-row:hover {
+    background-color: var(--bs-table-hover-bg);
+    color: var(--bs-table-hover-color);
+    z-index: 1; /* Ensure hover effect is on top */
 }
 
-/* table-bordered support */
+/* Active/Selected state */
+.wx-table-row.active,
+.wx-table-row.wx-row-active,
+.wx-table-row:active {
+    background-color: var(--bs-table-active-bg);
+    color: var(--bs-table-active-color);
+}
+
+/* Allow pointer cursor on selectable rows or when active */
+.wx-table-row:where(.active, [data-wx-primary-action]) {
+    cursor: pointer;
+}
+
+/* --- Border Handling --- */
 .wx-table.table-bordered {
-    border: 1px solid var(--bs-border-color);
-    border-radius: 0.25rem;
+    border: 1px solid var(--bs-table-border-color);
 }
 
 .wx-table.table-bordered .wx-table-cell,
 .wx-table.table-bordered .wx-grid-cell,
 .wx-table.table-bordered .wx-col-header,
 .wx-table.table-bordered .wx-grid-header-cell {
-    border-right: 1px solid var(--bs-border-color);
+    border-right: 1px solid var(--bs-table-border-color);
 }
 
-.wx-table.table-bordered .wx-table-row > .wx-table-cell:last-child,
-.wx-table.table-bordered .wx-table-row > .wx-grid-cell:last-child,
-.wx-table.table-bordered .wx-table-header-group .wx-col-header:last-child,
-.wx-table.table-bordered .wx-table-header-group .wx-grid-header-cell:last-child {
-    border-right: 0;
+.wx-table.table-bordered .wx-table-row .wx-grid-cell:last-child,
+.wx-table.table-bordered .wx-table-header-group .wx-col-header:last-child {
+    border-right: none;
 }
 
-.wx-table.table-bordered .wx-table-header-group {
-    border-bottom: 1px solid var(--bs-border-color);
-}
-
-.wx-table.table-bordered .wx-table-body-group .wx-table-row:last-child > .wx-table-cell,
-.wx-table.table-bordered .wx-table-body-group .wx-table-row:last-child > .wx-grid-cell {
-    border-bottom: 0;
-}
-
-/* rtl adjustments for bordered tables */
+/* RTL border adjustments */
 .wx-table[dir="rtl"].table-bordered .wx-table-cell,
-.wx-table[dir="rtl"].table-bordered .wx-grid-cell,
-.wx-table[dir="rtl"].table-bordered .wx-col-header,
-.wx-table[dir="rtl"].table-bordered .wx-grid-header-cell {
-    border-right: 0;
-    border-left: 1px solid var(--bs-border-color);
+.wx-table[dir="rtl"].table-bordered .wx-col-header {
+    border-right: none;
+    border-left: 1px solid var(--bs-table-border-color);
 }
-
-.wx-table[dir="rtl"].table-bordered .wx-table-row > .wx-table-cell:last-child,
-.wx-table[dir="rtl"].table-bordered .wx-table-row > .wx-grid-cell:last-child,
-.wx-table[dir="rtl"].table-bordered .wx-table-header-group .wx-col-header:last-child,
-.wx-table[dir="rtl"].table-bordered .wx-table-header-group .wx-grid-header-cell:last-child {
-    border-left: 0;
-}
-
-/* table-striped support */
-.wx-table.table-striped .wx-table-body-group .wx-table-row:nth-child(odd) > .wx-table-cell,
-.wx-table.table-striped .wx-table-body-group .wx-table-row:nth-child(odd) > .wx-grid-cell {
-    box-shadow: inset 0 0 0 9999px var(--bs-table-striped-bg, rgba(0, 0, 0, 0.05));
-}
-
-/* table-striped-columns support */
-.wx-table.table-striped-columns .wx-table-body-group .wx-table-row > .wx-table-cell:nth-child(even),
-.wx-table.table-striped-columns .wx-table-body-group .wx-table-row > .wx-grid-cell:nth-child(even) {
-    box-shadow: inset 0 0 0 9999px var(--bs-table-striped-bg, rgba(0, 0, 0, 0.05));
-}
-
-/* Hover and Active States */
-.wx-table-row:hover > .wx-table-cell,
-.wx-table-row:hover > .wx-grid-cell,
-.wx-table.table-striped .wx-table-body-group .wx-table-row:hover > .wx-table-cell,
-.wx-table.table-striped .wx-table-body-group .wx-table-row:hover > .wx-grid-cell,
-.wx-table.table-striped-columns .wx-table-body-group .wx-table-row:hover > .wx-table-cell,
-.wx-table.table-striped-columns .wx-table-body-group .wx-table-row:hover > .wx-grid-cell {
-    box-shadow: inset 0 0 0 9999px var(--bs-table-hover-bg, rgba(0, 0, 0, 0.075)) !important;
-    color: var(--bs-table-hover-color, inherit);
-    cursor: default;
-}
-
-.wx-table-row:active > .wx-table-cell,
-.wx-table-row:active > .wx-grid-cell,
-.wx-table-row.wx-row-active > .wx-table-cell,
-.wx-table-row.wx-row-active > .wx-grid-cell {
-    box-shadow: inset 0 0 0 9999px var(--bs-table-active-bg, rgba(0, 0, 0, 0.075)) !important;
-    color: var(--bs-table-active-color, inherit);
+.wx-table[dir="rtl"].table-bordered .wx-table-row .wx-grid-cell:last-child,
+.wx-table[dir="rtl"].table-bordered .wx-table-header-group .wx-col-header:last-child {
+    border-left: none;
 }
 
 /* Print handling */
 @media print {
-    .wx-table-actions, .wx-table-drag-handle { display: none !important; }
+    .wx-table-actions, .wx-table-drag-handle, .wx-col-resizer { display: none !important; }
+    .wx-table { display: block; } /* Fallback for print */
+    .wx-table-row, .wx-grid-row { page-break-inside: avoid; }
 }

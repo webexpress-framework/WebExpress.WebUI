@@ -67,7 +67,17 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                 label: dataset.label || el.textContent.trim(),
                 iconClass: dataset.icon,
                 iconImg: dataset.image,
-                mode: dataset.mode || "hide" // "hide" or "overlay"
+                mode: dataset.mode || "hide", // "hide" or "overlay"
+                
+                // action attributes
+                primaryAction: dataset.wxPrimaryAction || null,
+                primaryTarget: dataset.wxPrimaryTarget || null,
+                primaryUri: dataset.wxPrimaryUri || null,
+                primarySize: dataset.wxPrimarySize || null,
+                secondaryAction: dataset.wxSecondaryAction || null,
+                secondaryTarget: dataset.wxSecondaryTarget || null,
+                secondaryUri: dataset.wxSecondaryUri || null,
+                secondarySize: dataset.wxSecondarySize || null
             };
 
             if (el.classList.contains("wx-sidebar-header")) {
@@ -189,6 +199,32 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             wrapper.setAttribute("disabled", "");
         }
 
+        // apply action attributes
+        if (item.primaryAction) {
+            wrapper.setAttribute("data-wx-primary-action", item.primaryAction);
+        }
+        if (item.primaryTarget) {
+            wrapper.setAttribute("data-wx-primary-target", item.primaryTarget);
+        }
+        if (item.primaryUri) {
+            wrapper.setAttribute("data-wx-primary-uri", item.primaryUri);
+        }
+        if (item.primarySize) {
+            wrapper.setAttribute("data-wx-primary-size", item.primarySize);
+        }
+        if (item.secondaryAction) {
+            wrapper.setAttribute("data-wx-secondary-action", item.secondaryAction);
+        }
+        if (item.secondaryTarget) {
+            wrapper.setAttribute("data-wx-secondary-target", item.secondaryTarget);
+        }
+        if (item.secondaryUri) {
+            wrapper.setAttribute("data-wx-secondary-uri", item.secondaryUri);
+        }
+        if (item.secondarySize) {
+            wrapper.setAttribute("data-wx-secondary-size", item.secondarySize);
+        }
+
         const link = document.createElement("a");
         link.className = "wx-link";
         if (item.link) {
@@ -256,6 +292,32 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
         iconWrapper.className = "wx-sidebar-icon";
         iconWrapper.setAttribute("tabindex", "0");
 
+        // apply action attributes
+        if (item.primaryAction) {
+            iconWrapper.setAttribute("data-wx-primary-action", item.primaryAction);
+        }
+        if (item.primaryTarget) {
+            iconWrapper.setAttribute("data-wx-primary-target", item.primaryTarget);
+        }
+        if (item.primaryUri) {
+            iconWrapper.setAttribute("data-wx-primary-uri", item.primaryUri);
+        }
+        if (item.primarySize) {
+            iconWrapper.setAttribute("data-wx-primary-size", item.primarySize);
+        }
+        if (item.secondaryAction) {
+            iconWrapper.setAttribute("data-wx-secondary-action", item.secondaryAction);
+        }
+        if (item.secondaryTarget) {
+            iconWrapper.setAttribute("data-wx-secondary-target", item.secondaryTarget);
+        }
+        if (item.secondaryUri) {
+            iconWrapper.setAttribute("data-wx-secondary-uri", item.secondaryUri);
+        }
+        if (item.secondarySize) {
+            iconWrapper.setAttribute("data-wx-secondary-size", item.secondarySize);
+        }
+
         // icon presentation
         let iconEl = null;
         if (item.iconClass) {
@@ -286,6 +348,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             editBtn.className = "wx-sidebar-icon-edit";
             editBtn.title = this._i18n("webexpress.webui:edit", "Edit");
             editBtn.innerHTML = '<i class="fas fa-pen"></i>';
+            
             if (item.modal.id) {
                 editBtn.setAttribute("data-wx-primary-action", "modal");
                 editBtn.setAttribute("data-wx-primary-target", item.modal.id);
@@ -351,14 +414,23 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
 
     /**
      * Builds a toolbar at the footer of the sidebar, if available.
+     * Defines controller property as non-enumerable to prevent circular JSON error.
      */
     _buildFooter() {
         for (const item of this._items) {
             if (item.type === "toolbar") {
                 this._toolbarElement = item.element;
+                
                 if (!this._toolbarElement._toolbarCtrl) {
-                    this._toolbarElement._toolbarCtrl = new webexpress.webui.ToolbarCtrl(this._toolbarElement);
+                    // define as non-enumerable to prevent JSON.stringify circular reference issues
+                    Object.defineProperty(this._toolbarElement, '_toolbarCtrl', {
+                        value: new webexpress.webui.ToolbarCtrl(this._toolbarElement),
+                        writable: true,
+                        configurable: true,
+                        enumerable: false
+                    });
                 }
+                
                 this._element.appendChild(this._toolbarElement);
                 break;
             }
@@ -403,14 +475,15 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
     /**
      * Updates the sidebar CSS classes based on the current state.
      * Prevents DOM rebuilding to ensure performance.
+     * Uses ID in event payload to avoid circular JSON errors.
      */
     _updateView() {
         if (this._isReduced) {
             this._element.classList.add("wx-sidebar-reduced");
-            this._dispatch(webexpress.webui.Event.HIDE_EVENT, { sidebar: this._element });
+            this._dispatch(webexpress.webui.Event.HIDE_EVENT, { sidebarId: this._element.id });
         } else {
             this._element.classList.remove("wx-sidebar-reduced");
-            this._dispatch(webexpress.webui.Event.SHOW_EVENT, { sidebar: this._element });
+            this._dispatch(webexpress.webui.Event.SHOW_EVENT, { sidebarId: this._element.id });
         }
 
         for (const item of this._items) {
@@ -499,7 +572,8 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             this._initializePopper(triggerEl, overlayPanel);
         }
 
-        this._dispatch(webexpress.webui.Event.SHOW_EVENT, { overlay: overlayPanel });
+        // avoid passing DOM element to payload to prevent potential circular reference issues
+        this._dispatch(webexpress.webui.Event.SHOW_EVENT, { overlayActive: true });
 
         const closeOverlay = () => {
             // restore content to sidebar
@@ -517,7 +591,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             if (overlayPanel.parentElement) {
                 overlayPanel.parentElement.removeChild(overlayPanel);
             }
-            this._dispatch(webexpress.webui.Event.HIDE_EVENT, { overlay: overlayPanel });
+            this._dispatch(webexpress.webui.Event.HIDE_EVENT, { overlayActive: false });
         };
 
         // handle click outside

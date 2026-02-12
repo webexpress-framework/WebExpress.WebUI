@@ -41,6 +41,18 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControl> Content => _content;
 
         /// <summary>
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// click to open a modal or similar target.
+        /// </summary>
+        public IAction PrimaryAction { get; set; }
+
+        /// <summary>
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// double‑click to open a modal or similar target.
+        /// </summary>
+        public IAction SecondaryAction { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -104,6 +116,9 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
                 .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri.ToString())
                 .Add(_content.Select(x => x.Render(renderContext, visualTree)));
+
+            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

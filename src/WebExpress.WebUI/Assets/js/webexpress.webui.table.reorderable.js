@@ -1,20 +1,5 @@
 /**
  * Reorderable table control providing column mutation and row moving.
- * Features:
- * - reorder columns via drag & drop (header and dynamic modal panels)
- * - toggle column visibility
- * - move rows (flat and hierarchical, configurable via data attributes)
- * - persist columns (order, visibility, width), sort, and tree collapsed state
- * - actions modal panels including column search and inline reordering via DialogPanels
- *
- * Configuration via data attributes on host element:
- * - data-movable-row="true|false": enable row move handles and moving
- * - data-allow-column-remove="true|false": reserved for future column removal
- * - data-persist-key="string": key for cookie persistence
- * - data-tree-enabled="true|false": enable tree view (indent + toggle) when nested rows exist
- * - data-tree-move-enabled="true|false": allow hierarchical moving (drop as child)
- * - data-columns-modal-key="string": optional DialogPanels key for external column panels (default: "table-columns")
- *
  * The following events are triggered:
  * - webexpress.webui.Event.TABLE_SORT_EVENT
  * - webexpress.webui.Event.COLUMN_REORDER_EVENT
@@ -174,7 +159,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                 th.style.position = "relative"; // vital for drag indicator positioning
                 
                 if (col.color) {
-                    this._addClasses(th, col.color);
+                    th.classList.add(col.color);
                 }
 
                 if (col.sort) {
@@ -184,10 +169,15 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                 const inner = document.createElement("div");
                 inner.className = "wx-col-inner";
                 if (col.icon) {
-                    inner.appendChild(this._createIcon(col.icon));
+                    const i = document.createElement("i");
+                    i.className = col.icon;
+                    inner.appendChild(i);
                 }
                 if (col.image) {
-                    inner.appendChild(this._createImage(col.image));
+                    const img = document.createElement("img");
+                    img.className = "wx-icon";
+                    img.src = col.image;
+                    inner.appendChild(img);
                 }
                 inner.appendChild(document.createTextNode(col.label));
                 th.appendChild(inner);
@@ -549,13 +539,33 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         tr.setAttribute("role", "row");
         
         if (row.color) {
-            this._addClasses(tr, row.color);
+            tr.classList.add(row.color);
         }
         if (row.class) {
-            this._addClasses(tr, row.class);
+            tr.classList.add(...row.class.split(/\s+/).filter(Boolean));
         }
         if (row.style) {
             tr.style.cssText = row.style;
+        }
+
+        // map custom action attributes back to dataset (synced with base controller)
+        if (row.primaryAction) {
+            tr.dataset.wxPrimaryAction = row.primaryAction;
+        }
+        if (row.primaryTarget) {
+            tr.dataset.wxPrimaryTarget = row.primaryTarget;
+        }
+        if (row.primaryUri) {
+            tr.dataset.wxPrimaryUri = row.primaryUri;
+        }
+        if (row.secondaryAction) {
+            tr.dataset.wxSecondaryAction = row.secondaryAction;
+        }
+        if (row.secondaryTarget) {
+            tr.dataset.wxSecondaryTarget = row.secondaryTarget;
+        }
+        if (row.secondaryUri) {
+            tr.dataset.wxSecondaryUri = row.secondaryUri;
         }
 
         // restore selection state (if base controller supports selectedRow)
@@ -605,9 +615,15 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             const cell = row.cells[i];
 
             if (cell) {
-                if (cell.color) this._addClasses(td, cell.color);
-                if (cell.class) this._addClasses(td, cell.class);
-                if (cell.style) td.style.cssText += (td.style.cssText ? "; " : "") + cell.style;
+                if (cell.color) {
+                    td.classList.add(cell.color);
+                }
+                if (cell.class) {
+                    td.classList.add(...cell.class.split(/\s+/).filter(Boolean));
+                }
+                if (cell.style) {
+                    td.style.cssText += (td.style.cssText ? "; " : "") + cell.style;
+                }
 
                 let content = this._renderCell(row, colDef, cell, firstVisible);
 
@@ -617,7 +633,9 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                     wrap.className = "wx-cell-content";
                     if (row.uri) {
                         wrap.href = row.uri;
-                        if (row.target) wrap.target = row.target;
+                        if (row.target) {
+                            wrap.target = row.target;
+                        }
                         wrap.rel = "noopener noreferrer";
                     }
                     if (row.icon) {
@@ -685,7 +703,9 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         const lastVisibleId = visibleCols.length > 0 ? visibleCols[visibleCols.length - 1].id : null;
 
         for (const c of this._columns) {
-            if (!c.visible) continue;
+            if (!c.visible) {
+                continue;
+            }
 
             // Last column takes remaining space
             if (c.id === lastVisibleId) {
@@ -709,12 +729,14 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             }
 
             const min = c.minWidth || `${webexpress.webui.TableCtrl.MIN_COL_WIDTH}px`;
-            const max = c.maxWidth || "1fr";
-
+            
             if (c.width && c.width !== "auto") {
+                 if (c.minWidth) {
+                     val = `minmax(${c.minWidth}, ${val})`;
+                 }
                  parts.push(val);
             } else {
-                 parts.push(`minmax(${min}, ${max})`);
+                 parts.push(`minmax(${min}, 1fr)`);
             }
         }
         

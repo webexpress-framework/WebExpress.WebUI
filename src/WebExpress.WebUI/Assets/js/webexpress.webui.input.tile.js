@@ -155,6 +155,14 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
                 image: div.dataset.image || null,
                 colorCss: div.dataset.colorCss || div.dataset.color || null,
                 colorStyle: div.dataset.colorStyle || null,
+                
+                // parse action attributes
+                primaryAction: div.dataset.wxPrimaryAction || null,
+                primaryTarget: div.dataset.wxPrimaryTarget || null,
+                primaryUri: div.dataset.wxPrimaryUri || null,
+                secondaryAction: div.dataset.wxSecondaryAction || null,
+                secondaryTarget: div.dataset.wxSecondaryTarget || null,
+                secondaryUri: div.dataset.wxSecondaryUri || null
             });
         });
         return tiles;
@@ -260,6 +268,14 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         }
         card.setAttribute("role", "group");
         card.tabIndex = 0;
+
+        // Apply action attributes
+        if (tile.primaryAction) card.dataset.wxPrimaryAction = tile.primaryAction;
+        if (tile.primaryTarget) card.dataset.wxPrimaryTarget = tile.primaryTarget;
+        if (tile.primaryUri) card.dataset.wxPrimaryUri = tile.primaryUri;
+        if (tile.secondaryAction) card.dataset.wxSecondaryAction = tile.secondaryAction;
+        if (tile.secondaryTarget) card.dataset.wxSecondaryTarget = tile.secondaryTarget;
+        if (tile.secondaryUri) card.dataset.wxSecondaryUri = tile.secondaryUri;
 
         // remove all possible bg-* classes before (re-)applying selection
         const removeBackgroundClasses = () => {

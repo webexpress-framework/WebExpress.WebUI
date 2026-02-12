@@ -214,6 +214,54 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the primary action property of the list item link control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<li class=""list-group-item-action""><a class=""wx-link""></a></li>")]
+        [InlineData("modal", @"<li class=""list-group-item-action""><a class=""wx-link"" data-wx-primary-action=""modal"" data-wx-primary-target=""#modal""></a></li>")]
+        public void PrimaryAction(string modal, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlListItemLink()
+            {
+                PrimaryAction = new ActionModal(modal)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the secondary action property of the list item link control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<li class=""list-group-item-action""><a class=""wx-link""></a></li>")]
+        [InlineData("modal", @"<li class=""list-group-item-action""><a class=""wx-link"" data-wx-secondary-action=""modal"" data-wx-secondary-target=""#modal""></a></li>")]
+        public void SecondaryAction(string modal, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlListItemLink()
+            {
+                SecondaryAction = new ActionModal(modal)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests the add function of the list item link control.
         /// </summary>
         [Fact]

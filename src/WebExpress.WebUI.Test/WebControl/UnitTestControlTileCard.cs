@@ -113,6 +113,54 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the primary action property of the tile control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-tile-card""></div>")]
+        [InlineData("modal", @"<div class=""wx-tile-card"" data-wx-primary-action=""modal"" data-wx-primary-target=""#modal""></div>")]
+        public void PrimaryAction(string modal, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTileCard()
+            {
+                PrimaryAction = new ActionModal(modal)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the secondary action property of the tile control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-tile-card""></div>")]
+        [InlineData("modal", @"<div class=""wx-tile-card"" data-wx-secondary-action=""modal"" data-wx-secondary-target=""#modal""></div>")]
+        public void SecondaryAction(string modal, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTileCard()
+            {
+                SecondaryAction = new ActionModal(modal)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests adding a item to the tile control.
         /// </summary>
         [Fact]

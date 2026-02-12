@@ -1,7 +1,6 @@
 /**
  * Controller for interactive tile board: parsing markup, drag & drop reordering,
  * visibility toggling, searching, sorting and persistence (order + visibility).
- *
  * Events:
  *  - webexpress.webui.Event.MOVE_EVENT
  *  - webexpress.webui.Event.CHANGE_VISIBILITY_EVENT
@@ -120,6 +119,15 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
             colorCss: tileData.colorCss || tileData.color || null,
             colorStyle: tileData.colorStyle || null,
             visible: tileData.visible !== false,
+            
+            // action attributes
+            primaryAction: tileData.primaryAction || null,
+            primaryTarget: tileData.primaryTarget || null,
+            primaryUri: tileData.primaryUri || null,
+            secondaryAction: tileData.secondaryAction || null,
+            secondaryTarget: tileData.secondaryTarget || null,
+            secondaryUri: tileData.secondaryUri || null,
+
             _lc_id: null,
             _lc_label: null
         };
@@ -275,6 +283,15 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
                 colorCss: div.dataset.colorCss || div.dataset.color || null,
                 colorStyle: div.dataset.colorStyle || null,
                 visible: div.dataset.visible === "false" ? false : true,
+                
+                // parse action attributes
+                primaryAction: div.dataset.wxPrimaryAction || null,
+                primaryTarget: div.dataset.wxPrimaryTarget || null,
+                primaryUri: div.dataset.wxPrimaryUri || null,
+                secondaryAction: div.dataset.wxSecondaryAction || null,
+                secondaryTarget: div.dataset.wxSecondaryTarget || null,
+                secondaryUri: div.dataset.wxSecondaryUri || null,
+
                 _lc_id: null,
                 _lc_label: null
             });
@@ -304,6 +321,14 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
             card.style.cssText = tile.colorStyle;
         }
         card.setAttribute("role", "group");
+
+        // apply action attributes to the card element
+        if (tile.primaryAction) card.dataset.wxPrimaryAction = tile.primaryAction;
+        if (tile.primaryTarget) card.dataset.wxPrimaryTarget = tile.primaryTarget;
+        if (tile.primaryUri) card.dataset.wxPrimaryUri = tile.primaryUri;
+        if (tile.secondaryAction) card.dataset.wxSecondaryAction = tile.secondaryAction;
+        if (tile.secondaryTarget) card.dataset.wxSecondaryTarget = tile.secondaryTarget;
+        if (tile.secondaryUri) card.dataset.wxSecondaryUri = tile.secondaryUri;
 
         // add remove button if removable
         if (this._allowRemove) {
