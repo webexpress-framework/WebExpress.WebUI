@@ -1,0 +1,223 @@
+/* root container */
+.wx-view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--bs-body-color, #212529);
+    background: var(--bs-body-bg, #ffffff);
+    box-sizing: border-box;
+}
+
+/* toolbar (top bar with title / view selector) */
+.wx-view-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--bs-border-color, rgba(0,0,0,0.06));
+    background-color: var(--bs-body-bg, #f8f9fa);
+    flex: 0 0 auto;
+    z-index: 2;
+}
+
+    /* title area inside toolbar */
+    .wx-view-toolbar .text-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .wx-view-toolbar h5 {
+        margin: 0;
+        font-size: 1rem;
+        line-height: 1;
+        color: var(--bs-body-color, #212529);
+    }
+
+    .wx-view-toolbar small {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--bs-secondary, #6c757d);
+    }
+
+/* flexible header area for external controls */
+.wx-header {
+    padding: 0.5rem 0.75rem;
+    background-color: var(--bs-body-bg, #ffffff);
+    flex: 0 0 auto;
+}
+
+    /* when header has no content, border-bottom can be toggled by JS */
+    .wx-header.border-bottom {
+        border-bottom: 1px solid var(--bs-border-color, rgba(0,0,0,0.06));
+    }
+
+/* main body wrapper that holds master and optional detail panes */
+.wx-view-body {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+/* master pane (primary view area) */
+.wx-view-master {
+    flex: 1 1 auto;
+    position: relative;
+    min-width: 300px;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    background: transparent;
+}
+
+/* individual view container */
+.wx-view-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    box-sizing: border-box;
+}
+
+/* wrapper for arbitrary view markup */
+.wx-view-content {
+    padding: 0.75rem;
+    color: var(--bs-body-color, #212529);
+}
+
+/* split / detail pane */
+.wx-view-detail {
+    flex: 0 0 400px;
+    min-width: 300px;
+    max-width: 60%;
+    border-left: 1px solid var(--bs-border-color, rgba(0,0,0,0.06));
+    background-color: var(--bs-body-bg, #fafafa);
+    overflow: auto;
+    transition: width 180ms ease, opacity 180ms ease;
+    box-sizing: border-box;
+}
+
+/* internal frame host */
+.wx-detail-frame {
+    width: 100%;
+    height: 100%;
+}
+
+/* footer / statusbar */
+.wx-view-statusbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    background-color: var(--bs-body-bg, #f8f9fa);
+    flex: 0 0 auto;
+    font-size: 0.85rem;
+    color: var(--bs-secondary, #6c757d);
+}
+
+    /* footer border toggling: JS will add/remove border-top */
+    .wx-view-statusbar.border-top {
+        border-top: 1px solid var(--bs-border-color, rgba(0,0,0,0.06));
+    }
+
+/* flexible area on the right where external pagination / buttons may be placed */
+.wx-footer-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* small utilities */
+.d-none {
+    display: none !important;
+}
+
+.text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* dropdown styling (relies on Bootstrap variables) */
+.dropdown-menu {
+    background-color: var(--bs-body-bg, #ffffff);
+    color: var(--bs-body-color, #212529);
+    min-width: 180px;
+    box-shadow: var(--bs-dropdown-box-shadow, 0 6px 18px rgba(0,0,0,0.08));
+    border: 1px solid var(--bs-border-color, rgba(0,0,0,0.06));
+    padding: 0.25rem 0;
+    margin: 0;
+    list-style: none;
+    border-radius: 0.25rem;
+    z-index: 1060;
+}
+
+.dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 1rem;
+    font-weight: 400;
+    color: var(--bs-body-color, #212529);
+    text-decoration: none;
+    white-space: nowrap;
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+}
+
+    .dropdown-item:hover,
+    .dropdown-item:focus {
+        background-color: var(--bs-primary-bg-subtle, rgba(0,0,0,0.04));
+        color: var(--bs-body-color, #ffffff);
+    }
+
+/* responsive: collapse detail pane to overlay on small screens when active */
+@media (max-width: 768px) {
+    .wx-view-detail {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 5;
+        width: 100%;
+        max-width: 100%;
+        transform: translateX(100%);
+        opacity: 0;
+        transition: transform 220ms ease, opacity 220ms ease;
+    }
+
+        .wx-view-detail.overlay-visible {
+            transform: translateX(0);
+            opacity: 1;
+        }
+}
+
+/* ensure scrollbars are usable but unobtrusive */
+.wx-view-master::-webkit-scrollbar,
+.wx-view-detail::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.wx-view-master::-webkit-scrollbar-thumb,
+.wx-view-detail::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.08);
+    border-radius: 8px;
+}
+
+/* high-contrast adjustments for accessibility if user requests */
+@media (forced-colors: active) {
+    .wx-view-toolbar,
+    .wx-header,
+    .wx-view-statusbar,
+    .dropdown-menu {
+        forced-color-adjust: none;
+        background: ButtonFace;
+        color: ButtonText;
+        border-color: ButtonText;
+    }
+}

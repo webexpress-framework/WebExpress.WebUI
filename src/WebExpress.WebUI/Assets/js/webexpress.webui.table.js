@@ -214,7 +214,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         }
 
         // dispatch event
-        this._dispatch(webexpress?.webui?.Event?.SELECT_ROW_EVENT || "wx-select-row", {
+        this._dispatch(webexpress?.webui?.Event?.SELECT_ROW_EVENT, {
             detail: {
                 sender: this._element,
                 row: this._selectedRow,

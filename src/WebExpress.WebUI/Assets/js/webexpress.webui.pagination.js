@@ -26,8 +26,48 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
         element.removeAttribute("data-pagecount");
         element.classList.add("pagination", "wx-pagination");
 
-        // Render the control
+        this._initEvents();
         this.render();
+    }
+
+    /**
+     * Initialize event listeners, specifically for external state updates.
+     */
+    _initEvents() {
+        // Listen for sync events from the table (infinite scroll)
+        document.addEventListener("wx-update-pagination", (e) => {
+            // Logic to determine if this event is meant for this specific pager.
+            // Assuming the pager might be inside a wrapper or related by ID.
+            // For general usage on the same view, we update.
+            // Better: Check if the event bubbled from a related table.
+            if (e.detail) {
+                // Update internal state silently without triggering CHANGE_PAGE_EVENT
+                this.updateState(e.detail.page, e.detail.total);
+            }
+        });
+    }
+
+    /**
+     * Updates the pagination state from external source without firing change events.
+     * Used by infinite scrolling tables to update the indicator.
+     * @param {number} page Current page index.
+     * @param {number} total Total pages count.
+     */
+    updateState(page, total) {
+        let changed = false;
+        if (typeof total === "number" && total !== this._count) {
+            this._count = total < 1 ? 1 : total;
+            changed = true;
+        }
+        if (typeof page === "number" && page !== this._page) {
+            this._page = page;
+            changed = true;
+        }
+        
+        if (changed) {
+            // Re-render but do NOT dispatch events
+            this.render();
+        }
     }
 
     /**
@@ -46,6 +86,9 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
 
         // Add predecessor button
         const predecessor = this._createPageItem("<span class='fas fa-angle-left'></span>", Math.max(this._page - 1, 0));
+        if (this._page === 0) {
+            predecessor.classList.add("disabled");
+        }
         this._element.appendChild(predecessor);
 
         // Add page items
@@ -53,6 +96,9 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
 
         // Add successor button
         const successor = this._createPageItem("<span class='fas fa-angle-right'></span>", Math.min(this._page + 1, this._count - 1));
+        if (this._page === this._count - 1) {
+            successor.classList.add("disabled");
+        }
         this._element.appendChild(successor);
     }
 
@@ -74,8 +120,14 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
         li.appendChild(a);
 
         // Add click handler
-        li.addEventListener("click", () => {
-            this.page = page;
+        li.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (li.classList.contains("disabled") || li.classList.contains("active")) {
+                return;
+            }
+
+            this.page = page; // This setter triggers the event
+            
             const clickEvent = new CustomEvent(webexpress.webui.Event.CLICK_EVENT, {
                 detail: {
                     sender: this._element,
@@ -156,11 +208,12 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Sets the page number of the current page.
+     * Triggers event and re-render.
      * @param {number} value - The new page number to set.
      */
     set page(value) {
         if (value < 0 || value >= this._count) {
-            throw new Error("Invalid page number. It must be between 0 and the total number of pages - 1.");
+            return;
         }
 
         if (this._page !== value) {

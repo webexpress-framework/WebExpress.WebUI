@@ -17,12 +17,17 @@ webexpress.webui.Controller = new class {
         this.classRegistry = new Map();
         this._wxRegisteredElements = new WeakSet(); // prevent duplicate bindings
         this.observer = new MutationObserver(this.handleMutations.bind(this));
-        // observe attribute changes for both toggle and dismiss attributes
+        // observe attribute changes
         this.observer.observe(document, {
             childList: true,
             subtree: true,
             attributes: true,
-            attributeFilter: ["data-wx-primary-action", "data-wx-secondary-action", "data-wx-dismiss"]
+            attributeFilter: [
+                "data-wx-primary-action",
+                "data-wx-secondary-action",
+                "data-wx-dismiss",
+                "data-wx-bind"
+            ]
         });
         this.overrideCreateElement();
         this.initModalHandler();
@@ -41,7 +46,7 @@ webexpress.webui.Controller = new class {
         // wait for DOMContentLoaded event to ensure DOM is ready
         document.addEventListener("DOMContentLoaded", () => {
             // register both toggle and dismiss elements initially
-            document.querySelectorAll("[data-wx-primary-action], [data-wx-secondary-action], [data-wx-dismiss]").forEach(el => {
+            document.querySelectorAll("[data-wx-primary-action], [data-wx-secondary-action], [data-wx-dismiss], [data-wx-bind]").forEach(el => {
                 this._registerWxEvents(el);
             });
         });
@@ -309,6 +314,69 @@ webexpress.webui.Controller = new class {
                 // native exit is global on the document, so no specific target is needed
                 this._exitNativeFullscreen(); 
             });
+            bound = true;
+        }
+
+        // bind
+        // search 
+        if (element.matches("[data-wx-bind='search']")) {
+            // (e.g., searchCtrl -> TableCtrl)
+            document.addEventListener(webexpress.webui.Event.CHANGE_FILTER_EVENT, (e) => {
+                const query = e.detail?.value;
+                const instance = this.getInstanceByElement(element);
+                if (typeof instance?.search === "function") {
+                    instance.search(query);
+                }
+            });
+
+            // (e.g., TableCtrl -> searchCtrl)
+            document.addEventListener(webexpress.webui.Event.CHANGE_FILTER_EVENT, (e) => {
+                const target = element.getAttribute("data-wx-target") || null;
+
+                const instance = this.getInstance(target);
+
+                if (typeof instance?.search === "function") {
+                    instance.search();
+                }
+
+            });
+
+            bound = true;
+        }
+
+        // pagination
+        if (element.matches("[data-wx-bind='pagination']")) {
+            // (e.g., paginationCtrl -> TableCtrl)
+            element.addEventListener("click", (e) => {
+                const target = element.getAttribute("data-wx-target") || null;
+                const pageAttr = element.getAttribute("data-wx-page");
+                const page = pageAttr !== null ? parseInt(pageAttr, 10) : NaN;
+                if (!Number.isFinite(page)) {
+                    return;
+                }
+                const instance = this.getInstance(target);
+
+                if (typeof instance?.page === "function") {
+                    instance.page(page);
+                }
+            });
+
+            // (e.g., TableCtrl -> paginationCtrl)
+            document.addEventListener(webexpress.webui.Event.UPDATE_PAGINATION_EVENT, (e) => {
+                const target = element.getAttribute("data-wx-target") || null;
+
+                const detail = e.detail || {};
+                const total = detail.total ?? detail.totalPages ?? 0;
+                const page = detail.page ?? 0;
+
+                const ctrl = this.getInstanceByElement(target);
+                if (ctrl) {
+                    if ("total" in ctrl) pag.total = Math.max(1, Math.ceil(total));
+                    if ("page" in ctrl) pag.page = page;
+                    if (typeof ctrl.render === "function") pag.render();
+                }
+            });
+
             bound = true;
         }
 
@@ -1381,4 +1449,6 @@ webexpress.webui.Event = class {
     static WS_ERROR_EVENT = "webexpress.webui.websocket.error";
     // Event triggered when an item is selected.
     static SELECT_ITEM_EVENT = "webexpress.webui.select.item";
+    // Event triggered to notify external pagination controls about current page/total.
+    static UPDATE_PAGINATION_EVENT = "webexpress.webui.update.pagination";
 }

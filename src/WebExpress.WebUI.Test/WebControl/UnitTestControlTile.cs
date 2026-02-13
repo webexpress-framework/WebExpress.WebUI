@@ -29,6 +29,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -52,6 +53,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -75,6 +77,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -99,8 +102,8 @@ namespace WebExpress.WebUI.Test.WebControl
             // expected HTML
             var expected = @"<div class=""wx-webui-tile""><div class=""wx-tile-card""></div></div>";
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
-
     }
 }

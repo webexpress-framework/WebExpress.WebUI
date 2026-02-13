@@ -13,7 +13,7 @@ namespace WebExpress.WebUI.Test.WebControl
     public class UnitTestControlTileCard
     {
         /// <summary>
-        /// Tests the id property of the tile control.
+        /// Tests the id property of the tile card control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-tile-card""></div>")]
@@ -31,11 +31,12 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
         /// <summary>
-        /// Tests the color property of the alert control.
+        /// Tests the color property of the tile card control.
         /// </summary>
         [Theory]
         [InlineData(TypeColorTile.Default, @"<div class=""wx-tile-card""></div>")]
@@ -61,11 +62,12 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
         /// <summary>
-        /// Tests the header property of the panel card control.
+        /// Tests the header property of the tile card control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-tile-card""></div>")]
@@ -85,11 +87,12 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
         /// <summary>
-        /// Tests the icon property of the form tile card control item.
+        /// Tests the icon property of the tile card control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-tile-card""></div>")]
@@ -109,11 +112,12 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
         /// <summary>
-        /// Tests the primary action property of the tile control.
+        /// Tests the primary action property of the tile card control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-tile-card""></div>")]
@@ -137,7 +141,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the secondary action property of the tile control.
+        /// Tests the secondary action property of the tile card control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-tile-card""></div>")]
@@ -161,7 +165,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests adding a item to the tile control.
+        /// Tests adding a item to the tile card control.
         /// </summary>
         [Fact]
         public void Add()
@@ -172,13 +176,11 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTileCard(null);
 
-            // add column
+            // act
             control.Add(new ControlText());
 
-            // act
+            // validation
             var html = control.Render(context, visualTree);
-
-            // expected HTML
             var expected = @"<div class=""wx-tile-card""><div></div></div>";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
