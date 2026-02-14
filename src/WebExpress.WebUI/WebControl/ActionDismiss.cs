@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns the unique identifier for this modal.
         /// </summary>
-        public string Id { get; private set; }
+        public string Target { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the class with the specified identifier.
@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.WebControl
         /// </param>
         public ActionDismiss(string id)
         {
-            Id = !string.IsNullOrWhiteSpace(id) ? $"#{id}" : null;
+            Target = !string.IsNullOrWhiteSpace(id) ? $"#{id}" : null;
         }
 
         /// <summary>
@@ -36,13 +36,13 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public IAction ApplyUserAttributes(IHtmlNode htmlNode, TypeAction typeAction = TypeAction.Primary)
         {
-            if (string.IsNullOrWhiteSpace(Id))
+            if (string.IsNullOrWhiteSpace(Target))
             {
                 return this;
             }
 
             htmlNode?.AddUserAttribute("data-wx-dismiss", "fullscreen");
-            htmlNode?.AddUserAttribute("data-wx-target", Id);
+            htmlNode?.AddUserAttribute("data-wx-target", Target);
 
             return this;
         }

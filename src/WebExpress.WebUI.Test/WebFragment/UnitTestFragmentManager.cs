@@ -657,5 +657,49 @@ namespace WebExpress.WebUI.Test.WebFragment
             Assert.NotEmpty(html);
             AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
         }
+
+        /// <summary>
+        /// Test the render function of the fragment manager for tile control items.
+        /// </summary>
+        [Fact]
+        public void Render_TestSectionFragmentControlTile()
+        {
+            // arrange
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroltile"" class=""wx-webui-tile""><div class=""wx-tile-card""></div></div>";
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+
+            // act
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlTile));
+
+            // validation
+            Assert.NotNull(html);
+            Assert.NotEmpty(html);
+            AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
+        }
+
+        /// <summary>
+        /// Test the render function of the fragment manager for view control items.
+        /// </summary>
+        [Fact]
+        public void Render_TestSectionFragmentControlView()
+        {
+            // arrange
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolview"" class=""wx-webui-view""><div class=""wx-view""></div></div>";
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+
+            // act
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlView));
+
+            // validation
+            Assert.NotNull(html);
+            Assert.NotEmpty(html);
+            AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
+        }
     }
 }

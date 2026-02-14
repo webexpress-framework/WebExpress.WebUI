@@ -5,7 +5,6 @@
  * - webexpress.webui.Event.CLICK_EVENT
  */
 webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
-    // Default values for page and count
     _page = 0;
     _count = 10;
 
@@ -16,11 +15,11 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
     constructor(element) {
         super(element);
 
-        // Initialize properties from data attributes or defaults
+        // initialize properties from data attributes or defaults
         this._page = Number(element.dataset.page) || this._page;
         this._count = Number(element.dataset.total) || this._count;
 
-        // Clean up the DOM element and add base classes
+        // clean up the DOM element and add base classes
         element.innerHTML = "";
         element.removeAttribute("data-page");
         element.removeAttribute("data-pagecount");
@@ -34,14 +33,10 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
      * Initialize event listeners, specifically for external state updates.
      */
     _initEvents() {
-        // Listen for sync events from the table (infinite scroll)
+        // listen for sync events from the table (infinite scroll)
         document.addEventListener("wx-update-pagination", (e) => {
-            // Logic to determine if this event is meant for this specific pager.
-            // Assuming the pager might be inside a wrapper or related by ID.
-            // For general usage on the same view, we update.
-            // Better: Check if the event bubbled from a related table.
             if (e.detail) {
-                // Update internal state silently without triggering CHANGE_PAGE_EVENT
+                // update internal state silently without triggering CHANGE_PAGE_EVENT
                 this.updateState(e.detail.page, e.detail.total);
             }
         });
@@ -65,7 +60,7 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
         }
         
         if (changed) {
-            // Re-render but do NOT dispatch events
+            // re-render but do NOT dispatch events
             this.render();
         }
     }
@@ -84,17 +79,17 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
             return;
         }
 
-        // Add predecessor button
+        // add predecessor button
         const predecessor = this._createPageItem("<span class='fas fa-angle-left'></span>", Math.max(this._page - 1, 0));
         if (this._page === 0) {
             predecessor.classList.add("disabled");
         }
         this._element.appendChild(predecessor);
 
-        // Add page items
+        // add page items
         this._addPageItems();
 
-        // Add successor button
+        // add successor button
         const successor = this._createPageItem("<span class='fas fa-angle-right'></span>", Math.min(this._page + 1, this._count - 1));
         if (this._page === this._count - 1) {
             successor.classList.add("disabled");
@@ -109,24 +104,24 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
      * @returns {HTMLElement} The page item element.
      */
     _createPageItem(content, page) {
-        // Create list item
+        // create list item
         const li = document.createElement("li");
         li.className = "page-item";
-        // Create anchor
+        // create anchor
         const a = document.createElement("a");
         a.className = "page-link";
         a.href = "javascript:void(0)";
         a.innerHTML = content;
         li.appendChild(a);
 
-        // Add click handler
+        // add click handler
         li.addEventListener("click", (e) => {
             e.preventDefault();
             if (li.classList.contains("disabled") || li.classList.contains("active")) {
                 return;
             }
 
-            this.page = page; // This setter triggers the event
+            this.page = page; 
             
             const clickEvent = new CustomEvent(webexpress.webui.Event.CLICK_EVENT, {
                 detail: {
@@ -219,7 +214,7 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
         if (this._page !== value) {
             this._page = value;
 
-            // Trigger a page change event
+            // trigger a page change event
             const changeEvent = new CustomEvent(webexpress.webui.Event.CHANGE_PAGE_EVENT, {
                 detail: {
                     sender: this._element,
@@ -229,7 +224,7 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
             });
             document.dispatchEvent(changeEvent);
 
-            // Re-render the control
+            // re-render the control
             this.render();
         }
     }
@@ -247,20 +242,20 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
      */
     set total(value) {
         if (value < 1) {
-            value = 1; // Ensure at least one page exists
+            value = 1; // ensure at least one page exists
         }
 
         this._count = value;
 
-        // Adjust the current page if it exceeds the new page count
+        // adjust the current page if it exceeds the new page count
         if (this._page >= this._count) {
             this._page = this._count - 1;
         }
 
-        // Re-render the control
+        // re-render the control
         this.render();
     }
 };
 
-// Register the class in the controller
+// register the class in the controller
 webexpress.webui.Controller.registerClass("wx-webui-pagination", webexpress.webui.PaginationCtrl);

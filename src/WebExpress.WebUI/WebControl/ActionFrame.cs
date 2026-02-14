@@ -12,7 +12,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns the unique identifier for this modal.
         /// </summary>
-        public string Id { get; private set; }
+        public string Target { get; private set; }
 
         /// <summary>
         /// Returns or sets the target uri.
@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.WebControl
         /// </param>
         public ActionFrame(string id)
         {
-            Id = !string.IsNullOrWhiteSpace(id) ? $"#{id}" : null;
+            Target = !string.IsNullOrWhiteSpace(id) ? $"#{id}" : null;
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public IAction ApplyUserAttributes(IHtmlNode htmlNode, TypeAction typeAction = TypeAction.Primary)
         {
-            if (string.IsNullOrWhiteSpace(Id))
+            if (string.IsNullOrWhiteSpace(Target))
             {
                 return this;
             }
@@ -66,12 +66,12 @@ namespace WebExpress.WebUI.WebControl
             {
                 case TypeAction.Secondary:
                     htmlNode?.AddUserAttribute("data-wx-secondary-action", "frame");
-                    htmlNode?.AddUserAttribute("data-wx-secondary-target", Id);
+                    htmlNode?.AddUserAttribute("data-wx-secondary-target", Target);
                     htmlNode?.AddUserAttribute("data-wx-secondary-uri", Uri?.ToString());
                     break;
                 default:
                     htmlNode?.AddUserAttribute("data-wx-primary-action", "frame");
-                    htmlNode?.AddUserAttribute("data-wx-primary-target", Id);
+                    htmlNode?.AddUserAttribute("data-wx-primary-target", Target);
                     htmlNode?.AddUserAttribute("data-wx-primary-uri", Uri?.ToString());
                     break;
             }

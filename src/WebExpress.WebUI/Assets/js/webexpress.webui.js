@@ -320,60 +320,14 @@ webexpress.webui.Controller = new class {
         // bind
         // search 
         if (element.matches("[data-wx-bind='search']")) {
-            // (e.g., searchCtrl -> TableCtrl)
-            document.addEventListener(webexpress.webui.Event.CHANGE_FILTER_EVENT, (e) => {
+            const source = element.getAttribute("data-wx-source") || null;
+            const sourceElement = document.querySelector(source);
+
+            sourceElement?.addEventListener(webexpress.webui.Event.CHANGE_FILTER_EVENT, (e) => {
                 const query = e.detail?.value;
                 const instance = this.getInstanceByElement(element);
                 if (typeof instance?.search === "function") {
                     instance.search(query);
-                }
-            });
-
-            // (e.g., TableCtrl -> searchCtrl)
-            document.addEventListener(webexpress.webui.Event.CHANGE_FILTER_EVENT, (e) => {
-                const target = element.getAttribute("data-wx-target") || null;
-
-                const instance = this.getInstance(target);
-
-                if (typeof instance?.search === "function") {
-                    instance.search();
-                }
-
-            });
-
-            bound = true;
-        }
-
-        // pagination
-        if (element.matches("[data-wx-bind='pagination']")) {
-            // (e.g., paginationCtrl -> TableCtrl)
-            element.addEventListener("click", (e) => {
-                const target = element.getAttribute("data-wx-target") || null;
-                const pageAttr = element.getAttribute("data-wx-page");
-                const page = pageAttr !== null ? parseInt(pageAttr, 10) : NaN;
-                if (!Number.isFinite(page)) {
-                    return;
-                }
-                const instance = this.getInstance(target);
-
-                if (typeof instance?.page === "function") {
-                    instance.page(page);
-                }
-            });
-
-            // (e.g., TableCtrl -> paginationCtrl)
-            document.addEventListener(webexpress.webui.Event.UPDATE_PAGINATION_EVENT, (e) => {
-                const target = element.getAttribute("data-wx-target") || null;
-
-                const detail = e.detail || {};
-                const total = detail.total ?? detail.totalPages ?? 0;
-                const page = detail.page ?? 0;
-
-                const ctrl = this.getInstanceByElement(target);
-                if (ctrl) {
-                    if ("total" in ctrl) pag.total = Math.max(1, Math.ceil(total));
-                    if ("page" in ctrl) pag.page = page;
-                    if (typeof ctrl.render === "function") pag.render();
                 }
             });
 
@@ -1229,7 +1183,7 @@ webexpress.webui.Ctrl = class {
     * @param {object} detail payload
     */
     _dispatch(type, detail) {
-        document.dispatchEvent(new CustomEvent(type, {
+        this._element.dispatchEvent(new CustomEvent(type, {
             detail: {
                 sender: this._element,
                 id: this._element?.id,

@@ -121,39 +121,17 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     _parseViews(host) {
         // collect direct child .wx-view elements
         const viewNodes = Array.from(host.querySelectorAll(":scope > .wx-view"));
-        const knownSelectors = [
-            { type: "table", selector: ".wx-webapp-table, .wx-table" },
-            { type: "tile", selector: ".wx-webapp-tile, .wx-tile" },
-            { type: "graph", selector: ".wx-webapp-graph, .wx-graph" },
-            { type: "frame", selector: ".wx-frame" }
-        ];
 
         viewNodes.forEach((node, index) => {
-            let type = "unknown";
-            let contentNode = null;
-
-            // attempt to find known content elements using configuration array
-            for (const item of knownSelectors) {
-                const found = node.querySelector(item.selector);
-                if (found) {
-                    type = item.type;
-                    contentNode = found;
-                    break;
-                }
+            const wrapper = document.createElement("div");
+            wrapper.className = "wx-view-content";
+            // utilize document fragment for efficient dom manipulation
+            const fragment = document.createDocumentFragment();
+            while (node.firstChild) {
+                fragment.appendChild(node.firstChild);
             }
-
-            // if no recognized content node found, move all child nodes into a wrapper
-            if (!contentNode) {
-                const wrapper = document.createElement("div");
-                wrapper.className = "wx-view-content";
-                // utilize document fragment for efficient dom manipulation
-                const fragment = document.createDocumentFragment();
-                while (node.firstChild) {
-                    fragment.appendChild(node.firstChild);
-                }
-                wrapper.appendChild(fragment);
-                contentNode = wrapper;
-            }
+            wrapper.appendChild(fragment);
+            const contentNode = wrapper;
 
             // normalize dataset keys
             const ds = node.dataset;
@@ -165,7 +143,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
             const config = {
                 index: index,
-                type: type,
+                type: null,
                 title: title,
                 description: description,
                 iconCss: iconCss,

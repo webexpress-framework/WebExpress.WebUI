@@ -11,14 +11,13 @@
  * - data-highlight-color: optional css color for highlight background (default: "yellow").
  *
  * The following events are triggered:
- * - webexpress.webui.Event.CHANGE_FILTER_EVENT (dispatched when the search value changes)
+ * - webexpress.webui.Event.CHANGE_FILTER_EVENT
  */
 webexpress.webui.SearchContentCtrl = class extends webexpress.webui.Ctrl {
 
     _value = "";
     _highlightColor = "yellow";
     _targetIds = [];
-    _element;
     _searchBox;
     _searchInput;
 
@@ -363,5 +362,5 @@ webexpress.webui.SearchContentCtrl = class extends webexpress.webui.Ctrl {
     }
 };
 
-// Registers the control with the WebExpress controller registry when available.
+// register the class in the controller
 webexpress.webui.Controller.registerClass("wx-webui-search-content", webexpress.webui.SearchContentCtrl);

@@ -14,7 +14,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns the unique identifier for this modal.
         /// </summary>
-        public string Id { get; private set; }
+        public string Target { get; private set; }
 
         /// <summary>
         /// Returns the size configuration for the modal dialog.
@@ -32,10 +32,9 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="id">
         /// The unique identifier for the modal target. Cannot be null.
         /// </param>
-        /// <param name="size">The size configuration for the modal dialog.</param>
         public ActionModal(string id)
         {
-            Id = !string.IsNullOrWhiteSpace(id) ? $"#{id}" : null;
+            Target = !string.IsNullOrWhiteSpace(id) ? $"#{id}" : null;
         }
 
         /// <summary>
@@ -70,7 +69,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public IAction ApplyUserAttributes(IHtmlNode htmlNode, TypeAction typeAction = TypeAction.Primary)
         {
-            if (string.IsNullOrWhiteSpace(Id))
+            if (string.IsNullOrWhiteSpace(Target))
             {
                 return this;
             }
@@ -79,7 +78,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 case TypeAction.Secondary:
                     htmlNode?.AddUserAttribute("data-wx-secondary-action", "modal");
-                    htmlNode?.AddUserAttribute("data-wx-secondary-target", Id);
+                    htmlNode?.AddUserAttribute("data-wx-secondary-target", Target);
                     htmlNode?.AddUserAttribute("data-wx-secondary-uri", Uri?.ToString());
                     if (_size.HasValue)
                     {
@@ -89,7 +88,7 @@ namespace WebExpress.WebUI.WebControl
                     break;
                 default:
                     htmlNode?.AddUserAttribute("data-wx-primary-action", "modal");
-                    htmlNode?.AddUserAttribute("data-wx-primary-target", Id);
+                    htmlNode?.AddUserAttribute("data-wx-primary-target", Target);
                     htmlNode?.AddUserAttribute("data-wx-primary-uri", Uri?.ToString());
                     if (_size.HasValue)
                     {
