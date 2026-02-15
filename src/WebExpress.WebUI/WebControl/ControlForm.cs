@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using WebExpress.WebCore;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebFragment;
@@ -157,22 +156,10 @@ namespace WebExpress.WebUI.WebControl
         public IControl Conformation { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the class with an automatically assigned ID.
+        /// Initializes a new instance of the class.
         /// </summary>
-        /// <param name="instance">
-        /// The name of the calling member. This is automatically provided by the compiler.
-        /// </param>
-        /// <param name="file">
-        /// The file path of the source file where this instance is created. This is 
-        /// automatically provided by the compiler.
-        /// </param>
-        /// <param name="line">
-        /// The line number in the source file where this instance is created. This is 
-        /// automatically provided by the compiler.
-        /// </param>
-        /// <param name="items">The form items to add to the form.</param>
-        public ControlForm([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null, params IControlFormItem[] items)
-            : this($"{instance}_{file}_{line}".GetHashCode().ToString("X"), items)
+        public ControlForm()
+            : this(DeterministicId.Create())
         {
         }
 

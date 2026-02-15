@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -22,11 +21,6 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         public IEnumerable<ControlFormItemInputComboItem> Items => _items;
 
-        ///// <summary>
-        ///// Returns or sets the selected item.
-        ///// </summary>
-        //public string Selected { get; set; }
-
         /// <summary>
         /// Returns or sets a placeholder text.
         /// </summary>
@@ -37,20 +31,11 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         public PropertyOnChange OnChange { get; set; }
 
-        ///// <summary>
-        ///// Returns or sets the selected item.
-        ///// </summary>
-        //public string SelectedValue { get; set; }
-
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
         /// </summary>
-        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
-        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="items">The ComboBox entries.</param>
-        public ControlFormItemInputCombo([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null, params ControlFormItemInputComboItem[] items)
-            : this($"checkbox_{instance}_{file}_{line}".GetHashCode().ToString("X"), items)
+        public ControlFormItemInputCombo()
+            : this(DeterministicId.Create())
         {
         }
 

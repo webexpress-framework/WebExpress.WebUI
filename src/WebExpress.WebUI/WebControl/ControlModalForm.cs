@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebMessage;
@@ -79,27 +78,10 @@ namespace WebExpress.WebUI.WebControl
         public TypeFormState State => _form.State;
 
         /// <summary>
-        /// Initializes a new instance of the class with an automatically assigned ID.
+        /// Initializes a new instance of the class.
         /// </summary>
-        /// <param name="instance">
-        /// The name of the calling member. This is automatically provided by the compiler.
-        /// </param>
-        /// <param name="file">
-        /// The file path of the source file where this instance is created. This is automatically 
-        /// provided by the compiler.
-        /// </param>
-        /// <param name="line">
-        /// The line number in the source file where this instance is created. This is automatically 
-        /// provided by the compiler.
-        /// </param>
-        /// <param name="items">The form controls.</param>
-        public ControlModalForm
-        (
-            [CallerMemberName] string instance = null,
-            [CallerFilePath] string file = null,
-            [CallerLineNumber] int? line = null, params IControlFormItem[] items
-        )
-            : this($"modal_{instance}_{file}_{line}".GetHashCode().ToString("X"), items)
+        public ControlModalForm()
+            : this(DeterministicId.Create())
         {
         }
 

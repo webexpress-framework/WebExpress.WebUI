@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Runtime.CompilerServices;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebUri;
@@ -27,14 +26,10 @@ namespace WebExpress.WebUI.WebControl
         public string Selector { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the class with an automatically assigned ID.
+        /// Initializes a new instance of the class.
         /// </summary>
-        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
-        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="content">The content of the html element.</param>
-        public ControlModalRemotePage([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null, params IControl[] content)
-            : this($"modal_{instance}_{file}_{line}".GetHashCode().ToString("X"), content)
+        public ControlModalRemotePage()
+            : this(DeterministicId.Create())
         {
         }
 

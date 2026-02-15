@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using WebExpress.WebCore.Internationalization;
+﻿using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -34,11 +33,8 @@ namespace WebExpress.WebUI.WebControl
         /// Initializes a new instance of the <see cref="ControlFormItemInputCalendar"/> class 
         /// with an auto-generated ID based on source location.
         /// </summary>
-        public ControlFormItemInputCalendar(
-            [CallerMemberName] string instance = null,
-            [CallerFilePath] string file = null,
-            [CallerLineNumber] int? line = null)
-            : this($"calendar{instance}_{file}_{line}".GetHashCode().ToString("X"))
+        public ControlFormItemInputCalendar()
+            : this(DeterministicId.Create())
         {
         }
 

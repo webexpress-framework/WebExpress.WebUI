@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using WebExpress.WebCore.Internationalization;
+﻿using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
@@ -12,27 +11,10 @@ namespace WebExpress.WebUI.WebControl
     public class ControlModalFormConfirmDelete : ControlModalFormConfirm
     {
         /// <summary>
-        /// Initializes a new instance of the class with an automatically assigned ID.
+        /// Initializes a new instance of the class.
         /// </summary>
-        /// <param name="instance">
-        /// The name of the calling member. This is automatically provided by the compiler.
-        /// </param>
-        /// <param name="file">
-        /// The file path of the source file where this instance is created. This is automatically 
-        /// provided by the compiler.
-        /// </param>
-        /// <param name="line">
-        /// The line number in the source file where this instance is created. This is automatically 
-        /// provided by the compiler.
-        /// </param>
-        /// <param name="items">The form controls.</param>
-        public ControlModalFormConfirmDelete
-        (
-            [CallerMemberName] string instance = null,
-            [CallerFilePath] string file = null,
-            [CallerLineNumber] int? line = null, params IControlFormItem[] items
-        )
-            : this($"modal_confirm_delete_{instance}_{file}_{line}".GetHashCode().ToString("X"), items)
+        public ControlModalFormConfirmDelete()
+            : this(DeterministicId.Create())
         {
         }
 
