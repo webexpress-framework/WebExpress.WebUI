@@ -550,22 +550,17 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
 
         // map custom action attributes back to dataset (synced with base controller)
         if (row.primaryAction) {
-            tr.dataset.wxPrimaryAction = row.primaryAction;
+            for (const [key, value] of Object.entries(row.primaryAction)) {
+                const htmlName = `data-wx-primary-${key.toLowerCase()}`;
+                tr.setAttribute(htmlName, value);
+            }
         }
-        if (row.primaryTarget) {
-            tr.dataset.wxPrimaryTarget = row.primaryTarget;
-        }
-        if (row.primaryUri) {
-            tr.dataset.wxPrimaryUri = row.primaryUri;
-        }
+
         if (row.secondaryAction) {
-            tr.dataset.wxSecondaryAction = row.secondaryAction;
-        }
-        if (row.secondaryTarget) {
-            tr.dataset.wxSecondaryTarget = row.secondaryTarget;
-        }
-        if (row.secondaryUri) {
-            tr.dataset.wxSecondaryUri = row.secondaryUri;
+            for (const [key, value] of Object.entries(row.secondaryAction)) {
+                const htmlName = `data-wx-secondary-${key.toLowerCase()}`;
+                tr.setAttribute(htmlName, value);
+            }
         }
 
         // restore selection state (if base controller supports selectedRow)
@@ -628,7 +623,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                 let content = this._renderCell(row, colDef, cell, firstVisible);
 
                 // wrap content if first column has link/icon
-                if (firstVisible && (row.uri || row.icon)) {
+                if (firstVisible && (row.uri || row.icon || row.image)) {
                     const wrap = row.uri ? document.createElement("a") : document.createElement("span");
                     wrap.className = "wx-cell-content";
                     if (row.uri) {
@@ -642,6 +637,12 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                         const icon = document.createElement("i");
                         icon.className = row.icon;
                         wrap.appendChild(icon);
+                    }
+                    if (row.image) {
+                        const img = document.createElement("img");
+                        img.className = "wx-icon";
+                        img.src = row.image;
+                        wrap.appendChild(img);
                     }
                     if (content instanceof Node) {
                         wrap.appendChild(content);

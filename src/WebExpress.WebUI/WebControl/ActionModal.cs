@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+﻿using System.Collections.Generic;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebUri;
 
 namespace WebExpress.WebUI.WebControl
@@ -67,7 +68,7 @@ namespace WebExpress.WebUI.WebControl
         /// The type of action being applied, which may influence how attributes are applied.
         /// </param>
         /// <returns>The current instance for method chaining.</returns>
-        public IAction ApplyUserAttributes(IHtmlNode htmlNode, TypeAction typeAction = TypeAction.Primary)
+        public IAction ApplyUserAttributes(IHtmlNode htmlNode, TypeAction typeAction)
         {
             if (string.IsNullOrWhiteSpace(Target))
             {
@@ -99,6 +100,27 @@ namespace WebExpress.WebUI.WebControl
             }
 
             return this;
+        }
+
+        /// <summary>
+        /// Returns a string that represents the value of the property.
+        /// </summary>
+        /// <returns>A string that contains the value of the property.</returns>
+        public virtual Dictionary<string, object> ToJson()
+        {
+            var dict = new Dictionary<string, object>
+            {
+                ["action"] = "modal",
+                ["target"] = Target,
+                ["uri"] = Uri?.ToString()
+            };
+
+            if (_size.HasValue)
+            {
+                dict["size"] = Size;
+            }
+
+            return dict;
         }
     }
 }

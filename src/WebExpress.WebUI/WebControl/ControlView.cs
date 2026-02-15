@@ -10,12 +10,25 @@ namespace WebExpress.WebUI.WebControl
     /// </summary>
     public class ControlView : Control, IControlView
     {
+        private readonly List<IControlViewHeader> _headers = [];
         private readonly List<IControlViewItem> _views = [];
+        private readonly List<IControlViewFooter> _footers = [];
+
+        /// <summary>
+        /// Returns the collection of headers that define the structure 
+        /// and metadata of the control view.
+        /// </summary>
+        public IEnumerable<IControlViewHeader> Headers => _headers;
 
         /// <summary>
         /// Returns the views of the control.
         /// </summary>
         public IEnumerable<IControlViewItem> Views => _views;
+
+        /// <summary>
+        /// Returns the collection of footers associated with the control view.
+        /// </summary>
+        public IEnumerable<IControlViewFooter> Footers => _footers;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -29,6 +42,18 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Adds one or more headers to the view control.
+        /// </summary>
+        /// <param name="headers">The headers to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlView Add(params IControlViewHeader[] headers)
+        {
+            _headers.AddRange(headers);
+
+            return this;
+        }
+
+        /// <summary>
         /// Adds one or more items to the view control.
         /// </summary>
         /// <param name="items">The items to add.</param>
@@ -36,6 +61,30 @@ namespace WebExpress.WebUI.WebControl
         public IControlView Add(params IControlViewItem[] items)
         {
             _views.AddRange(items);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds one or more fotters to the view control.
+        /// </summary>
+        /// <param name="footers">The footer to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlView Add(params IControlViewFooter[] footers)
+        {
+            _footers.AddRange(footers);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds one or more headers to the view control.
+        /// </summary>
+        /// <param name="headers">The headers to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlView Add(IEnumerable<IControlViewHeader> headers)
+        {
+            _headers.AddRange(headers);
 
             return this;
         }
@@ -53,6 +102,30 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Adds one or more footers to the view control.
+        /// </summary>
+        /// <param name="footers">The items to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlView Add(IEnumerable<IControlViewFooter> footers)
+        {
+            _footers.AddRange(footers);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Removes the specified control from the view control.
+        /// </summary>
+        /// <param name="header">The control to remove.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlView Remove(IControlViewHeader header)
+        {
+            _headers.Remove(header);
+
+            return this;
+        }
+
+        /// <summary>
         /// Removes the specified control from the view control.
         /// </summary>
         /// <param name="item">The control to remove.</param>
@@ -60,6 +133,18 @@ namespace WebExpress.WebUI.WebControl
         public IControlView Remove(IControlViewItem item)
         {
             _views.Remove(item);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Removes the specified control from the view control.
+        /// </summary>
+        /// <param name="footer">The control to remove.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlView Remove(IControlViewFooter footer)
+        {
+            _footers.Remove(footer);
 
             return this;
         }
@@ -81,7 +166,9 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(),
                 Role = Role
             }
-                .Add(_views.Select(x => x.Render(renderContext, visualTree)));
+                .Add(_headers.Select(x => x.Render(renderContext, visualTree)))
+                .Add(_views.Select(x => x.Render(renderContext, visualTree)))
+                .Add(_footers.Select(x => x.Render(renderContext, visualTree)));
 
             return html;
         }

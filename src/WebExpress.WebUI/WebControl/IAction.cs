@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+﻿using System.Collections.Generic;
+using WebExpress.WebCore.WebHtml;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -17,6 +18,16 @@ namespace WebExpress.WebUI.WebControl
         /// The type of action being applied, which may influence how attributes are applied.
         /// </param>
         /// <returns>The current instance for method chaining.</returns>
-        IAction ApplyUserAttributes(IHtmlNode htmlNode, TypeAction typeAction = TypeAction.Primary);
+        IAction ApplyUserAttributes(IHtmlNode htmlNode, TypeAction typeAction);
+
+        /// <summary>
+        /// Returns a string that represents the current object, formatted 
+        /// according to the specified action type.
+        /// </summary>
+        /// <returns>
+        /// A string representation of the current object, formatted based 
+        /// on the provided action type.
+        /// </returns>
+        Dictionary<string, object> ToJson();
     }
 }

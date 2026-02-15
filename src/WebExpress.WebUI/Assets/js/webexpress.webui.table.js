@@ -220,11 +220,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 row: this._selectedRow,
                 rowId: this._selectedRow?.id,
                 primaryAction: this._selectedRow.primaryAction,
-                primaryTarget: this._selectedRow.primaryTarget,
-                primaryUri: this._selectedRow.primaryUri,
                 secondaryAction: this._selectedRow.secondaryAction,
-                secondaryTarget: this._selectedRow.secondaryTarget,
-                secondaryUri: this._selectedRow.secondaryUri,
+                bind: this._selectedRow.bind,
                 originalEvent: originalEvent
             }
         });
@@ -344,11 +341,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 uri: data.uri || data.url || null,
                 target: data.target || null,
                 primaryAction: data.primaryAction || null,
-                primaryTarget: data.primaryTarget || null,
-                primaryUri: data.primaryUri || null,
                 secondaryAction: data.secondaryAction || null,
-                secondaryTarget: data.secondaryTarget || null,
-                secondaryUri: data.secondaryUri || null,
+                bind: data.bind || null,
                 cells: Array.isArray(data.cells) ? data.cells.map(c => (c && typeof c === "object" ? c : { content: String(c ?? "") })) : [],
                 options: Array.isArray(data.options) ? data.options : null,
                 children: [],
@@ -554,24 +548,19 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
         // map custom action attributes back to dataset
         if (row.primaryAction) {
-            tr.dataset.wxPrimaryAction = row.primaryAction;
+            for (const [key, value] of Object.entries(row.primaryAction)) {
+                const htmlName = `data-wx-primary-${key.toLowerCase()}`;
+                tr.setAttribute(htmlName, value);
+            }
         }
-        if (row.primaryTarget) {
-            tr.dataset.wxPrimaryTarget = row.primaryTarget;
-        }
-        if (row.primaryUri) {
-            tr.dataset.wxPrimaryUri = row.primaryUri;
-        }
+
         if (row.secondaryAction) {
-            tr.dataset.wxSecondaryAction = row.secondaryAction;
+            for (const [key, value] of Object.entries(row.secondaryAction)) {
+                const htmlName = `data-wx-secondary-${key.toLowerCase()}`;
+                tr.setAttribute(htmlName, value);
+            }
         }
-        if (row.secondaryTarget) {
-            tr.dataset.wxSecondaryTarget = row.secondaryTarget;
-        }
-        if (row.secondaryUri) {
-            tr.dataset.wxSecondaryUri = row.secondaryUri;
-        }
-        
+                
         // apply selection state
         if (this._selectedRow === row) {
             tr.classList.add("active");
@@ -870,12 +859,24 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 target: div.dataset.target,
                 
                 // action attributes
-                primaryAction: div.dataset.wxPrimaryAction,
-                primaryTarget: div.dataset.wxPrimaryTarget,
-                primaryUri: div.dataset.wxPrimaryUri,
-                secondaryAction: div.dataset.wxSecondaryAction,
-                secondaryTarget: div.dataset.wxSecondaryTarget,
-                secondaryUri: div.dataset.wxSecondaryUri,
+                primaryAction: {
+                    action: div.dataset.wxPrimaryAction || null,
+                    target: div.dataset.wxPrimaryTarget || null,
+                    uri: div.dataset.wxPrimaryUri || null,
+                    size: div.dataset.wxPrimarySize || null
+                },
+
+                secondaryAction: {
+                    action: div.dataset.wxSecondaryAction || null,
+                    target: div.dataset.wxSecondaryTarget || null,
+                    uri: div.dataset.wxSecondaryUri || null,
+                    size: div.dataset.wxSecondarySize || null
+                },
+
+                // bind
+                bind: {
+                    source: div.dataset.wxSource || null,
+                },
                 
                 cells: [],
                 options: null,
@@ -945,12 +946,24 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 disabled: el.hasAttribute("disabled"),
                 
                 // parse action attributes for options
-                primaryAction: ds.wxPrimaryAction || null,
-                primaryTarget: ds.wxPrimaryTarget || null,
-                primaryUri: ds.wxPrimaryUri || null,
-                secondaryAction: ds.wxSecondaryAction || null,
-                secondaryTarget: ds.wxSecondaryTarget || null,
-                secondaryUri: ds.wxSecondaryUri || null
+                primaryAction: {
+                    action: ds.dataset.wxPrimaryAction || null,
+                    target: ds.dataset.wxPrimaryTarget || null,
+                    uri: ds.dataset.wxPrimaryUri || null,
+                    size: ds.dataset.wxPrimarySize || null
+                },
+
+                secondaryAction: {
+                    action: ds.dataset.wxSecondaryAction || null,
+                    target: ds.dataset.wxSecondaryTarget || null,
+                    uri: ds.dataset.wxSecondaryUri || null,
+                    size: ds.dataset.wxSecondarySize || null
+                },
+
+                // bind
+                bind: {
+                    source: div.dataset.wxSource || null,
+                }
             };
         });
     }

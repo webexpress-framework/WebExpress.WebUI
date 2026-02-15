@@ -92,10 +92,9 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                     icon: elem.dataset.icon || null,
                     text: elem.textContent || null,
                     color: elem.dataset.color || null,
-                    modal: {
-                        id: elem.dataset.wxTarget || null,
-                        size: elem.dataset.modalsize || null
-                    },
+                    primaryAction: elem.primaryAction || null,
+                    secondaryAction: elem.secondaryAction || null,
+                    bind: elem.bind || null,
                     backgroundColor: itemClasses
                         .filter(cls => cls !== "wx-dropdown-item")
                         .find(cls => cls.startsWith("wx-")) || "",
@@ -145,16 +144,23 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                 link.className = "wx-link dropdown-item";
                 if (item.color) link.classList.add(item.color);
 
-                if (!item.modal?.id) {
-                    link.href = item.uri;
-                } else {
-                    link.href = "javascript:void(0);";
-                    link.setAttribute("data-wx-primary-action", "modal");
-                    link.setAttribute("data-wx-primary-target", item.modal.id);
-                    link.setAttribute("data-wx-size", item.modal.size);
-                    link.setAttribute("data-wx-uri", item.uri);
+                if (item.primaryAction) {
+                    for (const [key, value] of Object.entries(item.primaryAction)) {
+                        const htmlName = `data-wx-primary-${key.toLowerCase()}`;
+                        link.setAttribute(htmlName, value);
+                    }
                 }
 
+                if (item.secondaryAction) {
+                    for (const [key, value] of Object.entries(item.secondaryAction)) {
+                        const htmlName = `data-wx-secondary-${key.toLowerCase()}`;
+                        link.setAttribute(htmlName, value);
+                    }
+                }
+
+                if (item.uri) {
+                    link.href = item.uri;
+                }
                 if (item.image) {
                     const img = document.createElement("img");
                     img.src = item.image;

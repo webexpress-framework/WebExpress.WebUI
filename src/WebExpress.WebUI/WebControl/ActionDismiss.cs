@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+﻿using System.Collections.Generic;
+using WebExpress.WebCore.WebHtml;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -45,6 +46,17 @@ namespace WebExpress.WebUI.WebControl
             htmlNode?.AddUserAttribute("data-wx-target", Target);
 
             return this;
+        }
+
+        /// <summary>
+        /// Returns a string that represents the value of the property.
+        /// </summary>
+        /// <returns>A string that contains the value of the property.</returns>
+        public virtual Dictionary<string, object> ToJson()
+        {
+            // todo
+
+            return null;
         }
     }
 }

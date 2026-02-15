@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+﻿using System.Collections.Generic;
+using WebExpress.WebCore.WebHtml;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -23,5 +24,15 @@ namespace WebExpress.WebUI.WebControl
         /// </param>
         /// <returns>The current instance for method chaining.</returns>
         IBind ApplyUserAttributes(IHtmlNode htmlNode, string target = null);
+
+        /// <summary>
+        /// Returns a string that represents the current object, formatted 
+        /// according to the specified action type.
+        /// </summary>
+        /// <returns>
+        /// A string representation of the current object, formatted based 
+        /// on the provided action type.
+        /// </returns>
+        Dictionary<string, object> ToJson();
     }
 }

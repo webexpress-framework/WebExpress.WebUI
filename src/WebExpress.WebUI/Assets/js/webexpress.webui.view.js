@@ -111,7 +111,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Parse child view configurations.
+     * Parse child view configurations and import header/footer nodes if present.
      * - accepts data-title or data-label for title
      * - accepts data-iconCss or data-icon for icon classes
      * - preserves arbitrary markup inside .wx-view by wrapping it when no known
@@ -119,6 +119,17 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
      * @param {HTMLElement} host host element
      */
     _parseViews(host) {
+        // import existing header and footer if they are direct children of the host
+        const headerNode = host.querySelector(":scope > .wx-header");
+        if (headerNode) {
+            this._views.header = headerNode;
+        }
+
+        const footerNode = host.querySelector(":scope > .wx-view-statusbar, :scope > .wx-footer, :scope > footer");
+        if (footerNode) {
+            this._views.footer = footerNode;
+        }
+
         // collect direct child .wx-view elements
         const viewNodes = Array.from(host.querySelectorAll(":scope > .wx-view"));
 
@@ -162,12 +173,13 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
             this._viewsConfig.push(config);
         });
 
-        // clear host so layout can be built cleanly
+        // clear host so layout can be built cleanly; keep references to imported header/footer
         host.innerHTML = "";
     }
 
     /**
-     * Build layout scaffolding.
+     * Build layout scaffolding. If header/footer were imported during parsing,
+     * they are reused instead of creating new nodes.
      * @param {HTMLElement} host host element
      */
     _buildLayout(host) {
@@ -175,11 +187,15 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
         this._buildToolbar(host);
 
-        // create a flexible header area
-        const headerRow = document.createElement("div");
-        headerRow.className = "wx-header p-2";
-        this._views.header = headerRow;
-        host.appendChild(headerRow);
+        // attach existing header if imported, otherwise create a flexible header area
+        if (this._views.header) {
+            host.appendChild(this._views.header);
+        } else {
+            const headerRow = document.createElement("div");
+            headerRow.className = "wx-header p-2";
+            this._views.header = headerRow;
+            host.appendChild(headerRow);
+        }
 
         this._views.bodyWrapper = document.createElement("div");
         this._views.bodyWrapper.className = "wx-view-body flex-fill position-relative overflow-hidden d-flex";
@@ -233,10 +249,16 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Build status bar (footer).
+     * Build status bar (footer). If a footer node was imported, reuse it.
      * @param {HTMLElement} host host element
      */
     _buildStatusbar(host) {
+        // if footer was previously imported, just append it
+        if (this._views.footer) {
+            host.appendChild(this._views.footer);
+            return;
+        }
+
         const sb = document.createElement("div");
         sb.className = "wx-view-statusbar d-flex align-items-center p-1 small px-3";
 
@@ -402,10 +424,14 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
      * @returns {boolean}
      */
     _hasVisibleContent(el) {
-        if (!el) return false;
+        if (!el) {
+            return false;
+        }
 
         // fast check: if children exist, assume content
-        if (el.children.length > 0) return true;
+        if (el.children.length > 0) {
+            return true;
+        }
 
         // slow check: verify text content
         return (el.textContent || "").trim().length > 0;
@@ -427,7 +453,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         if (this._views.bodyWrapper && this._views.bodyWrapper.parentNode) {
             this._views.bodyWrapper.parentNode.replaceChild(splitHost, this._views.bodyWrapper);
         }
-        
+
         this._views.bodyWrapper = splitHost;
         this._views.splitHost = splitHost;
         this._views.detailPane = document.createElement("div");
@@ -443,7 +469,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
         this._views.splitHost.appendChild(this._views.masterPane);
         this._views.splitHost.appendChild(this._views.detailPane);
-        
+
         if (webexpress.webui.SplitCtrl) {
             this._ctrls.split = new webexpress.webui.SplitCtrl(this._views.splitHost);
             // set initial splitter sizes to 50:50 if supported
@@ -451,8 +477,6 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
                 this._ctrls.split.setSizes([50, 50]);
             }
         }
-
-        
     }
 
     /**
@@ -511,9 +535,15 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         this._ctrls.activeMaster = cfg.controller;
 
         // update ui elements
-        if (this._elements.title) this._elements.title.textContent = cfg.title;
-        if (this._elements.desc) this._elements.desc.textContent = cfg.description;
-        if (this._elements.viewBtnLabel) this._elements.viewBtnLabel.textContent = cfg.title;
+        if (this._elements.title) {
+            this._elements.title.textContent = cfg.title;
+        }
+        if (this._elements.desc) {
+            this._elements.desc.textContent = cfg.description;
+        }
+        if (this._elements.viewBtnLabel) {
+            this._elements.viewBtnLabel.textContent = cfg.title;
+        }
 
         // update icon
         if (this._elements.icon) {
@@ -607,10 +637,14 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
         this._ensureDetailStructure();
         const pane = this._views.detailPane;
-        if (!pane) return;
+        if (!pane) {
+            return;
+        }
 
         let shouldShow = pane.classList.contains("d-none");
-        if (forceOpen) shouldShow = true;
+        if (forceOpen) {
+            shouldShow = true;
+        }
 
         if (shouldShow) {
             pane.classList.remove("d-none");

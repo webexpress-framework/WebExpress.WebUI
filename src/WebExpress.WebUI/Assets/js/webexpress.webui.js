@@ -365,7 +365,11 @@ webexpress.webui.Controller = new class {
     createInstances(element) {
         // initialize children first (depth-first)
         Array.from(element.children).forEach(child => {
-            this.createInstances(child);
+            try {
+                this.createInstances(child);
+            } catch (error) {
+                console.error("Error creating instances for child element", child, error);
+            }
         });
 
         // register wx events for dynamically added elements
