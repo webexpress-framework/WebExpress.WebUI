@@ -121,12 +121,9 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
             visible: tileData.visible !== false,
             
             // action attributes
-            primaryAction: tileData.primaryAction || null,
-            primaryTarget: tileData.primaryTarget || null,
-            primaryUri: tileData.primaryUri || null,
-            secondaryAction: tileData.secondaryAction || null,
-            secondaryTarget: tileData.secondaryTarget || null,
-            secondaryUri: tileData.secondaryUri || null,
+            primaryAction: tileData.primaryAction,
+            secondaryAction: tileData.secondaryAction,
+            bind: tileData.bind,
 
             _lc_id: null,
             _lc_label: null
@@ -284,13 +281,25 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
                 colorStyle: div.dataset.colorStyle || null,
                 visible: div.dataset.visible === "false" ? false : true,
                 
-                // parse action attributes
-                primaryAction: div.dataset.wxPrimaryAction || null,
-                primaryTarget: div.dataset.wxPrimaryTarget || null,
-                primaryUri: div.dataset.wxPrimaryUri || null,
-                secondaryAction: div.dataset.wxSecondaryAction || null,
-                secondaryTarget: div.dataset.wxSecondaryTarget || null,
-                secondaryUri: div.dataset.wxSecondaryUri || null,
+                // action attributes
+                primaryAction: {
+                    action: div.dataset.wxPrimaryAction || null,
+                    target: div.dataset.wxPrimaryTarget || null,
+                    uri: div.dataset.wxPrimaryUri || null,
+                    size: div.dataset.wxPrimarySize || null
+                },
+
+                secondaryAction: {
+                    action: div.dataset.wxSecondaryAction || null,
+                    target: div.dataset.wxSecondaryTarget || null,
+                    uri: div.dataset.wxSecondaryUri || null,
+                    size: div.dataset.wxSecondarySize || null
+                },
+
+                // bind
+                bind: {
+                    source: div.dataset.wxSource || null,
+                },
 
                 _lc_id: null,
                 _lc_label: null
@@ -323,12 +332,19 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         card.setAttribute("role", "group");
 
         // apply action attributes to the card element
-        if (tile.primaryAction) card.dataset.wxPrimaryAction = tile.primaryAction;
-        if (tile.primaryTarget) card.dataset.wxPrimaryTarget = tile.primaryTarget;
-        if (tile.primaryUri) card.dataset.wxPrimaryUri = tile.primaryUri;
-        if (tile.secondaryAction) card.dataset.wxSecondaryAction = tile.secondaryAction;
-        if (tile.secondaryTarget) card.dataset.wxSecondaryTarget = tile.secondaryTarget;
-        if (tile.secondaryUri) card.dataset.wxSecondaryUri = tile.secondaryUri;
+        if (tile.primaryAction) {
+            for (const [key, value] of Object.entries(tile.primaryAction)) {
+                const htmlName = `data-wx-primary-${key.toLowerCase()}`;
+                card.setAttribute(htmlName, value);
+            }
+        }
+
+        if (tile.secondaryAction) {
+            for (const [key, value] of Object.entries(tile.secondaryAction)) {
+                const htmlName = `data-wx-secondary-${key.toLowerCase()}`;
+                card.setAttribute(htmlName, value);
+            }
+        }
 
         // add remove button if removable
         if (this._allowRemove) {

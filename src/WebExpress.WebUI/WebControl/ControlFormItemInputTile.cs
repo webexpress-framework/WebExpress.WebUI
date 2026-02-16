@@ -23,6 +23,12 @@ namespace WebExpress.WebUI.WebControl
         public bool MultiSelect { get; set; }
 
         /// <summary>
+        /// Returns or sets a value indicating whether a large icon is displayed 
+        /// for the item.
+        /// </summary>
+        public bool LargeIcon { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         public ControlFormItemInputTile()
@@ -116,6 +122,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("name", Name)
                 .AddUserAttribute("data-value", value)
                 .AddUserAttribute("data-multiselect", MultiSelect ? "true" : null)
+                .AddUserAttribute("data-large-icon", LargeIcon ? "true" : null)
                 .Add
                 (
                     _items.Select

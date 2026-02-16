@@ -28,6 +28,12 @@ namespace WebExpress.WebUI.WebControl
         public bool AllowRemove { get; set; }
 
         /// <summary>
+        /// Returns or sets a value indicating whether a large icon is displayed 
+        /// for the item.
+        /// </summary>
+        public bool LargeIcon { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -93,6 +99,7 @@ namespace WebExpress.WebUI.WebControl
             }
                 .AddUserAttribute("data-movable", Movable ? "true" : null)
                 .AddUserAttribute("data-allow-remove", AllowRemove ? "true" : null)
+                .AddUserAttribute("data-large-icon", LargeIcon ? "true" : null)
                 .Add
                 (
                     _items.Select
