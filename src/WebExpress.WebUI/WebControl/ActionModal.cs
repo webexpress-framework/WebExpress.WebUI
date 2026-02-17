@@ -44,6 +44,21 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="id">
         /// The unique identifier for the modal target. Cannot be null.
         /// </param>
+        /// <param name="size">
+        /// The size configuration for the modal dialog.
+        /// </param>
+        public ActionModal(string id, TypeModalSize size = TypeModalSize.Default)
+            : this(id)
+        {
+            _size = size;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the class with the specified identifier.
+        /// </summary>
+        /// <param name="id">
+        /// The unique identifier for the modal target. Cannot be null.
+        /// </param>
         /// <param name="uri">
         /// The target URI to be associated with the modal action.
         /// </param>
@@ -51,11 +66,9 @@ namespace WebExpress.WebUI.WebControl
         /// The size configuration for the modal dialog.
         /// </param>
         public ActionModal(string id, IUri uri, TypeModalSize size = TypeModalSize.Default)
-            : this(id)
+            : this(id, size)
         {
             Uri = uri;
-
-            _size = size;
         }
 
         /// <summary>
@@ -111,9 +124,13 @@ namespace WebExpress.WebUI.WebControl
             var dict = new Dictionary<string, object>
             {
                 ["action"] = "modal",
-                ["target"] = Target,
-                ["uri"] = Uri?.ToString()
+                ["target"] = Target
             };
+
+            if (Uri is not null)
+            {
+                dict["uri"] = Uri.ToString();
+            }
 
             if (_size.HasValue)
             {

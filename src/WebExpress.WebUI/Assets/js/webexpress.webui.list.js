@@ -357,7 +357,26 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                     tooltip: ds.tooltip || null,
                     modal: ds.modal || null,
                     content: div.textContent.trim() || null,
-                    disabled: div.hasAttribute("disabled")
+                    disabled: div.hasAttribute("disabled"),
+                    // action attributes
+                    primaryAction: {
+                        action: div.dataset.wxPrimaryAction || null,
+                        target: div.dataset.wxPrimaryTarget || null,
+                        uri: div.dataset.wxPrimaryUri || null,
+                        size: div.dataset.wxPrimarySize || null
+                    },
+
+                    secondaryAction: {
+                        action: div.dataset.wxSecondaryAction || null,
+                        target: div.dataset.wxSecondaryTarget || null,
+                        uri: div.dataset.wxSecondaryUri || null,
+                        size: div.dataset.wxSecondarySize || null
+                    },
+
+                    // bind
+                    bind: {
+                        source: div.dataset.wxSource || null,
+                    }
                 });
             }
         }
@@ -465,7 +484,11 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                 ? data.content 
                 : { content: String(data?.content ?? "") },
             options: Array.isArray(data.options) ? data.options : null,
-            _anchorLi: null
+            _anchorLi: null,
+            // action attributes
+            primaryAction: data.primaryAction,
+            secondaryAction: data.secondaryAction,
+            bind: data.bind,
         };
     }
 
@@ -496,6 +519,21 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             }
             if (it.style) {
                 li.setAttribute("style", it.style);
+            }
+
+            // apply action attributes to the card element
+            if (it.primaryAction) {
+                for (const [key, value] of Object.entries(it.primaryAction)) {
+                    const htmlName = `data-wx-primary-${key.toLowerCase()}`;
+                    li.setAttribute(htmlName, value);
+                }
+            }
+
+            if (it.secondaryAction) {
+                for (const [key, value] of Object.entries(it.secondaryAction)) {
+                    const htmlName = `data-wx-secondary-${key.toLowerCase()}`;
+                    li.setAttribute(htmlName, value);
+                }
             }
             
             li._dataItemRef = it;

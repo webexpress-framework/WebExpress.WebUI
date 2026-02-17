@@ -189,9 +189,6 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
 
                 // register click handler for the menu item
                 link.addEventListener("click", () => {
-                    if (typeof item.action === "function") {
-                        item.action();
-                    }
                     const event = new CustomEvent(webexpress.webui.Event.CLICK_EVENT, {
                         detail: {
                             sender: this._element,
