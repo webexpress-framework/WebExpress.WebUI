@@ -46,7 +46,7 @@ namespace WebExpress.WebUI.WebControl
             SubmitButtonLabel ??= I18N.Translate(renderContext, "webexpress.webui:delete.label");
             Content ??= new ControlFormItemStaticText()
             {
-                Text = I18N.Translate(renderContext, "webexpress.webapp:webui.description")
+                Text = I18N.Translate(renderContext, "webexpress.webui:delete.description")
             };
 
             return base.Render(renderContext, visualTree);

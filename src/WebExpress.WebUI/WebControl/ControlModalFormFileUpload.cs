@@ -37,7 +37,7 @@ namespace WebExpress.WebUI.WebControl
         private ControlFormItemInputFile File { get; } = new ControlFormItemInputFile()
         {
             Name = "file",
-            Help = "webexpress.webapp:fileupload.file.description",
+            Help = "fileupload.file.description",
             Icon = new IconImage(),
             //AcceptFile = new string[] { "image/*, video/*, audio/*, .pdf, .doc, .docx, .txt" },
             Margin = new PropertySpacingMargin
@@ -162,7 +162,7 @@ namespace WebExpress.WebUI.WebControl
                 //eventArgs.AddResults(new ValidationResult
                 //(
                 //    TypesInputValidity.Error,
-                //    "webexpress.webapp:fileupload.file.validation.error.nofile"
+                //    "fileupload.file.validation.error.nofile"
                 //));
             }
         }
