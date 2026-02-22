@@ -325,9 +325,10 @@ webexpress.webui.Controller = new class {
 
             sourceElement?.addEventListener(webexpress.webui.Event.CHANGE_FILTER_EVENT, (e) => {
                 const query = e.detail?.value;
+                const searchType = e.detail?.searchType;
                 const instance = this.getInstanceByElement(element);
                 if (typeof instance?.search === "function") {
-                    instance.search(query);
+                    instance.search(query, searchType);
                 }
             });
 
@@ -1208,7 +1209,10 @@ webexpress.webui.Ctrl = class {
      * @returns {string} Translated text or the fallback.
      */
     _i18n(key, fallback) {
-        return (webexpress?.webui?.I18N?.translate(key)) ?? fallback;
+        if (key) {
+            return (webexpress?.webui?.I18N?.translate(key)) ?? fallback;
+        }
+        return fallback;
     }
 }
 
