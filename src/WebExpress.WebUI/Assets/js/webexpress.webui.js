@@ -1046,10 +1046,10 @@ webexpress.webui.TableTemplates = new class {
     /**
      * Registers a renderer function for a specific type.
      * Overwrites existing renderers if the same type is registered again.
-     * @param {string} type - unique template key (e.g., "date", "move", "currency").
+     * @param {string} type - Unique template key (e.g., "date", "move", "currency").
      * @param {Function} rendererFn - function(val, table, row, cell, name, opts) => Node|String.
-     * @param {object} [defaultOptions={}] - optional default options merged with column options.
-     * @returns {this} the registry instance for chaining.
+     * @param {object} [defaultOptions={}] - Optional default options merged with column options.
+     * @returns {this} - The registry instance for chaining.
      */
     register(type, rendererFn, defaultOptions = {}) {
         // validate inputs
@@ -1184,8 +1184,8 @@ webexpress.webui.Ctrl = class {
 
     /**
     * Dispatches a custom event.
-    * @param {string} type event type
-    * @param {object} detail payload
+    * @param {string} type - Event type
+    * @param {object} detail - Payload
     */
     _dispatch(type, detail) {
         this._element.dispatchEvent(new CustomEvent(type, {
@@ -1206,13 +1206,21 @@ webexpress.webui.Ctrl = class {
      *
      * @param {string} key - The i18n key of the value to translate.
      * @param {string} fallback - Text to use if no translation is found.
-     * @returns {string} Translated text or the fallback.
+     * @returns {string} - Translated text or the fallback.
      */
     _i18n(key, fallback) {
         if (key) {
             return (webexpress?.webui?.I18N?.translate(key)) ?? fallback;
         }
         return fallback;
+    }
+
+    /**
+     * Determines whether the component is currently visible in the document.
+     * @returns {boolean} - True if the element is visible; otherwise false.
+     */
+    _isVisible() {
+        return this._element && this._element.offsetParent !== null;
     }
 }
 

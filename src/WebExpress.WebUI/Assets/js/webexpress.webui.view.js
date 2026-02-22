@@ -1,5 +1,8 @@
 /**
  * ViewCtrl - Simple Multi-View Switcher with optional Split Detail Pane.
+ * 
+ * The following events are triggered:
+ * - webexpress.webui.Event.CHANGE_VISIBILITY_EVENT
  */
 webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
@@ -14,15 +17,6 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     // mutation observers for header/footer
     _headerObserver = null;
     _footerObserver = null;
-
-    // event handler references (for cleanup)
-    _handlers = {
-        resize: null,
-        selection: null,
-        dropdownClick: null,
-        navInterceptor: null,
-        detailToggle: null
-    };
 
     // ui references
     _views = {
@@ -61,7 +55,6 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         this._parseViews(element);
         this._buildLayout(element);
         this._initSubViews();
-        this._setupEvents();
 
         // use requestAnimationFrame to ensure dom is ready before switching
         requestAnimationFrame(() => {
@@ -83,22 +76,6 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         if (this._footerObserver) {
             this._footerObserver.disconnect();
             this._footerObserver = null;
-        }
-
-        // remove event listeners
-        const element = this._element || this.element;
-        if (element && this._handlers.selection) {
-            element.removeEventListener("wx-select-row", this._handlers.selection);
-            element.removeEventListener("wx-select-item", this._handlers.selection);
-            element.removeEventListener("wx-node-click", this._handlers.selection);
-        }
-
-        if (this._handlers.dropdownClick) {
-            document.removeEventListener(webexpress.webui.Event.CLICK_EVENT || "wx-click", this._handlers.dropdownClick);
-        }
-
-        if (this._handlers.navInterceptor) {
-            document.removeEventListener("click", this._handlers.navInterceptor, true);
         }
 
         // destroy child controllers
@@ -309,12 +286,9 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         }
 
         // instantiate the dropdown control
-        if (this._viewDropdownHost && webexpress.webui.DropdownCtrl) {
-            this._viewDropdownCtrl = new webexpress.webui.DropdownCtrl(this._viewDropdownHost);
-            this._setupDropdownEvents();
-        }
+        this._viewDropdownCtrl = new webexpress.webui.DropdownCtrl(this._viewDropdownHost);
+        this._setupDropdownEvents();
 
-        this._setupNavInterceptor();
         this._updateHeaderFooterBorders();
     }
 
@@ -322,7 +296,11 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
      * Setup events for dropdown interaction.
      */
     _setupDropdownEvents() {
-        this._handlers.dropdownClick = (ev) => {
+        this._viewDropdownHost.addEventListener(webexpress.webui.Event.CLICK_EVENT, (ev) => {
+            // prevent default navigation behavior
+            ev.preventDefault();
+            ev.stopPropagation();
+
             const detail = ev.detail || {};
             // ensure event comes from this dropdown instance
             if (detail && detail.sender === this._viewDropdownHost && detail.item && detail.item.uri) {
@@ -334,45 +312,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
                     }
                 }
             }
-        };
-        document.addEventListener(webexpress.webui.Event.CLICK_EVENT || "wx-click", this._handlers.dropdownClick);
-    }
-
-    /**
-     * Setup navigation interceptor for custom scheme.
-     */
-    _setupNavInterceptor() {
-        this._handlers.navInterceptor = (ev) => {
-            const anchor = ev.target && ev.target.closest ? ev.target.closest("a") : null;
-            if (!anchor) {
-                return;
-            }
-            const href = anchor.getAttribute("href") || anchor.getAttribute("data-uri") || "";
-            if (typeof href === "string" && href.indexOf("wx-switch:") === 0) {
-                ev.preventDefault();
-                const idx = parseInt(href.split(":")[1], 10);
-                if (!Number.isNaN(idx)) {
-                    this.switchView(idx);
-                }
-            }
-        };
-        document.addEventListener("click", this._handlers.navInterceptor, true);
-    }
-
-    /**
-     * Setup global events.
-     */
-    _setupEvents() {
-        const element = this._element || this.element;
-        if (!element) {
-            console.error("ViewCtrl: Element not attached during setupEvents.");
-            return;
-        }
-
-        this._handlers.selection = (e) => this._handleSelection(e);
-        element.addEventListener("wx-select-row", this._handlers.selection);
-        element.addEventListener("wx-select-item", this._handlers.selection);
-        element.addEventListener("wx-node-click", this._handlers.selection);
+        });
     }
 
     /**
@@ -527,6 +467,12 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
             oldCfg.container?.classList.add("d-none");
         }
 
+        // notify external listeners
+        this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
+            visible: true,
+            index: this._activeViewIndex
+        });
+
         this._activeViewIndex = index;
         const cfg = this._viewsConfig[index];
 
@@ -545,6 +491,12 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
             this._elements.viewBtnLabel.textContent = cfg.title;
         }
 
+        var element = cfg.contentNode.children[0];
+        var obj = webexpress.webui.Controller.getInstanceByElement(element);
+        if (obj) {
+            obj.update();
+        }
+               
         // update icon
         if (this._elements.icon) {
             let iconHtml = "";
@@ -559,8 +511,10 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         this._handleDetailState(cfg);
 
         // notify external listeners
-        const evt = new CustomEvent("wx-view-switched", { detail: { index: index, config: cfg } });
-        this._element.dispatchEvent(evt);
+        this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
+            visible: true,
+            index: index
+        });
     }
 
     /**

@@ -189,14 +189,9 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
 
                 // register click handler for the menu item
                 link.addEventListener("click", () => {
-                    const event = new CustomEvent(webexpress.webui.Event.CLICK_EVENT, {
-                        detail: {
-                            sender: this._element,
-                            id: this._element.id || null,
-                            item: item
-                        }
+                    this._dispatch(webexpress.webui.Event.CLICK_EVENT, {
+                        item: item
                     });
-                    document.dispatchEvent(event);
                 });
 
                 li.appendChild(link);
@@ -274,22 +269,14 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
         // handle visibility change event
         // fires CHANGE_VISIBILITY_EVENT when the menu is shown or hidden
         button.addEventListener('show.bs.dropdown', () => {
-            const visEvent = new CustomEvent(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
-                detail: {
-                    sender: this._element,
-                    visible: true
-                }
+            this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
+                visible: true
             });
-            document.dispatchEvent(visEvent);
         });
         button.addEventListener('hide.bs.dropdown', () => {
-            const visEvent = new CustomEvent(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
-                detail: {
-                    sender: this._element,
-                    visible: false
-                }
+            this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
+                visible: false
             });
-            document.dispatchEvent(visEvent);
         });
     }
 
