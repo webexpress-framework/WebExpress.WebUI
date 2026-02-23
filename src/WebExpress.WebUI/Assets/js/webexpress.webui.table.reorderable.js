@@ -742,7 +742,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         }
         
         if (this._hasOptions || this._allowColumnRemove) {
-            parts.push("1.5rem"); // Actions width
+            parts.push("1.5rem"); // actions width
         }
         
         const template = parts.length > 0 ? parts.join(" ") : "auto";
