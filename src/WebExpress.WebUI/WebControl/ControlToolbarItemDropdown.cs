@@ -144,7 +144,7 @@ namespace WebExpress.WebUI.WebControl
         /// Adds a new separator.
         /// </summary>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlToolbarItemDropdown AddSeperator()
+        public IControlToolbarItemDropdown AddSeparator()
         {
             _items.Add(null);
 

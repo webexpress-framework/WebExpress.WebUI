@@ -77,7 +77,7 @@ namespace WebExpress.WebUI.WebControl
             }
 
             var key = I18N.Translate(renderContext.Request?.Culture, Key);
-            var seperator = string.IsNullOrWhiteSpace(key) ? '\0' : Separator;
+            var separator = string.IsNullOrWhiteSpace(key) ? '\0' : Separator;
             var icon = Icon?.Render(renderContext, visualTree);
 
             var keyElement = new HtmlElementTextSemanticsSpan(new HtmlText(key + Separator))

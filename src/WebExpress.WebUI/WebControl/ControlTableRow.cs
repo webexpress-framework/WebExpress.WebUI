@@ -143,7 +143,7 @@ namespace WebExpress.WebUI.WebControl
         /// Adds a new separator.
         /// </summary>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlTableRow AddSeperator()
+        public IControlTableRow AddSeparator()
         {
             _options.Add(null);
 

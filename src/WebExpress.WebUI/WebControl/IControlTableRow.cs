@@ -87,7 +87,7 @@ namespace WebExpress.WebUI.WebControl
         /// Adds a new separator.
         /// </summary>
         /// <returns>The current instance for method chaining.</returns>
-        IControlTableRow AddSeperator();
+        IControlTableRow AddSeparator();
 
         /// <summary>
         /// Adds a new head.
