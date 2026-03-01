@@ -104,7 +104,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("btn", GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
-                Href = PrimaryAction is null ? uri?.ToString() : null,
+                Href = uri?.BindParameters(renderContext.Request.Parameters).ToString(),
                 Title = I18N.Translate(renderContext, tooltip),
                 OnClick = OnClick?.ToString()
             };
@@ -113,7 +113,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 html.Add(new ControlIcon()
                 {
-                    Icon = Icon,
+                    Icon = icon,
                     Margin = !string.IsNullOrWhiteSpace(Text) ? new PropertySpacingMargin
                     (
                         PropertySpacing.Space.None,
@@ -140,14 +140,8 @@ namespace WebExpress.WebUI.WebControl
                 html.AddUserAttribute("data-bs-toggle", "tooltip");
             }
 
-            //if (modal is not null)
-            //{
-            //    Modal?.ApplyUserAttributes(html);
-            //    html.AddUserAttribute("data-wx-uri", uri?.ToString());
-            //}
-
-            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
-            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
+            primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            secondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }
