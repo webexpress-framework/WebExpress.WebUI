@@ -1,6 +1,9 @@
 /**
  * ViewCtrl - Simple Multi-View Switcher with optional Split Detail Pane.
  * 
+ * Features:
+ * - Persists active view state via Cookies.
+ * 
  * The following events are triggered:
  * - webexpress.webui.Event.CHANGE_VISIBILITY_EVENT
  */
@@ -9,6 +12,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     // core state
     _viewsConfig = [];
     _activeViewIndex = -1;
+    _storageKey = "";
 
     // dropdown control instance and host element
     _viewDropdownCtrl = null;
@@ -52,14 +56,33 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     constructor(element) {
         super(element);
 
+        // generate storage key based on element id or fallback
+        const baseId = element.id || "wx-view-ctrl";
+        this._storageKey = `wx_view_state_${baseId}`;
+
         this._parseViews(element);
         this._buildLayout(element);
         this._initSubViews();
+        this._attachListeners();
+
+        // determine initial view: saved state > first view
+        let initialIndex = 0;
+        const savedIndex = this._getCookie(this._storageKey);
+        if (savedIndex !== null) {
+            const idx = parseInt(savedIndex, 10);
+            if (!isNaN(idx) && idx >= 0) {
+                initialIndex = idx;
+            }
+        }
 
         // use requestAnimationFrame to ensure dom is ready before switching
         requestAnimationFrame(() => {
             if (this._viewsConfig.length > 0) {
-                this.switchView(0);
+                // validate index against config length
+                if (initialIndex >= this._viewsConfig.length) {
+                    initialIndex = 0;
+                }
+                this.switchView(initialIndex);
             }
         });
     }
@@ -82,21 +105,23 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         if (this._viewDropdownCtrl && typeof this._viewDropdownCtrl.destroy === "function") {
             this._viewDropdownCtrl.destroy();
         }
+        
         this._teardownDetailStructure();
+
+        // clear references
+        this._viewsConfig = [];
+        this._views = {};
+        this._ctrls = {};
+        this._elements = {};
 
         super.dispose && super.dispose();
     }
 
     /**
      * Parse child view configurations and import header/footer nodes if present.
-     * - accepts data-title or data-label for title
-     * - accepts data-iconCss or data-icon for icon classes
-     * - preserves arbitrary markup inside .wx-view by wrapping it when no known
-     *   specialized child is present
      * @param {HTMLElement} host host element
      */
     _parseViews(host) {
-        // import existing header and footer if they are direct children of the host
         const headerNode = host.querySelector(":scope > .wx-header");
         if (headerNode) {
             this._views.header = headerNode;
@@ -107,13 +132,12 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
             this._views.footer = footerNode;
         }
 
-        // collect direct child .wx-view elements
         const viewNodes = Array.from(host.querySelectorAll(":scope > .wx-view"));
 
         viewNodes.forEach((node, index) => {
             const wrapper = document.createElement("div");
             wrapper.className = "wx-view-content";
-            // utilize document fragment for efficient dom manipulation
+            
             const fragment = document.createDocumentFragment();
             while (node.firstChild) {
                 fragment.appendChild(node.firstChild);
@@ -121,7 +145,6 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
             wrapper.appendChild(fragment);
             const contentNode = wrapper;
 
-            // normalize dataset keys
             const ds = node.dataset;
             const title = ds.title || ds.label || `View ${index + 1}`;
             const description = ds.description || ds.desc || "";
@@ -142,7 +165,6 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
                 controller: null
             };
 
-            // clean up metadata attributes from content
             if (config.contentNode && config.contentNode.removeAttribute) {
                 config.contentNode.removeAttribute("data-uri");
             }
@@ -150,13 +172,11 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
             this._viewsConfig.push(config);
         });
 
-        // clear host so layout can be built cleanly; keep references to imported header/footer
         host.innerHTML = "";
     }
 
     /**
-     * Build layout scaffolding. If header/footer were imported during parsing,
-     * they are reused instead of creating new nodes.
+     * Build layout scaffolding.
      * @param {HTMLElement} host host element
      */
     _buildLayout(host) {
@@ -164,7 +184,6 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
         this._buildToolbar(host);
 
-        // attach existing header if imported, otherwise create a flexible header area
         if (this._views.header) {
             host.appendChild(this._views.header);
         } else {
@@ -179,7 +198,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         host.appendChild(this._views.bodyWrapper);
 
         this._views.masterPane = document.createElement("div");
-        this._views.masterPane.className = "wx-main-pane";
+        this._views.masterPane.className = "wx-main-pane flex-fill w-100 h-100";
         this._views.bodyWrapper.appendChild(this._views.masterPane);
 
         this._buildStatusbar(host);
@@ -215,7 +234,6 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         titleGroup.appendChild(titleWrapper);
         tb.appendChild(titleGroup);
 
-        // create a host element for dropdown
         const dropdownHost = document.createElement("div");
         dropdownHost.dataset.icon = "fa fa-layer-group";
         this._viewDropdownHost = dropdownHost;
@@ -226,11 +244,10 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Build status bar (footer). If a footer node was imported, reuse it.
+     * Build status bar (footer).
      * @param {HTMLElement} host host element
      */
     _buildStatusbar(host) {
-        // if footer was previously imported, just append it
         if (this._views.footer) {
             host.appendChild(this._views.footer);
             return;
@@ -263,12 +280,10 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
             this._views.masterPane.appendChild(container);
             cfg.container = container;
 
-            // map controller reference if available
             if (cfg.contentNode && cfg.contentNode.controller) {
                 cfg.controller = cfg.contentNode.controller;
             }
 
-            // create dropdown item
             const itemEl = document.createElement("a");
             itemEl.className = "wx-dropdown-item";
             itemEl.href = "#";
@@ -280,12 +295,10 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
             dropdownFragment.appendChild(itemEl);
         });
 
-        // append all items at once
         if (this._viewDropdownHost) {
             this._viewDropdownHost.appendChild(dropdownFragment);
         }
 
-        // instantiate the dropdown control
         this._viewDropdownCtrl = new webexpress.webui.DropdownCtrl(this._viewDropdownHost);
         this._setupDropdownEvents();
 
@@ -293,16 +306,21 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Attaches global event listeners for the controller.
+     */
+    _attachListeners() {
+        this._element.addEventListener(webexpress.webui.Event.SELECT_ITEM_EVENT, this._handleSelection.bind(this));
+    }
+
+    /**
      * Setup events for dropdown interaction.
      */
     _setupDropdownEvents() {
         this._viewDropdownHost.addEventListener(webexpress.webui.Event.CLICK_EVENT, (ev) => {
-            // prevent default navigation behavior
             ev.preventDefault();
             ev.stopPropagation();
 
             const detail = ev.detail || {};
-            // ensure event comes from this dropdown instance
             if (detail && detail.sender === this._viewDropdownHost && detail.item && detail.item.uri) {
                 const uri = detail.item.uri;
                 if (typeof uri === "string" && uri.indexOf("wx-switch:") === 0) {
@@ -367,13 +385,9 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         if (!el) {
             return false;
         }
-
-        // fast check: if children exist, assume content
         if (el.children.length > 0) {
             return true;
         }
-
-        // slow check: verify text content
         return (el.textContent || "").trim().length > 0;
     }
 
@@ -389,6 +403,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         splitHost.dataset.orientation = "horizontal";
         splitHost.dataset.saveState = "true";
         splitHost.dataset.order = "main-side";
+        splitHost.className = "h-100 w-100";
 
         if (this._views.bodyWrapper && this._views.bodyWrapper.parentNode) {
             this._views.bodyWrapper.parentNode.replaceChild(splitHost, this._views.bodyWrapper);
@@ -396,23 +411,38 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
         this._views.bodyWrapper = splitHost;
         this._views.splitHost = splitHost;
+        
+        // IMPORTANT: remove w-100 and flex-fill so splitter can control the width
+        this._views.masterPane.className = "wx-main-pane"; 
+        
         this._views.detailPane = document.createElement("div");
         this._views.detailPane.className = "wx-side-pane";
         this._ctrls.detailFrame = new webexpress.webui.FrameCtrl(this._views.detailPane);
-        this._views.detailPane.innerHTML = `
-            <div class="d-flex h-100 align-items-center justify-content-center text-muted">
-                <div class="text-center p-4">
-                    <i class="fa-regular fa-file-lines fa-3x mb-3 text-secondary"></i><br>
-                    <span>Select an item to view details.</span>
-                </div>
-            </div>`;
+        
+        const placeholderWrapper = document.createElement("div");
+        placeholderWrapper.className = "d-flex h-100 align-items-center justify-content-center text-muted";
+        
+        const centerBox = document.createElement("div");
+        centerBox.className = "text-center p-4";
+        
+        const icon = document.createElement("i");
+        icon.className = "fa-regular fa-file-lines fa-3x mb-3 text-secondary";
+        
+        const br = document.createElement("br");
+        const span = document.createElement("span");
+        span.textContent = "Select an item to view details.";
+        
+        centerBox.appendChild(icon);
+        centerBox.appendChild(br);
+        centerBox.appendChild(span);
+        placeholderWrapper.appendChild(centerBox);
+        this._views.detailPane.appendChild(placeholderWrapper);
 
         this._views.splitHost.appendChild(this._views.masterPane);
         this._views.splitHost.appendChild(this._views.detailPane);
 
         if (webexpress.webui.SplitCtrl) {
             this._ctrls.split = new webexpress.webui.SplitCtrl(this._views.splitHost);
-            // set initial splitter sizes to 50:50 if supported
             if (typeof this._ctrls.split.setSizes === "function") {
                 this._ctrls.split.setSizes([50, 50]);
             }
@@ -423,13 +453,11 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
      * Remove detail structure when not needed.
      */
     _teardownDetailStructure() {
-        // remove detail pane
         if (this._views.detailPane && this._views.detailPane.parentNode) {
             this._views.detailPane.parentNode.removeChild(this._views.detailPane);
         }
         this._views.detailPane = null;
 
-        // destroy split controller
         if (this._ctrls.split) {
             if (typeof this._ctrls.split.destroy === "function") {
                 this._ctrls.split.destroy();
@@ -438,12 +466,15 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         }
         this._ctrls.detailFrame = null;
 
-        // restore original body layout
         if (this._views.splitHost && this._views.splitHost.parentNode) {
             const parent = this._views.splitHost.parentNode;
+            
             const bodyWrapper = document.createElement("div");
             bodyWrapper.className = "wx-view-body flex-fill position-relative overflow-hidden d-flex";
 
+            this._views.masterPane.removeAttribute("style");
+            this._views.masterPane.className = "wx-main-pane flex-fill w-100 h-100";
+            
             bodyWrapper.appendChild(this._views.masterPane);
             parent.replaceChild(bodyWrapper, this._views.splitHost);
 
@@ -453,7 +484,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Switch active view.
+     * Switch active view and save state.
      * @param {number} index target view index
      */
     switchView(index) {
@@ -461,13 +492,16 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
             return;
         }
 
-        // hide current view
+        // save to cookie
+        this._setCookie(this._storageKey, index.toString(), 30);
+
         if (this._activeViewIndex >= 0) {
             const oldCfg = this._viewsConfig[this._activeViewIndex];
-            oldCfg.container?.classList.add("d-none");
+            if (oldCfg.container) {
+                oldCfg.container.classList.add("d-none");
+            }
         }
 
-        // notify external listeners
         this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
             visible: true,
             index: this._activeViewIndex
@@ -476,11 +510,11 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         this._activeViewIndex = index;
         const cfg = this._viewsConfig[index];
 
-        // show new view
-        cfg.container?.classList.remove("d-none");
+        if (cfg.container) {
+            cfg.container.classList.remove("d-none");
+        }
         this._ctrls.activeMaster = cfg.controller;
 
-        // update ui elements
         if (this._elements.title) {
             this._elements.title.textContent = cfg.title;
         }
@@ -491,26 +525,31 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
             this._elements.viewBtnLabel.textContent = cfg.title;
         }
 
-        var element = cfg.contentNode.children[0];
-        var obj = webexpress.webui.Controller.getInstanceByElement(element);
-        if (obj) {
-            obj.update();
+        if (cfg.contentNode && cfg.contentNode.children.length > 0) {
+            const element = cfg.contentNode.children[0];
+            const obj = webexpress.webui.Controller.getInstanceByElement(element);
+            if (obj && typeof obj.update === 'function') {
+                obj.update();
+            }
         }
                
-        // update icon
         if (this._elements.icon) {
-            let iconHtml = "";
+            this._elements.icon.innerHTML = "";
             if (cfg.iconCss) {
-                iconHtml = `<i class="${cfg.iconCss} fa-lg"></i>`;
+                const i = document.createElement("i");
+                i.className = `${cfg.iconCss} fa-lg`;
+                this._elements.icon.appendChild(i);
             } else if (cfg.iconImg) {
-                iconHtml = `<img src="${cfg.iconImg}" style="height:24px;width:auto;">`;
+                const img = document.createElement("img");
+                img.src = cfg.iconImg;
+                img.style.height = "24px";
+                img.style.width = "auto";
+                this._elements.icon.appendChild(img);
             }
-            this._elements.icon.innerHTML = iconHtml;
         }
 
         this._handleDetailState(cfg);
 
-        // notify external listeners
         this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
             visible: true,
             index: index
@@ -525,7 +564,6 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         if (cfg.hasDetails) {
             this._ensureDetailStructure();
 
-            // default state for detail view is visible
             const isHidden = this._views.detailPane?.classList.contains("d-none");
 
             if (isHidden) {
@@ -534,7 +572,6 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
             this._updateToggleBtnState(true);
 
-            // reset splitter
             if (isHidden && typeof this._ctrls.split?.setSizes === "function") {
                 this._ctrls.split.setSizes([50, 50]);
             }
@@ -580,6 +617,14 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Helper to update any toggle button state if one exists (placeholder).
+     * @param {boolean} visible
+     */
+    _updateToggleBtnState(visible) {
+        // placeholder
+    }
+
+    /**
      * Toggle details pane visibility.
      * @param {boolean} forceOpen force open if true
      */
@@ -614,6 +659,42 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         if (this._ctrls.split) {
             window.dispatchEvent(new Event("resize"));
         }
+    }
+
+    /**
+     * Sets a cookie with the given name, value, and expiration days.
+     * @param {string} name - Name of the cookie.
+     * @param {string} value - Value of the cookie.
+     * @param {number} days - Expiration in days.
+     */
+    _setCookie(name, value, days) {
+        let expires = "";
+        if (days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Lax";
+    }
+
+    /**
+     * Gets the value of a cookie by name.
+     * @param {string} name - Name of the cookie.
+     * @returns {string|null} The cookie value or null if not found.
+     */
+    _getCookie(name) {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === ' ') {
+                c = c.substring(1, c.length);
+            }
+            if (c.indexOf(nameEQ) === 0) {
+                return c.substring(nameEQ.length, c.length);
+            }
+        }
+        return null;
     }
 };
 
