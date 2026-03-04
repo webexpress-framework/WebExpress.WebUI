@@ -5,7 +5,7 @@ using WebExpress.WebUI.WebControl;
 namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
-    /// Represents an icon that aligns content to the center.
+    /// Represents the web express icon.
     /// </summary>
     public class ImageIconWebExpress : ImageIcon
     {

@@ -77,7 +77,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return Render(renderContext, visualTree, Icon, Uri);
+            return Render(renderContext, visualTree, Icon, Uri, PrimaryAction, SecondaryAction);
         }
 
         /// <summary>
@@ -87,8 +87,15 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="visualTree">The visual tree representing the control's structure.</param>
         /// <param name="icon">The icon to be rendered.</param>
         /// <param name="uri">The URI associated with the icon.</param>
+        /// <param name="primaryAction">The primary action associated with the control, usually invoked 
+        /// when the user interacts with the main interactive element (e.g., a click).
+        /// </param>    
+        /// <param name="secondaryAction">
+        /// An optional secondary action that provides an alternative or contextual behavior.
+        /// </param>
+        /// </param>
         /// <returns>An HTML node representing the rendered control.</returns>
-        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IIcon icon, IUri uri)
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IIcon icon, IUri uri, IAction primaryAction, IAction secondaryAction)
         {
             var html = new HtmlElementTextContentDiv()
             {
@@ -102,8 +109,8 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-icon-text", I18N.Translate(renderContext, Text))
                 .AddUserAttribute("data-uri", uri?.ToString());
 
-            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
-            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
+            primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            secondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

@@ -32,7 +32,10 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
         this._items = this._parseItems(element.children);
 
         // clean up the dom and remove all data attributes
-        element.removeAttribute("data-breakpoint");
+        [...element.attributes]
+            .filter(attr => attr.name.startsWith("data-"))
+            .forEach(attr => element.removeAttribute(attr.name));
+
         element.classList.add("wx-sidebar");
         element.innerHTML = "";
 
@@ -61,23 +64,25 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
         for (let i = 0; i < nodes.length; i++) {
             const el = nodes[i];
             const dataset = el.dataset;
-
             const commonProps = {
                 index: i,
                 label: dataset.label || el.textContent.trim(),
                 iconClass: dataset.icon,
                 iconImg: dataset.image,
                 mode: dataset.mode || "hide", // "hide" or "overlay"
-                
                 // action attributes
-                primaryAction: dataset.wxPrimaryAction || null,
-                primaryTarget: dataset.wxPrimaryTarget || null,
-                primaryUri: dataset.wxPrimaryUri || null,
-                primarySize: dataset.wxPrimarySize || null,
-                secondaryAction: dataset.wxSecondaryAction || null,
-                secondaryTarget: dataset.wxSecondaryTarget || null,
-                secondaryUri: dataset.wxSecondaryUri || null,
-                secondarySize: dataset.wxSecondarySize || null
+                primaryAction: {
+                    action: dataset.wxPrimaryAction || null,
+                    target: dataset.wxPrimaryTarget || null,
+                    uri: dataset.wxPrimaryUri || null,
+                    size: dataset.wxPrimarySize || null
+                },
+                secondaryAction: {
+                    action: dataset.wxSecondaryAction || null,
+                    target: dataset.wxSecondaryTarget || null,
+                    uri: dataset.wxSecondaryUri || null,
+                    size: dataset.wxSecondarySize || null
+                }
             };
 
             if (el.classList.contains("wx-sidebar-header")) {
@@ -127,12 +132,21 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                     type: "icon",
                     uri: dataset.uri || dataset.wxUri || null,
                     iconEdit: dataset.iconEdit === "true",
-                    modal: {
-                        id: dataset.wxTarget || null,
-                        size: dataset.modalsize || null
-                    },
                     iconText: dataset.iconText || null,
-                    element: null
+                    element: null,
+                    // action attributes
+                    primaryAction: {
+                        action: dataset.wxPrimaryAction || null,
+                        target: dataset.wxPrimaryTarget || null,
+                        uri: dataset.wxPrimaryUri || null,
+                        size: dataset.wxPrimarySize || null
+                    },
+                    secondaryAction: {
+                        action: dataset.wxSecondaryAction || null,
+                        target: dataset.wxSecondaryTarget || null,
+                        uri: dataset.wxSecondaryUri || null,
+                        size: dataset.wxSecondarySize || null
+                    }
                 });
             }
         }
@@ -201,28 +215,21 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
 
         // apply action attributes
         if (item.primaryAction) {
-            wrapper.setAttribute("data-wx-primary-action", item.primaryAction);
+            for (const [key, value] of Object.entries(item.primaryAction)) {
+                if (value) {
+                    const htmlName = `data-wx-primary-${key.toLowerCase()}`;
+                    editBtn.setAttribute(htmlName, value);
+                }
+            }
         }
-        if (item.primaryTarget) {
-            wrapper.setAttribute("data-wx-primary-target", item.primaryTarget);
-        }
-        if (item.primaryUri) {
-            wrapper.setAttribute("data-wx-primary-uri", item.primaryUri);
-        }
-        if (item.primarySize) {
-            wrapper.setAttribute("data-wx-primary-size", item.primarySize);
-        }
+
         if (item.secondaryAction) {
-            wrapper.setAttribute("data-wx-secondary-action", item.secondaryAction);
-        }
-        if (item.secondaryTarget) {
-            wrapper.setAttribute("data-wx-secondary-target", item.secondaryTarget);
-        }
-        if (item.secondaryUri) {
-            wrapper.setAttribute("data-wx-secondary-uri", item.secondaryUri);
-        }
-        if (item.secondarySize) {
-            wrapper.setAttribute("data-wx-secondary-size", item.secondarySize);
+            for (const [key, value] of Object.entries(item.secondaryAction)) {
+                if (value) {
+                    const htmlName = `data-wx-secondary-${key.toLowerCase()}`;
+                    editBtn.setAttribute(htmlName, value);
+                }
+            }
         }
 
         const link = document.createElement("a");
@@ -292,32 +299,6 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
         iconWrapper.className = "wx-sidebar-icon";
         iconWrapper.setAttribute("tabindex", "0");
 
-        // apply action attributes
-        if (item.primaryAction) {
-            iconWrapper.setAttribute("data-wx-primary-action", item.primaryAction);
-        }
-        if (item.primaryTarget) {
-            iconWrapper.setAttribute("data-wx-primary-target", item.primaryTarget);
-        }
-        if (item.primaryUri) {
-            iconWrapper.setAttribute("data-wx-primary-uri", item.primaryUri);
-        }
-        if (item.primarySize) {
-            iconWrapper.setAttribute("data-wx-primary-size", item.primarySize);
-        }
-        if (item.secondaryAction) {
-            iconWrapper.setAttribute("data-wx-secondary-action", item.secondaryAction);
-        }
-        if (item.secondaryTarget) {
-            iconWrapper.setAttribute("data-wx-secondary-target", item.secondaryTarget);
-        }
-        if (item.secondaryUri) {
-            iconWrapper.setAttribute("data-wx-secondary-uri", item.secondaryUri);
-        }
-        if (item.secondarySize) {
-            iconWrapper.setAttribute("data-wx-secondary-size", item.secondarySize);
-        }
-
         // icon presentation
         let iconEl = null;
         if (item.iconClass) {
@@ -348,16 +329,27 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             editBtn.className = "wx-sidebar-icon-edit";
             editBtn.title = this._i18n("webexpress.webui:edit", "Edit");
             editBtn.innerHTML = '<i class="fas fa-pen"></i>';
-            
-            if (item.modal.id) {
-                editBtn.setAttribute("data-wx-primary-action", "modal");
-                editBtn.setAttribute("data-wx-primary-target", item.modal.id);
-            }
-            if (item.modal.size) {
-                editBtn.setAttribute("data-wx-size", item.modal.size);
-            }
             if (item.uri) {
                 editBtn.setAttribute("data-wx-uri", item.uri);
+            }
+
+            // apply action attributes
+            if (item.primaryAction) {
+                for (const [key, value] of Object.entries(item.primaryAction)) {
+                    if (value) {
+                        const htmlName = `data-wx-primary-${key.toLowerCase()}`;
+                        editBtn.setAttribute(htmlName, value);
+                    }
+                }
+            }
+
+            if (item.secondaryAction) {
+                for (const [key, value] of Object.entries(item.secondaryAction)) {
+                    if (value) {
+                        const htmlName = `data-wx-secondary-${key.toLowerCase()}`;
+                        editBtn.setAttribute(htmlName, value);
+                    }
+                }
             }
 
             iconWrapper.appendChild(editBtn);
