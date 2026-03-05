@@ -144,17 +144,22 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                 link.className = "wx-link dropdown-item";
                 if (item.color) link.classList.add(item.color);
 
+                // apply action attributes
                 if (item.primaryAction) {
                     for (const [key, value] of Object.entries(item.primaryAction)) {
-                        const htmlName = `data-wx-primary-${key.toLowerCase()}`;
-                        link.setAttribute(htmlName, value);
+                        if (value) {
+                            const htmlName = `data-wx-primary-${key.toLowerCase()}`;
+                            link.setAttribute(htmlName, value);
+                        }
                     }
                 }
 
                 if (item.secondaryAction) {
                     for (const [key, value] of Object.entries(item.secondaryAction)) {
-                        const htmlName = `data-wx-secondary-${key.toLowerCase()}`;
-                        link.setAttribute(htmlName, value);
+                        if (value) {
+                            const htmlName = `data-wx-secondary-${key.toLowerCase()}`;
+                            link.setAttribute(htmlName, value);
+                        }
                     }
                 }
 

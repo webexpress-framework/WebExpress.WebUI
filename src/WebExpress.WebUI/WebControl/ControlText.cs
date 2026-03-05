@@ -64,7 +64,19 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var text = I18N.Translate(renderContext?.Request.Culture, Text);
+            return Render(renderContext, visualTree, Text);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="text">The text to render.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, string text)
+        {
+            text = I18N.Translate(renderContext?.Request.Culture, text);
             var html = default(HtmlElement);
 
             switch (Format)

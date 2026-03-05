@@ -331,18 +331,22 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         }
         card.setAttribute("role", "group");
 
-        // apply action attributes to the card element
+        // apply action attributes
         if (tile.primaryAction) {
             for (const [key, value] of Object.entries(tile.primaryAction)) {
-                const htmlName = `data-wx-primary-${key.toLowerCase()}`;
-                card.setAttribute(htmlName, value);
+                if (value) {
+                    const htmlName = `data-wx-primary-${key.toLowerCase()}`;
+                    card.setAttribute(htmlName, value);
+                }
             }
         }
 
         if (tile.secondaryAction) {
             for (const [key, value] of Object.entries(tile.secondaryAction)) {
-                const htmlName = `data-wx-secondary-${key.toLowerCase()}`;
-                card.setAttribute(htmlName, value);
+                if (value) {
+                    const htmlName = `data-wx-secondary-${key.toLowerCase()}`;
+                    card.setAttribute(htmlName, value);
+                }
             }
         }
 

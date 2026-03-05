@@ -41,6 +41,21 @@ namespace WebExpress.WebUI.WebControl
         public bool DetailFrame { get; set; }
 
         /// <summary>
+        /// Returns or sets the initial size of the detail pane (e.g. "300px" or "30%").
+        /// </summary>
+        public string DetailSize { get; set; }
+
+        /// <summary>
+        /// Returns or sets the minimum size of the detail pane in pixels.
+        /// </summary>
+        public int? DetailMinSide { get; set; }
+
+        /// <summary>
+        /// Returns or sets the maximum size of the detail pane in pixels.
+        /// </summary>
+        public int? DetailMaxSide { get; set; }
+
+        /// <summary>
         /// Returns the content of the tile control.
         /// </summary>
         public IEnumerable<IControl> Content => _content;
@@ -108,6 +123,9 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
                 .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri.ToString())
                 .AddUserAttribute("data-has-details", DetailFrame ? "true" : null)
+                .AddUserAttribute("data-detail-size", DetailSize)
+                .AddUserAttribute("data-detail-min-side", DetailMinSide?.ToString())
+                .AddUserAttribute("data-detail-max-side", DetailMaxSide?.ToString())
                 .Add(_content.Select(x => x.Render(renderContext, visualTree)));
 
             return html;

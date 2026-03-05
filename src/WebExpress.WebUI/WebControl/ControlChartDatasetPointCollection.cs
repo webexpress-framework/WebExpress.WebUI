@@ -29,12 +29,35 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Initializes a new instance of the class using the specified scalar values.
+        /// </summary>
+        /// <param name="scalars">
+        /// An array of scalar values used to create the dataset points. Each value is converted 
+        /// into a <see cref="ControlChartDatasetPointScalar"/> instance.
+        /// </param>
+        public ControlChartDatasetPointCollection(IEnumerable<float> scalars)
+        {
+            _points = scalars.Select(v => new ControlChartDatasetPointScalar(v));
+        }
+
+        /// <summary>
         /// Initializes a new instance of the class  with the specified collection of dataset points.
         /// </summary>
         /// <param name="points">
         /// An array of <see cref="IControlChartDatasetPoint"/> objects representing the dataset points 
         /// to include in the collection. This parameter can accept zero or more points.</param>
         public ControlChartDatasetPointCollection(params IControlChartDatasetPoint[] points)
+        {
+            _points = points;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the class  with the specified collection of dataset points.
+        /// </summary>
+        /// <param name="points">
+        /// An array of <see cref="IControlChartDatasetPoint"/> objects representing the dataset points 
+        /// to include in the collection. This parameter can accept zero or more points.</param>
+        public ControlChartDatasetPointCollection(IEnumerable<IControlChartDatasetPoint> points)
         {
             _points = points;
         }

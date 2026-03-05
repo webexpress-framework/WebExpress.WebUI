@@ -546,7 +546,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             tr.style.cssText = row.style;
         }
 
-        // map custom action attributes back to dataset
+        // apply action attributes
         if (row.primaryAction) {
             for (const [key, value] of Object.entries(row.primaryAction)) {
                 const htmlName = `data-wx-primary-${key.toLowerCase()}`;

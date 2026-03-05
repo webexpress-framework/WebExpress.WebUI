@@ -86,9 +86,18 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>A string that contains the value of the property.</returns>
         public virtual Dictionary<string, object> ToJson()
         {
-            // todo
+            var dict = new Dictionary<string, object>
+            {
+                ["action"] = "frame",
+                ["target"] = Target
+            };
 
-            return null;
+            if (Uri is not null)
+            {
+                dict["uri"] = Uri.ToString();
+            }
+
+            return dict;
         }
     }
 }

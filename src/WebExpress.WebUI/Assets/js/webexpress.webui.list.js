@@ -521,18 +521,22 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                 li.setAttribute("style", it.style);
             }
 
-            // apply action attributes to the card element
+            // apply action attributes
             if (it.primaryAction) {
                 for (const [key, value] of Object.entries(it.primaryAction)) {
-                    const htmlName = `data-wx-primary-${key.toLowerCase()}`;
-                    li.setAttribute(htmlName, value);
+                    if (value) {
+                        const htmlName = `data-wx-primary-${key.toLowerCase()}`;
+                        li.setAttribute(htmlName, value);
+                    }
                 }
             }
 
             if (it.secondaryAction) {
                 for (const [key, value] of Object.entries(it.secondaryAction)) {
-                    const htmlName = `data-wx-secondary-${key.toLowerCase()}`;
-                    li.setAttribute(htmlName, value);
+                    if (value) {
+                        const htmlName = `data-wx-secondary-${key.toLowerCase()}`;
+                        li.setAttribute(htmlName, value);
+                    }
                 }
             }
             

@@ -21,6 +21,8 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
         this._element.removeAttribute("data-selector");
         this._element.removeAttribute("data-autoload");
 
+        this._element.classList.add("wx-frame");
+
         // autoload content if configured
         if (this._autoload) {
             this.load();
@@ -238,7 +240,7 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
      */
     set uri(value) {
         // update internal uri and optionally reload
-        this._uri = String(uri || "");
+        this._uri = String(value || "");
 
         this.load();
     }

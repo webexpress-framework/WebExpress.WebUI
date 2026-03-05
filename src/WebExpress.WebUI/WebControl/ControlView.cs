@@ -31,6 +31,16 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlViewFooter> Footers => _footers;
 
         /// <summary>
+        /// Returns or sets the explicit Id for the detail frame.
+        /// </summary>
+        public string DetailId { get; set; }
+
+        /// <summary>
+        /// Returns or sets the selector for the detail frame.
+        /// </summary>
+        public string DetailSelector { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -166,6 +176,8 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(),
                 Role = Role
             }
+                .AddUserAttribute("data-detail-id", DetailId)
+                .AddUserAttribute("data-detail-selector", DetailSelector)
                 .Add(_headers.Select(x => x.Render(renderContext, visualTree)))
                 .Add(_views.Select(x => x.Render(renderContext, visualTree)))
                 .Add(_footers.Select(x => x.Render(renderContext, visualTree)));

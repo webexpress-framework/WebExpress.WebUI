@@ -98,10 +98,8 @@ webexpress.webui.Controller = new class {
 
                 if (!instance) {
 
-                } else if (typeof instance.show === "function") {
-                    if (uri) {
-                        instance.uri = uri;
-                    }
+                } else if (uri) {
+                    instance.uri = uri;
                 }
             });
             bound = true;
