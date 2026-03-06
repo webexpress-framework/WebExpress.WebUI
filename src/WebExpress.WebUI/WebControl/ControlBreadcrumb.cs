@@ -108,8 +108,9 @@ namespace WebExpress.WebUI.WebControl
             for (int i = from + 1; i < Uri.PathSegments.Count() + 1; i++)
             {
                 var path = uri.Take(i);
-                var href = path?.ToString();
-                var endpointContext = siteManager.GetEndpoint(path);
+                var last = path?.PathSegments?.LastOrDefault();
+                var href = last?.Uri ?? path;
+                var endpointContext = siteManager.GetEndpoint(href);
 
                 if (endpointContext == lastEndpointContext)
                 {
@@ -119,7 +120,11 @@ namespace WebExpress.WebUI.WebControl
                 var displayText = path.GetDisplayText(renderContext);
                 var pathIcon = path.GetIcon(renderContext);
 
-                if (displayText is not null)
+                if (last?.IsHidden ?? false)
+                {
+                    // ignore
+                }
+                else if (displayText is not null)
                 {
                     var display = I18N.Translate(renderContext.Request?.Culture, displayText);
 
@@ -138,7 +143,7 @@ namespace WebExpress.WebUI.WebControl
                             )
                             .Add(new HtmlElementTextSemanticsA(display)
                             {
-                                Href = href
+                                Href = href?.ToString()
                             })
                     );
                 }
@@ -162,7 +167,7 @@ namespace WebExpress.WebUI.WebControl
                             )
                             .Add(new HtmlElementTextSemanticsA(display)
                             {
-                                Href = href
+                                Href = href?.ToString()
                             })
                     );
                 }
