@@ -71,14 +71,30 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            return Render(renderContext, visualTree, Key, Value, Uri, Icon);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="key">The key of the attribute to be rendered.</param>
+        /// <param name="value">The value of the attribute to be rendered.</param>
+        /// <param name="uri">The URI to be associated with the value, making it a clickable link if provided.</param>
+        /// <param name="icon">The icon to be displayed alongside the key-value pair, providing a visual representation of the attribute.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, string key, string value, IUri uri, IIcon icon)
+        {
             if (!Enable)
             {
                 return null;
             }
 
-            var key = I18N.Translate(renderContext.Request?.Culture, Key);
+            var resultUri = uri?.BindParameters(renderContext.Request);
+            key = I18N.Translate(renderContext.Request?.Culture, key);
             var separator = string.IsNullOrWhiteSpace(key) ? '\0' : Separator;
-            var icon = Icon?.Render(renderContext, visualTree);
+            var iconHtml = icon?.Render(renderContext, visualTree);
 
             var keyElement = new HtmlElementTextSemanticsSpan(new HtmlText(key + Separator))
             {
@@ -86,19 +102,19 @@ namespace WebExpress.WebUI.WebControl
                 Class = KeyColor?.ToClass()
             };
 
-            var valueElement = new HtmlElementTextSemanticsSpan(new HtmlText(I18N.Translate(renderContext.Request?.Culture, Value)))
+            var valueElement = new HtmlElementTextSemanticsSpan(new HtmlText(I18N.Translate(renderContext.Request?.Culture, value)))
             {
                 Id = string.IsNullOrWhiteSpace(Id) ? string.Empty : $"{Id}_value"
             };
 
             var html = new HtmlElementTextContentDiv
             (
-                Icon is not null ? icon : null,
+                Icon is not null ? iconHtml : null,
                 keyElement,
-                Uri is not null
+                resultUri is not null
                     ? new HtmlElementTextSemanticsA(valueElement)
                     {
-                        Href = Uri.ToString(),
+                        Href = resultUri.ToString(),
                         Class = "wx-link"
                     }
                     : valueElement

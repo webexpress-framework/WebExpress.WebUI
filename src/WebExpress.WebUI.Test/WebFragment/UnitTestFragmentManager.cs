@@ -41,6 +41,34 @@ namespace WebExpress.WebUI.Test.WebFragment
         /// </summary>
         [Theory]
         [InlineData(typeof(TestApplication), typeof(IScope),
+            @"<div id=""webexpress-webui-test-testfragmentcontrolattribute""><span id=""webexpress-webui-test-testfragmentcontrolattribute_name"">:</span><span id=""webexpress-webui-test-testfragmentcontrolattribute_value"">TestFragmentControlAttribute</span></div>")]
+        public void Render_TestSectionFragmentControlAttribute(Type applicationType, Type scopeType, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(applicationType).FirstOrDefault();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [scopeType]);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+
+            // act
+            var html = componentHub.FragmentManager.Render
+            (
+                renderContext,
+                visualTree,
+                typeof(TestSectionFragmentControlAttribute)
+            );
+
+            // validation
+            Assert.NotNull(html);
+            Assert.NotEmpty(html);
+            AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
+        }
+
+        /// <summary>
+        /// Test the render function of the fragment manager.
+        /// </summary>
+        [Theory]
+        [InlineData(typeof(TestApplication), typeof(IScope),
             @"<p id=""webexpress-webui-test-testfragmentcontroltext"">TestFragmentControlText</p>")]
         public void Render_TestSectionFragmentControlText(Type applicationType, Type scopeType, string expected)
         {

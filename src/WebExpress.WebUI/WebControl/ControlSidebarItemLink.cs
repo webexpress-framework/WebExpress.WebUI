@@ -97,6 +97,25 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            return Render(renderContext, visualTree, Text, Tooltip, Uri, Icon, PrimaryAction, SecondaryAction);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="text">The text to display for the link.</param>
+        /// <param name="tooltip">The tooltip text to display on hover.</param>
+        /// <param name="uri">The URI to navigate to when the link is clicked.</param>
+        /// <param name="icon">The icon to display alongside the link text.</param>
+        /// <param name="primaryAction">The primary action to execute when the link is clicked.</param>
+        /// <param name="secondaryAction">The secondary action to execute on a different interaction, such as a double-click.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, string text, string tooltip, IUri uri, IIcon icon, IAction primaryAction, IAction secondaryAction)
+        {
+            var resultUri = uri?.BindParameters(renderContext.Request);
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
@@ -104,19 +123,19 @@ namespace WebExpress.WebUI.WebControl
             }
                 .AddUserAttribute("data-mode", Mode != TypeSidebarMode.Default ? Mode.ToData() : null)
                 .AddUserAttribute("data-dismissibility", Dismissibility != TypeDismissibilitySidebar.None ? "true" : null)
-                .AddUserAttribute("data-label", I18N.Translate(renderContext, Text))
-                .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-uri", Uri?.ToString())
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, text))
+                .AddUserAttribute("data-icon", (icon as Icon)?.Class)
+                .AddUserAttribute("data-image", (icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-uri", resultUri?.ToString())
                 .AddUserAttribute("data-target", Target.ToValue())
-                .AddUserAttribute("data-title", I18N.Translate(renderContext, Tooltip))
+                .AddUserAttribute("data-title", I18N.Translate(renderContext, tooltip))
                 .AddUserAttribute("data-color-css", Color?.ToClass())
                 .AddUserAttribute("data-color-style", Color?.ToStyle())
                 .AddUserAttribute(Active == TypeActive.Active ? "active" : null)
                 .AddUserAttribute(Active == TypeActive.Disabled ? "disabled" : null);
 
-            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
-            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
+            primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            secondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }
