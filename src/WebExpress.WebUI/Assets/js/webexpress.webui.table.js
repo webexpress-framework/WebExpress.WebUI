@@ -634,6 +634,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
                 if (content instanceof Node) {
                     td.appendChild(content);
+                } else if (cell && cell.html === true) {
+                    td.innerHTML = String(content ?? "");
                 } else {
                     td.textContent = String(content ?? "");
                 }
