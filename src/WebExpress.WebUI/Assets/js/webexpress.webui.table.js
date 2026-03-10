@@ -215,15 +215,13 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
         // dispatch event
         this._dispatch(webexpress?.webui?.Event?.SELECT_ROW_EVENT, {
-            detail: {
-                sender: this._element,
-                row: this._selectedRow,
-                rowId: this._selectedRow?.id,
-                primaryAction: this._selectedRow.primaryAction,
-                secondaryAction: this._selectedRow.secondaryAction,
-                bind: this._selectedRow.bind,
-                originalEvent: originalEvent
-            }
+            sender: this._element,
+            row: this._selectedRow,
+            rowId: this._selectedRow?.id,
+            primaryAction: this._selectedRow.primaryAction,
+            secondaryAction: this._selectedRow.secondaryAction,
+            bind: this._selectedRow.bind,
+            originalEvent: originalEvent
         });
     }
 
@@ -758,11 +756,9 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         }
         
         this._dispatch(webexpress.webui.Event.TABLE_SORT_EVENT, { 
-            detail: {
-                sender: this._element, 
-                columnId: col.id, 
-                sortDirection: col.sort 
-            }
+            sender: this._element, 
+            columnId: col.id, 
+            sortDirection: col.sort 
         });
     }
 
