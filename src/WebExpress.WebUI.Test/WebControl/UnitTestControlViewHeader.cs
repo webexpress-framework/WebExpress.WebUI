@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the view item control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-header""></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-header""></div>")]
+        [InlineData(null, @"<div class=""wx-view-header""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-view-header""></div>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             var html = control.Render(context, visualTree);
-            var expected = @"<div class=""wx-header""><div></div></div>";
+            var expected = @"<div class=""wx-view-header""><div></div></div>";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }

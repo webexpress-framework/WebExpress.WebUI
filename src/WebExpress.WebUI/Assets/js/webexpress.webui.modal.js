@@ -9,7 +9,6 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
     _size = null;
     _autoShow = null;
     _dialogDiv = document.createElement("div");
-    _contentDiv = document.createElement("div");
     _headerDiv = document.createElement("div");
     _titleH1 = document.createElement("h1");
     _bodyDiv = document.createElement("div");
@@ -26,8 +25,7 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         // retrieve custom attributes or use default values
-        this._closeLabel = element.getAttribute("data-close-label") ||
-            this._i18n("webexpress.webui:close");
+        this._closeLabel = element.getAttribute("data-close-label") || this._i18n("webexpress.webui:close");
         this._size = element.getAttribute("data-size") || "";
         this._autoShow = element.getAttribute("data-auto-show") === "true";
 
@@ -49,10 +47,10 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
             this._titleH1.appendChild(this._detachElement(header));
         });
 
-        // extract and append all .wx-modal-content elements
+        // extract and append all .wx-modal-content elements directly to body div
         const contents = this._element.querySelectorAll(".wx-modal-content");
         contents.forEach(content => {
-            this._contentDiv.appendChild(this._detachElement(content));
+            this._bodyDiv.appendChild(this._detachElement(content));
         });
 
         // extract and append all .wx-modal-footer elements
@@ -63,7 +61,6 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
 
         // create header content
         this._headerDiv.appendChild(this._titleH1);
-        this._bodyDiv.appendChild(this._contentDiv);
 
         if (this._fullscreenMode && this._size !== "modal-fullscreen") {
             // create fullscreen toggle button
@@ -71,7 +68,9 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
             this._fullscreenButton.className = "btn wx-button-fullscreen ms-auto";
             this._fullscreenButton.innerHTML = '<i class="fas fa-expand"></i>';
             this._fullscreenButton.setAttribute("aria-label", "Toggle Fullscreen");
-            this._fullscreenButton.addEventListener("click", () => this.toggleFullscreen());
+            this._fullscreenButton.addEventListener("click", () => {
+                this.toggleFullscreen();
+            });
             this._headerDiv.appendChild(this._fullscreenButton);
         }
 
@@ -82,7 +81,9 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         closeButton.setAttribute("data-wx-dismiss", "modal");
         closeButton.innerHTML = '<i class="fas fa-times"></i>';
         closeButton.setAttribute("aria-label", this._closeLabel);
-        closeButton.addEventListener("click", () => this.hide());
+        closeButton.addEventListener("click", () => {
+            this.hide();
+        });
         this._headerDiv.appendChild(closeButton);
 
         // create footer content
@@ -90,7 +91,9 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         this._cancelButton.className = "btn btn-secondary";
         this._cancelButton.setAttribute("data-wx-dismiss", "modal");
         this._cancelButton.innerHTML = `<i class='fas fa-times me-2'></i>${this._closeLabel}`;
-        this._cancelButton.addEventListener("click", () => this.hide());
+        this._cancelButton.addEventListener("click", () => {
+            this.hide();
+        });
         this._footerDiv.appendChild(this._cancelButton);
 
         // create modal content structure
@@ -110,7 +113,7 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
             this.show();
         }
     }
-    
+
     /**
      * Toggles the modal fullscreen state.
      */
@@ -130,7 +133,7 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         // default: css/light fullscreen toggle
         const isFullscreen = this._dialogDiv.classList.toggle("modal-fullscreen");
         const icon = this._fullscreenButton ? this._fullscreenButton.querySelector("i") : null;
-        
+
         if (isFullscreen) {
             if (icon) {
                 icon.classList.remove("fa-expand");
@@ -148,6 +151,7 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
             }
             this._fullscreenButton.setAttribute("aria-pressed", "false");
             this._dialogDiv.classList.add(this._size);
+
             // restore body state
             document.body.classList.remove("modal-open");
         }
@@ -165,12 +169,14 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         const closeButton = this._dialogDiv.querySelector("[data-wx-dismiss='modal']");
         if (closeButton) {
             closeButton.removeEventListener("click", this.hide);
-            closeButton.addEventListener("click", () => this.hide()); // bind click event
+            closeButton.addEventListener("click", () => {
+                this.hide();
+            });
         }
 
-        // remove all known size classes EXCEPT fullscreen if it was toggled manually
+        // remove all known size classes except fullscreen if it was toggled manually
         this._dialogDiv.classList.remove("modal-sm", "modal-md", "modal-lg", "modal-xl", "modal-fullscreen");
-        
+
         // reset icon state
         const icon = this._fullscreenButton.querySelector("i");
         if (icon) {
@@ -189,7 +195,9 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
      * Ensures the modal is properly initialized before showing it.
      */
     show() {
-        this.update(); // ensure modal content is refreshed
+        // ensure modal content is refreshed
+        this.update();
+
         const modalInstance = new bootstrap.Modal(this._element, {
             backdrop: "static",
             keyboard: true,
@@ -197,7 +205,7 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         modalInstance.show();
 
         // trigger event for showing the modal
-        this._dispatch(webexpress.webui.Event.MODAL_SHOW_EVENT, { });
+        this._dispatch(webexpress.webui.Event.MODAL_SHOW_EVENT, {});
     }
 
     /**
@@ -206,7 +214,7 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
      */
     hide() {
         const modalInstance = bootstrap.Modal.getInstance(this._element);
-        
+
         this._element.addEventListener("hidden.bs.modal", () => {
             this._element.removeAttribute("style");
             this._element.removeAttribute("aria-hidden");
@@ -218,7 +226,9 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         this._element.removeAttribute("aria-hidden");
         document.body.focus();
 
-        modalInstance?.hide();
+        if (modalInstance) {
+            modalInstance.hide();
+        }
     }
 
     /**

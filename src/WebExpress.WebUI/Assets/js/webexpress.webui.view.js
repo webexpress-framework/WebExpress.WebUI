@@ -123,12 +123,12 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
      * @param {HTMLElement} host host element
      */
     _parseViews(host) {
-        const headerNode = host.querySelector(":scope > .wx-header");
+        const headerNode = host.querySelector(":scope > .wx-view-header");
         if (headerNode) {
             this._views.header = headerNode;
         }
 
-        const footerNode = host.querySelector(":scope > .wx-view-statusbar, :scope > .wx-footer, :scope > footer");
+        const footerNode = host.querySelector(":scope > .wx-view-statusbar, :scope > .wx-view-footer, :scope > footer");
         if (footerNode) {
             this._views.footer = footerNode;
         }
@@ -197,7 +197,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
             host.appendChild(this._views.header);
         } else {
             const headerRow = document.createElement("div");
-            headerRow.className = "wx-header p-2";
+            headerRow.className = "wx-view-header p-2";
             this._views.header = headerRow;
             host.appendChild(headerRow);
         }
@@ -266,7 +266,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         sb.className = "wx-view-statusbar d-flex align-items-center p-1 small px-3";
 
         const footerRight = document.createElement("div");
-        footerRight.className = "wx-footer-right d-flex align-items-center gap-2";
+        footerRight.className = "wx-view-footer-right d-flex align-items-center gap-2";
         sb.appendChild(footerRight);
 
         host.appendChild(sb);

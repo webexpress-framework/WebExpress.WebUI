@@ -78,7 +78,7 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = "wx-header"
+                Class = "wx-view-header"
             }
                 .Add(_content.Select(x => x.Render(renderContext, visualTree)));
 

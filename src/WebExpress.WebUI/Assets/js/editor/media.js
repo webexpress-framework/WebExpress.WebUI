@@ -8,8 +8,9 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
 
     /**
      * Initialization hook called by the editor when the plugin is registered.
-     * no special initialization is required for this plugin.
-     * @param {object} editor - the editor instance
+     * No special initialization is required for this plugin.
+     *
+     * @param {object} editor - The editor instance.
      * @returns {void}
      */
     init: function(editor) {
@@ -18,9 +19,10 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
 
     /**
      * Creates toolbar controls for the plugin.
-     * returns a document fragment that will be inserted into the editor toolbar.
-     * @param {object} editor - the editor instance
-     * @returns {DocumentFragment} fragment containing toolbar buttons
+     * Returns a document fragment that will be inserted into the editor toolbar.
+     *
+     * @param {object} editor - The editor instance.
+     * @returns {DocumentFragment} Fragment containing toolbar buttons.
      */
     createToolbar: function(editor) {
         const frag = document.createDocumentFragment();
@@ -29,23 +31,53 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
         sep.className = "wx-editor-separator";
         frag.appendChild(sep);
 
-        // link button
+        // create link button safely
         const btnLink = document.createElement("button");
         btnLink.className = "wx-editor-btn";
         btnLink.type = "button";
         btnLink.innerHTML = '<i class="fas fa-link"></i>';
+        
+        // save selection firmly before focus shifts away from the editor
+        btnLink.addEventListener("mousedown", (e) => {
+            e.preventDefault(); // prevent losing focus
+            if (typeof editor._saveCurrentSelection === "function") {
+                editor._saveCurrentSelection();
+            }
+        });
+
         btnLink.addEventListener("click", () => {
-            this._openLinkModal(editor);
+            let prefillText = "";
+            let activeRange = null;
+            
+            if (editor._savedRange) {
+                activeRange = editor._savedRange.cloneRange();
+                prefillText = activeRange.toString().trim();
+            }
+            
+            this._openModal(editor, "linkModal", "editor-link", "Insert Link", { url: "", text: prefillText }, activeRange);
         });
         frag.appendChild(btnLink);
 
-        // image button
+        // create image button safely
         const btnImg = document.createElement("button");
         btnImg.className = "wx-editor-btn";
         btnImg.type = "button";
         btnImg.innerHTML = '<i class="fas fa-image"></i>';
+        
+        btnImg.addEventListener("mousedown", (e) => {
+            e.preventDefault(); // prevent losing focus
+            if (typeof editor._saveCurrentSelection === "function") {
+                editor._saveCurrentSelection();
+            }
+        });
+
         btnImg.addEventListener("click", () => {
-            this._openImageModal(editor);
+            let activeRange = null;
+            if (editor._savedRange) {
+                activeRange = editor._savedRange.cloneRange();
+            }
+            // pass null as prefill to enforce clearing of old data
+            this._openModal(editor, "imageModal", "editor-image", "Insert Image", null, activeRange);
         });
         frag.appendChild(btnImg);
 
@@ -53,90 +85,200 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
     },
 
     /**
-     * Opens the link insertion modal and provides the editor context to the modal controller.
-     * creates the modal on first use.
-     * @param {object} editor - the editor instance
-     * @returns {void}
+     * Provides context menu items for the plugin.
+     * 
+     * @param {object} editor - The editor instance.
+     * @param {HTMLElement} target - The target element that was right-clicked.
+     * @returns {Array} List of context menu items.
      */
-    _openLinkModal: function(editor) {
-        if (!this.linkModal) {
-            this.linkModal = this._createModal("editor-link", "Insert Link");
+    getContextMenuItems: function(editor, target) {
+        const items = [];
+        
+        // check for image element
+        if (target && target.nodeName === "IMG") {
+            items.push({
+                label: "Edit Image",
+                icon: "fas fa-edit",
+                action: () => {
+                    const sel = window.getSelection();
+                    let activeRange = null;
+                    
+                    if (sel) {
+                        const range = document.createRange();
+                        range.selectNode(target);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                        activeRange = range.cloneRange();
+                        
+                        if (typeof editor._saveCurrentSelection === "function") {
+                            editor._saveCurrentSelection();
+                        }
+                    }
+
+                    const prefill = {
+                        url: target.getAttribute("src") || "",
+                        alt: target.getAttribute("alt") || ""
+                    };
+                    this._openModal(editor, "imageModal", "editor-image", "Edit Image", prefill, activeRange);
+                }
+            });
+            
+            items.push({
+                label: "Remove Image",
+                icon: "fas fa-trash",
+                action: () => {
+                    target.remove();
+                    if (typeof editor._syncValue === "function") {
+                        editor._syncValue();
+                    }
+                    if (typeof editor._updateUndoRedoStates === "function") {
+                        editor._updateUndoRedoStates();
+                    }
+                }
+            });
         }
 
-        if (this.linkModal && this.linkModal.ctrl) {
-            // provide editor reference to the modal controller for integrations
-            this.linkModal.ctrl._editor = editor;
-
-            // show modal via controller API if available
-            if (typeof this.linkModal.ctrl.show === "function") {
-                this.linkModal.ctrl.show();
-            }
+        // find nearest anchor tag if right-clicked inside a link
+        let anchor = target;
+        while (anchor && anchor.nodeName !== "A" && !anchor.classList?.contains("wx-editor-content")) {
+            anchor = anchor.parentElement;
         }
+
+        if (anchor && anchor.nodeName === "A") {
+            items.push({
+                label: "Edit Link",
+                icon: "fas fa-edit",
+                action: () => {
+                    const sel = window.getSelection();
+                    let activeRange = null;
+                    
+                    if (sel) {
+                        const range = document.createRange();
+                        range.selectNode(anchor);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                        activeRange = range.cloneRange();
+                        
+                        if (typeof editor._saveCurrentSelection === "function") {
+                            editor._saveCurrentSelection();
+                        }
+                    }
+
+                    const prefill = {
+                        url: anchor.getAttribute("href") || "",
+                        text: anchor.textContent || ""
+                    };
+                    this._openModal(editor, "linkModal", "editor-link", "Edit Link", prefill, activeRange);
+                }
+            });
+            
+            items.push({
+                label: "Remove Link",
+                icon: "fas fa-unlink",
+                action: () => {
+                    const sel = window.getSelection();
+                    if (sel) {
+                        const range = document.createRange();
+                        range.selectNode(anchor);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                        
+                        if (typeof editor._saveCurrentSelection === "function") {
+                            editor._saveCurrentSelection();
+                        }
+                    }
+                    
+                    const text = anchor.textContent || "";
+                    if (typeof editor.restoreSavedRange === "function") {
+                        editor.restoreSavedRange();
+                    }
+                    if (typeof editor.insertHtmlAtCursor === "function") {
+                        const div = document.createElement("div");
+                        div.textContent = text;
+                        editor.insertHtmlAtCursor(div.innerHTML);
+                    }
+                }
+            });
+        }
+
+        return items;
     },
 
     /**
-     * Opens the image insertion modal and provides the editor context to the modal controller.
-     * creates the modal on first use.
-     * @param {object} editor - the editor instance
+     * Opens a modal and provides the editor context to the modal controller.
+     * Creates the modal on first use to prevent redundant logic.
+     *
+     * @param {object} editor - The editor instance.
+     * @param {string} modalProperty - The property name where the modal wrapper is stored.
+     * @param {string} key - Registry key or identifier for the modal.
+     * @param {string} title - The title to display in the modal header.
+     * @param {object|null} prefill - Optional data to prefill the modal form.
+     * @param {Range|null} activeRange - The actively saved text range before focus loss.
      * @returns {void}
      */
-    _openImageModal: function(editor) {
-        if (!this.imageModal) {
-            this.imageModal = this._createModal("editor-image", "Insert Image");
+    _openModal: function(editor, modalProperty, key, title, prefill, activeRange) {
+        if (!this[modalProperty]) {
+            this[modalProperty] = this._createModal(key, title);
+        } else {
+            // dynamically update the title for existing modals
+            const titleElement = this[modalProperty].element.querySelector(".modal-title");
+            if (titleElement) {
+                titleElement.textContent = title;
+            }
         }
 
-        if (this.imageModal && this.imageModal.ctrl) {
-            // provide editor reference to the modal controller for integrations
-            this.imageModal.ctrl._editor = editor;
+        if (this[modalProperty] && this[modalProperty].ctrl) {
+            const ctrl = this[modalProperty].ctrl;
+            
+            // provide editor reference to the modal controller
+            ctrl._editor = editor;
+            
+            // securely store the explicit cursor position
+            ctrl._backupRange = activeRange || null;
+            
+            // set or clear prefill data to force reset on reuse
+            ctrl._linkPrefill = prefill || null;
+            ctrl._imagePrefill = prefill || null;
 
-            // show modal via controller API if available
-            if (typeof this.imageModal.ctrl.show === "function") {
-                this.imageModal.ctrl.show();
+            // show modal via controller api if available
+            if (typeof ctrl.show === "function") {
+                ctrl.show();
             }
         }
     },
 
     /**
      * Creates a minimal ModalSidebarPanel instance and returns a wrapper object.
-     * the created element is appended to document.body. the function does not
-     * assume any DialogPanels exist; it only prepares the shell.
-     *
-     * @param {string} key - registry key or identifier used by dialog panels (e.g. "editor-image")
-     * @param {string} title - modal header title
-     * @returns {{ element: HTMLElement, ctrl: object }} wrapper containing element and controller
+     * 
+     * @param {string} key - Registry key or identifier used by dialog panels.
+     * @param {string} title - Modal header title.
+     * @returns {{ element: HTMLElement, ctrl: object }} Wrapper containing element and controller.
      */
     _createModal: function(key, title) {
         const id = "wx-msp-" + key + "-" + Date.now();
         const el = document.createElement("div");
         el.id = id;
+        el.setAttribute("data-size", "modal-lg");
         el.setAttribute("data-key", key);
         el.setAttribute("aria-hidden", "true");
 
-        // build minimal modal shell: header, content, footer
+        // build minimal modal shell securely with static html
         el.innerHTML = `
             <div class="wx-modal-header">
-                <h5 class="modal-title">${title}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title"></h5>
             </div>
             <div class="wx-modal-content"></div>
             <div class="wx-modal-footer">
-                <button class="btn btn-primary submit-btn">Insert</button>
+                <button class="btn btn-primary submit-btn" disabled>Insert</button>
             </div>`;
 
-        document.body.appendChild(el);
-
-        // instantiate ModalSidebarPanel for consistent modal layout and sidebar support
-        const ctrl = new webexpress.webui.ModalSidebarPanel(el);
-
-        // bind submit button to a placeholder handler; actual panels will provide concrete behavior
-        const btn = el.querySelector(".submit-btn");
-        if (btn) {
-            btn.addEventListener("click", () => {
-                // placeholder: panels registered under DialogPanels should implement submission hooks.
-                // when a concrete panel sets up handlers it should override or listen to events and perform insertion.
-                // keep this minimal to avoid coupling plugin to specific panel implementations.
-            });
+        const titleElement = el.querySelector(".modal-title");
+        if (titleElement) {
+            titleElement.textContent = title;
         }
+
+        document.body.appendChild(el);
+        const ctrl = new webexpress.webui.ModalSidebarPanel(el);
 
         return { element: el, ctrl: ctrl };
     }

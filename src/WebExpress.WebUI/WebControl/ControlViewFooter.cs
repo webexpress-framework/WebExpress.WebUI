@@ -78,7 +78,7 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = "wx-footer"
+                Class = "wx-view-footer"
             }
                 .Add(_content.Select(x => x.Render(renderContext, visualTree)));
 

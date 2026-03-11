@@ -156,7 +156,7 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
      */
     _buildBodyContent() {
         // clear base content
-        this._contentDiv.innerHTML = "";
+        this._bodyDiv.innerHTML = "";
 
         // create split host
         const split = document.createElement("div");
@@ -188,7 +188,7 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
         // assemble
         split.appendChild(sidePane);
         split.appendChild(mainPane);
-        this._contentDiv.appendChild(split);
+        this._bodyDiv.appendChild(split);
 
         // store refs
         this._splitEl = split;
@@ -286,7 +286,7 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
      * @private
      */
     _bindModalLifecycle() {
-        // on shown, ensure a page is active and call onShow
+        // on shown, ensure a page is active and call onshow
         this._element.addEventListener("shown.bs.modal", () => {
             this._renderTree();
             if (!this._activePageId && this._pages.length > 0) {
@@ -369,7 +369,7 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
                 continue;
             }
 
-            // apply modalId filter if present
+            // apply modalid filter if present
             const hasPanelModalId = Object.prototype.hasOwnProperty.call(panel, "modalId") && panel.modalId != null && String(panel.modalId) !== "";
             if (hasPanelModalId) {
                 if (!modalId || String(panel.modalId) !== String(modalId)) {
@@ -428,7 +428,7 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
         // index node for lookup
         this._treeIndex.set(node.id, node);
 
-        // insert into model by parentId
+        // insert into model by parentid
         const pid = page.parentId ? String(page.parentId) : null;
         if (pid && this._treeIndex.has(pid)) {
             const parent = /** @type {any} */ (this._treeIndex.get(pid));
@@ -514,7 +514,7 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
         if (!this._treeCtrl) {
             return;
         }
-        // pass roots as hierarchical model; TreeCtrl handles children itself
+        // pass roots as hierarchical model; treectrl handles children itself
         this._treeCtrl.nodes = this._treeModel.slice();
     }
 
@@ -597,7 +597,7 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
         this._markActiveRecursive(this._treeModel, id);
         this._renderTree();
 
-        // call page onShow if provided
+        // call page onshow if provided
         const page = this.getActivePage();
         if (page && typeof page.onShow === "function") {
             page.onShow(this);
@@ -714,7 +714,7 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
                     active.onSubmit(this);
                 }
             } else {
-                // call onSubmit on active page first if available, then others
+                // call onsubmit on active page first if available, then others
                 if (active && typeof active.onSubmit === "function") {
                     active.onSubmit(this);
                 }
@@ -842,8 +842,8 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
         if (this._splitEl && this._splitEl.parentNode) {
             this._splitEl.parentNode.insertBefore(alert, this._splitEl);
         } else {
-            // fallback: append to content div if split not ready
-            this._contentDiv.insertBefore(alert, this._contentDiv.firstChild);
+            // fallback: append to body div if split not ready
+            this._bodyDiv.insertBefore(alert, this._bodyDiv.firstChild);
         }
 
         this._validationEl = alert;

@@ -1,5 +1,5 @@
 /**
- * registers the link page
+ * Registers the link page.
  */
 webexpress.webui.DialogPanels.register("editor-link", {
     id: "editor-link-page",
@@ -8,13 +8,13 @@ webexpress.webui.DialogPanels.register("editor-link", {
     iconClass: "fas fa-link",
 
     /**
-     * renders the page ui
-     * @param {HTMLElement} container - host container for the page
-     * @param {webexpress.webui.ModalSidebarPanel} modal - modal instance (holds _editor and optional _linkPrefill)
+     * Renders the page ui.
+     * 
+     * @param {HTMLElement} container - Host container for the page.
+     * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
      * @returns {void}
      */
     render: function (container, modal) {
-        // build form
         const wrapper = document.createElement("div");
 
         const urlGroup = document.createElement("div");
@@ -45,76 +45,154 @@ webexpress.webui.DialogPanels.register("editor-link", {
         wrapper.appendChild(textGroup);
         container.appendChild(wrapper);
 
-        // store refs on modal state
         if (!modal._link) {
             modal._link = {};
         }
         modal._link.urlInput = urlInput;
         modal._link.textInput = textInput;
 
-        // apply prefill if present
-        if (modal._linkPrefill && typeof modal._linkPrefill === "object") {
-            if (typeof modal._linkPrefill.url === "string") {
-                urlInput.value = modal._linkPrefill.url;
+        urlInput.addEventListener("input", function () {
+            const modalWrapper = this.closest("[data-key]") || document;
+            const submitBtn = modalWrapper.querySelector(".submit-btn");
+            
+            if (submitBtn) {
+                if (this.value.trim() !== "") {
+                    submitBtn.disabled = false;
+                } else {
+                    submitBtn.disabled = true;
+                }
             }
-            if (typeof modal._linkPrefill.text === "string") {
-                textInput.value = modal._linkPrefill.text;
-            }
-        }
+        });
     },
 
     /**
-     * called when the page becomes active
-     * @param {webexpress.webui.ModalSidebarPanel} modal - modal instance
+     * Called when the page becomes active.
+     * Resets or prefills inputs and attaches the explicit click handler.
+     * 
+     * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
      * @returns {void}
      */
     onShow: function (modal) {
-        // focus url input
         if (modal && modal._link && modal._link.urlInput) {
-            modal._link.urlInput.focus();
-            modal._link.urlInput.select();
+            const urlInput = modal._link.urlInput;
+            const textInput = modal._link.textInput;
+            
+            // reset or prefill fields on every show
+            if (modal._linkPrefill) {
+                urlInput.value = modal._linkPrefill.url || "";
+                if (textInput) {
+                    textInput.value = modal._linkPrefill.text || "";
+                }
+            } else {
+                urlInput.value = "";
+                if (textInput) {
+                    textInput.value = "";
+                }
+            }
+            
+            urlInput.focus();
+            urlInput.select();
+
+            const modalWrapper = urlInput.closest("[data-key]") || document;
+            const submitBtn = modalWrapper.querySelector(".submit-btn");
+            
+            if (submitBtn) {
+                if (urlInput.value.trim() !== "") {
+                    submitBtn.disabled = false;
+                } else {
+                    submitBtn.disabled = true;
+                }
+
+                // cleanly bind to this active tab
+                submitBtn.onclick = () => {
+                    const validationResult = this.validate(modal);
+                    if (validationResult === true) {
+                        this.onSubmit(modal);
+                    } else if (validationResult && validationResult.message) {
+                        alert(validationResult.message);
+                    }
+                };
+            }
         }
     },
 
     /**
-     * validates current page data
-     * @param {webexpress.webui.ModalSidebarPanel} modal - modal instance
+     * Validates current page data.
+     * 
+     * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
      * @returns {true|{valid:false,message:string}}
      */
     validate: function (modal) {
         const editor = modal ? modal._editor : null;
         const urlInput = modal && modal._link ? modal._link.urlInput : null;
+        
         if (!editor || !urlInput) {
-            return { valid: false, message: "internal error: editor or field not available." };
+            return { valid: false, message: "Internal error: editor or field not available." };
         }
-        const safeUrl = editor._sanitizeUrl(urlInput.value || "");
-        if (!safeUrl) {
+        
+        const urlVal = urlInput.value.trim();
+        if (urlVal === "") {
             return { valid: false, message: "Please enter a valid URL." };
         }
+        
         return true;
     },
 
     /**
-     * handles submit and inserts the link into the editor
-     * @param {webexpress.webui.ModalSidebarPanel} modal - modal instance
+     * Handles submit and inserts the link into the editor.
+     * 
+     * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
      * @returns {void}
      */
     onSubmit: function (modal) {
         const editor = modal ? modal._editor : null;
         const urlInput = modal && modal._link ? modal._link.urlInput : null;
         const textInput = modal && modal._link ? modal._link.textInput : null;
+        
         if (!editor || !urlInput) {
             return;
         }
-        const urlVal = editor._sanitizeUrl(urlInput.value || "");
-        if (!urlVal) {
+        
+        let urlVal = urlInput.value.trim();
+        if (urlVal === "") {
             return;
         }
-        const text = String((textInput && textInput.value) || "").trim() || urlVal.replace(/^https?:\/\//i, "");
-        editor._restoreSavedRange();
-        editor._insertHtmlAtCursor('<a href="' + urlVal + '" target="_blank" rel="noopener noreferrer">' + editor._escapeHtml(text) + "</a>");
-        if (editor._formInput) {
-            editor._formInput.value = editor._editorElement ? editor._editorElement.innerHTML : "";
+        
+        // append protocol if missing to prevent sanitizer from stripping
+        if (!/^https?:\/\//i.test(urlVal) && !urlVal.startsWith("/") && !urlVal.startsWith("#") && !urlVal.startsWith("mailto:")) {
+            urlVal = "https://" + urlVal;
+        }
+        
+        const rawText = String((textInput && textInput.value) || "").trim() || urlVal.replace(/^https?:\/\//i, "");
+        const safeUrl = urlVal.replace(/"/g, "%22");
+        
+        const escapeHtml = function (text) {
+            const div = document.createElement("div");
+            div.textContent = text;
+            return div.innerHTML;
+        };
+        
+        // strictly enforce backed up range to ensure exact selection replacement
+        if (modal._backupRange) {
+            editor._savedRange = modal._backupRange.cloneRange();
+        }
+        
+        // the controller's insertHtmlAtCursor uses the _savedRange automatically
+        editor.insertHtmlAtCursor('<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(rawText) + "</a>");
+        
+        // close modal
+        if (typeof modal.hide === "function") {
+            modal.hide();
+        } else if (modal.ctrl && typeof modal.ctrl.hide === "function") {
+            modal.ctrl.hide();
+        } else {
+            const modalWrapper = urlInput.closest(".modal");
+            if (modalWrapper && typeof bootstrap !== "undefined") {
+                const bsModal = bootstrap.Modal.getInstance(modalWrapper);
+                if (bsModal) {
+                    bsModal.hide();
+                }
+            }
         }
     }
 });
