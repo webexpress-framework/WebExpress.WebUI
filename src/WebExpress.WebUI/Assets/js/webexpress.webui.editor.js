@@ -1,6 +1,6 @@
 /**
  * Core WYSIWYG editor control.
- * Initializes the editor frame, manages undo/redo functionality, loads registered 
+ * Initializes the editor frame, manages undo/redo functionality, loads registered
  * plugins, and handles context menu operations.
  */
 webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
@@ -10,7 +10,6 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     _savedRange = null;
     _contextMenu = null;
     _documentClickHandler = null;
-    _fullscreenCloseBtn = null;
 
     // public configuration properties
     imageUploadUri = "";
@@ -31,6 +30,11 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
         this.imageUploadUri = element.dataset.imageUploadUri || "";
         this.imageBaseUri = element.dataset.imageBaseUri || "";
+
+        // ensure element has an id so the fullscreen button can reference it
+        if (!element.id) {
+            element.id = "wx-editor-" + Math.floor(Math.random() * 100000);
+        }
 
         this._createToolbar(element);
         this._createEditorArea(element, content);
@@ -123,8 +127,9 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Creates the undo/redo button group.
-     * Adds the fullscreen toggle button at the end.
+     * Creates the undo/redo button group including the fullscreen toggle.
+     * The fullscreen button uses data-wx-primary-action="fullscreen" so that the
+     * central Controller handles toggling and icon/aria-state updates.
      * @returns {HTMLElement} The history button group.
      */
     _createHistoryGroup() {
@@ -138,64 +143,25 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         historyGroup.appendChild(undoBtn);
         historyGroup.appendChild(redoBtn);
 
-        // Add Separator
+        // add separator
         const sep = document.createElement("div");
         sep.className = "wx-editor-separator";
         historyGroup.appendChild(sep);
 
-        // Add Fullscreen Button
+        // add fullscreen button – wired via the controller action system
         const fsBtn = document.createElement("button");
         fsBtn.className = "wx-editor-btn";
         fsBtn.title = "Toggle Fullscreen";
         fsBtn.innerHTML = `<i class="fas fa-expand"></i>`;
         fsBtn.type = "button";
 
-        // Set required data attributes
-        fsBtn.dataset.wxToggle = "fullscreen";
-
-        // Ensure element has an ID for the target reference
-        if (!this._element.id) {
-            this._element.id = "wx-editor-" + Math.floor(Math.random() * 100000);
-        }
-        fsBtn.dataset.wxTarget = "#" + this._element.id;
+        // use the current action system; the controller registers the click handler automatically
+        fsBtn.dataset.wxPrimaryAction = "fullscreen";
+        fsBtn.dataset.wxPrimaryTarget = "#" + this._element.id;
 
         historyGroup.appendChild(fsBtn);
 
         return historyGroup;
-    }
-
-    /**
-     * Toggles fullscreen mode for the editor.
-     * @param {HTMLElement} btn - The toggle button (optional).
-     */
-    _toggleFullscreen(btn) {
-        // if called without button (e.g. from footer), try to find the toolbar button
-        if (!btn) {
-            btn = this._element.querySelector('button[data-wx-primary-action="fullscreen"]');
-        }
-
-        const isFullscreen = this._element.classList.toggle("wx-fullscreen-active");
-        const icon = btn ? btn.querySelector("i") : null;
-
-        if (isFullscreen) {
-            if (icon) icon.className = "fas fa-compress";
-            if (btn) btn.title = "Exit Fullscreen";
-            document.body.style.overflow = "hidden"; // Prevent background scrolling
-
-            // Show close button in footer
-            if (this._fullscreenCloseBtn) {
-                this._fullscreenCloseBtn.style.display = "inline-block";
-            }
-        } else {
-            if (icon) icon.className = "fas fa-expand";
-            if (btn) btn.title = "Toggle Fullscreen";
-            document.body.style.overflow = "";
-
-            // Hide close button in footer
-            if (this._fullscreenCloseBtn) {
-                this._fullscreenCloseBtn.style.display = "none";
-            }
-        }
     }
 
     /**
@@ -267,29 +233,24 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Creates the status bar at the bottom of the editor.
-     * Includes hidden close button for fullscreen mode.
      * @param {HTMLElement} element - The parent element.
      */
     _createStatusBar(element) {
         const statusBar = document.createElement("div");
         statusBar.classList.add("wx-editor-status");
 
-        // add close button
-        this._fullscreenCloseBtn = document.createElement("button");
-        this._fullscreenCloseBtn.className = "btn btn-primary wx-button";
-        this._fullscreenCloseBtn.innerHTML = '<i class="fas fa-check-circle me-1"></i> Done';
-        this._fullscreenCloseBtn.type = "button";
-        this._fullscreenCloseBtn.style.marginLeft = "auto";
+        const doneBtn = document.createElement("button");
+        doneBtn.className = "btn btn-primary wx-button wx-editor-finish";
+        doneBtn.type = "button";
+        doneBtn.innerHTML = '<i class="fas fa-check-circle me-1"></i> Done';
+        doneBtn.setAttribute("aria-label", "Done");
+        doneBtn.title = "Done";
 
-        // use data attributes for controller logic
-        this._fullscreenCloseBtn.setAttribute("data-wx-dismiss", "fullscreen");
-        this._fullscreenCloseBtn.setAttribute("data-wx-primary-target", "#" + this._element.id);
+        // wire to the controller's dismiss handler for css fullscreen
+        doneBtn.setAttribute("data-wx-dismiss", "fullscreen");
+        doneBtn.setAttribute("data-wx-target", "#" + this._element.id);
 
-        // accessibility and tooltip
-        this._fullscreenCloseBtn.setAttribute("aria-label", "Done");
-        this._fullscreenCloseBtn.title = "Done";
-
-        statusBar.appendChild(this._fullscreenCloseBtn);
+        statusBar.appendChild(doneBtn);
         element.appendChild(statusBar);
     }
 
@@ -451,13 +412,13 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             }
 
             // handle custom element items
-            if (item.type === 'custom-element' && item.element) {
+            if (item.type === "custom-element" && item.element) {
                 container.appendChild(item.element);
                 return;
             }
 
             // handle color swatch items
-            if (item.type === 'color') {
+            if (item.type === "color") {
                 this._createColorItem(item, container);
                 return;
             }
@@ -597,7 +558,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Adds a separator to the menu if one doesn't already exist.
+     * Adds a separator to the menu if one does not already exist at the end.
      * @param {HTMLElement} container - The target container.
      */
     _addMenuSeparator(container = this._contextMenu) {
@@ -676,24 +637,22 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             "th": ["colspan", "rowspan"],
             "td": ["colspan", "rowspan"],
             "table": ["border", "cellpadding", "cellspacing"],
-            "*": ["class", "id", "title", "role", "tabindex", "style"] // style often needed for editors
+            "*": ["class", "id", "title", "role", "tabindex", "style"]
         };
 
         /**
-         * sanitize a node and its subtree
+         * Sanitizes a node and its subtree recursively.
          * @param {Node} node
          */
         function sanitizeNode(node) {
-            // if element node, check tag and attributes
             if (node.nodeType === Node.ELEMENT_NODE) {
                 const el = node;
                 const tag = el.tagName.toLowerCase();
 
-                // special case: skip check for body itself, only sanitize its content
+                // skip the body element itself; only sanitize its children
                 if (tag !== "body") {
-                    // remove disallowed elements by unwrapping or removing
                     if (!allowedTags.has(tag)) {
-                        // unwrap allowed children to preserve text where sensible
+                        // unwrap: move children to parent, then remove the element
                         const parent = el.parentNode;
                         if (parent) {
                             while (el.firstChild) {
@@ -701,26 +660,22 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                             }
                             parent.removeChild(el);
                         } else {
-                            // fallback: remove node completely
                             el.remove();
                         }
-                        // since node is removed/unwrapped, we don't recurse on it directly here
-                        // (children were moved to parent, they will be checked if we started high enough)
                         return;
                     }
 
-                    // iterate attributes and remove unsafe ones
+                    // remove unsafe attributes
                     const attrs = Array.from(el.attributes);
                     attrs.forEach((attr) => {
                         const name = attr.name.toLowerCase();
                         const value = attr.value;
 
-                        // allow data-* and aria-* always
+                        // always allow data-* and aria-*
                         if (name.startsWith("data-") || name.startsWith("aria-")) {
                             return;
                         }
 
-                        // allow only whitelisted attributes
                         const allowedForTag = allowedAttrs[tag] || [];
                         const allowedGlobal = allowedAttrs["*"] || [];
                         const isAllowed = allowedForTag.indexOf(name) !== -1 || allowedGlobal.indexOf(name) !== -1;
@@ -730,46 +685,44 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                             return;
                         }
 
-                        // if attribute is href or src, ensure protocol is safe
+                        // block unsafe url protocols in href and src
                         if ((name === "href" || name === "src") && value) {
                             const trimmed = value.trim();
-                            // allow relative links, anchors, and specific protocols
                             if (!trimmed.match(/^(http|https|mailto|tel|\/|#|\.)/i)) {
-                                // potential javascript: or data: alert -> remove
                                 el.removeAttribute(attr.name);
                                 return;
                             }
-                            
-                            // for anchors opening in new tab, enforce rel
+
+                            // enforce rel for links opening in new tab
                             if (name === "href" && el.tagName.toLowerCase() === "a") {
                                 if (!el.getAttribute("rel") && el.getAttribute("target") === "_blank") {
                                     el.setAttribute("rel", "noopener noreferrer");
                                 }
                             }
                         }
-                        // sanitize style attribute to prevent xss via url()
+
+                        // block javascript: and expression() in style values
                         if (name === "style" && value) {
-                             if (value.toLowerCase().includes("javascript:") || value.toLowerCase().includes("expression(")) {
-                                 el.removeAttribute("style");
-                             }
+                            if (value.toLowerCase().includes("javascript:") || value.toLowerCase().includes("expression(")) {
+                                el.removeAttribute("style");
+                            }
                         }
                     });
                 }
             }
 
-            // recurse children (use snapshot because children may change)
+            // recurse over a snapshot of children (list may change during sanitization)
             const children = Array.from(node.childNodes);
             children.forEach((child) => {
                 sanitizeNode(child);
             });
         }
 
-        // start sanitization on body, but the logic inside now skips the tag check for 'body'
         if (doc.body) {
             sanitizeNode(doc.body);
             return doc.body.innerHTML;
         }
-        
+
         return "";
     }
 
@@ -784,7 +737,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Setter for the editor content.
      * Updates the editor DOM, synchronizes hidden form input and refreshes UI state.
-     * incoming html is sanitized before insertion
+     * Incoming html is sanitized before insertion.
      * @param {string} v - HTML string to set as editor content
      */
     set value(v) {
@@ -819,15 +772,15 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             sel.removeAllRanges();
             sel.addRange(this._savedRange);
         } else {
-            // fallback: move cursor to the end if no selection exists
+            // fallback: move cursor to end if no selection exists
             const sel = window.getSelection();
             const range = document.createRange();
             range.selectNodeContents(this._editorElement);
-            range.collapse(false); // false means collapse to end
+            range.collapse(false);
             sel.removeAllRanges();
             sel.addRange(range);
 
-            // save this new position so subsequent calls use it
+            // save this position so subsequent calls use it
             this._savedRange = range.cloneRange();
         }
     }
@@ -844,7 +797,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Inserts HTML at the current cursor position.
-     * incoming html is sanitized before insertion
+     * Incoming html is sanitized before insertion.
      * @param {string} html - The HTML to insert.
      */
     insertHtmlAtCursor(html) {

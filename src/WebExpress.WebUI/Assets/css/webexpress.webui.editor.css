@@ -50,6 +50,11 @@ wx-editor-format-toolbar {
     background-color: var(--bs-body-bg);
 }
 
+/* align finish/done button to the right */
+.wx-editor-status .wx-editor-finish {
+    margin-left: auto;
+}
+
 .wx-editor-format-dropdown {
     background: transparent;
     border: none;

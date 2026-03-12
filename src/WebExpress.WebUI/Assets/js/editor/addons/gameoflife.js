@@ -6,8 +6,7 @@ webexpress.webui.EditorAddOns.register("game-of-life", {
     isContainer: false, // canvas handles its own interaction
     description: "Interactive Game of Life simulation.",
     properties: [
-        { name: "cellSize", label: "Cell Size (px)", type: "number", default: 10 },
-        { name: "color", label: "Color", type: "color", default: "#9ec5fe" }
+        { name: "cellSize", label: "Cell Size (px)", type: "number", default: 10 }
     ],
     renderer: (data) => {
         const cellSize = data.cellSize || 10;
@@ -15,8 +14,7 @@ webexpress.webui.EditorAddOns.register("game-of-life", {
         return `
             <div class="wx-webui-gameoflife" 
                  style="width: 100%; height: 300px; background: #f8f9fa;"
-                 data-cell-size="${cellSize}" 
-                 data-color="${color}">
+                 data-cell-size="${cellSize}">
             </div>`;
     }
 });

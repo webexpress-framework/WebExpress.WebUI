@@ -219,11 +219,8 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
             this._element.removeAttribute("style");
             this._element.removeAttribute("aria-hidden");
             this._dispatch(webexpress.webui.Event.MODAL_HIDE_EVENT, {});
-        });
+        }, { once: true });
 
-        this._element.innerHTML = "";
-        this._element.removeAttribute("style");
-        this._element.removeAttribute("aria-hidden");
         document.body.focus();
 
         if (modalInstance) {
