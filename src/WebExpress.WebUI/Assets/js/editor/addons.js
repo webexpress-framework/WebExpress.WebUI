@@ -16,8 +16,8 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
      * Helper to safely retrieve the target element from an event.
      * Handles text nodes by returning their parent element.
      * @param {Event} e -The event object.
-             * @returns {HTMLElement | null} The target element.
-                     */
+     * @returns {HTMLElement | null} The target element.
+     */
     _getSafeTarget: function(e) {
         let target = e.target;
         if (target && target.nodeType === 3) {
@@ -30,7 +30,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
      * Initializes the plugin.
      * Sets up event listeners for interactions (click, drag & drop) within the editor content.
      * @param {object} editor -The editor instance.
-             */
+     */
     init: function(editor) {
         // expose plugin to the editor so external pages can call property dialogs
         editor._addonPlugin = this;
@@ -63,8 +63,8 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
      * Initializes drag and drop event listeners on the editor element.
      * Manages the draggable state of frames to allow text selection vs. moving.
      * @param {HTMLElement} editorElem -The content editable element.
-             * @param {object} editor -The editor instance.
-                     */
+     * @param {object} editor -The editor instance.
+     */
     _initDragEvents: function(editorElem, editor) {
         editorElem.addEventListener("mousedown", (e) => {
             const target = this._getSafeTarget(e);
@@ -183,8 +183,8 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
     /**
      * Creates the plugin toolbar button.
      * @param {object} editor -The editor instance.
-             * @returns {HTMLElement} The button group element.
-                     */
+     * @returns {HTMLElement} The button group element.
+     */
     createToolbar: function(editor) {
         const group = document.createElement("div");
         group.className = "wx-editor-btn-group";
@@ -192,7 +192,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
         const btn = document.createElement("button");
         btn.className = "wx-editor-btn";
         btn.type = "button";
-        btn.title = "Insert AddOn";
+        btn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.insert.addon.tooltip");
         btn.innerHTML = '<i class="fas fa-puzzle-piece"></i>';
 
         btn.addEventListener("mousedown", (e) => {
@@ -215,7 +215,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
 
             this._currentEditor = editor;
             this._activeAddonNode = null;
-            this._openModal(editor, "_selectionModal", "editor-addon", "AddOn Library", activeRange);
+            this._openModal(editor, "_selectionModal", "editor-addon", "webexpress.webui:editor.insert.addon.title", activeRange);
         });
 
         group.appendChild(btn);
@@ -225,20 +225,15 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
     /**
      * Opens a modal and provides the editor context to the modal controller.
      * @param {object} editor -The editor instance.
-             * @param {string} modalProperty -The property name where the modal wrapper is stored.
-                     * @param {string} key -Registry key or identifier for the modal.
-                             * @param {string} title -The title to display in the modal header.
-                                     * @param {Range | null} activeRange -The actively saved text range before focus loss.
-                                             */
+     * @param {string} modalProperty -The property name where the modal wrapper is stored.
+     * @param {string} key -Registry key or identifier for the modal.
+     * @param {string} title -The title to display in the modal header.
+     * @param {Range | null} activeRange -The actively saved text range before focus loss.
+     */
     _openModal: function(editor, modalProperty, key, title, activeRange) {
         if (!this[modalProperty]) {
             this[modalProperty] = this._createModal(key, title);
-        } else {
-            const titleElement = this[modalProperty].element.querySelector(".modal-title");
-            if (titleElement) {
-                titleElement.textContent = title;
-            }
-        }
+        } 
 
         if (this[modalProperty] && this[modalProperty].ctrl) {
             const ctrl = this[modalProperty].ctrl;
@@ -264,9 +259,9 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
     /**
      * Creates a minimal ModalSidebarPanel instance and returns a wrapper object.
      * @param {string} key -Registry key or identifier used by dialog panels.
-             * @param {string} title -Modal header title.
-                     * @returns {{ element: HTMLElement, ctrl: object }} Wrapper containing element and controller.
-                             */
+     * @param {string} title -Modal header title.
+     * @returns {{ element: HTMLElement, ctrl: object }} Wrapper containing element and controller.
+     */
     _createModal: function(key, title) {
         const id = "wx-msp-" + key + "-" + Date.now();
         const el = document.createElement("div");
@@ -280,17 +275,12 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
 
         el.innerHTML = `
             <div class="wx-modal-header">
-                <h5 class="modal-title"></h5>
+                <h5 class="modal-title">${webexpress.webui.I18N.translate(title)}</h5>
             </div>
             <div class="wx-modal-content p-0"></div>
             <div class="wx-modal-footer">
-                <button class="btn btn-primary submit-btn" disabled>Insert</button>
+                <button class="btn btn-primary submit-btn" disabled>${webexpress.webui.I18N.translate("webexpress.webui:insert")}</button>
             </div>`;
-
-        const titleElement = el.querySelector(".modal-title");
-        if (titleElement) {
-            titleElement.textContent = title;
-        }
 
         document.body.appendChild(el);
         const ctrl = new webexpress.webui.ModalSidebarPanel(el);
@@ -303,7 +293,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
      * - captures tile selection and stores it on the modal host
      * - wires the insert button to create the add-on or open the property dialog
      * @param {HTMLElement} modalEl -The modal host element.
-             */
+     */
     _wireSelectionModalHandlers: function(modalEl) {
         if (!modalEl || modalEl.dataset.wxHandlersWired === "true") {
             return;
@@ -337,7 +327,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
     /**
      * Enables/disables the selection modal insert button based on stored selection.
      * @param {HTMLElement} modalEl -The modal host element.
-             */
+     */
     _syncSelectionModalInsertState: function(modalEl) {
         if (!modalEl) {
             return;
@@ -355,7 +345,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
     /**
      * Handles the insert action from the selection modal.
      * @param {HTMLElement} modalEl -The modal host element.
-             */
+     */
     _handleSelectionModalInsert: function(modalEl) {
         const addonId = modalEl ? (modalEl.getAttribute("data-selected-addon") || "") : "";
         if (!addonId) {
@@ -382,8 +372,8 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
     /**
      * Opens the property editor for a specific node (edit mode) or new add-on (insert mode).
      * @param {object} editor -Editor instance.
-             * @param {HTMLElement} node -Existing add-on node (optional).
-                     */
+     * @param {HTMLElement} node -Existing add-on node (optional).
+     */
     _openSettingsForNode: function(editor, node) {
         const addonId = node.dataset.addonId;
         const def = webexpress.webui.EditorAddOns.get(addonId);
@@ -397,9 +387,9 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
     /**
      * Generates context menu items for add-on elements.
      * @param {object} editor -Editor instance.
-             * @param {HTMLElement} target -Click target.
-                     * @returns {Array} List of menu items.
-                             */
+     * @param {HTMLElement} target -Click target.
+     * @returns {Array} List of menu items.
+     */
     getContextMenuItems: function(editor, target) {
         let element = target;
         if (element.nodeType === 3) {
@@ -486,8 +476,8 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
     /**
      * Opens the property dialog and fills it with form fields based on definition.
      * @param {object} addonDef -Add-on definition.
-             * @param {Range | null} activeRange -The explicitly saved text range for new insertions.
-                     */
+     * @param {Range | null} activeRange -The explicitly saved text range for new insertions.
+     */
     _openPropertyDialog: function(addonDef, activeRange) {
         if (!this._propModalCtrl) {
             this._createPropertyModal();
@@ -586,8 +576,8 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
     /**
      * Inserts a new add-on into the editor.
      * @param {object} addon -Add-on definition.
-             * @param {object} data -Configuration data.
-                     */
+     * @param {object} data -Configuration data.
+     */
     _insertAddon: function(addon, data) {
         if (!this._currentEditor) {
             return;
@@ -618,9 +608,9 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
     /**
      * Updates an existing add-on node with new data.
      * @param {HTMLElement} frameNode -The wrapper element.
-             * @param {object} def -Add-on definition.
-                     * @param {object} data -New configuration data.
-                             */
+     * @param {object} def -Add-on definition.
+     * @param {object} data -New configuration data.
+     */
     _updateAddonNode: function(frameNode, def, data) {
         let widget = null;
         if (def.type === "inline") {
@@ -655,9 +645,9 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
     /**
      * Generates the HTML wrapper (Frame) for an add-on.
      * @param {object} addonDef -Add-on definition.
-             * @param {string} contentHtml -Inner HTML content.
-                     * @returns {string} HTML string of the wrapped add-on.
-                             */
+     * @param {string} contentHtml -Inner HTML content.
+     * @returns {string} HTML string of the wrapped add-on.
+     */
     _createFrameHtml: function(addonDef, contentHtml) {
         const isContainer = !!addonDef.isContainer;
         const hasProps = addonDef.properties && addonDef.properties.length > 0;
@@ -688,7 +678,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
                      draggable="false"
                      data-addon-id="${addonDef.id}">
                     
-                    <div class="card-header wx-addon-header py-1 px-2 d-flex justify-content-between align-items-center">
+                    <div class="card-header py-1 px-2 d-flex justify-content-between align-items-center">
                         <div class="small text-muted fw-bold d-flex align-items-center">
                             ${dragHandle}
                             <i class="${addonDef.icon} me-2"></i> 
@@ -708,8 +698,8 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
     /**
      * Calculates the caret range from a mouse event (Cross-browser).
      * @param {MouseEvent} e -Mouse event.
-             * @returns {Range | null} The calculated range.
-                     */
+     * @returns {Range | null} The calculated range.
+     */
     _getRangeFromEvent: function(e) {
         if (document.caretRangeFromPoint) {
             return document.caretRangeFromPoint(e.clientX, e.clientY);
@@ -728,7 +718,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
     /**
      * Moves the drop marker to the current drop position.
      * @param {Range} range -The current drop range.
-             */
+     */
     _updateDropMarker: function(range) {
         if (!this._dropMarker) {
             this._dropMarker = document.createElement("span");

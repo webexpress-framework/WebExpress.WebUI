@@ -71,7 +71,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             this._table.classList.add(...ds.striped.split(" "));
         }
         
-        // Explicit check for string "true" to enable selection
+        // explicit check for string "true" to enable selection
         this._selectable = ds.selectable === "true";
 
         this._head.className = "wx-table-header-group";
@@ -108,7 +108,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Register event listeners for header interactions (sorting) and body interactions (selection).
+     * Register event listeners for header interactions (sorting) and body interactions (selection and inputs).
      */
     _initEventListeners() {
         // header click (sorting)
@@ -144,6 +144,33 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
             if (rowEl && rowEl._dataRowRef && this._selectable) {
                 this._selectRowInternal(rowEl._dataRowRef, e);
+            }
+        });
+
+        // body input (sync manual edits back to the internal data model)
+        this._body.addEventListener("input", (e) => {
+            const cellEl = e.target.closest(".wx-grid-cell");
+            const rowEl = e.target.closest(".wx-grid-row");
+            
+            if (cellEl && rowEl && rowEl._dataRowRef) {
+                const cellsInRow = Array.from(rowEl.children).filter(c => c.classList.contains("wx-grid-cell"));
+                const colIndex = cellsInRow.indexOf(cellEl);
+                
+                if (colIndex > -1) {
+                    let visibleCount = 0;
+                    for (let i = 0; i < this._columns.length; i++) {
+                        const colDef = this._columns[i];
+                        if (colDef.visible) {
+                            if (visibleCount === colIndex) {
+                                if (rowEl._dataRowRef.cells[i]) {
+                                    rowEl._dataRowRef.cells[i].content = cellEl.innerHTML;
+                                }
+                                break;
+                            }
+                            visibleCount++;
+                        }
+                    }
+                }
             }
         });
     }
@@ -773,7 +800,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         }
         
         const dir = column.sort === "asc" ? 1 : -1;
-        const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+        const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
 
         const decorated = this._rows.map((row, i) => ({ row, i }));
         decorated.sort((a, b) => {

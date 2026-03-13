@@ -637,7 +637,8 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             "th": ["colspan", "rowspan"],
             "td": ["colspan", "rowspan"],
             "table": ["border", "cellpadding", "cellspacing"],
-            "*": ["class", "id", "title", "role", "tabindex", "style"]
+            "div": ["class", "id", "title", "role", "tabindex", "contenteditable"],
+            "*": ["class", "id", "title", "role", "tabindex"]
         };
 
         /**

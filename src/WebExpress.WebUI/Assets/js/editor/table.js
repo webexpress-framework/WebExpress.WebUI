@@ -1,6 +1,6 @@
 /**
  * Plugin for table operations.
- * Wraps tables in frames for consistent handling and provides table-specific actions
+ * Wraps tables in frames for consistent handling and provides grid-table-specific actions
  * and enhanced navigation (Tab key).
  */
 webexpress.webui.EditorPlugins.register("table", 3000, {
@@ -21,8 +21,8 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
 
     /**
      * Plugin initialization hook.
-     * registers table navigation and monitors selection changes to toggle context toolbar.
-     * @param {object} editor - editor instance
+     * Registers table navigation and monitors selection changes to toggle context toolbar.
+     * @param {object} editor - Editor instance.
      */
     init: function(editor) {
         this._enableTabNav(editor);
@@ -37,7 +37,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                         this._tableToolbar.style.display = "none";
                     }
                 }
-                if (!editor.getEditorElement().querySelector("table")) {
+                if (!editor.getEditorElement().querySelector(".wx-table")) {
                     this._tableToolbar.style.display = "none";
                     this._tableToolbarShownOnce = false;
                 }
@@ -46,26 +46,31 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
     },
 
     /**
-     * Enables Tab / Shift+Tab navigation inside tables.
+     * Enables Tab / Shift+Tab navigation inside grid tables.
      * Tab moves forward and inserts a new row at the end of the table when necessary.
      * Shift+Tab moves backward without inserting rows.
-     * @param {object} editor - editor instance
+     * @param {object} editor - Editor instance.
      */
     _enableTabNav: function(editor) {
         editor.getEditorElement().addEventListener("keydown", (e) => {
             if (e.key === "Tab") {
                 const sel = window.getSelection();
-                if (!sel.rangeCount) return;
+                if (!sel.rangeCount) {
+                    return;
+                }
                 
                 let cell = sel.anchorNode;
-                if (cell.nodeType !== Node.ELEMENT_NODE) cell = cell.parentElement;
-                cell = cell.closest("td,th");
+                if (cell.nodeType !== Node.ELEMENT_NODE) {
+                    cell = cell.parentElement;
+                }
+                cell = cell.closest(".wx-grid-cell, .wx-grid-header-cell");
                 
                 if (cell) {
-                    const row = cell.parentElement;
-                    const table = row.closest("table");
+                    const row = cell.closest(".wx-grid-row");
+                    const table = row.closest(".wx-table");
                     
-                    e.preventDefault(); // prevent default tab behavior (blur or inserting tab char)
+                    // prevent default tab behavior (blur or inserting tab char)
+                    e.preventDefault(); 
 
                     if (e.shiftKey) {
                         // move to previous sibling cell or last cell of previous row
@@ -75,16 +80,19 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                         } else {
                             // start of row, move to last cell of previous row
                             let prevRow = row.previousElementSibling;
-                            // skip thead if currently in tbody
-                            if (!prevRow && row.parentElement.nodeName === 'TBODY') {
-                                const thead = table.tHead;
-                                if (thead && thead.rows.length > 0) {
-                                    prevRow = thead.rows[thead.rows.length - 1];
+                            
+                            // skip to header group if currently in body group and no prev row
+                            if (!prevRow) {
+                                if (row.parentElement.classList.contains("wx-table-body-group")) {
+                                    const thead = table.querySelector(".wx-table-header-group");
+                                    if (thead && thead.children.length > 0) {
+                                        prevRow = thead.children[thead.children.length - 1];
+                                    }
                                 }
                             }
 
                             if (prevRow) {
-                                const lastCell = prevRow.cells[prevRow.cells.length - 1];
+                                const lastCell = prevRow.children[prevRow.children.length - 1];
                                 this._focusCell(lastCell);
                             }
                         }
@@ -97,25 +105,37 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                             // end of row, move to first cell of next row
                             let nextRow = row.nextElementSibling;
                             
-                            // if currently in THEAD, jump to TBODY first row if available
-                            if (!nextRow && row.parentElement.nodeName === 'THEAD') {
-                                if (table.tBodies.length > 0 && table.tBodies[0].rows.length > 0) {
-                                    nextRow = table.tBodies[0].rows[0];
+                            // if currently in header group, jump to body group first row if available
+                            if (!nextRow) {
+                                if (row.parentElement.classList.contains("wx-table-header-group")) {
+                                    const tbody = table.querySelector(".wx-table-body-group");
+                                    if (tbody && tbody.children.length > 0) {
+                                        nextRow = tbody.children[0];
+                                    }
                                 }
                             }
 
                             if (nextRow) {
-                                const firstCell = nextRow.cells[0];
+                                const firstCell = nextRow.children[0];
                                 this._focusCell(firstCell);
                             } else {
-                                // end of table: insert new row at tbody end when appropriate
-                                if (row.parentElement.nodeName === 'TBODY' || !table.tHead) {
-                                    const cols = row.cells.length;
-                                    const newRow = table.insertRow(); // defaults to end of tbody
+                                // end of table: insert new row at body end when appropriate
+                                if (row.parentElement.classList.contains("wx-table-body-group") || !table.querySelector(".wx-table-header-group")) {
+                                    const cols = row.children.length;
+                                    const newRow = document.createElement("div");
+                                    newRow.className = "wx-grid-row";
+                                    newRow.setAttribute("role", "row");
+                                    
                                     for (let i = 0; i < cols; i++) {
-                                        newRow.insertCell(i).innerHTML = "<br>";
+                                        const newCell = document.createElement("div");
+                                        newCell.className = "wx-grid-cell";
+                                        newCell.setAttribute("role", "gridcell");
+                                        newCell.innerHTML = "<br>";
+                                        newRow.appendChild(newCell);
                                     }
-                                    this._focusCell(newRow.cells[0]);
+                                    
+                                    row.parentElement.appendChild(newRow);
+                                    this._focusCell(newRow.children[0]);
                                 }
                             }
                         }
@@ -127,14 +147,17 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
 
     /**
      * Sets caret inside a specific cell at the start.
-     * @param {HTMLElement} cell - target cell element (td or th)
+     * @param {HTMLElement} cell - Target cell element.
      * @private
      */
     _focusCell: function(cell) {
-        if (!cell) return;
+        if (!cell) {
+            return;
+        }
         const range = document.createRange();
         range.selectNodeContents(cell);
-        range.collapse(true); // collapse to start
+        // collapse to start
+        range.collapse(true); 
         const sel = window.getSelection();
         sel.removeAllRanges();
         sel.addRange(range);
@@ -143,12 +166,12 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
     /**
      * Returns context menu items for table cell actions.
      * Includes color submenu with predefined palette and custom picker.
-     * @param {object} editor - editor instance
-     * @param {HTMLElement} target - the element that triggered the context menu
-     * @returns {Array<object>} context menu descriptor array
+     * @param {object} editor - Editor instance.
+     * @param {HTMLElement} target - The element that triggered the context menu.
+     * @returns {Array<object>} Context menu descriptor array.
      */
     getContextMenuItems: function(editor, target) {
-        const cell = target.closest("td, th");
+        const cell = target.closest(".wx-grid-cell, .wx-grid-header-cell");
         if (!cell || !editor.getEditorElement().contains(cell)) {
             return [];
         }
@@ -161,7 +184,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         sel.addRange(range);
 
         const colorItems = this._colors.map(c => ({
-            type: 'color',
+            type: "color",
             value: c,
             action: () => {
                 this._lastCellColor = c;
@@ -194,7 +217,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         customLi.appendChild(customLabel);
 
         colorItems.push({
-            type: 'custom-element',
+            type: "custom-element",
             element: customLi
         });
 
@@ -222,8 +245,8 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
 
     /**
      * Creates toolbar fragment containing table insertion controls.
-     * @param {object} editor - editor instance
-     * @returns {DocumentFragment} toolbar fragment
+     * @param {object} editor - Editor instance.
+     * @returns {DocumentFragment} Toolbar fragment.
      */
     createToolbar: function(editor) {
         const frag = document.createDocumentFragment();
@@ -231,15 +254,13 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         sep.className = "wx-editor-separator";
         frag.appendChild(sep);
         frag.appendChild(this._createInsertButton(editor));
-        this._tableToolbar = this._createContextToolbar(editor);
-        frag.appendChild(this._tableToolbar);
         return frag;
     },
 
     /**
      * Creates the insert table dropdown with an interactive grid to pick dimensions.
-     * @param {object} editor - editor instance
-     * @returns {HTMLElement} insert button group
+     * @param {object} editor - Editor instance.
+     * @returns {HTMLElement} Insert button group.
      */
     _createInsertButton: function(editor) {
         const container = document.createElement("div");
@@ -309,8 +330,12 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                         highlightCells(selectedRows, selectedCols, rows, cols);
                         updateSizeDisplay(selectedRows, selectedCols);
                         if ((selectedRows === maxRows || selectedCols === maxCols) && (maxRows < ABS_MAX || maxCols < ABS_MAX)) {
-                            if (maxRows < ABS_MAX && selectedRows === maxRows) maxRows = Math.min(maxRows + 1, ABS_MAX);
-                            if (maxCols < ABS_MAX && selectedCols === maxCols) maxCols = Math.min(maxCols + 1, ABS_MAX);
+                            if (maxRows < ABS_MAX && selectedRows === maxRows) {
+                                maxRows = Math.min(maxRows + 1, ABS_MAX);
+                            }
+                            if (maxCols < ABS_MAX && selectedCols === maxCols) {
+                                maxCols = Math.min(maxCols + 1, ABS_MAX);
+                            }
                             buildGrid(maxRows, maxCols);
                             highlightCells(selectedRows, selectedCols, maxRows, maxCols);
                             updateSizeDisplay(selectedRows, selectedCols);
@@ -320,7 +345,9 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                     cell.addEventListener("click", (e) => {
                         // insert table with chosen dimensions
                         this._insertTable(editor, selectedRows, selectedCols);
-                        if (menu.classList.contains("show")) menu.classList.remove("show");
+                        if (menu.classList.contains("show")) {
+                            menu.classList.remove("show");
+                        }
                         resetGrid();
                         e.preventDefault();
                         e.stopPropagation();
@@ -345,31 +372,44 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         menu.appendChild(sizeDisplay);
         container.appendChild(button);
         container.appendChild(menu);
-        document.addEventListener("click", (event) => { if (!container.contains(event.target)) resetGrid(); });
-        button.addEventListener("click", () => { setTimeout(() => { resetGrid(); }, 0); });
+        document.addEventListener("click", (event) => { 
+            if (!container.contains(event.target)) {
+                resetGrid(); 
+            }
+        });
+        button.addEventListener("click", () => { 
+            setTimeout(() => { 
+                resetGrid(); 
+            }, 0); 
+        });
         return container;
     },
 
     /**
-     * Inserts an HTML table wrapped in a draggable frame.
+     * Inserts an HTML grid table wrapped in a draggable frame.
      * The table body is editable to allow inline editing and navigation.
-     * @param {object} editor - editor instance
-     * @param {number} rows - number of rows
-     * @param {number} cols - number of columns
+     * @param {object} editor - Editor instance.
+     * @param {number} rows - Number of rows.
+     * @param {number} cols - Number of columns.
      */
     _insertTable: function(editor, rows, cols) {
-        let tableHtml = "<table class='wx-editor-table' border='1' style='width:100%;'><thead><tr>";
-        for (let c = 0; c < cols; c++) tableHtml += "<th><br></th>";
-        tableHtml += "</tr></thead><tbody>";
-        for (let r = 1; r < rows; r++) {
-            tableHtml += "<tr>";
-            for (let c = 0; c < cols; c++) tableHtml += "<td><br></td>";
-            tableHtml += "</tr>";
+        let tableHtml = '<div class="wx-webui-table" data-striped="table-striped-columns table-striped" data-border="table-bordered" data-selectable="true">';
+        tableHtml += '<div class="wx-table-columns">';
+        for (let c = 0; c < cols; c++) {
+            tableHtml += `<div data-label="Header ${c + 1}" data-min-width="10px" data-resizable="true"></div>`;
         }
-        tableHtml += "</tbody></table>";
+        tableHtml += '</div>';
+        for (let r = 0; r < rows; r++) {
+            tableHtml += '<div class="wx-table-row">';
+            for (let c = 0; c < cols; c++) {
+                tableHtml += '<div>text<br></div>';
+            }
+            tableHtml += '</div>';
+        }
+        tableHtml += '</div>';
 
         const uniqueId = "table-" + Date.now();
-        const dragHandle = `<span class="wx-addon-drag-handle"><i class="fas fa-grip-vertical"></i></span>`;
+        const dragHandle = '<span class="wx-addon-drag-handle"><i class="fas fa-grip-vertical"></i></span>';
 
         const frameHtml = `
             <div class="wx-addon-frame card my-3 shadow-sm" 
@@ -378,7 +418,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                  data-addon-id="${uniqueId}"
                  data-type="table">
                 
-                <div class="card-header wx-addon-header py-1 px-2 d-flex justify-content-between align-items-center">
+                <div class="card-header py-1 px-2 d-flex justify-content-between align-items-center">
                     <div class="small text-muted fw-bold d-flex align-items-center">
                         ${dragHandle}
                         <i class="fas fa-table me-2"></i> 
@@ -396,51 +436,10 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
     },
 
     /**
-     * Creates context toolbar with table actions.
-     * @param {object} editor - editor instance
-     * @returns {HTMLElement} toolbar element
-     */
-    _createContextToolbar: function(editor) {
-        const tb = document.createElement("div");
-        tb.className = "wx-editor-table-toolbar";
-        tb.style.display = "none";
-        
-        const actions = [
-            { cmd: "insertRowAbove", icon: "wx-icon add-row-above" },
-            { cmd: "insertRowBelow", icon: "wx-icon add-row-below" },
-            { cmd: "deleteRow", icon: "wx-icon delete-row" },
-            { cmd: "insertColumnLeft", icon: "wx-icon add-col-above" },
-            { cmd: "insertColumnRight", icon: "wx-icon add-col-below" },
-            { cmd: "deleteColumn", icon: "wx-icon delete-col" },
-            { cmd: "mergeCells", icon: "wx-icon merge-cells" },
-            { cmd: "splitCell", icon: "wx-icon split-cell" },
-            { cmd: "cellBackground", icon: "wx-icon cell-background" },
-            { cmd: "deleteTable", icon: "wx-icon delete-table" }
-        ];
-        
-        actions.forEach((a) => {
-            if (a.cmd === "cellBackground") {
-                 tb.appendChild(this._createCellBackgroundButton(editor, a.icon));
-            } else {
-                const b = document.createElement("button");
-                b.className = "wx-editor-btn";
-                b.type = "button";
-                b.innerHTML = `<i class="${a.icon}"></i>`;
-                b.addEventListener("click", () => {
-                    this._modifyTable(editor, a.cmd);
-                    editor.restoreSavedRange();
-                });
-                tb.appendChild(b);
-            }
-        });
-        return tb;
-    },
-    
-    /**
      * Creates the cell background control with preset colors and a custom picker.
-     * @param {object} editor - editor instance
-     * @param {string} iconClass - icon class for the action button
-     * @returns {HTMLElement} button group element
+     * @param {object} editor - Editor instance.
+     * @param {string} iconClass - Icon class for the action button.
+     * @returns {HTMLElement} Button group element.
      */
     _createCellBackgroundButton: function(editor, iconClass) {
         const group = document.createElement("div");
@@ -521,94 +520,185 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
 
     /**
      * Detects whether the current selection is inside a table.
-     * @param {object} editor - editor instance
-     * @returns {boolean} true if selection is inside a table
+     * @param {object} editor - Editor instance.
+     * @returns {boolean} True if selection is inside a table.
      */
     _detectTableSelection: function(editor) {
         const sel = window.getSelection();
-        if (!sel.rangeCount) return false;
+        if (!sel.rangeCount) {
+            return false;
+        }
         let node = sel.getRangeAt(0).startContainer;
-        if (node.nodeType === Node.TEXT_NODE) node = node.parentElement;
-        return editor.getEditorElement().contains(node) && node.closest("table");
+        if (node.nodeType === Node.TEXT_NODE) {
+            node = node.parentElement;
+        }
+        return editor.getEditorElement().contains(node) && node.closest(".wx-table") !== null;
     },
     
     /**
      * Sets the background color of the current cell selection.
-     * uses editor.restoreSavedRange to ensure the selection is available.
-     * @param {object} editor - editor instance
-     * @param {string} color - css color string
+     * Uses editor.restoreSavedRange to ensure the selection is available.
+     * @param {object} editor - Editor instance.
+     * @param {string} color - CSS color string.
      */
     _setCellBackground: function(editor, color) {
         editor.restoreSavedRange();
         const sel = window.getSelection();
-        if (!sel.rangeCount) return;
+        if (!sel.rangeCount) {
+            return;
+        }
         let cell = sel.getRangeAt(0).startContainer;
-        if (cell.nodeType !== Node.ELEMENT_NODE) cell = cell.parentElement;
-        cell = cell.closest("td,th");
-        if (cell) cell.style.backgroundColor = color;
+        if (cell.nodeType !== Node.ELEMENT_NODE) {
+            cell = cell.parentElement;
+        }
+        cell = cell.closest(".wx-grid-cell, .wx-grid-header-cell");
+        if (cell) {
+            cell.style.backgroundColor = color;
+        }
     },
 
     /**
      * Performs table modification actions such as insert/delete rows/columns, merge/split cells.
      * Actions operate on the cell containing the current selection.
-     * @param {object} editor - editor instance
-     * @param {string} action - action identifier
+     * @param {object} editor - Editor instance.
+     * @param {string} action - Action identifier.
      */
     _modifyTable: function(editor, action) {
         const sel = window.getSelection();
-        if (!sel.rangeCount) return;
+        if (!sel.rangeCount) {
+            return;
+        }
         let cell = sel.getRangeAt(0).startContainer;
-        if (cell.nodeType !== Node.ELEMENT_NODE) cell = cell.parentElement;
-        cell = cell.closest("td,th");
-        if (!cell) return;
+        if (cell.nodeType !== Node.ELEMENT_NODE) {
+            cell = cell.parentElement;
+        }
+        cell = cell.closest(".wx-grid-cell, .wx-grid-header-cell");
+        if (!cell) {
+            return;
+        }
         
-        const row = cell.parentElement;
-        const table = cell.closest("table");
-        const frame = table.closest('.wx-addon-frame');
+        const row = cell.closest(".wx-grid-row");
+        const table = cell.closest(".wx-table");
+        const frame = table.closest(".wx-addon-frame");
+
+        // helper to get the visual index of the cell
+        const getCellIndex = (c) => Array.prototype.indexOf.call(c.parentElement.children, c);
+        const cellIndex = getCellIndex(cell);
 
         if (action === "deleteRow") {
             row.remove();
-            if (table.rows.length === 0) {
-                if (frame) frame.remove(); else table.remove();
+            const bodyGroup = table.querySelector(".wx-table-body-group");
+            if (!bodyGroup || bodyGroup.children.length === 0) {
+                if (frame) {
+                    frame.remove();
+                } else {
+                    table.remove();
+                }
             }
         } else if (action === "deleteColumn") {
-            const idx = cell.cellIndex;
-            for (let r = 0; r < table.rows.length; r++) {
-                if (table.rows[r].cells[idx]) table.rows[r].deleteCell(idx);
+            const rows = table.querySelectorAll(".wx-grid-row");
+            for (let i = 0; i < rows.length; i++) {
+                const targetCell = rows[i].children[cellIndex];
+                if (targetCell) {
+                    targetCell.remove();
+                }
             }
-            if (table.rows[0] && table.rows[0].cells.length === 0) {
-                if (frame) frame.remove(); else table.remove();
+            
+            // update grid template columns
+            const firstRow = table.querySelector(".wx-grid-row");
+            if (firstRow) {
+                const cols = firstRow.children.length;
+                if (cols === 0) {
+                    if (frame) {
+                        frame.remove();
+                    } else {
+                        table.remove();
+                    }
+                } else {
+                    table.style.setProperty("--wx-grid-template", `repeat(${cols}, 1fr)`);
+                }
             }
-        } else if (action === "insertRowAbove") {
-            const newRow = table.insertRow(row.rowIndex);
-            for (let i = 0; i < row.cells.length; i++) newRow.insertCell(i).innerHTML = "<br>";
-        } else if (action === "insertRowBelow") {
-            const newRow = table.insertRow(row.rowIndex + 1);
-            for (let i = 0; i < row.cells.length; i++) newRow.insertCell(i).innerHTML = "<br>";
-        } else if (action === "insertColumnLeft") {
-            const idx = cell.cellIndex;
-            for (let r = 0; r < table.rows.length; r++) table.rows[r].insertCell(idx).innerHTML = "<br>";
-        } else if (action === "insertColumnRight") {
-            const idx = cell.cellIndex + 1;
-            for (let r = 0; r < table.rows.length; r++) table.rows[r].insertCell(idx).innerHTML = "<br>";
+        } else if (action === "insertRowAbove" || action === "insertRowBelow") {
+            const cols = row.children.length;
+            const newRow = document.createElement("div");
+            newRow.className = "wx-grid-row";
+            newRow.setAttribute("role", "row");
+            
+            for (let i = 0; i < cols; i++) {
+                const newCell = document.createElement("div");
+                newCell.className = row.classList.contains("wx-table-header") ? "wx-grid-header-cell wx-col-header" : "wx-grid-cell";
+                newCell.setAttribute("role", row.classList.contains("wx-table-header") ? "columnheader" : "gridcell");
+                if (row.classList.contains("wx-table-header")) {
+                    newCell.innerHTML = "<div class='wx-col-inner'>New Header</div>";
+                } else {
+                    newCell.innerHTML = "<br>";
+                }
+                newRow.appendChild(newCell);
+            }
+            
+            if (action === "insertRowAbove") {
+                row.parentElement.insertBefore(newRow, row);
+            } else {
+                row.parentElement.insertBefore(newRow, row.nextElementSibling);
+            }
+        } else if (action === "insertColumnLeft" || action === "insertColumnRight") {
+            const rows = table.querySelectorAll(".wx-grid-row");
+            for (let i = 0; i < rows.length; i++) {
+                const currentRow = rows[i];
+                const isHeader = currentRow.classList.contains("wx-table-header");
+                const newCell = document.createElement("div");
+                
+                newCell.className = isHeader ? "wx-grid-header-cell wx-col-header" : "wx-grid-cell";
+                newCell.setAttribute("role", isHeader ? "columnheader" : "gridcell");
+                
+                if (isHeader) {
+                    newCell.innerHTML = "<div class='wx-col-inner'>New</div>";
+                } else {
+                    newCell.innerHTML = "<br>";
+                }
+                
+                const targetSibling = currentRow.children[cellIndex];
+                if (action === "insertColumnLeft") {
+                    currentRow.insertBefore(newCell, targetSibling);
+                } else {
+                    currentRow.insertBefore(newCell, targetSibling ? targetSibling.nextElementSibling : null);
+                }
+            }
+            
+            // update grid template columns
+            const firstRow = table.querySelector(".wx-grid-row");
+            if (firstRow) {
+                const cols = firstRow.children.length;
+                table.style.setProperty("--wx-grid-template", `repeat(${cols}, 1fr)`);
+            }
         } else if (action === "deleteTable") {
-            if (frame) frame.remove(); else table.remove();
+            if (frame) {
+                frame.remove();
+            } else {
+                table.remove();
+            }
         } else if (action === "mergeCells") {
             const next = cell.nextElementSibling;
             if (next) {
                 const content = next.innerHTML;
-                const colspan = (parseInt(cell.getAttribute("colspan") || 1)) + (parseInt(next.getAttribute("colspan") || 1));
+                const currentSpan = parseInt(cell.style.gridColumnEnd?.replace("span ", "") || 1);
+                const nextSpan = parseInt(next.style.gridColumnEnd?.replace("span ", "") || 1);
+                const colspan = currentSpan + nextSpan;
+                
                 cell.innerHTML += " " + content;
-                cell.setAttribute("colspan", colspan);
+                cell.style.gridColumnEnd = `span ${colspan}`;
                 next.remove();
             }
         } else if (action === "splitCell") {
-            const colspan = parseInt(cell.getAttribute("colspan") || 1);
+            const colspan = parseInt(cell.style.gridColumnEnd?.replace("span ", "") || 1);
             if (colspan > 1) {
-                cell.setAttribute("colspan", 1);
+                cell.style.gridColumnEnd = "span 1";
                 for (let i = 1; i < colspan; i++) {
-                    const c = row.insertCell(cell.cellIndex + 1);
-                    c.innerHTML = "<br>";
+                    const newCell = document.createElement("div");
+                    newCell.className = cell.className;
+                    newCell.setAttribute("role", cell.getAttribute("role"));
+                    newCell.innerHTML = "<br>";
+                    row.insertBefore(newCell, cell.nextElementSibling);
                 }
             }
         }

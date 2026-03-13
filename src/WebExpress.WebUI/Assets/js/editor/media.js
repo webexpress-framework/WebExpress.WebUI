@@ -9,7 +9,6 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
     /**
      * Initialization hook called by the editor when the plugin is registered.
      * No special initialization is required for this plugin.
-     *
      * @param {object} editor - The editor instance.
      * @returns {void}
      */
@@ -20,7 +19,6 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
     /**
      * Creates toolbar controls for the plugin.
      * Returns a document fragment that will be inserted into the editor toolbar.
-     *
      * @param {object} editor - The editor instance.
      * @returns {DocumentFragment} Fragment containing toolbar buttons.
      */
@@ -54,7 +52,7 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
                 prefillText = activeRange.toString().trim();
             }
             
-            this._openModal(editor, "linkModal", "editor-link", "Insert Link", { url: "", text: prefillText }, activeRange);
+            this._openModal(editor, "linkModal", "editor-link", "webexpress.webui:editor.insert.link.title", { url: "", text: prefillText }, activeRange);
         });
         frag.appendChild(btnLink);
 
@@ -77,7 +75,7 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
                 activeRange = editor._savedRange.cloneRange();
             }
             // pass null as prefill to enforce clearing of old data
-            this._openModal(editor, "imageModal", "editor-image", "Insert Image", null, activeRange);
+            this._openModal(editor, "imageModal", "editor-image", "webexpress.webui:editor.insert.image.title", null, activeRange);
         });
         frag.appendChild(btnImg);
 
@@ -86,7 +84,6 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
 
     /**
      * Provides context menu items for the plugin.
-     * 
      * @param {object} editor - The editor instance.
      * @param {HTMLElement} target - The target element that was right-clicked.
      * @returns {Array} List of context menu items.
@@ -207,7 +204,6 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
     /**
      * Opens a modal and provides the editor context to the modal controller.
      * Creates the modal on first use to prevent redundant logic.
-     *
      * @param {object} editor - The editor instance.
      * @param {string} modalProperty - The property name where the modal wrapper is stored.
      * @param {string} key - Registry key or identifier for the modal.
@@ -219,12 +215,6 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
     _openModal: function(editor, modalProperty, key, title, prefill, activeRange) {
         if (!this[modalProperty]) {
             this[modalProperty] = this._createModal(key, title);
-        } else {
-            // dynamically update the title for existing modals
-            const titleElement = this[modalProperty].element.querySelector(".modal-title");
-            if (titleElement) {
-                titleElement.textContent = title;
-            }
         }
 
         if (this[modalProperty] && this[modalProperty].ctrl) {
@@ -249,7 +239,6 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
 
     /**
      * Creates a minimal ModalSidebarPanel instance and returns a wrapper object.
-     * 
      * @param {string} key - Registry key or identifier used by dialog panels.
      * @param {string} title - Modal header title.
      * @returns {{ element: HTMLElement, ctrl: object }} Wrapper containing element and controller.
@@ -265,17 +254,12 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
         // build minimal modal shell securely with static html
         el.innerHTML = `
             <div class="wx-modal-header">
-                <h5 class="modal-title"></h5>
+                <h5 class="modal-title">${webexpress.webui.I18N.translate(title)}</h5>
             </div>
             <div class="wx-modal-content"></div>
             <div class="wx-modal-footer">
-                <button class="btn btn-primary submit-btn" disabled>Insert</button>
+                <button class="btn btn-primary submit-btn" disabled>${webexpress.webui.I18N.translate("webexpress.webui:insert")}</button>
             </div>`;
-
-        const titleElement = el.querySelector(".modal-title");
-        if (titleElement) {
-            titleElement.textContent = title;
-        }
 
         document.body.appendChild(el);
         const ctrl = new webexpress.webui.ModalSidebarPanel(el);

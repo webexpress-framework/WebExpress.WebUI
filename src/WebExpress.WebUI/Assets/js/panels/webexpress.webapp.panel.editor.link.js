@@ -177,9 +177,8 @@ webexpress.webui.DialogPanels.register("editor-link", {
             editor._savedRange = modal._backupRange.cloneRange();
         }
         
-        // the controller's insertHtmlAtCursor uses the _savedRange automatically
-        editor.insertHtmlAtCursor('<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(rawText) + "</a>");
-        
+        editor.insertHtmlAtCursor(' <a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(rawText) + "</a> ");
+               
         // close modal
         if (typeof modal.hide === "function") {
             modal.hide();

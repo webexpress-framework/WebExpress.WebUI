@@ -3,15 +3,11 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    /* Wichtig: Verhindert, dass die Tabelle kleiner als ihr Inhalt wird */
     min-width: fit-content; 
     margin-bottom: 0;
     isolation: isolate;
     
-    /* Standard Template - wird vom JS überschrieben */
     --wx-grid-template: none; 
-
-    /* Default Bootstrap table variables fallback */
     --bs-table-bg: transparent;
     --bs-table-accent-bg: transparent;
     --bs-table-striped-color: var(--bs-body-color);
@@ -30,36 +26,28 @@
     width: 100%;
     align-items: center;
     position: relative;
-    /* Verhindert Umbrüche bei zu viel Inhalt */
     min-width: fit-content; 
     transition: background-color 0.15s ease-in-out;
 }
 
 /* header group */
 .wx-table-header-group {
-    /* Header bleibt oben stehen, da er ausserhalb des scrollbaren Body ist */
     display: block;
     width: 100%;
     min-width: fit-content;
     z-index: 1020;
     background-color: var(--bs-table-head-bg, var(--bs-body-bg, #fff));
     box-shadow: 0 1px 0 var(--bs-table-border-color, var(--bs-border-color));
-    flex-shrink: 0; /* Darf nicht schrumpfen */
+    flex-shrink: 0;
 }
 
-/* --- BODY GROUP: SCROLL CONTAINER --- */
 .wx-table-body-group {
     display: flex;
     flex-direction: column;
-    
-    /* Hier passiert das Scrolling */
     overflow-y: auto;
-    overflow-x: auto; /* Falls Spalten breiter sind als der Schirm */
-    
-    /* Standardhöhe für Infinite Scroll - kann inline überschrieben werden */
+    overflow-x: auto;
     max-height: 70vh; 
     min-height: 150px;
-    
     position: relative;
     width: 100%;
     will-change: scroll-position;
@@ -80,7 +68,7 @@
     padding: 0.25rem 0.5rem;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap; /* Kein Textumbruch */
+    white-space: nowrap; 
     border-bottom: 1px solid var(--bs-table-border-color, var(--bs-border-color));
     display: flex;
     align-items: center;
@@ -363,22 +351,28 @@ a.wx-cell-content:hover { text-decoration: underline; color: var(--bs-link-hover
 .wx-change-flash > .wx-grid-cell { animation: wx-change-flash 1s ease-out; }
 
 /* --- Striping and Hover States --- */
-.wx-table.table-striped .wx-table-body-group .wx-table-row:nth-child(odd) {
+.wx-table.table-striped .wx-table-body-group .wx-table-row:nth-child(odd),
+.wx-table.table-striped .wx-table-body-group .wx-grid-row:nth-child(odd) {
     background-color: var(--bs-table-striped-bg);
     color: var(--bs-table-striped-color);
 }
-.wx-table-row:hover {
+.wx-table-row:hover,
+.wx-grid-row:hover {
     background-color: var(--bs-table-hover-bg);
     color: var(--bs-table-hover-color);
     z-index: 1;
 }
 .wx-table-row.active,
 .wx-table-row.wx-row-active,
-.wx-table-row:active {
+.wx-table-row:active,
+.wx-grid-row.active,
+.wx-grid-row.wx-row-active,
+.wx-grid-row:active {
     background-color: var(--bs-table-active-bg);
     color: var(--bs-table-active-color);
 }
-.wx-table-row:where(.active, [data-wx-primary-action]) {
+.wx-table-row:where(.active, [data-wx-primary-action]),
+.wx-grid-row:where(.active, [data-wx-primary-action]) {
     cursor: pointer;
 }
 
@@ -392,17 +386,31 @@ a.wx-cell-content:hover { text-decoration: underline; color: var(--bs-link-hover
 .wx-table.table-bordered .wx-grid-header-cell {
     border-right: 1px solid var(--bs-table-border-color);
 }
+
+/* Letztes Element in Zeilen und Headern (Entfernen des rechten Randes) */
+.wx-table.table-bordered .wx-table-row .wx-table-cell:last-child,
 .wx-table.table-bordered .wx-table-row .wx-grid-cell:last-child,
-.wx-table.table-bordered .wx-table-header-group .wx-col-header:last-child {
+.wx-table.table-bordered .wx-grid-row .wx-table-cell:last-child,
+.wx-table.table-bordered .wx-grid-row .wx-grid-cell:last-child,
+.wx-table.table-bordered .wx-table-header-group .wx-col-header:last-child,
+.wx-table.table-bordered .wx-table-header-group .wx-grid-header-cell:last-child {
     border-right: none;
 }
+
+/* RTL Support */
 .wx-table[dir="rtl"].table-bordered .wx-table-cell,
-.wx-table[dir="rtl"].table-bordered .wx-col-header {
+.wx-table[dir="rtl"].table-bordered .wx-grid-cell,
+.wx-table[dir="rtl"].table-bordered .wx-col-header,
+.wx-table[dir="rtl"].table-bordered .wx-grid-header-cell {
     border-right: none;
-    border-left: 1px solid var(--bs-table-border-color);
+    border-left: 1px solid var(--bs-table-border-color, #dee2e6);
 }
+.wx-table[dir="rtl"].table-bordered .wx-table-row .wx-table-cell:last-child,
 .wx-table[dir="rtl"].table-bordered .wx-table-row .wx-grid-cell:last-child,
-.wx-table[dir="rtl"].table-bordered .wx-table-header-group .wx-col-header:last-child {
+.wx-table[dir="rtl"].table-bordered .wx-grid-row .wx-table-cell:last-child,
+.wx-table[dir="rtl"].table-bordered .wx-grid-row .wx-grid-cell:last-child,
+.wx-table[dir="rtl"].table-bordered .wx-table-header-group .wx-col-header:last-child,
+.wx-table[dir="rtl"].table-bordered .wx-table-header-group .wx-grid-header-cell:last-child {
     border-left: none;
 }
 

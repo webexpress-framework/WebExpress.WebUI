@@ -5,6 +5,7 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "edit": "Bearbeiten",
     "copy": "Kopieren",
     "remove": "Entfernen",
+    "insert": "Einfügen",
     "save": "Speichern",
     "cancel": "Abbrechen",
     "close": "Schließen",
@@ -65,5 +66,10 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "page.table.columns.drag": "Spalte ziehen",
     "page.table.columns.default": "Spalte",
 
-    "color.custom": "Benutzerdefinierte Farbe"
+    "color.custom": "Benutzerdefinierte Farbe",
+    
+    "editor.insert.link.title": "Link einfügen",
+    "editor.insert.image.title": "Bild einfügen",
+    "editor.insert.addon.title": "AddOn-Bibliothek",
+    "editor.insert.addon.tooltip": "AddOn einfügen"
 });

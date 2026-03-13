@@ -12,7 +12,6 @@ webexpress.webui.DialogPanels.register("editor-addon", {
      * 
      * @param {HTMLElement} container - Host container for the page.
      * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
-     * @returns {void}
      */
     render: function (container, modal) {
         if (!modal._addonState) {
@@ -117,7 +116,7 @@ webexpress.webui.DialogPanels.register("editor-addon", {
         document.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, (e) => {
             if (e.detail.sender === tileHost || tileHost.contains(e.detail.sender)) {
                 state.selectedId = e.detail.value;
-                const modalWrapper = container.closest("[data-key]") || document;
+                const modalWrapper = container.closest(".modal-content") || document;
                 const submitBtn = modalWrapper.querySelector(".submit-btn");
                 if (submitBtn) {
                     submitBtn.disabled = !state.selectedId;
@@ -129,7 +128,7 @@ webexpress.webui.DialogPanels.register("editor-addon", {
         tileHost.addEventListener("dblclick", (e) => {
             const card = e.target.closest(".wx-tile-card");
             if (card && state.selectedId) {
-                const submitBtn = container.closest("[data-key]").querySelector(".submit-btn");
+                const submitBtn = container.closest(".modal-content")?.querySelector(".submit-btn");
                 if (submitBtn && !submitBtn.disabled) {
                     submitBtn.click();
                 }
@@ -140,9 +139,7 @@ webexpress.webui.DialogPanels.register("editor-addon", {
     /**
      * Called when the page becomes active.
      * Resets inputs and selection states.
-     * 
      * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
-     * @returns {void}
      */
     onShow: function (modal) {
         if (!modal._addonState) {
@@ -170,11 +167,16 @@ webexpress.webui.DialogPanels.register("editor-addon", {
 
         // bind click event to the dynamically managed submit button
         if (state.tileHost) {
-            const modalWrapper = state.tileHost.closest("[data-key]") || document;
+            const modalWrapper = state.tileHost.closest(".modal-content") || document;
             const submitBtn = modalWrapper.querySelector(".submit-btn");
             
             if (submitBtn) {
                 submitBtn.disabled = true; // reset button
+                
+                if (state.tileCtrl?.value) {
+                    state.selectedId = state.tileCtrl.value;
+                    submitBtn.disabled = false;
+                }
                 
                 // ensure we only bind once
                 if (!state.submitBound) {
@@ -198,7 +200,6 @@ webexpress.webui.DialogPanels.register("editor-addon", {
 
     /**
      * Validates current page data.
-     * 
      * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
      * @returns {true|{valid:false,message:string}}
      */
@@ -218,9 +219,7 @@ webexpress.webui.DialogPanels.register("editor-addon", {
 
     /**
      * Handles submit and delegates the final insertion or property opening to the plugin.
-     * 
      * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
-     * @returns {void}
      */
     onSubmit: function (modal) {
         const state = modal._addonState;
