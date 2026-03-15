@@ -97,15 +97,15 @@ namespace WebExpress.WebUI.WebControl
                 );
             }
 
-            if (Uri is null)
+            if (uri is null)
             {
                 return html;
             }
 
-            var takeLast = Math.Min(TakeLast, Uri.PathSegments.Count());
+            var takeLast = Math.Min(TakeLast, uri.PathSegments.Count());
             var from = uri.PathSegments.Count() - takeLast;
 
-            for (int i = from + 1; i < Uri.PathSegments.Count() + 1; i++)
+            for (int i = from + 1; i < uri.PathSegments.Count() + 1; i++)
             {
                 var path = uri.Take(i);
                 var last = path?.PathSegments?.LastOrDefault();
