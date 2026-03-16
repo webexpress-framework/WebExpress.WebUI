@@ -1419,4 +1419,6 @@ webexpress.webui.Event = class {
     static SELECT_ITEM_EVENT = "webexpress.webui.select.item";
     // Event triggered to notify external pagination controls about current page/total.
     static UPDATE_PAGINATION_EVENT = "webexpress.webui.update.pagination";
+     // Event triggered when a tab is selected.
+    static TAB_SELECTED_EVENT = "webexpress.webui.tab.selected";
 }

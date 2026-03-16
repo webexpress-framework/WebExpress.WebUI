@@ -7,6 +7,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     _formFieldName = null;
     _formInput = null;
     _editorElement = null;
+    _uiContainer = null;
     _savedRange = null;
     _contextMenu = null;
     _documentClickHandler = null;
@@ -17,44 +18,149 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Creates a new instance of the class.
-     * @param {HTMLElement} element - The host element for the editor.
+     * @param {HTMLElement} element - The host element for the editor (always a div).
      */
     constructor(element) {
         super(element);
-        const content = element.innerHTML;
-        this._formFieldName = element.getAttribute("name") || null;
+        
+        // read content preferably from value attribute (form-item behavior), fallback to innerhtml
+        let content = element.getAttribute("value") || element.innerHTML || "";
+        this._formFieldName = element.getAttribute("name") || element.dataset.name || null;
 
+        this._uiContainer = element;
+        
+        // clean up container
         element.removeAttribute("name");
+        element.removeAttribute("value");
         element.innerHTML = "";
         element.classList.add("wx-editor");
+
+        // create hidden input field directly inside the container
+        if (this._formFieldName) {
+            this._formInput = document.createElement("input");
+            this._formInput.type = "hidden";
+            this._formInput.name = this._formFieldName;
+            this._uiContainer.appendChild(this._formInput);
+        }
 
         this.imageUploadUri = element.dataset.imageUploadUri || "";
         this.imageBaseUri = element.dataset.imageBaseUri || "";
 
-        // ensure element has an id so the fullscreen button can reference it
-        if (!element.id) {
-            element.id = "wx-editor-" + Math.floor(Math.random() * 100000);
+        // ensure the container has an id
+        if (!this._uiContainer.id) {
+            this._uiContainer.id = "wx-editor-" + Math.floor(Math.random() * 100000);
         }
 
-        this._createToolbar(element);
-        this._createEditorArea(element, content);
-        this._createStatusBar(element);
+        this._createToolbar(this._uiContainer);
+        this._createEditorArea(this._uiContainer, content);
+        this._createStatusBar(this._uiContainer);
         this._initContextMenu();
 
-        if (this._formFieldName) {
-            this._ensureFormInput();
+        if (this._formInput) {
+            this._syncValue();
+            this._setupFormIntegration();
         }
 
         this._attachEventHandlers();
         this._initializePlugins();
         this._updateUndoRedoStates();
+        
+        // notify plugins first so tables are wrapped in frames
+        this._notifyPluginsContentChanged();
+        
+        // ensure typing space is available after initialization and upgrades
+        this._ensureTypingSpace();
+    }
+
+    /**
+     * Notifies all plugins that the content has been loaded or programmatically changed.
+     */
+    _notifyPluginsContentChanged() {
+        const plugins = webexpress.webui.EditorPlugins.getAll();
+        plugins.forEach((plugin) => {
+            if (typeof plugin.onContentChange === "function") {
+                plugin.onContentChange(this);
+            }
+        });
+    }
+
+    /**
+     * Ensures there is always an empty paragraph before, after, and between non-editable elements.
+     * This totally prevents the cursor trap issue.
+     */
+    _ensureTypingSpace() {
+        if (!this._editorElement) {
+            return;
+        }
+
+        let modified = false;
+        const editor = this._editorElement;
+
+        // find all non-editable blocks (like table frames)
+        const nonEditables = Array.from(editor.querySelectorAll('[contenteditable="false"]'));
+        
+        nonEditables.forEach(el => {
+            // skip elements that are nested inside OTHER non-editable elements
+            if (el.parentElement && el.parentElement.closest('[contenteditable="false"]')) {
+                return;
+            }
+
+            // un-nest from <p> if it accidentally got put inside one during insertion
+            const parentP = el.closest("p");
+            if (parentP && parentP.parentElement === editor) {
+                // move element out of the paragraph and place it after
+                editor.insertBefore(el, parentP.nextSibling);
+                modified = true;
+                
+                // cleanup the empty parent paragraph
+                if (parentP.textContent.trim() === "" && parentP.querySelectorAll("img, table, [contenteditable='false']").length === 0) {
+                    parentP.remove();
+                }
+            }
+
+            // strictly ensure el is a direct child of the editor before attempting to insert siblings
+            if (el.parentElement === editor) {
+                // ensure paragraph exists before the non-editable element
+                const prev = el.previousElementSibling;
+                if (!prev || (prev.tagName !== "P" && prev.getAttribute("contenteditable") === "false")) {
+                    const pBefore = document.createElement("p");
+                    pBefore.innerHTML = "<br>";
+                    editor.insertBefore(pBefore, el);
+                    modified = true;
+                }
+
+                // ensure paragraph exists after the non-editable element
+                const next = el.nextElementSibling;
+                if (!next || (next.tagName !== "P" && next.getAttribute("contenteditable") === "false")) {
+                    const pAfter = document.createElement("p");
+                    pAfter.innerHTML = "<br>";
+                    if (el.nextSibling) {
+                        editor.insertBefore(pAfter, el.nextSibling);
+                    } else {
+                        editor.appendChild(pAfter);
+                    }
+                    modified = true;
+                }
+            }
+        });
+
+        // ensure editor is never completely empty
+        const html = editor.innerHTML.trim();
+        if (!html || html === "<br>") {
+            editor.innerHTML = "<p><br></p>";
+            modified = true;
+        }
+
+        if (modified) {
+            this._syncValue();
+        }
     }
 
     /**
      * Attaches all necessary event handlers to the editor and toolbar.
      */
     _attachEventHandlers() {
-        const toolbar = this._element.querySelector(".wx-editor-toolbar");
+        const toolbar = this._uiContainer.querySelector(".wx-editor-toolbar");
         if (toolbar) {
             // use capture to catch the event before it bubbles up
             toolbar.addEventListener("mousedown", (e) => {
@@ -63,6 +169,10 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                 this._saveCurrentSelection();
             }, true);
         }
+
+        this._editorElement.addEventListener("change", () => {
+            this._editorElement.innerHTML = this._formInput.value;
+        });
 
         this._editorElement.addEventListener("blur", () => {
             this._saveCurrentSelection();
@@ -73,14 +183,78 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             this._updateUndoRedoStates();
         });
 
-        this._editorElement.addEventListener("keydown", () => {
+        this._editorElement.addEventListener("keydown", (e) => {
+            let actionModified = false;
+
+            // prevent accidental deletion of empty paragraphs directly around non-editable elements
+            if (e.key === "Backspace" || e.key === "Delete") {
+                const sel = window.getSelection();
+                if (sel && sel.rangeCount > 0 && sel.isCollapsed) {
+                    let node = sel.getRangeAt(0).startContainer;
+                    
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        node = node.parentElement;
+                    }
+
+                    // only intercept if we are inside a direct block like <p>
+                    const block = node.closest("p, div:not(.wx-editor-content)");
+                    if (block && block.parentElement === this._editorElement) {
+                        
+                        if (e.key === "Backspace") {
+                            const prev = block.previousElementSibling;
+                            if (prev && prev.getAttribute("contenteditable") === "false") {
+                                // check if cursor is at the very start with no content before it
+                                const range = sel.getRangeAt(0);
+                                const preCaretRange = range.cloneRange();
+                                preCaretRange.selectNodeContents(block);
+                                preCaretRange.setEnd(range.startContainer, range.startOffset);
+                                
+                                const frag = preCaretRange.cloneContents();
+                                const hasContent = frag.textContent.trim().length > 0 || 
+                                    Array.from(frag.querySelectorAll("*")).filter(el => el.tagName !== "BR").length > 0;
+                                
+                                if (!hasContent) {
+                                    e.preventDefault(); // don't delete the empty space paragraph
+                                    prev.remove(); // delete the non-editable block (table) instead
+                                    actionModified = true;
+                                }
+                            }
+                        } else if (e.key === "Delete") {
+                            const next = block.nextElementSibling;
+                            if (next && next.getAttribute("contenteditable") === "false") {
+                                // check if cursor is at the very end with no content after it
+                                const range = sel.getRangeAt(0);
+                                const postCaretRange = range.cloneRange();
+                                postCaretRange.selectNodeContents(block);
+                                postCaretRange.setStart(range.endContainer, range.endOffset);
+                                
+                                const frag = postCaretRange.cloneContents();
+                                const hasContent = frag.textContent.trim().length > 0 || 
+                                    Array.from(frag.querySelectorAll("*")).filter(el => el.tagName !== "BR").length > 0;
+                                
+                                if (!hasContent) {
+                                    e.preventDefault(); // don't delete the empty space paragraph
+                                    next.remove(); // delete the non-editable block (table) instead
+                                    actionModified = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             setTimeout(() => {
+                this._ensureTypingSpace();
                 this._updateUndoRedoStates();
+                if (actionModified) {
+                    this._syncValue();
+                }
             }, 0);
         });
 
         this._editorElement.addEventListener("mouseup", () => {
             setTimeout(() => {
+                this._ensureTypingSpace();
                 this._updateUndoRedoStates();
             }, 0);
         });
@@ -100,7 +274,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Creates the toolbar containing plugin buttons and undo/redo controls.
-     * @param {HTMLElement} element - The parent element.
+     * @param {HTMLElement} element - The parent element (ui container).
      */
     _createToolbar(element) {
         const toolbar = document.createElement("div");
@@ -128,8 +302,6 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Creates the undo/redo button group including the fullscreen toggle.
-     * The fullscreen button uses data-wx-primary-action="fullscreen" so that the
-     * central Controller handles toggling and icon/aria-state updates.
      * @returns {HTMLElement} The history button group.
      */
     _createHistoryGroup() {
@@ -148,16 +320,16 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         sep.className = "wx-editor-separator";
         historyGroup.appendChild(sep);
 
-        // add fullscreen button – wired via the controller action system
+        // add fullscreen button
         const fsBtn = document.createElement("button");
         fsBtn.className = "wx-editor-btn";
         fsBtn.title = "Toggle Fullscreen";
         fsBtn.innerHTML = `<i class="fas fa-expand"></i>`;
         fsBtn.type = "button";
 
-        // use the current action system; the controller registers the click handler automatically
+        // use the current action system targetting the container
         fsBtn.dataset.wxPrimaryAction = "fullscreen";
-        fsBtn.dataset.wxPrimaryTarget = "#" + this._element.id;
+        fsBtn.dataset.wxPrimaryTarget = "#" + this._uiContainer.id;
 
         historyGroup.appendChild(fsBtn);
 
@@ -191,8 +363,8 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      * Updates the enabled/disabled state of undo and redo buttons.
      */
     _updateUndoRedoStates() {
-        const undoBtn = this._element.querySelector('button[data-command="undo"]');
-        const redoBtn = this._element.querySelector('button[data-command="redo"]');
+        const undoBtn = this._uiContainer.querySelector('button[data-command="undo"]');
+        const redoBtn = this._uiContainer.querySelector('button[data-command="redo"]');
 
         if (undoBtn) {
             const canUndo = document.queryCommandEnabled("undo");
@@ -248,7 +420,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
         // wire to the controller's dismiss handler for css fullscreen
         doneBtn.setAttribute("data-wx-dismiss", "fullscreen");
-        doneBtn.setAttribute("data-wx-target", "#" + this._element.id);
+        doneBtn.setAttribute("data-wx-target", "#" + this._uiContainer.id);
 
         statusBar.appendChild(doneBtn);
         element.appendChild(statusBar);
@@ -571,30 +743,13 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Ensures a hidden form input exists for the editor content.
+     * Ensures form synchronization events are established.
      */
-    _ensureFormInput() {
-        let parent = this._editorElement;
-        while (parent && parent.nodeName !== "FORM") {
-            parent = parent.parentElement;
-        }
-
-        if (parent) {
-            if (!this._formInput) {
-                this._formInput = document.createElement("input");
-                this._formInput.type = "hidden";
-                this._formInput.name = this._formFieldName;
-                parent.appendChild(this._formInput);
-            }
-
-            parent.addEventListener("submit", () => {
+    _setupFormIntegration() {
+        const form = this._uiContainer.closest("form");
+        if (form) {
+            form.addEventListener("submit", () => {
                 this._syncValue();
-            });
-
-            this._formInput.addEventListener("input", () => {
-                if (this._editorElement.innerHTML !== this._formInput.value) {
-                    this._editorElement.innerHTML = this._formInput.value || "";
-                }
             });
         }
     }
@@ -627,18 +782,19 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             "a", "b", "strong", "i", "em", "u", "p", "br", "ul", "ol", "li",
             "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "pre", "code",
             "img", "span", "div", "table", "thead", "tbody", "tr", "th", "td",
-            "hr", "small", "sub", "sup"
+            "colgroup", "col", "hr", "small", "sub", "sup"
         ]);
 
         // allowed attributes per tag
         const allowedAttrs = {
             "a": ["href", "title", "target", "rel"],
             "img": ["src", "alt", "title", "width", "height"],
-            "th": ["colspan", "rowspan"],
-            "td": ["colspan", "rowspan"],
+            "th": ["colspan", "rowspan", "scope", "contenteditable"],
+            "td": ["colspan", "rowspan", "contenteditable"],
             "table": ["border", "cellpadding", "cellspacing"],
-            "div": ["class", "id", "title", "role", "tabindex", "contenteditable"],
-            "*": ["class", "id", "title", "role", "tabindex"]
+            "div": ["draggable"],
+            // globally allow attributes relevant to the editor
+            "*": ["class", "id", "title", "role", "tabindex", "style", "contenteditable", "data-addon-id", "data-type"]
         };
 
         /**
@@ -748,6 +904,12 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         // sanitize incoming html before placing into editor
         const clean = this._sanitizeHtml(v || "");
         this._editorElement.innerHTML = clean;
+        
+        // notify plugins first to upgrade tables to frames
+        this._notifyPluginsContentChanged();
+        // then ensure typing space un-nests the newly upgraded frames
+        this._ensureTypingSpace();
+        
         // update hidden input and dispatch change
         this._syncValue();
         this._updateUndoRedoStates();
@@ -798,7 +960,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Inserts HTML at the current cursor position.
-     * Incoming html is sanitized before insertion.
+     * Replaces empty paragraphs with the block element to prevent nested invalid HTML structures.
      * @param {string} html - The HTML to insert.
      */
     insertHtmlAtCursor(html) {
@@ -812,21 +974,55 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
             if (!this._editorElement.contains(range.startContainer)) {
                 this._editorElement.innerHTML += cleanHtml;
+                this._notifyPluginsContentChanged();
+                this._ensureTypingSpace();
                 this._syncValue();
                 this._updateUndoRedoStates();
                 return;
             }
 
+            let node = range.startContainer;
+            if (node.nodeType === Node.TEXT_NODE) {
+                node = node.parentElement;
+            }
+            const p = node.closest("p");
+
             range.deleteContents();
             const el = document.createElement("div");
             el.innerHTML = cleanHtml;
             const frag = document.createDocumentFragment();
-            let node, lastNode;
+            let n, lastNode;
 
-            while ((node = el.firstChild)) {
-                lastNode = frag.appendChild(node);
+            while ((n = el.firstChild)) {
+                lastNode = frag.appendChild(n);
             }
 
+            // if we are inserting a block inside a paragraph, check if paragraph is empty
+            if (p && p.parentElement === this._editorElement) {
+                const pContent = p.textContent.trim();
+                // replace the empty paragraph entirely to prevent nesting
+                if (pContent === "" || p.innerHTML === "<br>") {
+                    p.parentNode.insertBefore(frag, p);
+                    p.remove();
+                    
+                    if (lastNode) {
+                        const newRange = document.createRange();
+                        newRange.setStartAfter(lastNode);
+                        newRange.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(newRange);
+                        this._saveCurrentSelection();
+                    }
+                    
+                    this._notifyPluginsContentChanged();
+                    this._ensureTypingSpace();
+                    this._syncValue();
+                    this._updateUndoRedoStates();
+                    return;
+                }
+            }
+
+            // fallback normal insertion
             range.insertNode(frag);
 
             if (lastNode) {
@@ -840,6 +1036,8 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             this._editorElement.innerHTML += cleanHtml;
         }
 
+        this._notifyPluginsContentChanged();
+        this._ensureTypingSpace();
         this._syncValue();
         this._updateUndoRedoStates();
     }

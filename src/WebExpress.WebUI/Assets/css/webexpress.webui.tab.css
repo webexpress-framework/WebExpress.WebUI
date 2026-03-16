@@ -1,0 +1,43 @@
+.wx-tab {
+
+}
+
+/* hide raw tab view elements before javascript initialization to prevent fouc */
+.wx-tab-view {
+    display: none;
+}
+
+/* main container for the initialized tab control */
+.wx-tab-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* styling for the content area to match bootstrap border radiuses */
+.wx-tab-content {
+    background-color: var(--bs-body-bg);
+    border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
+}
+
+/* ensure pointer cursor for dynamically generated tab links */
+.wx-tab-nav .nav-link,
+.wx-form-designer-tabs .nav-link {
+    cursor: pointer;
+}
+
+/* specific transition for the close button inside the tab header */
+.wx-form-designer-tabs .nav-link span {
+    transition: color 0.2s ease-in-out;
+}
+
+/* hover effect for the close button to indicate destructiveness */
+.wx-form-designer-tabs .nav-link span:hover {
+    color: var(--bs-danger) !important;
+}
+
+/* dark theme adjustments if necessary, mostly handled by standard bootstrap variables */
+[data-bs-theme="dark"] .wx-tab-content {
+    background-color: var(--bs-dark);
+    border-color: var(--bs-border-color);
+}

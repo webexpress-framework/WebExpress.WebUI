@@ -9,7 +9,6 @@ webexpress.webui.DialogPanels.register("editor-addon", {
 
     /**
      * Renders the unified page UI for Add-on selection.
-     * 
      * @param {HTMLElement} container - Host container for the page.
      * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
      */

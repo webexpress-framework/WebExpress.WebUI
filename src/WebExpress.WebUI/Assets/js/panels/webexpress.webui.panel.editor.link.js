@@ -9,10 +9,8 @@ webexpress.webui.DialogPanels.register("editor-link", {
 
     /**
      * Renders the page ui.
-     * 
      * @param {HTMLElement} container - Host container for the page.
      * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
-     * @returns {void}
      */
     render: function (container, modal) {
         const wrapper = document.createElement("div");
@@ -68,9 +66,7 @@ webexpress.webui.DialogPanels.register("editor-link", {
     /**
      * Called when the page becomes active.
      * Resets or prefills inputs and attaches the explicit click handler.
-     * 
      * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
-     * @returns {void}
      */
     onShow: function (modal) {
         if (modal && modal._link && modal._link.urlInput) {
@@ -118,7 +114,6 @@ webexpress.webui.DialogPanels.register("editor-link", {
 
     /**
      * Validates current page data.
-     * 
      * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
      * @returns {true|{valid:false,message:string}}
      */

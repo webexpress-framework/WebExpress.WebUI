@@ -58,6 +58,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/webexpress.webui.smartedit.js")]
     [Asset("/assets/js/webexpress.webui.smartview.js")]
     [Asset("/assets/js/webexpress.webui.split.js")]
+    [Asset("/assets/js/webexpress.webui.tab.js")]
     [Asset("/assets/js/webexpress.webui.table.js")]
     [Asset("/assets/js/webexpress.webui.table.reorderable.js")]
     [Asset("/assets/js/webexpress.webui.tag.js")]
@@ -92,10 +93,10 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/syntax/python.js")]
     [Asset("/assets/js/syntax/visualbasic.js")]
     [Asset("/assets/js/syntax/xml.js")]
-    [Asset("/assets/js/panels/webexpress.webapp.panel.editor.addon.js")]
-    [Asset("/assets/js/panels/webexpress.webapp.panel.editor.image.js")]
-    [Asset("/assets/js/panels/webexpress.webapp.panel.editor.link.js")]
-    [Asset("/assets/js/panels/webexpress.webapp.panel.table.columns.js")]
+    [Asset("/assets/js/panels/webexpress.webui.panel.editor.addon.js")]
+    [Asset("/assets/js/panels/webexpress.webui.panel.editor.image.js")]
+    [Asset("/assets/js/panels/webexpress.webui.panel.editor.link.js")]
+    [Asset("/assets/js/panels/webexpress.webui.panel.table.columns.js")]
     public sealed class IncludeJavaScript : IInclude
     {
 

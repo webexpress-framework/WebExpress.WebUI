@@ -1,6 +1,5 @@
 /**
  * Ensures the image state bag on modal.
- * 
  * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
  * @returns {any} The image state object.
  */
@@ -30,10 +29,8 @@ webexpress.webui.DialogPanels.register("editor-image", {
 
     /**
      * Renders the page ui.
-     * 
      * @param {HTMLElement} container - Host container for the page.
      * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
-     * @returns {void}
      */
     render: function (container, modal) {
         const state = ensureImageState(modal);
@@ -88,9 +85,7 @@ webexpress.webui.DialogPanels.register("editor-image", {
     /**
      * Called when the page becomes active.
      * Resets or prefills inputs and attaches persistent events.
-     * 
      * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
-     * @returns {void}
      */
     onShow: function (modal) {
         const state = ensureImageState(modal);
@@ -137,7 +132,6 @@ webexpress.webui.DialogPanels.register("editor-image", {
 
     /**
      * Validates current page data.
-     * 
      * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
      * @returns {true|{valid:false,message:string}}
      */
@@ -159,9 +153,7 @@ webexpress.webui.DialogPanels.register("editor-image", {
 
     /**
      * Handles submit and inserts the image html.
-     * 
      * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
-     * @returns {void}
      */
     onSubmit: function (modal) {
         const editor = modal ? modal._editor : null;
@@ -224,10 +216,8 @@ webexpress.webui.DialogPanels.register("editor-image", {
 
     /**
      * Renders the page ui.
-     * 
      * @param {HTMLElement} container - Host container for the page.
      * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
-     * @returns {void}
      */
     render: function (container, modal) {
         const state = ensureImageState(modal);
@@ -410,9 +400,7 @@ webexpress.webui.DialogPanels.register("editor-image", {
     /**
      * Called when the page becomes active.
      * Evaluates button state and resets list selection on new inserts.
-     * 
      * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
-     * @returns {void}
      */
     onShow: function (modal) {
         const state = ensureImageState(modal);
@@ -453,7 +441,6 @@ webexpress.webui.DialogPanels.register("editor-image", {
 
     /**
      * Validates current page data.
-     * 
      * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
      * @returns {true|{valid:false,message:string}}
      */
@@ -479,9 +466,7 @@ webexpress.webui.DialogPanels.register("editor-image", {
 
     /**
      * Handles submit and inserts the image html.
-     * 
      * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
-     * @returns {void}
      */
     onSubmit: function (modal) {
         const editor = modal ? modal._editor : null;
