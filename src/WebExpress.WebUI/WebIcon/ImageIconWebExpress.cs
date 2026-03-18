@@ -12,8 +12,16 @@ namespace WebExpress.WebUI.WebIcon
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
+        public ImageIconWebExpress()
+            : base(new UriEndpoint("/assets/img/webexpress.svg"), null, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the class.
+        /// </summary>
         /// <param name="applicationContext">The application context to be associated with the icon.</param>
-        public ImageIconWebExpress(IApplicationContext applicationContext = null)
+        public ImageIconWebExpress(IApplicationContext applicationContext)
             : base(new UriEndpoint("/assets/img/webexpress.svg"), null, applicationContext)
         {
         }

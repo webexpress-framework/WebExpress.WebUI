@@ -1030,6 +1030,66 @@ webexpress.webui.DialogPanels = new class {
 };
 
 /**
+ * Registry for dashboard widgets.
+ */
+webexpress.webui.DashboardWidgets = new class {
+    /**
+     * Creates a new instance of the registry.
+     */
+    constructor() {
+        this._widgets = {};
+    }
+
+    /**
+     * Registers a new dashboard widget.
+     * @param {string} id - The unique identifier for the widget.
+     * @param {object} definition - The widget definition containing render logic.
+     * @returns {this} The registry instance for chaining.
+     */
+    register(id, definition) {
+        if (!id || !definition) {
+            return this;
+        }
+
+        // store a shallow copy of the definition
+        this._widgets[id] = Object.assign({ id: id }, definition);
+
+        return this;
+    }
+
+    /**
+     * Retrieves a widget definition by its id.
+     * @param {string} id - The widget id.
+     * @returns {object|null} The widget definition or null if not found.
+     */
+    get(id) {
+        if (typeof id !== "string") {
+            return null;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(this._widgets, id)) {
+            return Object.assign({}, this._widgets[id]);
+        }
+
+        return null;
+    }
+
+    /**
+     * Retrieves all registered widgets.
+     * @returns {Array<object>} An array of all widget definitions.
+     */
+    getAll() {
+        const result = [];
+        for (const key in this._widgets) {
+            if (Object.prototype.hasOwnProperty.call(this._widgets, key)) {
+                result.push(Object.assign({}, this._widgets[key]));
+            }
+        }
+        return result;
+    }
+};
+
+/**
  * Central registry for table cell templates (renderers).
  * Stores renderer functions and their default options by type key.
  */
@@ -1419,6 +1479,6 @@ webexpress.webui.Event = class {
     static SELECT_ITEM_EVENT = "webexpress.webui.select.item";
     // Event triggered to notify external pagination controls about current page/total.
     static UPDATE_PAGINATION_EVENT = "webexpress.webui.update.pagination";
-     // Event triggered when a tab is selected.
+    // Event triggered when a tab is selected.
     static TAB_SELECTED_EVENT = "webexpress.webui.tab.selected";
 }

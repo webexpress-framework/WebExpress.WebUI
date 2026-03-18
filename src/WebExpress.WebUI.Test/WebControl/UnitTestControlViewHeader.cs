@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.Test.WebControl
     public class UnitTestControlViewHeader
     {
         /// <summary>
-        /// Tests the id property of the view item control.
+        /// Tests the id property of the view header control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-view-header""></div>")]
@@ -34,7 +34,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests adding a item to the view item control.
+        /// Tests adding a item to the view header control.
         /// </summary>
         [Fact]
         public void Add()

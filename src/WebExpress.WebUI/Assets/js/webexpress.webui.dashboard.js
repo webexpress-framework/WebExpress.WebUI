@@ -1,17 +1,19 @@
 /**
- * Core Dashboard control that handles the visual grid layout, rendering of widgets,
- * and drag-and-drop reordering. Uses a 12-column grid system logic.
- * Triggers events on moving or removing widgets.
+ * Core Dashboard control that handles independent vertical columns (lanes).
+ * Columns can have optional titles and custom width sizes (e.g., 25%, 50%, *).
+ * Widgets are stacked independently inside their respective columns.
  */
 webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
 
-    // model state
-    _widgets = [];
+    // model state: array of column objects { title: string, widgets: [] }
+    _columns = [];
     _isMovable = true;
+    _boardCols = 3; // default number of vertical lanes
+    _boardTemplate = null; // custom grid template columns string
     
     // drag state
     _dragWidget = null;
-    _dragElement = null;
+    _dragColIndex = -1;
 
     /**
      * Initializes the dashboard control.
@@ -26,233 +28,348 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             this._isMovable = false;
         }
 
+        // parse custom column sizes (e.g. "25%, 50%, *")
+        if (element.dataset.columnSize) {
+            const sizes = element.dataset.columnSize.split(",").map(s => {
+                let size = s.trim();
+                return size === "*" ? "1fr" : size;
+            });
+            
+            if (sizes.length > 0) {
+                this._boardCols = sizes.length;
+                this._boardTemplate = sizes.join(" ");
+            }
+        } else if (element.dataset.columns) {
+            // fallback to equal width columns
+            this._boardCols = parseInt(element.dataset.columns, 10) || 3;
+        }
+
+        // read optional column titles (comma separated)
+        const titlesAttr = element.dataset.columnTitles || "";
+        const titles = titlesAttr.split(",").map(s => s.trim());
+
+        // initialize columns with optional titles
+        this._columns = Array.from({ length: this._boardCols }, (_, i) => {
+            return {
+                title: titles[i] || null,
+                widgets: []
+            };
+        });
+
+        this._parseStaticWidgets();
         this.render();
     }
 
     /**
-     * Renders the complete dashboard based on the current widget list.
+     * Parses the initial widget configuration from the static DOM elements.
+     */
+    _parseStaticWidgets() {
+        const widgetElements = this._element.querySelectorAll(".wx-dashboard-widget");
+        let parseIndex = 0;
+        
+        for (let i = 0; i < widgetElements.length; i++) {
+            const wEl = widgetElements[i];
+            const dataset = wEl.dataset;
+            const widgetId = dataset.widget || null;
+            const htmlContent = wEl.innerHTML.trim();
+            
+            if (widgetId || htmlContent) {
+                const params = {};
+                
+                const reservedKeys = [
+                    "widget", "color", "closeable", "movable", 
+                    "label", "icon", "image", "column"
+                ];
+
+                for (const key in dataset) {
+                    if (Object.prototype.hasOwnProperty.call(dataset, key)) {
+                        if (!reservedKeys.includes(key)) {
+                            params[key] = dataset[key];
+                        }
+                    }
+                }
+
+                const widgetData = {
+                    instanceId: "wx_inst_" + i + "_" + Date.now(),
+                    id: widgetId || "w_custom_" + i,
+                    label: dataset.label || null,
+                    icon: dataset.icon || null,
+                    image: dataset.image || null,
+                    color: dataset.color || null,
+                    removable: dataset.closeable !== "false",
+                    movable: dataset.movable !== "false",
+                    html: htmlContent,
+                    params: params
+                };
+                
+                // assign to specified column or distribute evenly
+                let targetCol = dataset.column !== undefined ? parseInt(dataset.column, 10) : (parseIndex % this._boardCols);
+                targetCol = Math.max(0, Math.min(targetCol, this._boardCols - 1));
+                
+                this._columns[targetCol].widgets.push(widgetData);
+                parseIndex++;
+            }
+        }
+    }
+
+    /**
+     * Renders the complete dashboard based on the current columns structure.
      */
     render() {
         const el = this._element;
         el.innerHTML = "";
 
         const row = document.createElement("div");
-        row.className = "row g-3 wx-dashboard-row";
+        row.className = "wx-dashboard-row";
+        
+        // apply columns or custom template
+        row.style.setProperty("--wx-board-cols", this._boardCols);
+        if (this._boardTemplate) {
+            row.style.setProperty("--wx-board-template", this._boardTemplate);
+        }
 
-        for (let i = 0; i < this._widgets.length; i++) {
-            const widget = this._widgets[i];
-            const col = this._buildWidgetElement(widget);
-            row.appendChild(col);
+        for (let colIdx = 0; colIdx < this._boardCols; colIdx++) {
+            const colData = this._columns[colIdx];
+
+            // Create a wrapper for the title and the lane
+            const wrapperEl = document.createElement("div");
+            wrapperEl.className = "wx-dashboard-lane-wrapper";
+
+            // Append title if it exists
+            if (colData.title) {
+                const titleEl = document.createElement("h5");
+                titleEl.className = "wx-dashboard-lane-title";
+                titleEl.textContent = colData.title;
+                wrapperEl.appendChild(titleEl);
+            }
+
+            // Create the actual drop zone lane
+            const laneEl = document.createElement("div");
+            laneEl.className = "wx-dashboard-lane";
+            laneEl.dataset.columnIndex = colIdx;
+
+            // handle dropping into the general area of the lane
+            if (this._isMovable) {
+                laneEl.addEventListener("dragover", (e) => {
+                    e.preventDefault();
+                    if (laneEl.children.length === 0) {
+                        laneEl.classList.add("wx-drag-over-empty");
+                    } else {
+                        // highlight the bottom of the last widget when dragging in empty space below
+                        const lastChild = laneEl.lastElementChild;
+                        if (lastChild && !lastChild.classList.contains("wx-drag-over-top")) {
+                            lastChild.classList.add("wx-drag-over-bottom");
+                        }
+                    }
+                });
+                laneEl.addEventListener("dragleave", (e) => {
+                    laneEl.classList.remove("wx-drag-over-empty");
+                    const lastChild = laneEl.lastElementChild;
+                    if (lastChild) {
+                        lastChild.classList.remove("wx-drag-over-bottom");
+                    }
+                });
+                laneEl.addEventListener("drop", (e) => {
+                    this._onDropLane(e, colIdx, laneEl);
+                });
+            }
+
+            // append all widgets for this column
+            const columnWidgets = colData.widgets;
+            for (let i = 0; i < columnWidgets.length; i++) {
+                const widgetData = columnWidgets[i];
+                const card = this._buildWidgetElement(widgetData, colIdx);
+                laneEl.appendChild(card);
+            }
+
+            wrapperEl.appendChild(laneEl);
+            row.appendChild(wrapperEl);
         }
 
         el.appendChild(row);
     }
 
     /**
-     * Updates the internal model for widgets and re-renders the dashboard.
-     * @param {Object} data - The configuration data containing widgets.
-     */
-    updateData(data) {
-        if (!data) {
-            return;
-        }
-
-        if (Array.isArray(data.widgets)) {
-            this._widgets = data.widgets;
-        } else if (Array.isArray(data.items)) {
-            this._widgets = data.items;
-        }
-
-        this.render();
-    }
-
-    /**
      * Builds the DOM element for a single dashboard widget.
-     * @param {Object} widget - The widget data object.
-     * @returns {HTMLElement} The column element containing the widget card.
      */
-    _buildWidgetElement(widget) {
-        const colWidth = widget.width || 4; // default to 4 of 12 columns
-        const colEl = document.createElement("div");
-        colEl.className = `col-12 col-md-${colWidth} wx-dashboard-col`;
-        colEl.dataset.widgetId = widget.id;
-
+    _buildWidgetElement(widgetData, colIdx) {
+        const registeredWidget = webexpress.webui.DashboardWidgets.get(widgetData.id) || {};
+        
         const cardEl = document.createElement("div");
-        cardEl.className = "card h-100 shadow-sm wx-dashboard-widget";
+        cardEl.className = "card shadow-sm wx-dashboard-widget-card";
+        cardEl.dataset.instanceId = widgetData.instanceId;
         
-        // build header
+        if (widgetData.color) {
+            cardEl.style.setProperty("--wx-widget-color", widgetData.color);
+            cardEl.classList.add("wx-widget-has-color");
+        }
+        
         const header = document.createElement("div");
-        header.className = "card-header d-flex justify-content-between align-items-center bg-white";
+        header.className = "card-header";
         
+        const leftArea = document.createElement("div");
+        leftArea.className = "d-flex align-items-center gap-2 overflow-hidden";
+        
+        const isWidgetMovable = this._isMovable && widgetData.movable !== false && registeredWidget.movable !== false;
+
+        if (isWidgetMovable) {
+            const dragHandle = document.createElement("span");
+            dragHandle.className = "text-muted wx-drag-handle";
+            dragHandle.innerHTML = '<i class="fas fa-grip-horizontal"></i>';
+            leftArea.appendChild(dragHandle);
+
+            cardEl.setAttribute("draggable", "true");
+            cardEl.addEventListener("dragstart", (e) => {
+                this._onDragStart(e, widgetData, colIdx);
+            });
+            cardEl.addEventListener("dragend", (e) => {
+                this._onDragEnd(e, cardEl);
+            });
+        }
+
         const titleArea = document.createElement("div");
         titleArea.className = "fw-bold text-truncate";
         
-        if (widget.icon) {
+        const imgSrc = widgetData.image;
+        const iconCssClass = widgetData.icon || (!imgSrc ? registeredWidget.icon : null);
+
+        if (imgSrc) {
+            const img = document.createElement("img");
+            img.src = imgSrc;
+            img.className = "me-2";
+            img.style.maxHeight = "1.2em";
+            img.style.width = "auto";
+            img.style.verticalAlign = "middle";
+            img.alt = "";
+            titleArea.appendChild(img);
+        } else if (iconCssClass) {
             const icon = document.createElement("i");
-            icon.className = `${widget.icon} me-2 text-muted`;
+            icon.className = `${iconCssClass} me-2 text-muted`;
             titleArea.appendChild(icon);
         }
         
+        const widgetLabel = widgetData.label || registeredWidget.title || "";
         const titleText = document.createElement("span");
-        titleText.textContent = widget.title || "";
+        titleText.textContent = widgetLabel;
         titleArea.appendChild(titleText);
-        header.appendChild(titleArea);
+        
+        leftArea.appendChild(titleArea);
+        header.appendChild(leftArea);
 
-        // build controls area (drag handle, remove button)
-        const controls = document.createElement("div");
-        controls.className = "d-flex gap-2";
+        const rightArea = document.createElement("div");
+        rightArea.className = "d-flex gap-2";
 
-        if (this._isMovable) {
-            const dragHandle = document.createElement("span");
-            dragHandle.className = "text-muted wx-drag-handle";
-            dragHandle.style.cursor = "grab";
-            dragHandle.innerHTML = '<i class="fas fa-grip-horizontal"></i>';
-            controls.appendChild(dragHandle);
-
-            // enable drag and drop on the whole card but indicate grab on handle
-            cardEl.setAttribute("draggable", "true");
-            cardEl.addEventListener("dragstart", (e) => {
-                this._onDragStart(e, widget, colEl);
-            });
-            cardEl.addEventListener("dragend", (e) => {
-                this._onDragEnd(e, colEl);
-            });
-        }
-
-        if (widget.removable !== false) {
+        if (widgetData.removable !== false && registeredWidget.removable !== false) {
             const removeBtn = document.createElement("button");
             removeBtn.type = "button";
             removeBtn.className = "btn-close btn-close-sm";
             removeBtn.setAttribute("aria-label", "Remove");
             removeBtn.addEventListener("click", () => {
-                this._removeWidget(widget.id);
+                this._removeWidget(colIdx, widgetData.instanceId);
             });
-            controls.appendChild(removeBtn);
+            rightArea.appendChild(removeBtn);
         }
 
-        header.appendChild(controls);
+        header.appendChild(rightArea);
         cardEl.appendChild(header);
 
-        // build body
         const body = document.createElement("div");
         body.className = "card-body overflow-auto";
-        if (widget.html) {
-            body.innerHTML = widget.html;
+        
+        if (typeof registeredWidget.render === "function") {
+            registeredWidget.render(body, widgetData);
+        } else if (widgetData.html) {
+            body.innerHTML = widgetData.html;
+        } else {
+            body.textContent = "Widget content not available.";
         }
+        
         cardEl.appendChild(body);
 
-        // handle drop events on the column container
+        // handle drops specifically on this widget
         if (this._isMovable) {
-            colEl.addEventListener("dragover", (e) => {
-                this._onDragOver(e, colEl);
+            cardEl.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                e.stopPropagation(); // prevent lane events
+                
+                // calc mouse position to determine top or bottom drop indicator
+                const rect = cardEl.getBoundingClientRect();
+                const isTopHalf = (e.clientY - rect.top) < (rect.height / 2);
+                
+                if (isTopHalf) {
+                    cardEl.classList.add("wx-drag-over-top");
+                    cardEl.classList.remove("wx-drag-over-bottom");
+                } else {
+                    cardEl.classList.add("wx-drag-over-bottom");
+                    cardEl.classList.remove("wx-drag-over-top");
+                }
             });
-            colEl.addEventListener("dragleave", (e) => {
-                this._onDragLeave(e, colEl);
+            
+            cardEl.addEventListener("dragleave", (e) => {
+                e.stopPropagation();
+                cardEl.classList.remove("wx-drag-over-top", "wx-drag-over-bottom");
             });
-            colEl.addEventListener("drop", (e) => {
-                this._onDrop(e, widget, colEl);
+            
+            cardEl.addEventListener("drop", (e) => {
+                e.stopPropagation();
+                
+                // determine if dropped in top or bottom half
+                const rect = cardEl.getBoundingClientRect();
+                const isTopHalf = (e.clientY - rect.top) < (rect.height / 2);
+                
+                this._onDropWidget(e, widgetData, colIdx, cardEl, isTopHalf);
             });
         }
 
-        colEl.appendChild(cardEl);
-        return colEl;
+        return cardEl;
     }
 
-    /**
-     * Removes a widget from the dashboard.
-     * @param {string} widgetId - The id of the widget to remove.
-     */
-    _removeWidget(widgetId) {
-        const index = this._widgets.findIndex((w) => {
-            return w.id === widgetId;
-        });
-        
+    _removeWidget(colIdx, instanceId) {
+        const index = this._columns[colIdx].widgets.findIndex(w => w.instanceId === instanceId);
         if (index > -1) {
-            this._widgets.splice(index, 1);
+            this._columns[colIdx].widgets.splice(index, 1);
             this.render();
             this._dispatchChangeEvent("remove");
         }
     }
 
-    /**
-     * Handles the start of a drag operation.
-     * @param {DragEvent} e - The drag event.
-     * @param {Object} widget - The widget model.
-     * @param {HTMLElement} colEl - The column DOM element.
-     */
-    _onDragStart(e, widget, colEl) {
-        this._dragWidget = widget;
-        this._dragElement = colEl;
-        colEl.classList.add("opacity-50");
+    _onDragStart(e, widgetData, colIdx) {
+        this._dragWidget = widgetData;
+        this._dragColIndex = colIdx;
+        
+        // timeout ensures the drag image doesn't glitch when setting opacity immediately
+        setTimeout(() => {
+            const el = this._element.querySelector(`[data-instance-id="${widgetData.instanceId}"]`);
+            if(el) el.classList.add("opacity-50");
+        }, 0);
         
         try {
             e.dataTransfer.effectAllowed = "move";
-            e.dataTransfer.setData("text/plain", widget.id || "");
-        } catch (err) {
-            // ignore data transfer errors on unsupported browsers
-        }
+            e.dataTransfer.setData("text/plain", widgetData.instanceId || "");
+        } catch (err) {}
     }
 
-    /**
-     * Handles the end of a drag operation.
-     * @param {DragEvent} e - The drag event.
-     * @param {HTMLElement} colEl - The column DOM element.
-     */
-    _onDragEnd(e, colEl) {
-        colEl.classList.remove("opacity-50");
+    _onDragEnd(e, cardEl) {
+        cardEl.classList.remove("opacity-50");
         this._dragWidget = null;
-        this._dragElement = null;
+        this._dragColIndex = -1;
         this._clearDropTargets();
     }
 
     /**
-     * Handles dragging over a target column.
-     * @param {DragEvent} e - The drag event.
-     * @param {HTMLElement} targetCol - The target column.
+     * Handles drop on the lane background (appends to the column).
      */
-    _onDragOver(e, targetCol) {
-        if (!this._dragWidget || this._dragElement === targetCol) {
-            return;
-        }
+    _onDropLane(e, targetColIdx, laneEl) {
         e.preventDefault();
-        targetCol.classList.add("border-primary", "border", "border-2", "rounded");
-    }
+        this._clearDropTargets();
 
-    /**
-     * Handles the pointer leaving a drop target.
-     * @param {DragEvent} e - The drag event.
-     * @param {HTMLElement} targetCol - The target column.
-     */
-    _onDragLeave(e, targetCol) {
-        targetCol.classList.remove("border-primary", "border", "border-2", "rounded");
-    }
+        if (!this._dragWidget || this._dragColIndex === -1) return;
 
-    /**
-     * Handles dropping a widget onto another to reorder them.
-     * @param {DragEvent} e - The drag event.
-     * @param {Object} targetWidget - The target widget model.
-     * @param {HTMLElement} targetCol - The target column element.
-     */
-    _onDrop(e, targetWidget, targetCol) {
-        e.preventDefault();
-        targetCol.classList.remove("border-primary", "border", "border-2", "rounded");
-
-        if (!this._dragWidget || this._dragWidget.id === targetWidget.id) {
-            return;
-        }
-
-        const sourceIndex = this._widgets.findIndex((w) => {
-            return w.id === this._dragWidget.id;
-        });
-        const targetIndex = this._widgets.findIndex((w) => {
-            return w.id === targetWidget.id;
-        });
-
-        if (sourceIndex > -1 && targetIndex > -1) {
-            // remove from old position
-            const [moved] = this._widgets.splice(sourceIndex, 1);
-            // insert at new position
-            this._widgets.splice(targetIndex, 0, moved);
+        const sourceIndex = this._columns[this._dragColIndex].widgets.findIndex(w => w.instanceId === this._dragWidget.instanceId);
+        if (sourceIndex > -1) {
+            const [moved] = this._columns[this._dragColIndex].widgets.splice(sourceIndex, 1);
+            // always append at the end of the lane
+            this._columns[targetColIdx].widgets.push(moved);
             
             this.render();
             this._dispatchChangeEvent("reorder");
@@ -260,37 +377,61 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Clears visual highlighting from all columns.
+     * Handles drop directly onto another widget (inserts before or after).
      */
-    _clearDropTargets() {
-        const cols = this._element.querySelectorAll(".wx-dashboard-col");
-        for (let i = 0; i < cols.length; i++) {
-            cols[i].classList.remove("border-primary", "border", "border-2", "rounded");
+    _onDropWidget(e, targetWidget, targetColIdx, cardEl, isTopHalf) {
+        e.preventDefault();
+        this._clearDropTargets();
+
+        if (!this._dragWidget || this._dragColIndex === -1 || this._dragWidget.instanceId === targetWidget.instanceId) {
+            return;
+        }
+
+        const sourceIndex = this._columns[this._dragColIndex].widgets.findIndex(w => w.instanceId === this._dragWidget.instanceId);
+        let targetIndex = this._columns[targetColIdx].widgets.findIndex(w => w.instanceId === targetWidget.instanceId);
+
+        if (sourceIndex > -1 && targetIndex > -1) {
+            const [moved] = this._columns[this._dragColIndex].widgets.splice(sourceIndex, 1);
+            
+            // adjust target index since splicing from the SAME column shifts indices
+            if (this._dragColIndex === targetColIdx && sourceIndex < targetIndex) {
+                targetIndex -= 1;
+            }
+            
+            // if dropping on the bottom half, insert AFTER the target widget
+            if (!isTopHalf) {
+                targetIndex += 1;
+            }
+            
+            this._columns[targetColIdx].widgets.splice(targetIndex, 0, moved);
+            
+            this.render();
+            this._dispatchChangeEvent("reorder");
         }
     }
 
-    /**
-     * Dispatches a custom event indicating the dashboard configuration changed.
-     * @param {string} action - The action type (e.g., 'reorder', 'remove').
-     */
+    _clearDropTargets() {
+        const dropZones = this._element.querySelectorAll(".wx-dashboard-lane, .wx-dashboard-widget-card");
+        for (let i = 0; i < dropZones.length; i++) {
+            dropZones[i].classList.remove("wx-drag-over-empty", "wx-drag-over-top", "wx-drag-over-bottom");
+        }
+    }
+
     _dispatchChangeEvent(action) {
         const evRoot = webexpress?.webui?.Event;
         const eventName = (evRoot && evRoot.CHANGE_VALUE_EVENT) ? evRoot.CHANGE_VALUE_EVENT : "webexpress.webui.change.value";
         
-        const widgetOrder = [];
-        for (let i = 0; i < this._widgets.length; i++) {
-            widgetOrder.push(this._widgets[i].id);
-        }
+        // simplify structure for persistence: returns array of columns containing widget IDs
+        const structure = this._columns.map(col => col.widgets.map(w => w.id));
 
         this._dispatch(eventName, {
             detail: {
                 id: this._element.id,
                 action: action,
-                order: widgetOrder
+                layout: structure
             }
         });
     }
 };
 
-// register the base class in the controller system
 webexpress.webui.Controller.registerClass("wx-webui-dashboard", webexpress.webui.DashboardCtrl);

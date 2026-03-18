@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebControl
     /// </summary>
     public class ControlCarousel : Control, IControlCarousel
     {
-        private readonly List<ControlCarouselItem> _items = [];
+        private readonly List<IControlCarouselItem> _items = [];
 
         /// <summary>
         /// Returns the collection of carousel items.
@@ -17,14 +17,14 @@ namespace WebExpress.WebUI.WebControl
         /// <value>
         /// An <see cref="IEnumerable{ControlCarouselItem}"/> representing the carousel items.
         /// </value>
-        public IEnumerable<ControlCarouselItem> Items => _items;
+        public IEnumerable<IControlCarouselItem> Items => _items;
 
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
         /// <param name="items">The carousel items to be added.</param>
-        public ControlCarousel(string id = null, params ControlCarouselItem[] items)
+        public ControlCarousel(string id = null, params IControlCarouselItem[] items)
             : base(string.IsNullOrWhiteSpace(id) ? "carousel" : id)
         {
             _items.AddRange(items);
@@ -35,7 +35,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="items">The carousel items to be added.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlCarousel Add(params ControlCarouselItem[] items)
+        public IControlCarousel Add(params IControlCarouselItem[] items)
         {
             _items.AddRange(items);
 
@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="items">The carousel items to be added.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlCarousel Add(IEnumerable<ControlCarouselItem> items)
+        public IControlCarousel Add(IEnumerable<IControlCarouselItem> items)
         {
             _items.AddRange(items);
 

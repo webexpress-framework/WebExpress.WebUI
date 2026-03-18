@@ -6,9 +6,9 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebFragment
 {
     /// <summary>
-    /// Represents a control view for a fragment, implementing the IFragmentControl interface.
+    /// Represents a dashboard control for a fragment, implementing the IFragmentControl interface.
     /// </summary>
-    public class FragmentControlView : ControlView, IFragmentControl<ControlView>
+    public class FragmentControlDashboard : ControlDashboard, IFragmentControl<ControlDashboard>
     {
         /// <summary>
         /// Returns the context of the fragment.
@@ -19,7 +19,7 @@ namespace WebExpress.WebUI.WebFragment
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="fragmentContext">The context of the fragment.</param>
-        protected FragmentControlView(IFragmentContext fragmentContext)
+        protected FragmentControlDashboard(IFragmentContext fragmentContext)
             : base(fragmentContext?.FragmentId?.ToString())
         {
             FragmentContext = fragmentContext;

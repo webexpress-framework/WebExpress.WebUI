@@ -729,5 +729,27 @@ namespace WebExpress.WebUI.Test.WebFragment
             Assert.NotEmpty(html);
             AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
         }
+
+        // <summary>
+        /// Test the render function of the fragment manager for dashboard control items.
+        /// </summary>
+        [Fact]
+        public void Render_TestSectionFragmentControlDashboard()
+        {
+            // arrange
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroldashboard"" class=""wx-webui-dashboard""><div class=""wx-dashboard-widget""></div></div>";
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+
+            // act
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlDashboard));
+
+            // validation
+            Assert.NotNull(html);
+            Assert.NotEmpty(html);
+            AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
+        }
     }
 }

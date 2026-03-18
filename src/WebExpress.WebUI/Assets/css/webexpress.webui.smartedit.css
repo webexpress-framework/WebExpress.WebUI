@@ -1,4 +1,5 @@
 .wx-smart-edit {
+    position: relative;
     display: flex;
     justify-content: space-between;
     margin-top: 0.2em;

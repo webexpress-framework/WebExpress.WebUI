@@ -88,7 +88,6 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = "wx-dropdown-item"
             }
-                .AddUserAttribute("id", Id)
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
                 .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-tooltip", Tooltip)

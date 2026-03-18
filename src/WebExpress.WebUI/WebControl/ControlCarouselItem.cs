@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents an slideshow element in a carousel control.
     /// </summary>
-    public class ControlCarouselItem
+    public class ControlCarouselItem : IControlCarouselItem
     {
         /// <summary>
         /// Returns or sets the headline.

@@ -7,24 +7,24 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.Test.WebControl
 {
     /// <summary>
-    /// Tests the view item control.
+    /// Tests the dashboard widget control.
     /// </summary>
     [Collection("NonParallelTests")]
-    public class UnitTestControlViewItem
+    public class UnitTestControlDashboardWidgetContent
     {
         /// <summary>
-        /// Tests the id property of the view item control.
+        /// Tests the id property of the dashboard widget control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-view""></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-view""></div>")]
+        [InlineData(null, @"<div class=""wx-dashboard-widget""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-dashboard-widget""></div>")]
         public void Id(string id, string expected)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlViewItem(id)
+            var control = new ControlDashboardWidgetContent(id)
             {
             };
 
@@ -36,19 +36,20 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the title property of the view item control.
+        /// Tests the title property of the dashboard widget control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-view""></div>")]
-        [InlineData("abc", @"<div class=""wx-view"" data-label=""abc""></div>")]
-        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-view"" data-label=""WebExpress.WebUI""></div>")]
+        [InlineData(null, @"<div class=""wx-dashboard-widget""></div>")]
+        [InlineData("", @"<div class=""wx-dashboard-widget""></div>")]
+        [InlineData("abc", @"<div class=""wx-dashboard-widget"" data-title=""abc""></div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-dashboard-widget"" data-title=""WebExpress.WebUI""></div>")]
         public void Title(string title, string expected)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlViewItem()
+            var control = new ControlDashboardWidgetContent()
             {
                 Title = title
             };
@@ -61,21 +62,20 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the description property of the view item control.
+        /// Tests the color property of the dashboard widget control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-view""></div>")]
-        [InlineData("abc", @"<div class=""wx-view"" data-description=""abc""></div>")]
-        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-view"" data-description=""WebExpress.WebUI""></div>")]
-        public void Description(string description, string expected)
+        [InlineData(null, @"<div class=""wx-dashboard-widget""></div>")]
+        [InlineData("red", @"<div class=""wx-dashboard-widget"" data-color=""red""></div>")]
+        public void Color(string color, string expected)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlViewItem()
+            var control = new ControlDashboardWidgetContent()
             {
-                Description = description
+                Color = color
             };
 
             // act
@@ -86,12 +86,61 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the icon property of the view item control.
+        /// Tests the column property of the dashboard widget control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-view""></div>")]
-        [InlineData(typeof(IconFolder), @"<div class=""wx-view"" data-icon=""fas fa-folder""></div>")]
-        [InlineData(typeof(ImageIconWebExpress), @"<div class=""wx-view"" data-image=""/assets/img/webexpress.svg""></div>")]
+        [InlineData(uint.MaxValue, @"<div class=""wx-dashboard-widget""></div>")]
+        [InlineData(0, @"<div class=""wx-dashboard-widget"" data-column=""0""></div>")]
+        [InlineData(10, @"<div class=""wx-dashboard-widget"" data-column=""10""></div>")]
+        public void Column(uint column, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlDashboardWidgetContent()
+            {
+                Column = column
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the movable property of the dashboard widget control.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-dashboard-widget""></div>")]
+        [InlineData(true, @"<div class=""wx-dashboard-widget"" data-movable=""true""></div>")]
+        public void Moveable(bool movable, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlDashboardWidgetContent()
+            {
+                Movable = movable
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the icon property of the dashboard widget control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-dashboard-widget""></div>")]
+        [InlineData(typeof(IconFolder), @"<div class=""wx-dashboard-widget"" data-icon=""fas fa-folder""></div>")]
+        [InlineData(typeof(ImageIconWebExpress), @"<div class=""wx-dashboard-widget"" data-image=""/assets/img/webexpress.svg""></div>")]
         public void Icon(Type iconType, string expected)
         {
             // arrange
@@ -99,7 +148,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var icon = iconType is not null ? Activator.CreateInstance(iconType) as IIcon : null;
-            var control = new ControlViewItem(null)
+            var control = new ControlDashboardWidgetContent(null)
             {
                 Icon = icon
             };
@@ -112,31 +161,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the detail frame property of the view item control.
-        /// </summary>
-        [Theory]
-        [InlineData(false, @"<div class=""wx-view""></div>")]
-        [InlineData(true, @"<div class=""wx-view"" data-has-details=""true""></div>")]
-        public void DetailFrame(bool hasFrame, string expected)
-        {
-            // arrange
-            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CreateRenderContextMock();
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlViewItem(null)
-            {
-                DetailFrame = hasFrame
-            };
-
-            // act
-            var html = control.Render(context, visualTree);
-
-            // validation
-            AssertExtensions.EqualWithPlaceholders(expected, html);
-        }
-
-        /// <summary>
-        /// Tests adding a item to the view item control.
+        /// Tests adding a item to the dashboard widget control.
         /// </summary>
         [Fact]
         public void Add()
@@ -145,14 +170,14 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlViewItem(null);
+            var control = new ControlDashboardWidgetContent();
 
             // act
             control.Add(new ControlText());
 
             // validation
             var html = control.Render(context, visualTree);
-            var expected = @"<div class=""wx-view""><div></div></div>";
+            var expected = @"<div class=""wx-dashboard-widget""><div></div></div>";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }

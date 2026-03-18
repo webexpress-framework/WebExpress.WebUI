@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.Test.WebControl
     public class UnitTestControlViewFooter
     {
         /// <summary>
-        /// Tests the id property of the view item control.
+        /// Tests the id property of the view footer control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-view-footer""></div>")]
@@ -34,7 +34,7 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests adding a item to the view item control.
+        /// Tests adding a item to the view footer control.
         /// </summary>
         [Fact]
         public void Add()
