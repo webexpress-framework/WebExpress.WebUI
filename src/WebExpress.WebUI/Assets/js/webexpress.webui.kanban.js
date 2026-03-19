@@ -32,41 +32,68 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         let swimlanes = [];
         let cards = [];
 
-        // extract column ids and titles
-        let colIds = [];
-        let colTitles = [];
-
-        if (el.dataset.columns) {
-            colIds = String(el.dataset.columns).split(",").map((s) => s.trim());
-        }
-        if (el.dataset.columnTitles) {
-            colTitles = String(el.dataset.columnTitles).split(",").map((s) => s.trim());
-        }
-
-        const maxCols = Math.max(colIds.length, colTitles.length);
-
-        for (let i = 0; i < maxCols; i++) {
-            columns.push({
-                id: colIds[i] || `col_${i}`,
-                label: colTitles[i] || colIds[i] || `Column ${i + 1}`
+        // extract columns from elements or dataset
+        const columnNodes = el.querySelectorAll(".wx-column");
+        if (columnNodes.length > 0) {
+            columnNodes.forEach((node) => {
+                columns.push({
+                    id: node.id || node.dataset.id,
+                    label: node.dataset.label || node.id || "column",
+                    size: node.dataset.size || "1fr"
+                });
             });
+        } else {
+            let colIds = [];
+            let colTitles = [];
+
+            if (el.dataset.columns) {
+                colIds = String(el.dataset.columns).split(",").map((s) => {
+                    return s.trim();
+                });
+            }
+            if (el.dataset.columnTitles) {
+                colTitles = String(el.dataset.columnTitles).split(",").map((s) => {
+                    return s.trim();
+                });
+            }
+
+            const maxCols = Math.max(colIds.length, colTitles.length);
+
+            for (let i = 0; i < maxCols; i++) {
+                columns.push({
+                    id: colIds[i] || `col_${i}`,
+                    label: colTitles[i] || colIds[i] || `column ${i + 1}`,
+                    size: "1fr"
+                });
+            }
         }
 
-        // extract swimlanes from dataset
-        if (el.dataset.swimlanes) {
+        // extract swimlanes from child elements or dataset
+        const swimlaneNodes = el.querySelectorAll(".wx-swimlane");
+        if (swimlaneNodes.length > 0) {
+            swimlaneNodes.forEach((node) => {
+                swimlanes.push({
+                    id: node.id || node.dataset.id,
+                    label: node.dataset.label || node.id,
+                    expanded: node.dataset.expanded !== "false"
+                });
+            });
+        } else if (el.dataset.swimlanes) {
             swimlanes = String(el.dataset.swimlanes).split(",").map((s) => {
-                return { id: s.trim(), label: s.trim() };
+                return { 
+                    id: s.trim(), 
+                    label: s.trim(), 
+                    expanded: true 
+                };
             });
         }
 
         // apply board template constraints based on columns
         if (columns.length > 0) {
             el.style.setProperty("--wx-board-cols", columns.length);
-        }
-        
-        if (el.dataset.columnSize) {
-            const sizes = el.dataset.columnSize.split(",").map((s) => {
-                return s.trim() === "*" ? "1fr" : s.trim();
+            
+            const sizes = columns.map((col) => {
+                return col.size === "*" ? "1fr" : col.size;
             });
             el.style.setProperty("--wx-board-template", sizes.join(" "));
         }
@@ -132,19 +159,17 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             el.appendChild(headerRow);
         }
 
-        const swimlanesToRender = hasSwimlanes ? this._swimlanes : [{ id: null, label: "" }];
+        const swimlanesToRender = hasSwimlanes ? this._swimlanes : [{ id: null, label: "", expanded: true }];
 
         for (let s = 0; s < swimlanesToRender.length; s++) {
             const lane = swimlanesToRender[s];
             const laneWrapper = document.createElement("div");
             laneWrapper.className = "wx-kanban-swimlane";
 
-            // render swimlane title if swimlanes are configured
+            // setup expandable parameters if swimlanes are configured
             if (hasSwimlanes) {
-                const laneTitle = document.createElement("h5");
-                laneTitle.className = "wx-kanban-swimlane-title";
-                laneTitle.textContent = lane.label;
-                laneWrapper.appendChild(laneTitle);
+                laneWrapper.dataset.header = lane.label;
+                laneWrapper.dataset.expanded = lane.expanded ? "true" : "false";
             }
 
             // create the grid row for the drop zones
@@ -213,6 +238,16 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             }
             laneWrapper.appendChild(row);
             el.appendChild(laneWrapper);
+            
+            // convert lane wrapper into an expandable component and sync state
+            if (hasSwimlanes) {
+                new webexpress.webui.ExpandableCtrl(laneWrapper);
+                laneWrapper.addEventListener(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, (e) => {
+                    if (e && e.detail !== undefined) {
+                        lane.expanded = e.detail.value;
+                    }
+                });
+            }
         }
     }
 
@@ -228,24 +263,6 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         cardEl.className = "wx-kanban-card";
         cardEl.dataset.cardId = card.id;
         cardEl.setAttribute("draggable", "true");
-
-        // apply primary actions to DOM element
-        if (card.primaryAction && card.primaryAction.action) {
-            for (const [key, value] of Object.entries(card.primaryAction)) {
-                if (value) {
-                    cardEl.setAttribute(`data-wx-primary-${key.toLowerCase()}`, value);
-                }
-            }
-        }
-
-        // apply secondary actions to DOM element
-        if (card.secondaryAction && card.secondaryAction.action) {
-            for (const [key, value] of Object.entries(card.secondaryAction)) {
-                if (value) {
-                    cardEl.setAttribute(`data-wx-secondary-${key.toLowerCase()}`, value);
-                }
-            }
-        }
 
         // map bootstrap colors to hex for the top border highlight
         const colorCss = card.colorCss || "";
@@ -263,29 +280,13 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         
         cardEl.style.setProperty("--kanban-color", colorHex);
 
-        // build card header (icon/image + title)
+        // build card header
         const header = document.createElement("div");
         header.className = "card-header";
-
-        if (card.image) {
-            const img = document.createElement("img");
-            img.src = card.image;
-            img.className = "card-image";
-            header.appendChild(img);
-        } else if (card.icon) {
-            const iconWrapper = document.createElement("div");
-            iconWrapper.className = "card-icon";
-            const icon = document.createElement("i");
-            icon.className = card.icon;
-            iconWrapper.appendChild(icon);
-            header.appendChild(iconWrapper);
-        }
-
         const title = document.createElement("div");
         title.className = "card-title";
         title.textContent = card.label;
         header.appendChild(title);
-        
         cardEl.appendChild(header);
 
         // build card content
@@ -306,7 +307,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 e.dataTransfer.effectAllowed = "move";
                 e.dataTransfer.setData("text/plain", card.id || "");
             } catch (err) {
-                // ignore data transfer errors on unsupported browsers
+                // ignore error
             }
         });
 
@@ -318,7 +319,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
         cardEl.addEventListener("dragover", (e) => {
             e.preventDefault();
-            e.stopPropagation(); // prevent bubbling to the cell
+            e.stopPropagation();
             
             const rect = cardEl.getBoundingClientRect();
             const isTopHalf = (e.clientY - rect.top) < (rect.height / 2);
@@ -451,4 +452,5 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     }
 };
 
+// register the class in the controller registry
 webexpress.webui.Controller.registerClass("wx-webui-kanban", webexpress.webui.KanbanCtrl);

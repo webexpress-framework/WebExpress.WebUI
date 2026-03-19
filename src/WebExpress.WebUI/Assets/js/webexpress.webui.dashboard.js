@@ -5,13 +5,9 @@
  */
 webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
 
-    // model state: array of column objects { title: string, widgets: [] }
     _columns = [];
     _isMovable = true;
-    _boardCols = 3; // default number of vertical lanes
-    _boardTemplate = null; // custom grid template columns string
     
-    // drag state
     _dragWidget = null;
     _dragColIndex = -1;
 
@@ -28,36 +24,76 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             this._isMovable = false;
         }
 
-        // parse custom column sizes (e.g. "25%, 50%, *")
-        if (element.dataset.columnSize) {
-            const sizes = element.dataset.columnSize.split(",").map(s => {
-                let size = s.trim();
-                return size === "*" ? "1fr" : size;
+        this._parseStaticConfig();
+        this.render();
+    }
+
+    /**
+     * Parses columns and widgets from the static dom attributes.
+     */
+    _parseStaticConfig() {
+        const el = this._element;
+        let columns = [];
+
+        // extract columns from elements or dataset
+        const columnNodes = el.querySelectorAll(".wx-column");
+        if (columnNodes.length > 0) {
+            columnNodes.forEach((node) => {
+                columns.push({
+                    id: node.id || node.dataset.id,
+                    label: node.dataset.label || node.id || "column",
+                    size: node.dataset.size || "1fr",
+                    widgets: []
+                });
             });
-            
-            if (sizes.length > 0) {
-                this._boardCols = sizes.length;
-                this._boardTemplate = sizes.join(" ");
+        } else {
+            let colIds = [];
+            let colTitles = [];
+            let colSizes = [];
+
+            if (el.dataset.columns) {
+                colIds = String(el.dataset.columns).split(",").map((s) => {
+                    return s.trim();
+                });
             }
-        } else if (element.dataset.columns) {
-            // fallback to equal width columns
-            this._boardCols = parseInt(element.dataset.columns, 10) || 3;
+            if (el.dataset.columnTitles) {
+                colTitles = String(el.dataset.columnTitles).split(",").map((s) => {
+                    return s.trim();
+                });
+            }
+            if (el.dataset.columnSize) {
+                colSizes = String(el.dataset.columnSize).split(",").map((s) => {
+                    let size = s.trim();
+                    return size === "*" ? "1fr" : size;
+                });
+            }
+
+            const maxCols = Math.max(colIds.length, colTitles.length);
+
+            if (maxCols === 0) {
+                // default to 3 columns if nothing is specified
+                for (let i = 0; i < 3; i++) {
+                    columns.push({
+                        id: "col_" + i,
+                        label: "",
+                        size: "1fr",
+                        widgets: []
+                    });
+                }
+            } else {
+                for (let i = 0; i < maxCols; i++) {
+                    columns.push({
+                        id: colIds[i] || `col_${i}`,
+                        label: colTitles[i] || colIds[i] || `column ${i + 1}`,
+                        size: colSizes[i] || "1fr",
+                        widgets: []
+                    });
+                }
+            }
         }
 
-        // read optional column titles (comma separated)
-        const titlesAttr = element.dataset.columnTitles || "";
-        const titles = titlesAttr.split(",").map(s => s.trim());
-
-        // initialize columns with optional titles
-        this._columns = Array.from({ length: this._boardCols }, (_, i) => {
-            return {
-                title: titles[i] || null,
-                widgets: []
-            };
-        });
-
+        this._columns = columns;
         this._parseStaticWidgets();
-        this.render();
     }
 
     /**
@@ -78,7 +114,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
                 
                 const reservedKeys = [
                     "widget", "color", "closeable", "movable", 
-                    "label", "icon", "image", "column"
+                    "label", "icon", "image", "column", "columnId"
                 ];
 
                 for (const key in dataset) {
@@ -99,14 +135,33 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
                     removable: dataset.closeable !== "false",
                     movable: dataset.movable !== "false",
                     html: htmlContent,
-                    params: params
+                    params: params,
+                    columnId: dataset.columnId || dataset.column || null
                 };
                 
-                // assign to specified column or distribute evenly
-                let targetCol = dataset.column !== undefined ? parseInt(dataset.column, 10) : (parseIndex % this._boardCols);
-                targetCol = Math.max(0, Math.min(targetCol, this._boardCols - 1));
+                let targetColIndex = -1;
                 
-                this._columns[targetCol].widgets.push(widgetData);
+                if (widgetData.columnId !== null) {
+                    // try to find column by id
+                    targetColIndex = this._columns.findIndex((c) => {
+                        return c.id === String(widgetData.columnId);
+                    });
+                    
+                    // fallback to index if id is numeric
+                    if (targetColIndex === -1 && !isNaN(widgetData.columnId)) {
+                        const idx = parseInt(widgetData.columnId, 10);
+                        if (idx >= 0 && idx < this._columns.length) {
+                            targetColIndex = idx;
+                        }
+                    }
+                }
+                
+                if (targetColIndex === -1) {
+                    // distribute evenly
+                    targetColIndex = parseIndex % this._columns.length;
+                }
+                
+                this._columns[targetColIndex].widgets.push(widgetData);
                 parseIndex++;
             }
         }
@@ -122,33 +177,31 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         const row = document.createElement("div");
         row.className = "wx-dashboard-row";
         
-        // apply columns or custom template
-        row.style.setProperty("--wx-board-cols", this._boardCols);
-        if (this._boardTemplate) {
-            row.style.setProperty("--wx-board-template", this._boardTemplate);
-        }
+        // apply columns and custom template
+        row.style.setProperty("--wx-board-cols", this._columns.length);
+        const sizes = this._columns.map((c) => {
+            return c.size === "*" ? "1fr" : c.size;
+        });
+        row.style.setProperty("--wx-board-template", sizes.join(" "));
 
-        for (let colIdx = 0; colIdx < this._boardCols; colIdx++) {
+        for (let colIdx = 0; colIdx < this._columns.length; colIdx++) {
             const colData = this._columns[colIdx];
 
-            // Create a wrapper for the title and the lane
             const wrapperEl = document.createElement("div");
             wrapperEl.className = "wx-dashboard-lane-wrapper";
 
-            // Append title if it exists
-            if (colData.title) {
+            if (colData.label) {
                 const titleEl = document.createElement("h5");
                 titleEl.className = "wx-dashboard-lane-title";
-                titleEl.textContent = colData.title;
+                titleEl.textContent = colData.label;
                 wrapperEl.appendChild(titleEl);
             }
 
-            // Create the actual drop zone lane
             const laneEl = document.createElement("div");
             laneEl.className = "wx-dashboard-lane";
             laneEl.dataset.columnIndex = colIdx;
+            laneEl.dataset.columnId = colData.id;
 
-            // handle dropping into the general area of the lane
             if (this._isMovable) {
                 laneEl.addEventListener("dragover", (e) => {
                     e.preventDefault();
@@ -174,7 +227,6 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
                 });
             }
 
-            // append all widgets for this column
             const columnWidgets = colData.widgets;
             for (let i = 0; i < columnWidgets.length; i++) {
                 const widgetData = columnWidgets[i];
@@ -190,7 +242,10 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Builds the DOM element for a single dashboard widget.
+     * Builds and returns the DOM element representing a single dashboard widget.
+     * @param {Object} widgetData - The widget configuration object.
+     * @param {number} colIdx - Index of the column the widget belongs to.
+     * @returns {HTMLElement} The constructed widget card element.
      */
     _buildWidgetElement(widgetData, colIdx) {
         const registeredWidget = webexpress.webui.DashboardWidgets.get(widgetData.id) || {};
@@ -290,7 +345,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         if (this._isMovable) {
             cardEl.addEventListener("dragover", (e) => {
                 e.preventDefault();
-                e.stopPropagation(); // prevent lane events
+                e.stopPropagation();
                 
                 // calc mouse position to determine top or bottom drop indicator
                 const rect = cardEl.getBoundingClientRect();
@@ -324,8 +379,15 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         return cardEl;
     }
 
+    /**
+     * Removes a widget from the specified column and re-renders the dashboard.
+     * @param {number} colIdx - Index of the column containing the widget.
+     * @param {string} instanceId - Unique instance identifier of the widget.
+     */
     _removeWidget(colIdx, instanceId) {
-        const index = this._columns[colIdx].widgets.findIndex(w => w.instanceId === instanceId);
+        const index = this._columns[colIdx].widgets.findIndex((w) => {
+            return w.instanceId === instanceId;
+        });
         if (index > -1) {
             this._columns[colIdx].widgets.splice(index, 1);
             this.render();
@@ -333,22 +395,39 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         }
     }
 
+    /**
+     * Handles the drag start event for a widget.
+     * Stores the dragged widget reference and applies visual drag indicators.
+     * @param {DragEvent} e - The dragstart event.
+     * @param {Object} widgetData - The widget being dragged.
+     * @param {number} colIdx - Index of the column the widget originates from.
+     */
     _onDragStart(e, widgetData, colIdx) {
         this._dragWidget = widgetData;
         this._dragColIndex = colIdx;
         
-        // timeout ensures the drag image doesn't glitch when setting opacity immediately
+        // timeout ensures the drag image doesn't glitch
         setTimeout(() => {
             const el = this._element.querySelector(`[data-instance-id="${widgetData.instanceId}"]`);
-            if(el) el.classList.add("opacity-50");
+            if (el) {
+                el.classList.add("opacity-50");
+            }
         }, 0);
         
         try {
             e.dataTransfer.effectAllowed = "move";
             e.dataTransfer.setData("text/plain", widgetData.instanceId || "");
-        } catch (err) {}
+        } catch (err) {
+            // ignore
+        }
     }
 
+    /**
+     * Handles the drag end event for a widget.
+     * Clears drag indicators and resets internal drag state.
+     * @param {DragEvent} e - The dragend event.
+     * @param {HTMLElement} cardEl - The widget card element.
+     */
     _onDragEnd(e, cardEl) {
         cardEl.classList.remove("opacity-50");
         this._dragWidget = null;
@@ -357,18 +436,25 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Handles drop on the lane background (appends to the column).
+     * Handles dropping a widget onto an empty area of a column.
+     * The widget is appended to the end of the target column.
+     * @param {DragEvent} e - The drop event.
+     * @param {number} targetColIdx - Index of the target column.
+     * @param {HTMLElement} laneEl - The lane element receiving the drop.
      */
     _onDropLane(e, targetColIdx, laneEl) {
         e.preventDefault();
         this._clearDropTargets();
 
-        if (!this._dragWidget || this._dragColIndex === -1) return;
+        if (!this._dragWidget || this._dragColIndex === -1) {
+            return;
+        }
 
-        const sourceIndex = this._columns[this._dragColIndex].widgets.findIndex(w => w.instanceId === this._dragWidget.instanceId);
+        const sourceIndex = this._columns[this._dragColIndex].widgets.findIndex((w) => {
+            return w.instanceId === this._dragWidget.instanceId;
+        });
         if (sourceIndex > -1) {
             const [moved] = this._columns[this._dragColIndex].widgets.splice(sourceIndex, 1);
-            // always append at the end of the lane
             this._columns[targetColIdx].widgets.push(moved);
             
             this.render();
@@ -377,7 +463,14 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Handles drop directly onto another widget (inserts before or after).
+     * Handles dropping a widget directly onto another widget.
+     * Inserts the dragged widget before or after the target widget,
+     * depending on the drop position (top or bottom half).
+     * @param {DragEvent} e - The drop event.
+     * @param {Object} targetWidget - The widget onto which the drop occurred.
+     * @param {number} targetColIdx - Index of the target column.
+     * @param {HTMLElement} cardEl - The target widget's card element.
+     * @param {boolean} isTopHalf - True if dropped in the upper half of the widget.
      */
     _onDropWidget(e, targetWidget, targetColIdx, cardEl, isTopHalf) {
         e.preventDefault();
@@ -387,18 +480,21 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             return;
         }
 
-        const sourceIndex = this._columns[this._dragColIndex].widgets.findIndex(w => w.instanceId === this._dragWidget.instanceId);
-        let targetIndex = this._columns[targetColIdx].widgets.findIndex(w => w.instanceId === targetWidget.instanceId);
+        const sourceIndex = this._columns[this._dragColIndex].widgets.findIndex((w) => {
+            return w.instanceId === this._dragWidget.instanceId;
+        });
+        let targetIndex = this._columns[targetColIdx].widgets.findIndex((w) => {
+            return w.instanceId === targetWidget.instanceId;
+        });
 
         if (sourceIndex > -1 && targetIndex > -1) {
             const [moved] = this._columns[this._dragColIndex].widgets.splice(sourceIndex, 1);
             
-            // adjust target index since splicing from the SAME column shifts indices
+            // adjust target index since splicing from the same column shifts indices
             if (this._dragColIndex === targetColIdx && sourceIndex < targetIndex) {
                 targetIndex -= 1;
             }
             
-            // if dropping on the bottom half, insert AFTER the target widget
             if (!isTopHalf) {
                 targetIndex += 1;
             }
@@ -410,6 +506,9 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         }
     }
 
+    /**
+     * Clears all visual drop indicators from lanes and widget cards.
+     */
     _clearDropTargets() {
         const dropZones = this._element.querySelectorAll(".wx-dashboard-lane, .wx-dashboard-widget-card");
         for (let i = 0; i < dropZones.length; i++) {
@@ -417,21 +516,28 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         }
     }
 
+    /**
+     * Dispatches a change event containing the updated dashboard layout.
+     * Used to persist layout changes on the server.
+     * @param {string} action - The type of change (e.g., "remove", "reorder").
+     */
     _dispatchChangeEvent(action) {
-        const evRoot = webexpress?.webui?.Event;
-        const eventName = (evRoot && evRoot.CHANGE_VALUE_EVENT) ? evRoot.CHANGE_VALUE_EVENT : "webexpress.webui.change.value";
-        
-        // simplify structure for persistence: returns array of columns containing widget IDs
-        const structure = this._columns.map(col => col.widgets.map(w => w.id));
+        // map the columns array to layout structure for server persistence
+        const structure = this._columns.map((col) => {
+            return {
+                columnId: col.id,
+                widgets: col.widgets.map((w) => {
+                    return w.id;
+                })
+            };
+        });
 
-        this._dispatch(eventName, {
-            detail: {
-                id: this._element.id,
-                action: action,
-                layout: structure
-            }
+        this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
+            action: action,
+            layout: structure
         });
     }
 };
 
+// register the class in the webapp controller namespace
 webexpress.webui.Controller.registerClass("wx-webui-dashboard", webexpress.webui.DashboardCtrl);

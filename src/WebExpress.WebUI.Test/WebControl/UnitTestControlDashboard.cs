@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             var html = control.Render(context, visualTree);
-            var expected = @"<div class=""wx-webui-dashboard"" data-column-titles=""A"" data-column-size=""10%""></div>";
+            var expected = @"<div class=""wx-webui-dashboard""><div class=""wx-column"" data-label=""A"" data-size=""10%""></div></div>";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             var html = control.Render(context, visualTree);
-            var expected = @"<div class=""wx-webui-dashboard"" data-column-titles=""A,B"" data-column-size=""10%,*""></div>";
+            var expected = @"<div class=""wx-webui-dashboard""><div class=""wx-column"" data-label=""A"" data-size=""10%""></div><div class=""wx-column"" data-label=""B"" data-size=""*""></div></div>";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }

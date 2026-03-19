@@ -134,8 +134,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("wx-webui-dashboard", GetClasses()),
                 Style = GetStyles()
             }
-                .AddUserAttribute("data-column-titles", string.Join(",", _columns.Select(x => x.Title)))
-                .AddUserAttribute("data-column-size", string.Join(",", _columns.Select(x => x.Size)))
+                .Add(_columns.Select(x => x.Render(renderContext, visualTree)))
                 .Add(widgets.Select(x => x.Render(renderContext, visualTree)));
 
             return html;
