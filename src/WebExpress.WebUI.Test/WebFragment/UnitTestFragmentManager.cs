@@ -730,7 +730,7 @@ namespace WebExpress.WebUI.Test.WebFragment
             AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
         }
 
-        // <summary>
+        /// <summary>
         /// Test the render function of the fragment manager for dashboard control items.
         /// </summary>
         [Fact]
@@ -745,6 +745,28 @@ namespace WebExpress.WebUI.Test.WebFragment
 
             // act
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlDashboard));
+
+            // validation
+            Assert.NotNull(html);
+            Assert.NotEmpty(html);
+            AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
+        }
+
+        /// <summary>
+        /// Test the render function of the fragment manager for kanban control items.
+        /// </summary>
+        [Fact]
+        public void Render_TestSectionFragmentControlKanban()
+        {
+            // arrange
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolkanban"" class=""wx-webui-kanban""><div class=""wx-kanban-card""></div></div>";
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+
+            // act
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlKanban));
 
             // validation
             Assert.NotNull(html);

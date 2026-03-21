@@ -5,37 +5,38 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a column in a control dashboard, including its display title 
-    /// and size configuration.
+    /// Represents a swimlane in a kanban control.
     /// </summary>
-    public sealed class ControlDashboardColumn : IControlDashboardColumn
+    public sealed class ControlKanbanSwimlane : IControlKanbanSwimlane
     {
         /// <summary>
         /// Returns the id of the control.
         /// </summary>
-        public string Id { get; }
+        public string Id { get; private set; }
 
         /// <summary>
-        /// Returns the title associated with the object.
+        /// Returns the title associated with the swimlane.
         /// </summary>
         public string Title { get; }
 
         /// <summary>
-        /// Returns the size descriptor associated with the object.
+        /// Returns a value indicating whether the content is currently collapsed.
         /// </summary>
-        public string Size { get; }
+        public bool Collapsed { get; }
 
         /// <summary>
         /// Initializes a new instance of class.
         /// </summary>
         /// <param name="id">The unique identifier for the column.</param>
         /// <param name="title">The title to be displayed for the column.</param>
-        /// <param name="size">The size descriptor for the column (e.g., "33%", "*").</param>
-        public ControlDashboardColumn(string id, string title, string size)
+        /// <param name="collapsed">
+        /// A value indicating whether the column content is initially collapsed.
+        /// </param>
+        public ControlKanbanSwimlane(string id, string title, bool collapsed = false)
         {
             Id = id;
             Title = title;
-            Size = size;
+            Collapsed = collapsed;
         }
 
         /// <summary>
@@ -49,10 +50,10 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = "wx-column"
+                Class = "wx-swimlane"
             }
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, Title))
-                .AddUserAttribute("data-size", Size);
+                .AddUserAttribute("data-expanded", Collapsed ? "false" : null);
 
             return html;
         }

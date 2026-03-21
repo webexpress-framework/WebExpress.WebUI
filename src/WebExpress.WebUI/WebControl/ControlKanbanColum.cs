@@ -5,23 +5,23 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a column in a control dashboard, including its display title 
+    /// Represents a column in a kanban control, including its display title 
     /// and size configuration.
     /// </summary>
-    public sealed class ControlDashboardColumn : IControlDashboardColumn
+    public sealed class ControlKanbanColumn : IControlKanbanColumn
     {
         /// <summary>
         /// Returns the id of the control.
         /// </summary>
-        public string Id { get; }
+        public string Id { get; private set; }
 
         /// <summary>
-        /// Returns the title associated with the object.
+        /// Returns the title associated with the column.
         /// </summary>
         public string Title { get; }
 
         /// <summary>
-        /// Returns the size descriptor associated with the object.
+        /// Returns the size descriptor associated with the column.
         /// </summary>
         public string Size { get; }
 
@@ -31,7 +31,7 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="id">The unique identifier for the column.</param>
         /// <param name="title">The title to be displayed for the column.</param>
         /// <param name="size">The size descriptor for the column (e.g., "33%", "*").</param>
-        public ControlDashboardColumn(string id, string title, string size)
+        public ControlKanbanColumn(string id, string title, string size)
         {
             Id = id;
             Title = title;

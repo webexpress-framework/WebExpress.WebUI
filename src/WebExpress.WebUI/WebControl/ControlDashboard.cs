@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     /// </summary>
     public class ControlDashboard : Control, IControlDashboard
     {
-        private readonly List<ControlDashboardColumn> _columns = [];
+        private readonly List<IControlDashboardColumn> _columns = [];
         private readonly List<IControlDashboardWidget> _widgets = [];
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace WebExpress.WebUI.WebControl
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        /// <param name="items">The carousel items to be added.</param>
+        /// <param name="items">The widget items to be added.</param>
         public ControlDashboard(string id = null, params IControlDashboardWidget[] items)
             : base(id)
         {
@@ -30,15 +30,15 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Adds one or more columns to the control dashboard.
+        /// Adds one or more columns to the dashboard control.
         /// </summary>
         /// <param name="columns">
         /// An array of columns to add to the dashboard.
         /// </param>
         /// <returns>
-        /// The updated control dashboard instance with the specified columns added.
+        /// The updated dashboard control instance with the specified columns added.
         /// </returns>
-        public IControlDashboard Add(params ControlDashboardColumn[] columns)
+        public virtual IControlDashboard Add(params IControlDashboardColumn[] columns)
         {
             _columns.AddRange(columns);
             return this;
@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="widgets">The widgets to be added.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlDashboard Add(params IControlDashboardWidget[] widgets)
+        public virtual IControlDashboard Add(params IControlDashboardWidget[] widgets)
         {
             _widgets.AddRange(widgets);
 
@@ -58,15 +58,15 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Adds one or more columns to the control dashboard.
+        /// Adds one or more columns to the dashboar controld.
         /// </summary>
         /// <param name="columns">
         /// An array of columns to add to the dashboard.
         /// </param>
         /// <returns>
-        /// The updated control dashboard instance with the specified columns added.
+        /// The updated dashboard control instance with the specified columns added.
         /// </returns>
-        public IControlDashboard Add(IEnumerable<ControlDashboardColumn> columns)
+        public virtual IControlDashboard Add(IEnumerable<IControlDashboardColumn> columns)
         {
             _columns.AddRange(columns);
             return this;
@@ -77,7 +77,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="widgets">The widgets to be added.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlDashboard Add(IEnumerable<IControlDashboardWidget> widgets)
+        public virtual IControlDashboard Add(IEnumerable<IControlDashboardWidget> widgets)
         {
             _widgets.AddRange(widgets);
 
@@ -91,7 +91,7 @@ namespace WebExpress.WebUI.WebControl
         /// The current instance of the dashboard control, allowing for method 
         /// chaining.
         /// </returns>
-        public IControlDashboard ClearColumns()
+        public virtual IControlDashboard ClearColumns()
         {
             _columns.Clear();
 
@@ -102,7 +102,7 @@ namespace WebExpress.WebUI.WebControl
         /// Clears all widgets from the dashboard.
         /// </summary>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlDashboard Clear()
+        public virtual IControlDashboard Clear()
         {
             _widgets.Clear();
 
@@ -125,6 +125,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="widgets">The collection of widgets to be rendered within the dashboard.</param>
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlDashboardWidget> widgets)
         {

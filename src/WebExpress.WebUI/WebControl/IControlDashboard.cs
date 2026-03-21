@@ -13,15 +13,15 @@ namespace WebExpress.WebUI.WebControl
         IEnumerable<IControlDashboardWidget> Widgets { get; }
 
         /// <summary>
-        /// Adds one or more columns to the control dashboard.
+        /// Adds one or more columns to the dashboard control.
         /// </summary>
         /// <param name="columns">
         /// An array of columns to add to the dashboard.
         /// </param>
         /// <returns>
-        /// The updated control dashboard instance with the specified columns added.
+        /// The updated dashboard control instance with the specified columns added.
         /// </returns>
-        IControlDashboard Add(params ControlDashboardColumn[] columns);
+        IControlDashboard Add(params IControlDashboardColumn[] columns);
 
         /// <summary>
         /// Adds one or more widgets to the dashboard.
@@ -31,15 +31,15 @@ namespace WebExpress.WebUI.WebControl
         IControlDashboard Add(params IControlDashboardWidget[] widgets);
 
         /// <summary>
-        /// Adds one or more columns to the control dashboard.
+        /// Adds one or more columns to the dashboard control.
         /// </summary>
         /// <param name="columns">
         /// An array of columns to add to the dashboard.
         /// </param>
         /// <returns>
-        /// The updated control dashboard instance with the specified columns added.
+        /// The updated dashboard control instance with the specified columns added.
         /// </returns>
-        IControlDashboard Add(IEnumerable<ControlDashboardColumn> columns);
+        IControlDashboard Add(IEnumerable<IControlDashboardColumn> columns);
 
         /// <summary>
         /// Adds a collection of widgets to the dashboard.

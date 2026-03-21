@@ -4,9 +4,9 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a dashboard column.
+    /// Represents a kanban column.
     /// </summary>
-    public interface IControlDashboardColumn : IWebUIElement<IRenderControlContext, IVisualTreeControl>
+    public interface IControlKanbanColumn : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
         /// Returns the title associated with the column.
