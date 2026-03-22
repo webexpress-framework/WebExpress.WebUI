@@ -17,6 +17,7 @@ webexpress.webui.Controller = new class {
         this.classRegistry = new Map();
         this._wxRegisteredElements = new WeakSet(); // prevent duplicate bindings
         this.observer = new MutationObserver(this.handleMutations.bind(this));
+        
         // observe attribute changes
         this.observer.observe(document, {
             childList: true,
@@ -29,24 +30,54 @@ webexpress.webui.Controller = new class {
                 "data-wx-bind"
             ]
         });
+        
         this.overrideCreateElement();
         this.initModalHandler();
 
         // re-added native fullscreen listeners
-        document.addEventListener("fullscreenchange", () => { this._onFullscreenChange(); });
-        document.addEventListener("webkitfullscreenchange", () => { this._onFullscreenChange(); });
-        document.addEventListener("mozfullscreenchange", () => { this._onFullscreenChange(); });
-        document.addEventListener("MSFullscreenChange", () => { this._onFullscreenChange(); });
+        document.addEventListener("fullscreenchange", () => { 
+            this._onFullscreenChange(); 
+        });
+        document.addEventListener("webkitfullscreenchange", () => { 
+            this._onFullscreenChange(); 
+        });
+        document.addEventListener("mozfullscreenchange", () => { 
+            this._onFullscreenChange(); 
+        });
+        document.addEventListener("MSFullscreenChange", () => { 
+            this._onFullscreenChange(); 
+        });
     }
 
     /**
      * Initializes modal handling using custom attributes.
      */
     initModalHandler() {
-        // wait for DOMContentLoaded event to ensure DOM is ready
+        // wait for domcontentloaded event to ensure dom is ready
         document.addEventListener("DOMContentLoaded", () => {
+            const filterPrimaryElements = document.querySelectorAll("[data-wx-primary-action='filter']");
+            const filterPrimaryDefs = Array.from(filterPrimaryElements).map(el => ({
+                id: el.id,
+                name: el.textContent.trim(),
+                group: el.dataset.wxPrimaryGroup || null,
+                exclusive: el.dataset.wxPrimaryExclusive === "true"
+            }));
+            if (filterPrimaryDefs.length > 0) {
+                webexpress.webui.FilterRegistry.registerFilters(filterPrimaryDefs);
+            }
+            const filterSecondaryElements = document.querySelectorAll("[data-wx-secondary-action='filter']");
+            const filterSecondaryDefs = Array.from(filterSecondaryElements).map(el => ({
+                id: el.id,
+                name: el.textContent.trim(),
+                group: el.dataset.wxSecondaryGroup || null,
+                exclusive: el.dataset.wxSecondaryExclusive === "true"
+            }));
+            if (filterSecondaryDefs.length > 0) {
+                webexpress.webui.FilterRegistry.registerFilters(filterSecondaryDefs);
+            }
+            webexpress.webui.FilterRegistry.init();
             // register both toggle and dismiss elements initially
-            document.querySelectorAll("[data-wx-primary-action], [data-wx-secondary-action], [data-wx-dismiss], [data-wx-bind]").forEach(el => {
+            document.querySelectorAll("[data-wx-primary-action], [data-wx-secondary-action], [data-wx-dismiss], [data-wx-bind]").forEach((el) => {
                 this._registerWxEvents(el);
             });
         });
@@ -75,7 +106,7 @@ webexpress.webui.Controller = new class {
                 const instance = this.getInstance(target);
 
                 if (!instance) {
-
+                    // no instance found
                 } else if (typeof instance.show === "function") {
                     if (size) {
                         instance.size = size;
@@ -97,7 +128,7 @@ webexpress.webui.Controller = new class {
                 const instance = this.getInstance(target);
 
                 if (!instance) {
-
+                    // no instance found
                 } else if (uri) {
                     instance.uri = uri;
                 }
@@ -141,10 +172,10 @@ webexpress.webui.Controller = new class {
         if (element.matches("[data-wx-primary-action='fullscreen']")) {
             element.addEventListener("click", (e) => {
                 e.preventDefault();
-                e.stopPropagation(); // stop bubbling to prevent parent handlers (like editor modals) from closing
+                e.stopPropagation(); // stop bubbling to prevent parent handlers from closing
 
                 const targetSelector = element.getAttribute("data-wx-primary-target");
-                // default to body if no target is specified, as styling the body is more reliable for 'light' fullscreen
+                // default to body if no target is specified
                 const targetEl = targetSelector ? document.querySelector(targetSelector) : document.body;
                 
                 if (targetEl) {
@@ -171,6 +202,15 @@ webexpress.webui.Controller = new class {
             element.setAttribute("aria-pressed", "false");
             bound = true;
         }
+        
+        // quickfilter actions
+        if (element.matches("[data-wx-primary-action='filter']")) {
+            element.addEventListener("click", (e) => {
+                e.preventDefault();
+                webexpress.webui.FilterRegistry.toggle(element.id);
+            });
+            bound = true;
+        }
 
         // secondary actions
         // modal
@@ -182,7 +222,7 @@ webexpress.webui.Controller = new class {
                 const instance = this.getInstance(target);
 
                 if (!instance) {
-
+                    // no instance found
                 } else if (typeof instance.show === "function") {
                     if (size) {
                         instance.size = size;
@@ -204,7 +244,7 @@ webexpress.webui.Controller = new class {
                 const instance = this.getInstance(target);
 
                 if (!instance) {
-
+                    // no instance found
                 } else if (typeof instance.show === "function") {
                     if (uri) {
                         instance.uri = uri;
@@ -250,10 +290,9 @@ webexpress.webui.Controller = new class {
         if (element.matches("[data-wx-secondary-action='fullscreen']")) {
             element.addEventListener("dblclick", (e) => {
                 e.preventDefault();
-                e.stopPropagation(); // stop bubbling to prevent parent handlers (like editor modals) from closing
+                e.stopPropagation();
 
                 const targetSelector = element.getAttribute("data-wx-secondary-target");
-                // default to body if no target is specified, as styling the body is more reliable for 'light' fullscreen
                 const targetEl = targetSelector ? document.querySelector(targetSelector) : document.body;
 
                 if (targetEl) {
@@ -281,24 +320,32 @@ webexpress.webui.Controller = new class {
             bound = true;
         }
 
-        // dissmiss actions
+        // quickfilter actions
+        if (element.matches("[data-wx-secondary-action='filter']")) {
+            element.addEventListener("dblclick", (e) => {
+                e.preventDefault();
+                webexpress.webui.FilterRegistry.toggle(element.id);
+            });
+            bound = true;
+        }
+
+        // dismiss actions
         // css fullscreen dismiss support
         if (element.matches("[data-wx-dismiss='fullscreen']")) {
             element.addEventListener("click", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
 
-                // check for a specific target, otherwise try to find the active fullscreen element
                 const targetSelector = element.getAttribute("data-wx-target");
                 let targetEl = targetSelector ? document.querySelector(targetSelector) : document.querySelector(".wx-fullscreen-active");
 
-                // if no specific target is active, we might be inside the fullscreen element itself
+                // fallback to closest full screen element
                 if (!targetEl) {
                     targetEl = element.closest(".wx-fullscreen-active");
                 }
 
                 if (targetEl && this._isCssFullscreenElement(targetEl)) {
-                    this.toggleFullscreen(targetEl); // toggling while active exits it
+                    this.toggleFullscreen(targetEl);
                 }
             });
             bound = true;
@@ -309,25 +356,22 @@ webexpress.webui.Controller = new class {
             element.addEventListener("click", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                // native exit is global on the document, so no specific target is needed
                 this._exitNativeFullscreen(); 
             });
             bound = true;
         }
 
         // bind
-        // search 
-        if (element.matches("[data-wx-bind='search']")) {
-            const source = element.getAttribute("data-wx-source") || null;
-            const sourceElement = document.querySelector(source);
+        const bindAttr = element.getAttribute("data-wx-bind");
+        if (bindAttr) {
+            const binds = bindAttr.split(",").map((b) => {
+                return b.trim();
+            }).filter((b) => {
+                return b.length > 0;
+            });
 
-            sourceElement?.addEventListener(webexpress.webui.Event.CHANGE_FILTER_EVENT, (e) => {
-                const query = e.detail?.value;
-                const searchType = e.detail?.searchType;
-                const instance = this.getInstanceByElement(element);
-                if (typeof instance?.search === "function") {
-                    instance.search(query, searchType);
-                }
+            binds.forEach((bindName) => {
+                this._registerBind(element, bindName);
             });
 
             bound = true;
@@ -345,6 +389,10 @@ webexpress.webui.Controller = new class {
     handleMutations(mutationsList) {
         for (const mutation of mutationsList) {
             if (mutation.type === "attributes" && mutation.target instanceof HTMLElement) {
+                // quickfilter
+                if (mutation.target.dataset.wxPrimaryAction === "filter") {
+                    this._registerQuickfilterElement(mutation.target);
+                }
                 this._registerWxEvents(mutation.target);
                 continue;
             }
@@ -352,6 +400,10 @@ webexpress.webui.Controller = new class {
             for (const node of mutation.addedNodes) {
                 if (node.nodeType === Node.ELEMENT_NODE) {
                     this.createInstances(node);
+                    // quickfilter
+                    node.querySelectorAll?.("[data-wx-primary-action='filter']").forEach(el => {
+                        this._registerQuickfilterElement(el);
+                    });
                 }
             }
         }
@@ -363,7 +415,7 @@ webexpress.webui.Controller = new class {
      */
     createInstances(element) {
         // initialize children first (depth-first)
-        Array.from(element.children).forEach(child => {
+        Array.from(element.children).forEach((child) => {
             try {
                 this.createInstances(child);
             } catch (error) {
@@ -374,7 +426,7 @@ webexpress.webui.Controller = new class {
         // register wx events for dynamically added elements
         this._registerWxEvents(element);
 
-        // then initialize the element itself if it matches a registered selector
+        // initialize the element itself if it matches a registered selector
         for (const [selector, ClassConstructor] of this.classRegistry.entries()) {
             if (element.classList.contains(selector)) {
                 element.classList.remove(selector);
@@ -419,7 +471,7 @@ webexpress.webui.Controller = new class {
             this.instanceMap.delete(element);
         }
         // remove instances for all descendants
-        element.querySelectorAll('*').forEach(child => {
+        element.querySelectorAll('*').forEach((child) => {
             if (this.instanceMap.has(child)) {
                 this.instanceMap.delete(child);
             }
@@ -442,7 +494,6 @@ webexpress.webui.Controller = new class {
         const originalCreateElement = document.createElement.bind(document);
         document.createElement = (tagName, options) => {
             const element = originalCreateElement(tagName, options);
-            // create instances for the newly created element
             this.createInstances(element);
             return element;
         };
@@ -450,9 +501,9 @@ webexpress.webui.Controller = new class {
 
     /**
      * Retrieves an instance based on a CSS selector (ID or class).
-     * @param {string} selector - The CSS selector for the DOM element (e.g., "#elementId" or ".className").
+     * @param {string} selector - The CSS selector for the DOM element.
      * @param {Function} [ClassConstructor] - (Optional) The constructor of the expected class instance.
-     * @returns {Object|null} - The instance associated with the element, or null if not found or type mismatch.
+     * @returns {Object|null} - The instance associated with the element, or null if not found.
      */
     getInstance(selector, ClassConstructor) {
         const element = document.querySelector(selector);
@@ -470,7 +521,7 @@ webexpress.webui.Controller = new class {
      * Retrieves an instance based on a DOM element.
      * @param {HTMLElement} element - The DOM element.
      * @param {Function} [ClassConstructor] - (Optional) The constructor of the expected class instance.
-     * @returns {Object|null} - The instance associated with the element, or null if not found or type mismatch.
+     * @returns {Object|null} - The instance associated with the element, or null.
      */
     getInstanceByElement(element, ClassConstructor) {
         if (element._wx_controller) {
@@ -510,7 +561,9 @@ webexpress.webui.Controller = new class {
      * @param {HTMLElement} el - target element to toggle fullscreen for
      */
     toggleFullscreen(el) {
-        if (!el) { return; }
+        if (!el) { 
+            return; 
+        }
         
         const isFullscreen = el.classList.toggle("wx-fullscreen-active");
 
@@ -531,7 +584,9 @@ webexpress.webui.Controller = new class {
      * @param {HTMLElement} el - target element
      */
     toggleNativeFullscreen(el) {
-        if (!el) { return; }
+        if (!el) { 
+            return; 
+        }
         if (this._isNativeFullscreenElement(el)) {
             this._exitNativeFullscreen();
         } else {
@@ -590,15 +645,13 @@ webexpress.webui.Controller = new class {
     }
 
     /**
-     * Handler for global fullscreen change event (both native and simulated).
-     * Updates all fullscreen toggle buttons' aria-pressed state to reflect current status.
+     * Handler for global fullscreen change event.
      * @param {HTMLElement} [changedEl] - The element that changed state (for CSS fullscreen)
      */
     _onFullscreenChange(changedEl) {
         const nativeFsEl = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement || null;
         
-        // update CSS-based fullscreen buttons
-        document.querySelectorAll("[data-wx-primary-action='fullscreen']").forEach(btn => {
+        document.querySelectorAll("[data-wx-primary-action='fullscreen']").forEach((btn) => {
             const targetSelector = btn.getAttribute("data-wx-primary-target") || null;
             const target = targetSelector ? document.querySelector(targetSelector) : document.documentElement;
             
@@ -606,8 +659,7 @@ webexpress.webui.Controller = new class {
             this._updateButtonState(btn, active);
         });
 
-        // update native fullscreen buttons
-        document.querySelectorAll("[data-wx-primary-action='native-fullscreen']").forEach(btn => {
+        document.querySelectorAll("[data-wx-primary-action='native-fullscreen']").forEach((btn) => {
             const targetSelector = btn.getAttribute("data-wx-primary-target") || null;
             const target = targetSelector ? document.querySelector(targetSelector) : document.documentElement;
             
@@ -615,7 +667,6 @@ webexpress.webui.Controller = new class {
             this._updateButtonState(btn, active);
         });
 
-        // dispatch a framework event for consumers
         document.dispatchEvent(new CustomEvent(webexpress.webui.Event.SIZE_CHANGE_EVENT, {
             detail: {
                 sender: document,
@@ -640,7 +691,6 @@ webexpress.webui.Controller = new class {
             if (icon) {
                 if (icon.classList.contains("fa-expand")) {
                     icon.classList.replace("fa-expand", "fa-compress");
-                    // store original title if needed, or just toggle text
                     if (btn.title && btn.title.includes("Toggle")) {
                         btn.title = "Exit Fullscreen";
                     }
@@ -659,7 +709,290 @@ webexpress.webui.Controller = new class {
             }
         }
     }
-}
+    
+    /**
+     * Registers a single bind type for a given element.
+     * @param {HTMLElement} element - The bound DOM element.
+     * @param {string} bindName - The bind type identifier.
+     */
+    _registerBind(element, bindName) {
+        const sourceSelector = element.getAttribute(`data-wx-source-${bindName}`) ||
+            element.getAttribute("data-wx-source");
+
+        if (sourceSelector) {
+            const sourceElement = document.querySelector(sourceSelector);
+
+            if (!sourceElement) {
+                console.warn(`Source element not found for bind "${bindName}":`, sourceSelector);
+                return;
+            }
+
+            if (bindName == "search") {
+                sourceElement?.addEventListener(webexpress.webui.Event.CHANGE_FILTER_EVENT, (e) => {
+                    const query = e.detail?.value;
+                    const searchType = e.detail?.searchType;
+                    const instance = this.getInstanceByElement(element);
+                    if (typeof instance?.search === "function") {
+                        instance.search(query, searchType);
+                    }
+                });
+                return;
+            } 
+        }
+
+        if (bindName == "filter") {
+            document?.addEventListener(webexpress.webui.Event.CHANGE_FILTER_EVENT, (e) => {
+                const instance = this.getInstanceByElement(element);
+                if (typeof instance?.filter === "function") {
+                    instance.filter(webexpress.webui.FilterRegistry.getActiveFilters());
+                } else {
+                    element.dispatchEvent(new Event("change", { bubbles: true }));
+                }
+            });
+        }
+    }
+    
+    /**
+     * Registers a quickfilter definition in the global FilterRegistry based on the given element.
+     * Extracts relevant filter properties (id, name, group, exclusive) from the element's data attributes.
+     * This function is used in mutation observers to automatically register new quickfilter UI elements.
+     * @param {HTMLElement} el - The quickfilter UI element (e.g., button or any filter-triggering element).
+     */
+    _registerQuickfilterElement(el) {
+        // build the filter definition from the element's attributes and text content
+        const filterDef = {
+            id: el.id,
+            name: el.textContent.trim(),
+            group: el.dataset.wxPrimaryGroup || null,
+            exclusive: el.dataset.wxPrimaryExclusive === "true"
+        };
+        // register the definition in the global FilterRegistry
+        webexpress.webui.FilterRegistry.registerFilters([filterDef]);
+    }
+};
+
+/**
+ * Central registry for managing client-side quick filters.
+ * Handles state, enforces group exclusivity, persists to cookies, and notifies observers.
+ */
+webexpress.webui.FilterRegistry = new class {
+    /**
+     * Creates a new instance of the class.
+     */
+    constructor() {
+        this._knownFilters = new Map();
+        this._activeFilters = new Set();
+        this._cookieName = "wx_quickfilters";
+        this._saveTimer = null;
+        this._debounceTime = 300;
+    }
+
+    /**
+     * Registers an array of available filters in the system.
+     * @param {Array} filters - array of filter definition objects.
+     */
+    registerFilters(filters) {
+        if (Array.isArray(filters)) {
+            for (let i = 0; i < filters.length; i++) {
+                const f = filters[i];
+                if (f && f.id) {
+                    this._knownFilters.set(f.id, {
+                        id: f.id,
+                        name: f.name || f.id,
+                        group: f.group || null,
+                        exclusive: f.exclusive === true
+                    });
+                }
+            }
+        }
+    }
+
+    /**
+     * Initializes the state from the cookie and broadcasts the initial state.
+     */
+    init() {
+        const savedData = this._readCookie();
+        let changed = false;
+
+        if (savedData) {
+            const parsedIds = savedData.split(",");
+            for (let i = 0; i < parsedIds.length; i++) {
+                const id = parsedIds[i].trim();
+                // validate against known filters to prevent manipulation
+                if (this._knownFilters.has(id)) {
+                    this._activeFilters.add(id);
+                    document.getElementById(id)?.classList.add("active");
+                } else {
+                    changed = true;
+                }
+            }
+        }
+
+        // if unknown filters were dropped, update the cookie immediately
+        if (changed) {
+            this._scheduleCookieSave();
+        }
+
+        this._notifyListeners();
+    }
+
+    /**
+     * Activates a specific filter by its id and enforces group constraints.
+     * @param {string} id - the unique identifier of the filter.
+     */
+    activate(id) {
+        if (!this._knownFilters.has(id)) {
+            return;
+        }
+
+        const filter = this._knownFilters.get(id);
+
+        // enforce exclusive group logic
+        if (filter.group && filter.exclusive) {
+            const activeArray = Array.from(this._activeFilters);
+            for (let i = 0; i < activeArray.length; i++) {
+                const activeId = activeArray[i];
+                const activeConfig = this._knownFilters.get(activeId);
+                
+                if (activeConfig && activeConfig.group === filter.group && activeId !== id) {
+                    this._activeFilters.delete(activeId);
+                    document.getElementById(activeId)?.classList.remove("active");
+                }
+            }
+        }
+
+        if (!this._activeFilters.has(id)) {
+            this._activeFilters.add(id);
+            this._scheduleCookieSave();
+            this._notifyListeners();
+            document.getElementById(id)?.classList.add("active");
+        }
+    }
+
+    /**
+     * Deactivates a specific filter by its id.
+     * @param {string} id - the unique identifier of the filter.
+     */
+    deactivate(id) {
+        if (this._activeFilters.has(id)) {
+            this._activeFilters.delete(id);
+            this._scheduleCookieSave();
+            this._notifyListeners();
+            document.getElementById(id)?.classList.remove("active");
+        }
+    }
+
+    /**
+     * Toggles the state of a specific filter.
+     * @param {string} id - the unique identifier of the filter.
+     */
+    toggle(id) {
+        if (this._activeFilters.has(id)) {
+            this.deactivate(id);
+        } else {
+            this.activate(id);
+        }
+    }
+
+    /**
+     * Clears all currently active filters.
+     */
+    clearAll() {
+        if (this._activeFilters.size > 0) {
+            this._activeFilters.clear();
+            this._scheduleCookieSave();
+            this._notifyListeners();
+        }
+    }
+
+    /**
+     * Returns an array of all currently active filter ids.
+     * @returns {Array} - list of active filter identifiers.
+     */
+    getActiveFilters() {
+        return Array.from(this._activeFilters);
+    }
+
+    /**
+     * Returns the configuration details for a given filter id.
+     * @param {string} id - the identifier of the filter.
+     * @returns {Object|null} - the filter configuration.
+     */
+    getFilterConfig(id) {
+        if (this._knownFilters.has(id)) {
+            return this._knownFilters.get(id);
+        }
+        return null;
+    }
+
+    /**
+     * Returns all registered filters, grouped or as a flat list.
+     * @returns {Array} - list of all known filter configurations.
+     */
+    getAllKnownFilters() {
+        return Array.from(this._knownFilters.values());
+    }
+
+    /**
+     * Dispatches a custom event to notify components about state changes.
+     */
+    _notifyListeners() {
+        const eventName = webexpress.webui.Event.CHANGE_FILTER_EVENT;
+        const payload = {
+            activeFilters: this.getActiveFilters()
+        };
+
+        const event = new CustomEvent(eventName, { 
+            detail: payload,
+            bubbles: true 
+        });
+        document.dispatchEvent(event);
+    }
+
+    /**
+     * Schedules a debounced write operation to the cookie.
+     */
+    _scheduleCookieSave() {
+        if (this._saveTimer) {
+            clearTimeout(this._saveTimer);
+        }
+        this._saveTimer = setTimeout(() => {
+            this._writeCookie();
+        }, this._debounceTime);
+    }
+
+    /**
+     * Serializes the active filters and writes them to a document cookie.
+     */
+    _writeCookie() {
+        const val = encodeURIComponent(Array.from(this._activeFilters).join(","));
+        // set cookie valid for 30 days with secure attributes
+        const date = new Date();
+        date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000));
+        const expires = "expires=" + date.toUTCString();
+        document.cookie = this._cookieName + "=" + val + ";" + expires + ";path=/;SameSite=Strict";
+    }
+
+    /**
+     * Reads and decodes the filter state from the document cookie.
+     * @returns {string} - the decoded cookie value or empty string.
+     */
+    _readCookie() {
+        const nameEq = this._cookieName + "=";
+        const ca = document.cookie.split(";");
+        
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === " ") {
+                c = c.substring(1, c.length);
+            }
+            if (c.indexOf(nameEq) === 0) {
+                return decodeURIComponent(c.substring(nameEq.length, c.length));
+            }
+        }
+        return "";
+    }
+};
 
 /**
  * Internationalization (i18n) helper class supporting key=value files.

@@ -9,9 +9,9 @@ namespace WebExpress.WebUI.WebControl
     public interface IBind
     {
         /// <summary>
-        /// Returns the source of the data.
+        /// Returns the binding name.
         /// </summary>
-        string Source { get; }
+        string Name { get; }
 
         /// <summary>
         /// Applies user-defined attributes to the specified HTML node.

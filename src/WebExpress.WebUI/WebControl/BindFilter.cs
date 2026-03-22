@@ -4,15 +4,15 @@ using WebExpress.WebCore.WebHtml;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a binding search that applies user-defined attributes to HTML nodes 
+    /// Represents a binding filter that applies user-defined attributes to HTML nodes 
     /// for data binding purposes.
     /// </summary>
-    public class BindSearch : IBindSearch
+    public class BindFilter : IBind
     {
         /// <summary>
         /// Returns the binding name.
         /// </summary>
-        public string Name => "search";
+        public string Name => "filter";
 
         /// <summary>
         /// Returns or sets the source of the data.
@@ -31,17 +31,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public IBind ApplyUserAttributes(IHtmlNode htmlNode, string target = null)
         {
-            if (string.IsNullOrWhiteSpace(Source))
-            {
-                return this;
-            }
-
             htmlNode?.AddUserAttribute("data-wx-bind", Name);
-            htmlNode?.AddUserAttribute($"data-wx-source-{Name}", !string.IsNullOrWhiteSpace(Source) ? (Source.StartsWith('#') ? Source : $"#{Source}") : null);
-            if (!string.IsNullOrWhiteSpace(target))
-            {
-                htmlNode?.AddUserAttribute($"data-wx-target-{Name}", !string.IsNullOrWhiteSpace(target) ? (target.StartsWith('#') ? target : $"#{target}") : null);
-            }
 
             return this;
         }

@@ -134,10 +134,6 @@ webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
         if (this._label) {
             const buttonText = document.createElement("span");
             buttonText.textContent = this._label;
-            // add a small margin if there is an icon/image
-            if (this._icon || this._image) {
-                buttonText.classList.add("ms-2");
-            }
             fragment.appendChild(buttonText);
         }
 
