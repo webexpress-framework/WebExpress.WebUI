@@ -55,10 +55,7 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="htmlNode">
         /// The HTML node to which user attributes will be applied. Cannot be null.
         /// </param>
-        /// <param name="target">
-        /// The identifier specifying the target to apply
-        /// </param>
         /// <returns>The current instance for method chaining.</returns>
-        IBinding ApplyUserAttributes(IHtmlNode htmlNode, string target = null);
+        IBinding ApplyUserAttributes(IHtmlNode htmlNode);
     }
 }

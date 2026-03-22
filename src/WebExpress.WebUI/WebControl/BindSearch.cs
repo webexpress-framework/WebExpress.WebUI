@@ -25,11 +25,8 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="htmlNode">
         /// The HTML node to which user attributes will be applied. Cannot be null.
         /// </param>
-        /// <param name="target">
-        /// The identifier specifying the target to apply
-        /// </param>
         /// <returns>The current instance for method chaining.</returns>
-        public IBind ApplyUserAttributes(IHtmlNode htmlNode, string target = null)
+        public IBind ApplyUserAttributes(IHtmlNode htmlNode)
         {
             if (string.IsNullOrWhiteSpace(Source))
             {
@@ -38,10 +35,6 @@ namespace WebExpress.WebUI.WebControl
 
             htmlNode?.AddUserAttribute("data-wx-bind", Name);
             htmlNode?.AddUserAttribute($"data-wx-source-{Name}", !string.IsNullOrWhiteSpace(Source) ? (Source.StartsWith('#') ? Source : $"#{Source}") : null);
-            if (!string.IsNullOrWhiteSpace(target))
-            {
-                htmlNode?.AddUserAttribute($"data-wx-target-{Name}", !string.IsNullOrWhiteSpace(target) ? (target.StartsWith('#') ? target : $"#{target}") : null);
-            }
 
             return this;
         }

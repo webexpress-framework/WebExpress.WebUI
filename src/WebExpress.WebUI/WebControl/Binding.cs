@@ -79,11 +79,8 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="htmlNode">
         /// The HTML node to which user attributes will be applied. Cannot be null.
         /// </param>
-        /// <param name="target">
-        /// The identifier specifying the target to apply
-        /// </param>
         /// <returns>The current instance for method chaining.</returns>
-        public IBinding ApplyUserAttributes(IHtmlNode htmlNode, string target = null)
+        public IBinding ApplyUserAttributes(IHtmlNode htmlNode)
         {
             if (_binds.Count == 0)
             {
@@ -92,7 +89,7 @@ namespace WebExpress.WebUI.WebControl
 
             foreach (var bind in _binds)
             {
-                bind.ApplyUserAttributes(htmlNode, target);
+                bind.ApplyUserAttributes(htmlNode);
             }
 
             htmlNode?.RemoveUserAttribute("data-wx-bind");

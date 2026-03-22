@@ -15,21 +15,13 @@ namespace WebExpress.WebUI.WebControl
         public string Name => "filter";
 
         /// <summary>
-        /// Returns or sets the source of the data.
-        /// </summary>
-        public string Source { get; set; }
-
-        /// <summary>
         /// Applies user-defined attributes to the specified HTML node.
         /// </summary>
         /// <param name="htmlNode">
         /// The HTML node to which user attributes will be applied. Cannot be null.
         /// </param>
-        /// <param name="target">
-        /// The identifier specifying the target to apply
-        /// </param>
         /// <returns>The current instance for method chaining.</returns>
-        public IBind ApplyUserAttributes(IHtmlNode htmlNode, string target = null)
+        public IBind ApplyUserAttributes(IHtmlNode htmlNode)
         {
             htmlNode?.AddUserAttribute("data-wx-bind", Name);
 
