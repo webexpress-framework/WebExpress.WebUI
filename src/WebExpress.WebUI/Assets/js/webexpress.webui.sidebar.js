@@ -272,9 +272,9 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
         // remove button
         if (item.isRemoveable) {
             const removeBtn = document.createElement("button");
-            removeBtn.className = "btn wx-sidebar-remove";
+            removeBtn.className = "btn wx-button-close";
             removeBtn.title = this._i18n ? this._i18n("webexpress.webui:remove", "Remove") : "Remove";
-            removeBtn.innerHTML = '<i class="fas fa-xmark"></i>';
+            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
             removeBtn.addEventListener("click", (e) => {
                 e.preventDefault();
                 e.stopPropagation();

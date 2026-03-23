@@ -269,7 +269,7 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         card.setAttribute("role", "group");
         card.tabIndex = 0;
 
-        // Apply action attributes
+        // apply action attributes
         if (tile.primaryAction) card.dataset.wxPrimaryAction = tile.primaryAction;
         if (tile.primaryTarget) card.dataset.wxPrimaryTarget = tile.primaryTarget;
         if (tile.primaryUri) card.dataset.wxPrimaryUri = tile.primaryUri;
@@ -409,9 +409,12 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         while (this._tileList.firstChild) {
             this._tileList.removeChild(this._tileList.firstChild);
         }
+        const container = document.createElement("div");
+        container.className = "wx-tile-container";
         this._tiles.forEach((tile, idx) => {
-            this._tileList.appendChild(this._createTileCard(tile, idx));
+            container.appendChild(this._createTileCard(tile, idx));
         });
+        this._tileList.appendChild(container);
     }
 };
 

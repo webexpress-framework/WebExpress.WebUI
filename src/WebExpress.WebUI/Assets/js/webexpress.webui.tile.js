@@ -83,7 +83,8 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         }
 
         const term = (this._filterTerm || "").toLowerCase();
-        const frag = document.createDocumentFragment();
+        const container = document.createElement("div");
+        container.className = "wx-tile-container";
 
         for (const tile of this._tiles) {
             if (!tile.visible) {
@@ -92,10 +93,10 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
             if (term && !this._matchesFilter(tile, term)) {
                 continue;
             }
-            frag.appendChild(this._buildCardElement(tile));
+            container.appendChild(this._buildCardElement(tile));
         }
 
-        el.appendChild(frag);
+        el.appendChild(container);
         this._updateSnapshot(states);
         if (!this._initialized) {
             this._initialized = true;

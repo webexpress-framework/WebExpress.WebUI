@@ -18,10 +18,11 @@
     margin-right: calc(-.5 * var(--bs-modal-header-padding-x));
     margin-bottom: calc(-.5 * var(--bs-modal-header-padding-y));
     margin-left: auto;
+    color: var(--bs-secondary);
 }
 
 .wx-button-close:hover { 
-    color: var(--bs-secondary);
+    color: var(--bs-danger);
     outline: none;
 }
 
@@ -31,9 +32,10 @@
     margin-right: calc(-.5 * var(--bs-modal-header-padding-x));
     margin-bottom: calc(-.5 * var(--bs-modal-header-padding-y));
     margin-left: auto;
+    color: var(--bs-secondary);
 }
 
 .wx-button-fullscreen:hover { 
-    color: var(--bs-secondary);
+    color: var(--bs-body-color);
     outline: none;
 }

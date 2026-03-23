@@ -117,3 +117,17 @@
     align-items: center;
     justify-content: center;
 }
+
+.wx-remove-widget {
+    padding: 0;
+}
+
+.wx-remove-widget i {
+    color: var(--bs-secondary, #adb5bd);
+    transition: color 0.2s;
+}
+
+.wx-remove-widget:hover i,
+.wx-remove-widget:focus i {
+    color: var(--bs-danger, #dc3545);
+}

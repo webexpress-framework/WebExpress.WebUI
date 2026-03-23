@@ -3,7 +3,8 @@
     display: flex;
     flex-wrap: wrap;
     gap: 1rem;
-    align-items: stretch;
+    flex-direction: column;
+    align-items: flex-start;
     background: var(--bs-body-bg);
     color: var(--bs-body-color);
     font-family: var(--bs-body-font-family);
@@ -11,8 +12,17 @@
     line-height: var(--bs-body-line-height);
 }
 
+.wx-tile-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em; 
+    align-items: stretch;
+    justify-content: flex-start;
+    margin-bottom: 0.5em;
+}
+
 /* Tile card */
-.wx-tile-card {
+.wx-tile-container > .wx-tile-card {
     background: var(--bs-card-bg, var(--bs-body-bg));
     border: 1px solid var(--bs-border-color);
     border-radius: var(--bs-border-radius);

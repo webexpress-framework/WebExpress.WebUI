@@ -36,6 +36,7 @@
 .wx-quickfilter-btn-chip[aria-pressed="true"] {
     background: var(--bs-primary);
     color: var(--bs-white);
+    border-color: var(--bs-primary);
 }
 
 /* chip button hover (not active) */

@@ -317,8 +317,9 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         if (widgetData.removable !== false && registeredWidget.removable !== false) {
             const removeBtn = document.createElement("button");
             removeBtn.type = "button";
-            removeBtn.className = "btn-close btn-close-sm";
+            removeBtn.className = "btn wx-button-close";
             removeBtn.setAttribute("aria-label", "Remove");
+            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
             removeBtn.addEventListener("click", () => {
                 this._removeWidget(colIdx, widgetData.instanceId);
             });
