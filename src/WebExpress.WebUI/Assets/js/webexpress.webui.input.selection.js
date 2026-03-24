@@ -141,7 +141,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
             }
 
             const itemId = targetItem.dataset.id;
-            const item = this._items.find((i) => { return i.id === itemId; });
+            const item = this._items.find((i) => { return i.id == itemId; });
 
             if (item) {
                 if (!this._multiselect) {
@@ -152,8 +152,6 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                 if (!this._values.includes(item.id)) {
                     this.value = [...this.value, item.id];
                 }
-
-                this.render();
 
                 // close the dropdown after selection (optional logic for single select)
                 if (!this._multiselect) {
@@ -235,10 +233,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                     icon: elem.dataset.icon,
                     image: elem.dataset.image,
                     content: elem.innerHTML || elem.dataset.label,
-                    disabled: elem.hasAttribute("disabled"),
-                    renderFunction: elem.dataset.render
-                        ? new Function("item", `return (${elem.dataset.render})(item);`)
-                        : null,
+                    disabled: elem.hasAttribute("disabled")
                 });
             }
         });
@@ -288,28 +283,25 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                     li.classList.add("disabled");
                 }
 
-                if (item.renderFunction) {
-                    li.innerHTML = item.renderFunction(item);
-                } else {
-                    const contentWrapper = document.createElement(item.disabled ? "span" : "button");
-                    if (item.disabled) {
-                        contentWrapper.setAttribute("disabled", "disabled");
-                    }
-                    contentWrapper.innerHTML = item.content;
-
-                    if (item.icon) {
-                        const icon = document.createElement("i");
-                        icon.className = item.icon;
-                        contentWrapper.prepend(icon);
-                    }
-                    if (item.image) {
-                        const img = document.createElement("img");
-                        img.className = "wx-icon";
-                        img.src = item.image;
-                        contentWrapper.prepend(img);
-                    }
-                    li.appendChild(contentWrapper);
+                const contentWrapper = document.createElement(item.disabled ? "span" : "button");
+                if (item.disabled) {
+                    contentWrapper.setAttribute("disabled", "disabled");
                 }
+                contentWrapper.innerHTML = item.content;
+
+                if (item.icon) {
+                    const icon = document.createElement("i");
+                    icon.className = item.icon;
+                    contentWrapper.prepend(icon);
+                }
+                if (item.image) {
+                    const img = document.createElement("img");
+                    img.className = "wx-icon";
+                    img.src = item.image;
+                    contentWrapper.prepend(img);
+                }
+                li.appendChild(contentWrapper);
+               
                 fragment.appendChild(li);
             }
         });

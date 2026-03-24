@@ -123,14 +123,9 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
 
             this.page = page; 
             
-            const clickEvent = new CustomEvent(webexpress.webui.Event.CLICK_EVENT, {
-                detail: {
-                    sender: this._element,
-                    id: this._element.id,
-                    index: page
-                }
+            this._dispatch(webexpress.webui.Event.CLICK_EVENT, {
+                index: page
             });
-            document.dispatchEvent(clickEvent);
         });
 
         return li;
@@ -215,14 +210,9 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
             this._page = value;
 
             // trigger a page change event
-            const changeEvent = new CustomEvent(webexpress.webui.Event.CHANGE_PAGE_EVENT, {
-                detail: {
-                    sender: this._element,
-                    id: this._element.id,
-                    page: this._page
-                }
+            this._dispatch(webexpress.webui.Event.CHANGE_PAGE_EVENT, {
+                page: this._page
             });
-            document.dispatchEvent(changeEvent);
 
             // re-render the control
             this.render();

@@ -2,9 +2,8 @@
 .wx-tile {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
     background: var(--bs-body-bg);
     color: var(--bs-body-color);
     font-family: var(--bs-body-font-family);

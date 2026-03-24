@@ -207,7 +207,8 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
         const pt = this._svg.createSVGPoint();
         pt.x = e.clientX;
         pt.y = e.clientY;
-        const ctm = (this._viewport && typeof this._viewport.getScreenCTM === "function" ? this._viewport.getScreenCTM() : null) || this._svg.getScreenCTM();
+        const ctm = (this._viewport && typeof this._viewport.getScreenCTM === "function" ? this._viewport.getScreenCTM() : null) 
+            || this._svg.getScreenCTM();
         return ctm ? pt.matrixTransform(ctm.inverse()) : { x: e.clientX, y: e.clientY };
     }
 
@@ -1206,7 +1207,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             // determine the size actually used for centering logic
             const currentIconSize = n.data.image ? imgSize : iconBoxSize;
 
-            // Update shape position and size
+            // update shape position and size
             if (n.shape === "circle") {
                 shapeEl.setAttribute("cx", n.x);
                 shapeEl.setAttribute("cy", n.y);
@@ -1218,7 +1219,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                 shapeEl.setAttribute("height", rectH);
             }
 
-            // Handle visual hover highlights (for Editor/Interactive use)
+            // handle visual hover highlights (for Editor/Interactive use)
             if (g.classList.contains("wx-graph-node-hover")) {
                 shapeEl.classList.add("hover-highlight");
             } else {

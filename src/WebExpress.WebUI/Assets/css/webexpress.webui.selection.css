@@ -9,13 +9,14 @@
     padding-left: 0.2em;
     margin-right: auto;
     margin-bottom: 0;
+    display: inline-flex;
+    gap: 0.2em;
 }
 
 .wx-selection > ul > li {
     float: left;
     display: flex;
     align-items: center;
-    margin-right: 0.5em;
     margin-top: 0.2em;
     margin-bottom: 0.2em;
     border-radius: 0.2em;
@@ -52,6 +53,9 @@
 }
 
 .wx-selection > div:nth-child(2) > ul {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.2em;
     padding-left: 0.2em;
     margin-right: auto;
     margin-bottom: 0;
@@ -59,17 +63,12 @@
 
 .wx-selection > div:nth-child(2) > ul > li {
     float: left;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    margin-right: 0.5em;
-    margin-top: 0.2em;
-    margin-bottom: 0.2em;
+    padding-left: 0.5em;
     border-radius: 0.2em;
-    padding-top: 0.1em;
-    padding-left: 0.3em;
-    padding-right: 0.3em;
-    padding-bottom: 0.1em;
     white-space: nowrap;
+    gap: 0.2em;
 }
 
 .wx-selection > div:nth-child(2) > ul > span {
@@ -89,15 +88,14 @@
 }
 
 .wx-selection > div:nth-child(2) > ul > li > a {
-    margin-left: 0.5em;
-    margin-right: 0.1em;
+    margin-right: 0.2em;
     text-decoration: none;
-    font-size: 1em;
+    font-size: 0.8em;
     color: var(--bs-secondary);
 }
 
 .wx-selection > div:nth-child(2) > ul > li > a:hover {
-    color: var(--bs-secondary-hover);
+    color: var(--bs-danger);
 }
 
 .wx-selection > div:nth-child(2) > a {
@@ -222,10 +220,26 @@
     border: 1px solid var(--bs-primary);
 }
 
+.wx-selection-primary > a {
+    color: var(--bs-white)!important;
+}
+
+.wx-selection-primary > a:hover {
+    color: var(--bs-danger) !important;
+}
+
 .wx-selection-secondary {
     color: var(--bs-light);
     background-color: var(--bs-secondary);
     border: 1px solid var(--bs-secondary);
+}
+
+.wx-selection-secondary > a {
+    color: var(--bs-white)!important;
+}
+
+.wx-selection-secondary > a:hover {
+    color: var(--bs-danger) !important;
 }
 
 .wx-selection-success {
@@ -234,10 +248,26 @@
     border: 1px solid var(--bs-success);
 }
 
+.wx-selection-success > a {
+    color: var(--bs-white) !important;
+}
+
+.wx-selection-success > a:hover {
+    color: var(--bs-danger) !important;
+}
+
 .wx-selection-info {
     color: var(--bs-dark);
     background-color: var(--bs-info);
     border: 1px solid var(--bs-info);
+}
+
+.wx-selection-info > a {
+    color: var(--bs-dark) !important;
+}
+
+.wx-selection-info > a:hover {
+    color: var(--bs-danger) !important;
 }
 
 .wx-selection-warning {
@@ -246,10 +276,26 @@
     border: 1px solid var(--bs-warning);
 }
 
+.wx-selection-warning > a {
+    color: var(--bs-dark) !important;
+}
+
+.wx-selection-warning > a:hover {
+    color: var(--bs-danger) !important;
+}
+
 .wx-selection-danger {
     color: var(--bs-light);
     background-color: var(--bs-danger);
     border: 1px solid var(--bs-danger);
+}
+
+.wx-selection-danger > a {
+    color: var(--bs-white) !important;
+}
+
+.wx-selection-danger > a:hover {
+    color: var(--bs-dark) !important;
 }
 
 .wx-selection-light {
@@ -258,8 +304,24 @@
     border: 1px solid var(--bs-light);
 }
 
+.wx-selection-light > a {
+    color: var(--bs-dark) !important;
+}
+
+.wx-selection-light > a:hover {
+    color: var(--bs-danger) !important;
+}
+
 .wx-selection-dark {
     color: var(--bs-light);
     background-color: var(--bs-dark);
     border: 1px solid var(--bs-dark);
+}
+
+.wx-selection-dark > a {
+    color: var(--bs-white) !important;
+}
+
+.wx-selection-dark > a:hover {
+    color: var(--bs-danger) !important;
 }

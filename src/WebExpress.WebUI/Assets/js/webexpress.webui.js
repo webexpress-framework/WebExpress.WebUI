@@ -737,6 +737,15 @@ webexpress.webui.Controller = new class {
                     }
                 });
                 return;
+            } else if (bindName == "paging") {
+                sourceElement?.addEventListener(webexpress.webui.Event.CHANGE_PAGE_EVENT, (e) => {
+                    const page = e.detail?.page;
+                    const instance = this.getInstanceByElement(element);
+                    if (typeof instance?.search === "function") {
+                        instance.paging(page);
+                    }
+                });
+                return;
             } 
         }
 

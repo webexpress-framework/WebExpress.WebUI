@@ -57,9 +57,6 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
     constructor(element) {
         super(element);
 
-        // base classes
-        this._list.className = "wx-list list-unstyled m-0";
-
         // dataset / flags
         const ds = element.dataset;
         this._movableItem = ds.movableItem === "true";
@@ -318,13 +315,10 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         }
 
         if (dispatch) {
-            this._dispatch(webexpress?.webui?.Event?.SELECT_ITEM_EVENT || "wx-select-item", {
-                detail: {
-                    sender: this._element,
-                    item: this._selectedItem,
-                    itemId: this._selectedItem?.id || null,
-                    originalEvent: originalEvent
-                }
+            this._dispatch(webexpress.webui.Event.SELECT_ITEM_EVENT, {
+                item: this._selectedItem,
+                itemId: this._selectedItem?.id || null,
+                originalEvent: originalEvent
             });
         }
     }
@@ -931,21 +925,15 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             // dispatch events only if index actually changed
             if (oldIndex !== insertIndex) {
                 this._dispatch(webexpress.webui.Event.ROW_REORDER_EVENT, {
-                    detail: {
-                        sender: this._element,
-                        newOrder: this._items,
-                        previousOrder: prevOrder
-                    }
+                    newOrder: this._items,
+                    previousOrder: prevOrder
                 });
 
                 this._dispatch(webexpress?.webui?.Event?.MOVE_EVENT, {
-                    detail: {
-                        sender: this._element,
-                        kind: "item",
-                        action: "move",
-                        itemId: this._draggedItem?.id || null,
-                        index: insertIndex
-                    }
+                    kind: "item",
+                    action: "move",
+                    itemId: this._draggedItem?.id || null,
+                    index: insertIndex
                 });
 
                 this._schedulePersist();

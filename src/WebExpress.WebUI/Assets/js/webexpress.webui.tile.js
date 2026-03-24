@@ -55,10 +55,22 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         } else {
             element.classList.remove("wx-tile-picker-largeicon");
         }
-
+        
+        this._initTileContainer(element);
         this._tiles = this._parseInitialTiles(element);
         this._loadState();
         this.render();
+    }
+    
+    /**
+     * Initializes or binds a pagination control and an information area.
+     * @param {HTMLElement} host The host element to search or attach the pager to.
+     */
+    _initTileContainer(host) {
+        this._tileContainer = document.createElement("div");
+        this._tileContainer.className = "wx-tile-container";
+        
+        host.appendChild(this._tileContainer);
     }
 
     /**
@@ -67,7 +79,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
     render() {
         const states = this._collectStates();
         const el = this._element;
-        el.innerHTML = "";
+        this._tileContainer.innerHTML = "";
         el.classList.add("wx-tile");
         if (this._allowRemove) {
             el.classList.add("wx-tile-removable");
@@ -83,8 +95,6 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         }
 
         const term = (this._filterTerm || "").toLowerCase();
-        const container = document.createElement("div");
-        container.className = "wx-tile-container";
 
         for (const tile of this._tiles) {
             if (!tile.visible) {
@@ -93,10 +103,9 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
             if (term && !this._matchesFilter(tile, term)) {
                 continue;
             }
-            container.appendChild(this._buildCardElement(tile));
+            this._tileContainer.appendChild(this._buildCardElement(tile));
         }
 
-        el.appendChild(container);
         this._updateSnapshot(states);
         if (!this._initialized) {
             this._initialized = true;
