@@ -2,7 +2,7 @@
  * Controller for interactive tab navigation: parsing markup, rendering tabs,
  * and handling tab selection state without destroying existing dom nodes.
  * Events:
- *  - webexpress.webui.Event.TAB_SELECTED_EVENT
+ *  - webexpress.webui.Event.SELECTED_TAB_EVENT
  */
 webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
 
@@ -181,7 +181,7 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
      * @param {string} tabId The selected tab id.
      */
     _dispatchTabSelectedEvent(tabId) {
-        this._dispatch(webexpress.webui.Event.TAB_SELECTED_EVENT, {
+        this._dispatch(webexpress.webui.Event.SELECTED_TAB_EVENT, {
             tabId: tabId
         });
     }
