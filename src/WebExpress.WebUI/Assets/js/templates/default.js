@@ -248,6 +248,9 @@ webexpress.webui.TableTemplates.register("text", (val, table, row, cell, name, o
 
     const container = document.createElement("div");
     const editable = opts.editable === true || opts.editable === "true";
+    const cssColor = opts.colorCss || null;
+    const styleColor = opts.colorStyle || null;
+    const placeholder = opts.placeholder || null;
 
     if (editable) {
         // create native text input for editing
@@ -256,6 +259,11 @@ webexpress.webui.TableTemplates.register("text", (val, table, row, cell, name, o
         input.className = "form-control";
         input.id = "wx_" + Math.random().toString(36).slice(2, 7);
         input.value = val !== null && typeof val !== "undefined" ? String(val) : "";
+
+        // apply placeholder
+        if (placeholder) {
+            input.placeholder = placeholder;
+        }
 
         // attach input to container
         container.appendChild(input);
@@ -270,6 +278,13 @@ webexpress.webui.TableTemplates.register("text", (val, table, row, cell, name, o
     } else {
         // create simple text view for read-only mode
         const span = document.createElement("span");
+        // apply color (CSS class or inline style)
+        if (cssColor) {
+            span.classList.add(cssColor);
+        }
+        if (styleColor) {
+            span.style = styleColor;
+        }
         span.textContent = val !== null && typeof val !== "undefined" ? String(val) : "";
         container.appendChild(span);
     }
@@ -288,6 +303,9 @@ webexpress.webui.TableTemplates.register("numeric", (val, table, row, cell, name
 
     // determine if field should be editable
     const editable = opts.editable === true || opts.editable === "true";
+    const cssColor = opts.colorCss || null;
+    const styleColor = opts.colorStyle || null;
+    const placeholder = opts.placeholder || null;
 
     if (editable) {
         // create native number input for editing
@@ -301,6 +319,11 @@ webexpress.webui.TableTemplates.register("numeric", (val, table, row, cell, name
             input.value = String(val);
         } else {
             input.value = "";
+        }
+
+        // apply placeholder
+        if (placeholder) {
+            input.placeholder = placeholder;
         }
 
         // set optional numeric attributes from options (if provided)
@@ -328,6 +351,13 @@ webexpress.webui.TableTemplates.register("numeric", (val, table, row, cell, name
     } else {
         // create simple text view for read-only mode
         const span = document.createElement("span");
+        // apply color (CSS class or inline style)
+        if (cssColor) {
+            span.classList.add(cssColor);
+        }
+        if (styleColor) {
+            span.style = styleColor;
+        }
         span.textContent = val !== null && typeof val !== "undefined" ? String(val) : "";
         container.appendChild(span);
     }

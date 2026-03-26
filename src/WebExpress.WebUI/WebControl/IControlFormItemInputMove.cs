@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns the collection of available options for the control.
         /// </summary>
-        IEnumerable<ControlFormItemInputMoveItem> Options { get; }
+        IEnumerable<IControlFormItemInputMoveItem> Options { get; }
 
         /// <summary>
         /// Returns or sets the label displayed for the selected options list.
@@ -27,13 +27,20 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="items">The items to add to the available options list.</param>
         /// <returns>The current instance for method chaining.</returns>
-        IControlFormItemInputMove Add(params ControlFormItemInputMoveItem[] items);
+        IControlFormItemInputMove Add(params IControlFormItemInputMoveItem[] items);
+
+        /// <summary>
+        /// Adds one or more items to the available options list.
+        /// </summary>
+        /// <param name="items">The items to add to the available options list.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        IControlFormItemInputMove Add(IEnumerable<IControlFormItemInputMoveItem> items);
 
         /// <summary>
         /// Removes a specific item from the available options list.
         /// </summary>
         /// <param name="item">The item to remove from the available options list.</param>
         /// <returns>The current instance for method chaining.</returns>
-        IControlFormItemInputMove Remove(ControlFormItemInputMoveItem item);
+        IControlFormItemInputMove Remove(IControlFormItemInputMoveItem item);
     }
 }

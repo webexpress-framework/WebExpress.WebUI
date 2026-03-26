@@ -156,20 +156,20 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the label property of the form move control item.
+        /// Tests the text property of the form move control item.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-input-move"" *><div class=""wx-webui-move-option""></div></div>")]
         [InlineData("abc", @"<div class=""wx-webui-input-move"" *><div class=""wx-webui-move-option"">abc</div></div>")]
         [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-input-move"" *><div class=""wx-webui-move-option"">WebExpress.WebUI</div></div>")]
-        public void Label(string label, string expected)
+        public void Text(string label, string expected)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputMove(null, new ControlFormItemInputMoveItem() { Label = label })
+            var control = new ControlFormItemInputMove(null, new ControlFormItemInputMoveItem() { Text = label })
             {
             };
 
@@ -219,7 +219,7 @@ namespace WebExpress.WebUI.Test.WebControl
             };
 
             // act
-            control.Add(new ControlFormItemInputMoveItem() { Label = "label" });
+            control.Add(new ControlFormItemInputMoveItem() { Text = "label" });
             var html = control.Render(context, visualTree);
 
             Assert.NotEmpty(control.Options);
