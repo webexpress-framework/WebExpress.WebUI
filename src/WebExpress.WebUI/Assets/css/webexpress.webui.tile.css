@@ -22,7 +22,6 @@
 
 /* Tile card */
 .wx-tile-container > .wx-tile-card {
-    background: var(--bs-card-bg, var(--bs-body-bg));
     border: 1px solid var(--bs-border-color);
     border-radius: var(--bs-border-radius);
     box-shadow: 0 2px 6px rgba(0,0,0,.05);
@@ -227,32 +226,32 @@
 
 /* Color variants (applied to .wx-tile-card) */
 .wx-tile-primary {
-    background: color-mix(in srgb, var(--bs-primary) 52%, var(--bs-body-bg));
+    background: var(--bs-primary);
     color: var(--bs-light, #fff);
 }
 
 .wx-tile-secondary {
-    background: color-mix(in srgb, var(--bs-secondary) 52%, var(--bs-body-bg));
+    background: var(--bs-secondary);
     color: var(--bs-light, #fff);
 }
 
 .wx-tile-success {
-    background: color-mix(in srgb, var(--bs-success) 50%, var(--bs-body-bg));
+    background: var(--bs-success);
     color: var(--bs-light, #fff);
 }
 
 .wx-tile-info {
-    background: color-mix(in srgb, var(--bs-info) 55%, var(--bs-body-bg));
+    background: var(--bs-info);
     color: var(--bs-dark, #031b21);
 }
 
 .wx-tile-warning {
-    background: color-mix(in srgb, var(--bs-warning) 55%, var(--bs-body-bg));
+    background: var(--bs-warning);
     color: var(--bs-dark, #2d2300);
 }
 
 .wx-tile-danger {
-    background: color-mix(in srgb, var(--bs-danger) 50%, var(--bs-body-bg));
+    background: var(--bs-danger);
     color: var(--bs-light, #fff);
 }
 
