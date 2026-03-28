@@ -100,6 +100,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/panels/webexpress.webui.panel.editor.image.js")]
     [Asset("/assets/js/panels/webexpress.webui.panel.editor.link.js")]
     [Asset("/assets/js/panels/webexpress.webui.panel.table.columns.js")]
+    [Asset("/assets/js/widgets/default.js")]
     public sealed class IncludeJavaScript : IInclude
     {
 
