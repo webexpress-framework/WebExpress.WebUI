@@ -25,6 +25,11 @@ namespace WebExpress.WebUI.WebControl
         bool DetailFrame { get; }
 
         /// <summary>
+        /// Returns the content of the view control.
+        /// </summary>
+        IEnumerable<IControl> Content { get; }
+
+        /// <summary>
         /// Adds one or more items to the view control.
         /// </summary>
         /// <param name="items">The items to add.</param>
@@ -39,7 +44,7 @@ namespace WebExpress.WebUI.WebControl
         IControlViewItem Add(IEnumerable<IControl> items);
 
         /// <summary>
-        /// Removes the specified control from the view item.
+        /// Removes the specified control from the view.
         /// </summary>
         /// <param name="item">The control to remove.</param>
         /// <returns>The current instance for method chaining.</returns>

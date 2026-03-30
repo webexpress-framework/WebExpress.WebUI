@@ -56,7 +56,7 @@ namespace WebExpress.WebUI.WebControl
         public int? DetailMaxSide { get; set; }
 
         /// <summary>
-        /// Returns the content of the tile control.
+        /// Returns the content of the view control.
         /// </summary>
         public IEnumerable<IControl> Content => _content;
 
@@ -94,7 +94,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Removes the specified control from the view item.
+        /// Removes the specified control from the view.
         /// </summary>
         /// <param name="item">The control to remove.</param>
         /// <returns>The current instance for method chaining.</returns>
