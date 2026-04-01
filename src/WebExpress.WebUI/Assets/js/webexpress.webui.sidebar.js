@@ -65,6 +65,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             const el = nodes[i];
             const dataset = el.dataset;
             const commonProps = {
+                id: el.id || null,
                 index: i,
                 label: dataset.label || el.textContent.trim(),
                 iconClass: dataset.icon,
@@ -205,6 +206,9 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
      */
     _buildItemElement(item) {
         const wrapper = document.createElement("div");
+        if (item.id) {
+            wrapper.id = item.id;
+        }
         wrapper.className = "wx-sidebar-link";
         if (item.active) {
             wrapper.setAttribute("active", "");
@@ -218,7 +222,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             for (const [key, value] of Object.entries(item.primaryAction)) {
                 if (value) {
                     const htmlName = `data-wx-primary-${key.toLowerCase()}`;
-                    editBtn.setAttribute(htmlName, value);
+                    wrapper.setAttribute(htmlName, value);
                 }
             }
         }
@@ -227,7 +231,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             for (const [key, value] of Object.entries(item.secondaryAction)) {
                 if (value) {
                     const htmlName = `data-wx-secondary-${key.toLowerCase()}`;
-                    editBtn.setAttribute(htmlName, value);
+                    wrapper.setAttribute(htmlName, value);
                 }
             }
         }

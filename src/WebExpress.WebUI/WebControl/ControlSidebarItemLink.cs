@@ -15,12 +15,10 @@ namespace WebExpress.WebUI.WebControl
     /// </remarks>
     public class ControlSidebarItemLink : IControlSidebarItem
     {
-        private readonly string _id;
-
         /// <summary>
         /// Returns the unique identifier for the entity.
         /// </summary>
-        public string Id => _id;
+        public string Id { get; }
 
         /// <summary>
         /// Returns or sets whether the link is active or not.
@@ -86,7 +84,7 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="id">The id of the control.</param>
         public ControlSidebarItemLink(string id = null)
         {
-            _id = id;
+            Id = id;
         }
 
         /// <summary>
