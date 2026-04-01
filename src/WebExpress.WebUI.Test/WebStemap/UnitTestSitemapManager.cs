@@ -29,7 +29,7 @@ namespace WebExpress.WebUI.Test.WebStemap
             // act
             var searchResult = componentHub.SitemapManager.SearchResource(new Uri(uri), searchContext);
 
-            var response = componentHub.EndpointManager.HandleRequest(UnitTestControlFixture.CrerateRequestMock(), searchResult.EndpointContext);
+            var response = componentHub.EndpointManager.HandleRequest(UnitTestControlFixture.CreateRequestMock(), searchResult.EndpointContext);
 
             Assert.Equal(id, searchResult?.EndpointContext?.EndpointId.ToString());
         }

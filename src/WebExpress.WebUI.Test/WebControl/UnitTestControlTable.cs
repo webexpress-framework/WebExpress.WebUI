@@ -29,7 +29,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            // vallidation
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -54,7 +54,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            // vallidation
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -80,7 +80,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            // vallidation
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -111,7 +111,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            // vallidation
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -135,7 +135,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            // vallidation
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -159,7 +159,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            // vallidation
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -184,7 +184,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // expected HTML
             var expected = @"<div class=""wx-webui-table""><div class=""wx-table-columns""><div data-label=""Column 1""></div></div></div>";
 
-            // vallidation
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -207,7 +207,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            // vallidation
+            // validation
             var expected = @"<div class=""wx-webui-table""><div class=""wx-table-columns""></div><div class=""wx-table-row""><div></div></div><div class=""wx-table-row""><div></div></div></div>";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
