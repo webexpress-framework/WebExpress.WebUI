@@ -4,7 +4,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a control tag.
+    /// Represents a read only tag control.
     /// </summary>
     public class ControlTag : Control
     {
