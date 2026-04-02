@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemButton()
             {
-                PrimaryAction = new ActionModal(modal)
+                PrimaryAction = string.IsNullOrWhiteSpace(modal) ? null : new ActionModal(modal)
             };
 
             // act
@@ -96,7 +96,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemButton()
             {
-                SecondaryAction = new ActionModal(modal)
+                SecondaryAction = string.IsNullOrWhiteSpace(modal) ? null : new ActionModal(modal)
             };
 
             // act

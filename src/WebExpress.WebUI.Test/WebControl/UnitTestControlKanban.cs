@@ -94,7 +94,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             var html = control.Render(context, visualTree);
-            var expected = @"<div class=""wx-webui-kanban""><div id=""a"" class=""wx-swimlane"" data-label=""A"" data-expanded=""false""></div></div>";
+            var expected = @"<div class=""wx-webui-kanban""><div id=""a"" class=""wx-swimlane"" data-label=""A"" data-expanded=""true""></div></div>";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }

@@ -20,23 +20,23 @@ namespace WebExpress.WebUI.WebControl
         public string Title { get; }
 
         /// <summary>
-        /// Returns a value indicating whether the content is currently collapsed.
+        /// Returns a value indicating whether the content is currently expanded.
         /// </summary>
-        public bool Collapsed { get; }
+        public bool Expanded { get; }
 
         /// <summary>
         /// Initializes a new instance of class.
         /// </summary>
         /// <param name="id">The unique identifier for the column.</param>
         /// <param name="title">The title to be displayed for the column.</param>
-        /// <param name="collapsed">
-        /// A value indicating whether the column content is initially collapsed.
+        /// <param name="expanded">
+        /// A value indicating whether the column content is initially expanded.
         /// </param>
-        public ControlKanbanSwimlane(string id, string title, bool collapsed = false)
+        public ControlKanbanSwimlane(string id, string title, bool expanded = false)
         {
             Id = id;
             Title = title;
-            Collapsed = collapsed;
+            Expanded = expanded;
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = "wx-swimlane"
             }
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, Title))
-                .AddUserAttribute("data-expanded", Collapsed ? "false" : null);
+                .AddUserAttribute("data-expanded", Expanded ? "true" : null);
 
             return html;
         }
