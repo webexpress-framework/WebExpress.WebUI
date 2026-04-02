@@ -60,7 +60,8 @@ webexpress.webui.Controller = new class {
                 id: el.id,
                 name: el.textContent.trim(),
                 group: el.dataset.wxPrimaryGroup || null,
-                exclusive: el.dataset.wxPrimaryExclusive === "true"
+                exclusive: el.dataset.wxPrimaryExclusive === "true",
+                reset: el.dataset.wxPrimaryReset === "true"
             }));
             if (filterPrimaryDefs.length > 0) {
                 webexpress.webui.FilterRegistry.registerFilters(filterPrimaryDefs);
@@ -70,7 +71,8 @@ webexpress.webui.Controller = new class {
                 id: el.id,
                 name: el.textContent.trim(),
                 group: el.dataset.wxSecondaryGroup || null,
-                exclusive: el.dataset.wxSecondaryExclusive === "true"
+                exclusive: el.dataset.wxSecondaryExclusive === "true",
+                reset: el.dataset.wxSecondaryReset === "true"
             }));
             if (filterSecondaryDefs.length > 0) {
                 webexpress.webui.FilterRegistry.registerFilters(filterSecondaryDefs);
@@ -245,10 +247,8 @@ webexpress.webui.Controller = new class {
 
                 if (!instance) {
                     // no instance found
-                } else if (typeof instance.show === "function") {
-                    if (uri) {
-                        instance.uri = uri;
-                    }
+                } else if (uri) {
+                    instance.uri = uri;
                 }
             });
             bound = true;
@@ -773,7 +773,8 @@ webexpress.webui.Controller = new class {
             id: el.id,
             name: el.textContent.trim(),
             group: el.dataset.wxPrimaryGroup || null,
-            exclusive: el.dataset.wxPrimaryExclusive === "true"
+            exclusive: el.dataset.wxPrimaryExclusive === "true",
+            reset: el.dataset.wxPrimaryReset === "true"
         };
         // register the definition in the global FilterRegistry
         webexpress.webui.FilterRegistry.registerFilters([filterDef]);
@@ -809,7 +810,8 @@ webexpress.webui.FilterRegistry = new class {
                         id: f.id,
                         name: f.name || f.id,
                         group: f.group || null,
-                        exclusive: f.exclusive === true
+                        exclusive: f.exclusive === true,
+                        reset: f.reset === true
                     });
                 }
             }
@@ -829,13 +831,23 @@ webexpress.webui.FilterRegistry = new class {
                 const id = parsedIds[i].trim();
                 // validate against known filters to prevent manipulation
                 if (this._knownFilters.has(id)) {
-                    this._activeFilters.add(id);
-                    document.getElementById(id)?.classList.add("active");
+                    const filter = this._knownFilters.get(id);
+                    // do not add reset filters to active set
+                    if (!filter.reset) {
+                        this._activeFilters.add(id);
+                        const el = document.getElementById(id);
+                        if (el) {
+                            el.classList.add("active");
+                        }
+                    }
                 } else {
                     changed = true;
                 }
             }
         }
+
+        // update reset visual states based on initially active filters
+        this._updateResetStates();
 
         // if unknown filters were dropped, update the cookie immediately
         if (changed) {
@@ -847,7 +859,7 @@ webexpress.webui.FilterRegistry = new class {
 
     /**
      * Activates a specific filter by its id and enforces group constraints.
-     * @param {string} id - the unique identifier of the filter.
+     * @param {string} id - The unique identifier of the filter.
      */
     activate(id) {
         if (!this._knownFilters.has(id)) {
@@ -856,50 +868,102 @@ webexpress.webui.FilterRegistry = new class {
 
         const filter = this._knownFilters.get(id);
 
+        if (filter.reset) {
+            // clear the group if it is a reset filter
+            if (filter.group) {
+                this.clearGroup(filter.group);
+            }
+            return;
+        }
+
         // enforce exclusive group logic
         if (filter.group && filter.exclusive) {
             const activeArray = Array.from(this._activeFilters);
             for (let i = 0; i < activeArray.length; i++) {
                 const activeId = activeArray[i];
                 const activeConfig = this._knownFilters.get(activeId);
-                
+
                 if (activeConfig && activeConfig.group === filter.group && activeId !== id) {
                     this._activeFilters.delete(activeId);
-                    document.getElementById(activeId)?.classList.remove("active");
+                    const el = document.getElementById(activeId);
+                    if (el) {
+                        el.classList.remove("active");
+                    }
                 }
             }
         }
 
         if (!this._activeFilters.has(id)) {
             this._activeFilters.add(id);
+            this._updateResetStates();
             this._scheduleCookieSave();
             this._notifyListeners();
-            document.getElementById(id)?.classList.add("active");
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.add("active");
+            }
         }
     }
 
     /**
      * Deactivates a specific filter by its id.
-     * @param {string} id - the unique identifier of the filter.
+     * @param {string} id - The unique identifier of the filter.
      */
     deactivate(id) {
         if (this._activeFilters.has(id)) {
             this._activeFilters.delete(id);
+            this._updateResetStates();
             this._scheduleCookieSave();
             this._notifyListeners();
-            document.getElementById(id)?.classList.remove("active");
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.remove("active");
+            }
         }
     }
 
     /**
      * Toggles the state of a specific filter.
-     * @param {string} id - the unique identifier of the filter.
+     * @param {string} id - The unique identifier of the filter.
      */
     toggle(id) {
-        if (this._activeFilters.has(id)) {
+        const filter = this._knownFilters.get(id);
+        if (filter && filter.reset) {
+            if (filter.group) {
+                this.clearGroup(filter.group);
+            }
+        } else if (this._activeFilters.has(id)) {
             this.deactivate(id);
         } else {
             this.activate(id);
+        }
+    }
+
+    /**
+     * Clears all filters within a specific group.
+     * @param {string} group - The group name to clear.
+     */
+    clearGroup(group) {
+        let changed = false;
+        const activeArray = Array.from(this._activeFilters);
+        for (let i = 0; i < activeArray.length; i++) {
+            const activeId = activeArray[i];
+            const activeConfig = this._knownFilters.get(activeId);
+
+            if (activeConfig && activeConfig.group === group) {
+                this._activeFilters.delete(activeId);
+                const el = document.getElementById(activeId);
+                if (el) {
+                    el.classList.remove("active");
+                }
+                changed = true;
+            }
+        }
+
+        if (changed) {
+            this._updateResetStates();
+            this._scheduleCookieSave();
+            this._notifyListeners();
         }
     }
 
@@ -908,7 +972,15 @@ webexpress.webui.FilterRegistry = new class {
      */
     clearAll() {
         if (this._activeFilters.size > 0) {
+            const activeArray = Array.from(this._activeFilters);
+            for (let i = 0; i < activeArray.length; i++) {
+                const el = document.getElementById(activeArray[i]);
+                if (el) {
+                    el.classList.remove("active");
+                }
+            }
             this._activeFilters.clear();
+            this._updateResetStates();
             this._scheduleCookieSave();
             this._notifyListeners();
         }
@@ -916,7 +988,7 @@ webexpress.webui.FilterRegistry = new class {
 
     /**
      * Returns an array of all currently active filter ids.
-     * @returns {Array} - list of active filter identifiers.
+     * @returns {Array} List of active filter identifiers.
      */
     getActiveFilters() {
         return Array.from(this._activeFilters);
@@ -936,7 +1008,7 @@ webexpress.webui.FilterRegistry = new class {
 
     /**
      * Returns all registered filters, grouped or as a flat list.
-     * @returns {Array} - list of all known filter configurations.
+     * @returns {Array} List of all known filter configurations.
      */
     getAllKnownFilters() {
         return Array.from(this._knownFilters.values());
@@ -951,9 +1023,9 @@ webexpress.webui.FilterRegistry = new class {
             activeFilters: this.getActiveFilters()
         };
 
-        const event = new CustomEvent(eventName, { 
+        const event = new CustomEvent(eventName, {
             detail: payload,
-            bubbles: true 
+            bubbles: true
         });
         document.dispatchEvent(event);
     }
@@ -984,12 +1056,12 @@ webexpress.webui.FilterRegistry = new class {
 
     /**
      * Reads and decodes the filter state from the document cookie.
-     * @returns {string} - the decoded cookie value or empty string.
+     * @returns {string} The decoded cookie value or empty string.
      */
     _readCookie() {
         const nameEq = this._cookieName + "=";
         const ca = document.cookie.split(";");
-        
+
         for (let i = 0; i < ca.length; i++) {
             let c = ca[i];
             while (c.charAt(0) === " ") {
@@ -1000,6 +1072,39 @@ webexpress.webui.FilterRegistry = new class {
             }
         }
         return "";
+    }
+
+    /**
+     * Updates the visual state of reset elements depending on their group's active filters.
+     */
+    _updateResetStates() {
+        const groupHasActive = new Map();
+
+        // determine which groups have active filters
+        const activeArray = Array.from(this._activeFilters);
+        for (let i = 0; i < activeArray.length; i++) {
+            const activeId = activeArray[i];
+            const activeConfig = this._knownFilters.get(activeId);
+            if (activeConfig && activeConfig.group) {
+                groupHasActive.set(activeConfig.group, true);
+            }
+        }
+
+        // update the active state of reset elements
+        const filters = Array.from(this._knownFilters.values());
+        for (let i = 0; i < filters.length; i++) {
+            const filter = filters[i];
+            if (filter.reset && filter.group) {
+                const el = document.getElementById(filter.id);
+                if (el) {
+                    if (!groupHasActive.has(filter.group)) {
+                        el.classList.add("active");
+                    } else {
+                        el.classList.remove("active");
+                    }
+                }
+            }
+        }
     }
 };
 

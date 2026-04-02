@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the pagination control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<ul class=""pagination""><li class=""page-item disabled""><a class=""wx-link page-link""><i class=""fas fa-angle-left""></i></a></li><li class=""page-item""><a class=""wx-link page-link"" href=""?offset=%2D1"">0</a></li><li class=""page-item disabled""><a class=""wx-link page-link""><i class=""fas fa-angle-right""></i></a></li></ul>")]
-        [InlineData("id", @"<ul id=""id"" class=""pagination"">*</ul>")]
+        [InlineData(null, @"<div class=""wx-webui-pagination""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-pagination""></div>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -33,5 +33,52 @@ namespace WebExpress.WebUI.Test.WebControl
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
+        /// <summary>
+        /// Tests the page property of the pagination control.
+        /// </summary>
+        [Theory]
+        [InlineData(0, @"<div class=""wx-webui-pagination""></div>")]
+        [InlineData(2, @"<div class=""wx-webui-pagination"" data-page=""2""></div>")]
+        public void Page(uint page, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlPagination()
+            {
+                Page = page
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the page property of the pagination control.
+        /// </summary>
+        [Theory]
+        [InlineData(0, @"<div class=""wx-webui-pagination""></div>")]
+        [InlineData(5, @"<div class=""wx-webui-pagination"" data-total=""5""></div>")]
+        public void Total(uint total, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlPagination()
+            {
+                Total = total
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
     }
 }

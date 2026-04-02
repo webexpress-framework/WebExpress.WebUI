@@ -62,7 +62,7 @@
     background: var(--bs-secondary-bg);
 }
 
-.wx-sidebar .wx-sidebar-link[active] {
+.wx-sidebar .wx-sidebar-link.active {
     background-color: var(--bs-primary);
     color: white;
 }
@@ -74,7 +74,7 @@
     flex: 1;
 }
 
-.wx-sidebar .wx-sidebar-link[active] > .wx-link  {
+.wx-sidebar .wx-sidebar-link.active > .wx-link {
     color: white;
 }
 

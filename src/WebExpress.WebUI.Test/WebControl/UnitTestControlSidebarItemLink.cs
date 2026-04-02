@@ -116,8 +116,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeActive.None, @"<div class=""wx-sidebar-link""></div>")]
-        [InlineData(TypeActive.Active, @"<div class=""wx-sidebar-link"" active></div>")]
-        [InlineData(TypeActive.Disabled, @"<div class=""wx-sidebar-link"" disabled></div>")]
+        [InlineData(TypeActive.Active, @"<div class=""wx-sidebar-link"" data-active=""active""></div>")]
+        [InlineData(TypeActive.Disabled, @"<div class=""wx-sidebar-link"" data-active=""disabled""></div>")]
         public void Active(TypeActive active, string expected)
         {
             // arrange

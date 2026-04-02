@@ -72,18 +72,20 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                 iconImg: dataset.image,
                 mode: dataset.mode || "hide", // "hide" or "overlay"
                 // action attributes
-                primaryAction: {
-                    action: dataset.wxPrimaryAction || null,
-                    target: dataset.wxPrimaryTarget || null,
-                    uri: dataset.wxPrimaryUri || null,
-                    size: dataset.wxPrimarySize || null
-                },
-                secondaryAction: {
-                    action: dataset.wxSecondaryAction || null,
-                    target: dataset.wxSecondaryTarget || null,
-                    uri: dataset.wxSecondaryUri || null,
-                    size: dataset.wxSecondarySize || null
-                }
+                primaryAction: Object.fromEntries(Object.entries(dataset)
+                    .filter(([k]) => k.startsWith("wxPrimary"))
+                    .map(([k, v]) => [
+                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                ),
+                secondaryAction: Object.fromEntries(Object.entries(dataset)
+                    .filter(([k]) => k.startsWith("wxSecondary"))
+                    .map(([k, v]) => [
+                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                )
             };
 
             if (el.classList.contains("wx-sidebar-header")) {
@@ -99,8 +101,8 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                     element: this._createDividerElement()
                 });
             } else if (el.classList.contains("wx-sidebar-link")) {
-                const isActive = el.hasAttribute("active");
-                const isDisabled = el.hasAttribute("disabled");
+                const isActive = dataset.active === "active";
+                const isDisabled = dataset.active === "disabled";
 
                 items.push({
                     ...commonProps,
@@ -211,10 +213,11 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
         }
         wrapper.className = "wx-sidebar-link";
         if (item.active) {
-            wrapper.setAttribute("active", "");
+            wrapper.classList.add("active");
         }
+
         if (item.disabled) {
-            wrapper.setAttribute("disabled", "");
+            wrapper.classList.add("disabled");
         }
 
         // apply action attributes

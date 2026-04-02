@@ -291,22 +291,21 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
                 colorCss: div.dataset.colorCss || div.dataset.color || null,
                 colorStyle: div.dataset.colorStyle || null,
                 visible: div.dataset.visible === "false" ? false : true,
-                
                 // action attributes
-                primaryAction: {
-                    action: div.dataset.wxPrimaryAction || null,
-                    target: div.dataset.wxPrimaryTarget || null,
-                    uri: div.dataset.wxPrimaryUri || null,
-                    size: div.dataset.wxPrimarySize || null
-                },
-
-                secondaryAction: {
-                    action: div.dataset.wxSecondaryAction || null,
-                    target: div.dataset.wxSecondaryTarget || null,
-                    uri: div.dataset.wxSecondaryUri || null,
-                    size: div.dataset.wxSecondarySize || null
-                },
-
+                primaryAction: Object.fromEntries(Object.entries(dataset)
+                    .filter(([k]) => k.startsWith("wxPrimary"))
+                    .map(([k, v]) => [
+                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                ),
+                secondaryAction: Object.fromEntries(Object.entries(dataset)
+                    .filter(([k]) => k.startsWith("wxSecondary"))
+                    .map(([k, v]) => [
+                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                ),
                 // bind
                 bind: {
                     source: div.dataset.wxSource || null,

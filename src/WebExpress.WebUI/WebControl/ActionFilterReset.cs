@@ -6,22 +6,12 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a action element for a filter.
     /// </summary>
-    public class ActionFilter : IAction
+    public class ActionFilterReset : ActionFilter
     {
-        /// <summary>
-        /// Returns or sets the group name associated with the current instance.
-        /// </summary>
-        public string Group { get; set; }
-
-        /// <summary>
-        /// Returns or sets a value indicating whether the operation should be performed exclusively.
-        /// </summary>
-        public bool Exclusive { get; set; }
-
         /// <summary>
         /// Initializes a new instance of the class with the specified identifier.
         /// </summary>
-        public ActionFilter()
+        public ActionFilterReset()
         {
         }
 
@@ -35,7 +25,7 @@ namespace WebExpress.WebUI.WebControl
         /// The type of action being applied, which may influence how attributes are applied.
         /// </param>
         /// <returns>The current instance for method chaining.</returns>
-        public virtual IAction ApplyUserAttributes(IHtmlNode htmlNode, TypeAction typeAction)
+        public override IAction ApplyUserAttributes(IHtmlNode htmlNode, TypeAction typeAction)
         {
             switch (typeAction)
             {
@@ -43,11 +33,13 @@ namespace WebExpress.WebUI.WebControl
                     htmlNode?.AddUserAttribute("data-wx-secondary-action", "filter");
                     htmlNode?.AddUserAttribute("data-wx-secondary-group", Group);
                     htmlNode?.AddUserAttribute("data-wx-secondary-exclusive", Exclusive ? "true" : null);
+                    htmlNode?.AddUserAttribute("data-wx-secondary-reset", "true");
                     break;
                 default:
                     htmlNode?.AddUserAttribute("data-wx-primary-action", "filter");
                     htmlNode?.AddUserAttribute("data-wx-primary-group", Group);
                     htmlNode?.AddUserAttribute("data-wx-primary-exclusive", Exclusive ? "true" : null);
+                    htmlNode?.AddUserAttribute("data-wx-primary-reset", "true");
                     break;
             }
 
@@ -58,12 +50,13 @@ namespace WebExpress.WebUI.WebControl
         /// Returns a string that represents the value of the property.
         /// </summary>
         /// <returns>A string that contains the value of the property.</returns>
-        public virtual Dictionary<string, object> ToJson()
+        public override Dictionary<string, object> ToJson()
         {
             var dict = new Dictionary<string, object>
             {
                 ["action"] = "filter",
-                ["group"] = Group
+                ["group"] = Group,
+                ["reset"] = "true"
             };
 
             if (Exclusive)

@@ -129,8 +129,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-title", I18N.Translate(renderContext, tooltip))
                 .AddUserAttribute("data-color-css", Color?.ToClass())
                 .AddUserAttribute("data-color-style", Color?.ToStyle())
-                .AddUserAttribute(Active == TypeActive.Active ? "active" : null)
-                .AddUserAttribute(Active == TypeActive.Disabled ? "disabled" : null);
+                .AddUserAttribute("data-active", Active == TypeActive.Active ? "active" : Active == TypeActive.Disabled ? "disabled" : null);
 
             primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
             secondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);

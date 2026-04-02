@@ -50,14 +50,21 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
                 // keep original rich content if needed later
                 content: elem.innerHTML || "",
                 disabled: elem.hasAttribute("disabled"),
-                
-                // Parse Action Attributes
-                primaryAction: ds.wxPrimaryAction || null,
-                primaryTarget: ds.wxPrimaryTarget || null,
-                primaryUri: ds.wxPrimaryUri || null,
-                secondaryAction: ds.wxSecondaryAction || null,
-                secondaryTarget: ds.wxSecondaryTarget || null,
-                secondaryUri: ds.wxSecondaryUri || null
+                // parse action attributes
+                primaryAction: Object.fromEntries(Object.entries(dataset)
+                    .filter(([k]) => k.startsWith("wxPrimary"))
+                    .map(([k, v]) => [
+                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                ),
+                secondaryAction: Object.fromEntries(Object.entries(dataset)
+                    .filter(([k]) => k.startsWith("wxSecondary"))
+                    .map(([k, v]) => [
+                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                )
             });
         });
         return items;

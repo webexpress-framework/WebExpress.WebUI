@@ -11,14 +11,16 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
     constructor(element) {
         super(element);
         element.classList.add("wx-quickfilter");
+
         // ensure registry is loaded and available
         this._registry = webexpress.webui.FilterRegistry || null;
         if (!this._registry) {
             throw new Error("QuickFilterCtrl: filterRegistry singleton not found!");
         }
+
         // store static buttons on first construct
         this._staticButtonConfigs = Array.from(element.querySelectorAll(".wx-quickfilter-button"))
-            .map(btn => {
+            .map((btn) => {
                 return {
                     id: btn.id,
                     label: btn.textContent,
@@ -29,21 +31,33 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
                     size: btn.dataset.size || null,
                     image: btn.dataset.image || null,
                     // action attributes
-                    primaryAction: {
-                        action: btn.dataset.wxPrimaryAction || null,
-                        target: btn.dataset.wxPrimaryTarget || null,
-                        uri: btn.dataset.wxPrimaryUri || null,
-                        size: btn.dataset.wxPrimarySize || null
-                    },
-                    secondaryAction: {
-                        action: btn.dataset.wxSecondaryAction || null,
-                        target: btn.dataset.wxSecondaryTarget || null,
-                        uri: btn.dataset.wxSecondaryUri || null,
-                        size: btn.dataset.wxSecondarySize || null
-                    },
+                    primaryAction: Object.fromEntries(Object.entries(btn.dataset)
+                        .filter(([k]) => {
+                            return k.startsWith("wxPrimary");
+                        })
+                        .map(([k, v]) => {
+                            return [
+                                k.slice(9).replace(/^./, (c) => { return c.toLowerCase(); }),
+                                v === "true" ? true : v === "false" ? false : v
+                            ];
+                        })
+                    ),
+                    secondaryAction: Object.fromEntries(Object.entries(btn.dataset)
+                        .filter(([k]) => {
+                            return k.startsWith("wxSecondary");
+                        })
+                        .map(([k, v]) => {
+                            return [
+                                k.slice(9).replace(/^./, (c) => { return c.toLowerCase(); }),
+                                v === "true" ? true : v === "false" ? false : v
+                            ];
+                        })
+                    )
                 };
             });
+
         this._bindEvents();
+
         // only render if filters known; otherwise show nothing
         if (typeof this._registry.getActiveFilters === "function") {
             this.render();
@@ -77,8 +91,12 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
 
         // collect all filter ids represented by static buttons in this control
         const buttonFilterIds = this._staticButtonConfigs
-            .map(cfg => cfg.id || cfg.primaryAction.target)
-            .filter(id => !!id);
+            .map((cfg) => {
+                return cfg.id || cfg.primaryAction.target;
+            })
+            .filter((id) => {
+                return !!id;
+            });
 
         // render static filter buttons first
         for (let i = 0; i < this._staticButtonConfigs.length; i++) {
@@ -90,30 +108,63 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
 
             // copy primary and secondary action attributes from config to the button element
             for (const [k, v] of Object.entries(btnCfg.primaryAction)) {
-                if (v) {
-                    btnElem.dataset["wxPrimary" + k.charAt(0).toUpperCase() + k.slice(1)] = v;
+                if (v !== null && v !== undefined) {
+                    const attributeName = "wxPrimary" + k.charAt(0).toUpperCase() + k.slice(1);
+                    btnElem.dataset[attributeName] = v;
                 }
             }
             for (const [k, v] of Object.entries(btnCfg.secondaryAction)) {
-                if (v) {
-                    btnElem.dataset["wxSecondary" + k.charAt(0).toUpperCase() + k.slice(1)] = v;
+                if (v !== null && v !== undefined) {
+                    const attributeName = "wxSecondary" + k.charAt(0).toUpperCase() + k.slice(1);
+                    btnElem.dataset[attributeName] = v;
                 }
             }
 
             // map icon, color, size, image as required
-            if (btnCfg.icon) { btnElem.dataset.icon = btnCfg.icon; }
-            if (btnCfg.color) { btnElem.dataset.color = btnCfg.color; }
-            if (btnCfg.size) { btnElem.dataset.size = btnCfg.size; }
-            if (btnCfg.image) { btnElem.dataset.image = btnCfg.image; }
+            if (btnCfg.icon) {
+                btnElem.dataset.icon = btnCfg.icon;
+            }
+            if (btnCfg.color) {
+                btnElem.dataset.color = btnCfg.color;
+            }
+            if (btnCfg.size) {
+                btnElem.dataset.size = btnCfg.size;
+            }
+            if (btnCfg.image) {
+                btnElem.dataset.image = btnCfg.image;
+            }
 
-            // mark the button as active if its filter is currently enabled
+            // check active state and fallback to button config if registry is incomplete
             const filterId = btnCfg.id || btnCfg.primaryAction.target;
-            if (activeIds.includes(filterId)) {
+            let isActive = activeIds.includes(filterId);
+            const filterConfig = this._registry.getFilterConfig(filterId);
+
+            // evaluate reset status considering both registry and button configuration
+            const isReset = (filterConfig && filterConfig.reset) || btnCfg.primaryAction.reset;
+            const groupName = (filterConfig && filterConfig.group) || btnCfg.primaryAction.group;
+
+            // if it is a reset filter, check if the group is completely empty
+            if (isReset && groupName) {
+                let groupHasActive = false;
+                for (let j = 0; j < activeIds.length; j++) {
+                    const activeConfig = this._registry.getFilterConfig(activeIds[j]);
+                    if (activeConfig && activeConfig.group === groupName) {
+                        groupHasActive = true;
+                        break;
+                    }
+                }
+                if (!groupHasActive) {
+                    isActive = true;
+                }
+            }
+
+            // mark the button as active if its filter is currently enabled or it acts as a reset for an empty group
+            if (isActive) {
                 btnElem.classList.add("active");
                 btnElem.setAttribute("aria-pressed", "true");
             }
 
-            // instantiate ButtonCtrl for consistent WebExpress behaviour
+            // instantiate buttonctrl for consistent webexpress behaviour
             webexpress.webui.Controller.createInstanceByClassType("wx-webui-button", btnElem);
             container.appendChild(btnElem);
         }
@@ -142,25 +193,25 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
         const chip = document.createElement("div");
         // rely on css for padding and exact sizes instead of inline styles
         chip.className = "wx-quickfilter-btn-chip btn wx-button active";
-        
+
         const label = document.createElement("span");
         label.textContent = config.name;
-        
+
         const removeBtn = document.createElement("button");
         removeBtn.className = "btn-close btn-close-white";
         removeBtn.setAttribute("aria-label", "Remove");
-        
+
         // directly invoke the action mechanism via action attribute conventions
         removeBtn.dataset.wxPrimaryAction = "deactivate_quickfilter";
         removeBtn.dataset.wxPrimaryTarget = config.id;
-        
+
         removeBtn.addEventListener("click", () => {
             this._registry.deactivate(config.id);
         });
 
         chip.appendChild(label);
         chip.appendChild(removeBtn);
-        
+
         return chip;
     }
 };
