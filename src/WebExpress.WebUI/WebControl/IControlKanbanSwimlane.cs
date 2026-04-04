@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.WebControl
         string Title { get; }
 
         /// <summary>
-        /// Returns a value indicating whether the content is currently collapsed.
+        /// Returns a value indicating whether the content is currently expanded.
         /// </summary>
-        bool Collapsed { get; }
+        bool Expanded { get; }
     }
 }

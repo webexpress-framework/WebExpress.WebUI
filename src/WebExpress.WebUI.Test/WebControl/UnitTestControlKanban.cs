@@ -80,8 +80,10 @@ namespace WebExpress.WebUI.Test.WebControl
         /// <summary>
         /// Tests adding a swimlane to the kanban control.
         /// </summary>
-        [Fact]
-        public void AddSwimlane()
+        [Theory]
+        [InlineData(false, "<div class=\"wx-webui-kanban\"><div id=\"a\" class=\"wx-swimlane\" data-label=\"A\" data-expanded=\"false\"></div></div>")]
+        [InlineData(true, "<div class=\"wx-webui-kanban\"><div id=\"a\" class=\"wx-swimlane\" data-label=\"A\"></div></div>")]
+        public void AddSwimlane(bool expanded, string expected)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -90,12 +92,10 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlKanban(null);
 
             // act
-            control.Add(new ControlKanbanSwimlane("a", "A", true));
+            control.Add(new ControlKanbanSwimlane("a", "A", expanded));
 
             // validation
             var html = control.Render(context, visualTree);
-            var expected = @"<div class=""wx-webui-kanban""><div id=""a"" class=""wx-swimlane"" data-label=""A"" data-expanded=""true""></div></div>";
-
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 

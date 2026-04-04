@@ -32,7 +32,7 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="expanded">
         /// A value indicating whether the column content is initially expanded.
         /// </param>
-        public ControlKanbanSwimlane(string id, string title, bool expanded = false)
+        public ControlKanbanSwimlane(string id, string title, bool expanded = true)
         {
             Id = id;
             Title = title;
@@ -53,7 +53,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = "wx-swimlane"
             }
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, Title))
-                .AddUserAttribute("data-expanded", Expanded ? "true" : null);
+                .AddUserAttribute("data-expanded", !Expanded ? "false" : null);
 
             return html;
         }
