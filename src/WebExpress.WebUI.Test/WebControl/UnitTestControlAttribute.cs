@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<div id=""id""><span id=""id_name"">:</span><span id=""id_value""></span></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -29,7 +29,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -45,7 +45,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.webui:plugin.name", @"<div><span>WebExpress.WebUI:</span><span></span></div>")]
         public void Key(string title, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -54,7 +54,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Key = title,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -69,16 +69,16 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(typeof(IconStar), @"<div><i class=""fas fa-star""></i><span>:</span><span></span></div>")]
         public void Icon(Type icon, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAttribute()
             {
-                Icon = icon != null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -101,7 +101,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Muted, @"<div class=""text-muted""><span>:</span><span></span></div>")]
         public void Color(TypeColorText color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -110,7 +110,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Color = new PropertyColorText(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -133,7 +133,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Muted, @"<div><span class=""text-muted"">:</span><span></span></div>")]
         public void KeyColor(TypeColorText color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -142,7 +142,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 KeyColor = new PropertyColorText(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -165,7 +165,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Transparent, @"<div class=""bg-transparent""><span>:</span><span></span></div>")]
         public void BackgroundColor(TypeColorBackground color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -174,7 +174,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 BackgroundColor = new PropertyColorBackground(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -189,7 +189,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("value", @"<div><span>:</span><span>value</span></div>")]
         public void Value(string value, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -198,7 +198,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Value = value
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -213,7 +213,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(';', @"<div><span>;</span><span></span></div>")]
         public void Separator(char value, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -222,7 +222,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Separator = value
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -237,16 +237,16 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("http://example.com", @"<div><span>:</span><a href=""http://example.com/"" class=""wx-link""><span></span></a></div>")]
         public void Uri(string uri, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAttribute()
             {
-                Uri = uri != null ? new UriEndpoint(uri) : null
+                Uri = uri is not null ? new UriEndpoint(uri) : null
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation

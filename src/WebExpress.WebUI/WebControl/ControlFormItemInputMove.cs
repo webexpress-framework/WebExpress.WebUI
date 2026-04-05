@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
-using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -13,12 +11,12 @@ namespace WebExpress.WebUI.WebControl
     /// </summary>
     public class ControlFormItemInputMove : ControlFormItemInput<ControlFormInputValueStringList>, IControlFormItemInputMove
     {
-        private readonly List<ControlFormItemInputMoveItem> _options = [];
+        private readonly List<IControlFormItemInputMoveItem> _options = [];
 
         /// <summary>
         /// Returns the collection of available options for the control.
         /// </summary>
-        public IEnumerable<ControlFormItemInputMoveItem> Options => _options;
+        public IEnumerable<IControlFormItemInputMoveItem> Options => _options;
 
         /// <summary>
         /// Returns or sets the label displayed for the selected options list.
@@ -33,18 +31,8 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
         /// </summary>
-        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
-        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="items">The initial set of items to populate the control.</param>
-        public ControlFormItemInputMove
-        (
-            [CallerMemberName] string instance = null,
-            [CallerFilePath] string file = null,
-            [CallerLineNumber] int? line = null,
-            params ControlFormItemInputMoveItem[] items
-        )
-            : this($"move_{instance}_{file}_{line}".GetHashCode().ToString("X"), items)
+        public ControlFormItemInputMove()
+            : this(DeterministicId.Create())
         {
         }
 
@@ -53,7 +41,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="id">The unique identifier for the control.</param>
         /// <param name="items">The initial set of items to populate the control.</param>
-        public ControlFormItemInputMove(string id, params ControlFormItemInputMoveItem[] items)
+        public ControlFormItemInputMove(string id, params IControlFormItemInputMoveItem[] items)
             : base(id)
         {
             _options.AddRange(items);
@@ -64,7 +52,19 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="items">The items to add to the available options list.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlFormItemInputMove Add(params ControlFormItemInputMoveItem[] items)
+        public IControlFormItemInputMove Add(params IControlFormItemInputMoveItem[] items)
+        {
+            _options.AddRange(items);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds one or more items to the available options list.
+        /// </summary>
+        /// <param name="items">The items to add to the available options list.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlFormItemInputMove Add(IEnumerable<IControlFormItemInputMoveItem> items)
         {
             _options.AddRange(items);
 
@@ -76,7 +76,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="item">The item to remove from the available options list.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlFormItemInputMove Remove(ControlFormItemInputMoveItem item)
+        public IControlFormItemInputMove Remove(IControlFormItemInputMoveItem item)
         {
             _options.Remove(item);
 
@@ -103,19 +103,14 @@ namespace WebExpress.WebUI.WebControl
                 classes.Add("disabled");
             }
 
-            var html = new HtmlElementTextContentDiv([.. _options.Select(x => new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(x.Label)))
-                {
-                    Id = x.Id,
-                    Class = "wx-webui-move-option"
-                }
-                    .AddUserAttribute("data-icon", (x.Icon as Icon)?.Class)
-                    .AddUserAttribute("data-image", (x.Icon as ImageIcon)?.Uri.ToString()))])
+            var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-input-move", classes),
                 Style = GetStyles()
             }
-                .AddUserAttribute("name", Name);
+                .AddUserAttribute("name", Name)
+                .Add(_options.Select(x => x.Render(renderContext, visualTree)));
 
             if (!string.IsNullOrEmpty(SelectedHeader))
             {

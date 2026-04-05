@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<button id=""id"" name=""id"" type=""submit"" class=""btn me-2 btn-success"">*</i>Submit</button>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -29,7 +29,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -43,7 +43,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"<button type=""submit"" class=""btn me-2 btn-success""><i class=""fas fa-save me-2""></i>abc</button>")]
         public void Text(string text, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -53,7 +53,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Text = text
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -68,7 +68,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeSizeButton.Large, @"<button type=""submit"" class=""btn me-2 btn-lg btn-success"">*</button>")]
         public void Size(TypeSizeButton size, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -78,7 +78,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Size = size
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -99,7 +99,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Transparent, @"<button type=""submit"" class=""btn bg-transparent *"">*</button>")]
         public void BackgroundColor(TypeColorBackground color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -109,7 +109,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 BackgroundColor = new PropertyColorBackground(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -128,7 +128,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorButton.Light, @"<button type=""submit"" class=""btn me-2 btn-light"">*</button>")]
         public void Color(TypeColorButton color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -138,7 +138,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Color = new PropertyColorButton(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -158,7 +158,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, TypeColorButton.Light, @"<button type=""submit"" class=""btn me-2"">*</button>")]
         public void Outline(bool outline, TypeColorButton color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -169,7 +169,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Color = new PropertyColorButton(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -183,7 +183,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeBlockButton.Block, @"<button type=""submit"" class=""btn me-2 btn-success btn-block"">*</button>")]
         public void Block(TypeBlockButton block, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -193,7 +193,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Block = block
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -207,17 +207,17 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(typeof(IconStar), @"<button type=""submit"" class=""btn me-2 btn-success""><i class=""fas fa-star me-2""></i>Submit</button>")]
         public void Icon(Type icon, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButtonSubmit()
             {
-                Icon = icon != null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -229,7 +229,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Fact]
         public void Add()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -241,7 +241,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control5 = new ControlFormItemButtonSubmit(null);
             var control6 = new ControlFormItemButtonSubmit(null);
 
-            // test execution
+            // act
             control4.Add(new ControlIcon() { Icon = new IconStar() });
             control5.Add([new ControlIcon() { Icon = new IconStar() }]);
             control6.Add(new List<ControlIcon>([new ControlIcon() { Icon = new IconStar() }]));

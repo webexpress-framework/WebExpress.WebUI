@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<pre id=""id"" class=""wx-webui-code"" data-base64=""true""></pre>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -26,7 +26,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -41,7 +41,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"<pre class=""wx-webui-code"" data-base64=""true"">YWJj</pre>")]
         public void Code(string code, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Code = code
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -65,7 +65,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"<pre class=""wx-webui-code"" data-line-numbers=""true"" data-base64=""true""></pre>")]
         public void LineNumbers(bool lineNumbers, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -106,7 +106,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
         public void Language(TypeLanguage language, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -115,7 +115,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Language = language
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation

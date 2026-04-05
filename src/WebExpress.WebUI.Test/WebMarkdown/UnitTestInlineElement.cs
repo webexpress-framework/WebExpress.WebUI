@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("*italic* Start", "italic")]
         public void Italic(string input, string expectedItalic)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -36,7 +36,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("mixed *italic **bold** not closed", "mixed * italic bold not closed")]
         public void Italic_Invalid(string input, string expected)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -59,7 +59,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("**This is line \nand this is line is still bold.**\n\nThis is no longer bold.", "This is line and this is line is still bold.")]
         public void Bold(string input, string expectedBold)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -78,7 +78,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("Before *bold**", "Before * bold **")]
         public void Bold_Invalid(string input, string expectedBold)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -97,7 +97,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("***bold+italic*** Start", "bold+italic")]
         public void BoldItalic(string input, string expectedItalic)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -121,7 +121,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("~~strike~~ Test", "strike")]
         public void Strikethrough(string input, string expectedStrike)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -139,7 +139,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("~~**strike bold**~~ Test", "strike bold")]
         public void StrikethroughBold(string input, string expectedStrikeBold)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -158,7 +158,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("_underline_ in between", "underline")]
         public void Underline(string input, string expectedUnderline)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -176,7 +176,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("_**underline bold**_ in between", "underline bold")]
         public void UnderlineBold(string input, string expectedUnderlineBold)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -196,7 +196,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("_***underline bold italic***_ in between", "underline bold italic")]
         public void UnderlineBoldItalic(string input, string expected)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -217,7 +217,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("==Multiline \nhighlight== continues here.", "Multiline highlight")]
         public void Marked(string input, string expected)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -234,7 +234,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("[Test](http://example.com)", "Test", "http://example.com")]
         public void Link(string input, string expectedText, string expectedUrl)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -251,7 +251,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("![Test](http://a.com/b.png)", "Test", "http://a.com/b.png")]
         public void Image(string input, string expectedAlt, string expectedUrl)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -268,7 +268,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("**! Text [Text](http://example.com)", "** ! Text http://example.com")]
         public void Image_Invalid(string input, string expected)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -284,7 +284,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("Contact: mailto:info@example.com", "mailto:info@example.com")]
         public void Url(string input, string expectedUrl)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -307,7 +307,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("This is a checkbox [   ].", "false")]
         public void Checkbox(string input, string expected)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -322,7 +322,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("This is a footnote[^1].", "1")]
         public void Footnotes(string input, string expectedNumber)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation
@@ -338,7 +338,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("This is `code`.", "code")]
         public void Code(string input, string expectedCode)
         {
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(input);
 
             // validation

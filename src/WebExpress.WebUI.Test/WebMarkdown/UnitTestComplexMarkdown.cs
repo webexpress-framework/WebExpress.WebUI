@@ -21,10 +21,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("WebExpress.WebUI.Test.Data.ComplexExample3.md", 9)]
         public void ParsesComplexDocument(string fileName, int elementsCount)
         {
-            // preconditions
+            // arrange
             var markdown = LoadEmbeddedResource(fileName);
 
-            // test execution
+            // act
             var doc = MarkdownParser.Parse(markdown);
 
             // validation
@@ -40,7 +40,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         {
             var assembly = Assembly.GetExecutingAssembly();
             using var stream = assembly.GetManifestResourceStream(resourceName);
-            if (stream == null)
+            if (stream is null)
             {
                 throw new FileNotFoundException("Resource not found: " + resourceName);
             }

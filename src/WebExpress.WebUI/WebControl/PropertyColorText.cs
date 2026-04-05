@@ -54,6 +54,11 @@
         {
             if ((TypeColor)SystemColor == TypeColor.User)
             {
+                if (string.IsNullOrWhiteSpace(UserColor))
+                {
+                    return null;
+                }
+
                 return "color:" + UserColor + ";";
             }
 

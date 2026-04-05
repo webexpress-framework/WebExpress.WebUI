@@ -53,12 +53,24 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            return Render(renderContext, visualTree, Text);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="text">The header text to be rendered.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, string text)
+        {
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-sidebar-header"
             }
-                .AddUserAttribute("data-label", I18N.Translate(renderContext, Text))
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, text))
                 .AddUserAttribute("data-title", I18N.Translate(renderContext, Tooltip))
                 .AddUserAttribute("data-color-css", Color?.ToClass())
                 .AddUserAttribute("data-color-style", Color?.ToStyle())

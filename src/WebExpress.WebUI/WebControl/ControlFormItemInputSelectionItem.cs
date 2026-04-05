@@ -1,40 +1,43 @@
-﻿using System.Runtime.CompilerServices;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+using WebExpress.WebCore.Internationalization;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebUI.WebIcon;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// Represents an item in a selection input form.
     /// </summary>
-    public class ControlFormItemInputSelectionItem
+    public class ControlFormItemInputSelectionItem : IControlFormItemInputSelectionItem
     {
         /// <summary>
-        /// Gets the unique identifier of the selection item.
+        /// Returns the unique identifier of the selection item.
         /// </summary>
         [JsonPropertyName("id")]
         public string Id { get; }
 
         /// <summary>
-        /// Gets or sets the label of the selection item.
+        /// Returns or sets the text of the selection item.
         /// </summary>
         [JsonPropertyName("label")]
-        public string Label { get; set; }
+        public string Text { get; set; }
 
         /// <summary>
-        /// Gets or sets the icon associated with the selection item.
+        /// Returns or sets the icon associated with the selection item.
         /// </summary>
         [JsonPropertyName("icon")]
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Gets or sets the color of the label.
+        /// Returns or sets the color of the label.
         /// </summary>
         [JsonPropertyName("labelcolor")]
         public TypeColorSelection LabelColor { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the selection item is selected.
+        /// Returns or sets a value indicating whether the selection item is selected.
         /// </summary>
         [JsonPropertyName("selected")]
         public bool Selected { get; set; }
@@ -46,24 +49,15 @@ namespace WebExpress.WebUI.WebControl
         public bool Disabled { get; set; }
 
         /// <summary>
-        /// Gets or sets the content of the selection item.
+        /// Returns or sets the content of the selection item.
         /// </summary>
         public IControl Content { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
         /// </summary>
-        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
-        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="items">The entries.</param>
-        public ControlFormItemInputSelectionItem
-        (
-            [CallerMemberName] string instance = null,
-            [CallerFilePath] string file = null,
-            [CallerLineNumber] int? line = null
-        )
-            : this($"selectionitem_{instance}_{file}_{line}".GetHashCode().ToString("X"))
+        public ControlFormItemInputSelectionItem()
+            : this(DeterministicId.Create())
         {
         }
 
@@ -74,6 +68,42 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemInputSelectionItem(string id)
         {
             Id = id;
+        }
+
+        /// <summary>
+        /// Converts the cell to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
+        {
+            var html = new HtmlElementTextContentDiv()
+            {
+                Id = Id,
+                Class = Css.Concatenate("wx-selection-item"),
+            }
+                .AddUserAttribute("data-label", I18N.Translate(Text))
+                .AddUserAttribute("data-icon", Icon is Icon ? (Icon as Icon).Class : null)
+                .AddUserAttribute("data-image", Icon is ImageIcon
+                    ? (Icon as ImageIcon).Uri?.ToString()
+                    : null)
+                .AddUserAttribute("data-label-color", LabelColor != TypeColorSelection.Default
+                    ? LabelColor.ToClass()
+                    : null)
+                .Add(Content?.Render(renderContext, visualTree));
+
+            if (Selected)
+            {
+                html.AddUserAttribute("selected");
+            }
+
+            if (Disabled)
+            {
+                html.AddUserAttribute("disabled");
+            }
+
+            return html;
         }
     }
 }

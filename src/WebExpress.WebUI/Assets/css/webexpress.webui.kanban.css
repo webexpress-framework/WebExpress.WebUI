@@ -1,0 +1,205 @@
+/* 
+ * Kanban Board aligned with Dashboard styling.
+ * Forces columns side-by-side with horizontal scrolling even on small screens.
+ */
+.wx-kanban {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    overflow-x: auto; /* enable horizontal scrolling */
+    padding-bottom: 1rem; /* reserve space for the scrollbar */
+}
+
+/* Kanban grid row keeps all columns in one horizontal line */
+.wx-kanban-row {
+    display: grid;
+    /* Use JS-supplied layout or default to equal columns, min 280px */
+    grid-template-columns: var(--wx-board-template, repeat(var(--wx-board-cols, 3), minmax(280px, 1fr)));
+    /* Force grid to add all children as columns and never wrap to a new row */
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(280px, 1fr);
+    gap: 0.5rem;
+    align-items: stretch;
+    min-width: 100%;
+    width: max-content; /* grid fits content, enables horizontal scroll */
+}
+
+/* Header row sits visually closer to first swimlane */
+.wx-kanban-headers.wx-kanban-row {
+    margin-bottom: -0.5rem; 
+}
+
+/* Column header styling */
+.wx-kanban-column-header {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--bs-border-color, #dee2e6);
+    color: var(--bs-heading-color, #495057);
+    background: transparent;
+    /* dark theme adaptation */
+    transition: background 0.15s, color 0.15s;
+}
+
+[data-bs-theme="dark"] .wx-kanban-column-header {
+    color: var(--bs-heading-color, #e7eaf0);
+    border-bottom-color: var(--bs-border-color, #495057);
+}
+
+/* Swimlane title style */
+.wx-kanban-swimlane-title {
+    font-size: 1.15rem;
+    font-weight: bold;
+    margin: 0.5em 0 0.75em 0;
+    color: var(--bs-primary, #0d6efd);
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    padding-bottom: 0.25rem;
+    background: transparent;
+    transition: color 0.15s, border-bottom 0.15s;
+}
+
+[data-bs-theme="dark"] .wx-kanban-swimlane-title {
+    color: var(--bs-primary, #6ea8fe);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Column dropzone cell */
+.wx-kanban-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-height: 150px;
+    padding: 0.25rem;
+    padding-bottom: 2rem;
+    background-color: var(--bs-gray-100, #f8f9fa);
+    border-radius: 0.25rem;
+    border: 2px dashed transparent;
+    transition: background-color 0.2s, border 0.2s;
+    height: 100%;
+}
+
+[data-bs-theme="dark"] .wx-kanban-cell {
+    background: var(--bs-gray-900, #393b40);
+    border-color: var(--bs-border-color, #495057);
+}
+
+/* Visual feedback when hovering over an empty dropzone */
+.wx-kanban-cell.wx-drag-over-empty {
+    background-color: rgba(13, 110, 253, 0.05);
+    border-color: rgba(13, 110, 253, 0.4);
+}
+
+[data-bs-theme="dark"] .wx-kanban-cell.wx-drag-over-empty {
+    background-color: rgba(13, 110, 253, 0.12);
+    border-color: rgba(90, 170, 255, 0.30);
+}
+
+/* Kanban Cards */
+.wx-kanban-card {
+    position: relative;
+    width: 100%;
+    background: #fff;
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: box-shadow 0.15s ease, background 0.15s, color 0.15s;
+    cursor: grab;
+    padding: 0.75rem 1rem;
+    border-top: 4px solid var(--kanban-color, transparent);
+    user-select: none;
+    color: var(--bs-body-color, #333);
+}
+
+[data-bs-theme="dark"] .wx-kanban-card {
+    background: var(--bs-gray-800, #23272b);
+    color: var(--bs-gray-100, #f8f9fa);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.21);
+}
+
+/* cursor pointer for cards with actions */
+.wx-kanban-card[data-wx-primary-action],
+.wx-kanban-card[data-wx-secondary-action] {
+    cursor: pointer;
+}
+
+.wx-kanban-card.wx-dragging {
+    opacity: 0.5;
+    box-shadow: 0 4px 12px rgba(13,110,253,0.15);
+    cursor: grabbing;
+}
+
+.wx-kanban-card .card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+    background: transparent;
+}
+
+.wx-kanban-card .card-header .card-icon {
+    font-size: 1.1rem;
+    color: var(--bs-secondary, #6c757d);
+    display: flex;
+    align-items: center;
+}
+
+[data-bs-theme="dark"] .wx-kanban-card .card-header .card-icon {
+    color: var(--bs-gray-400, #bdc8d6);
+}
+
+.wx-kanban-card .card-header .card-image {
+    max-height: 1.5rem;
+    width: auto;
+    border-radius: 0.125rem;
+}
+
+.wx-kanban-card .card-header .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--bs-heading-color, #212529);
+    flex-grow: 1;
+    background: transparent;
+}
+
+[data-bs-theme="dark"] .wx-kanban-card .card-header .card-title {
+    color: var(--bs-heading-color, #fff);
+}
+
+.wx-kanban-card .card-text {
+    font-size: 0.9em;
+    color: #6c757d;
+    margin-bottom: 0;
+    background: transparent;
+}
+
+[data-bs-theme="dark"] .wx-kanban-card .card-text {
+    color: var(--bs-gray-300, #abb4be);
+}
+
+/* Visual Drop Indicator (blue line for insert) */
+.wx-kanban-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: #0d6efd; /* primary color */
+    border-radius: 2px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10;
+    transition: opacity 0.15s ease;
+}
+
+/* blue line appears above the card */
+.wx-kanban-card.wx-drag-over-top::before {
+    top: -10px;
+    opacity: 1;
+}
+
+/* blue line appears below the card */
+.wx-kanban-card.wx-drag-over-bottom::before {
+    bottom: -10px;
+    opacity: 1;
+}

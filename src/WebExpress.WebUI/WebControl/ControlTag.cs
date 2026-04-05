@@ -1,32 +1,26 @@
-﻿using WebExpress.WebCore.Internationalization;
-using WebExpress.WebCore.WebHtml;
+﻿using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a control tag.
+    /// Represents a read only tag control.
     /// </summary>
     public class ControlTag : Control
     {
         /// <summary>
-        /// Returns or sets the layout.
+        /// Returns or sets the color.
         /// </summary>
-        public PropertyColorBackgroundBadge Layout
+        public PropertyColorTag Color
         {
-            get => (PropertyColorBackgroundBadge)GetPropertyObject();
+            get => (PropertyColorTag)GetPropertyObject();
             set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
         }
 
         /// <summary>
-        /// Return or specifies whether rounded corners should be used.
-        /// </summary>
-        public bool Pill { get; set; }
-
-        /// <summary>
         /// Returns or sets the text.
         /// </summary>
-        public string Text { get; set; }
+        public string Value { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -35,7 +29,6 @@ namespace WebExpress.WebUI.WebControl
         public ControlTag(string id = null)
             : base(id)
         {
-            Pill = true;
         }
 
         /// <summary>
@@ -46,12 +39,15 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var html = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Text)))
+            var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = "wx-tag" + (Pill ? " wx-tag-pill" : string.Empty),
+                Class = "wx-webui-tag",
                 Role = "tag"
-            };
+            }
+                .AddUserAttribute("data-color-css", Color?.ToClass())
+                .AddUserAttribute("data-color-style", Color?.ToStyle())
+                .AddUserAttribute("data-value", Value);
 
             return html;
         }

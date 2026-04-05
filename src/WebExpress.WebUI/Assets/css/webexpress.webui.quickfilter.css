@@ -1,0 +1,103 @@
+/**
+ * Styles for the QuickFilter control.
+ * Uses only Bootstrap color variables for theme compatibility.
+ */
+
+.wx-quickfilter {
+    display: block;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.wx-quickfilter > div {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.2em;
+    align-items: center;
+    padding: 0.2em;
+}
+
+/* chip-like filter button: default (not active) */
+.wx-quickfilter-btn-chip {
+    outline: none;
+    background: transparent;
+    color: var(--bs-primary);
+    font-size: 0.85em;
+    font-weight: 500;
+    border-radius: 20px;
+    border: 1px solid var(--bs-primary);
+    transition: box-shadow 0.2s, background 0.15s, color 0.2s;
+    cursor: pointer;
+    gap: 0;
+}
+
+/* chip button active state */
+.wx-quickfilter-btn-chip.active,
+.wx-quickfilter-btn-chip[aria-pressed="true"] {
+    background: var(--bs-primary);
+    color: var(--bs-white);
+    border-color: var(--bs-primary);
+}
+
+/* chip button hover (not active) */
+.wx-quickfilter-btn-chip:hover {
+    background: var(--bs-light);
+    color: var(--bs-primary);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* chip button: active + hover = darker */
+.wx-quickfilter-btn-chip.active:hover,
+.wx-quickfilter-btn-chip[aria-pressed="true"]:hover {
+    background: var(--bs-primary);
+    color: var(--bs-white);
+}
+
+.wx-quickfilter-btn-chip i {
+    margin-right: 0.3em;
+}
+
+/* close button for chips */
+.wx-quickfilter .btn-close {
+    margin-left: 0.5rem;
+    width: 0.5em;
+    height: 0.5em;
+    opacity: 0.8;
+}
+
+.wx-quickfilter .btn-close:hover {
+    opacity: 1;
+}
+
+/* dropdown toggle for filter menu */
+.wx-quickfilter .dropdown-toggle {
+    border-radius: 20px;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.85rem;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bs-light);
+    color: var(--bs-primary);
+}
+
+/* dropdown menu style */
+.wx-quickfilter .dropdown-menu {
+    border-radius: 0.5rem;
+    padding: 0.5rem 0;
+    background-color: var(--bs-light);
+}
+
+/* dropdown item style */
+.wx-quickfilter .dropdown-item {
+    font-size: 0.9rem;
+    padding: 0.4rem 1rem;
+    color: var(--bs-dark);
+    transition: background-color 0.15s ease-in-out;
+}
+
+.wx-quickfilter .dropdown-item:hover {
+    background-color: var(--bs-primary);
+    color: var(--bs-white);
+}

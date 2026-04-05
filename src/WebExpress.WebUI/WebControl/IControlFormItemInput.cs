@@ -23,7 +23,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns a value indicating whether the input element is disabled.
         /// </summary>
-        bool Disabled { get; set; }
+        bool Disabled { get; }
+
+        /// <summary>
+        /// Returns or sets whether inputs are enforced.
+        /// </summary>
+        bool Required { get; }
 
         /// <summary>
         /// Returns the elements that are displayed in front of the control.

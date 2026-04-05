@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<div id=""id"" class=""btn-group"" role=""button""><a id=""id_btn"" class=""btn""></a><span id=""id_btn"" class=""btn dropdown-toggle dropdown-toggle-split"" data-bs-toggle=""dropdown"" aria-expanded=""false""><span class=""caret""></span></span><ul class=""dropdown-menu""></ul></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -28,7 +28,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -42,7 +42,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"<div class=""btn-group"" role=""button""><a class=""btn"">abc</a>*</div>")]
         public void Text(string text, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -51,7 +51,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Text = text
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -66,7 +66,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeSizeButton.Large, @"<div class=""btn-group"" role=""button""><a class=""btn btn-lg""></a>*</div>")]
         public void Size(TypeSizeButton size, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Size = size
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -93,7 +93,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorButton.Dark, @"<div class=""btn-group"" role=""button""><a class=""btn btn-dark""></a><span class=""btn dropdown-toggle dropdown-toggle-split btn-dark"" *</div>")]
         public void BackgroundColor(TypeColorButton color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -102,7 +102,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 BackgroundColor = new PropertyColorButton(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -121,7 +121,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, TypeColorButton.Dark, @"<div class=""btn-group"" role=""button""><a class=""btn btn-outline-dark""></a><span class=""btn dropdown-toggle dropdown-toggle-split btn-outline-dark"" *</div>")]
         public void Outline(bool outline, TypeColorButton color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -131,7 +131,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 BackgroundColor = new PropertyColorButton(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -145,7 +145,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeBlockButton.Block, @"<div class=""btn-group btn-block"" role=""button""><a class=""btn btn-block""></a>*</div>")]
         public void Block(TypeBlockButton block, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -154,7 +154,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Block = block
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -168,16 +168,16 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(typeof(IconStar), @"<div class=""btn-group"" role=""button""><a class=""btn""><i class=""fas fa-star""></i>*</div>")]
         public void Icon(Type icon, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSplitButtonLink()
             {
-                Icon = icon != null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -189,7 +189,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Fact]
         public void Add()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -200,7 +200,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control5 = new ControlSplitButtonLink(null);
             var control6 = new ControlSplitButtonLink(null);
 
-            // test execution
+            // act
             control4.Add(new ControlSplitButtonItemLink() { Text = "abc" });
             control5.Add([new ControlSplitButtonItemLink() { Text = "abc" }]);
             control6.Add(new List<IControlSplitButtonItem>([new ControlSplitButtonItemLink() { Text = "abc" }]).ToArray());

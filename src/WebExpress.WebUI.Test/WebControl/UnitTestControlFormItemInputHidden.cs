@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<input id=""id"" name=""id"" type=""hidden"">")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -41,7 +41,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"<input name=""abc"" type=""hidden"">")]
         public void Name(string name, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -51,7 +51,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Name = name
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -65,7 +65,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"*<input value=""abc"" type=""hidden"">*")]
         public void Value(string value, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 renderContext.SetValue(control, new ControlFormInputValueString(value));
             });
 
-            // test execution
+            // act
             var html = form.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);

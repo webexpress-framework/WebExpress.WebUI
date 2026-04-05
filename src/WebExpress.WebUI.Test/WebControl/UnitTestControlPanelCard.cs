@@ -19,7 +19,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<div id=""id"" class=""card border""><div class=""card-body""><div class=""card-text""></div></div></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -42,7 +42,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.webui:plugin.name", @"<div class=""card border""><div class=""card-header"">WebExpress.WebUI</div><div class=""card-body"">*</div></div>")]
         public void Header(string header, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -51,7 +51,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Header = header
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -65,16 +65,16 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("/headerImage", @"<div class=""card border""><img src=""/headerImage"" class=""card-img-top"">*</div>")]
         public void HeaderImage(string headerImage, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelCard()
             {
-                HeaderImage = headerImage != null ? new UriEndpoint(headerImage) : null
+                HeaderImage = headerImage is not null ? new UriEndpoint(headerImage) : null
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -88,7 +88,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("headline", @"<div class=""card border"">*<h4 class=""card-title"">headline</h4>*</div>")]
         public void Headline(string headline, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -97,7 +97,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Headline = headline
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -111,7 +111,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("footer", @"<div class=""card border"">*<div class=""card-footer"">footer</div></div>")]
         public void Footer(string footer, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -120,7 +120,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Footer = footer
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -134,16 +134,16 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("/footerImage", @"<div class=""card border"">*<img src=""/footerImage"" class=""card-img-top""></div>")]
         public void FooterImage(string footerImage, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelCard()
             {
-                FooterImage = footerImage != null ? new UriEndpoint(footerImage) : null
+                FooterImage = footerImage is not null ? new UriEndpoint(footerImage) : null
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -158,7 +158,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeTheme.Dark, @"<div class=""card border"" data-bs-theme=""dark"">*</div>")]
         public void Theme(TypeTheme theme, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -167,7 +167,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Theme = theme
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);

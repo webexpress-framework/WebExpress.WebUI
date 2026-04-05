@@ -22,7 +22,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<li id=""id"" class=""list-group-item-action""><a id=""id"" class=""wx-link""></a></li>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -30,9 +30,10 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -45,7 +46,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.webui:plugin.name", @"<li class=""list-group-item-action""><a class=""wx-link"">WebExpress.WebUI</a></li>")]
         public void Text(string text, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -54,9 +55,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 Text = text,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -69,18 +71,19 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("/a/b", @"<li class=""list-group-item-action""><a class=""wx-link"" href=""/a/b""></a></li>")]
         public void Uri(string uri, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                Uri = uri != null ? new UriEndpoint(uri) : null,
+                Uri = uri is not null ? new UriEndpoint(uri) : null,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -93,7 +96,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("b", @"<li class=""list-group-item-action""><a class=""wx-link"" title=""b""></a></li>")]
         public void Title(string title, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -102,9 +105,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 Title = title,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -119,7 +123,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeTarget.Framename, @"<li class=""list-group-item-action""><a class=""wx-link"" target=""_framename""></a></li>")]
         public void Target(TypeTarget target, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -128,9 +132,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 Target = target,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -144,7 +149,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("a<br/>b", @"<li class=""list-group-item-action""><a class=""wx-link"" data-bs-toggle=""tooltip""></a></li>")]
         public void Tooltip(string tooltip, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -153,9 +158,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 Tooltip = tooltip
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -167,18 +173,19 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(typeof(IconStar), @"<li class=""list-group-item-action""><a class=""wx-link""><i class=""fas fa-star""></i></a></li>")]
         public void Icon(Type icon, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                Icon = icon != null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -190,7 +197,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeActive.Active, @"<li class=""list-group-item-action active""><a class=""wx-link""></a></li>")]
         public void Active(TypeActive active, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -199,9 +206,58 @@ namespace WebExpress.WebUI.Test.WebControl
                 Active = active
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the primary action property of the list item link control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<li class=""list-group-item-action""><a class=""wx-link""></a></li>")]
+        [InlineData("modal", @"<li class=""list-group-item-action""><a class=""wx-link"" data-wx-primary-action=""modal"" data-wx-primary-target=""#modal""></a></li>")]
+        public void PrimaryAction(string modal, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlListItemLink()
+            {
+                PrimaryAction = new ActionModal(modal)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the secondary action property of the list item link control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<li class=""list-group-item-action""><a class=""wx-link""></a></li>")]
+        [InlineData("modal", @"<li class=""list-group-item-action""><a class=""wx-link"" data-wx-secondary-action=""modal"" data-wx-secondary-target=""#modal""></a></li>")]
+        public void SecondaryAction(string modal, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlListItemLink()
+            {
+                SecondaryAction = new ActionModal(modal)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -211,7 +267,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Fact]
         public void Add()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -222,7 +278,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control5 = new ControlListItemLink(null);
             var control6 = new ControlListItemLink(null);
 
-            // test execution
+            // act
             control4.Add(new ControlIcon() { Icon = new IconStar() });
             control5.Add([new ControlIcon() { Icon = new IconStar() }]);
             control6.Add(new List<ControlIcon>([new ControlIcon() { Icon = new IconStar() }]).ToArray());
@@ -234,6 +290,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var html5 = control5.Render(context, visualTree);
             var html6 = control6.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""wx-link""><i class=""fas fa-star""></i></a></li>", html1);
             AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""wx-link""><i class=""fas fa-star""></i></a></li>", html2);
             AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""wx-link""><i class=""fas fa-star""></i></a></li>", html3);

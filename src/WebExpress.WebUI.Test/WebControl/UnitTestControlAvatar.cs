@@ -19,7 +19,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<div id=""id"" class=""wx-profile""></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -41,7 +41,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("me", @"<div class=""wx-profile""><b class=""bg-info text-light"">m</b>me</div>")]
         public void User(string user, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 User = user
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -64,16 +64,16 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("http://example.com", @"<div class=""wx-profile""><img src=""http://example.com/""></div>")]
         public void Image(string uri, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatar()
             {
-                Image = uri != null ? new UriEndpoint(uri) : null
+                Image = uri is not null ? new UriEndpoint(uri) : null
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -95,7 +95,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Muted, @"<div class=""wx-profile text-muted""></div>")]
         public void TextColor(TypeColorText color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -104,7 +104,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 TextColor = new PropertyColorText(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -124,7 +124,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Transparent, @"<div class=""wx-profile bg-transparent""></div>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -133,7 +133,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 BackgroundColor = new PropertyColorBackground(backgroundColor)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -147,16 +147,16 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("http://example.com", @"<div class=""wx-profile""><a href=""http://example.com/"" class=""wx-link""></a></div>")]
         public void Uri(string uri, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatar()
             {
-                Uri = uri != null ? new UriEndpoint(uri) : null
+                Uri = uri is not null ? new UriEndpoint(uri) : null
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -171,7 +171,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeSizeAvatar.Large, @"<div class=""wx-profile wx-prifile-lg""></div>")]
         public void Size(TypeSizeAvatar size, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -180,7 +180,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Size = size
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);

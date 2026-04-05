@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<div id=""id"" class=""wx-webui-smart-edit"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""POST""></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -28,7 +28,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -46,7 +46,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(RequestMethod.DELETE, @"<div id=""*"" class=""wx-webui-smart-edit"" data-object-name=""*"" data-form-action=""http://localhost:8080/"" data-form-method=""DELETE""></div>")]
         public void Method(RequestMethod method, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -55,7 +55,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Method = method
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -70,16 +70,16 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("http://localhost:8080/webui", @"<div id=""*"" class=""wx-webui-smart-edit"" data-object-name=""*"" data-form-action=""http://localhost:8080/webui"" data-form-method=""POST""></div>")]
         public void Uri(string uri, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSmartEdit()
             {
-                Uri = uri != null ? new UriEndpoint(uri) : null
+                Uri = uri is not null ? new UriEndpoint(uri) : null
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);

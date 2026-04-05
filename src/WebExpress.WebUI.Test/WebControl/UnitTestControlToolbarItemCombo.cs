@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<div id=""id"" class=""wx-toolbar-combo""></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -28,7 +28,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -44,7 +44,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.WebUI:plugin.name", @"<div class=""wx-toolbar-combo"" data-label=""WebExpress.WebUI""></div>")]
         public void Text(string text, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -53,7 +53,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Text = text,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -69,7 +69,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.WebUI:plugin.name", @"<div class=""wx-toolbar-combo"" data-title=""WebExpress.WebUI""></div>")]
         public void Tooltip(string tooltip, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -78,7 +78,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Tooltip = tooltip,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -93,16 +93,16 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(typeof(IconStar), @"<div class=""wx-toolbar-combo"" data-icon=""fas fa-star""></div>")]
         public void Icon(Type icon, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemCombo()
             {
-                Icon = icon != null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -118,7 +118,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeActive.Disabled, @"<div class=""wx-toolbar-combo"" disabled></div>")]
         public void Active(TypeActive active, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -127,7 +127,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Active = active
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -147,7 +147,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Light, @"<div class=""wx-toolbar-combo"" data-color-css=""text-light""></div>")]
         public void Color(TypeColorText color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -156,7 +156,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Color = new PropertyColorText(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -172,7 +172,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeToolbarItemAlignment.Right, @"<div class=""wx-toolbar-combo"" data-align=""right""></div>")]
         public void Alignment(TypeToolbarItemAlignment alignment, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -181,7 +181,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Alignment = alignment,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -194,13 +194,13 @@ namespace WebExpress.WebUI.Test.WebControl
         [Fact]
         public void Add()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemCombo();
 
-            // test execution
+            // act
             control.Add(new ControlFormItemInputComboItem() { Text = "webexpress.WebUI:plugin.name", Value = "1" });
 
             // validation

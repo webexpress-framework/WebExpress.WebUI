@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -39,11 +38,6 @@ namespace WebExpress.WebUI.WebControl
         public uint? MaxLength { get; set; }
 
         /// <summary>
-        /// Returns or sets whether inputs are enforced.
-        /// </summary>
-        public bool Required { get; set; }
-
-        /// <summary>
         /// Returns or sets a search pattern that checks the content.
         /// </summary>
         public string Pattern { get; set; }
@@ -54,13 +48,10 @@ namespace WebExpress.WebUI.WebControl
         public uint? Rows { get; set; } = 8;
 
         /// <summary>
-        /// Initializes a new instance of the class with an automatically assigned ID.
+        /// Initializes a new instance of the class.
         /// </summary>
-        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
-        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
-        public ControlFormItemInputText([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null)
-            : this($"textbox_{instance}_{file}_{line}".GetHashCode().ToString("X"))
+        public ControlFormItemInputText()
+            : this(DeterministicId.Create())
         {
         }
 
@@ -116,16 +107,12 @@ namespace WebExpress.WebUI.WebControl
                     Placeholder = I18N.Translate(renderContext.Request?.Culture, Placeholder),
                     Rows = Rows.ToString()
                 },
-                TypeEditTextFormat.Wysiwyg => new HtmlElementTextContentDiv()
+                TypeEditTextFormat.Wysiwyg => new HtmlElementTextContentDiv(new HtmlText(value?.Text))
                 {
                     Id = id,
-                    //Value = value,
-                    //Name = Name,
                     Class = Css.Concatenate("wx-webui-editor", classes),
                     Style = GetStyles(),
                     Role = Role,
-                    //Placeholder = I18N.Translate(renderContext.Request?.Culture, Placeholder),
-                    //Rows = Rows.ToString()
                 }.AddUserAttribute("name", Name),
                 _ => new HtmlElementFieldInput()
                 {

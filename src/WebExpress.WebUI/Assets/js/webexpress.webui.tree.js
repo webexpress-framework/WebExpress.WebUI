@@ -268,21 +268,35 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
     _parseNodes(elements, parent = null) {
         const nodes = [];
         elements.forEach((elem) => {
+            const dataset = elem.dataset;
             const node = {
                 id: elem.id || null,
-                label: elem.dataset.label || "Unnamed",
-                iconOpen: elem.dataset.iconOpened || elem.dataset.icon || null,
-                iconClose: elem.dataset.iconClosed || elem.dataset.icon || null,
-                imageOpen: elem.dataset.imageOpened || elem.dataset.image || null,
-                imageClose: elem.dataset.imageClosed || elem.dataset.image || null,
-                active: elem.dataset.active === "true",
-                color: elem.dataset.color || "",
-                expand: elem.dataset.expand === "true",
-                url: elem.dataset.uri || null,
-                target: elem.dataset.target || null,
-                tooltip: elem.dataset.tooltip || null,
-                render: elem.dataset.render || null,
-                parent: parent
+                label: dataset.label || "Unnamed",
+                iconOpen: dataset.iconOpened || dataset.icon || null,
+                iconClose: dataset.iconClosed || dataset.icon || null,
+                imageOpen: dataset.imageOpened || dataset.image || null,
+                imageClose: dataset.imageClosed || dataset.image || null,
+                active: dataset.active === "true",
+                color: dataset.color || "",
+                expand: dataset.expand === "true",
+                url: dataset.uri || null,
+                target: dataset.target || null,
+                tooltip: dataset.tooltip || null,
+                parent: parent,
+                primaryAction: Object.fromEntries(Object.entries(dataset)
+                    .filter(([k]) => k.startsWith("wxPrimary"))
+                    .map(([k, v]) => [
+                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                ),
+                secondaryAction: Object.fromEntries(Object.entries(dataset)
+                    .filter(([k]) => k.startsWith("wxSecondary"))
+                    .map(([k, v]) => [
+                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                )
             };
             // recursively parse children
             node.children = this._parseNodes(Array.from(elem.children).filter((e) => { return e.classList.contains("wx-tree-node"); }), node);
@@ -384,21 +398,9 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 labelContainer.appendChild(icon);
             }
 
-            // render label
-            if (typeof node.render === "string") {
-                // custom render logic
-                const render = new Function("node", node.render);
-                const renderResult = render(node);
-                if (renderResult instanceof Node) {
-                    labelContainer.appendChild(renderResult);
-                } else if (typeof renderResult === "string") {
-                    labelContainer.innerHTML += renderResult;
-                }
-            } else {
-                const span = document.createElement("span");
-                span.textContent = node.label;
-                labelContainer.appendChild(span);
-            }
+            const span = document.createElement("span");
+            span.textContent = node.label;
+            labelContainer.appendChild(span);
 
             // set link attributes if present
             if (node.url) {
@@ -410,6 +412,14 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             if (node.tooltip) {
                 labelContainer.setAttribute("title", node.tooltip);
             }
+            
+            // apply action attributes
+            if (node.primaryAction) labelContainer.dataset.wxPrimaryAction = node.primaryAction;
+            if (node.primaryTarget) labelContainer.dataset.wxPrimaryTarget = node.primaryTarget;
+            if (node.primaryUri) labelContainer.dataset.wxPrimaryUri = node.primaryUri;
+            if (node.secondaryAction) labelContainer.dataset.wxSecondaryAction = node.secondaryAction;
+            if (node.secondaryTarget) labelContainer.dataset.wxSecondaryTarget = node.secondaryTarget;
+            if (node.secondaryUri) labelContainer.dataset.wxSecondaryUri = node.secondaryUri;
 
             // compose the node: indicator, label, and children
             const div = document.createElement("div");

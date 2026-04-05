@@ -1,338 +1,359 @@
 /**
- * Advanced table control:
- * - Column reordering, visibility management, sorting
- * - Inline editing integration
- * - Row drag & drop (flat + hierarchical with expand/collapse)
- * - Persisted state (columns + tree collapsed nodes)
- * - Tree utilities (expand/collapse level management)
- * - Column searching and dropdown management
-
+ * Table controller providing declarative parsing, sorting, rendering, and optional column resizing.
  * The following events are triggered:
- *  - webexpress.webui.Event.TABLE_SORT_EVENT
- *  - webexpress.webui.Event.COLUMN_REORDER_EVENT
- *  - webexpress.webui.Event.COLUMN_VISIBILITY_EVENT
- *  - webexpress.webui.Event.COLUMN_SEARCH_EVENT
- *  - webexpress.webui.Event.START_INLINE_EDIT_EVENT
- *  - webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT
- *  - webexpress.webui.Event.END_INLINE_EDIT_EVENT
- *  - webexpress.webui.Event.ROW_REORDER_EVENT
- *  - webexpress.webui.Event.CHANGE_VISIBILITY_EVENT
- *  - webexpress.webui.Event.MOVE_EVENT
+ * - webexpress.webui.Event.TABLE_SORT_EVENT
+ * - webexpress.webui.Event.SELECT_ROW_EVENT
  */
 webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
-    // core elements
-    _table = document.createElement("table");
-    _col = document.createElement("colgroup");
-    _head = document.createElement("thead");
-    _body = document.createElement("tbody");
-    _foot = document.createElement("tfoot");
-
-    // data
+    _table = document.createElement("div");
+    _head = document.createElement("div");
+    _body = document.createElement("div");
+    _foot = null;
+    
     _columns = [];
     _rows = [];
     _footer = [];
     _options = [];
 
-    // flags / features
-    _movableRow = false;
-    _hasOptions = false;
-    _allowColumnRemove = true;
+    // feature flags
     _isTree = false;
     _suppressHeaders = false;
+    _highlightChanges = true;
+    _suppressFlashOnce = false;
+    _columnResizeEnabled = true;
+    _hasOptions = false;
+    _selectable = false;
 
-    // drag state columns
-    _draggedColumn = null;
-    _dragColumnIndicator = null;
-
-    // drag state rows
-    _draggedRow = null;
-    _draggedRowParent = null;
-    _draggedRowBlockTrs = null;
-    _rowPlaceholder = null;
-    _rowDragActive = false;
-    _autoScrollInterval = null;
-    _lastPointerY = null;
-
-    // extended tree drag target state
-    _dragRowTargetParent = null;
-    _dragRowInsertIndex = null;
-    _dragRowTargetMode = null;
-
-    // resizing
-    _resizingColumn = null;
-    _resizeStartX = null;
-    _resizeStartWidth = null;
-    _resizeMoveHandler = null;
-    _resizeEndHandler = null;
-
-    // persistence
-    _persistKey = null;
-    _saveDebounceTimer = null;
-
-    // enhancements / filters
-    _columnFilterTerm = "";
-
-    // dropdown column list drag state
-    _ddDragSourceIndex = null;
-    _ddDragPlaceholder = null;
-
-    // change detection / highlighting
-    _prevRowState = new Map();
+    // state
+    _selectedRow = null;
+    _renderScheduled = false;
+    _isResizing = false;
     _initialized = false;
 
-    // cache
-    _colIndexCache = null;
+    // caches
+    _prevRowState = new Map();
+    _colIndexCache = new Map();
 
-    // change flash control
-    _highlightChanges = true;          // when false, no row flash animations are performed
-    _suppressFlashOnce = false;        // when true, next render will not flash even if enabled
-
-    // constants
     static MIN_COL_WIDTH = 30;
-    static NUMERIC_RX = /^-?\d+(?:\.\d+)?$/;
 
     /**
-     * Creates a new table control instance.
-     * @param {HTMLElement} element Root element.
+     * Initialize controller and render initial state.
+     * @param {HTMLElement} element Host element that contains declarative configuration.
      */
     constructor(element) {
         super(element);
-
-        // utilities
-        this._util = {
-            addClasses: (el, cls) => { 
-                if (!cls) { 
-                    return; 
-                } 
-                cls.split(/\s+/).filter(Boolean).forEach(c => el.classList.add(c)); 
-            },
-            create: (tag, opts = {}) => {
-                const el = document.createElement(tag);
-                if (opts.class) { 
-                    this._util.addClasses(el, opts.class); 
-                }
-                if (opts.text != null) { 
-                    el.textContent = opts.text; 
-                }
-                if (opts.html != null) { 
-                    el.innerHTML = opts.html; 
-                }
-                if (opts.attrs) { 
-                    for (const [k, v] of Object.entries(opts.attrs)) { 
-                        if (v != null) { 
-                            el.setAttribute(k, v); 
-                        } 
-                    } 
-                }
-                return el;
-            },
-            dispatch: (evtConst, detail) => {
-                if (!evtConst) { 
-                    return; 
-                }
-                this._dispatch(evtConst, { detail });
-            }
-        };
-
-        // base class / style
-        this._table.className = "wx-table table table-hover table-sm";
-
-        // dataset / flags
-        const ds = element.dataset;
-        const tableColor   = ds.color || null;
-        const tableBorder  = ds.border || null;
-        const tableStriped = ds.striped || null;
-        this._movableRow        = ds.movableRow === "true" || false;
-        this._allowColumnRemove = ds.allowColumnRemove === "true" || false;
-        this._persistKey        = ds.persistKey || element.id || null;
-
-        // parse declarative config
-        this._options = this._parseOptions(element.querySelector(":scope > .wx-table-options"));
-        this._columns = this._parseColumns(element.querySelector(":scope > .wx-table-columns"));
-        this._rows    = this._parseRows(element.querySelectorAll(":scope > .wx-table-row"));
-        this._footer  = this._parseFooter(element.querySelector(":scope > .wx-table-footer"));
-
-        // load persisted state
-        this._loadStateFromCookie();
-
-        // assemble DOM
-        this._table.appendChild(this._col);
-        this._table.appendChild(this._head);
-        this._table.appendChild(this._body);
-        if (this._footer.length) { 
-            this._table.appendChild(this._foot); 
-        }
-
-        // cleanup attributes
-        [
-            "data-color",
-            "data-border",
-            "data-striped",
-            "data-movable-row",
-            "data-persist-key",
-            "data-allow-column-remove"
-        ].forEach(a => element.removeAttribute(a));
-
-        element.innerHTML = "";
-        element.appendChild(this._table);
-
-        // drag indicator (columns)
-        this._dragColumnIndicator = this._util.create("div", { class: "wx-table-drag-indicator", attrs: { "aria-hidden": "true" } });
-        this._dragColumnIndicator.style.display = "none";
-        this._table.appendChild(this._dragColumnIndicator);
-
-        // optional classes
-        [tableColor, tableBorder, tableStriped].forEach(cls => this._util.addClasses(this._table, cls));
-
-        // initial render
+        this._suppressFlashOnce = true;
+        this._setupDom(element);
+        this._parseConfig(element);
+        this._initEventListeners();
         this.render();
-
-        // inline editing integration
-        this._bindInlineEditSaveListener();
+        this._initialized = true;
     }
 
     /**
-     * Enables flashing highlight of changed rows.
+     * Build base DOM structure and apply initial classes from dataset.
+     * Sets ARIA roles for accessibility.
+     * @param {HTMLElement} element Host element.
+     */
+    _setupDom(element) {
+        this._table.className = "wx-table";
+        this._table.setAttribute("role", "table");
+        
+        const ds = element.dataset;
+        if (ds.color) {
+            this._table.classList.add(ds.color);
+        }
+        if (ds.border) {
+            this._table.classList.add(ds.border);
+        }
+        if (ds.striped) {
+            this._table.classList.add(...ds.striped.split(" "));
+        }
+        
+        // explicit check for string "true" to enable selection
+        this._selectable = ds.selectable === "true";
+
+        this._head.className = "wx-table-header-group";
+        this._head.setAttribute("role", "rowgroup");
+        
+        this._body.className = "wx-table-body-group";
+        this._body.setAttribute("role", "rowgroup");
+
+        const frag = document.createDocumentFragment();
+        frag.append(this._head, this._body);
+        this._table.appendChild(frag);
+    }
+
+    /**
+     * Parse declarative configuration from child nodes of the host element.
+     * @param {HTMLElement} element Host element.
+     */
+    _parseConfig(element) {
+        this._beforeInitParse(element);
+
+        this._options = this._parseOptions(element.querySelector(":scope > .wx-table-options"));
+        this._columns = this._parseColumns(element.querySelector(":scope > .wx-table-columns"));
+        this._rows = this._parseRows(element.querySelectorAll(":scope > .wx-table-row"));
+        this._footer = this._parseFooter(element.querySelector(":scope > .wx-table-footer"));
+
+        this._recalculateHasOptions();
+
+        element.replaceChildren(this._table);
+
+        // cleanup attributes
+        ["data-color", "data-border", "data-striped", "data-selectable"].forEach(attr => {
+            element.removeAttribute(attr);
+        });
+    }
+
+    /**
+     * Register event listeners for header interactions (sorting) and body interactions (selection and inputs).
+     */
+    _initEventListeners() {
+        // header click (sorting)
+        this._head.addEventListener("click", (e) => {
+            const headerCell = e.target.closest(".wx-col-header");
+            if (!headerCell || this._isResizing) {
+                return;
+            }
+            
+            const colId = headerCell.dataset.columnId;
+            if (!colId || !this._colIndexCache.has(colId)) {
+                return;
+            }
+            
+            const col = this._columns[this._colIndexCache.get(colId)];
+            if (col) {
+                this._handleSortClick(headerCell, col);
+            }
+        }, { passive: true });
+
+        // body click (selection)
+        this._body.addEventListener("click", (e) => {
+            if (e.target.closest(".wx-dropdown-toggle, .wx-dropdown-menu, .dropdown-toggle, .dropdown-menu, .wx-table-actions")) {
+                return;
+            }
+            
+            // ignore interactive elements and content editable areas
+            if (e.target.closest("a, button, input, select, textarea, [contenteditable='true'], .wx-prevent-row-select")) {
+                return;
+            }
+
+            const rowEl = e.target.closest(".wx-grid-row");
+
+            if (rowEl && rowEl._dataRowRef && this._selectable) {
+                this._selectRowInternal(rowEl._dataRowRef, e);
+            }
+        });
+
+        // body input (sync manual edits back to the internal data model)
+        this._body.addEventListener("input", (e) => {
+            const cellEl = e.target.closest(".wx-grid-cell");
+            const rowEl = e.target.closest(".wx-grid-row");
+            
+            if (cellEl && rowEl && rowEl._dataRowRef) {
+                const cellsInRow = Array.from(rowEl.children).filter(c => c.classList.contains("wx-grid-cell"));
+                const colIndex = cellsInRow.indexOf(cellEl);
+                
+                if (colIndex > -1) {
+                    let visibleCount = 0;
+                    for (let i = 0; i < this._columns.length; i++) {
+                        const colDef = this._columns[i];
+                        if (colDef.visible) {
+                            if (visibleCount === colIndex) {
+                                if (rowEl._dataRowRef.cells[i]) {
+                                    rowEl._dataRowRef.cells[i].content = cellEl.innerHTML;
+                                }
+                                break;
+                            }
+                            visibleCount++;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Hook for subclasses to preprocess the host element before parsing.
+     * @param {HTMLElement} element Host element.
+     */
+    _beforeInitParse(element) { }
+
+    /**
+     * Enable change flash highlighting.
      */
     enableChangeFlash() {
         this._highlightChanges = true;
     }
 
     /**
-     * Disables flashing highlight of changed rows.
+     * Disable change flash highlighting.
      */
     disableChangeFlash() {
         this._highlightChanges = false;
     }
 
     /**
-     * Sets flashing highlight enabled state.
-     * @param {boolean} enabled True to enable, false to disable.
+     * Enable column resizing behavior.
      */
-    setChangeFlash(enabled) {
-        this._highlightChanges = !!enabled;
+    enableColumnResize() {
+        this._columnResizeEnabled = true;
     }
 
     /**
-     * Suppresses flashing for the next render cycle only.
+     * Disable column resizing behavior.
      */
-    suppressNextChangeFlash() {
-        this._suppressFlashOnce = true;
+    disableColumnResize() {
+        this._columnResizeEnabled = false;
     }
 
     /**
-     * Renders entire table (columns, rows, footer), applying diff highlight when enabled.
+     * Selects a row programmatically.
+     * @param {string} rowId The ID of the row.
      */
-    render() {
-        const currentStates = this._collectCurrentRowStates();
-        const allowDiff = this._initialized;
-        const changes = allowDiff ? this._detectChangedRows(currentStates) : [];
-        const allowFlash = allowDiff && this._highlightChanges && !this._suppressFlashOnce;
-
-        this._renderColumns();
-        this._renderRows();
-        this._renderFooter();
-        this._syncColumnWidths();
-        this._rebuildColumnIndexCache();
-
-        if (allowFlash && changes.length) { 
-            changes.forEach(r => this._flashRow(r)); 
-        }
-        if (this._suppressFlashOnce) { 
-            this._suppressFlashOnce = false; 
-        }
-        this._updateSnapshot(currentStates);
-        if (!this._initialized) { 
-            this._initialized = true; 
+    selectRow(rowId) {
+        const row = this._findRowById(rowId);
+        if (row) {
+            this._selectRowInternal(row, null);
         }
     }
 
     /**
-     * Clears all internal table sections.
+     * Internal logic to handle row selection and event dispatching.
+     * @param {Object} row Data row object.
+     * @param {Event|null} originalEvent Triggering event.
      */
-    clear() {
-        this._col.innerHTML = "";
-        this._head.innerHTML = "";
-        this._body.innerHTML = "";
-        this._foot.innerHTML = "";
+    _selectRowInternal(row, originalEvent) {
+        // deselect previous
+        if (this._selectedRow && this._selectedRow._anchorTr) {
+            this._selectedRow._anchorTr.classList.remove("active");
+            this._selectedRow._anchorTr.removeAttribute("aria-selected");
+        }
+
+        this._selectedRow = row;
+
+        // select new
+        if (this._selectedRow && this._selectedRow._anchorTr) {
+            this._selectedRow._anchorTr.classList.add("active");
+            this._selectedRow._anchorTr.setAttribute("aria-selected", "true");
+        }
+
+        // dispatch event
+        this._dispatch(webexpress?.webui?.Event?.SELECT_ROW_EVENT, {
+            sender: this._element,
+            row: this._selectedRow,
+            rowId: this._selectedRow?.id,
+            primaryAction: this._selectedRow.primaryAction,
+            secondaryAction: this._selectedRow.secondaryAction,
+            bind: this._selectedRow.bind,
+            originalEvent: originalEvent
+        });
     }
 
     /**
-     * Sets new column definitions with optional mapping preservation.
-     * @param {Array<Object>} columns Column definitions.
-     * @param {boolean} [preserveExisting=true] Preserve existing cell mapping.
+     * Recalculates the _hasOptions flag based on rows and global options.
+     */
+    _recalculateHasOptions() {
+        if (this._options && this._options.length > 0) {
+            this._hasOptions = true;
+            return;
+        }
+        const hasRowOptions = (rows) => {
+            for (const r of rows) {
+                if (r.options?.length > 0) {
+                    return true;
+                }
+                if (r.children && hasRowOptions(r.children)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        this._hasOptions = hasRowOptions(this._rows);
+    }
+
+    /**
+     * Replace the current column definitions.
+     * @param {Array<Object>} columns Column descriptors.
+     * @param {boolean} [preserveExisting=true] Preserve row mappings.
      */
     setColumns(columns, preserveExisting = true) {
-        if (!Array.isArray(columns) || !columns.length) { 
-            return; 
+        if (!Array.isArray(columns) || !columns.length) {
+            return;
         }
+
         const prevCols = this._columns.slice();
         const prevOrder = prevCols.map(c => c.id);
+
         const normalized = columns.map((c, idx) => ({
-            id: c.id || ("col_" + idx),
+            id: c.id || `col_${idx}`,
             index: idx,
             name: c.name || null,
-            label: c.label != null ? String(c.label) : (c.id || ("Column " + (idx + 1))),
+            label: c.label != null ? String(c.label) : (c.id || `Column ${idx + 1}`),
             icon: c.icon || null,
             image: c.image || null,
             color: c.color || null,
             width: c.width || null,
+            minWidth: c.minWidth || null,
+            resizable: typeof c.resizable === "boolean" ? c.resizable : true,
             sort: null,
             visible: typeof c.visible === "boolean" ? c.visible : true,
-            editable: !!c.editable,
-            editAction: c.editAction || c.editaction || null,
-            editMethod: c.editMethod || c.editmethod || null,
-            template: c.template || null
+            rendererType: c.rendererType || null,
+            rendererOptions: c.rendererOptions || {}
         }));
 
-        if (!preserveExisting) {
-            this._traverseRows(this._rows, r => {
-                if (!Array.isArray(r.cells)) { 
-                    r.cells = []; 
-                }
-                if (r.cells.length > normalized.length) { 
-                    r.cells.length = normalized.length; 
-                }
-                while (r.cells.length < normalized.length) { 
-                    r.cells.push({ text: "" }); 
-                }
-            });
-        } else {
+        if (preserveExisting) {
             const prevIndexMap = new Map(prevOrder.map((id, i) => [id, i]));
             const remapRow = (row) => {
-                const newCells = [];
-                normalized.forEach(col => {
-                    const oldIdx = prevIndexMap.get(col.id);
-                    newCells.push(oldIdx != null && row.cells[oldIdx] ? row.cells[oldIdx] : { text: "" });
-                });
+                const newCells = new Array(normalized.length);
+                for (let i = 0; i < normalized.length; i++) {
+                    const oldIdx = prevIndexMap.get(normalized[i].id);
+                    newCells[i] = (oldIdx != null && row.cells[oldIdx]) ? row.cells[oldIdx] : { content: "" };
+                }
                 row.cells = newCells;
-                if (row.children) { 
-                    row.children.forEach(remapRow); 
+                if (row.children) {
+                    row.children.forEach(remapRow);
                 }
             };
             this._rows.forEach(remapRow);
+        } else {
+            const resizeRow = (r) => {
+                if (!Array.isArray(r.cells)) {
+                    r.cells = [];
+                }
+                while (r.cells.length < normalized.length) {
+                    r.cells.push({ content: "" });
+                }
+                if (r.cells.length > normalized.length) {
+                    r.cells.length = normalized.length;
+                }
+                if (r.children) {
+                    r.children.forEach(resizeRow);
+                }
+            };
+            this._rows.forEach(resizeRow);
         }
 
         this._columns = normalized;
-        this._schedulePersist();
         this.render();
     }
 
     /**
-     * Inserts a new row optionally as a child of another.
-     * @param {Object|Array} rowData Row data object or cell array.
-     * @param {string|null} [parentId=null] Parent id.
-     * @param {number|null} [index=null] Index.
-     * @returns {Object|null} Inserted row or null.
+     * Insert a new row at the given position.
+     * @param {Object|Array} rowData Row data object.
+     * @param {string|null} [parentId=null] Parent row id.
+     * @param {number|null} [index=null] Target index.
+     * @returns {Object|null} The inserted row.
      */
     insertRow(rowData, parentId = null, index = null) {
         const buildRow = (data) => {
             if (Array.isArray(data)) {
-                return {
-                    id: null, class: null, style: null, color: null,
-                    cells: data.map(v => ({ text: String(v ?? "") })),
-                    options: null, children: [], parent: null, expanded: true
+                return { 
+                    id: null, 
+                    cells: data.map(v => ({ content: String(v ?? "") })), 
+                    children: [], parent: null, expanded: true, options: null 
                 };
             }
             return {
@@ -340,9 +361,14 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 class: data.class || null,
                 style: data.style || null,
                 color: data.color || null,
-                cells: Array.isArray(data.cells)
-                    ? data.cells.map(c => c && typeof c === "object" ? c : { text: String(c ?? "") })
-                    : [],
+                image: data.image || null,
+                icon: data.icon || null,
+                uri: data.uri || data.url || null,
+                target: data.target || null,
+                primaryAction: data.primaryAction || null,
+                secondaryAction: data.secondaryAction || null,
+                bind: data.bind || null,
+                cells: Array.isArray(data.cells) ? data.cells.map(c => (c && typeof c === "object" ? c : { content: String(c ?? "") })) : [],
                 options: Array.isArray(data.options) ? data.options : null,
                 children: [],
                 parent: null,
@@ -351,2049 +377,802 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         };
 
         const row = buildRow(rowData);
-        while (row.cells.length < this._columns.length) { 
-            row.cells.push({ text: "" }); 
-        }
-        if (row.cells.length > this._columns.length) { 
-            row.cells.length = this._columns.length; 
+        while (row.cells.length < this._columns.length) {
+            row.cells.push({ content: "" });
         }
 
-        let siblings;
+        let siblings = this._rows;
         if (parentId) {
             const info = this._findRowAndParent(parentId);
-            if (!info || !info.row) { 
-                return null; 
+            if (!info || !info.row) {
+                return null;
             }
-            const parent = info.row;
-            if (!Array.isArray(parent.children)) { 
-                parent.children = []; 
+            if (!Array.isArray(info.row.children)) {
+                info.row.children = [];
             }
-            siblings = parent.children;
-            row.parent = parent;
-        } else {
-            siblings = this._rows;
+            siblings = info.row.children;
+            row.parent = info.row;
         }
 
-        if (index == null || index < 0 || index > siblings.length) { 
-            index = siblings.length; 
+        if (index === null || index < 0 || index > siblings.length) {
+            index = siblings.length;
         }
         siblings.splice(index, 0, row);
 
-        this._schedulePersist();
+        if (!this._hasOptions && row.options?.length > 0) {
+            this._hasOptions = true;
+        }
+
         this.render();
         return row;
     }
 
     /**
-     * Deletes a row (and descendants) by id.
-     * @param {string} rowId Row id.
-     * @returns {boolean} True if removed.
+     * Delete a row by its id.
+     * @param {string} rowId Target row id.
+     * @returns {boolean} True when a row was removed.
      */
     deleteRow(rowId) {
-        if (!rowId) { 
-            return false; 
+        if (!rowId) {
+            return false;
         }
-        const removed = this._removeRowRecursive(rowId, this._rows, null);
-        if (removed) {
-            this._schedulePersist();
-            this.render();
+        const removed = this._removeRowRecursive(rowId, this._rows);
+        if (removed) { 
+            this._recalculateHasOptions();
+            this.render(); 
         }
         return removed;
     }
 
     /**
-     * Expands all rows in the tree.
+     * Render the table using microtask batching.
      */
-    expandAll() {
-        const changed = [];
-        this._traverseRows(this._rows, r => {
-            if (r.children && r.children.length && !r.expanded) {
-                r.expanded = true;
-                if (r.id) { 
-                    changed.push(r.id); 
-                }
-            }
-        });
-        this._schedulePersist();
-        this.render();
-        if (changed.length) {
-            this._dispatchVisibilityChange({ kind: "row", action: "expandAll", changedIds: changed });
-        }
-    }
-
-    /**
-     * Collapses all rows in the tree.
-     */
-    collapseAll() {
-        const changed = [];
-        this._traverseRows(this._rows, r => {
-            if (r.children && r.children.length && r.expanded) {
-                r.expanded = false;
-                if (r.id) { 
-                    changed.push(r.id); 
-                }
-            }
-        });
-        this._schedulePersist();
-        this.render();
-        if (changed.length) {
-            this._dispatchVisibilityChange({ kind: "row", action: "collapseAll", changedIds: changed });
-        }
-    }
-
-    /**
-     * Expands rows up to a given level count.
-     * @param {number} levelCount Level count (1 = root only).
-     */
-    expandFirstLevels(levelCount) {
-        if (typeof levelCount !== "number" || levelCount < 1) { 
-            return; 
-        }
-        const maxDepth = levelCount - 1;
-        const changed = [];
-        const walk = (rows, depth) => {
-            for (const r of rows) {
-                if (r.children && r.children.length) {
-                    const desired = depth <= maxDepth;
-                    if (r.expanded !== desired) {
-                        r.expanded = desired;
-                        if (r.id) { 
-                            changed.push(r.id); 
-                        }
-                    }
-                    walk(r.children, depth + 1);
-                }
-            }
-        };
-        walk(this._rows, 0);
-        this._schedulePersist();
-        this.render();
-        if (changed.length) {
-            this._dispatchVisibilityChange({ kind: "row", action: "expandFirstLevels", levelCount, changedIds: changed });
-        }
-    }
-
-    /**
-     * Collapses rows deeper than levelCount.
-     * @param {number} levelCount Level threshold.
-     */
-    collapseDeeperThan(levelCount) {
-        if (typeof levelCount !== "number" || levelCount < 1) { 
-            return; 
-        }
-        const maxDepth = levelCount - 1;
-        const changed = [];
-        const walk = (rows, depth) => {
-            for (const r of rows) {
-                if (r.children && r.children.length) {
-                    const desired = depth <= maxDepth;
-                    if (r.expanded !== desired) {
-                        r.expanded = desired;
-                        if (r.id) { 
-                            changed.push(r.id); 
-                        }
-                    }
-                    walk(r.children, depth + 1);
-                }
-            }
-        };
-        walk(this._rows, 0);
-        this._schedulePersist();
-        this.render();
-        if (changed.length) {
-            this._dispatchVisibilityChange({ kind: "row", action: "collapseDeeperThan", levelCount, changedIds: changed });
-        }
-    }
-
-    /**
-     * Searches columns (id/label) case-insensitive.
-     * @param {string} term Search term.
-     * @returns {Array<Object>} Matching columns.
-     */
-    searchColumns(term) {
-        term = (term || "").trim();
-        this._columnFilterTerm = term;
-        const lower = term.toLowerCase();
-        const matches = term
-            ? this._columns.filter(c =>
-                (c.id && c.id.toLowerCase().includes(lower)) ||
-                (c.label && c.label.toLowerCase().includes(lower)))
-            : [...this._columns];
-
-        this.render();
-
-        this._util.dispatch(webexpress?.webui?.Event?.COLUMN_SEARCH_EVENT, {
-            sender: this._element,
-            term,
-            matches: matches.map(c => ({ id: c.id, label: c.label }))
-        });
-        return matches;
-    }
-
-    /**
-     * Orders top-level rows by a column (simple).
-     * @param {Object} column Column descriptor.
-     */
-    orderRows(column) {
-        const idx = this._columns.indexOf(column);
-        if (idx === -1) { 
-            return; 
-        }
-        const numeric = this._rows.every(r => {
-            const v = r.cells[idx]?.text?.trim();
-            return v === "" || webexpress.webui.TableCtrl.NUMERIC_RX.test(v);
-        });
-        this._rows.sort((a, b) => {
-            const va = a.cells[idx]?.text || "";
-            const vb = b.cells[idx]?.text || "";
-            if (column.sort === "asc") {
-                return numeric
-                    ? (parseFloat(va) || 0) - (parseFloat(vb) || 0)
-                    : va.localeCompare(vb, undefined, { numeric: true });
-            }
-            if (column.sort === "desc") {
-                return numeric
-                    ? (parseFloat(vb) || 0) - (parseFloat(va) || 0)
-                    : vb.localeCompare(va, undefined, { numeric: true });
-            }
-            return 0;
-        });
-        this._schedulePersist();
-        this.render();
-    }
-
-    /**
-     * Sets column visibility.
-     * @param {string|number} idOrIndex Column id or index.
-     * @param {boolean} visible Visible flag.
-     */
-    setColumnVisibility(idOrIndex, visible) {
-        const col = (typeof idOrIndex === "number")
-            ? this._columns[idOrIndex]
-            : this._columns.find(c => c.id === idOrIndex);
-        if (!col || col.visible === visible || !this._allowColumnRemove) { 
-            return; 
-        }
-        col.visible = visible;
-
-        this._util.dispatch(webexpress.webui.Event.COLUMN_VISIBILITY_EVENT, {
-            sender: this._element,
-            columnId: col.id,
-            visible: col.visible,
-            columnIndex: this._columns.indexOf(col)
-        });
-
-        this._dispatchVisibilityChange({
-            kind: "column",
-            action: "toggle",
-            columnId: col.id,
-            visible: col.visible,
-            columnIndex: this._columns.indexOf(col)
-        });
-
-        this._schedulePersist();
-        this.render();
-    }
-
-    /**
-     * Hides a column.
-     * @param {string|number} idOrIndex Column id or index.
-     */
-    hideColumn(idOrIndex) {
-        this.setColumnVisibility(idOrIndex, false);
-    }
-
-    /**
-     * Shows a column.
-     * @param {string|number} idOrIndex Column id or index.
-     */
-    showColumn(idOrIndex) {
-        this.setColumnVisibility(idOrIndex, true);
-    }
-
-    /**
-     * Toggles a column visibility.
-     * @param {string|number} idOrIndex Column id or index.
-     */
-    toggleColumn(idOrIndex) {
-        const col = typeof idOrIndex === "number"
-            ? this._columns[idOrIndex]
-            : this._columns.find(c => c.id === idOrIndex);
-        if (!col) { 
-            return; 
-        }
-        this.setColumnVisibility(col.id, !col.visible);
-    }
-
-    /**
-     * Returns all visible columns.
-     * @returns {Array<Object>} Visible column list.
-     */
-    getVisibleColumns() {
-        return this._columns.filter(c => c.visible);
-    }
-
-    /**
-     * Parses global option items.
-     * @param {HTMLElement|null} optionsDiv Container element.
-     * @returns {Array<Object>} Option list.
-     */
-    _parseOptions(optionsDiv) {
-        if (!optionsDiv) { 
-            return []; 
-        }
-        const list = [];
-        for (const div of optionsDiv.children) {
-            if (div.classList.contains("wx-dropdown-divider") || div.classList.contains("wx-dropdownbutton-divider")) {
-                list.push({ type: "divider" });
-            } else if (div.classList.contains("wx-dropdown-header") || div.classList.contains("wx-dropdownbutton-header")) {
-                list.push({ type: "header", content: div.textContent.trim(), icon: div.dataset.icon || null });
-            } else {
-                list.push({
-                    id: div.id || null,
-                    image: div.dataset.image || null,
-                    icon: div.dataset.icon || null,
-                    linkColor: div.dataset.linkcolor || null,
-                    uri: div.dataset.uri || div.dataset.url || null,
-                    target: div.dataset.target || null,
-                    tooltip: div.dataset.tooltip || null,
-                    modal: div.dataset.modal || null,
-                    content: div.textContent.trim() || null,
-                    disabled: div.hasAttribute("disabled")
-                });
-            }
-        }
-        return list;
-    }
-
-    /**
-     * Parses column definitions.
-     * @param {HTMLElement|null} columnsDiv Container.
-     * @returns {Array<Object>} Column definitions.
-     */
-    _parseColumns(columnsDiv) {
-        if (!columnsDiv) { 
-            return []; 
-        }
-        const headerColor = columnsDiv.dataset.color || null;
-        this._suppressHeaders = columnsDiv.dataset.suppressHeaders === "true" || false;
-        if (headerColor) { 
-            this._head.classList.add(headerColor); 
-        }
-        return Array.from(columnsDiv.children).map((div, idx) => ({
-            id: div.id || ("col_" + idx),
-            index: idx,
-            name: div.dataset.objectName || null,
-            label: div.dataset.label || "",
-            icon: div.dataset.icon || null,
-            image: div.dataset.image || null,
-            color: div.dataset.color || null,
-            width: div.getAttribute("width") ? parseInt(div.getAttribute("width"), 10) || null : null,
-            sort: div.dataset.sort || null,
-            visible: div.dataset.visible === "false" ? false : true,
-            editable: div.dataset.editable === "true",
-            editAction: div.dataset.formAction || null,
-            editMethod: div.dataset.formMethod || null,
-            template: div.firstElementChild
-        }));
-    }
-
-    /**
-     * Parses hierarchical rows.
-     * @param {NodeList|Array} rowsDivs Row elements.
-     * @param {Object|null} parent Parent row.
-     * @returns {Array<Object>} Parsed rows.
-     */
-    _parseRows(rowsDivs, parent = null) {
-        const rows = [];
-        for (const div of rowsDivs) {
-            if (!(div instanceof HTMLElement) || !div.classList.contains("wx-table-row")) { 
-                continue; 
-            }
-
-            let expanded = true;
-            if (div.dataset.expanded === "true") { 
-                expanded = true; 
-            } else if (div.dataset.expanded === "false") { 
-                expanded = false; 
-            } else if (div.dataset.collapsed === "true") { 
-                expanded = false; 
-            }
-
-            const r = {
-                id: div.id || null,
-                class: div.className || null,
-                style: div.getAttribute("style") || null,
-                color: div.dataset.color || null,
-                cells: [],
-                options: null,
-                children: [],
-                parent,
-                expanded
-            };
-
-            const childRowDivs = [];
-            for (const child of div.children) {
-                if (!(child instanceof HTMLElement)) { 
-                    continue; 
-                }
-                if (child.classList.contains("wx-table-row")) {
-                    childRowDivs.push(child);
-                    this._isTree = true;
-                    continue;
-                }
-                if (child.classList.contains("wx-table-options")) {
-                    r.options = this._parseOptions(child);
-                    if (r.options && r.options.length) { 
-                        this._hasOptions = true; 
-                    }
-                } else if (child.classList.contains("wx-table-footer")) {
-                    // ignore
-                } else {
-                    r.cells.push({
-                        id: child.id || null,
-                        class: child.className || null,
-                        style: child.getAttribute("style") || null,
-                        color: child.dataset.color || null,
-                        text: child.textContent.trim(),
-                        html: child.firstElementChild,
-                        image: child.dataset.image || null,
-                        icon: child.dataset.icon || null,
-                        uri: child.dataset.uri || null,
-                        target: child.dataset.target || null,
-                        modal: child.dataset.modal || null,
-                        objectId: child.dataset.objectId || null
-                    });
-                }
-            }
-            if (childRowDivs.length) { 
-                r.children = this._parseRows(childRowDivs, r); 
-            }
-            rows.push(r);
-        }
-        return rows;
-    }
-
-    /**
-     * Parses footer cells.
-     * @param {HTMLElement|null} footerDiv Footer container.
-     * @returns {Array<string>} Footer html fragments.
-     */
-    _parseFooter(footerDiv) {
-        if (!footerDiv) { 
-            return []; 
-        }
-        return Array.from(footerDiv.children).map(div => div.innerHTML.trim());
-    }
-
-    /**
-     * Renders column headers including actions.
-     */
-    _renderColumns() {
-        this._col.innerHTML = "";
-        this._head.innerHTML = "";
-        const headRow = document.createElement("tr");
-        this._head.appendChild(headRow);
-        const colFrag = document.createDocumentFragment();
-        
-        if (this._suppressHeaders) {
+    render() {
+        if (this._renderScheduled) {
             return;
         }
+        this._renderScheduled = true;
 
-        if (this._movableRow) {
-            headRow.appendChild(document.createElement("th"));
-            const fixCol = document.createElement("col");
-            fixCol.style.width = "1ch";
-            fixCol.style.maxWidth = "1ch";
-            colFrag.appendChild(fixCol);
-        }
+        queueMicrotask(() => {
+            this._renderScheduled = false;
 
-        for (const col of this._columns) {
-            if (!col.visible) { 
-                continue; 
-            }
-            const th = document.createElement("th");
-            th.draggable = true;
-            th.dataset.columnId = col.id;
-            if (col.sort) { 
-                th.classList.add(col.sort === "asc" ? "wx-sort-asc" : "wx-sort-desc"); 
-            }
-            this._util.addClasses(th, col.color);
-            th.setAttribute("scope", "col");
+            const currentStates = this._collectCurrentRowStates();
+            const changedIds = new Set();
+            const newIds = new Set();
 
-            const inner = document.createElement("div");
-            if (col.icon) {
-                const i = document.createElement("i");
-                i.className = col.icon;
-                inner.appendChild(i);
-            }
-            if (col.image) {
-                const img = document.createElement("img");
-                img.className = "wx-icon";
-                img.src = col.image;
-                img.alt = "";
-                inner.appendChild(img);
-            }
-            inner.appendChild(document.createTextNode(col.label));
-            th.appendChild(inner);
-            headRow.appendChild(th);
-
-            const cg = document.createElement("col");
-            cg.dataset.columnId = col.id;
-            if (col.width) { 
-                cg.style.width = col.width + "px"; 
-            }
-            colFrag.appendChild(cg);
-
-            this._enableDragAndDropColumn(th, col);
-            this._enableResizableColumns(th, col);
-            this._enableSortColumns(th, col);
-        }
-
-        this._renderActionsHeader(headRow, colFrag);
-        this._col.appendChild(colFrag);
-    }
-
-    /**
-     * Renders the actions header (column dropdown) if needed.
-     * @param {HTMLTableRowElement} headRow Header row.
-     * @param {DocumentFragment} colFrag Colgroup fragment.
-     */
-    _renderActionsHeader(headRow, colFrag) {
-        const anyHidden = this._columns.some(c => !c.visible);
-        const hasGlobalOptions = this._options.length > 0;
-        const hasRowOptions = this._hasOptions;
-        const showHeader = anyHidden || hasGlobalOptions || hasRowOptions || this._allowColumnRemove;
-        if (!showHeader) { 
-            return; 
-        }
-
-        const th = document.createElement("th");
-        th.className = "wx-table-actions";
-        th.style.overflow = "visible";
-
-        const wrapper = document.createElement("div");
-        wrapper.className = "wx-dropdown";
-
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "btn dropdown-toggle";
-        btn.setAttribute("data-bs-toggle", "dropdown");
-        btn.setAttribute("aria-expanded", "false");
-        btn.title = this._i18n("webexpress.webui:table.columns.toggle", "Show/Hide columns");
-        btn.textContent = "+";
-
-        const menu = document.createElement("div");
-        menu.className = "dropdown-menu";
-        menu.setAttribute("role", "menu");
-
-        const header = document.createElement("h6");
-        header.className = "dropdown-header";
-        header.textContent = this._i18n("webexpress.webui:table.columns.label", "Columns");
-        menu.appendChild(header);
-
-        const searchGrp = document.createElement("div");
-        searchGrp.className = "mb-2";
-        const searchInput = document.createElement("input");
-        searchInput.type = "text";
-        searchInput.className = "form-control form-control-sm";
-        searchInput.placeholder = this._i18n("webexpress.webui:table.search.placeholder", "search...");
-        searchInput.value = this._columnFilterTerm || "";
-        searchInput.setAttribute("aria-label", this._i18n("webexpress.webui:table.filter.columns.label", "Filter columns"));
-        searchInput.addEventListener("input", e => {
-            this._columnFilterTerm = e.target.value.trim();
-            this._applyColumnFilter(menu);
-        });
-        searchGrp.appendChild(searchInput);
-        menu.appendChild(searchGrp);
-
-        const listContainer = document.createElement("div");
-        listContainer.className = "wx-columns-list";
-
-        this._columns.forEach((c, idx) => {
-            const item = document.createElement("div");
-            item.className = "dropdown-item px-1 py-1 wx-col-item";
-            item.style.whiteSpace = "normal";
-            item.dataset.columnId = c.id;
-            item.dataset.index = String(idx);
-            item.draggable = true;
-
-            const line = document.createElement("div");
-            line.className = "d-flex align-items-center gap-2";
-
-            const handle = document.createElement("span");
-            handle.className = "wx-col-drag-handle";
-            handle.title = this._i18n("webexpress.webui:table.handle.title", "Move");
-            handle.textContent = "≡";
-
-            const formCheck = document.createElement("div");
-            formCheck.className = "form-check m-0 flex-grow-1";
-
-            const cb = document.createElement("input");
-            cb.type = "checkbox";
-            cb.className = "form-check-input";
-            cb.id = "dd_col_" + c.id;
-            cb.checked = c.visible;
-            cb.addEventListener("change", (ev) => {
-                ev.stopPropagation();
-                if (!cb.checked && this.getVisibleColumns().length <= 1) {
-                    cb.checked = true;
-                    return;
+            const shouldHighlight = this._initialized && this._highlightChanges && !this._suppressFlashOnce && this._prevRowState.size > 0;
+            if (shouldHighlight) {
+                for (const entry of currentStates) {
+                    const oldSig = this._prevRowState.get(entry.key);
+                    if (oldSig === undefined) {
+                        newIds.add(entry.key);
+                    } else if (oldSig !== entry.signature) {
+                        changedIds.add(entry.key);
+                    }
                 }
-                this.setColumnVisibility(c.id, cb.checked);
-                this._reopenDropdownAfterRender(btn);
-            });
+            }
 
-            const label = document.createElement("label");
-            label.className = "form-check-label";
-            label.setAttribute("for", cb.id);
-            label.textContent = c.label;
+            this._isTree = this._detectTree(this._rows);
 
-            formCheck.appendChild(cb);
-            formCheck.appendChild(label);
-            line.appendChild(handle);
-            line.appendChild(formCheck);
-            item.appendChild(line);
-            listContainer.appendChild(item);
+            this._rebuildColumnIndexCache();
+            this._syncColumnWidths(); 
+
+            this._renderColumns();
+            this._renderRows(changedIds, newIds);
+            this._renderFooter();
+            this._attachColumnResizers();
+
+            this._suppressFlashOnce = false;
+            this._updateSnapshot(currentStates);
+            this._initialized = true;
         });
-
-        menu.appendChild(listContainer);
-        this._enableDropdownColumnDrag(listContainer, btn);
-
-        const divider = document.createElement("div");
-        divider.className = "dropdown-divider";
-        menu.appendChild(divider);
-
-        wrapper.appendChild(btn);
-        wrapper.appendChild(menu);
-        th.appendChild(wrapper);
-        headRow.appendChild(th);
-
-        const cg = document.createElement("col");
-        cg.style.width = "1em";
-        colFrag.appendChild(cg);
-
-        if (this._columnFilterTerm) { 
-            this._applyColumnFilter(menu); 
-        }
     }
 
     /**
-     * Renders body rows.
+     * Render header row structure.
      */
-    _renderRows() {
-        this._body.innerHTML = "";
+    _renderColumns() {
+        const headFragment = document.createDocumentFragment();
+        const headRow = document.createElement("div");
+        headRow.className = "wx-grid-row wx-table-header";
+        headRow.setAttribute("role", "row");
+        headFragment.appendChild(headRow);
+
+        if (!this._suppressHeaders) {
+            for (const col of this._columns) {
+                if (!col.visible) {
+                    continue;
+                }
+
+                const th = document.createElement("div");
+                th.className = "wx-grid-header-cell wx-col-header";
+                th.setAttribute("role", "columnheader");
+                th.dataset.columnId = col.id;
+                
+                if (col.color) {
+                    th.classList.add(col.color);
+                }
+
+                if (col.sort) {
+                    th.classList.add(col.sort === "asc" ? "wx-sort-asc" : "wx-sort-desc");
+                }
+
+                const inner = document.createElement("div");
+                inner.className = "wx-col-inner";
+                if (col.icon) {
+                    const i = document.createElement("i");
+                    i.className = col.icon;
+                    inner.appendChild(i);
+                }
+                if (col.image) {
+                    const img = document.createElement("img");
+                    img.className = "wx-icon";
+                    img.src = col.image;
+                    inner.appendChild(img);
+                }
+                inner.appendChild(document.createTextNode(col.label));
+                th.appendChild(inner);
+
+                headRow.appendChild(th);
+            }
+            
+            if (this._hasOptions) {
+                const th = document.createElement("div");
+                th.className = "wx-grid-header-cell wx-table-actions";
+                th.setAttribute("role", "columnheader");
+                headRow.appendChild(th);
+            }
+        }
+
+        this._head.replaceChildren(headFragment);
+    }
+
+    /**
+     * Render body rows.
+     * @param {Set<string>} changedIds Keys of modified rows.
+     * @param {Set<string>} newIds Keys of new rows.
+     */
+    _renderRows(changedIds, newIds) {
         const fragment = document.createDocumentFragment();
         const renderList = (rows, depth) => {
             for (const r of rows) {
-                this._addRow(r, depth, fragment);
-                if (r.children && r.children.length && r.expanded) {
+                this._addRow(r, depth, fragment, changedIds, newIds);
+                if (r.children?.length && r.expanded) {
                     renderList(r.children, depth + 1);
                 }
             }
         };
-        renderList(this._rows, 0);
-        this._body.appendChild(fragment);
+        if (this._rows.length) {
+            renderList(this._rows, 0);
+        }
+        this._body.replaceChildren(fragment);
     }
 
     /**
-     * Renders a single row.
-     * @param {Object} row Row object.
-     * @param {number} depth Depth.
+     * Create and append a single row div.
+     * @param {Object} row Row data object.
+     * @param {number} depth Hierarchy depth.
      * @param {DocumentFragment} fragment Target fragment.
+     * @param {Set<string>} changedIds Keys with changed signatures.
+     * @param {Set<string>} newIds Keys for new rows.
      */
-    _addRow(row, depth = 0, fragment) {
-        const tr = document.createElement("tr");
-        this._util.addClasses(tr, row.color);
-        this._util.addClasses(tr, row.class);
-        if (row.style) { 
-            tr.setAttribute("style", row.style); 
+    _addRow(row, depth, fragment, changedIds, newIds) {
+        const tr = document.createElement("div");
+        tr.className = "wx-grid-row";
+        tr.setAttribute("role", "row");
+        
+        if (row.color) {
+            tr.classList.add(row.color);
         }
+        if (row.class) {
+            tr.classList.add(...row.class.split(/\s+/).filter(Boolean));
+        }
+        if (row.style) {
+            tr.style.cssText = row.style;
+        }
+
+        // apply action attributes
+        if (row.primaryAction) {
+            for (const [key, value] of Object.entries(row.primaryAction)) {
+                const htmlName = `data-wx-primary-${key.toLowerCase()}`;
+                tr.setAttribute(htmlName, value);
+            }
+        }
+
+        if (row.secondaryAction) {
+            for (const [key, value] of Object.entries(row.secondaryAction)) {
+                const htmlName = `data-wx-secondary-${key.toLowerCase()}`;
+                tr.setAttribute(htmlName, value);
+            }
+        }
+                
+        // apply selection state
+        if (this._selectedRow === row) {
+            tr.classList.add("active");
+            tr.setAttribute("aria-selected", "true");
+        }
+
+        const key = this._getRowKey(row);
+        if (key) {
+            if (changedIds.has(key)) {
+                tr.classList.add("wx-change-flash");
+            } else if (newIds.has(key)) {
+                tr.classList.add("wx-new-flash");
+            }
+        }
+
         tr._dataRowRef = row;
         row._anchorTr = tr;
         row._depth = depth;
 
-        if (this._movableRow) {
-            const handle = document.createElement("td");
-            handle.className = "wx-table-drag-handle";
-            handle.textContent = "☰";
-            handle.title = this._i18n("webexpress.webui:table.handle.title", "Move");
-            handle.setAttribute("aria-label", "Move row");
-            tr.appendChild(handle);
-            this._enableDragAndDropRow(handle, row);
-        }
+        let firstVisible = true;
+        const len = this._columns.length;
 
-        for (let idx = 0; idx < this._columns.length; idx++) {
-            const colDef = this._columns[idx];
-            if (!colDef.visible) { 
-                continue; 
+        for (let i = 0; i < len; i++) {
+            const colDef = this._columns[i];
+            if (!colDef.visible) {
+                continue;
             }
-            const td = document.createElement("td");
-            const cell = row.cells[idx];
+
+            const td = document.createElement("div");
+            td.className = "wx-grid-cell";
+            td.setAttribute("role", "gridcell");
+
+            const cell = row.cells[i];
+
             if (cell) {
-                this._util.addClasses(td, cell.color);
-                this._util.addClasses(td, cell.class);
-                if (cell.style) { 
-                    td.setAttribute("style", cell.style); 
+                if (cell.color) {
+                    td.classList.add(cell.color);
                 }
-                const wrap = document.createElement("div");
-                if (cell.image) {
-                    const img = document.createElement("img");
-                    img.className = "wx-icon";
-                    img.src = cell.image;
-                    img.alt = "";
-                    wrap.appendChild(img);
+                if (cell.class) {
+                    td.classList.add(...cell.class.split(/\s+/).filter(Boolean));
                 }
-                if (cell.icon) {
-                    const i = document.createElement("i");
-                    i.className = cell.icon;
-                    wrap.appendChild(i);
+                if (cell.style) {
+                    td.style.cssText += (td.style.cssText ? "; " : "") + cell.style;
                 }
-                if (colDef.editable) {
-                    if (cell.objectId) { 
-                        wrap.id = colDef.id; 
+
+                let content = this._renderCell(row, colDef, cell, firstVisible);
+
+                // enhance first visible column with row-level icon/link
+                if (firstVisible && (row.uri || row.icon)) {
+                    const wrap = row.uri ? document.createElement("a") : document.createElement("span");
+                    wrap.className = "wx-cell-content";
+                    if (row.uri) {
+                        wrap.href = row.uri;
+                        if (row.target) {
+                            wrap.target = row.target;
+                        }
+                        wrap.rel = "noopener noreferrer";
                     }
-                    if (cell.objectId) { 
-                        wrap.setAttribute("data-object-id", cell.id); 
+                    if (row.icon) {
+                        const icon = document.createElement("i");
+                        icon.className = row.icon;
+                        wrap.appendChild(icon);
                     }
-                    if (colDef.name) { 
-                        wrap.setAttribute("data-object-name", colDef.name); 
-                    }
-                    if (colDef.editAction) { 
-                        wrap.setAttribute("data-form-action", colDef.editAction); 
-                    }
-                    if (colDef.editMethod) { 
-                        wrap.setAttribute("data-form-method", colDef.editMethod); 
-                    }
-                    if (colDef.template) {
-                        wrap.appendChild(colDef.template);
+                    if (content instanceof Node) {
+                        wrap.appendChild(content);
                     } else {
-                        const input = document.createElement("input");
-                        input.type = "text";
-                        input.className = "form-control";
-                        input.value = cell.text || "";
-                        input.name = colDef.id;
-                        wrap.appendChild(input);
+                        wrap.appendChild(document.createTextNode(String(content ?? "")));
                     }
-                    const smartEditCtrl = new webexpress.webui.SmartEditCtrl(wrap);
-                    smartEditCtrl.value = cell.text || "";
-                } else if (colDef.template) {
-                    wrap.appendChild(colDef.template);
-                    const smartViewCtrl = new webexpress.webui.SmartViewCtrl(wrap);
-                    smartViewCtrl.value = cell.text || "";
-                } else {
-                    wrap.appendChild(cell?.html ?? document.createTextNode(cell?.text || ""));
+                    content = wrap;
                 }
-                td.appendChild(wrap);
+
+                if (content instanceof Node) {
+                    td.appendChild(content);
+                } else if (cell && cell.html === true) {
+                    td.innerHTML = String(content ?? "");
+                } else {
+                    td.textContent = String(content ?? "");
+                }
+            } else {
+                td.textContent = "";
             }
+
             tr.appendChild(td);
+            firstVisible = false;
+        }
+        
+        if (this._hasOptions) {
+            const tdOpt = document.createElement("div");
+            tdOpt.className = "wx-grid-cell wx-table-actions";
+            tdOpt.setAttribute("role", "gridcell");
+            
+            const effectiveOptions = (row.options && row.options.length) ? row.options : this._options;
+            
+            if (effectiveOptions && effectiveOptions.length > 0) {
+                const div = document.createElement("div");
+                div.dataset.icon = "fas fa-cog";
+                div.dataset.size = "btn-sm";
+                div.dataset.border = "false";
+                
+                div.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                });
+                
+                tdOpt.appendChild(div);
+                new webexpress.webui.DropdownCtrl(div).items = effectiveOptions;
+            }
+            tr.appendChild(tdOpt);
         }
 
-        if (row.options && row.options.length) {
-            const td = document.createElement("td");
-            const div = document.createElement("div");
-            div.dataset.icon = "fas fa-cog";
-            div.dataset.size = "btn-sm";
-            div.dataset.border = "false";
-            new webexpress.webui.DropdownCtrl(div).items = row.options;
-            td.appendChild(div);
-            tr.appendChild(td);
-        } else if (this._hasOptions || this._options.length > 0 || this._allowColumnRemove) {
-            tr.appendChild(document.createElement("td"));
-        }
-
-        if (this._isTree) { 
-            this._injectTreeToggle(tr, row, depth); 
+        if (this._isTree) {
+            this._injectTreeToggle(tr, row, depth);
         }
         fragment.appendChild(tr);
     }
 
     /**
-     * Injects tree toggle into the first data cell.
-     * @param {HTMLTableRowElement} tr Table row.
-     * @param {Object} row Row object.
-     * @param {number} depth Depth level.
+     * Render cell content using renderer templates if available.
+     * @param {Object} row Row data.
+     * @param {Object} colDef Column definition.
+     * @param {Object} cell Cell data.
+     * @param {boolean} isFirstVisible Is first visible column.
+     * @returns {string|Node} Rendered content.
      */
-    _injectTreeToggle(tr, row, depth) {
-        let firstDataCell = null;
-        const cells = Array.from(tr.children);
-        const startIndex = (this._movableRow ? 1 : 0);
-        for (let i = startIndex; i < cells.length; i++) { 
-            firstDataCell = cells[i]; 
-            break; 
-        }
-        if (!firstDataCell) { 
-            return; 
-        }
+    _renderCell(row, colDef, cell, isFirstVisible) {
+        const type = cell?.type || colDef.rendererType;
+        const tmpl = type ? webexpress.webui.TableTemplates.get(type) : null;
 
-        const contentWrapper = document.createElement("span");
-        contentWrapper.classList.add("wx-tree");
-
-        const indent = document.createElement("span");
-        indent.className = "wx-tree-indent";
-        indent.style.width = (depth * 1.25) + "em";
-
-        let toggle;
-        if (row.children && row.children.length) {
-            toggle = document.createElement("button");
-            toggle.type = "button";
-            toggle.className = "wx-tree-toggle btn btn-link btn-sm p-0";
-            toggle.setAttribute("aria-expanded", String(!!row.expanded));
-            toggle.setAttribute("aria-label", row.expanded ? "Collapse" : "Expand");
-
-            const icon = document.createElement("span");
-            icon.className = "wx-tree-indicator-angle";
-            if (row.expanded) { 
-                icon.classList.add("wx-tree-expand"); 
+        if (tmpl) {
+            try {
+                const opts = Object.assign({}, tmpl.options, colDef.rendererOptions || {});
+                return tmpl.fn(cell?.content, this, row, cell, colDef.name || colDef.id, opts);
+            } catch (e) {
+                console.error("renderer error", e);
+                return "Error";
             }
-            toggle.appendChild(icon);
-
-            toggle.addEventListener("click", (e) => {
-                e.stopPropagation();
-                const prev = row.expanded;
-                row.expanded = !row.expanded;
-                toggle.setAttribute("aria-expanded", String(row.expanded));
-                toggle.setAttribute("aria-label", row.expanded ? "Collapse" : "Expand");
-                if (row.expanded) { 
-                    icon.classList.add("wx-tree-expand"); 
-                } else { 
-                    icon.classList.remove("wx-tree-expand"); 
-                }
-                this._schedulePersist();
-                this.render();
-                if (prev !== row.expanded) {
-                    this._dispatchVisibilityChange({
-                        kind: "row",
-                        action: row.expanded ? "expand" : "collapse",
-                        rowId: row.id || null,
-                        expanded: row.expanded
-                    });
-                }
-            });
-        } else {
-            toggle = document.createElement("span");
-            toggle.className = "wx-tree-toggle-placeholder";
         }
-
-        const treeLead = document.createElement("span");
-        treeLead.className = "wx-tree-lead";
-        treeLead.appendChild(indent);
-        treeLead.appendChild(toggle);
-
-        contentWrapper.appendChild(treeLead);
-        contentWrapper.appendChild(firstDataCell.firstChild);
-        firstDataCell.innerHTML = "";
-        firstDataCell.appendChild(contentWrapper);
+        return cell?.content ?? "";
     }
 
     /**
-     * Renders footer row.
+     * Render footer row.
      */
     _renderFooter() {
-        this._foot.innerHTML = "";
-        const tr = document.createElement("tr");
-        if (this._movableRow) { 
-            tr.appendChild(document.createElement("td")); 
+        if (!this._footer.length) {
+            this._foot?.remove();
+            this._foot = null;
+            return;
         }
 
-        if (this._footer.length) {
-            for (let logicalIdx = 0; logicalIdx < this._columns.length; logicalIdx++) {
-                const col = this._columns[logicalIdx];
-                if (!col.visible) { 
-                    continue; 
-                }
-                const td = document.createElement("td");
-                const content = this._footer[logicalIdx];
-                if (content != null) { 
-                    td.innerHTML = content; 
-                }
-                tr.appendChild(td);
-            }
-        } else {
-            for (const c of this._columns) {
-                if (c.visible) { 
-                    tr.appendChild(document.createElement("td")); 
-                }
-            }
+        if (!this._foot) {
+            this._foot = document.createElement("div");
+            this._foot.className = "wx-table-footer-group";
+            this._foot.setAttribute("role", "rowgroup");
+            this._table.appendChild(this._foot);
         }
-        if (this._hasOptions || this._options.length > 0 || this._columns.some(c => !c.visible)) {
-            tr.appendChild(document.createElement("td"));
+
+        this._foot.textContent = "";
+        const tr = document.createElement("div");
+        tr.className = "wx-grid-row wx-table-footer";
+        tr.setAttribute("role", "row");
+
+        for (let i = 0; i < this._columns.length; i++) {
+            const col = this._columns[i];
+            if (!col.visible) {
+                continue;
+            }
+            
+            const td = document.createElement("div");
+            td.className = "wx-grid-cell";
+            td.setAttribute("role", "gridcell");
+            if (this._footer[i] != null) {
+                td.innerHTML = this._footer[i];
+            }
+            tr.appendChild(td);
         }
         this._foot.appendChild(tr);
     }
 
     /**
-     * Synchronizes column widths to col elements.
+     * Handle sort interaction.
+     * @param {HTMLElement} headerCell Target header div.
+     * @param {Object} col Column descriptor.
      */
-    _syncColumnWidths() {
+    _handleSortClick(headerCell, col) {
+        const next = col.sort === "asc" ? "desc" : (col.sort === "desc" ? null : "asc");
         for (const c of this._columns) {
-            if (!c.visible || !c.width) { 
-                continue; 
-            }
-            this._applyWidthToColElement(c.id, c.width);
+            c.sort = null;
         }
-    }
-
-    /**
-     * Applies width to matching col element.
-     * @param {string} columnId Column id.
-     * @param {number} width Width px.
-     */
-    _applyWidthToColElement(columnId, width) {
-        const colEl = this._col.querySelector(`col[data-column-id='${columnId}']`);
-        if (colEl) { 
-            colEl.style.width = width + "px"; 
-        }
-    }
-
-    /**
-     * Returns current column order.
-     * @returns {Array<string>} Column ids in order.
-     */
-    _getColumnOrder() {
-        return this._columns.map(c => c.id);
-    }
-
-    /**
-     * Rebuilds row cell arrays after reorder.
-     * @param {Array<string>} oldOrder Old order.
-     * @param {Array<string>} newOrder New order.
-     */
-    _rebuildAllRowCellsFromColumnOrder(oldOrder, newOrder) {
-        const oldIndexMap = new Map(oldOrder.map((id, i) => [id, i]));
-        const rebuildRow = (row) => {
-            const newCells = new Array(newOrder.length);
-            for (let i = 0; i < newOrder.length; i++) {
-                const id = newOrder[i];
-                const oldIdx = oldIndexMap.get(id);
-                newCells[i] = (oldIdx != null && row.cells[oldIdx]) ? row.cells[oldIdx] : { text: "", id: null };
-            }
-            row.cells = newCells;
-            if (row.children) { 
-                row.children.forEach(rebuildRow); 
-            }
-        };
-        this._rows.forEach(rebuildRow);
-    }
-
-    /**
-     * Applies current column filter term to dropdown list.
-     * @param {HTMLElement} menu Dropdown menu element.
-     */
-    _applyColumnFilter(menu) {
-        const term = (this._columnFilterTerm || "").toLowerCase();
-        const items = menu.querySelectorAll(".wx-columns-list > .dropdown-item");
-        items.forEach(it => {
-            const id = it.dataset.columnId || "";
-            const label = it.querySelector(".form-check-label")?.textContent || "";
-            const hay = (id + " " + label).toLowerCase();
-            it.style.display = (!term || hay.includes(term)) ? "" : "none";
-        });
-    }
-
-    /**
-     * Enables drag & drop ordering inside the column dropdown.
-     * @param {HTMLElement} listContainer Container.
-     * @param {HTMLButtonElement} trigger Dropdown trigger button.
-     */
-    _enableDropdownColumnDrag(listContainer, trigger) {
-        this._ddDragPlaceholder = document.createElement("div");
-        this._ddDragPlaceholder.className = "wx-col-placeholder";
-        this._ddDragSourceIndex = null;
-
-        const items = () => Array.from(listContainer.querySelectorAll(".wx-col-item"));
-
-        const computeIndexFromY = (clientY) => {
-            const listItems = items().filter(i => !i.classList.contains("dragging"));
-            if (!listItems.length) { 
-                return 0; 
-            }
-            for (let i = 0; i < listItems.length; i++) {
-                const rect = listItems[i].getBoundingClientRect();
-                const mid = rect.top + rect.height / 2;
-                if (clientY < mid) { 
-                    return i; 
-                }
-            }
-            return listItems.length;
-        };
-
-        const placePlaceholderAt = (index) => {
-            const listItems = items().filter(i => !i.classList.contains("dragging"));
-            if (index >= listItems.length) {
-                const last = listItems[listItems.length - 1];
-                if (last) {
-                    if (last.nextSibling !== this._ddDragPlaceholder) {
-                        last.parentNode.insertBefore(this._ddDragPlaceholder, last.nextSibling);
-                    }
-                } else {
-                    listContainer.appendChild(this._ddDragPlaceholder);
-                }
-            } else {
-                const ref = listItems[index];
-                if (ref && ref !== this._ddDragPlaceholder.nextSibling) {
-                    ref.parentNode.insertBefore(this._ddDragPlaceholder, ref);
-                }
-            }
-        };
-
-        const handleDragStart = (e) => {
-            const item = e.currentTarget;
-            this._ddDragSourceIndex = parseInt(item.dataset.index, 10);
-            item.classList.add("dragging");
-            try {
-                e.dataTransfer.effectAllowed = "move";
-                e.dataTransfer.setData("text/plain", item.dataset.columnId);
-            } catch (_) {}
-        };
-
-        const handleDragEnd = (e) => {
-            const item = e.currentTarget;
-            item.classList.remove("dragging");
-            if (this._ddDragPlaceholder.parentNode) {
-                this._ddDragPlaceholder.parentNode.removeChild(this._ddDragPlaceholder);
-            }
-            items().forEach((it, idx) => it.dataset.index = String(idx));
-            this._ddDragSourceIndex = null;
-        };
-
-        const handleContainerDragOver = (e) => {
-            const draggingItem = listContainer.querySelector(".wx-col-item.dragging");
-            if (!draggingItem) { 
-                return; 
-            }
-            e.preventDefault();
-            const idx = computeIndexFromY(e.clientY);
-            placePlaceholderAt(idx);
-        };
-
-        const handleContainerDrop = (e) => {
-            const draggingItem = listContainer.querySelector(".wx-col-item.dragging");
-            if (!draggingItem) { 
-                return; 
-            }
-            e.preventDefault();
-            const targetIndex = (() => {
-                if (this._ddDragPlaceholder.parentNode) {
-                    const listItems = items().filter(i => !i.classList.contains("dragging"));
-                    const allNodes = Array.from(listContainer.children);
-                    let visualIndex = 0;
-                    for (let i = 0; i < allNodes.length; i++) {
-                        const n = allNodes[i];
-                        if (n === this._ddDragPlaceholder) { 
-                            return visualIndex; 
-                        }
-                        if (n.classList && n.classList.contains("wx-col-item") && !n.classList.contains("dragging")) {
-                            visualIndex++;
-                        }
-                    }
-                    return listItems.length;
-                }
-                return computeIndexFromY(e.clientY);
-            })();
-
-            const sourceIndex = this._ddDragSourceIndex;
-            if (sourceIndex == null) { 
-                return; 
-            }
-
-            let adjustedTarget = targetIndex;
-            if (sourceIndex < targetIndex) { 
-                adjustedTarget -= 1; 
-            }
-            adjustedTarget = Math.max(0, Math.min(adjustedTarget, this._columns.length - 1));
-
-            if (sourceIndex !== adjustedTarget) {
-                const previousOrder = this._getColumnOrder();
-                const moved = this._columns.splice(sourceIndex, 1)[0];
-                this._columns.splice(adjustedTarget, 0, moved);
-                this._rebuildAllRowCellsFromColumnOrder(previousOrder, this._getColumnOrder());
-                this._dispatchMassColumnReorder(previousOrder, this._getColumnOrder());
-                this._dispatchMove({
-                    kind: "column",
-                    action: "move",
-                    sourceIndex,
-                    targetIndex: adjustedTarget,
-                    order: this._getColumnOrder(),
-                    previousOrder
-                });
-                this._schedulePersist();
-                this.render();
-            } else {
-                this._reopenDropdownAfterRender(trigger);
-            }
-        };
-
-        items().forEach((it) => {
-            it.addEventListener("dragstart", handleDragStart);
-            it.addEventListener("dragend", handleDragEnd);
-            it.addEventListener("dragover", (e) => e.preventDefault());
-        });
-
-        listContainer.addEventListener("dragover", handleContainerDragOver);
-        listContainer.addEventListener("drop", handleContainerDrop);
-    }
-
-    /**
-     * Re-opens dropdown after rerender.
-     * @param {HTMLButtonElement} trigger Trigger button.
-     */
-    _reopenDropdownAfterRender(trigger) {
-        setTimeout(() => {
-            if (!trigger.isConnected) {
-                const newBtn = this._head.querySelector(".wx-table-actions .dropdown > .dropdown-toggle");
-                if (newBtn && window.bootstrap?.Dropdown) {
-                    const inst = bootstrap.Dropdown.getOrCreateInstance(newBtn);
-                    inst.show();
-                    newBtn.parentElement.querySelector("input[type=text]")?.focus();
-                }
-            } else if (window.bootstrap?.Dropdown) {
-                const inst = bootstrap.Dropdown.getOrCreateInstance(trigger);
-                inst.show();
-                trigger.parentElement.querySelector("input[type=text]")?.focus();
-            }
-        }, 0);
-    }
-
-    /**
-     * Enables row drag & drop using handle cell.
-     * @param {HTMLTableCellElement} handle Handle.
-     * @param {Object} row Row object.
-     */
-    _enableDragAndDropRow(handle, row) {
-        if (!this._movableRow) { 
-            return; 
-        }
-        handle.draggable = true;
-        handle.setAttribute("tabindex", "0");
-        handle.setAttribute("role", "button");
-        const tr = handle.closest("tr");
-
-        handle.addEventListener("keydown", (e) => {
-            if (e.code === "Space") {
-                e.preventDefault();
-                if (!this._rowDragActive) { 
-                    this._startRowDrag(tr, row); 
-                } else { 
-                    this._finalizeRowDrag(); 
-                }
-            }
-            if (this._rowDragActive && (e.code === "ArrowUp" || e.code === "ArrowDown")) {
-                e.preventDefault();
-                this._keyboardMovePlaceholder(e.code === "ArrowUp" ? -1 : 1);
-            }
-            if (this._rowDragActive && e.code === "Enter") { 
-                e.preventDefault(); 
-                this._finalizeRowDrag(); 
-            }
-            if (this._rowDragActive && e.code === "Escape") { 
-                e.preventDefault(); 
-                this._cancelRowDrag(); 
-            }
-        });
-
-        handle.addEventListener("dragstart", (e) => {
-            this._startRowDrag(tr, row);
-            const img = document.createElement("canvas");
-            img.width = img.height = 1;
-            e.dataTransfer.setDragImage(img, 0, 0);
-        });
-        handle.addEventListener("dragend", () => {
-            if (this._rowDragActive) { 
-                this._finalizeRowDrag(); 
-            }
-        });
-    }
-
-    /**
-     * Starts a row drag operation (block aware).
-     * @param {HTMLTableRowElement} tr Row element.
-     * @param {Object} row Row object.
-     */
-    _startRowDrag(tr, row) {
-        this._draggedRow = row;
-        this._draggedRowParent = row.parent || null;
-        this._dragRowTargetParent = null;
-        this._dragRowInsertIndex = null;
-        this._dragRowTargetMode = null;
-        this._rowDragActive = true;
-
-        const block = [tr];
-        let next = tr.nextSibling;
-        while (next && next._dataRowRef && this._isDescendant(next._dataRowRef, row)) {
-            block.push(next);
-            next = next.nextSibling;
-        }
-        this._draggedRowBlockTrs = block;
-        tr.classList.add("wx-table-dragging");
-
-        const totalHeight = block.reduce((h, t) => h + t.getBoundingClientRect().height, 0);
-        this._rowPlaceholder = document.createElement("tr");
-        this._rowPlaceholder.className = "wx-table-drag-placeholder";
-        this._rowPlaceholder.style.height = totalHeight + "px";
-
-        const visibleCols = this.getVisibleColumns().length
-            + (this._movableRow ? 1 : 0)
-            + (this._hasOptions || this._options.length > 0 || this._allowColumnRemove ? 1 : 0);
-        for (let i = 0; i < visibleCols; i++) {
-            const td = document.createElement("td");
-            td.innerHTML = "&nbsp;";
-            this._rowPlaceholder.appendChild(td);
-        }
-
-        tr.parentNode.insertBefore(this._rowPlaceholder, block[block.length - 1].nextSibling);
-
-        if (!this._body._rowDragBound) {
-            this._body.addEventListener("dragover", (e) => this._onTbodyDragOver(e));
-            this._body.addEventListener("drop", (e) => {
-                e.preventDefault();
-                if (this._rowDragActive) { 
-                    this._finalizeRowDrag(); 
-                }
-            });
-            this._body._rowDragBound = true;
-        }
-        this._autoScrollInterval = setInterval(() => this._autoScrollCheck(), 30);
-    }
-
-    /**
-     * Returns true if candidate is descendant of ancestor.
-     * @param {Object} candidate Candidate row.
-     * @param {Object} ancestor Ancestor row.
-     * @returns {boolean} True if descendant.
-     */
-    _isDescendant(candidate, ancestor) {
-        let p = candidate.parent;
-        while (p) {
-            if (p === ancestor) { 
-                return true; 
-            }
-            p = p.parent;
-        }
-        return false;
-    }
-
-    /**
-     * Moves placeholder by keyboard within siblings.
-     * @param {number} delta Direction (+/-).
-     */
-    _keyboardMovePlaceholder(delta) {
-        const siblings = this._getDragSiblings();
-        if (!siblings.length) { 
-            return; 
-        }
-        const currentIndex = this._getPlaceholderSiblingIndex(siblings);
-        const target = Math.min(Math.max(currentIndex + delta, 0), siblings.length);
-        this._movePlaceholderToSiblingIndex(siblings, target);
-        this._dragRowTargetParent = this._draggedRowParent;
-        this._dragRowTargetMode = null;
-        this._dragRowInsertIndex = target;
-    }
-
-    /**
-     * Handles dragover events inside tbody for row dragging.
-     * @param {DragEvent} e Event.
-     */
-    _onTbodyDragOver(e) {
-        if (!this._rowDragActive || !this._rowPlaceholder) { 
-            return; 
-        }
-        e.preventDefault();
-        this._lastPointerY = e.clientY;
-
-        const tr = e.target.closest("tr");
-        if (!tr || !tr._dataRowRef) { 
-            return; 
-        }
-        const candidate = tr._dataRowRef;
-
-        if (candidate === this._draggedRow) { 
-            return; 
-        }
-        if (this._isDescendant(candidate, this._draggedRow)) { 
-            return; 
-        }
-
-        const rect = tr.getBoundingClientRect();
-        const y = e.clientY;
-        const topZone = rect.top + rect.height * 0.25;
-        const bottomZone = rect.bottom - rect.height * 0.25;
-
-        let mode = "child";
-        if (y < topZone) { 
-            mode = "before"; 
-        } else if (y > bottomZone) { 
-            mode = "after"; 
-        }
-
-        if (mode === "child") {
-            this._dragRowTargetParent = candidate;
-            this._dragRowInsertIndex = candidate.children ? candidate.children.length : 0;
-            this._dragRowTargetMode = "child";
-            const endTr = this._getRowBlockEndTr(candidate);
-            if (endTr.nextSibling !== this._rowPlaceholder) {
-                endTr.parentNode.insertBefore(this._rowPlaceholder, endTr.nextSibling);
-            }
-        } else if (mode === "before") {
-            const parent = candidate.parent || null;
-            const idx = (parent ? parent.children : this._rows).indexOf(candidate);
-            this._dragRowTargetParent = parent;
-            this._dragRowInsertIndex = idx;
-            this._dragRowTargetMode = "before";
-            if (tr !== this._rowPlaceholder.nextSibling) {
-                tr.parentNode.insertBefore(this._rowPlaceholder, tr);
-            }
+        col.sort = next;
+        
+        if (next) {
+            this.orderRows(col);
         } else {
-            const parent = candidate.parent || null;
-            const siblings = parent ? parent.children : this._rows;
-            const idx = siblings.indexOf(candidate);
-            this._dragRowTargetParent = parent;
-            this._dragRowInsertIndex = idx + 1;
-            this._dragRowTargetMode = "after";
-            const endTr = this._getRowBlockEndTr(candidate);
-            if (endTr.nextSibling !== this._rowPlaceholder) {
-                endTr.parentNode.insertBefore(this._rowPlaceholder, endTr.nextSibling);
-            }
-        }
-    }
-
-    /**
-     * Moves placeholder to given sibling index.
-     * @param {Array<Object>} siblings Sibling rows.
-     * @param {number} index Target index.
-     */
-    _movePlaceholderToSiblingIndex(siblings, index) {
-        if (!this._rowPlaceholder) { 
-            return; 
-        }
-        if (index >= siblings.length) {
-            const last = siblings[siblings.length - 1];
-            if (!last) { 
-                return; 
-            }
-            const lastBlockEnd = this._getRowBlockEndTr(last);
-            if (lastBlockEnd.nextSibling !== this._rowPlaceholder) {
-                lastBlockEnd.parentNode.insertBefore(this._rowPlaceholder, lastBlockEnd.nextSibling);
-            }
-        } else {
-            const anchor = siblings[index]._anchorTr;
-            if (anchor !== this._rowPlaceholder.nextSibling) {
-                anchor.parentNode.insertBefore(this._rowPlaceholder, anchor);
-            }
-        }
-    }
-
-    /**
-     * Returns last tr belonging to hierarchical block.
-     * @param {Object} row Row.
-     * @returns {HTMLTableRowElement} Last tr.
-     */
-    _getRowBlockEndTr(row) {
-        let end = row._anchorTr;
-        let next = end.nextSibling;
-        while (next && next._dataRowRef && this._isDescendant(next._dataRowRef, row)) {
-            end = next;
-            next = next.nextSibling;
-        }
-        return end;
-    }
-
-    /**
-     * Returns siblings excluding dragged row.
-     * @returns {Array<Object>} Siblings.
-     */
-    _getDragSiblings() {
-        if (!this._draggedRow) { 
-            return []; 
-        }
-        const base = (this._draggedRowParent ? this._draggedRowParent.children : this._rows);
-        return base.filter(r => r !== this._draggedRow);
-    }
-
-    /**
-     * Returns placeholder index among siblings.
-     * @param {Array<Object>} siblings Sibling rows.
-     * @returns {number} Index.
-     */
-    _getPlaceholderSiblingIndex(siblings) {
-        if (!this._rowPlaceholder) { 
-            return -1; 
-        }
-        const ordered = [...siblings];
-        for (let i = 0; i < ordered.length; i++) {
-            const anchor = ordered[i]._anchorTr;
-            if (this._rowPlaceholder.compareDocumentPosition(anchor) & Node.DOCUMENT_POSITION_FOLLOWING) {
-                return i;
-            }
-        }
-        return ordered.length;
-    }
-
-    /**
-     * Performs auto-scroll during row drag.
-     */
-    _autoScrollCheck() {
-        if (!this._rowDragActive) { 
-            return; 
-        }
-        if (this._lastPointerY == null) { 
-            return; 
-        }
-        const container = this._table.parentElement || document.scrollingElement;
-        const rect = container.getBoundingClientRect();
-        const threshold = 40;
-        if (this._lastPointerY < rect.top + threshold) { 
-            container.scrollTop -= 10; 
-        } else if (this._lastPointerY > rect.bottom - threshold) { 
-            container.scrollTop += 10; 
-        }
-    }
-
-    /**
-     * Finalizes row drag repositioning.
-     */
-    _finalizeRowDrag() {
-        if (!this._rowDragActive) { 
-            return; 
-        }
-
-        const sourceParent = this._draggedRowParent;
-        let targetParent = this._dragRowTargetParent;
-        let insertIndex = this._dragRowInsertIndex;
-
-        if (targetParent == null && insertIndex == null) {
-            targetParent = sourceParent;
-            const siblingsArr = (sourceParent ? sourceParent.children : this._rows);
-            const others = siblingsArr.filter(r => r !== this._draggedRow);
-            let idx = others.length;
-            for (let i = 0; i < others.length; i++) {
-                const anchor = others[i]._anchorTr;
-                if (this._rowPlaceholder.compareDocumentPosition(anchor) & Node.DOCUMENT_POSITION_FOLLOWING) {
-                    idx = i;
-                    break;
-                }
-            }
-            insertIndex = idx;
-        }
-
-        if (targetParent && this._isDescendant(targetParent, this._draggedRow)) {
-            this._cleanupRowDrag();
             this.render();
+        }
+        
+        this._dispatch(webexpress.webui.Event.TABLE_SORT_EVENT, { 
+            sender: this._element, 
+            columnId: col.id, 
+            sortDirection: col.sort 
+        });
+    }
+
+    /**
+     * Sort rows by a specific column.
+     * @param {Object} column Sorting column descriptor.
+     */
+    orderRows(column) {
+        const idx = column.index;
+        if (idx === undefined) {
+            return;
+        }
+        
+        const dir = column.sort === "asc" ? 1 : -1;
+        const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+
+        const decorated = this._rows.map((row, i) => ({ row, i }));
+        decorated.sort((a, b) => {
+            const va = a.row.cells[idx]?.content || "";
+            const vb = b.row.cells[idx]?.content || "";
+            const cmp = collator.compare(va, vb);
+            return cmp === 0 ? a.i - b.i : cmp * dir;
+        });
+        
+        this._rows = decorated.map(d => d.row);
+        this.render();
+    }
+
+    /**
+     * Parse column definitions with extended width properties.
+     * @param {HTMLElement} div Columns container element.
+     * @returns {Array<Object>} Parsed columns.
+     */
+    _parseColumns(div) {
+        if (!div) {
+            return [];
+        }
+        if (div.dataset.color) {
+            this._head.classList.add(div.dataset.color);
+        }
+        this._suppressHeaders = div.dataset.suppressHeaders === "true";
+
+        return Array.from(div.children).map((el, idx) => {
+            const typeEl = el.querySelector(":scope > [data-type], :scope > template[data-type]");
+            const rendererType = typeEl?.dataset.type || el.dataset.type || null;
+            const rendererOptions = typeEl ? Object.assign({}, typeEl.dataset) : Object.assign({}, el.dataset);
+
+            if (typeEl) {
+                const src = (typeEl.tagName === "TEMPLATE") ? typeEl.content.children : typeEl.children;
+                if (src.length) {
+                    rendererOptions.children = Array.from(src);
+                }
+            }
+            
+            return {
+                id: el.id || `col_${idx}`,
+                index: idx,
+                label: el.dataset.label || "",
+                name: el.dataset.objectName || null,
+                icon: el.dataset.icon || null,
+                image: el.dataset.image || null,
+                color: el.dataset.color || null,
+                width: el.dataset.width || (el.getAttribute("width") ? parseInt(el.getAttribute("width"), 10) : null),
+                minWidth: el.dataset.minWidth || null,
+                resizable: el.dataset.resizable !== "false",
+                sort: el.dataset.sort || null,
+                visible: el.dataset.visible !== "false",
+                rendererType,
+                rendererOptions
+            };
+        });
+    }
+
+    /**
+     * Parse rows from config.
+     * @param {NodeList} divs Row elements.
+     * @param {Object} [parent=null] Parent row.
+     * @returns {Array<Object>} Parsed rows.
+     */
+    _parseRows(divs, parent = null) {
+        const rows = [];
+        for (const div of divs) {
+            if (!div.classList.contains("wx-table-row")) {
+                continue;
+            }
+
+            const row = {
+                id: div.id || null,
+                class: div.className,
+                style: div.getAttribute("style"),
+                color: div.dataset.color,
+                image: div.dataset.image,
+                icon: div.dataset.icon,
+                uri: div.dataset.uri || div.dataset.url,
+                restApi: div.dataset.restApi || div.dataset.editApi,
+                target: div.dataset.target,
+                
+                // action attributes
+                primaryAction: Object.fromEntries(Object.entries(div.dataset)
+                    .filter(([k]) => k.startsWith("wxPrimary"))
+                    .map(([k, v]) => [
+                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                ),
+                secondaryAction: Object.fromEntries(Object.entries(div.dataset)
+                    .filter(([k]) => k.startsWith("wxSecondary"))
+                    .map(([k, v]) => [
+                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                ),
+                cells: [],
+                options: null,
+                children: [],
+                parent,
+                expanded: div.dataset.expanded !== "false" && div.dataset.collapsed !== "true"
+            };
+
+            const childRows = [];
+            for (const child of div.children) {
+                if (child.classList.contains("wx-table-row")) {
+                    childRows.push(child);
+                    this._isTree = true;
+                } else if (child.classList.contains("wx-table-options")) {
+                    row.options = this._parseOptions(child);
+                } else if (!child.classList.contains("wx-table-footer")) {
+                    row.cells.push({
+                        content: child.textContent.trim(),
+                        id: child.id,
+                        class: child.className,
+                        style: child.getAttribute("style"),
+                        color: child.dataset.color,
+                        icon: child.dataset.icon,
+                        image: child.dataset.image,
+                        uri: child.dataset.uri || child.dataset.url,
+                        target: child.dataset.target,
+                        objectId: child.dataset.objectId,
+                        type: child.dataset.type
+                    });
+                }
+            }
+            if (childRows.length) {
+                row.children = this._parseRows(childRows, row);
+            }
+            rows.push(row);
+        }
+        return rows;
+    }
+
+    /**
+     * Parse dropdown options.
+     * @param {HTMLElement} div Options container.
+     * @returns {Array<Object>} Parsed options.
+     */
+    _parseOptions(div) {
+        if (!div) {
+            return [];
+        }
+        return Array.from(div.children).map((el) => {
+            const cls = el.classList;
+            if (cls.contains("wx-dropdown-divider") || cls.contains("wx-dropdownbutton-divider")) { 
+                return { type: "divider" }; 
+            }
+            if (cls.contains("wx-dropdown-header")) { 
+                return { type: "header", content: el.textContent.trim(), icon: el.dataset.icon }; 
+            }
+            
+            const ds = el.dataset;
+            return {
+                content: el.textContent.trim(),
+                id: el.id,
+                icon: ds.icon,
+                image: ds.image,
+                uri: ds.uri || ds.url,
+                target: ds.target,
+                modal: ds.modal,
+                disabled: el.hasAttribute("disabled"),
+                
+                // parse action attributes for options
+                primaryAction: {
+                    action: ds.dataset.wxPrimaryAction || null,
+                    target: ds.dataset.wxPrimaryTarget || null,
+                    uri: ds.dataset.wxPrimaryUri || null,
+                    size: ds.dataset.wxPrimarySize || null
+                },
+
+                secondaryAction: {
+                    action: ds.dataset.wxSecondaryAction || null,
+                    target: ds.dataset.wxSecondaryTarget || null,
+                    uri: ds.dataset.wxSecondaryUri || null,
+                    size: ds.dataset.wxSecondarySize || null
+                },
+
+                // bind
+                bind: {
+                    source: div.dataset.wxSource || null,
+                }
+            };
+        });
+    }
+
+    /**
+     * Parse footer configuration.
+     * @param {HTMLElement} div Footer container.
+     * @returns {Array<string>} Footer cell contents.
+     */
+    _parseFooter(div) {
+        return div ? Array.from(div.children).map(c => c.innerHTML.trim()) : [];
+    }
+
+    /**
+     * Inject tree toggle control into the first data column.
+     * @param {HTMLElement} tr Row element.
+     * @param {Object} row Row data.
+     * @param {number} depth Hierarchy depth.
+     */
+    _injectTreeToggle(tr, row, depth) {
+        const firstCell = Array.from(tr.children).find(cell => 
+            cell.classList.contains("wx-grid-cell") && !cell.classList.contains("wx-table-drag-handle")
+        );
+        if (!firstCell) {
             return;
         }
 
-        const oldParentId = sourceParent ? sourceParent.id : null;
-        const newParentId = targetParent ? targetParent.id : null;
+        const wrapper = document.createElement("span");
+        wrapper.className = "wx-tree";
 
-        const oldSiblings = sourceParent ? sourceParent.children : this._rows;
-        const oldIndex = oldSiblings.indexOf(this._draggedRow);
-        if (oldIndex >= 0) { 
-            oldSiblings.splice(oldIndex, 1); 
-        }
+        const indent = document.createElement("span");
+        indent.className = "wx-tree-indent";
+        indent.style.width = `${depth * 1.2}rem`;
+        wrapper.appendChild(indent);
 
-        if (targetParent === sourceParent && insertIndex != null && oldIndex < insertIndex) { 
-            insertIndex -= 1; 
-        }
+        if (row.children?.length) {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "wx-tree-toggle";
+            btn.setAttribute("aria-expanded", String(row.expanded));
 
-        const newSiblings = targetParent ? targetParent.children : this._rows;
-        if (insertIndex == null || insertIndex < 0) { 
-            insertIndex = newSiblings.length; 
-        }
-        insertIndex = Math.min(insertIndex, newSiblings.length);
-        newSiblings.splice(insertIndex, 0, this._draggedRow);
-        this._draggedRow.parent = targetParent || null;
+            const icon = document.createElement("span");
+            icon.className = "wx-tree-indicator-angle" + (row.expanded ? " wx-tree-expand" : "");
+            btn.appendChild(icon);
 
-        if (this._dragRowTargetMode === "child" && targetParent && !targetParent.expanded) { 
-            targetParent.expanded = true; 
-        }
-
-        const previousOrder = [];
-        this._util.dispatch(webexpress.webui.Event.ROW_REORDER_EVENT, {
-            sender: this._element,
-            newOrder: newSiblings,
-            previousOrder: previousOrder,
-            parentId: targetParent ? targetParent.id : null
-        });
-
-        this._dispatchMove({
-            kind: "row",
-            action: "move",
-            rowId: this._draggedRow.id || null,
-            oldParentId,
-            newParentId,
-            index: insertIndex
-        });
-
-        this._cleanupRowDrag();
-        this._schedulePersist();
-        this.render();
-    }
-
-    /**
-     * Cancels current row drag.
-     */
-    _cancelRowDrag() {
-        if (!this._rowDragActive) { 
-            return; 
-        }
-        this._cleanupRowDrag();
-        this.render();
-    }
-
-    /**
-     * Cleans all temporary row drag state.
-     */
-    _cleanupRowDrag() {
-        if (this._rowPlaceholder && this._rowPlaceholder.parentNode) {
-            this._rowPlaceholder.parentNode.removeChild(this._rowPlaceholder);
-        }
-        this._rowPlaceholder = null;
-        if (this._draggedRowBlockTrs) {
-            this._draggedRowBlockTrs.forEach(tr => tr.classList.remove("wx-table-dragging"));
-        }
-        this._draggedRowBlockTrs = null;
-        this._draggedRow = null;
-        this._draggedRowParent = null;
-        this._rowDragActive = false;
-        this._lastPointerY = null;
-        this._dragRowTargetParent = null;
-        this._dragRowInsertIndex = null;
-        this._dragRowTargetMode = null;
-        if (this._autoScrollInterval) {
-            clearInterval(this._autoScrollInterval);
-            this._autoScrollInterval = null;
-        }
-    }
-
-    /**
-     * Enables column drag (ctrl+drag) with indicator (external css).
-     * @param {HTMLElement} th Header cell.
-     * @param {Object} column Column object.
-     */
-    _enableDragAndDropColumn(th, column) {
-        th.draggable = true;
-        th.addEventListener("dragstart", (e) => {
-            if (!e.ctrlKey) { 
-                e.preventDefault(); 
-                return; 
-            }
-            if (e.target.closest(".wx-table-column-resizer")) { 
-                e.preventDefault(); 
-                return; 
-            }
-            if (e.target.closest(".wx-table-col-remove")) { 
-                e.preventDefault(); 
-                return; 
-            }
-            this._draggedColumn = column;
-            th.classList.add("wx-table-dragging");
-        });
-        th.addEventListener("dragend", () => {
-            th.classList.remove("wx-table-dragging");
-            this._dragColumnIndicator.style.display = "none";
-            this._draggedColumn = null;
-        });
-        th.addEventListener("dragover", (e) => {
-            if (!this._draggedColumn) { 
-                return; 
-            }
-            e.preventDefault();
-            const rect = th.getBoundingClientRect();
-            const x = e.clientX;
-            const leftSide = x < rect.left + th.offsetWidth / 2;
-            this._dragColumnIndicator.style.top = rect.top + "px";
-            this._dragColumnIndicator.style.left = (leftSide ? rect.left - 1 : rect.left + th.offsetWidth - 1) + "px";
-            this._dragColumnIndicator.style.height = rect.height + "px";
-            this._dragColumnIndicator.style.display = "block";
-        });
-        th.addEventListener("dragleave", (ev) => {
-            setTimeout(() => {
-                if (!this._draggedColumn) { 
-                    return; 
-                }
-                const rel = document.elementFromPoint(ev.clientX, ev.clientY);
-                if (!rel || !rel.closest("thead")) {
-                    this._dragColumnIndicator.style.display = "none";
-                }
-            }, 10);
-        });
-        th.addEventListener("drop", (e) => {
-            e.preventDefault();
-            if (this._draggedColumn === null || column === null || this._draggedColumn === column) { 
-                return; 
-            }
-            const sourceIndex = this._columns.indexOf(this._draggedColumn);
-            const targetIndex = this._columns.indexOf(column);
-            if (sourceIndex === -1 || targetIndex === -1) { 
-                return; 
-            }
-            const rect = th.getBoundingClientRect();
-            const x = e.clientX;
-            const insertBefore = x < rect.left + th.offsetWidth / 2;
-            let adjusted = targetIndex;
-            if (insertBefore) {
-                if (sourceIndex < targetIndex) { 
-                    adjusted -= 1; 
-                }
-            } else {
-                if (sourceIndex > targetIndex) { 
-                    adjusted += 1; 
-                }
-            }
-            if (sourceIndex === adjusted) {
-                this._dragColumnIndicator.style.display = "none";
-                this._draggedColumn = null;
-                return;
-            }
-            const previousOrder = this._getColumnOrder();
-            const moved = this._columns.splice(sourceIndex, 1)[0];
-            this._columns.splice(adjusted, 0, moved);
-            this._rows.forEach(r => {
-                if (!Array.isArray(r.cells)) { 
-                    return; 
-                }
-                if (sourceIndex < 0 || sourceIndex >= r.cells.length) { 
-                    return; 
-                }
-                const movedCell = r.cells.splice(sourceIndex, 1)[0];
-                const targetPos = Math.min(Math.max(adjusted, 0), r.cells.length);
-                r.cells.splice(targetPos, 0, movedCell);
-                this._reorderChildCells(r.children, sourceIndex, adjusted);
-            });
-            this._dragColumnIndicator.style.display = "none";
-            this._draggedColumn = null;
-            this._triggerColumnReorderEvent(sourceIndex, adjusted);
-            this._dispatchMassColumnReorder(previousOrder, this._getColumnOrder());
-            this._schedulePersist();
-            this.render();
-            this._dispatchMove({
-                kind: "column",
-                action: "move",
-                sourceIndex,
-                targetIndex: adjusted,
-                order: this._getColumnOrder(),
-                previousOrder
-            });
-        });
-    }
-
-    /**
-     * Reorders child cells recursively.
-     * @param {Array<Object>} children Child rows.
-     * @param {number} sourceIndex Source index.
-     * @param {number} adjusted Target index.
-     */
-    _reorderChildCells(children, sourceIndex, adjusted) {
-        if (!children) { 
-            return; 
-        }
-        for (const ch of children) {
-            if (Array.isArray(ch.cells) && sourceIndex >= 0 && sourceIndex < ch.cells.length) {
-                const movedCell = ch.cells.splice(sourceIndex, 1)[0];
-                const targetPos = Math.min(Math.max(adjusted, 0), ch.cells.length);
-                ch.cells.splice(targetPos, 0, movedCell);
-            }
-            if (ch.children && ch.children.length) { 
-                this._reorderChildCells(ch.children, sourceIndex, adjusted); 
-            }
-        }
-    }
-
-    /**
-     * Enables sorting on header click (cycle).
-     * @param {HTMLElement} th Header cell.
-     * @param {Object} column Column object.
-     */
-    _enableSortColumns(th, column) {
-        th.addEventListener("click", (ev) => {
-            if (ev.target.closest(".wx-table-col-remove")) { 
-                return; 
-            }
-            if (th.classList.contains("wx-table-actions")) { 
-                return; 
-            }
-            const prev = column.sort;
-            const next = prev === "asc" ? "desc" : (prev === "desc" ? null : "asc");
-            this._columns.forEach(c => c.sort = null);
-            this._head.querySelectorAll("th").forEach(h => h.classList.remove("wx-sort-asc", "wx-sort-desc"));
-            column.sort = next;
-            if (next) {
-                th.classList.add(next === "asc" ? "wx-sort-asc" : "wx-sort-desc");
-                this.orderRows(column);
-            } else {
-                this._schedulePersist();
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                row.expanded = !row.expanded;
                 this.render();
-            }
-            this._util.dispatch(webexpress.webui.Event.TABLE_SORT_EVENT, {
-                sender: this._element,
-                columnId: column.id,
-                sortDirection: column.sort,
-                columnLabel: th.textContent.trim()
-            });
-        });
-    }
-
-    /**
-     * Adds a resize handle to header.
-     * @param {HTMLElement} th Header cell.
-     * @param {Object} column Column object.
-     */
-    _enableResizableColumns(th, column) {
-        const resizer = document.createElement("div");
-        resizer.className = "wx-table-column-resizer";
-        resizer.addEventListener("click", (e) => e.stopPropagation());
-        resizer.addEventListener("mousedown", (e) => this._onResizeStart(e, th, column));
-        th.style.position = "relative";
-        th.appendChild(resizer);
-    }
-
-    /**
-     * Starts column resize.
-     * @param {MouseEvent} e Mouse event.
-     * @param {HTMLElement} th Header cell.
-     * @param {Object} column Column object.
-     */
-    _onResizeStart(e, th, column) {
-        this._resizingColumn = th;
-        this._resizeStartX = e.pageX;
-        this._resizeStartWidth = th.offsetWidth;
-        document.body.classList.add("wx-table-resizing");
-        document.addEventListener("mousemove", this._resizeMoveHandler = (ev) => this._onResize(ev, th, column));
-        document.addEventListener("mouseup", this._resizeEndHandler = () => this._onResizeEnd(th));
-    }
-
-    /**
-     * Handles live resizing.
-     * @param {MouseEvent} e Mouse event.
-     * @param {HTMLElement} th Header cell.
-     * @param {Object} column Column object.
-     */
-    _onResize(e, th, column) {
-        if (!this._resizingColumn || this._resizingColumn !== th) { 
-            return; 
+            };
+            wrapper.appendChild(btn);
+        } else {
+            const dummy = document.createElement("span");
+            dummy.className = "wx-tree-toggle-placeholder";
+            wrapper.appendChild(dummy);
         }
-        const dx = e.pageX - this._resizeStartX;
-        const w = Math.max(this._resizeStartWidth + dx, webexpress.webui.TableCtrl.MIN_COL_WIDTH);
-        th.style.width = w + "px";
-        column.width = w;
-        this._applyWidthToColElement(column.id, w);
+
+        while (firstCell.firstChild) { 
+            wrapper.appendChild(firstCell.firstChild); 
+        }
+        firstCell.appendChild(wrapper);
     }
 
     /**
-     * Ends column resize and persists.
-     * @param {HTMLElement} th Header cell.
+     * Helper to find a row in the flat structure or hierarchy.
+     * @param {string} id Row ID.
+     * @returns {Object|null} Row object.
      */
-    _onResizeEnd(th) {
-        if (!this._resizingColumn || this._resizingColumn !== th) { 
-            return; 
-        }
-        document.body.classList.remove("wx-table-resizing");
-        document.removeEventListener("mousemove", this._resizeMoveHandler);
-        document.removeEventListener("mouseup", this._resizeEndHandler);
-        this._resizingColumn = null;
-        this._resizeStartX = null;
-        this._resizeStartWidth = null;
-        this._schedulePersist();
-    }
-
-    /**
-     * Binds inline edit SAVE event -> update snapshot + flash (if enabled).
-     */
-    _bindInlineEditSaveListener() {
-        if (!webexpress?.webui?.Event?.SAVE_INLINE_EDIT_EVENT) { 
-            return; 
-        }
-        document.addEventListener(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, (e) => {
-            const src = e.detail?.sender instanceof HTMLElement ? e.detail?.sender : null;
-            if (!src) { 
-                return; 
-            }
-            const tbl = src.closest("table");
-            if (tbl !== this._table) { 
-                return; 
-            }
-            const tr = src.closest("tr");
-            if (!tr || !tr._dataRowRef) { 
-                return; 
-            }
-            this._updateRowSnapshotFromDom(tr._dataRowRef);
-            this._flashRow(tr._dataRowRef);
-        });
-    }
-
-    /**
-     * Updates snapshot entry for a row after edit.
-     * @param {Object} row Row object.
-     */
-    _updateRowSnapshotFromDom(row) {
-        const key = this._getRowKey(row);
-        if (!key) { 
-            return; 
-        }
-        const sig = this._computeRowSignature(row);
-        this._prevRowState.set(key, sig);
-    }
-
-    /**
-     * Schedules a debounced persist.
-     */
-    _schedulePersist() {
-        if (!this._persistKey) { 
-            return; 
-        }
-        if (this._saveDebounceTimer) { 
-            clearTimeout(this._saveDebounceTimer); 
-        }
-        this._saveDebounceTimer = setTimeout(() => this._persistState(), 150);
-    }
-
-    /**
-     * Persists state to cookie.
-     */
-    _persistState() {
-        if (!this._persistKey) { 
-            return; 
-        }
-        const collapsed = [];
-        this._traverseRows(this._rows, (r) => {
-            if (r.id && r.expanded === false && r.children && r.children.length) { 
-                collapsed.push(r.id); 
-            }
-        });
-        const state = {
-            v: 1,
-            cols: this._columns.map(c => ({ id: c.id, visible: c.visible, width: c.width })),
-            order: this._getColumnOrder(),
-            sort: (() => { 
-                const s = this._columns.find(c => c.sort); 
-                return s ? { id: s.id, dir: s.sort } : null; 
-            })(),
-            tree: { collapsed: collapsed }
-        };
-        const json = encodeURIComponent(JSON.stringify(state));
-        this._setCookie(this._persistKey, json, 365);
-    }
-
-    /**
-     * Loads persisted state from cookie.
-     */
-    _loadStateFromCookie() {
-        const raw = this._getCookie(this._persistKey);
-        if (!raw) { 
-            return; 
-        }
-        try {
-            const obj = JSON.parse(decodeURIComponent(raw));
-            if (!obj || obj.v !== 1) { 
-                return; 
-            }
-
-            if (Array.isArray(obj.order) && obj.order.length) {
-                const map = new Map(this._columns.map(c => [c.id, c]));
-                const reordered = [];
-                obj.order.forEach(id => { if (map.has(id)) { reordered.push(map.get(id)); } });
-                this._columns.forEach(c => { if (!reordered.includes(c)) { reordered.push(c); } });
-                this._columns = reordered;
-            }
-            if (Array.isArray(obj.cols)) {
-                const cmap = new Map(obj.cols.map(c => [c.id, c]));
-                this._columns.forEach(c => {
-                    if (cmap.has(c.id)) {
-                        const s = cmap.get(c.id);
-                        if (typeof s.visible === "boolean") { 
-                            c.visible = s.visible; 
-                        }
-                        if (s.width != null) { 
-                            c.width = parseInt(s.width, 10); 
-                        }
+    _findRowById(id) {
+        const search = (rows) => {
+            for (const r of rows) {
+                if (r.id === id) {
+                    return r;
+                }
+                if (r.children) {
+                    const found = search(r.children);
+                    if (found) {
+                        return found;
                     }
-                });
-            }
-            if (obj.sort?.id && ["asc", "desc"].includes(obj.sort.dir)) {
-                const col = this._columns.find(c => c.id === obj.sort.id);
-                if (col) { 
-                    col.sort = obj.sort.dir; 
                 }
             }
-            if (obj.tree?.collapsed?.length) { 
-                this._applyCollapsedState(obj.tree.collapsed); 
-            }
-        } catch (_) {
-            // ignore malformed state
-        }
+            return null;
+        };
+        return search(this._rows);
     }
 
     /**
-     * Applies collapsed row ids to current tree.
-     * @param {Array<string>} collapsedIds Collapsed id list.
+     * Rebuilds the internal column index cache.
      */
-    _applyCollapsedState(collapsedIds) {
-        if (!Array.isArray(collapsedIds) || !collapsedIds.length) { 
-            return; 
+    _rebuildColumnIndexCache() {
+        this._colIndexCache.clear();
+        for (let i = 0; i < this._columns.length; i++) { 
+            this._colIndexCache.set(this._columns[i].id, i); 
         }
-        const set = new Set(collapsedIds);
-        this._traverseRows(this._rows, (r) => {
-            if (r.id && set.has(r.id)) { 
-                r.expanded = false; 
-            }
-        });
     }
 
     /**
-     * Retrieves cookie value.
-     * @param {string} name Cookie name.
-     * @returns {string|null} Value.
+     * Constructs the CSS Grid Template string.
      */
-    _getCookie(name) {
-        if (!name) { 
-            return null; 
-        }
-        const prefix = name + "=";
-        const parts = document.cookie.split(";").map(c => c.trim());
-        for (const p of parts) {
-            if (p.indexOf(prefix) === 0) { 
-                return p.substring(prefix.length); 
+    _syncColumnWidths() {
+        const parts = [];
+        const visibleCols = this._columns.filter(c => c.visible);
+        const lastVisibleId = visibleCols.length > 0 ? visibleCols[visibleCols.length - 1].id : null;
+
+        for (const c of this._columns) {
+            if (!c.visible) {
+                continue;
             }
+            
+            if (c.id === lastVisibleId) {
+                const min = c.minWidth || `${webexpress.webui.TableCtrl.MIN_COL_WIDTH}px`;
+                parts.push(`minmax(${min}, 1fr)`);
+                continue;
+            }
+
+            let val = "1fr";
+            if (c.width !== null && c.width !== "") {
+                const w = String(c.width);
+                if (w === "auto") {
+                    val = "auto";
+                } else if (w.endsWith("%") || w.endsWith("fr") || w.endsWith("rem") || w.endsWith("px")) {
+                    val = w;
+                } else if (!isNaN(Number(w))) {
+                    val = `${w}px`;
+                } else {
+                    val = w;
+                }
+            } 
+            
+            if (c.minWidth) {
+                val = `minmax(${c.minWidth}, ${val})`;
+            } else if (val === "1fr" || val === "auto") {
+                val = `minmax(${webexpress.webui.TableCtrl.MIN_COL_WIDTH}px, ${val})`;
+            }
+            parts.push(val);
         }
-        return null;
+        
+        if (this._hasOptions) {
+            parts.push("1.5rem");
+        }
+
+        const template = parts.length > 0 ? parts.join(" ") : "auto";
+        this._table.style.setProperty("--wx-grid-template", template);
     }
 
     /**
-     * Sets a cookie (SameSite=Lax).
-     * @param {string} name Name.
-     * @param {string} value Value.
-     * @param {number} days Days to expire.
-     */
-    _setCookie(name, value, days) {
-        const expires = (() => {
-            if (!days) { 
-                return ""; 
-            }
-            const d = new Date();
-            d.setTime(d.getTime() + days * 86400000);
-            return "; expires=" + d.toUTCString();
-        })();
-        document.cookie = name + "=" + value + expires + "; path=/; SameSite=Lax";
-    }
-
-    /**
-     * Collects current row signature states.
-     * @returns {Array<{row:Object,key:string,signature:string}>} State list.
+     * Collects the current state of all rows.
+     * @returns {Array<{ key: string, signature: string }>} Row states.
      */
     _collectCurrentRowStates() {
         const list = [];
-        this._traverseRows(this._rows, (r) => {
+        const stack = [...this._rows];
+        while (stack.length) {
+            const r = stack.pop();
             const key = this._getRowKey(r);
-            if (!key) { 
-                return; 
+            if (key) {
+                list.push({ key, signature: r.cells.map(c => c.content).join("|") });
             }
-            list.push({ row: r, key, signature: this._computeRowSignature(r) });
-        });
+            if (r.children) {
+                stack.push(...r.children);
+            }
+        }
         return list;
     }
 
     /**
-     * Computes row signature from cell text.
-     * @param {Object} row Row object.
-     * @returns {string} Signature.
+     * Returns a stable key for a row.
+     * @param {Object} row - The row object.
+     * @returns {string} The resolved row key.
      */
-    _computeRowSignature(row) {
-        const parts = [];
-        if (Array.isArray(row.cells)) {
-            for (const c of row.cells) {
-                parts.push((c?.text || "").trim());
-            }
-        }
-        return parts.join("|");
+    _getRowKey(row) { 
+        return row.id || (row._uid || (row._uid = `r_${crypto.randomUUID()}`)); 
     }
 
     /**
-     * Returns stable key for row.
-     * @param {Object} row Row object.
-     * @returns {string|null} Key.
+     * Updates the internal snapshot.
+     * @param {Array<{ key: string, signature: string }>} states.
      */
-    _getRowKey(row) {
-        if (!row) { 
-            return null; 
-        }
-        if (row.id) { 
-            return row.id; 
-        }
-        if (!row._uid) { 
-            row._uid = "r_" + Math.random().toString(36).slice(2); 
-        }
-        return row._uid;
+    _updateSnapshot(states) { 
+        this._prevRowState.clear(); 
+        for (const s of states) { 
+            this._prevRowState.set(s.key, s.signature); 
+        } 
     }
 
     /**
-     * Detects changed rows relative to snapshot.
-     * @param {Array} currentStates Current states.
-     * @returns {Array<Object>} Changed rows.
-     */
-    _detectChangedRows(currentStates) {
-        const changed = [];
-        for (const st of currentStates) {
-            const prev = this._prevRowState.get(st.key);
-            if (prev == null || prev !== st.signature) {
-                changed.push(st.row);
-            }
-        }
-        return changed;
-    }
-
-    /**
-     * Updates snapshot map.
-     * @param {Array} currentStates Current states.
-     */
-    _updateSnapshot(currentStates) {
-        this._prevRowState.clear();
-        for (const st of currentStates) {
-            this._prevRowState.set(st.key, st.signature);
-        }
-    }
-
-    /**
-     * Highlights a changed row (if feature enabled).
-     * @param {Object} row Row object.
-     */
-    _flashRow(row) {
-        if (!this._highlightChanges) {
-            return;
-        }
-        if (!row || !row._anchorTr) {
-            return;
-        }
-        const tr = row._anchorTr;
-        tr.classList.add("wx-row-flash");
-        // keep slightly longer than css animation (1.2s) to ensure completion
-        setTimeout(() => {
-            if (tr.isConnected) {
-                tr.classList.remove("wx-row-flash");
-            }
-        }, 1500);
-    }
-
-    /**
-     * Traverses rows depth-first.
-     * @param {Array<Object>} rows Row list.
-     * @param {Function} fn Callback.
-     */
-    _traverseRows(rows, fn) {
-        if (!Array.isArray(rows)) { 
-            return; 
-        }
-        for (const r of rows) {
-            fn(r);
-            if (r.children && r.children.length) { 
-                this._traverseRows(r.children, fn); 
-            }
-        }
-    }
-
-    /**
-     * Finds row and parent by id.
-     * @param {string} id Row id.
-     * @returns {{row:Object|null,parent:Object|null}|null} Result.
+     * Finds a row by ID and returns both the row and its parent.
+     * @param {string} id - The row ID.
+     * @returns {{ row: Object, parent: Object|null } | null} Result.
      */
     _findRowAndParent(id) {
         let found = null;
@@ -2403,7 +1182,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                     found = { row: r, parent };
                     return true;
                 }
-                if (r.children && r.children.length && walk(r.children, r)) {
+                if (r.children && walk(r.children, r)) {
                     return true;
                 }
             }
@@ -2414,15 +1193,14 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Removes row recursively.
-     * @param {string} id Row id.
-     * @param {Array<Object>} rows Row list.
-     * @param {Object|null} parent Parent row.
-     * @returns {boolean} True if removed.
+     * Removes a row recursively.
+     * @param {string} id - The ID.
+     * @param {Array} rows - The row array.
+     * @returns {boolean} Success.
      */
-    _removeRowRecursive(id, rows, parent) {
-        if (!Array.isArray(rows)) { 
-            return false; 
+    _removeRowRecursive(id, rows) {
+        if (!Array.isArray(rows)) {
+            return false;
         }
         for (let i = 0; i < rows.length; i++) {
             const r = rows[i];
@@ -2430,7 +1208,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 rows.splice(i, 1);
                 return true;
             }
-            if (r.children && r.children.length && this._removeRowRecursive(id, r.children, r)) {
+            if (r.children && this._removeRowRecursive(id, r.children)) {
                 return true;
             }
         }
@@ -2438,59 +1216,197 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Dispatches visibility change event.
-     * @param {Object} payload Event payload.
+     * Attach column resizer handles.
      */
-    _dispatchVisibilityChange(payload) {
-        this._util.dispatch(webexpress?.webui?.Event?.CHANGE_VISIBILITY_EVENT, Object.assign({ sender: this._element }, payload));
-    }
+    _attachColumnResizers() {
+        if (!this._columnResizeEnabled) {
+            return;
+        }
+        const headers = this._head.querySelectorAll(".wx-col-header");
+        
+        const visibleCols = this._columns.filter(c => c.visible);
+        const lastVisibleId = visibleCols.length > 0 ? visibleCols[visibleCols.length - 1].id : null;
 
-    /**
-     * Dispatches generic move event.
-     * @param {Object} payload Data.
-     */
-    _dispatchMove(payload) {
-        this._util.dispatch(webexpress?.webui?.Event?.MOVE_EVENT, Object.assign({ sender: this._element }, payload));
-    }
+        headers.forEach((th) => {
+            const colId = th.dataset.columnId;
+            if (!colId || !this._colIndexCache.has(colId)) {
+                return;
+            }
+            if (colId === lastVisibleId) {
+                return;
+            }
 
-    /**
-     * Dispatches mass column reorder event.
-     * @param {Array<string>} previousOrder Previous order.
-     * @param {Array<string>} newOrder New order.
-     */
-    _dispatchMassColumnReorder(previousOrder, newOrder) {
-        this._util.dispatch(webexpress.webui.Event.COLUMN_REORDER_EVENT, {
-            sender: this._element,
-            sourceIndex: -1,
-            targetIndex: -1,
-            previousOrder,
-            newOrder,
-            columns: this._columns
+            const index = this._colIndexCache.get(colId);
+            const column = this._columns[index];
+
+            if (column && column.resizable === false) {
+                return;
+            }
+
+            let handle = th.querySelector(":scope > .wx-col-resizer");
+            if (!handle) {
+                handle = document.createElement("span");
+                handle.className = "wx-col-resizer";
+                th.appendChild(handle);
+
+                handle.addEventListener("mousedown", (e) => {
+                    e.stopPropagation();
+                    this._beginColumnResize(e, th);
+                });
+                handle.addEventListener("touchstart", (e) => {
+                    e.stopPropagation();
+                    this._beginColumnResize(e, th);
+                }, { passive: true });
+                handle.addEventListener("click", (e) => { e.stopPropagation(); e.preventDefault(); });
+                handle.addEventListener("dblclick", (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    this._autoSizeColumn(index);
+                });
+            }
         });
     }
 
     /**
-     * Triggers single column reorder event.
-     * @param {number} sourceIndex Source index.
-     * @param {number} targetIndex Target index.
+     * Autosize a specific column.
+     * @param {number} index Column index.
      */
-    _triggerColumnReorderEvent(sourceIndex, targetIndex) {
-        this._util.dispatch(webexpress.webui.Event.COLUMN_REORDER_EVENT, {
-            sender: this._element,
-            sourceIndex,
-            targetIndex,
-            columns: this._columns
-        });
+    _autoSizeColumn(index) {
+        const column = this._columns[index];
+        if (!column || column.visible === false || column.resizable === false) {
+            return;
+        }
+
+        const headers = this._head.querySelectorAll(".wx-col-header");
+        let headerTh = null;
+        let domIndex = -1;
+
+        // find dom index
+        for (let i = 0; i < headers.length; i++) {
+            if (headers[i].dataset.columnId === column.id) {
+                domIndex = i;
+                headerTh = headers[i];
+                break;
+            }
+        }
+        if (!headerTh) {
+            return;
+        }
+
+        let maxWidth = 0;
+        const inner = headerTh.querySelector(".wx-col-inner") || headerTh;
+        
+        // measure header
+        const thStyle = getComputedStyle(headerTh);
+        const headerWidth = Math.ceil(inner.getBoundingClientRect().width) 
+            + parseFloat(thStyle.paddingLeft) + parseFloat(thStyle.paddingRight)
+            + parseFloat(thStyle.borderLeftWidth) + parseFloat(thStyle.borderRightWidth);
+        
+        maxWidth = Math.max(maxWidth, headerWidth);
+
+        // measure cells (expensive loop)
+        const rows = this._body.querySelectorAll(".wx-grid-row");
+        for (let r = 0; r < rows.length; r++) {
+            const td = rows[r].children[domIndex];
+            if (!td) {
+                continue;
+            }
+            
+            // use scrollWidth to detect content overflow
+            const tdStyle = getComputedStyle(td);
+            const contentW = Math.max(td.scrollWidth, Math.ceil(td.getBoundingClientRect().width));
+            const totalW = contentW + parseFloat(tdStyle.borderLeftWidth) + parseFloat(tdStyle.borderRightWidth);
+            
+            if (totalW > maxWidth) {
+                maxWidth = totalW;
+            }
+        }
+
+        const buffer = 8;
+        column.width = Math.max(Math.ceil(maxWidth) + buffer, webexpress.webui.TableCtrl.MIN_COL_WIDTH);
+        
+        this._syncColumnWidths(); 
+        this._schedulePersistIfAvailable();
     }
 
     /**
-     * Rebuilds column index cache.
+     * Start column resize interaction.
+     * @param {Event} evt Triggering event.
+     * @param {HTMLElement} th Column header element.
      */
-    _rebuildColumnIndexCache() {
-        this._colIndexCache = new Map();
-        this._columns.forEach((c, i) => this._colIndexCache.set(c.id, i));
+    _beginColumnResize(evt, th) {
+        this._isResizing = true;
+        const colId = th.dataset.columnId;
+        const index = this._colIndexCache.get(colId);
+        const column = this._columns[index];
+        
+        if (!column || !column.visible || column.resizable === false) {
+            this._isResizing = false;
+            return;
+        }
+
+        const startWidth = Math.max(parseInt(column.width || th.getBoundingClientRect().width), webexpress.webui.TableCtrl.MIN_COL_WIDTH);
+        const pointX = (ev) => (ev.touches && ev.touches.length) ? ev.touches[0].clientX : ev.clientX;
+        const startX = pointX(evt);
+        const isRtl = getComputedStyle(this._table).direction === "rtl";
+
+        const move = (e) => {
+            e.preventDefault();
+            const dx = pointX(e) - startX;
+            const signed = isRtl ? -dx : dx;
+            const newWidth = Math.max(startWidth + signed, webexpress.webui.TableCtrl.MIN_COL_WIDTH);
+            if (column.width !== newWidth) {
+                column.width = Math.round(newWidth);
+                this._syncColumnWidths(); 
+            }
+        };
+
+        const up = () => {
+            document.removeEventListener("mousemove", move);
+            document.removeEventListener("mouseup", up);
+            document.removeEventListener("touchmove", move);
+            document.removeEventListener("touchend", up);
+            setTimeout(() => { this._isResizing = false; }, 0);
+            this._schedulePersistIfAvailable();
+        };
+
+        document.addEventListener("mousemove", move);
+        document.addEventListener("mouseup", up);
+        document.addEventListener("touchmove", move, { passive: false });
+        document.addEventListener("touchend", up);
+    }
+
+    /**
+     * Schedule state persistence if supported.
+     */
+    _schedulePersistIfAvailable() {
+        if (typeof this._schedulePersist === "function") {
+            try { this._schedulePersist(); } catch (_) {}
+        }
+    }
+
+    /**
+     * Detect whether any row has children.
+     * @param {Array<Object>} rows Row list.
+     * @returns {boolean} True if a tree structure exists.
+     */
+    _detectTree(rows) {
+        if (!Array.isArray(rows)) {
+            return false;
+        }
+        const stack = [...rows];
+        while (stack.length) {
+            const r = stack.pop();
+            if (r?.children?.length > 0) {
+                return true;
+            }
+            if (r?.children) {
+                stack.push(...r.children);
+            }
+        }
+        return false;
     }
 };
 
-// register class
+// register the class in the controller
 webexpress.webui.Controller.registerClass("wx-webui-table", webexpress.webui.TableCtrl);

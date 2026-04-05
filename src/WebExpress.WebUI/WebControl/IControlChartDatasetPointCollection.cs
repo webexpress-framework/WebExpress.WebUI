@@ -12,6 +12,9 @@ namespace WebExpress.WebUI.WebControl
     /// </remarks>
     public interface IControlChartDatasetPointCollection : IEnumerable<IControlChartDatasetPoint>
     {
+        /// <summary>
+        /// Returns the number of elements contained in the collection.
+        /// </summary>
         int Count { get; }
     }
 

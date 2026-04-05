@@ -11,30 +11,37 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns the entries.
         /// </summary>
-        public IEnumerable<ControlFormItemInputSelectionItem> Options { get; }
+        public IEnumerable<IControlFormItemInputSelectionItem> Options { get; }
 
         /// <summary>
         /// Returns or sets the label of the selected options.
         /// </summary>
-        public string Placeholder { get; set; }
+        public string Placeholder { get; }
 
         /// <summary>
         /// Allows you to select multiple items.
         /// </summary>
-        public bool MultiSelect { get; set; }
+        public bool MultiSelect { get; }
 
         /// <summary>
         /// Adds one or more items to the selection options.
         /// </summary>
         /// <param name="items">The items to add to the selection options.</param>
         /// <returns>The current instance for method chaining.</returns>
-        IControlFormItemInputSelection Add(params ControlFormItemInputSelectionItem[] items);
+        IControlFormItemInputSelection Add(params IControlFormItemInputSelectionItem[] items);
+
+        /// <summary>
+        /// Adds one or more items to the selection options.
+        /// </summary>
+        /// <param name="items">The items to add to the selection options.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        IControlFormItemInputSelection Add(IEnumerable<IControlFormItemInputSelectionItem> items);
 
         /// <summary>
         /// Removes an item from the selection options.
         /// </summary>
         /// <param name="item">The item to remove from the selection options.</param>
         /// <returns>The current instance for method chaining.</returns>
-        IControlFormItemInputSelection Remove(ControlFormItemInputSelectionItem item);
+        IControlFormItemInputSelection Remove(IControlFormItemInputSelectionItem item);
     }
 }

@@ -71,6 +71,18 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Adds items to the list.
+        /// </summary>
+        /// <param name="items">Strings to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public ControlFormInputValueStringList Add(IEnumerable<string> items)
+        {
+            // add non-empty and trimmed items to the list
+            _items.AddRange(items?.Where(x => !string.IsNullOrEmpty(x)).Select(x => x.Trim()) ?? []);
+            return this;
+        }
+
+        /// <summary>
         /// Removes an item from the list.
         /// </summary>
         /// <param name="item">String to remove.</param>
@@ -91,7 +103,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual string ToString(string format, IFormatProvider formatProvider)
         {
             // join all items with semicolon
-            return _items != null && _items.Count != 0
+            return _items is not null && _items.Count != 0
                 ? string.Join("; ", _items)
                 : string.Empty;
         }

@@ -1,0 +1,21 @@
+.wx-pagination {
+    user-select: none;
+    gap: 0.2em;
+}
+
+.wx-pagination .disabled > .page-link, .page-link.disabled {
+    background-color: inherit;
+}
+
+.wx-pagination .page-link {
+    border-radius: 2em;
+    font-size: 0.85em;
+}
+
+.wx-pagination .page-item:first-child .page-link {
+    border-radius: 2em;
+}
+
+.wx-pagination .page-item:last-child .page-link {
+    border-radius: 2em;
+}

@@ -1,13 +1,41 @@
 .wx-button {
     display: inline-flex;
-    align-items: center;
-    gap: 0.5em;
+    align-items: baseline;
+    gap: 0.2em;
 }
 
 .wx-button > img {
     min-width: 1em;
-    vertical-align: middle; 
+    align-self: center;
 }
 
 .wx-button > i {
+}
+
+.wx-button-close { 
+    padding: calc(var(--bs-modal-header-padding-y) * .5) calc(var(--bs-modal-header-padding-x) * .5);
+    margin-top: calc(-.5 * var(--bs-modal-header-padding-y));
+    margin-right: calc(-.5 * var(--bs-modal-header-padding-x));
+    margin-bottom: calc(-.5 * var(--bs-modal-header-padding-y));
+    margin-left: auto;
+    color: var(--bs-secondary);
+}
+
+.wx-button-close:hover { 
+    color: var(--bs-danger);
+    outline: none;
+}
+
+.wx-button-fullscreen { 
+    padding: calc(var(--bs-modal-header-padding-y) * .5) calc(var(--bs-modal-header-padding-x) * .5);
+    margin-top: calc(-.5 * var(--bs-modal-header-padding-y));
+    margin-right: calc(-.5 * var(--bs-modal-header-padding-x));
+    margin-bottom: calc(-.5 * var(--bs-modal-header-padding-y));
+    margin-left: auto;
+    color: var(--bs-secondary);
+}
+
+.wx-button-fullscreen:hover { 
+    color: var(--bs-body-color);
+    outline: none;
 }

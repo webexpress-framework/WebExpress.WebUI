@@ -124,10 +124,10 @@ webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
         this._buttons.appendChild(this._btnSelect);
 
         // create hidden input for data-url payload
-        this._hiddenFormInput = document.createElement("input");
-        this._hiddenFormInput.type = "hidden";
-        this._hiddenFormInput.name = this._name;
-        this._element.appendChild(this._hiddenFormInput);
+        this._hidden = document.createElement("input");
+        this._hidden.type = "hidden";
+        this._hidden.name = this._name;
+        this._element.appendChild(this._hidden);
     }
 
     /**
@@ -308,14 +308,19 @@ webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
                 try {
                     const blob = await this._exportCroppedBlob();
                     const dataUrl = await this._blobToDataURL(blob);
-                    this._hiddenFormInput.value = `file:${this._filename};${String(dataUrl)}`;
+                    this._hidden.value = `file:${this._filename};${String(dataUrl)}`;
                 } catch (err) {
-                    this._hiddenFormInput.value = "";
+                    this._hidden.value = "";
                 }
 
                 form.submit();
             });
         }
+
+        // also handle cases where value is set via assignment (fires 'change')
+        this._hidden.addEventListener("change", () => {
+            this._updateFromHiddenInputValue(this._hidden.value);
+        });
 
         // cleanup on unload to release object urls
         window.addEventListener("beforeunload", () => {
@@ -802,6 +807,59 @@ webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
             return max;
         }
         return n;
+    }
+
+    /**
+     * Updates the avatar preview if a new value is set into the hidden field (externally).
+     * Recognizes data-urls and generates preview.
+     * @param {string} value The new value from the hidden field.
+     */
+    _updateFromHiddenInputValue(value) {
+        if (typeof value !== "string" || !value) {
+            // reset preview
+            this._image = null;
+            this._cleanupObjectUrl();
+            this._requestRender();
+            return;
+        }
+
+        this._cleanupObjectUrl();
+        const img = new window.Image();
+        img.onload = () => {
+            this._image = img;
+            this._filename = "avatar";
+            this._isPassThrough = false;
+            this._initTransform();
+            this._zoom.disabled = false;
+            this._requestRender();
+        };
+        img.onerror = () => {
+            this._image = null;
+            this._requestRender();
+        };
+        img.src = value;
+    }
+
+    /**
+     * Returns the current value.
+     * @returns {string}
+     */
+    get value() {
+        return this._hidden ? this._hidden.value : "";
+    }
+
+    /**
+     * Sets the value of the input and updates the preview accordingly.
+     * @param {string} v new value (should be a data url or file:...)
+     */
+    set value(v) {
+        if (typeof v !== "string") {
+            v = "";
+        }
+        if (this._hidden) {
+            this._hidden.value = v;
+            this._updateFromHiddenInputValue(v);
+        }
     }
 };
 

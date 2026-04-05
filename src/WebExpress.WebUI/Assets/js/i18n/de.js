@@ -5,14 +5,15 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "edit": "Bearbeiten",
     "copy": "Kopieren",
     "remove": "Entfernen",
+    "insert": "Einfügen",
     "save": "Speichern",
     "cancel": "Abbrechen",
     "close": "Schließen",
     "selected": "Ausgewählt",
     "available": "Verfügbar",
     "search": "Suche",
-    "delete": "Löschen",
-    "confirm": "Bestätigung",
+    "rating": "Bewertung",
+    "fit": "Ansicht anpassen",
 
     "calendar.select_date": "Datum auswählen",
     "calendar.select_range": "Zeitraum auswählen",
@@ -40,13 +41,7 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "calendar.today": "Heute",
     "calendar.format": "DD.MM.YYYY",
 
-    "confirm.header": "Bestätigung einholen",
-    "confirm.description": "Sind Sie sicher das Sie das tun möchten?",
-
-    "delete.header": "Löschen bestätigen",
-    "delete.description": "Sind Sie sicher, dass Sie dieses Element löschen möchten?",
-
-    "selection.placeholder": "Bitte eine Option wählen",
+    "selection.placeholder": "Wähle eine Option aus.",
 
     "upload.placeholder": "Datei hier ablegen oder zum Hochladen klicken.",
     
@@ -61,6 +56,20 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "avatar.upload.image.label": "Bild auswählen",
     "avatar.placeholder": "Bild auswählen durch Ziehen oder Doppelklick.",
     
-    "frame.contentNotLoaded.label": "Der Inhalt konnte nicht geladen werden.",
-    "frame.contentNotLoaded.details": "Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie die Seite erneut zu laden. Falls das Problem weiterhin besteht, könnte die angeforderte Ressource momentan nicht verfügbar sein oder ein technischer Fehler vorliegen. Sie können auch versuchen, die Seite zu aktualisieren oder sich an den technischen Support wenden, falls Unterstützung benötigt wird."
+    "page.contentNotLoaded.label": "Der Inhalt konnte nicht geladen werden.",
+    "page.contentNotLoaded.details": "Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie die Seite erneut zu laden. Falls das Problem weiterhin besteht, könnte die angeforderte Ressource momentan nicht verfügbar sein oder ein technischer Fehler vorliegen. Sie können auch versuchen, die Seite zu aktualisieren oder sich an den technischen Support wenden, falls Unterstützung benötigt wird.",
+    
+    "table.columns.manage": "Spalten verwalten",
+    "table.columns.title": "Spalten",
+    "page.table.columns.desc": "Sichtbarkeit umschalten und Reihenfolge per Ziehen ändern.",
+    "page.table.columns.search": "Suche Spalten…",
+    "page.table.columns.drag": "Spalte ziehen",
+    "page.table.columns.default": "Spalte",
+
+    "color.custom": "Benutzerdefinierte Farbe",
+    
+    "editor.insert.link.title": "Link einfügen",
+    "editor.insert.image.title": "Bild einfügen",
+    "editor.insert.addon.title": "AddOn-Bibliothek",
+    "editor.insert.addon.tooltip": "AddOn einfügen"
 });

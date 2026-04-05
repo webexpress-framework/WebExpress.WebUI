@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebMessage;
@@ -18,11 +17,6 @@ namespace WebExpress.WebUI.WebControl
         /// Returns or sets the description.
         /// </summary>
         public string Description { get; set; }
-
-        /// <summary>
-        /// Returns or sets whether inputs are enforced.
-        /// </summary>
-        public bool Required { get; set; }
 
         /// <summary>
         /// Returns or sets the placeholder text displayed when no date is selected.
@@ -72,17 +66,8 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
         /// </summary>
-        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
-        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="items">The entries.</param>
-        public ControlFormItemInputAvatar
-        (
-            [CallerMemberName] string instance = null,
-            [CallerFilePath] string file = null,
-            [CallerLineNumber] int? line = null
-        )
-            : this($"avatar{instance}_{file}_{line}".GetHashCode().ToString("X"))
+        public ControlFormItemInputAvatar()
+            : this(DeterministicId.Create())
         {
         }
 
@@ -116,10 +101,18 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("shape", Shape.ToShape())
                 .AddUserAttribute("viewport", Viewport > 0 ? Viewport.ToString() : null)
                 .AddUserAttribute("size", OutputSize > 0 ? OutputSize.ToString() : null)
-                .AddUserAttribute("output-format", OutputFormat != ContentType.Unknown ? OutputFormat.GetMimeType() : null)
-                .AddUserAttribute("output-quality", OutputQuality > 0 ? OutputQuality.ToString(System.Globalization.CultureInfo.InvariantCulture) : null)
-                .AddUserAttribute("accept", Accept != null ? string.Join(",", Accept?.Select(x => x.GetMimeType())) : null)
-                .AddUserAttribute("overlay-alpha", OverlayAlpha > 0 ? OverlayAlpha.ToString(System.Globalization.CultureInfo.InvariantCulture) : null)
+                .AddUserAttribute("output-format", OutputFormat != ContentType.Unknown
+                    ? OutputFormat.GetMimeType()
+                    : null)
+                .AddUserAttribute("output-quality", OutputQuality > 0
+                    ? OutputQuality.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                    : null)
+                .AddUserAttribute("accept", Accept is not null
+                    ? string.Join(",", Accept?.Select(x => x.GetMimeType()))
+                    : null)
+                .AddUserAttribute("overlay-alpha", OverlayAlpha > 0
+                    ? OverlayAlpha.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                    : null)
                 .AddUserAttribute("data-value", value);
 
             return html;

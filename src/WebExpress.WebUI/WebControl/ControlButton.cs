@@ -65,9 +65,16 @@ namespace WebExpress.WebUI.WebControl
         public string Value { get; set; }
 
         /// <summary>
-        /// Returns or sets the id of a modal dialogue.
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// click to open a modal or similar target.
         /// </summary>
-        public string Modal { get; set; }
+        public IAction PrimaryAction { get; set; }
+
+        /// <summary>
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// double‑click to open a modal or similar target.
+        /// </summary>
+        public IAction SecondaryAction { get; set; }
 
         /// <summary>
         /// Returns or sets the icon.
@@ -150,7 +157,7 @@ namespace WebExpress.WebUI.WebControl
                 Disabled = Active == TypeActive.Disabled
             };
 
-            if (Icon != null)
+            if (Icon is not null)
             {
                 html.Add(new ControlIcon()
                 {
@@ -173,11 +180,8 @@ namespace WebExpress.WebUI.WebControl
                 html.Add(_content.Select(x => x.Render(renderContext, visualTree)).ToArray());
             }
 
-            if (!string.IsNullOrWhiteSpace(Modal))
-            {
-                html.AddUserAttribute("data-wx-toggle", "modal");
-                html.AddUserAttribute("data-wx-target", $"#{Modal}");
-            }
+            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

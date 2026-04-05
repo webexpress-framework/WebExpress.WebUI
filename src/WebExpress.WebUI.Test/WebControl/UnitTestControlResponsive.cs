@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<div id=""id"" class=""wx-webui-responsive""></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -26,7 +26,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -43,14 +43,14 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(1024, @"<div class=""wx-webui-responsive""><div class=""wx-responsive-panel"" data-breakpoint=""1024""></div></div>")]
         public void Add(int breakpoint, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlResponsive(null);
             var panel = new ControlPanel();
 
-            // test execution
+            // act
             control.Add(panel, breakpoint);
 
             // validation

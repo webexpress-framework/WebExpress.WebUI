@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<a id=""id"" class=""btn""></a>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -28,7 +28,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             Assert.Equal(expected, html.Trim());
@@ -42,7 +42,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"<a class=""btn"">abc</a>")]
         public void Text(string text, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -51,7 +51,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Text = text
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             Assert.Equal(expected, html.Trim());
@@ -65,9 +65,10 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("a", @"<a class=""btn"" title=""a"" data-bs-toggle=""tooltip""></a>")]
         [InlineData("b", @"<a class=""btn"" title=""b"" data-bs-toggle=""tooltip""></a>")]
         [InlineData("a<br/>b", @"<a class=""btn"" title=""a<br/>b"" data-bs-toggle=""tooltip""></a>")]
+        [InlineData("webexpress.WebUI:plugin.name", @"<a class=""btn"" title=""WebExpress.WebUI"" data-bs-toggle=""tooltip""></a>")]
         public void Tooltip(string tooltip, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -76,7 +77,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Tooltip = tooltip
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             Assert.Equal(expected, html.Trim());
@@ -91,7 +92,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeSizeButton.Large, @"<a class=""btn btn-lg""></a>")]
         public void Size(TypeSizeButton size, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -100,7 +101,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Size = size
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             Assert.Equal(expected, html.Trim());
@@ -118,7 +119,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorButton.Dark, @"<a class=""btn btn-dark""></a>")]
         public void BackgroundColor(TypeColorButton color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -127,7 +128,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 BackgroundColor = new PropertyColorButton(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             Assert.Equal(expected, html.Trim());
@@ -146,7 +147,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, TypeColorButton.Dark, @"<a class=""btn btn-outline-dark""></a>")]
         public void Outline(bool outline, TypeColorButton color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -156,7 +157,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 BackgroundColor = new PropertyColorButton(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             Assert.Equal(expected, html.Trim());
@@ -170,7 +171,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeBlockButton.Block, @"<a class=""btn btn-block""></a>")]
         public void Block(TypeBlockButton block, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -179,7 +180,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Block = block
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             Assert.Equal(expected, html.Trim());
@@ -193,19 +194,67 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(typeof(IconStar), @"<a class=""btn""><i class=""fas fa-star""></i></a>")]
         public void Icon(Type icon, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
-                Icon = icon != null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             Assert.Equal(expected, html.Trim());
+        }
+
+        /// <summary>
+        /// Tests the primary action property of the buttonlink control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<a class=""btn""></a>")]
+        [InlineData("modal", @"<a class=""btn"" data-wx-primary-action=""modal"" data-wx-primary-target=""#modal""></a>")]
+        public void PrimaryAction(string modal, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlButtonLink()
+            {
+                PrimaryAction = new ActionModal(modal)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the secondary action property of the buttonlink control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<a class=""btn""></a>")]
+        [InlineData("modal", @"<a class=""btn"" data-wx-secondary-action=""modal"" data-wx-secondary-target=""#modal""></a>")]
+        public void SecondaryAction(string modal, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlButtonLink()
+            {
+                SecondaryAction = new ActionModal(modal)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
         /// <summary>
@@ -214,7 +263,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Fact]
         public void Content()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -222,7 +271,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control2 = new ControlButtonLink(null, [new ControlIcon() { Icon = new IconStar() }]);
             var control3 = new ControlButtonLink(null, new List<ControlIcon>([new ControlIcon() { Icon = new IconStar() }]).ToArray());
 
-            // test execution
+            // act
             var html1 = control1.Render(context, visualTree);
             var html2 = control2.Render(context, visualTree);
             var html3 = control3.Render(context, visualTree);

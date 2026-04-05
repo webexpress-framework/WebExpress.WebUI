@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// The standard background colors.
+    /// The standard colors.
     /// </summary>
     public enum TypeColorLine
     {

@@ -55,7 +55,9 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles()
             }
                 .AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder))
-                .AddUserAttribute("data-target-ids", TargetIds != null ? string.Join(",", TargetIds) : null)
+                .AddUserAttribute("data-target-ids", TargetIds is not null
+                    ? string.Join(",", TargetIds)
+                    : null)
                 .AddUserAttribute("data-highlight-color", HighlightColor)
                 .AddUserAttribute("data-icon", Icon is Icon icon ? icon.Class : null)
                 .AddUserAttribute("data-image", Icon is ImageIcon image ? image.Uri?.ToString() : null);

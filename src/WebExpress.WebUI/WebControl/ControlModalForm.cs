@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebMessage;
@@ -79,27 +78,10 @@ namespace WebExpress.WebUI.WebControl
         public TypeFormState State => _form.State;
 
         /// <summary>
-        /// Initializes a new instance of the class with an automatically assigned ID.
+        /// Initializes a new instance of the class.
         /// </summary>
-        /// <param name="instance">
-        /// The name of the calling member. This is automatically provided by the compiler.
-        /// </param>
-        /// <param name="file">
-        /// The file path of the source file where this instance is created. This is automatically 
-        /// provided by the compiler.
-        /// </param>
-        /// <param name="line">
-        /// The line number in the source file where this instance is created. This is automatically 
-        /// provided by the compiler.
-        /// </param>
-        /// <param name="items">The form controls.</param>
-        public ControlModalForm
-        (
-            [CallerMemberName] string instance = null,
-            [CallerFilePath] string file = null,
-            [CallerLineNumber] int? line = null, params IControlFormItem[] items
-        )
-            : this($"modal_{instance}_{file}_{line}".GetHashCode().ToString("X"), items)
+        public ControlModalForm()
+            : this(DeterministicId.Create())
         {
         }
 
@@ -111,7 +93,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlModalForm(string id, params IControlFormItem[] items)
             : base(id)
         {
-            _form = new ControlForm(id != null ? $"form_{id}" : null, items ?? []);
+            _form = new ControlForm(id is not null ? $"form_{id}" : null, items ?? []);
 
             _form.InitializeForm += (e) => InitializeForm?.Invoke(e);
             _form.ValidateForm += (e) => ValidateForm?.Invoke(e);
@@ -329,7 +311,7 @@ namespace WebExpress.WebUI.WebControl
         {
             var classes = Classes.ToList();
             var formElement = _form.Render(renderContext, visualTree, items);
-            var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(Header)))
+            var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Header)))
             {
                 Class = "wx-modal-header"
             };
@@ -349,7 +331,7 @@ namespace WebExpress.WebUI.WebControl
                 Role = "dialog"
             }
             .AddUserAttribute("data-size", Size.ToClass())
-            .AddUserAttribute("data-close-label", I18N.Translate(CloseLabel));
+            .AddUserAttribute("data-close-label", I18N.Translate(renderContext, CloseLabel));
 
             if (formElement is HtmlElementFormForm form && _form.State != TypeFormState.Success)
             {
@@ -360,32 +342,38 @@ namespace WebExpress.WebUI.WebControl
                 {
                     TypeFormState.Default => null,
                     TypeFormState.Error => "true",
-                    TypeFormState.Success => _form.Conformation != null ? "true" : null,
+                    TypeFormState.Success => _form.Conformation is not null ? "true" : null,
                     _ => null
                 };
 
                 content.Add(elements);
                 footer.Add(buttons);
 
-                modal.AddUserAttribute("data-auto-show", State != TypeFormState.Default ? "true" : null);
+                modal.AddUserAttribute("data-auto-show", State != TypeFormState.Default
+                    ? "true"
+                    : null);
 
                 var html = new HtmlElementFormForm()
                 {
                     Id = !string.IsNullOrWhiteSpace(Id) ? $"{Id}-form" : null,
-                    Class = _form.FormLayout == TypeLayoutForm.Inline ? Css.Concatenate("wx-form-inline", GetClasses()) : GetClasses(),
+                    Class = _form.FormLayout == TypeLayoutForm.Inline
+                        ? Css.Concatenate("wx-form-inline", GetClasses())
+                        : GetClasses(),
                     Role = _form.Role,
                     Action = Uri?.ToString() ?? renderContext.Request.Uri?.ToString(),
-                    Method = (Method == RequestMethod.NONE ? RequestMethod.POST : Method).ToString(),
-                    Enctype = TypeEnctype.None,
+                    Method = (Method == RequestMethod.NONE
+                        ? RequestMethod.POST
+                        : Method).ToString(),
+                    Enctype = TypeEnctype.Multipart,
                     Name = Name
                 }
-                .Add(modal);
+                    .Add(modal);
 
                 return html;
             }
 
             content.Add(_form.Conformation?.Render(renderContext, visualTree));
-            modal.AddUserAttribute("data-auto-show", _form.Conformation != null ? "true" : null);
+            modal.AddUserAttribute("data-auto-show", _form.Conformation is not null ? "true" : null);
 
             return modal;
         }

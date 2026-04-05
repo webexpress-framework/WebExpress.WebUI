@@ -68,7 +68,7 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
             // check for separator key
             if (event.key === "," || event.key === ";" || event.key === " ") {
                 const tags = value.split(/[,; ]+/)
-                    .map(t => t.trim().toLowerCase())
+                    .map(t => t.trim())
                     .filter(t => t.length > 0);
                 tags.forEach(tag => {
                     if (tag && !this._tags.includes(tag)) {
@@ -88,6 +88,11 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
                 this._tags.pop();
                 this.render();
             }
+        });
+
+        // also handle cases where value is set via assignment (fires 'change')
+        this._hidden.addEventListener("change", () => {
+            this.value = this._hidden.value;
         });
 
         element.appendChild(this._input);
@@ -149,7 +154,7 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
         });
 
         // update hidden field
-        this._hidden.value = this._tags.map(t => t.toLowerCase()).join(";");
+        this._hidden.value = this._tags.map(t => t).join(";");
 
         // update placeholder visibility
         this._updatePlaceholder();
@@ -161,7 +166,7 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
      */
     get value() {
         // returns the current tags as string, separated by semicolon
-        return this._tags.map(t => t.toLowerCase()).join(";");
+        return this._tags.map(t => t).join(";");
     }
 
     /**
@@ -169,12 +174,39 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
      * @param {string|Array} value - Tags as semicolon-separated string or array.
      */
     set value(value) {
-        // sets the tags, accepts array or string (semicolon-separated)
+        // array input
         if (Array.isArray(value)) {
-            this._tags = value.map(t => t.trim().toLowerCase()).filter(t => t.length > 0);
-        } else if (typeof value === "string") {
-            this._tags = value.split(";").map(t => t.trim().toLowerCase()).filter(t => t.length > 0);
+            this._tags = value
+                .map(item => {
+                    if (item == null) return null;
+
+                    // object with tag
+                    if (typeof item === "object") {
+                        const name = item.tag || item.label || item.name;
+                        return name ? String(name).trim() : null;
+                    }
+
+                    // primitive string
+                    if (typeof item === "string") {
+                        return item.trim();
+                    }
+
+                    return null;
+                })
+                .filter(t => t && t.length > 0);
         }
+        // semicolon-separated string
+        else if (typeof value === "string") {
+            this._tags = value
+                .split(";")
+                .map(t => t.trim())
+                .filter(t => t.length > 0);
+        }
+        // fallback
+        else {
+            this._tags = [];
+        }
+
         this.render();
     }
 };

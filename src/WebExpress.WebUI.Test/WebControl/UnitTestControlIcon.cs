@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<i id=""id"" class=""fas fa-star""></i>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -29,7 +29,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Icon = new IconStar()
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
@@ -43,7 +43,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"<i class=""fas fa-star"" title=""abc""></i>")]
         public void Title(string title, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -53,7 +53,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Title = title
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
@@ -67,16 +67,16 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(typeof(IconStar), @"<i class=""fas fa-star""></i>")]
         public void Icon(Type icon, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlIcon()
             {
-                Icon = icon != null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
@@ -93,7 +93,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeSizeText.ExtraLarge, @"<i class=""fas fa-star wx-elg""></i>")]
         public void Size(TypeSizeText size, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -103,7 +103,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Size = new PropertySizeText(size)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
@@ -120,7 +120,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeVerticalAlignment.Bottom, @"<i class=""fas fa-star align-bottom""></i>")]
         public void VerticalAlignment(TypeVerticalAlignment verticalAlignment, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -130,7 +130,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 VerticalAlignment = verticalAlignment
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html.Trim());

@@ -1,24 +1,11 @@
 /**
- * TileCtrl
  * Controller for interactive tile board: parsing markup, drag & drop reordering,
  * visibility toggling, searching, sorting and persistence (order + visibility).
- *
- * Public API (unchanged):
- *  - insertTile(tileData, index = null)
- *  - deleteTile(tileId)
- *  - setTileVisibility(idOrIndex, visible)
- *  - hideTile(idOrIndex)
- *  - showTile(idOrIndex)
- *  - toggleTile(idOrIndex)
- *  - getVisibleTiles()
- *  - searchTiles(term)
- *  - orderTiles(property = "label", direction = "asc")
- *  - render()
  * Events:
- *  - MOVE_EVENT
- *  - CHANGE_VISIBILITY_EVENT
- *  - TILE_SEARCH_EVENT
- *  - TILE_SORT_EVENT
+ *  - webexpress.webui.Event.MOVE_EVENT
+ *  - webexpress.webui.Event.CHANGE_VISIBILITY_EVENT
+ *  - webexpress.webui.Event.TILE_SEARCH_EVENT
+ *  - webexpress.webui.Event.TILE_SORT_EVENT
  */
 webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
@@ -47,9 +34,12 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
     // cached lowercase fields for search speed
     _searchCacheDirty = true;
 
+    // large icon mode
+    _largeIcon = false;
+
     /**
      * Creates a tile controller for the root element.
-     * @param {HTMLElement} element Root node containing .wx-tile-card children.
+     * @param {HTMLElement} element - Root node containing .wx-tile-card children.
      */
     constructor(element) {
         super(element);
@@ -58,9 +48,30 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         this._allowRemove = ds.allowRemove === "true";
         this._persistKey = ds.persistKey || element.id || null;
 
+        // check for large icon option
+        this._largeIcon = ds.largeIcon === "true";
+        if (this._largeIcon) {
+            element.classList.add("wx-tile-picker-largeicon");
+        } else {
+            element.classList.remove("wx-tile-picker-largeicon");
+        }
+
         this._tiles = this._parseInitialTiles(element);
+        element.innerHTML = "";
+        this._initTileContainer(element);
         this._loadState();
         this.render();
+    }
+    
+    /**
+     * Initializes or binds a pagination control and an information area.
+     * @param {HTMLElement} host - The host element to search or attach the pager to.
+     */
+    _initTileContainer(host) {
+        this._tileContainer = document.createElement("div");
+        this._tileContainer.className = "wx-tile-container";
+        
+        host.appendChild(this._tileContainer);
     }
 
     /**
@@ -69,17 +80,22 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
     render() {
         const states = this._collectStates();
         const el = this._element;
-        el.innerHTML = "";
+        this._tileContainer.innerHTML = "";
         el.classList.add("wx-tile");
         if (this._allowRemove) {
             el.classList.add("wx-tile-removable");
+        }
+        // toggle large icon class on root depending on option
+        if (this._largeIcon) {
+            el.classList.add("wx-tile-picker-largeicon");
+        } else {
+            el.classList.remove("wx-tile-picker-largeicon");
         }
         if (this._searchCacheDirty) {
             this._rebuildSearchCache();
         }
 
         const term = (this._filterTerm || "").toLowerCase();
-        const frag = document.createDocumentFragment();
 
         for (const tile of this._tiles) {
             if (!tile.visible) {
@@ -88,10 +104,9 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
             if (term && !this._matchesFilter(tile, term)) {
                 continue;
             }
-            frag.appendChild(this._buildCardElement(tile));
+            this._tileContainer.appendChild(this._buildCardElement(tile));
         }
 
-        el.appendChild(frag);
         this._updateSnapshot(states);
         if (!this._initialized) {
             this._initialized = true;
@@ -100,8 +115,8 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Inserts a new tile.
-     * @param {Object} tileData Tile definition.
-     * @param {number|null} index Optional index.
+     * @param {Object} tileData - Tile definition.
+     * @param {number|null} index - Optional index.
      * @returns {Object} Inserted tile model.
      */
     insertTile(tileData, index = null) {
@@ -115,6 +130,12 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
             colorCss: tileData.colorCss || tileData.color || null,
             colorStyle: tileData.colorStyle || null,
             visible: tileData.visible !== false,
+            
+            // action attributes
+            primaryAction: tileData.primaryAction,
+            secondaryAction: tileData.secondaryAction,
+            bind: tileData.bind,
+
             _lc_id: null,
             _lc_label: null
         };
@@ -130,7 +151,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Deletes a tile by id.
-     * @param {string} tileId Tile id.
+     * @param {string} tileId - Tile id.
      * @returns {boolean} True if removed.
      */
     deleteTile(tileId) {
@@ -150,8 +171,8 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Sets tile visibility (if allowed).
-     * @param {string|number} idOrIndex Id or index.
-     * @param {boolean} visible Visibility.
+     * @param {string|number} idOrIndex - Id or index.
+     * @param {boolean} visible - Visibility.
      */
     setTileVisibility(idOrIndex, visible) {
         if (!this._allowRemove) {
@@ -169,7 +190,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Hides tile.
-     * @param {string|number} idOrIndex Id or index.
+     * @param {string|number} idOrIndex - Id or index.
      */
     hideTile(idOrIndex) {
         this.setTileVisibility(idOrIndex, false);
@@ -177,7 +198,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Shows tile.
-     * @param {string|number} idOrIndex Id or index.
+     * @param {string|number} idOrIndex - Id or index.
      */
     showTile(idOrIndex) {
         this.setTileVisibility(idOrIndex, true);
@@ -185,7 +206,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Toggles tile visibility.
-     * @param {string|number} idOrIndex Id or index.
+     * @param {string|number} idOrIndex - Id or index.
      */
     toggleTile(idOrIndex) {
         const tile = this._getTileByIdOrIndex(idOrIndex);
@@ -205,7 +226,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Filters tiles by search term.
-     * @param {string} term Search term.
+     * @param {string} term - Search term.
      * @returns {Array<Object>} Matches.
      */
     searchTiles(term) {
@@ -224,8 +245,8 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Orders tiles by property.
-     * @param {string} property Property name.
-     * @param {"asc"|"desc"} direction Direction.
+     * @param {string} property - Property name.
+     * @param {"asc"|"desc"} direction - Direction.
      */
     orderTiles(property = "label", direction = "asc") {
         const dir = direction === "desc" ? -1 : 1;
@@ -253,7 +274,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Parses initial markup.
-     * @param {HTMLElement} root Root element.
+     * @param {HTMLElement} root - Root element.
      * @returns {Array<Object>} Tiles.
      */
     _parseInitialTiles(root) {
@@ -270,6 +291,21 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
                 colorCss: div.dataset.colorCss || div.dataset.color || null,
                 colorStyle: div.dataset.colorStyle || null,
                 visible: div.dataset.visible === "false" ? false : true,
+                // action attributes
+                primaryAction: Object.fromEntries(Object.entries(div.dataset)
+                    .filter(([k]) => k.startsWith("wxPrimary"))
+                    .map(([k, v]) => [
+                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                ),
+                secondaryAction: Object.fromEntries(Object.entries(div.dataset)
+                    .filter(([k]) => k.startsWith("wxSecondary"))
+                    .map(([k, v]) => [
+                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                ),
                 _lc_id: null,
                 _lc_label: null
             });
@@ -279,7 +315,8 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Builds a tile card element.
-     * @param {Object} tile Tile model.
+     * Adds support for large icons if option enabled.
+     * @param {Object} tile - Tile model.
      * @returns {HTMLElement} Card element.
      */
     _buildCardElement(tile) {
@@ -299,6 +336,26 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         }
         card.setAttribute("role", "group");
 
+        // apply action attributes
+        if (tile.primaryAction) {
+            for (const [key, value] of Object.entries(tile.primaryAction)) {
+                if (value) {
+                    const htmlName = `data-wx-primary-${key.toLowerCase()}`;
+                    card.setAttribute(htmlName, value);
+                }
+            }
+        }
+
+        if (tile.secondaryAction) {
+            for (const [key, value] of Object.entries(tile.secondaryAction)) {
+                if (value) {
+                    const htmlName = `data-wx-secondary-${key.toLowerCase()}`;
+                    card.setAttribute(htmlName, value);
+                }
+            }
+        }
+
+        // add remove button if removable
         if (this._allowRemove) {
             const btn = document.createElement("button");
             btn.type = "button";
@@ -315,12 +372,17 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
             card.appendChild(btn);
         }
 
+        // render header with icon/image/label and supporting large icons
         if (tile.label || tile.icon || tile.image) {
             const header = document.createElement("h5");
             header.className = "card-title";
             if (tile.icon) {
                 const icon = document.createElement("i");
                 icon.className = tile.icon;
+                // add large icon class if enabled
+                if (this._largeIcon) {
+                    icon.classList.add("wx-tile-icon-large");
+                }
                 header.appendChild(icon);
                 header.append(document.createTextNode(" "));
             }
@@ -329,6 +391,10 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
                 img.className = "wx-icon";
                 img.src = tile.image;
                 img.alt = "";
+                // add large icon class if enabled
+                if (this._largeIcon) {
+                    img.classList.add("wx-tile-icon-large");
+                }
                 header.appendChild(img);
                 header.append(document.createTextNode(" "));
             }
@@ -339,10 +405,11 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         const body = document.createElement("div");
         body.className = "card-body";
         if (tile.html) {
-            body.innerHTML = tile.html; // html trusted upstream
+            body.innerHTML = tile.html;
         }
         card.appendChild(body);
 
+        // add drag and drop support if movable
         if (this._movable) {
             card.setAttribute("draggable", "true");
             card.addEventListener("dragstart", e => this._onDragStart(e, tile, card));
@@ -357,7 +424,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Returns tile by id or index.
-     * @param {string|number} idOrIndex Id or index.
+     * @param {string|number} idOrIndex - Id or index.
      * @returns {Object|null} Tile or null.
      */
     _getTileByIdOrIndex(idOrIndex) {
@@ -390,8 +457,8 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Checks filter match.
-     * @param {Object} tile Tile.
-     * @param {string} term Lowercase term.
+     * @param {Object} tile - Tile.
+     * @param {string} term - Lowercase term.
      * @returns {boolean} Match.
      */
     _matchesFilter(tile, term) {
@@ -402,8 +469,8 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Computes insertion side (before/after) relative to pointer.
      * Chooses axis by greater dimension (vertical if height >= width).
-     * @param {DragEvent} e Drag event.
-     * @param {HTMLElement} card Target card.
+     * @param {DragEvent} e - Drag event.
+     * @param {HTMLElement} card - Target card.
      * @returns {"before"|"after"} Side.
      */
     _computeInsertionSide(e, card) {
@@ -430,9 +497,9 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Drag start handler.
-     * @param {DragEvent} e Event.
-     * @param {Object} tile Tile.
-     * @param {HTMLElement} card Card.
+     * @param {DragEvent} e - Event.
+     * @param {Object} tile - Tile.
+     * @param {HTMLElement} card - Card.
      */
     _onDragStart(e, tile, card) {
         this._dragTile = tile;
@@ -447,9 +514,9 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Drag end handler.
-     * @param {DragEvent} e Event.
-     * @param {Object} tile Tile.
-     * @param {HTMLElement} card Card.
+     * @param {DragEvent} e - Event.
+     * @param {Object} tile - Tile.
+     * @param {HTMLElement} card - Card.
      */
     _onDragEnd(e, tile, card) {
         card.classList.remove("wx-dragging", "wx-drop-target");
@@ -460,9 +527,9 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Drag over handler.
-     * @param {DragEvent} e Event.
-     * @param {Object} tile Target tile.
-     * @param {HTMLElement} card Card element.
+     * @param {DragEvent} e - Event.
+     * @param {Object} tile - Target tile.
+     * @param {HTMLElement} card - Card element.
      */
     _onDragOver(e, tile, card) {
         if (!this._dragTile || this._dragTile === tile) {
@@ -484,9 +551,9 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Drag leave handler.
-     * @param {DragEvent} e Event.
-     * @param {Object} tile Tile.
-     * @param {HTMLElement} card Card.
+     * @param {DragEvent} e - Event.
+     * @param {Object} tile - Tile.
+     * @param {HTMLElement} card - Card.
      */
     _onDragLeave(e, tile, card) {
         if (this._dragTile === tile) {
@@ -502,9 +569,9 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Drop handler (inserts before or after depending on stored side).
-     * @param {DragEvent} e Event.
-     * @param {Object} targetTile Target tile.
-     * @param {HTMLElement} card Card element.
+     * @param {DragEvent} e - Event.
+     * @param {Object} targetTile - Target tile.
+     * @param {HTMLElement} card - Card element.
      */
     _onDrop(e, targetTile, card) {
         e.preventDefault();
@@ -565,9 +632,9 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Dispatches reorder event.
-     * @param {Object} tile Tile moved.
-     * @param {number} from Old index.
-     * @param {number} to New index.
+     * @param {Object} tile - Tile moved.
+     * @param {number} from - Old index.
+     * @param {number} to - New index.
      */
     _dispatchReorderEvent(tile, from, to) {
         this._dispatchEvent("MOVE_EVENT", {
@@ -581,7 +648,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Dispatches visibility event.
-     * @param {Object} tile Tile.
+     * @param {Object} tile - Tile.
      */
     _dispatchVisibilityEvent(tile) {
         this._dispatchEvent("CHANGE_VISIBILITY_EVENT", {
@@ -593,8 +660,8 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Dispatches search event.
-     * @param {string} term Search term.
-     * @param {Array<Object>} matches Matches.
+     * @param {string} term - Search term.
+     * @param {Array<Object>} matches - Matches.
      */
     _dispatchSearchEvent(term, matches) {
         this._dispatchEvent("TILE_SEARCH_EVENT", {
@@ -607,8 +674,8 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Dispatches sort event.
-     * @param {string} property Property.
-     * @param {string} direction Direction.
+     * @param {string} property - Property.
+     * @param {string} direction - Direction.
      */
     _dispatchSortEvent(property, direction) {
         this._dispatchEvent("TILE_SORT_EVENT", {
@@ -621,8 +688,8 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Dispatch helper resolves event constant.
-     * @param {string} constName Event constant name.
-     * @param {Object} detail Detail payload.
+     * @param {string} constName - Event constant name.
+     * @param {Object} detail - Detail payload.
      */
     _dispatchEvent(constName, detail) {
         const evRoot = webexpress?.webui?.Event;
@@ -643,7 +710,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Updates snapshot.
-     * @param {Array} states States.
+     * @param {Array} states - States.
      */
     _updateSnapshot(states) {
         this._prevState.clear();
@@ -730,7 +797,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Reads a cookie by name.
-     * @param {string} name Cookie name.
+     * @param {string} name - Cookie name.
      * @returns {string|null} Value.
      */
     _readCookie(name) {

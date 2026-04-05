@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<input id=""id"" name=""id"" type=""file"" class=""form-control-file me-2"">")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -40,7 +40,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(@"<input id=""*"" name=""*"" type=""file"" class=""form-control-file me-2"">")]
         public void AutoId(string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -63,7 +63,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"<input id=""file"" name=""abc"" type=""file"" class=""form-control-file me-2"">")]
         public void Name(string name, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -73,7 +73,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Name = name
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -87,7 +87,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"<input id=""file"" name=""file"" type=""file"" class=""form-control-file me-2"">")]
         public void Required(bool required, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -97,7 +97,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Required = required
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -111,14 +111,14 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("image/*", @"<input id=""file"" name=""file"" type=""file"" class=""form-control-file me-2"" accept=""image/*"">")]
         public void Accept(string accept, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputFile(null);
 
-            // test execution
+            // act
             control.AddAcceptFile(accept);
             var html = control.Render(context, visualTree);
 

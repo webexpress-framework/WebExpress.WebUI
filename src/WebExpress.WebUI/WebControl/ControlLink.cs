@@ -4,6 +4,7 @@ using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebMessage;
+using WebExpress.WebCore.WebParameter;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
@@ -64,9 +65,16 @@ namespace WebExpress.WebUI.WebControl
         public TypeTarget Target { get; set; }
 
         /// <summary>
-        /// Returns or sets the id of a modal dialogue.
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// click to open a modal or similar target.
         /// </summary>
-        public string Modal { get; set; }
+        public IAction PrimaryAction { get; set; }
+
+        /// <summary>
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// double‑click to open a modal or similar target.
+        /// </summary>
+        public IAction SecondaryAction { get; set; }
 
         /// <summary>
         /// Returns or sets the icon.
@@ -165,12 +173,12 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="request">The context in which the control is rendered.</param>
         /// <returns>The parameters as a query string.</returns>
-        private string GetParams(Request request)
+        private string GetParams(IRequest request)
         {
             var dict = new Dictionary<string, Parameter>();
 
             // transfer of the parameters from the request.
-            if (Params != null)
+            if (Params is not null)
             {
                 foreach (var v in Params)
                 {
@@ -213,7 +221,7 @@ namespace WebExpress.WebUI.WebControl
                 OnClick = OnClick?.ToString()
             };
 
-            if (Icon != null)
+            if (Icon is not null)
             {
                 html.Add(new ControlIcon()
                 {
@@ -231,11 +239,8 @@ namespace WebExpress.WebUI.WebControl
                 html.AddUserAttribute("data-bs-toggle", "tooltip");
             }
 
-            if (!string.IsNullOrWhiteSpace(Modal))
-            {
-                html.AddUserAttribute("data-wx-toggle", "modal");
-                html.AddUserAttribute("data-wx-target", $"#{Modal}");
-            }
+            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

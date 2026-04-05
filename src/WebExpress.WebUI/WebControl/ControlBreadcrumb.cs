@@ -58,9 +58,20 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            return Render(renderContext, visualTree, Uri);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="uri">The URI used to generate the breadcrumb links.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IUri uri)
+        {
             var siteManager = WebEx.ComponentHub.SitemapManager;
             var lastEndpointContext = default(IEndpointContext);
-
 
             var html = new HtmlElementTextContentOl()
             {
@@ -86,38 +97,56 @@ namespace WebExpress.WebUI.WebControl
                 );
             }
 
-            if (Uri == null)
+            if (uri is null)
             {
                 return html;
             }
 
-            var takeLast = Math.Min(TakeLast, Uri.PathSegments.Count());
-            var from = Uri.PathSegments.Count() - takeLast;
+            var takeLast = Math.Min(TakeLast, uri.PathSegments.Count());
+            var from = uri.PathSegments.Count() - takeLast;
 
-            for (int i = from + 1; i < Uri.PathSegments.Count() + 1; i++)
+            for (int i = from + 1; i < uri.PathSegments.Count() + 1; i++)
             {
-                var path = Uri.Take(i);
-                var href = path.ToString();
-                var endpointContext = siteManager.GetEndpoint(path);
+                var path = uri.Take(i);
+                var last = path?.PathSegments?.LastOrDefault();
+                var href = last?.Uri ?? path;
+                var endpointContext = siteManager.GetEndpoint(href);
 
                 if (endpointContext == lastEndpointContext)
                 {
                     continue;
                 }
 
-                if (path.Display != null)
+                var displayText = path.GetDisplayText(renderContext);
+                var pathIcon = path.GetIcon(renderContext);
+
+                if (last?.IsHidden ?? false)
                 {
-                    var display = I18N.Translate(renderContext.Request?.Culture, path.Display);
+                    // ignore
+                }
+                else if (displayText is not null)
+                {
+                    var display = I18N.Translate(renderContext.Request?.Culture, displayText);
 
                     html.Add
                     (
                         new HtmlElementTextContentLi()
+                            .Add
+                            (
+                                pathIcon is not null
+                                    ? new ControlIcon()
+                                    {
+                                        Icon = pathIcon
+                                    }
+                                        .Render(renderContext, visualTree)
+                                    : null
+                            )
                             .Add(new HtmlElementTextSemanticsA(display)
                             {
-                                Href = href
+                                Href = href?.ToString()
                             })
                     );
-                } 
+                }
                 else if (endpointContext is PageContext page)
                 {
                     var display = I18N.Translate(renderContext.Request?.Culture, page.PageTitle);
@@ -128,7 +157,7 @@ namespace WebExpress.WebUI.WebControl
                         new HtmlElementTextContentLi()
                             .Add
                             (
-                                icon != null 
+                                icon is not null
                                     ? new ControlIcon()
                                     {
                                         Icon = icon
@@ -138,7 +167,7 @@ namespace WebExpress.WebUI.WebControl
                             )
                             .Add(new HtmlElementTextSemanticsA(display)
                             {
-                                Href = href
+                                Href = href?.ToString()
                             })
                     );
                 }

@@ -27,7 +27,7 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
         this._favorited = element.dataset.favorited === "true";
         this._value = element.dataset.value || "";
 
-        // Build the search UI
+        // build the search UI
         this._searchBox = this._createSearchBox();
         this._searchIcon = this._createSearchIcon(icon);
         this._searchInput = this._createSearchInput(name, placeholder);
@@ -38,6 +38,9 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
         this._searchBox.appendChild(this._searchIcon);
         this._searchBox.appendChild(this._searchInput);
         this._searchBox.appendChild(this._searchClear);
+
+        // allow derived classes to modify the searchBox before adding to DOM
+        this._onAfterBuildSearchBox && this._onAfterBuildSearchBox();
 
         // clean up DOM and add built elements
         element.removeAttribute("name");
@@ -151,6 +154,7 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
      * @param {Array<Object>} suggestions - An array of suggestion objects.
      * @param {string|null} footer - Footer HTML to display additional information.
      * @returns {HTMLElement} The suggestion container element.
+     * This method can be overridden in subclasses to provide a custom suggestion UI.
      */
     _createSuggestionMenu(suggestions, footer) {
         const suggestionMenu = document.createElement("div");
@@ -179,7 +183,9 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
-     * Updates the suggestion box based on the current input value.
+     * Ensures that derived controls can manage the suggestion list.
+     * This method can and should be overridden in subclasses
+     * to integrate features such as AJAX/API‑based suggestions.
      */
     _refreshSuggestions() {
         const query = (this._searchInput.value || "").toLowerCase();

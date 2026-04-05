@@ -14,24 +14,20 @@ webexpress.webui.TagCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         // extract configuration from attributes
-        const initialTags = (element.getAttribute("data-value") || "")
-            .split(";")
-            .map(t => t.trim())
-            .filter(t => t.length > 0);
+        const initialValue = element.getAttribute("data-value") || "";
+        this._tags = this._parseTags(initialValue);
 
         // extract color configuration from data-color
         this._colorCss = element.getAttribute("data-color-css") || null;
         this._colorStyle = element.getAttribute("data-color-style") || null;
 
-        // save tag array
-        this._tags = initialTags;
-
-        // build DOM structure
+        // build dom structure
         element.classList.add("wx-tag");
 
-        // clean up the DOM element
+        // clean up the dom element
         element.innerHTML = "";
         element.removeAttribute("data-tags");
+        element.removeAttribute("data-value");
         element.removeAttribute("data-color-css");
         element.removeAttribute("data-color-style");
 
@@ -44,6 +40,21 @@ webexpress.webui.TagCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Parses a semicolon-separated string into an array of tags.
+     * @param {string} value - The raw string value.
+     * @returns {string[]} An array of cleaned tag strings.
+     */
+    _parseTags(value) {
+        if (!value) {
+            return [];
+        }
+        return String(value)
+            .split(";")
+            .map((t) => { return t.trim(); })
+            .filter((t) => { return t.length > 0; });
+    }
+
+    /**
      * Renders tags as <li> with x-button before the input field and updates the hidden field.
      * Each tag color is taken from the _color value, default is no color.
      */
@@ -51,8 +62,15 @@ webexpress.webui.TagCtrl = class extends webexpress.webui.Ctrl {
         // remove all tag elements
         this._list.innerHTML = "";
 
-        // create tag elements with color and remove button
-        this._tags.forEach((tag, index) => {
+        if (!this._tags || this._tags.length === 0) {
+            return;
+        }
+
+        // use document fragment for efficient batch insertion
+        const fragment = document.createDocumentFragment();
+
+        // create tag elements
+        this._tags.forEach((tag) => {
             const tagElement = document.createElement("li");
             tagElement.textContent = tag.toLowerCase();
 
@@ -65,8 +83,10 @@ webexpress.webui.TagCtrl = class extends webexpress.webui.Ctrl {
                 tagElement.classList.add("wx-tag-primary");
             }
 
-            this._list.appendChild(tagElement);
+            fragment.appendChild(tagElement);
         });
+
+        this._list.appendChild(fragment);
     }
     
     /**
@@ -75,7 +95,7 @@ webexpress.webui.TagCtrl = class extends webexpress.webui.Ctrl {
      */
     get value() {
         // returns the current tags as string, separated by semicolon
-        return this._tags.map(t => t.toLowerCase()).join(";");
+        return this._tags.map((t) => { return t.toLowerCase(); }).join(";");
     }
 
     /**
@@ -83,15 +103,21 @@ webexpress.webui.TagCtrl = class extends webexpress.webui.Ctrl {
      * @param {string|Array} value - Tags as semicolon-separated string or array.
      */
     set value(value) {
-        // sets the tags, accepts array or string (semicolon-separated)
+        let newTags = [];
+        
         if (Array.isArray(value)) {
-            this._tags = value.map(t => t.trim()).filter(t => t.length > 0);
+            newTags = value.map((t) => { return String(t).trim(); }).filter((t) => { return t.length > 0; });
         } else if (typeof value === "string") {
-            this._tags = value.split(";").map(t => t.trim()).filter(t => t.length > 0);
+            newTags = this._parseTags(value);
         }
-        this.render();
+
+        // check for changes before re-rendering (simple shallow comparison)
+        if (this._tags.join(";") !== newTags.join(";")) {
+            this._tags = newTags;
+            this.render();
+        }
     }
 };
 
-// Controller registration
+// controller registration
 webexpress.webui.Controller.registerClass("wx-webui-tag", webexpress.webui.TagCtrl);

@@ -22,6 +22,9 @@ confirm.label=Confirm
 confirm.header=Request Confirmation
 confirm.description=Are you sure you want to do this?
 
+new.label=New
+edit.label=Save
+
 delete.label=Delete
 delete.header=Confirm Delete
 delete.description=Are you sure you want to delete this item?

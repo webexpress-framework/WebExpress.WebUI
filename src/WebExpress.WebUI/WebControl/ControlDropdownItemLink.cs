@@ -40,9 +40,16 @@ namespace WebExpress.WebUI.WebControl
         public TypeTarget Target { get; set; }
 
         /// <summary>
-        /// Returns or sets the id of a modal dialogue.
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// click to open a modal or similar target.
         /// </summary>
-        public string Modal { get; set; }
+        public IAction PrimaryAction { get; set; }
+
+        /// <summary>
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// double‑click to open a modal or similar target.
+        /// </summary>
+        public IAction SecondaryAction { get; set; }
 
         /// <summary>
         /// Returns or sets the icon.
@@ -76,19 +83,22 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Text)))
+            var html = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Text)))
             {
                 Id = Id,
                 Class = "wx-dropdown-item"
             }
-                .AddUserAttribute("id", Id)
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
                 .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-uri", Uri?.ToString())
-                .AddUserAttribute("data-target", Target.ToStringValue())
-                .AddUserAttribute("data-modal", !string.IsNullOrWhiteSpace(Modal) ? $"#{Modal}" : null)
                 .AddUserAttribute("data-tooltip", Tooltip)
-                .AddUserAttribute("data-color", Color.ToClass());
+                .AddUserAttribute("data-color", Color.ToClass())
+                .AddUserAttribute("data-uri", Uri?.ToString())
+                .AddUserAttribute("data-target", Target.ToValue());
+
+            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
+
+            return html;
         }
     }
 }

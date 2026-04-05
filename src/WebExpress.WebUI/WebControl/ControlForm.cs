@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using WebExpress.WebCore;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebFragment;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebMessage;
-using WebExpress.WebCore.WebPage;
 using WebExpress.WebCore.WebScope;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebFragment;
@@ -158,22 +156,10 @@ namespace WebExpress.WebUI.WebControl
         public IControl Conformation { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the class with an automatically assigned ID.
+        /// Initializes a new instance of the class.
         /// </summary>
-        /// <param name="instance">
-        /// The name of the calling member. This is automatically provided by the compiler.
-        /// </param>
-        /// <param name="file">
-        /// The file path of the source file where this instance is created. This is 
-        /// automatically provided by the compiler.
-        /// </param>
-        /// <param name="line">
-        /// The line number in the source file where this instance is created. This is 
-        /// automatically provided by the compiler.
-        /// </param>
-        /// <param name="items">The form items to add to the form.</param>
-        public ControlForm([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null, params IControlFormItem[] items)
-            : this($"{instance}_{file}_{line}".GetHashCode().ToString("X"), items)
+        public ControlForm()
+            : this(DeterministicId.Create())
         {
         }
 
@@ -269,11 +255,11 @@ namespace WebExpress.WebUI.WebControl
 
                 // uninizialized form
                 // fill the form with data
-                foreach (var item in items.Where(x => x != null))
+                foreach (var item in items.Where(x => x is not null))
                 {
                     item.Initialize(renderContext);
                 }
-                foreach (var item in Buttons.Where(x => x != null))
+                foreach (var item in Buttons.Where(x => x is not null))
                 {
                     item.Initialize(renderContext);
                 }
@@ -324,7 +310,7 @@ namespace WebExpress.WebUI.WebControl
                         throw new RedirectException(RedirectUri);
                     }
 
-                    if (Conformation != null)
+                    if (Conformation is not null)
                     {
                         return new HtmlElementFormForm(Conformation.Render(renderContext, visualTree))
                         {
@@ -347,7 +333,7 @@ namespace WebExpress.WebUI.WebControl
                 Method = (Method == RequestMethod.NONE
                     ? RequestMethod.POST
                     : Method).ToString(),
-                Enctype = TypeEnctype.None,
+                Enctype = TypeEnctype.Multipart,
                 Name = Name
             };
 

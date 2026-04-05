@@ -40,15 +40,31 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
     _parseItems(nodes) {
         const items = [];
         nodes.forEach(elem => {
+            const ds = elem.dataset;
             items.push({
                 id: elem.getAttribute("id") || null,
-                label: elem.dataset.label || elem.textContent.trim(),
-                labelColor: elem.dataset.labelColor || null,
-                icon: elem.dataset.icon || null,
-                image: elem.dataset.image || null,
+                label: ds.label || elem.textContent.trim(),
+                labelColor: ds.labelColor || null,
+                icon: ds.icon || null,
+                image: ds.image || null,
                 // keep original rich content if needed later
                 content: elem.innerHTML || "",
-                disabled: elem.hasAttribute("disabled")
+                disabled: elem.hasAttribute("disabled"),
+                // parse action attributes
+                primaryAction: Object.fromEntries(Object.entries(ds)
+                    .filter(([k]) => k.startsWith("wxPrimary"))
+                    .map(([k, v]) => [
+                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                ),
+                secondaryAction: Object.fromEntries(Object.entries(ds)
+                    .filter(([k]) => k.startsWith("wxSecondary"))
+                    .map(([k, v]) => [
+                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                )
             });
         });
         return items;
@@ -86,16 +102,33 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
      * Renders all items (never filtered); applies 'selected' marking where needed.
      */
     render() {
-        if (!this._list) return;
+        if (!this._list) { return; }
         this._list.innerHTML = "";
+        
+        // build lookup for selected ids
+        const selected = new Set((this._values || []).map(v => String(v)));
+        // filter items to render only selected ones (preserve original order)
+        const itemsToRender = this._items.filter(item => selected.has(String(item.id)));
 
-        this._items.forEach(item => {
+
+        itemsToRender.forEach(item => {
             const li = document.createElement("li");
-            if (item.labelColor) li.classList.add(item.labelColor);
-            if (item.disabled) li.classList.add("is-disabled");
+            
+            // apply styles and state
+            if (item.labelColor) { li.classList.add(item.labelColor); }
+            if (item.disabled) { li.classList.add("is-disabled"); }
             if (this._values.includes(String(item.id))) {
                 li.classList.add("selected");
             }
+
+            // apply action attributes to the rendered list item
+            if (item.primaryAction) { li.dataset.wxPrimaryAction = item.primaryAction; }
+            if (item.primaryTarget) { li.dataset.wxPrimaryTarget = item.primaryTarget; }
+            if (item.primaryUri) { li.dataset.wxPrimaryUri = item.primaryUri; }
+            
+            if (item.secondaryAction) { li.dataset.wxSecondaryAction = item.secondaryAction; }
+            if (item.secondaryTarget) { li.dataset.wxSecondaryTarget = item.secondaryTarget; }
+            if (item.secondaryUri) { li.dataset.wxSecondaryUri = item.secondaryUri; }
 
             const wrapper = document.createElement("span");
             // optional image
@@ -121,7 +154,7 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
             this._list.appendChild(li);
         });
 
-        // add an empty state marker only if keinerlei items exist
+        // add an empty state marker only if no items exist
         if (this._items.length === 0) {
             const li = document.createElement("li");
             li.textContent = "";

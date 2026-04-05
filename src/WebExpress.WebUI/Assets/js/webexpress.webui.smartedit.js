@@ -9,57 +9,59 @@
  */
 webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
     _activeEdit = null;
+    _editor = null;
+    _previousValue = null;
 
     /**
      * Constructor
-     * @param {HTMLElement} element - the dom element for the inline edit control
+     * @param {HTMLElement} element the host element for the inline edit control
      */
     constructor(element) {
         super(element);
 
-        // get options from attributes
+        // lese optionen
         this._id = element.id || null;
-        this._editor = this._detachElement(element.firstElementChild);
-        this._value = this._getEditorValue(element);
         this._objectId = element.getAttribute('data-object-id') || null;
         this._objectName = element.getAttribute('data-object-name') || null;
         this._formAction = element.getAttribute('data-form-action') || null;
         this._formMethod = element.getAttribute('data-form-method') || null;
 
-        // clean up dom and add built elements
+        this._editor = this._detachElement(element.firstElementChild);
+
+        // bereinige dom
         element.removeAttribute('data-form-action');
         element.removeAttribute('data-form-method');
         element.removeAttribute('data-object-id');
         element.removeAttribute('data-object-name');
         element.classList.add("wx-smart-edit");
 
-        const displayValue = this._getDisplayLabel(this._value);
-        element.appendChild(displayValue);
-
-        // add mouse events to the control element itself
-        element.addEventListener("mouseenter", e => this._showEditIcon(element));
-        element.addEventListener("mouseleave", e => this._hideEditIcon(element));
-        element.addEventListener("dblclick", e => {
+        // events
+        element.addEventListener("mouseenter", (e) => { this._showEditIcon(element); });
+        element.addEventListener("mouseleave", (e) => { this._hideEditIcon(element); });
+        element.addEventListener("dblclick", (e) => {
             e.stopPropagation();
             this._startEditing(element);
         });
+
+        const view = this._getView(this.value);
+        this._element.appendChild(view);
     }
 
     /**
-     * Shows the pencil icon for editing
-     * @param {HTMLElement} element - target element
+     * Shows the pencil icon on hover.
+     * @param {HTMLElement} element target element
      */
     _showEditIcon(element) {
-        if (this._activeEdit) return;
-        // do nothing if pencil already exists
-        if (element.querySelector('button')) return;
+        if (this._activeEdit || element.querySelector('button')) {
+            return;
+        }
         const pencil = document.createElement('button');
         const icon = document.createElement('i');
         icon.className = 'fas fa-pencil';
         icon.title = this._i18n("webexpress.webui:edit", "Edit");
         pencil.classList.add("pencil");
         pencil.appendChild(icon);
-        pencil.addEventListener('click', e => {
+        pencil.addEventListener('click', (e) => {
             e.stopPropagation();
             this._startEditing(element);
         });
@@ -67,76 +69,78 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Hides the pencil icon
-     * @param {HTMLElement} element - target element
+     * Hides the pencil icon.
+     * @param {HTMLElement} element target element
      */
     _hideEditIcon(element) {
-        // remove pencil if not editing
         const pencil = element.querySelector(":scope > button");
-        if (pencil) element.removeChild(pencil);
+        if (pencil) {
+            element.removeChild(pencil);
+        }
     }
 
     /**
-     * Displays a spinner icon to indicate edit mode
-     * @param {HTMLElement} element - target element
+     * Shows a spinner indicating edit mode is active.
+     * @param {HTMLElement} element target element
      */
     _showEditSpinner(element) {
-        if (!this._activeEdit) return;
-
+        if (!this._activeEdit) {
+            return;
+        }
         const spinnerButton = document.createElement('button');
         const spinner = document.createElement('span');
-
         spinner.className = 'spinner-border spinner-border-sm';
         spinner.role = 'status';
         spinner.setAttribute('aria-hidden', 'true');
         spinner.title = this._i18n("webexpress.webui:edit", "Edit");
-
         spinnerButton.classList.add('spinner-button');
         spinnerButton.appendChild(spinner);
-
-        spinnerButton.addEventListener('click', e => {
+        spinnerButton.addEventListener('click', (e) => {
             e.stopPropagation();
             this._startEditing(element);
         });
-
         element.appendChild(spinnerButton);
     }
 
     /**
-     * Removes the spinner icon from the target element
-     * @param {HTMLElement} element - target element
+     * Hides the edit spinner.
+     * @param {HTMLElement} element target element
      */
     _hideEditSpinner(element) {
         const spinnerButton = element.querySelector(":scope > button");
-        if (spinnerButton) element.removeChild(spinnerButton);
+        if (spinnerButton) {
+            element.removeChild(spinnerButton);
+        }
     }
 
     /**
-     * Starts the inline editing process
-     * @param {HTMLElement} element - target element
+     * Starts the inline editing process.
+     * Stores the current value for potential restoration.
+     * @param {HTMLElement} element target element
      */
     _startEditing(element) {
-        // only one active edit at a time
-        if (this._activeEdit) return;
+        if (this._activeEdit) {
+            return;
+        }
 
-        this.value = this._value;
+        // wert vor beginn zwischenspeichern
+        this._previousValue = this.value;
+
         this._activeEdit = element;
         this._hideEditIcon(element);
 
-        // trigger start event
-        this._dispatch(webexpress.webui.Event.START_INLINE_EDIT_EVENT, { value: this._value });
+        this._dispatch(webexpress.webui.Event.START_INLINE_EDIT_EVENT, { value: this.value });
 
-        // clear selection
-        if (window.getSelection) {
-            const selection = window.getSelection();
-            if (!selection.isCollapsed) {
-                selection.removeAllRanges();
-            }
+        if (window.getSelection && !window.getSelection().isCollapsed) {
+            window.getSelection().removeAllRanges();
         }
 
         element.innerHTML = '';
         const form = document.createElement('form');
-        form.appendChild(this._editor);
+
+        if (this._editor) {
+            form.appendChild(this._editor);
+        }
 
         if (this._objectName) {
             const hidden = document.createElement('input');
@@ -176,7 +180,6 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         btnCancel.appendChild(iconCancel);
         btnCancel.title = this._i18n("webexpress.webui:cancel", "Cancel");
 
-        // handle save event
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const newValue = this._getEditorValue(element);
@@ -190,58 +193,45 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
                     body: formData
                 });
 
-                if (response.ok) {
-                    // trigger save
-                    this._dispatch(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
-                        value: this._value,
-                        status: response.status,
-                        statusText: ""
-                    });
-                    return;
-                } else {
-                    // trigger error
-                    document.dispatchEvent(new CustomEvent(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
-                        detail: {
-                            sender: element,
-                            id: element.id,
-                            value: this._value,
-                            status: response.status,
-                            statusText: ""
-                        }
-                    }));
-                }
-            } catch (error) {
-                // trigger error
                 this._dispatch(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
-                    value: this._value,
-                    status: 500,
-                    statusText: ""
+                    value: this.value,
+                    status: response.status,
+                    statusText: response.statusText || ""
                 });
-                console.error(`Failed to edit`, error);
+
+                // bei erfolg übernimmt _finishEditing(save=true) den neuen wert
+            } catch (error) {
+                this._dispatch(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
+                    value: this.value,
+                    status: 500,
+                    statusText: error.message || "Network Error"
+                });
+                console.error('failed to edit', error);
+                // bei fehler wird dennoch save=true weitergegeben, die anwendung kann status prüfen
             } finally {
                 this._hideEditSpinner(element);
                 this._finishEditing(true, element, newValue);
             }
         });
 
-        // handle cancel event
-        btnCancel.addEventListener('click', e => {
+        btnCancel.addEventListener('click', (e) => {
             e.preventDefault();
-            this._finishEditing(false, element, this._value);
+            // bei abbrechen alten wert wiederherstellen
+            this._finishEditing(false, element, this._previousValue);
         });
 
-        // handle click outside to cancel edit mode
         this._outsideClickHandler = (e) => {
-            e.stopPropagation();
-            // check if click is outside the current element
             if (!element.contains(e.target)) {
-                this._finishEditing(false, element, this._value);
+                e.stopPropagation();
+                // bei klick außerhalb abbrechen und alten wert wiederherstellen
+                this._finishEditing(false, element, this._previousValue);
             }
         };
 
-        // register outside click handler (with delay to avoid immediate trigger)
-        document.addEventListener('mousedown', this._outsideClickHandler);
-        document.addEventListener('touchstart', this._outsideClickHandler);
+        setTimeout(() => {
+            document.addEventListener('mousedown', this._outsideClickHandler);
+            document.addEventListener('touchstart', this._outsideClickHandler);
+        }, 0);
 
         const buttonWrapper = document.createElement('div');
         buttonWrapper.className = 'form-buttons';
@@ -255,181 +245,149 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Finishes editing, restores or saves value
-     * @param {boolean} save - true if saving, false if canceling
-     * @param {HTMLElement} element - target element
-     * @param {string} value - new or original value
+     * Finishes editing and restores or applies value.
+     * @param {boolean} save whether to apply the new value
+     * @param {HTMLElement} element target element
+     * @param {string|any} value new or restored value
      */
     _finishEditing(save, element, value) {
-        // remove outside click listeners if any
         if (this._outsideClickHandler) {
             document.removeEventListener('mousedown', this._outsideClickHandler);
             document.removeEventListener('touchstart', this._outsideClickHandler);
             this._outsideClickHandler = null;
         }
 
-        // restore or save the value
         element.innerHTML = '';
-
-        // always trigger end event
-        this._dispatch(webexpress.webui.Event.END_INLINE_EDIT_EVENT, { value: this._value });
+        this._dispatch(webexpress.webui.Event.END_INLINE_EDIT_EVENT, { value: this.value });
 
         if (save && typeof this.onSave === 'function') {
             this.onSave(element, value);
-        } else if (typeof this.onCancel === 'function') {
+        } else if (!save && typeof this.onCancel === 'function') {
             this.onCancel(element, value);
         }
-        const displayValue = this._getDisplayLabel(value);
-        element.appendChild(displayValue);
-        this._value = value;
+
+        // editor zurücksetzen (falls kontrollinstanz vorhanden)
+        if (this._editor) {
+            const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
+            if (ctrl && typeof ctrl.value !== 'undefined') {
+                ctrl.value = value;
+            } else if (this._editor.tagName === 'SELECT') {
+                const first = Array.isArray(value) ? value[0] : String(value || '').split(';')[0];
+                const opt = Array.from(this._editor.options).find(o => String(o.value) === String(first));
+                if (opt) {
+                    this._editor.value = opt.value;
+                }
+            } else if (['INPUT', 'TEXTAREA'].includes(this._editor.tagName)) {
+                this._editor.value = value;
+            } else {
+                this._editor.innerHTML = value ?? '';
+            }
+        }
+
+        // anzeige aktualisieren mit entsprechendem wert (neu oder wiederhergestellt)
+        const view = this._getView(value);
+        element.appendChild(view);
+
+        // edit modus beenden und cache löschen
         this._activeEdit = null;
+        this._previousValue = null;
     }
 
     /**
-     * Extracts the most relevant value from the given container element.
-     * @param {HTMLElement} element - The DOM element to extract the value from
-     * @returns {string} The extracted value based on priority
+     * Extracts the most relevant value from the editor container.
+     * Priority order: control value, input/textarea, select, input inside editor, [data-value], text content.
+     * @param {HTMLElement} element editor container
+     * @returns {string} extracted value
      */
     _getEditorValue(element) {
-        // get the control instance
+        if (!this._editor) {
+            return (element.querySelector('[data-value]')?.getAttribute('data-value')) || element.textContent.trim();
+        }
         const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
-
         if (ctrl && ctrl instanceof webexpress.webui.EditorCtrl) {
             return ctrl._editorElement?.innerHTML;
         }
-
-        // 1. input field
-        if (this._editor?.tagName === 'INPUT') {
+        if (['INPUT', 'TEXTAREA'].includes(this._editor.tagName)) {
             return this._editor.value;
         }
-
-        // 2. textarea element
-        if (this._editor?.tagName === 'TEXTAREA') {
-            return this._editor.value;
-        }
-
-        // 3. select element
-        if (this._editor?.tagName === 'SELECT') {
+        if (this._editor.tagName === 'SELECT') {
             return this._editor.options[this._editor.selectedIndex]?.value ?? '';
         }
-
-        // 4. hidden input field
-        let el = this._editor?.querySelector('input');
+        let el = this._editor.querySelector('input');
         if (el) {
             return el.value;
         }
-
-        // 5. element with a 'data-value' attribute anywhere inside
         el = element.querySelector('[data-value]');
         if (el) {
             return el.getAttribute('data-value');
         }
-
-        // 6. fallback: visible text content from the container itself
-        return this._editor?.textContent.trim();
+        return this._editor.textContent.trim();
     }
 
     /**
-     * Returns the display label for the given value(s)
-     * @param {string|string[]} value - selected id(s)
-     * @returns {string|HTMLElement} label(s) as node
+     * Builds a read-only view node for a given value based on the editor type.
+     * @param {string|string[]|any} value value to display
+     * @returns {HTMLElement} read-only view node
      */
-    _getDisplayLabel(value) {
-        // get the control instance
+    _getView(value) {
+        if (!this._editor) {
+            const span = document.createElement('span');
+            span.textContent = value ?? '';
+            return span;
+        }
+
         const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
 
-        if (ctrl && ctrl instanceof webexpress.webui.InputSelectionCtrl) {
-            const ids = Array.isArray(value) ? value : String(value).split(';');
-            const ul = document.createElement("ul");
-
-            // map every id to its label using the control's items 
-            ids.map(id => {
-                const item = ctrl.options.find(opt => String(opt.id) === String(id));
-                const li = document.createElement("li");
-                const span = document.createElement("span");
-                if (item?.labelColor) {
-                    li.className = item.labelColor;
-                }
-                if (item?.image) {
-                    const img = document.createElement("img");
-                    img.src = item.image;
-                    img.className = "wx-icon";
-                    span.appendChild(img);
-                }
-                if (item?.icon) {
-                    const icon = document.createElement("i");
-                    icon.className = item.icon;
-                    span.appendChild(icon);
-                }
-                const labelSpan = document.createElement("span");
-                labelSpan.textContent = item?.label;
-                span.appendChild(labelSpan);
-
-                li.appendChild(span);
-                ul.appendChild(li);
-            });
-
-            return ul;
-        } else if (ctrl && ctrl instanceof webexpress.webui.InputMoveCtrl) {
-            const ids = Array.isArray(value) ? value : String(value).split(';');
-            const ul = document.createElement("ul");
-
-            ids.map(id => {
-                const item = ctrl.options.find(opt => String(opt.id) === String(id));
-                const li = document.createElement("li");
-                const span = document.createElement("span");
-                if (item?.labelColor) {
-                    li.className = item.labelColor;
-                }
-                if (item?.image) {
-                    const img = document.createElement("img");
-                    img.src = item.image;
-                    img.className = "wx-icon";
-                    span.appendChild(img);
-                }
-                if (item?.icon) {
-                    const icon = document.createElement("i");
-                    icon.className = item.icon;
-                    span.appendChild(icon);
-                }
-                const labelSpan = document.createElement("span");
-                labelSpan.textContent = item?.label;
-                span.appendChild(labelSpan);
-
-                li.appendChild(span);
-                ul.appendChild(li);
-            });
-
-            return ul;
-        } else if (ctrl && ctrl instanceof webexpress.webui.InputTagCtrl) {
-            const ids = Array.isArray(value) ? value : String(value).split(';');
-            const ul = document.createElement("ul");
-
-            ids.forEach((tag) => {
-                const li = document.createElement("li");
-                li.textContent = tag;
-
-                // set color if defined
-                if (ctrl?._colorCss) {
-                    li.classList.add(ctrl._colorCss);
-                } else if (ctrl?._colorStyle) {
-                    li.style.cssText = ctrl._colorStyle;
-                } else {
-                    li.classList.add("wx-tag-primary");
-                }
-
-                ul.appendChild(li);
-            });
-
-            return ul;
-        } else if (ctrl && ctrl instanceof webexpress.webui.EditorCtrl) {
+        if (ctrl instanceof webexpress.webui.InputSelectionCtrl) {
+            const container = document.createElement("div");
+            const selection = new webexpress.webui.SelectionCtrl(container);
+            const ids = Array.isArray(value) ? value : String(value || '').split(';');
+            selection.options = ctrl.options;
+            selection.value = ids;
+            return container;
+        } else if (ctrl instanceof webexpress.webui.InputMoveCtrl) {
+            const container = document.createElement("div");
+            const move = new webexpress.webui.MoveCtrl(container);
+            const ids = Array.isArray(value) ? value : String(value || '').split(';');
+            move.options = ctrl.options;
+            move.value = ids;
+            return container;
+        } else if (ctrl instanceof webexpress.webui.InputCalendarCtrl) {
+            const container = document.createElement("div");
+            const date = new webexpress.webui.DateCtrl(container);
+            date.format = ctrl.format;
+            date.value = value;
+            return container;
+        } else if (ctrl instanceof webexpress.webui.InputDateCtrl) {
+            const container = document.createElement("div");
+            const date = new webexpress.webui.DateCtrl(container);
+            date.format = ctrl.format;
+            date.value = value;
+            return container;
+        } else if (ctrl instanceof webexpress.webui.InputTagCtrl) {
+            const container = document.createElement("div");
+            const tag = new webexpress.webui.TagCtrl(container);
+            tag.value = value;
+            return container;
+        } else if (ctrl instanceof webexpress.webui.InputRatingCtrl) {
+            const container = document.createElement("div");
+            const rating = new webexpress.webui.RatingCtrl(container);
+            rating.stars = ctrl.stars;
+            rating.value = value;
+            return container;
+        } else if (ctrl instanceof webexpress.webui.InputColorCtrl) {
+            const container = document.createElement("div");
+            const color = new webexpress.webui.ColorCtrl(container);
+            color.value = value;
+            return container;
+        } else if (ctrl instanceof webexpress.webui.EditorCtrl) {
             const span = document.createElement('span');
-            span.innerHTML = ctrl._editorElement?.innerHTML;
+            span.innerHTML = value ?? '';
             return span;
         } else if (this._editor.tagName === 'SELECT') {
-            const ids = Array.isArray(value) ? value : String(value).split(';');
-            const labels = ids.map(id => {
-                const opt = Array.from(this._editor.options).find(o => o.value === id);
+            const ids = Array.isArray(value) ? value : String(value || '').split(';');
+            const labels = ids.map((id) => {
+                const opt = Array.from(this._editor.options).find((o) => o.value === id);
                 return opt?.label || opt?.text || id;
             });
             const span = document.createElement('span');
@@ -437,79 +395,73 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             return span;
         }
 
-        // fallback
         const span = document.createElement('span');
-        span.textContent = value;
+        span.textContent = value ?? '';
         return span;
     }
 
     /**
-     * Detach element (helper to preserve event handlers if any)
+     * Detaches the given element from its parent (helper to preserve event handlers).
      * @param {HTMLElement} el element to detach
      * @returns {HTMLElement} detached element
      * @private
      */
-    _detachElement(el){
-        if (!el) return null;
-        if (el.parentNode) el.parentNode.removeChild(el);
+    _detachElement(el) {
+        if (el && el.parentNode) {
+            el.parentNode.removeChild(el);
+        }
         return el;
     }
-    
+
     /**
-     * Gets the text value of an element
-     * @returns {string} value
+     * Returns the current value from the underlying editor or view.
+     * @returns {string|any} current value
      */
     get value() {
-        // get text content of element
-        return this.element.textContent;
+        if (this._editor) {
+            const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
+            if (ctrl && typeof ctrl.value !== 'undefined') {
+                return ctrl.value;
+            } else if (this._editor.tagName === 'SELECT') {
+                return this._editor.value;
+            } else if (['INPUT', 'TEXTAREA'].includes(this._editor.tagName)) {
+                return this._editor.value;
+            } else {
+                return this._editor.innerHTML;
+            }
+        }
+        return null;
     }
 
     /**
-     * Sets the value of the editor and updates the display
-     * @param {string} value - value to set
+     * Sets the value on the underlying editor and updates the read-only view if not editing.
+     * @param {string|string[]|any} value new value
      */
     set value(value) {
-        // set editor value and update visible text
-        this._value = value;
-
-        // update the editor control if possible
-        // get the control instance
-        const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
-
-        if (ctrl && ctrl instanceof webexpress.webui.InputDateCtrl) {
-            ctrl.value = value;
-        } else if (ctrl && ctrl instanceof webexpress.webui.InputCalendarCtrl) {
-            ctrl.value = value;
-        } else if (ctrl && ctrl instanceof webexpress.webui.InputSelectionCtrl) {
-            ctrl.value = value;
-        } else if (ctrl && ctrl instanceof webexpress.webui.InputMoveCtrl) {
-            ctrl.value = value;
-        } else if (ctrl && ctrl instanceof webexpress.webui.InputTagCtrl) {
-            ctrl.value = value;
-        } else if (ctrl && ctrl instanceof webexpress.webui.EditorCtrl) {
-           ctrl.value = value;
-        } else if (this._editor?.tagName === 'SELECT') {
-            // corrected: select matching option instead of overwriting current option value
-            // support semicolon separated multi values by choosing first (single select assumed here)
-            const first = Array.isArray(value) ? value[0] : String(value).split(';')[0];
-            const opt = Array.from(this._editor.options).find(o => String(o.value) === String(first));
-            if (opt) {
-                this._editor.value = opt.value;
+        if (this._editor) {
+            const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
+            if (ctrl && typeof ctrl.value !== 'undefined') {
+                ctrl.value = value;
+            } else if (this._editor.tagName === 'SELECT') {
+                const first = Array.isArray(value) ? value[0] : String(value || '').split(';')[0];
+                const opt = Array.from(this._editor.options).find((o) => String(o.value) === String(first));
+                if (opt) {
+                    this._editor.value = opt.value;
+                }
+            } else if (['INPUT', 'TEXTAREA'].includes(this._editor.tagName)) {
+                this._editor.value = value;
+            } else {
+                this._editor.innerHTML = value ?? '';
             }
-        } else if (this._editor?.tagName === 'INPUT') {
-            this._editor.value = value;
-        } else if (this._editor?.tagName === 'TEXTAREA') {
-            this._editor.value = value;
         }
 
-        // update the visible display
-        if (this._element) {
+        if (this._element && !this._activeEdit) {
             this._element.innerHTML = '';
-            const displayValue = this._getDisplayLabel(value);
+            const displayValue = this._getView(value);
             this._element.appendChild(displayValue);
         }
     }
-}
+};
 
 // register the class in the controller
 webexpress.webui.Controller.registerClass("wx-webui-smart-edit", webexpress.webui.SmartEditCtrl);

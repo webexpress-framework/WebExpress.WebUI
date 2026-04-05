@@ -300,7 +300,7 @@ namespace WebExpress.WebUI.WebControl
                 {
                     html = html.AddUserAttribute(prefix + "label", ds.Title);
                 }
-                if (ds.Data != null && ds.Data.Count != 0)
+                if (ds.Data is not null && ds.Data.Count != 0)
                 {
                     html = html.AddUserAttribute(prefix + "data", SerializeJson(ds.Data));
                 }

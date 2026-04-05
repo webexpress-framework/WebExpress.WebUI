@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<div id=""id"" class=""wx-webui-chart"" data-type=""line""></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -26,7 +26,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Muted, @"<div class=""wx-webui-chart text-muted"" data-type=""line""></div>")]
         public void TextColor(TypeColorText color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -58,7 +58,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 TextColor = new PropertyColorText(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -79,7 +79,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Transparent, @"<div class=""wx-webui-chart bg-transparent"" data-type=""line""></div>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -88,7 +88,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 BackgroundColor = new PropertyColorBackground(backgroundColor)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -108,7 +108,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeChart.Scatter, @"<div class=""wx-webui-chart"" data-type=""scatter""></div>")]
         public void Type(TypeChart type, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -117,7 +117,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Type = type
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -133,7 +133,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-chart"" data-type=""line"" data-title-text=""WebExpress.WebUI""></div>")]
         public void Title(string title, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -142,7 +142,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Title = title
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -158,7 +158,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-chart"" data-type=""line"" data-scale-x-title=""WebExpress.WebUI""></div>")]
         public void TitleX(string titleX, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -167,7 +167,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 TitleX = titleX
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -183,7 +183,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-chart"" data-type=""line"" data-scale-y-title=""WebExpress.WebUI""></div>")]
         public void TitleY(string titleY, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -192,7 +192,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 TitleY = titleY
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -207,7 +207,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(500, @"<div class=""wx-webui-chart"" data-type=""line"" data-width=""500""></div>")]
         public void Width(int width, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -216,7 +216,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Width = width
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -231,7 +231,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(300, @"<div class=""wx-webui-chart"" data-type=""line"" data-height=""300""></div>")]
         public void Height(int height, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -240,7 +240,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Height = height
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -255,7 +255,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(0f, @"<div class=""wx-webui-chart"" data-type=""line"" data-scale-y-min=""0""></div>")]
         public void Minimum(float minimum, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -264,7 +264,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Minimum = minimum
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -279,7 +279,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(100f, @"<div class=""wx-webui-chart"" data-type=""line"" data-scale-y-max=""100""></div>")]
         public void Maximum(float maximum, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -288,7 +288,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Maximum = maximum
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -301,7 +301,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Fact]
         public void Labels()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -311,7 +311,7 @@ namespace WebExpress.WebUI.Test.WebControl
             }
                 .AddLabel(labels);
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -328,7 +328,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"<div class=""wx-webui-chart"" data-type=""line"" data-responsive=""true""></div>")]
         public void Responsive(bool value, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -337,7 +337,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Responsive = value
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -352,7 +352,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"<div class=""wx-webui-chart"" data-type=""line"" data-maintain-aspect-ratio=""true""></div>")]
         public void MaintainAspectRatio(bool value, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -361,7 +361,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 MaintainAspectRatio = value
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -376,7 +376,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"<div class=""wx-webui-chart"" data-type=""line"" data-legend-display=""true""></div>")]
         public void LegendDisplay(bool value, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -385,7 +385,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 LegendDisplay = value
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -400,7 +400,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"<div class=""wx-webui-chart"" data-type=""line"" data-title-display=""true""></div>")]
         public void TitleDisplay(bool value, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -409,7 +409,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 TitleDisplay = value
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -424,7 +424,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"<div class=""wx-webui-chart"" data-type=""line"" data-scale-y-begin-at-zero=""true""></div>")]
         public void YBeginAtZero(bool value, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -433,7 +433,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 YBeginAtZero = value
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -448,7 +448,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"<div class=""wx-webui-chart"" data-type=""line"" data-scale-x-begin-at-zero=""true""></div>")]
         public void XBeginAtZero(bool value, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -457,7 +457,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 XBeginAtZero = value
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -470,7 +470,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Fact]
         public void DatasetSingle()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -485,7 +485,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlChart()
                 .AddDataset(ds);
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -506,7 +506,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Fact]
         public void DatasetsMultiple()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -529,7 +529,7 @@ namespace WebExpress.WebUI.Test.WebControl
                     BorderWidth = 2
                 });
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation 

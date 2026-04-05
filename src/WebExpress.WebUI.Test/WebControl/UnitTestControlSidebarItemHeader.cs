@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<div id=""id"" class=""wx-sidebar-header""></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -26,7 +26,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -42,7 +42,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.WebUI:plugin.name", @"<div class=""wx-sidebar-header"" data-label=""WebExpress.WebUI""></div>")]
         public void Text(string text, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -51,7 +51,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Text = text,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -67,7 +67,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.WebUI:plugin.name", @"<div class=""wx-sidebar-header"" data-title=""WebExpress.WebUI""></div>")]
         public void Tooltip(string tooltip, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -76,7 +76,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Tooltip = tooltip,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -97,7 +97,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Muted, @"<div class=""wx-sidebar-header"" data-color-css=""text-muted""></div>")]
         public void Color(TypeColorText color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -106,7 +106,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Color = new PropertyColorText(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -121,7 +121,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"<div class=""wx-sidebar-header"" disabled></div>")]
         public void Disable(bool disabled, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -130,7 +130,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Disabled = disabled,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation

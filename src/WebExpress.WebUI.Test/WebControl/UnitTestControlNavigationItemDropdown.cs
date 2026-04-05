@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<div id=""id"" class=""wx-webui-dropdown"" role=""button""></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -28,9 +28,10 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -48,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorButton.Dark, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-dark""></div>")]
         public void Color(TypeColorButton color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -57,9 +58,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 Color = new PropertyColorButton(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -72,7 +74,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeSizeButton.Large, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-lg""></div>")]
         public void Size(TypeSizeButton size, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -81,9 +83,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 Size = size
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -95,7 +98,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-outline-primary""></div>")]
         public void Outline(bool outline, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -105,9 +108,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 Color = new PropertyColorButton(TypeColorButton.Primary)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -119,7 +123,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeBlockButton.Block, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-block""></div>")]
         public void Block(TypeBlockButton block, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -128,9 +132,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 Block = block
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -142,7 +147,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeToggleDropdown.Toggle, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""dropdown-toggle""></div>")]
         public void Toogle(TypeToggleDropdown toogle, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -151,9 +156,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 Toggle = toogle
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -166,7 +172,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.WebUI:plugin.name", @"<div class=""wx-webui-dropdown"" role=""button"" data-label=""WebExpress.WebUI""></div>")]
         public void Text(string text, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -175,9 +181,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 Text = text,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -190,7 +197,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.WebUI:plugin.name", @"<div class=""wx-webui-dropdown"" role=""button""></div>")]
         public void Tooltip(string tooltip, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -199,9 +206,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 Tooltip = tooltip,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -213,18 +221,19 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(typeof(IconStar), @"<div class=""wx-webui-dropdown"" role=""button"" data-icon=""fas fa-star""></div>")]
         public void Icon(Type icon, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemDropdown()
             {
-                Icon = icon != null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -237,7 +246,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeActive.Disabled, @"<div class=""wx-webui-dropdown"" role=""button"" disabled></div>")]
         public void Active(TypeActive active, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -246,9 +255,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 Active = active
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -260,7 +270,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeAlignmentDropdownMenu.Right, @"<div class=""wx-webui-dropdown"" role=""button"" data-menuCss=""dropdown-menu-end""></div>")]
         public void AlignmentMenu(TypeAlignmentDropdownMenu alignmentMenu, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -269,9 +279,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 AlignmentMenu = alignmentMenu
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -281,17 +292,18 @@ namespace WebExpress.WebUI.Test.WebControl
         [Fact]
         public void Add()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemDropdown();
 
-            // test execution
+            // act
             control.Add(new ControlDropdownItemLink() { Text = "abc" });
 
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-dropdown"" role=""button""><div class=""wx-dropdown-item"">abc</div></div>", html.Trim());
         }
     }

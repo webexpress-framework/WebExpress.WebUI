@@ -56,9 +56,16 @@ namespace WebExpress.WebUI.WebControl
         public bool Active { get; set; }
 
         /// <summary>
-        /// Returns or sets the id of a modal dialogue.
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// click to open a modal or similar target.
         /// </summary>
-        public string Modal { get; set; }
+        public IAction PrimaryAction { get; set; }
+
+        /// <summary>
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// double‑click to open a modal or similar target.
+        /// </summary>
+        public IAction SecondaryAction { get; set; }
 
         /// <summary>
         /// Returns or sets the link color.
@@ -143,11 +150,10 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-label", I18N.Translate(Text))
                 .AddUserAttribute("data-expand", Expand ? "true" : null)
                 .AddUserAttribute("data-active", Active ? "true" : null)
-                .AddUserAttribute("data-modal", Modal)
                 .AddUserAttribute("data-color", Color.ToClass())
                 .AddUserAttribute("data-tooltip", Tooltip)
                 .AddUserAttribute("data-uri", Uri?.ToString())
-                .AddUserAttribute("data-target", Target.ToStringValue());
+                .AddUserAttribute("data-target", Target.ToValue());
 
             if (IconOpen == IconClose && Icon is Icon icon)
             {
@@ -178,6 +184,9 @@ namespace WebExpress.WebUI.WebControl
             {
                 html.AddUserAttribute("data-image-closed", imageClose.Uri?.ToString());
             }
+
+            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

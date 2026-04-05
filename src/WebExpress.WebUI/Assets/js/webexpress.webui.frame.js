@@ -21,6 +21,8 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
         this._element.removeAttribute("data-selector");
         this._element.removeAttribute("data-autoload");
 
+        this._element.classList.add("wx-frame");
+
         // autoload content if configured
         if (this._autoload) {
             this.load();
@@ -73,6 +75,11 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
      * @param {string} response - The raw HTML string fetched from the server.
      */
     _update(response) {
+        if (!response) {
+            this._element.innerHTML = "";
+            return;
+        }
+
         // parse the incoming html into a detached document
         const parser = new DOMParser();
         const doc = parser.parseFromString(response, "text/html");
@@ -83,11 +90,93 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
             source = doc.body;
         }
 
-        // replace host element content with the selected region's inner html
+        // use document fragment for efficient batch insertion
+        const fragment = document.createDocumentFragment();
+        const scriptsToExecute = [];
+
+        // move nodes to fragment and collect scripts
+        while (source.firstChild) {
+            const node = source.firstChild;
+            if (node.tagName === "SCRIPT") {
+                scriptsToExecute.push(node);
+                // remove original script from source
+                source.removeChild(node); 
+            } else {
+                fragment.appendChild(node);
+            }
+        }
+
+        // clear host and append fragment
         this._element.innerHTML = "";
-        Array.from(source.childNodes).forEach(node => {
-            this._element.appendChild(node);
+        this._element.appendChild(fragment);
+
+        // execute scripts that were found in the content
+        this._executeScripts(scriptsToExecute);
+    }
+
+    /**
+     * Executes script elements by recreating them, as inserted script tags
+     * via innerHTML or appendChild are not executed by the browser automatically.
+     * @param {Array<HTMLScriptElement>} scripts - List of script elements to execute.
+     */
+    _executeScripts(scripts) {
+        scripts.forEach((oldScript) => {
+            const newScript = document.createElement("script");
+            
+            // copy attributes
+            Array.from(oldScript.attributes).forEach((attr) => {
+                newScript.setAttribute(attr.name, attr.value);
+            });
+
+            // copy content
+            newScript.textContent = oldScript.textContent;
+
+            // append to host to trigger execution
+            this._element.appendChild(newScript);
+            
+            // optionally remove script tag after execution to keep dom clean
+            // this._element.removeChild(newScript);
         });
+    }
+
+    /**
+     * Renders an error message structure into the host element.
+     * @param {Error} error - The error object caught during fetch.
+     */
+    _renderError(error) {
+        this._element.innerHTML = "";
+
+        // create the expandable error container using ExpandableCtrl
+        const expandableDiv = document.createElement("div");
+        expandableDiv.setAttribute("data-header", this._i18n("webexpress.webui:frame.contentNotLoaded.label", "Content could not be loaded."));
+        expandableDiv.setAttribute("data-headercss", "fw-bold text-danger");
+        expandableDiv.setAttribute("data-icon", "fa-solid fa-triangle-exclamation text-warning me-2");
+        expandableDiv.setAttribute("data-expanded", "false");
+        expandableDiv.className = "mb-2 alert alert-danger";
+
+        // prepare error message
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "mb-2";
+        messageDiv.textContent = this._i18n("webexpress.webui:frame.contentNotLoaded.details", "An error occurred while loading external content.");
+        
+        // prepare stacktrace if available
+        const stackDiv = document.createElement("pre");
+        stackDiv.className = "bg-light border rounded p-2 mb-0";
+        if (typeof error === "object" && error !== null && error.stack) {
+            stackDiv.textContent = error.stack;
+        } else {
+            stackDiv.textContent = String(error);
+        }
+
+        // add message and stacktrace to expandable content
+        expandableDiv.appendChild(messageDiv);
+        expandableDiv.appendChild(stackDiv);
+
+        // initialize the ExpandableCtrl
+        new webexpress.webui.ExpandableCtrl(expandableDiv);
+
+        // render the expandable error container
+        this._element.appendChild(expandableDiv);
     }
 
     /**
@@ -125,40 +214,7 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
                 this._dispatch(webexpress.webui.Event.DATA_ARRIVED_EVENT, { uri: this._uri, response: html });
             })
             .catch((error) => {
-                // on error, present message
-                this._element.innerHTML = "";
-
-                // create the expandable error container using ExpandableCtrl
-                const expandableDiv = document.createElement("div");
-                expandableDiv.setAttribute("data-header", this._i18n("webexpress.webui:frame.contentNotLoaded.label", "Content could not be loaded."));
-                expandableDiv.setAttribute("data-headercss", "fw-bold text-danger");
-                expandableDiv.setAttribute("data-icon", "fa-solid fa-triangle-exclamation text-warning me-2");
-                expandableDiv.setAttribute("data-expanded", "false");
-                expandableDiv.className = "mb-2 alert alert-danger";
-
-                // prepare error message and stacktrace
-                const messageDiv = document.createElement("div");
-                messageDiv.className = "mb-2";
-                messageDiv.textContent = this._i18n("webexpress.webui:frame.contentNotLoaded.details", "");
-                
-                // prepare stacktrace if available
-                const stackDiv = document.createElement("pre");
-                stackDiv.className = "bg-light border rounded p-2 mb-0";
-                if (typeof error === "object" && error !== null && error.stack) {
-                    stackDiv.textContent = error.stack;
-                } else {
-                    stackDiv.textContent = String(error);
-                }
-
-                // add message and stacktrace to expandable content
-                expandableDiv.appendChild(messageDiv);
-                expandableDiv.appendChild(stackDiv);
-
-                // initialize the ExpandableCtrl from expandable_controller.js
-                const expandable = new webexpress.webui.ExpandableCtrl(expandableDiv);
-
-                // render the expandable error container
-                this._element.appendChild(expandableDiv);
+                this._renderError(error);
             });
     }
 
@@ -170,16 +226,23 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Sets a new URI and optionally reloads the content.
-     * @param {string} uri - The new URI to fetch content from.
-     * @param {boolean} [reload=true] - When true, triggers an immediate reload.
+     * Returns the currently configured URI.
+     * @returns {string} The active URI value.
      */
-    setUri(uri, reload = true) {
+    get uri() {
+        return this._uri;
+    }
+
+    /**
+     * Updates the internal URI value without triggering a reload.
+     * Use this setter when you only want to change the URI.
+     * @param {string} value - The new URI to assign.
+     */
+    set uri(value) {
         // update internal uri and optionally reload
-        this._uri = String(uri || "");
-        if (reload) {
-            this.load();
-        }
+        this._uri = String(value || "");
+
+        this.load();
     }
 };
 

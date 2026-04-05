@@ -1,10 +1,10 @@
 /**
  * ButtonSplitToggleCtrl handles a toggle button to collapse or expand the split side pane.
- * triggers CLICK_EVENT on toggling.
+ * Triggers CLICK_EVENT on toggling.
  */
 webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCtrl {
     /**
-     * constructs the controller instance and initializes properties from data attributes
+     * Constructs the controller instance and initializes properties from data attributes.
      * @param {HTMLElement} element - target DOM element
      */
     constructor(element) {
@@ -38,7 +38,7 @@ webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCt
     }
 
     /**
-     * renders the button UI based on the current state and properties
+     * Renders the button UI based on the current state and properties.
      */
     render() {
         // always clear previous content
@@ -68,14 +68,14 @@ webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCt
     }
 
     /**
-     * returns the label
+     * Returns the label.
      */
     get label() {
         return this._label;
     }
     
     /**
-     * sets the label and triggers render
+     * Sets the label and triggers render.
      */
     set label(value) {
         this._label = value;
@@ -83,14 +83,14 @@ webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCt
     }
 
     /**
-     * returns the icon for collapse state
+     * Returns the icon for collapse state.
      */
     get iconCollapse() {
         return this._iconCollapse;
     }
     
     /**
-     * sets the icon for collapse state and triggers render
+     * Sets the icon for collapse state and triggers render.
      */
     set iconCollapse(value) {
         this._iconCollapse = value;
@@ -98,14 +98,14 @@ webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCt
     }
 
     /**
-     * returns the icon for expand state
+     * Returns the icon for expand state.
      */
     get iconExpand() {
         return this._iconExpand;
     }
     
     /**
-     * sets the icon for expand state and triggers render
+     * Sets the icon for expand state and triggers render.
      */
     set iconExpand(value) {
         this._iconExpand = value;
@@ -113,14 +113,14 @@ webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCt
     }
 
     /**
-     * returns the image URL for collapse state
+     * Returns the image URL for collapse state.
      */
     get imageCollapse() {
         return this._imageCollapse;
     }
     
     /**
-     * sets the image URL for collapse state and triggers render
+     * Sets the image URL for collapse state and triggers render.
      */
     set imageCollapse(value) {
         this._imageCollapse = value;
@@ -128,14 +128,14 @@ webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCt
     }
     
     /**
-     * returns the image URL for expand state
+     * Returns the image URL for expand state.
      */
     get imageExpand() {
         return this._imageExpand;
     }
     
     /**
-     * sets the image URL for expand state and triggers render
+     * Sets the image URL for expand state and triggers render.
      */
     set imageExpand(value) {
         this._imageExpand = value;
@@ -143,14 +143,14 @@ webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCt
     }
     
     /**
-     * returns true if collapsed
+     * Returns true if collapsed.
      */
     get collapsed() {
         return this._collapsed;
     }
     
     /**
-     * sets the collapsed state and updates the button view
+     * Sets the collapsed state and updates the button view.
      */
     set collapsed(value) {
         this._collapsed = value;
@@ -158,7 +158,7 @@ webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCt
     }
 
     /**
-     * toggles the collapsed state and updates the button view
+     * Toggles the collapsed state and updates the button view.
      */
     toggle() {
         this._collapsed = !this._collapsed;

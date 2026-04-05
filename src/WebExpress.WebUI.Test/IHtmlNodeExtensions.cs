@@ -15,7 +15,7 @@ namespace WebExpress.WebUI.Test
         /// <returns>A string with all consecutive spaces and line breaks reduced to single ones.</returns>
         public static string Trim(this IHtmlNode node)
         {
-            if (node == null)
+            if (node is null)
             {
                 return string.Empty;
             }

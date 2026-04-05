@@ -19,7 +19,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<span id=""id"" class=""badge""></span>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -43,7 +43,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(10, @"<span class=""badge"">10</span>")]
         public void Value(int? value, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -52,7 +52,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Value = value?.ToString()
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -66,16 +66,16 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("http://example.com", @"<a class=""badge link"" href=""http://example.com/""></a>")]
         public void Uri(string uri, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlBadge()
             {
-                Uri = uri != null ? new UriEndpoint(uri) : null
+                Uri = uri is not null ? new UriEndpoint(uri) : null
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -97,7 +97,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Muted, @"<span class=""badge text-muted""></span>")]
         public void TextColor(TypeColorText color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -106,7 +106,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 TextColor = new PropertyColorText(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -125,7 +125,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackgroundBadge.Light, @"<span class=""badge text-bg-light""></span>")]
         public void BackgroundColor(TypeColorBackgroundBadge backgroundColor, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -134,7 +134,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 BackgroundColor = new PropertyColorBackgroundBadge(backgroundColor)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -148,7 +148,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypePillBadge.Pill, @"<span class=""badge rounded-pill""></span>")]
         public void Pill(TypePillBadge pill, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -157,7 +157,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Pill = pill
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);

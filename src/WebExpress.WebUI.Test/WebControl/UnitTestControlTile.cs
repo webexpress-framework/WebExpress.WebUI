@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<div id=""id"" class=""wx-webui-tile""></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -26,9 +26,10 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -40,7 +41,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"<div class=""wx-webui-tile"" data-movable=""true""></div>")]
         public void Movable(bool movable, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -49,9 +50,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 Movable = movable
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -63,7 +65,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"<div class=""wx-webui-tile"" data-allow-remove=""true""></div>")]
         public void AllowRemove(bool allowRemove, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -72,9 +74,35 @@ namespace WebExpress.WebUI.Test.WebControl
                 AllowRemove = allowRemove
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the large icon property of the tile control.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-webui-tile""></div>")]
+        [InlineData(true, @"<div class=""wx-webui-tile"" data-large-icon=""true""></div>")]
+        public void LargeIcon(bool largeIcon, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTile(null)
+            {
+                LargeIcon = largeIcon
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -84,7 +112,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Fact]
         public void Add()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -93,14 +121,14 @@ namespace WebExpress.WebUI.Test.WebControl
             // add column
             control.Add(new ControlTileCard());
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // expected HTML
             var expected = @"<div class=""wx-webui-tile""><div class=""wx-tile-card""></div></div>";
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
-
     }
 }

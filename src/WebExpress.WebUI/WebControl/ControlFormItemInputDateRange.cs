@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using WebExpress.WebCore.Internationalization;
+﻿using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -16,11 +15,6 @@ namespace WebExpress.WebUI.WebControl
         public string Description { get; set; }
 
         /// <summary>
-        /// Returns or sets whether inputs are enforced.
-        /// </summary>
-        public bool Required { get; set; }
-
-        /// <summary>
         /// Gets or sets the placeholder text displayed when no date is selected.
         /// </summary>
         public string Placeholder { get; set; }
@@ -33,17 +27,8 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
         /// </summary>
-        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
-        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="items">The entries.</param>
-        public ControlFormItemInputDateRange
-        (
-            [CallerMemberName] string instance = null,
-            [CallerFilePath] string file = null,
-            [CallerLineNumber] int? line = null
-        )
-            : this($"datepicker_range{instance}_{file}_{line}".GetHashCode().ToString("X"))
+        public ControlFormItemInputDateRange()
+            : this(DeterministicId.Create())
         {
         }
 

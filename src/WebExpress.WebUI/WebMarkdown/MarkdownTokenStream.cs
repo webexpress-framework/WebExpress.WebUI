@@ -36,7 +36,7 @@ namespace WebExpress.WebUI.WebMarkdown
 
             var last = _tokens.LastOrDefault();
 
-            if (last == null)
+            if (last is null)
             {
                 _tokens.Add(new MarkdownToken(MarkdownTokenType.EOF, "", 0));
             }
@@ -57,7 +57,7 @@ namespace WebExpress.WebUI.WebMarkdown
             {
                 var tokens = tokenStream._tokens.Where(x => x.Type != MarkdownTokenType.EOF);
                 var lastToken = tokens.LastOrDefault();
-                var position = lastToken != null ? lastToken.Position + lastToken.Count + 1 : 0;
+                var position = lastToken is not null ? lastToken.Position + lastToken.Count + 1 : 0;
 
                 _tokens.AddRange(tokens);
                 _tokens.Add(new MarkdownToken(MarkdownTokenType.EOL, "", position));
@@ -91,12 +91,12 @@ namespace WebExpress.WebUI.WebMarkdown
         {
             var currentToken = _position < _tokens.Count ? _tokens[_position] : null;
 
-            if (currentToken == null)
+            if (currentToken is null)
             {
                 return null;
             }
 
-            if (tokenType == null || tokenType.Length == 0)
+            if (tokenType is null || tokenType.Length == 0)
             {
                 return currentToken;
             }
@@ -125,10 +125,10 @@ namespace WebExpress.WebUI.WebMarkdown
             var nextIndex = _position + 1;
             var nextToken = nextIndex < _tokens.Count ? _tokens[nextIndex] : null;
 
-            if (nextToken == null)
+            if (nextToken is null)
                 return null;
 
-            if (tokenType == null || tokenType.Length == 0)
+            if (tokenType is null || tokenType.Length == 0)
                 return nextToken;
 
             if (tokenType.Contains(nextToken.Type))
@@ -152,7 +152,7 @@ namespace WebExpress.WebUI.WebMarkdown
         public MarkdownTokenStream Preview(params MarkdownTokenType[] stopTokens)
         {
             // no stop tokens specified → return everything
-            if (stopTokens == null || stopTokens.Length == 0)
+            if (stopTokens is null || stopTokens.Length == 0)
             {
                 var remaining = _tokens.Skip(_position);
                 return new MarkdownTokenStream(remaining, _source);
@@ -198,10 +198,10 @@ namespace WebExpress.WebUI.WebMarkdown
         {
             var current = Peek();
 
-            if (current == null)
+            if (current is null)
                 return null;
 
-            if (expectedTypes == null || expectedTypes.Length == 0 || expectedTypes.Contains(current.Type))
+            if (expectedTypes is null || expectedTypes.Length == 0 || expectedTypes.Contains(current.Type))
                 return _tokens[_position++];
 
             return null;
@@ -216,7 +216,7 @@ namespace WebExpress.WebUI.WebMarkdown
         {
             var consumedTokens = new List<MarkdownToken>();
 
-            while (!IsAtEnd() && Peek() != null)
+            while (!IsAtEnd() && Peek() is not null)
             {
                 var currentToken = Peek();
 
@@ -250,7 +250,7 @@ namespace WebExpress.WebUI.WebMarkdown
         public MarkdownTokenStream Skip(params MarkdownTokenType[] skipTokenTypes)
         {
             // if no types provided, skip one token unconditionally
-            if (skipTokenTypes == null || skipTokenTypes.Length == 0)
+            if (skipTokenTypes is null || skipTokenTypes.Length == 0)
             {
                 if (_position < _tokens.Count)
                 {
@@ -266,7 +266,7 @@ namespace WebExpress.WebUI.WebMarkdown
             {
                 var currentToken = Peek();
 
-                if (currentToken == null || !skipSet.Contains(currentToken.Type))
+                if (currentToken is null || !skipSet.Contains(currentToken.Type))
                     break;
 
                 if (_position < _tokens.Count)
@@ -412,7 +412,7 @@ namespace WebExpress.WebUI.WebMarkdown
             // get the start position of the first token, and the end position of the last token
             var first = firstToken?.Position ?? 0;
             // assuming tokens have a Length property to know how many characters they span
-            int end = (lastToken != null) ? lastToken.Position + lastToken.Count : firstToken?.Count ?? 0;
+            int end = (lastToken is not null) ? lastToken.Position + lastToken.Count : firstToken?.Count ?? 0;
 
             // extract and return the substring from the source text
             return _source[first..end];
@@ -429,7 +429,7 @@ namespace WebExpress.WebUI.WebMarkdown
         /// </returns>
         public string GetSource(MarkdownToken start, MarkdownToken end)
         {
-            if (start == null || end == null)
+            if (start is null || end is null)
             {
                 return string.Empty;
             }

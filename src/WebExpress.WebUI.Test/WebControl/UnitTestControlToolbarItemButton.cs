@@ -22,7 +22,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<div id=""id"" class=""wx-toolbar-button""></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -30,7 +30,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -45,7 +45,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.WebUI:plugin.name", @"<div class=""wx-toolbar-button"" data-label=""WebExpress.WebUI""></div>")]
         public void Text(string text, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -54,7 +54,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Text = text,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -69,7 +69,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.WebUI:plugin.name", @"<div class=""wx-toolbar-button"" data-title=""WebExpress.WebUI""></div>")]
         public void Tooltip(string tooltip, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -78,7 +78,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Tooltip = tooltip,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -92,16 +92,16 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(typeof(IconStar), @"<div class=""wx-toolbar-button"" data-icon=""fas fa-star""></div>")]
         public void Icon(Type icon, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemButton()
             {
-                Icon = icon != null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -116,7 +116,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeActive.Disabled, @"<div class=""wx-toolbar-button"" disabled></div>")]
         public void Active(TypeActive active, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -125,32 +125,57 @@ namespace WebExpress.WebUI.Test.WebControl
                 Active = active
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
         /// <summary>
-        /// Tests the modal property of the toolbar item button control.
+        /// Tests the primary action property of the toolbar item button control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-toolbar-button""></div>")]
-        [InlineData("id", @"<div class=""wx-toolbar-button"" data-modal=""id""></div>")]
-        public void Modal(string modal, string expected)
+        [InlineData("id", @"<div class=""wx-toolbar-button"" data-wx-primary-action=""modal"" data-wx-primary-target=""#id""></div>")]
+        public void PrimaryAction(string modal, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemButton()
             {
-                Modal = modal
+                PrimaryAction = new ActionModal(modal)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
+        }
+
+        /// <summary>
+        /// Tests the secondary action property of the toolbar item button control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-toolbar-button""></div>")]
+        [InlineData("id", @"<div class=""wx-toolbar-button"" data-wx-secondary-action=""modal"" data-wx-secondary-target=""#id""></div>")]
+        public void SecondaryAction(string modal, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlToolbarItemButton()
+            {
+                SecondaryAction = new ActionModal(modal)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
         }
 
@@ -163,16 +188,16 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("/a/b", @"<div class=""wx-toolbar-button"" data-uri=""/a/b""></div>")]
         public void Uri(string uri, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemButton()
             {
-                Uri = uri != null ? new UriEndpoint(uri) : null,
+                Uri = uri is not null ? new UriEndpoint(uri) : null,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
@@ -192,7 +217,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Muted, @"<div class=""wx-toolbar-button"" data-color-css=""text-muted""></div>")]
         public void Color(TypeColorText color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -201,7 +226,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Color = new PropertyColorText(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -218,7 +243,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeTarget.Framename, @"<div class=""wx-toolbar-button"" data-target=""_framename""></div>")]
         public void Target(TypeTarget target, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -227,7 +252,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Target = target,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
@@ -242,7 +267,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeToolbarItemAlignment.Right, @"<div class=""wx-toolbar-button"" data-align=""right""></div>")]
         public void Alignment(TypeToolbarItemAlignment alignment, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -251,7 +276,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Alignment = alignment,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html.Trim());

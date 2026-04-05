@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            if (Uri != null)
+            if (Uri is not null)
             {
                 return new HtmlElementTextSemanticsA(new HtmlText(Value))
                 {

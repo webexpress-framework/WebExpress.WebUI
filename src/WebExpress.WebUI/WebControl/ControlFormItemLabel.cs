@@ -48,10 +48,10 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id,
                 Text = I18N.Translate(renderContext.Request?.Culture, Text),
-                Class = GetClasses(),
+                Class = Css.Concatenate("wx-form-label", GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
-                For = FormItem != null ?
+                For = FormItem is not null ?
                     string.IsNullOrWhiteSpace(FormItem.Id) ?
                     FormItem.Name :
                     FormItem.Id :

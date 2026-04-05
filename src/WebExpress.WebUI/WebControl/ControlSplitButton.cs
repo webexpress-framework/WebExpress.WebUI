@@ -70,9 +70,16 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the id of a modal dialogue.
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// click to open a modal or similar target.
         /// </summary>
-        public string Modal { get; set; }
+        public IAction PrimaryAction { get; set; }
+
+        /// <summary>
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// double‑click to open a modal or similar target.
+        /// </summary>
+        public IAction SecondaryAction { get; set; }
 
         /// <summary>
         /// Returns or sets the content.
@@ -164,7 +171,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles()
             };
 
-            if (Icon != null)
+            if (Icon is not null)
             {
                 button.Add(new ControlIcon()
                 {
@@ -185,11 +192,8 @@ namespace WebExpress.WebUI.WebControl
                 button.Add(new HtmlText(Text));
             }
 
-            if (!string.IsNullOrWhiteSpace(Modal))
-            {
-                button.AddUserAttribute("data-wx-toggle", "modal");
-                button.AddUserAttribute("data-wx-target", $"#{Modal}");
-            }
+            PrimaryAction?.ApplyUserAttributes(button, TypeAction.Primary);
+            SecondaryAction?.ApplyUserAttributes(button, TypeAction.Secondary);
 
             var dropdownButton = new HtmlElementFieldButton(new HtmlElementTextSemanticsSpan() { Class = "caret" })
             {
@@ -206,7 +210,7 @@ namespace WebExpress.WebUI.WebControl
                     Items.Select
                     (
                         x =>
-                        x == null || x is ControlDropdownItemDivider || x is ControlLine ?
+                        x is null || x is ControlDropdownItemDivider || x is ControlLine ?
                         new HtmlElementTextContentLi() { Class = "dropdown-divider", Inline = true } :
                         x is ControlDropdownItemHeader ?
                         x.Render(renderContext, visualTree) :

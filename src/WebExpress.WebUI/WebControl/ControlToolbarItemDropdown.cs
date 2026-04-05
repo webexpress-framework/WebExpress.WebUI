@@ -144,7 +144,7 @@ namespace WebExpress.WebUI.WebControl
         /// Adds a new separator.
         /// </summary>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlToolbarItemDropdown AddSeperator()
+        public IControlToolbarItemDropdown AddSeparator()
         {
             _items.Add(null);
 
@@ -183,6 +183,31 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            return Render(renderContext, visualTree, _items, Icon);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="items">The items in the dropdown.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlDropdownItem> items)
+        {
+            return Render(renderContext, visualTree, items, Icon);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="items">The items in the dropdown.</param>
+        /// <param name="icon">The icon for the dropdown.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlDropdownItem> items, IIcon icon)
+        {
             var buttonCss = "";
 
             if (Size != TypeSizeButton.Default)
@@ -207,8 +232,8 @@ namespace WebExpress.WebUI.WebControl
             }
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, Text))
                 .AddUserAttribute("data-title", I18N.Translate(renderContext, Tooltip))
-                .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-icon", (icon as Icon)?.Class)
+                .AddUserAttribute("data-image", (icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-color-css", Color?.ToClass())
                 .AddUserAttribute("data-color-style", Color?.ToStyle())
                 .AddUserAttribute("data-toggle", Toggle == TypeToggleDropdown.Toggle ? "true" : null)
@@ -216,7 +241,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute(Active == TypeActive.Disabled ? "disabled" : null)
                 .AddUserAttribute("data-align", Alignment.ToValue())
                 .AddUserAttribute("data-overflow", Overflow.ToValue())
-                .Add(_items.Select(x => x.Render(renderContext, visualTree)));
+                .Add(items.Select(x => x.Render(renderContext, visualTree)));
 
             return html;
         }

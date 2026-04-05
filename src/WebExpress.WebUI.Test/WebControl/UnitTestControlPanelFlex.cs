@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<div id=""id""></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -26,7 +26,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -43,7 +43,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeDirection.HorizontalReverse, @"<div class=""flex-row-reverse""></div>")]
         public void Direction(TypeDirection direction, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -52,7 +52,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Direction = direction,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -67,7 +67,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypePanelContainer.Fluid, @"<div class=""container-fluid""></div>")]
         public void Fluid(TypePanelContainer fluid, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -76,7 +76,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Fluid = fluid,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -91,7 +91,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeLayoutFlex.Inline, @"<div class=""d-inline-flex""></div>")]
         public void Layout(TypeLayoutFlex layout, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -100,7 +100,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Layout = layout,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -117,7 +117,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeJustifiedFlex.End, @"<div class=""justify-content-end""></div>")]
         public void Justify(TypeJustifiedFlex justify, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -126,7 +126,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Justify = justify,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -143,7 +143,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeAlignFlex.End, @"<div class=""align-items-end""></div>")]
         public void Align(TypeAlignFlex align, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -152,7 +152,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Align = align,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -168,7 +168,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeWrap.Reverse, @"<div class=""flex-wrap-reverse""></div>")]
         public void Wrap(TypeWrap wrap, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -177,7 +177,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Wrap = wrap,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -192,7 +192,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeTheme.Dark, @"<div data-bs-theme=""dark""></div>")]
         public void Theme(TypeTheme theme, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -201,7 +201,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Theme = theme
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -216,14 +216,14 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(typeof(ControlImage), @"<div><img></div>")]
         public void Add(Type child, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var childInstance = Activator.CreateInstance(child, [null]) as IControl;
             var control = new ControlPanelFlex();
 
-            // test execution
+            // act
             control.Add(childInstance);
 
             var html = control.Render(context, visualTree);

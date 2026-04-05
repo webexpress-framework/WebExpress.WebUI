@@ -19,7 +19,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<ol id=""id"" class=""wx-breadcrumb wx-sm""></ol>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -27,9 +27,10 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -41,18 +42,19 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("http://example.com/a/b/c", @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
         public void Uri(string uri, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlBreadcrumb 
-            { 
-                Uri = new UriEndpoint(uri) 
+            var control = new ControlBreadcrumb
+            {
+                Uri = new UriEndpoint(uri)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -67,19 +69,20 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeSizeText.ExtraLarge, @"<ol class=""wx-breadcrumb wx-elg""></ol>")]
         public void Size(TypeSizeText size, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlBreadcrumb 
-            { 
-                Size = size, 
-                Uri = new UriEndpoint("http://example.com/a/b/c") 
+            var control = new ControlBreadcrumb
+            {
+                Size = size,
+                Uri = new UriEndpoint("http://example.com/a/b/c")
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -91,15 +94,16 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("Prefix", @"<ol class=""wx-breadcrumb wx-sm""><li class=""wx-breadcrumb-prefix""><div>Prefix</div></li></ol>")]
         public void Prefix(string prefix, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlBreadcrumb { Prefix = prefix, Uri = new UriEndpoint("http://example.com") };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -111,15 +115,16 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(3, @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
         public void TakeLast(ushort takeLast, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlBreadcrumb { TakeLast = takeLast, Uri = new UriEndpoint("http://example.com") };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -131,28 +136,24 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("http://localhost:80/app/page", @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
         public void Render(string uri, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
-            var context = UnitTestControlFixture.CreateRenderContextMock(application);
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
             var uriResource = new UriEndpoint(uri);
             var control = new ControlBreadcrumb()
             {
                 Uri = !string.IsNullOrWhiteSpace(uri) ? uriResource : null
             };
 
-            if (uriResource.PathSegments.LastOrDefault() != null)
-            {
-                uriResource.PathSegments.LastOrDefault().Display ??= "abc";
-            }
+            var uriProperty = renderContext.Request.GetType().GetProperty("Uri");
+            uriProperty.SetValue(renderContext.Request, uriResource);
 
-            var uriProperty = context.Request.GetType().GetProperty("Uri");
-            uriProperty.SetValue(context.Request, uriResource);
+            // act
+            var html = control.Render(renderContext, visualTree);
 
-            // test execution
-            var html = control.Render(context, visualTree);
-
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
     }

@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<form id=""id"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -28,9 +28,10 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -48,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Transparent, @"<form id=""*"" class=""bg-transparent"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void BackgroundColor(TypeColorBackground color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -57,9 +58,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 BackgroundColor = new PropertyColorBackground(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -71,7 +73,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""abc"">*</form>")]
         public void Name(string name, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -80,9 +82,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 Name = name
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -95,18 +98,19 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("http://localhost:8080/webui", @"<form id=""*"" action=""http://localhost:8080/webui"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void Uri(string uri, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlForm()
             {
-                Uri = uri != null ? new UriEndpoint(uri) : null
+                Uri = uri is not null ? new UriEndpoint(uri) : null
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -122,7 +126,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(RequestMethod.DELETE, @"<form id=""*"" action=""http://localhost:8080/"" method=""DELETE"" enctype=""multipart/form-data"">*</form>")]
         public void Method(RequestMethod method, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -131,9 +135,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 Method = method
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -145,7 +150,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeLayoutForm.Inline, @"<form id=""*"" class=""wx-form-inline"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void FormLayout(TypeLayoutForm formLayout, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -154,9 +159,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 FormLayout = formLayout
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -169,7 +175,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeLayoutFormItem.Mix, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void ItemLayout(TypeLayoutFormItem itemLayout, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -178,9 +184,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 ItemLayout = itemLayout
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -195,7 +202,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeJustifiedFlex.End, @"<form id=""*"" class=""justify-content-end"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void Justify(TypeJustifiedFlex justify, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -204,9 +211,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 Justify = justify,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -216,15 +224,16 @@ namespace WebExpress.WebUI.Test.WebControl
         [Fact]
         public void EmptyForm()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlForm();
 
+            // act
             var html = control.Render(context, visualTree);
 
-            // test execution
+            // validation
             AssertExtensions.EqualWithPlaceholders(@"<form id=""*"" action=*", html.Trim());
         }
 
@@ -234,16 +243,17 @@ namespace WebExpress.WebUI.Test.WebControl
         [Fact]
         public void EmptyFormChangeSubmitText()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlForm();
             control.AddPrimaryButton(new ControlFormItemButtonSubmit("") { Text = "sendbutton" });
 
+            // act
             var html = control.Render(context, visualTree);
 
-            // test execution
+            // validation
             Assert.Contains(@"sendbutton", html.Trim());
         }
 
@@ -255,7 +265,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"<form *>*<input value=""abc"" type=""text"" class=""form-control"">*</form>")]
         public void Value(string value, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -265,9 +275,10 @@ namespace WebExpress.WebUI.Test.WebControl
                 renderContext.SetValue(control, new ControlFormInputValueString(value));
             });
 
-            // test execution
+            // act
             var html = form.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
     }

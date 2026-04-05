@@ -1,8 +1,9 @@
 .wx-modalform {
 }
-    .wx-modalform > .modal-dialog > form {
-        background-color: transparent !important;
-        border: none !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
+
+.wx-modalform > .modal-dialog > form {
+    background-color: transparent !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}

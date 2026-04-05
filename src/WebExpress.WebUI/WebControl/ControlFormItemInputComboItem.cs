@@ -5,7 +5,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents an item in a combobox control within a form.
     /// </summary>
-    public class ControlFormItemInputComboItem
+    public class ControlFormItemInputComboItem : IControlFormItemInputComboItem
     {
         private readonly List<ControlFormItemInputComboItem> _subItems = [];
 

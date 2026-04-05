@@ -3,7 +3,7 @@ using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
-using WebExpress.WebCore.WebMessage;
+using WebExpress.WebCore.WebParameter;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
@@ -50,6 +50,18 @@ namespace WebExpress.WebUI.WebControl
         public List<Parameter> Params { get; set; }
 
         /// <summary>
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// click to open a modal or similar target.
+        /// </summary>
+        public IAction PrimaryAction { get; set; }
+
+        /// <summary>
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// double‑click to open a modal or similar target.
+        /// </summary>
+        public IAction SecondaryAction { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -68,7 +80,7 @@ namespace WebExpress.WebUI.WebControl
             var dict = new Dictionary<string, Parameter>();
 
             // copying the parameters of the link
-            if (Params != null)
+            if (Params is not null)
             {
                 foreach (var v in Params)
                 {
@@ -110,7 +122,7 @@ namespace WebExpress.WebUI.WebControl
                 OnClick = OnClick?.ToString()
             };
 
-            if (Icon != null)
+            if (Icon is not null)
             {
                 link.Add(new ControlIcon()
                 {
@@ -131,27 +143,24 @@ namespace WebExpress.WebUI.WebControl
                 link.Add(new HtmlText(I18N.Translate(renderContext.Request?.Culture, Text)));
             }
 
-            //if (Modal != null)
-            //{
-            //    html.AddUserAttribute("data-bs-toggle", "modal");
-            //    html.AddUserAttribute("data-bs-target", "#" + Modal.Id);
-
-            //    return new HtmlList(html, Modal.Render(context));
-            //}
-
             if (!string.IsNullOrWhiteSpace(Tooltip))
             {
                 link.AddUserAttribute("data-bs-toggle", "tooltip");
             }
 
-            return new HtmlElementTextContentLi(link)
+            PrimaryAction?.ApplyUserAttributes(link, TypeAction.Primary);
+            SecondaryAction?.ApplyUserAttributes(link, TypeAction.Secondary);
+
+            var html = new HtmlElementTextContentLi(link)
             {
                 Id = Id,
                 Class = Css.Concatenate("list-group-item-action", GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
                 OnClick = OnClick?.ToString()
-            }; ;
+            };
+
+            return html;
         }
     }
 }

@@ -53,6 +53,11 @@ namespace WebExpress.WebUI.WebControl
         public bool Disabled { get; set; }
 
         /// <summary>
+        /// Returns or sets whether inputs are enforced.
+        /// </summary>
+        public bool Required { get; set; }
+
+        /// <summary>
         /// Returns the elements that are displayed in front of the control.
         /// </summary>
         public IEnumerable<IControl> Prepend => _prepend;
@@ -86,7 +91,7 @@ namespace WebExpress.WebUI.WebControl
         {
             var value = renderContext.Request.GetParameter(Name)?.Value;
 
-            if (value == null)
+            if (value is null)
             {
                 var eventArgument = new ControlFormEventItemInitialize<TValue>()
                 {

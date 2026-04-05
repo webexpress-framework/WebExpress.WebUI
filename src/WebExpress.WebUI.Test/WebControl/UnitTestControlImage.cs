@@ -19,7 +19,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<img id=""id"">")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -42,16 +42,16 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("/a/b", @"<img src=""/a/b"">")]
         public void Route(string uri, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlImage()
             {
-                Uri = uri != null ? new UriEndpoint(uri) : null,
+                Uri = uri is not null ? new UriEndpoint(uri) : null,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -66,7 +66,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(1, @"<img width=""1"">")]
         public void Width(int width, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Width = width,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -90,7 +90,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(1, @"<img height=""1"">")]
         public void Height(int height, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -99,7 +99,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Height = height,
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -115,7 +115,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("a<br/>b", @"<img alt=""a<br/>b"" data-toggle=""tooltip"" title=""a<br/>b"">")]
         public void Tooltip(string tooltip, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -124,7 +124,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Tooltip = tooltip
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);

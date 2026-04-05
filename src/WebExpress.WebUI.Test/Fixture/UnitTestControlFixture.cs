@@ -97,7 +97,7 @@ namespace WebExpress.WebUI.Test.Fixture
         /// <param name="content">The content of the request.</param>
         /// <param name="uri">The URI of the request.</param>
         /// <returns>A fake request for testing.</returns>
-        public static Request CrerateRequestMock(string content = "", string uri = "")
+        public static IRequest CreateRequestMock(string content = "", string uri = "")
         {
             var context = CreateHttpContextMock(content);
 
@@ -191,18 +191,18 @@ namespace WebExpress.WebUI.Test.Fixture
         /// <returns>A mock render context for testing.</returns>
         public static IRenderControlContext CreateRenderContextMock(IApplicationContext applicationContext = null, IEnumerable<Type> scopes = null)
         {
-            var request = CrerateRequestMock();
+            var request = CreateRequestMock();
 
-            return new RenderControlContext(null, CreratePageContextMock(applicationContext, scopes), request);
+            return new RenderControlContext(null, CreatePageContextMock(applicationContext, scopes), request);
         }
 
         /// <summary>
         /// Create a fake page context for unit testing.
         /// </summary>
         /// <param name="applicationContext">The application context. If null, defaults to null.</param>
-        /// <param name="scopes">The scopes of the page.</param></param>
+        /// <param name="scopes">The scopes of the page.</param>
         /// <returns>A fake context for testing.</returns>
-        public static PageContext CreratePageContextMock(IApplicationContext applicationContext = null, IEnumerable<Type> scopes = null)
+        public static PageContext CreatePageContextMock(IApplicationContext applicationContext = null, IEnumerable<Type> scopes = null)
         {
             var ctorPageContext = typeof(PageContext).GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, null, [], null);
 

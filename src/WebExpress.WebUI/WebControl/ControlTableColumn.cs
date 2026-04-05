@@ -27,11 +27,6 @@ namespace WebExpress.WebUI.WebControl
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the render function used for rendering the cells in the column.
-        /// </summary>
-        public string RenderScript { get; set; }
-
-        /// <summary>
         /// Returns or sets the color scheme used for the column.
         /// </summary>
         public TypeColorTable Color { get; set; } = TypeColorTable.Default;
@@ -60,8 +55,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, Title))
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
                 .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-color", Color.ToClass())
-                .AddUserAttribute("data-render", RenderScript);
+                .AddUserAttribute("data-color", Color.ToClass());
 
             return html;
         }

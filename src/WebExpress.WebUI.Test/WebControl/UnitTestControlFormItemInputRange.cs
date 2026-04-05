@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<input id=""id"" name=""id"" class=""form-range"" type=""range"" min=""0"" max=""10"" step=""1"">")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -40,7 +40,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(@"<input id=""*"" class=""form-range"" type=""range"" min=""0"" max=""10"" step=""1"">")]
         public void AutoId(string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -63,7 +63,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(1.5, @"<input class=""form-range"" type=""range"" min=""1.5"" max=""10"" step=""1"">")]
         public void Min(float min, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -73,7 +73,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Min = min
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -87,7 +87,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(1.0, @"<input class=""form-range"" type=""range"" min=""0"" max=""1"" step=""1"">")]
         public void Max(float max, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -97,7 +97,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Max = max
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -111,7 +111,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(1.0, @"<input class=""form-range"" type=""range"" min=""0"" max=""10"" step=""1"">")]
         public void Step(float step, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -121,7 +121,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Step = step
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -136,7 +136,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.WebUI:plugin.name", @"<input class=""form-range"" type=""range"" min=""0"" max=""10"" step=""1"">")]
         public void Description(string description, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -146,7 +146,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Description = description
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -160,7 +160,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(true, @"<input class=""form-range"" type=""range"" min=""0"" max=""10"" step=""1"" disabled>")]
         public void Disabled(bool disabled, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
@@ -171,7 +171,7 @@ namespace WebExpress.WebUI.Test.WebControl
             };
 
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -186,7 +186,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(2.2, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data""><input name=""*"" type=""hidden""><main><div><fieldset class=""wx-form-group""><input class=""form-range"" type=""range"" min=""0"" max=""10"" step=""1"" value=""2.2""></fieldset></div></main><div></div></form>")]
         public void ValueForm(float value, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -196,7 +196,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 renderContext.SetValue(control, new ControlFormInputValueFloat(value));
             });
 
-            // test execution
+            // act
             var html = form.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);

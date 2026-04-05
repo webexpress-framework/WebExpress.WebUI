@@ -76,33 +76,69 @@ namespace WebExpress.WebUI.WebControl
                 if (item is IControlFormItemInput input)
                 {
                     var icon = new ControlIcon() { Icon = input?.Icon };
-                    var label = new ControlFormItemLabel(!string.IsNullOrEmpty(item.Id) ? item.Id + "_label" : string.Empty);
+                    var label = default(IHtmlNode);
                     var help = new ControlFormItemHelpText(!string.IsNullOrEmpty(item.Id) ? item.Id + "_help" : string.Empty);
                     var fieldset = new HtmlElementFormFieldset() { Class = "wx-form-group" };
 
-                    label.Initialize(renderGroupContext);
-                    help.Initialize(renderGroupContext);
+                    if (!string.IsNullOrWhiteSpace(input.Label) && !input.Required)
+                    {
+                        var text = I18N.Translate(renderGroupContext, input.Label);
 
-                    label.Text = I18N.Translate(renderGroupContext.Request?.Culture, input?.Label);
-                    label.FormItem = item;
+                        var l = new ControlFormItemLabel(!string.IsNullOrEmpty(item.Id) ? item.Id + "_label" : string.Empty)
+                        {
+                            Text = text.EndsWith(":") ? text : text + ":"
+                        };
+
+                        l.Initialize(renderGroupContext);
+                        l.FormItem = item;
+
+                        label = l.Render(renderGroupContext, visualTree);
+                    }
+                    else if (!string.IsNullOrWhiteSpace(input.Label))
+                    {
+                        var text = I18N.Translate(renderGroupContext, input.Label)?.Trim(':');
+                        var l = new ControlFormItemLabel(!string.IsNullOrEmpty(item.Id) ? item.Id + "_label" : string.Empty)
+                        {
+                            Text = text
+                        };
+                        var required = new ControlFormItemLabel(null)
+                        {
+                            Text = "*",
+                            Classes = ["wx-form-required"],
+                            TextColor = new PropertyColorText(TypeColorText.Danger)
+                        };
+
+                        l.Initialize(renderGroupContext);
+                        l.FormItem = item;
+
+                        label = new HtmlElementTextSemanticsSpan()
+                        {
+                            Class = "wx-form-label"
+                        }
+                            .Add(l.Render(renderGroupContext, visualTree).RemoveClass("wx-form-label"))
+                            .Add(required.Render(renderGroupContext, visualTree))
+                            .Add(new HtmlText(":"));
+                    }
+
+                    help.Initialize(renderGroupContext);
                     help.Text = I18N.Translate(renderGroupContext.Request?.Culture, input?.Help);
 
-                    if (icon.Icon != null && string.IsNullOrWhiteSpace(label.Text))
+                    if (icon.Icon is not null && label is null)
                     {
                         icon.Classes = ["me-2", "pt-1"];
                         fieldset.Add(new HtmlElementTextSemanticsSpan(icon.Render(renderGroupContext, visualTree)));
                     }
-                    else if (icon.Icon != null)
+                    else if (icon.Icon is not null)
                     {
                         icon.Classes = ["me-2", "pt-1"];
-                        fieldset.Add(new HtmlElementTextSemanticsSpan(icon.Render(renderGroupContext, visualTree), label.Render(renderGroupContext, visualTree))
+                        fieldset.Add(new HtmlElementTextSemanticsSpan(icon.Render(renderGroupContext, visualTree), label)
                         {
                             Style = "display: flex;"
                         });
                     }
-                    else if (!string.IsNullOrWhiteSpace(label.Text))
+                    else if (label is not null)
                     {
-                        fieldset.Add(label.Render(renderGroupContext, visualTree));
+                        fieldset.Add(label);
                     }
 
                     fieldset.Add(item.Render(renderGroupContext, visualTree));

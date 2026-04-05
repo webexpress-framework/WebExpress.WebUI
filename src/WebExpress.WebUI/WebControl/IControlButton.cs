@@ -11,47 +11,54 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the color. der Schaltfläche
         /// </summary>
-        new PropertyColorButton BackgroundColor { get; set; }
+        new PropertyColorButton BackgroundColor { get; }
 
         /// <summary>
         /// Returns or sets the size.
         /// </summary>
-        TypeSizeButton Size { get; set; }
+        TypeSizeButton Size { get; }
 
         /// <summary>
         /// Returns or sets the outline property
         /// </summary>
-        bool Outline { get; set; }
+        bool Outline { get; }
 
         /// <summary>
         /// Returns or sets whether the button should take up the full width.
         /// </summary>
-        TypeBlockButton Block { get; set; }
+        TypeBlockButton Block { get; }
 
         /// <summary>
         /// Returns or sets the text.
         /// </summary>
-        string Text { get; set; }
+        string Text { get; }
 
         /// <summary>
         /// Returns or sets the value.
         /// </summary>
-        string Value { get; set; }
+        string Value { get; }
 
         /// <summary>
         /// Returns or sets the icon.
         /// </summary>
-        IIcon Icon { get; set; }
+        IIcon Icon { get; }
 
         /// <summary>
         /// Returns or sets the activation status of the button.
         /// </summary>
-        TypeActive Active { get; set; }
+        TypeActive Active { get; }
 
         /// <summary>
-        /// Returns or sets the id of a modal dialogue.
+        /// Returns the secondary action, typically triggered by a 
+        /// click to open a modal or similar target.
         /// </summary>
-        string Modal { get; set; }
+        IAction PrimaryAction { get; }
+
+        /// <summary>
+        /// Returns the secondary action, typically triggered by a 
+        /// double‑click to open a modal or similar target.
+        /// </summary>
+        IAction SecondaryAction { get; }
 
         /// <summary>
         /// Adds one or more controls to the content.

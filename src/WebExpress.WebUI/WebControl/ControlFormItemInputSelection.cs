@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
-using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -16,12 +14,12 @@ namespace WebExpress.WebUI.WebControl
     /// </remarks>
     public class ControlFormItemInputSelection : ControlFormItemInput<ControlFormInputValueString>, IControlFormItemInputSelection
     {
-        private readonly List<ControlFormItemInputSelectionItem> _options = [];
+        private readonly List<IControlFormItemInputSelectionItem> _options = [];
 
         /// <summary>
         /// Returns the entries.
         /// </summary>
-        public IEnumerable<ControlFormItemInputSelectionItem> Options => _options;
+        public IEnumerable<IControlFormItemInputSelectionItem> Options => _options;
 
         /// <summary>
         /// Returns or sets the label of the selected options.
@@ -41,18 +39,8 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
         /// </summary>
-        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
-        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="items">The entries.</param>
-        public ControlFormItemInputSelection
-        (
-            [CallerMemberName] string instance = null,
-            [CallerFilePath] string file = null,
-            [CallerLineNumber] int? line = null,
-            params ControlFormItemInputSelectionItem[] items
-        )
-            : this($"selection_{instance}_{file}_{line}".GetHashCode().ToString("X"), items)
+        public ControlFormItemInputSelection()
+            : this(DeterministicId.Create())
         {
         }
 
@@ -61,7 +49,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="id">The id of the control.</param>
         /// <param name="items">The entries.</param>
-        public ControlFormItemInputSelection(string id, params ControlFormItemInputSelectionItem[] items)
+        public ControlFormItemInputSelection(string id, params IControlFormItemInputSelectionItem[] items)
             : base(id)
         {
             _options.AddRange(items);
@@ -72,7 +60,19 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="items">The items to add to the selection options.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public virtual IControlFormItemInputSelection Add(params ControlFormItemInputSelectionItem[] items)
+        public virtual IControlFormItemInputSelection Add(params IControlFormItemInputSelectionItem[] items)
+        {
+            _options.AddRange(items);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds one or more items to the selection options.
+        /// </summary>
+        /// <param name="items">The items to add to the selection options.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlFormItemInputSelection Add(IEnumerable<IControlFormItemInputSelectionItem> items)
         {
             _options.AddRange(items);
 
@@ -84,7 +84,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="item">The item to remove from the selection options.</param>
         /// <returns>The current instance for method chaining.</returns>
-        public virtual IControlFormItemInputSelection Remove(ControlFormItemInputSelectionItem item)
+        public virtual IControlFormItemInputSelection Remove(IControlFormItemInputSelectionItem item)
         {
             _options.Remove(item);
 
@@ -100,7 +100,7 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
-            var classes = new List<string>(["wx-webui-input-selection"]);
+            var classes = new List<string>();
             classes.AddRange(Classes);
 
             if (Disabled)
@@ -108,49 +108,17 @@ namespace WebExpress.WebUI.WebControl
                 classes.Add("disabled");
             }
 
-            var html = new HtmlElementTextContentDiv([.._options.Select(x => {
-                var option = new HtmlElementTextContentDiv(x.Content?.Render(renderContext, visualTree))
-                {
-                    Id = x.Id,
-                    Class = "wx-selection-item"
-                }
-                    .AddUserAttribute("data-label", I18N.Translate(x.Label))
-                    .AddUserAttribute("data-label-color", x.LabelColor != TypeColorSelection.Default
-                        ? x.LabelColor.ToClass()
-                        : null);
-
-                if (x.Selected)
-                {
-                    option.AddUserAttribute("selected");
-                }
-
-                if (x.Disabled)
-                {
-                    option.AddUserAttribute("disabled");
-                }
-
-                if (x.Icon is Icon icon)
-                {
-                    option.AddUserAttribute("data-icon", icon.Class);
-                }
-
-                if (x.Icon is ImageIcon image)
-                {
-                    option.AddUserAttribute("data-image", image.Uri?.ToString());
-                }
-
-                return option;
-
-            })])
+            var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
+                Class = Css.Concatenate("wx-webui-input-selection", classes),
                 Style = GetStyles()
             }
                 .AddUserAttribute("name", Name)
                 .AddUserAttribute("placeholder", I18N.Translate(Placeholder))
                 .AddUserAttribute("data-multiselection", MultiSelect ? "true" : null)
-                .AddUserAttribute("data-value", value);
+                .AddUserAttribute("data-value", value)
+                .Add(_options.Select(x => x.Render(renderContext, visualTree)));
 
             return html;
         }

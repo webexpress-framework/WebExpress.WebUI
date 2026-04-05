@@ -59,7 +59,7 @@ namespace WebExpress.WebUI.Internationalization
         /// </returns>
         public string Format(string format, object arg, IFormatProvider formatProvider)
         {
-            if (format == null || !format.StartsWith(fileSizeFormat))
+            if (format is null || !format.StartsWith(fileSizeFormat))
             {
                 return DefaultFormat(format, arg, formatProvider);
             }
@@ -127,7 +127,7 @@ namespace WebExpress.WebUI.Internationalization
         {
             var formattableArg = arg as IFormattable;
 
-            if (formattableArg != null)
+            if (formattableArg is not null)
             {
                 return formattableArg.ToString(format, formatProvider);
             }

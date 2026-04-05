@@ -56,7 +56,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemPanel(string id = null, params IControl[] controls)
             : base(id)
         {
-            _content.AddRange(controls.Where(x => x != null));
+            _content.AddRange(controls.Where(x => x is not null));
         }
 
         /// <summary>

@@ -1,0 +1,292 @@
+.wx-graph-editor {
+    display: inline-block;
+    user-select: none;
+    width: 100%;
+}
+
+/* Toolbar Buttons */
+.wx-graph-editor .btn-group-sm > .btn {
+    padding-inline: 0.6rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.wx-graph-editor .btn i {
+    line-height: 1;
+}
+
+.wx-graph-editor .small.text-muted {
+    align-self: center;
+}
+
+.wx-graph-fit-button {
+    position: absolute; 
+    top: 8px; 
+    right: 8px; 
+    padding: 4px 8px; 
+    border: 1px solid #ced4da; 
+    border-radius: 4px; 
+    color: var(--bs-secondary);
+    background: #fff; 
+    cursor: pointer; 
+}
+
+[data-bs-theme="dark"] .wx-graph-fit-button {
+    background: var(--bs-dark);
+    border: 1px solid var(--bs-dark-border-subtle);
+}
+
+.wx-graph-svg {
+    background: var(--bs-light);
+    border: 1px solid var(--bs-light-border-subtle);
+    border-radius: 4px;
+    touch-action: none;
+    width: 100%;
+    height: 520px;
+    cursor: default;
+    will-change: transform;
+}
+
+[data-bs-theme="dark"] .wx-graph-svg {
+    background: var(--bs-dark);
+    border: 1px solid var(--bs-dark-border-subtle);
+}
+
+/* --- Graph Elements: Edges --- */
+.wx-graph-edge {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke 0.2s ease, stroke-width 0.2s ease;
+}
+
+.wx-graph-edge:hover {
+    stroke: var(--bs-primary);
+    cursor: pointer;
+}
+
+.wx-graph-edge {
+    cursor: grab;
+}
+
+.wx-graph-edge-label {
+    fill: var(--bs-body-color);
+    stroke-width: 0;
+    pointer-events: none;
+}
+
+.wx-graph-edge-arrow path { 
+    fill: var(--bs-secondary); 
+}
+
+/* --- Graph Elements: Nodes --- */
+.wx-graph-node-rect {
+    stroke: var(--bs-secondary);
+    stroke-width: 1;
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
+    transition: stroke-width 0.1s ease, filter 0.1s ease;
+}
+
+[data-bs-theme="dark"] .wx-graph-node-rect {
+    stroke: var(--bs-light);
+}
+
+.wx-graph-node-rect:hover {
+    stroke: var(--bs-primary);
+    stroke-width: 3;
+    cursor: grab;
+}
+
+.wx-graph-node-rect:active {
+    stroke: var(--bs-success);
+    stroke-width: 3;
+    cursor: grabbing;
+}
+
+.wx-graph-node-circle {
+    stroke: var(--bs-secondary);
+    stroke-width: 1;
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
+    transition: stroke-width 0.1s ease, filter 0.1s ease;
+}
+
+[data-bs-theme="dark"] .wx-graph-node-circle {
+    stroke: var(--bs-light);
+}
+
+.wx-graph-node-circle:hover {
+    stroke: var(--bs-primary);
+    stroke-width: 3;
+    cursor: grab;
+}
+
+.wx-graph-node-circle:active {
+    stroke: var(--bs-success);
+    stroke-width: 3;
+    cursor: grabbing;
+}
+
+.wx-graph-node-label {
+    fill: var(--bs-body-color);
+    stroke-width: 0;
+    pointer-events: none;
+}
+
+.wx-graph-node-icon {
+    display: block;
+    pointer-events: none;
+}
+
+.wx-graph-node-link {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.wx-graph-node-link:hover {
+    opacity: 0.8;
+}
+
+.wx-graph-node-hover rect, 
+.wx-graph-node-hover circle,
+.hover-highlight {
+    stroke: #28a745 !important; 
+    stroke-width: 3px !important;
+    stroke-dasharray: 6, 3; 
+    fill: rgba(40, 167, 69, 0.1); 
+    transition: all 0.1s ease;
+}
+
+.wx-graph-node-source rect, 
+.wx-graph-node-source circle {
+    stroke: #ffc107 !important;
+    stroke-width: 3px !important;
+    stroke-dasharray: 4, 2;
+}
+
+/* Visible only when the corresponding transition is selected or edited */
+.wx-graph-waypoint {
+    fill: #0b5ed7;
+    cursor: grab;
+    transition: r 0.1s ease, stroke-width 0.1s ease;
+}
+
+.wx-graph-waypoint:hover {
+    fill: #0b5ed7;
+    stroke: #ffffff;
+    stroke-width: 3;
+}
+
+.wx-graph-waypoint:active {
+    cursor: grabbing;
+}
+
+/* Fill colors */
+.wx-graph-viewer .bg-primary { fill: var(--bs-primary); }
+.wx-graph-viewer .bg-secondary { fill: var(--bs-secondary); }
+.wx-graph-viewer .bg-success { fill: var(--bs-success); }
+.wx-graph-viewer .bg-info { fill: var(--bs-info); }
+.wx-graph-viewer .bg-warning { fill: var(--bs-warning); }
+.wx-graph-viewer .bg-danger { fill: var(--bs-danger); }
+.wx-graph-viewer .bg-light { fill: var(--bs-light); }
+.wx-graph-viewer .bg-dark { fill: var(--bs-dark); }
+.wx-graph-viewer .bg-body { fill: var(--bs-body-bg); }
+.wx-graph-viewer .bg-white { fill: var(--bs-white); }
+
+.wx-graph-viewer .primary { 
+    stroke:var(--bs-primary); 
+    fill: var(--bs-primary); 
+}
+
+.wx-graph-viewer .secondary {
+    stroke: var(--bs-secondary);
+    fill: var(--bs-secondary);
+}
+
+.wx-graph-viewer .success {
+    stroke: var(--bs-success);
+    fill: var(--bs-success);
+}
+
+.wx-graph-viewer .info {
+    stroke: var(--bs-info);
+    fill: var(--bs-info);
+}
+
+.wx-graph-viewer .warning {
+    stroke: var(--bs-warning);
+    fill: var(--bs-warning);
+}
+
+.wx-graph-viewer .danger {
+    stroke: var(--bs-danger);
+    fill: var(--bs-danger);
+}
+
+.wx-graph-viewer .light {
+    stroke: var(--bs-light);
+    fill: var(--bs-light);
+}
+
+.wx-graph-viewer .dark {
+    stroke: var(--bs-dark);
+    fill: var(--bs-dark);
+}
+
+.wx-graph-viewer .white {
+    stroke: var(--bs-white);
+    fill: var(--bs-white);
+}
+
+.wx-graph-editor {
+    overflow: hidden; font-family: sans-serif; display: flex; flex-direction: column; background: #fff;
+    min-height: 400px; height: 100%;
+}
+.wx-graph-simple-toolbar {
+    flex: 0 0 auto; background: #f0f2f5; border-bottom: 1px solid #ccc;
+    padding: 4px 8px; display: flex; gap: 4px; align-items: center; z-index: 20; min-height: 40px;
+}
+.wx-simple-btn {
+    background: transparent; border: 1px solid transparent; border-radius: 4px; cursor: pointer;
+    padding: 6px 10px; color: #444; font-size: 14px;
+}
+.wx-simple-btn:hover:not(:disabled) { background: #e4e6eb; border-color: #d0d2d6; }
+.wx-simple-btn:active:not(:disabled), .wx-simple-btn.active {
+    background: #d0d7de; border-color: #b0b8be; color: #000; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}
+.wx-simple-btn:disabled { color: #aaa; cursor: default; }
+.wx-simple-sep { width: 1px; height: 24px; background: #ccc; margin: 0 4px; }
+.wx-graph-svg {
+    flex: 1 1 auto; width: 100%; height: 100%; min-height: 300px; display: block; position: relative; z-index: 1;
+}
+.wx-graph-modal-backdrop {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+}
+.wx-graph-modal-dialog {
+    background: #fff; width: 380px; max-width: 90%; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    display: flex; flex-direction: column; border: 1px solid #ccc;
+}
+.wx-graph-modal-header {
+    padding: 12px 16px; border-bottom: 1px solid #eee; font-weight: bold; font-size: 15px;
+    display: flex; justify-content: space-between; align-items: center; background: #f9f9f9; border-radius: 6px 6px 0 0;
+}
+.wx-graph-modal-body { padding: 16px; overflow-y: auto; max-height: 70vh; }
+.wx-graph-modal-footer {
+    padding: 12px 16px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 8px;
+    background: #f9f9f9; border-radius: 0 0 6px 6px;
+}
+.wx-graph-form-group { margin-bottom: 12px; }
+.wx-graph-form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; color: #555; }
+.wx-graph-form-group input, .wx-graph-form-group select {
+    width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; box-sizing: border-box;
+}
+.wx-graph-node-selected rect, .wx-graph-node-selected circle { stroke: #0d6efd; stroke-width: 2px; }
+.wx-workflow-edge { stroke-width: 2px; cursor: pointer; }
+.wx-workflow-edge:hover { stroke-width: 3px; }
+.wx-workflow-edge[data-selected="true"] { stroke: #0d6efd; stroke-width: 2px; }
+.wx-graph-node-hover rect, .wx-graph-node-hover circle { stroke: #28a745 !important; stroke-width: 3px !important; fill: rgba(40, 167, 69, 0.1); }
+.wx-graph-node-source rect, .wx-graph-node-source circle { stroke: #ffc107 !important; stroke-width: 3px !important; stroke-dasharray: 5 3; }
+.wx-workflow-handle { fill: #fff; stroke: #0d6efd; cursor: move; }
+.wx-workflow-waypoint { fill: #fff; stroke: #666; cursor: move; }
+.wx-graph-preview-edge { stroke: #ffc107; stroke-width: 2px; stroke-dasharray: 5 5; pointer-events: none; }

@@ -39,25 +39,14 @@ namespace WebExpress.WebUI.WebControl
         TypeBorderTable TableBorder { get; }
 
         /// <summary>
+        /// Returns a value indicating whether the item can be selected.
+        /// </summary>
+        bool Selectable { get; }
+
+        /// <summary>
         /// Returns or sets a value indicating whether columns should be hidden.
         /// </summary>
         bool SuppressHeaders { get; }
-
-        /// <summary>
-        /// Returns a value indicating whether columns can be removed.
-        /// </summary>
-        bool AllowColumnRemove { get; }
-
-        /// <summary>
-        /// Returns a value indicating whether rows in the table can be moved.
-        /// </summary>
-        bool MovableRow { get; }
-
-        /// <summary>
-        /// Returns the key used to persist data (column order, visibility, 
-        /// widths, active sort) across sessions.
-        /// </summary>
-        string PersistKey { get; }
 
         /// <summary>
         /// Adds a column to the table.

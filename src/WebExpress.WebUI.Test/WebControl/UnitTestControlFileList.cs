@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("03C6031F-04A9-451F-B817-EBD6D32F8B0C", @"<div id=""03C6031F-04A9-451F-B817-EBD6D32F8B0C"" class=""wx-webui-file-list""></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -29,7 +29,7 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -44,7 +44,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("name", @"<div class=""wx-webui-file-list""><div class=""wx-webui-file"">name</div></div>")]
         public void Name(string name, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -54,7 +54,7 @@ namespace WebExpress.WebUI.Test.WebControl
                     Name = name,
                 });
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -69,19 +69,19 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(typeof(IconHome), @"<div class=""wx-webui-file-list""><div class=""wx-webui-file"" data-file-icon=""fas fa-home""></div></div>")]
         public void Icon(Type icon, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFileList()
                 .Add(new ControlFileListItem()
                 {
-                    Icon = icon != null
+                    Icon = icon is not null
                         ? Activator.CreateInstance(icon) as IIcon
                         : null
                 });
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -96,7 +96,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(22321, @"<div class=""wx-webui-file-list""><div class=""wx-webui-file"" data-file-size=""21.8 kB""></div></div>")]
         public void Size(long size, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -106,7 +106,7 @@ namespace WebExpress.WebUI.Test.WebControl
                     Size = size,
                 });
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -121,7 +121,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("description", @"<div class=""wx-webui-file-list""><div class=""wx-webui-file"" data-description=""description""></div></div>")]
         public void Description(string description, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -131,7 +131,7 @@ namespace WebExpress.WebUI.Test.WebControl
                     Description = description,
                 });
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation

@@ -1,0 +1,133 @@
+/* 
+ * styles for the dashboard component and its widgets
+ */
+.wx-dashboard {
+}
+
+/* dashboard lane layout */
+.wx-dashboard-row {
+    display: grid;
+    grid-template-columns: 1fr; /* default for mobile: stack vertically */
+    gap: 1.5rem;
+    align-items: start; /* ensures columns are independent vertically */
+}
+
+/* apply configurable columns for desktop */
+@media (min-width: 768px) {
+    .wx-dashboard-row {
+        /* use custom template if provided, else fallback to equal fractions */
+        grid-template-columns: var(--wx-board-template, repeat(var(--wx-board-cols, 3), 1fr));
+    }
+}
+
+/* wrapper for the lane to hold the title and the dropzone */
+.wx-dashboard-lane-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Lane title styling */
+.wx-dashboard-lane-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--bs-border-color, #dee2e6);
+    color: var(--bs-heading-color, #495057);
+}
+
+/* A vertical column (lane) that holds the widgets */
+.wx-dashboard-lane {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 150px; /* allows dropping into an empty column */
+    padding-bottom: 2rem; /* extra space at the bottom to easily drop at the end */
+    border-radius: 0.25rem;
+    transition: background-color 0.2s, border 0.2s;
+    border: 2px dashed transparent;
+}
+
+/* visual feedback for completely empty lanes */
+.wx-dashboard-lane.wx-drag-over-empty {
+    background-color: rgba(13, 110, 253, 0.05);
+    border-color: rgba(13, 110, 253, 0.4);
+}
+
+.wx-dashboard-widget-card {
+    transition: box-shadow 0.2s ease;
+    width: 100%;
+    position: relative;
+}
+
+.wx-dashboard-widget-card > .card-header {
+    display: flex;
+    border-bottom: none;
+    background-color: var(--bs-body);
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* visual drop indicator (blue line) */
+.wx-dashboard-widget-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: #0d6efd; /* primary color */
+    border-radius: 2px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10;
+    transition: opacity 0.15s ease;
+}
+
+/* line appears above the card (in the gap) */
+.wx-dashboard-widget-card.wx-drag-over-top::before {
+    top: -10px;
+    opacity: 1;
+}
+
+/* line appears below the card (in the gap) */
+.wx-dashboard-widget-card.wx-drag-over-bottom::before {
+    bottom: -10px;
+    opacity: 1;
+}
+
+/* applies the dynamic border color if the variable is set */
+.wx-dashboard-widget-card.wx-widget-has-color {
+    border-top: 4px solid var(--wx-widget-color, transparent);
+}
+
+.wx-drag-handle {
+    cursor: grab;
+}
+
+.wx-drag-handle:active {
+    cursor: grabbing;
+}
+
+.wx-dashboard-chart-placeholder {
+    height: 150px;
+    background-color: #f8f9fa;
+    border: 1px dashed #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wx-remove-widget {
+    padding: 0;
+}
+
+.wx-remove-widget i {
+    color: var(--bs-secondary, #adb5bd);
+    transition: color 0.2s;
+}
+
+.wx-remove-widget:hover i,
+.wx-remove-widget:focus i {
+    color: var(--bs-danger, #dc3545);
+}

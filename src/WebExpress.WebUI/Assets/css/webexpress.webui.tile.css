@@ -2,7 +2,7 @@
 .wx-tile {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
+    flex-direction: column;
     align-items: stretch;
     background: var(--bs-body-bg);
     color: var(--bs-body-color);
@@ -11,9 +11,17 @@
     line-height: var(--bs-body-line-height);
 }
 
+.wx-tile-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em; 
+    align-items: stretch;
+    justify-content: flex-start;
+    margin-bottom: 0.5em;
+}
+
 /* Tile card */
-.wx-tile-card {
-    background: var(--bs-card-bg, var(--bs-body-bg));
+.wx-tile-container > .wx-tile-card {
     border: 1px solid var(--bs-border-color);
     border-radius: var(--bs-border-radius);
     box-shadow: 0 2px 6px rgba(0,0,0,.05);
@@ -156,6 +164,20 @@
     );
 }
 
+.wx-tile-icon-large {
+    font-size: 4em;
+    vertical-align: middle;
+}
+
+.wx-icon.wx-tile-icon-large {
+    width: 2.8em; 
+    height: 2.8em;
+    max-width: 100%;
+    max-height: 2.8em;
+    object-fit: contain;
+    vertical-align: middle;
+}
+
 /* start/end drop zones */
 .wx-drop-target {
     outline: 2px dashed var(--bs-success);
@@ -178,6 +200,24 @@
     animation: wx-tile-flash .7s linear 2;
 }
 
+.wx-tile-picker {
+    display: block;
+    background: var(--bs-body-bg, #fff);
+    padding: 1.2rem 1.5rem;
+    min-height: 180px;
+}
+
+/* Tile picker grid */
+.wx-tile-picker-tiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.2rem;
+    align-items: stretch;
+    justify-content: flex-start;
+    margin-bottom: 1rem;
+    padding: 0;
+}
+
 @keyframes wx-tile-flash {
     0% { box-shadow: 0 0 0 0 var(--bs-warning); }
     50% { box-shadow: 0 0 10px 5px var(--bs-warning); }
@@ -186,32 +226,32 @@
 
 /* Color variants (applied to .wx-tile-card) */
 .wx-tile-primary {
-    background: color-mix(in srgb, var(--bs-primary) 52%, var(--bs-body-bg));
+    background: var(--bs-primary);
     color: var(--bs-light, #fff);
 }
 
 .wx-tile-secondary {
-    background: color-mix(in srgb, var(--bs-secondary) 52%, var(--bs-body-bg));
+    background: var(--bs-secondary);
     color: var(--bs-light, #fff);
 }
 
 .wx-tile-success {
-    background: color-mix(in srgb, var(--bs-success) 50%, var(--bs-body-bg));
+    background: var(--bs-success);
     color: var(--bs-light, #fff);
 }
 
 .wx-tile-info {
-    background: color-mix(in srgb, var(--bs-info) 55%, var(--bs-body-bg));
+    background: var(--bs-info);
     color: var(--bs-dark, #031b21);
 }
 
 .wx-tile-warning {
-    background: color-mix(in srgb, var(--bs-warning) 55%, var(--bs-body-bg));
+    background: var(--bs-warning);
     color: var(--bs-dark, #2d2300);
 }
 
 .wx-tile-danger {
-    background: color-mix(in srgb, var(--bs-danger) 50%, var(--bs-body-bg));
+    background: var(--bs-danger);
     color: var(--bs-light, #fff);
 }
 

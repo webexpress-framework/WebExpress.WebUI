@@ -10,12 +10,38 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
     constructor(element) {
         super(element);
 
-        this._uri = element.getAttribute("data-uri") || ""; // Retrieve the URI for loading content
-        this._selector = element.getAttribute("data-selector") || "body"; // Retrieve the selector for the content area
+        // retrieve the uri for loading content
+        this._uri = element.getAttribute("data-uri") || "";
 
-        // cleanup the DOM element
+        // retrieve the selector for the content area
+        this._selector = element.getAttribute("data-selector") || "body";
+
+        // cleanup the dom element
         element.removeAttribute("data-uri");
         element.removeAttribute("data-selector");
+
+        // load content dynamically after the modal is shown
+        this._element.addEventListener("shown.bs.modal", () => {
+            // trigger event when data is requested
+            this._dispatch(webexpress.webui.Event.DATA_REQUESTED_EVENT, {});
+
+            if (this._uri) {
+                fetch(this._uri)
+                    .then((response) => {
+                        return response.text();
+                    })
+                    .then((data) => {
+                        this._update(data);
+
+                        // trigger event when data has successfully arrived
+                        this._element.dispatchEvent(new CustomEvent(webexpress.webui.Event.DATA_ARRIVED_EVENT, {
+                            detail: { sender: this._element, id: this._element.id, response: data }
+                        }));
+                    });
+            } else {
+                this._update(this._element.innerHTML);
+            }
+        });
     }
 
     /**
@@ -26,20 +52,31 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
         const parser = new DOMParser();
         const doc = parser.parseFromString(response, "text/html");
 
-        this._contentDiv = doc.querySelector(this._selector); // locate the main content area
+        // locate the main content area
+        const contentNode = doc.querySelector(this._selector);
 
-        // clear existing content in body and append the new content
+        // clear existing content in body
         this._bodyDiv.innerHTML = "";
-        this._bodyDiv.appendChild(this._contentDiv);
 
-        // clear the DOM element and append the dialog structure
+        if (contentNode) {
+            // append children directly to avoid creating an extra container layer
+            const childNodes = Array.from(contentNode.childNodes);
+            for (let i = 0; i < childNodes.length; i++) {
+                this._bodyDiv.appendChild(childNodes[i]);
+            }
+        }
+
+        // clear the dom element and append the dialog structure
         this._element.innerHTML = "";
         this._element.appendChild(this._dialogDiv);
 
         // bind click event to close the modal when dismiss button is clicked
-        this._dialogDiv.querySelectorAll("[data-wx-dismiss='modal']").forEach(button => {
-            button.addEventListener("click", () => this.hide());
-        });
+        const dismissButtons = this._dialogDiv.querySelectorAll("[data-wx-dismiss='modal']");
+        for (let i = 0; i < dismissButtons.length; i++) {
+            dismissButtons[i].addEventListener("click", () => {
+                this.hide();
+            });
+        }
     }
 
     /**
@@ -65,38 +102,48 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
         this._element.innerHTML = "";
         this._element.appendChild(this._dialogDiv);
 
-        this._dialogDiv.querySelectorAll("[data-wx-dismiss='modal']").forEach(button => {
-            button.addEventListener("click", () => this.hide());
-        });
+        const dismissButtons = this._dialogDiv.querySelectorAll("[data-wx-dismiss='modal']");
+        for (let i = 0; i < dismissButtons.length; i++) {
+            dismissButtons[i].addEventListener("click", () => {
+                this.hide();
+            });
+        }
+
+        // remove all known size classes
+        this._dialogDiv.classList.remove("modal-sm", "modal-md", "modal-lg", "modal-xl", "modal-fullscreen");
+
+        if (this._size) {
+            // apply modal size class
+            this._dialogDiv.classList.add(this._size);
+        }
 
         const modalInstance = bootstrap.Modal.getOrCreateInstance(this._element);
-        modalInstance.show(); // opens the modal
+
+        // opens the modal
+        modalInstance.show();
 
         // trigger custom event for showing the modal
         this._dispatch(webexpress.webui.Event.MODAL_SHOW_EVENT, {});
-
-        // load content dynamically after the modal is shown
-        this._element.addEventListener("shown.bs.modal", () => {
-            // trigger event when data is requested
-            this._dispatch(webexpress.webui.Event.DATA_REQUESTED_EVENT, {});
-
-            if (this._uri) {
-                fetch(this._uri)
-                    .then(response => response.text())
-                    .then(data => {
-                        this._update(data);
-
-                        // trigger event when data has successfully arrived
-                        this._element.dispatchEvent(new CustomEvent(webexpress.webui.Event.DATA_ARRIVED_EVENT, {
-                            detail: { sender: this._element, id: this._element.id, response: data }
-                        }));
-                    });
-            } else {
-                this._update(this._element.innerHTML);
-            }
-        });
     }
-}
 
-// Register the class in the controller
+    /**
+     * Gets the URI used to load the modal content.
+     *
+     * @returns {string} The URI from which the modal content is retrieved.
+     */
+    get uri() {
+        return this._uri;
+    }
+
+    /**
+     * Sets the URI used to load the modal content.
+     *
+     * @param {string} value The URI from which the modal content will be retrieved.
+     */
+    set uri(value) {
+        this._uri = value;
+    }
+};
+
+// register the class in the controller
 webexpress.webui.Controller.registerClass("wx-webui-modal-page", webexpress.webui.ModalPageCtrl);

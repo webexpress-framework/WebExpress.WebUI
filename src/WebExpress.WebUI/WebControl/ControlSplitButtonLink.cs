@@ -52,7 +52,7 @@ namespace WebExpress.WebUI.WebControl
                 OnClick = OnClick?.ToString()
             };
 
-            if (Icon != null)
+            if (Icon is not null)
             {
                 button.Add(new ControlIcon()
                 {
@@ -73,11 +73,8 @@ namespace WebExpress.WebUI.WebControl
                 button.Add(new HtmlText(I18N.Translate(renderContext.Request?.Culture, Text)));
             }
 
-            if (!string.IsNullOrWhiteSpace(Modal))
-            {
-                button.AddUserAttribute("data-wx-toggle", "modal");
-                button.AddUserAttribute("data-wx-target", $"#{Modal}");
-            }
+            PrimaryAction?.ApplyUserAttributes(button, TypeAction.Primary);
+            SecondaryAction?.ApplyUserAttributes(button, TypeAction.Secondary);
 
             var dropdownButton = new HtmlElementTextSemanticsSpan(new HtmlElementTextSemanticsSpan() { Class = "caret" })
             {
@@ -93,7 +90,7 @@ namespace WebExpress.WebUI.WebControl
                     [.. Items.Select
                     (
                         x =>
-                        x == null || x is ControlDropdownItemDivider || x is ControlLine ?
+                        x is null || x is ControlDropdownItemDivider || x is ControlLine ?
                         new HtmlElementTextContentLi() { Class = "dropdown-divider", Inline = true } :
                         x is ControlDropdownItemHeader ?
                         x.Render(renderContext, visualTree) :

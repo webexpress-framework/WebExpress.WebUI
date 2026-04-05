@@ -1,817 +1,406 @@
 /**
- * A WYSIWYG editor control.
+ * Core WYSIWYG editor control.
+ * Initializes the editor frame, manages undo/redo functionality, loads registered
+ * plugins, and handles context menu operations.
  */
 webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     _formFieldName = null;
     _formInput = null;
-    _tableToolbar = null;
     _editorElement = null;
+    _uiContainer = null;
     _savedRange = null;
-    _tableToolbarShownOnce = false;
-    _colors = [
-        // basic colors
-        "#000000", "#FF0000", "#008000", "#0000FF", "#FFFF00",
-        "#FFA500", "#800080", "#A52A2A", "#00FFFF", "#808080",
-        // extended palette
-        "#FFC0CB", "#FFD700", "#B22222", "#ADFF2F", "#20B2AA",
-        "#00CED1", "#4682B4", "#DA70D6", "#D2691E", "#C0C0C0",
-        // pastel tones
-        "#FFB6C1", "#FFDAB9", "#E6E6FA", "#98FB98", "#AFEEEE",
-        "#D3D3D3", "#FFE4E1", "#F0E68C", "#F5DEB3", "#F4A460",
-        // dark shades
-        "#2F4F4F", "#696969", "#708090", "#778899", "#556B2F",
-        "#483D8B", "#8B0000", "#9400D3", "#FF4500", "#DC143C"
-    ];
+    _contextMenu = null;
+    _documentClickHandler = null;
 
-    // bootstrap modal references (created lazily) - now backed by ModalSidebarPanel
-    _linkModalEl = null;
-    _linkModal = null;
-    _linkModal = null;
-    _linkUrlInput = null;
-    _linkTextInput = null;
-
-    _imageModalEl = null;
-    _imageModal = null;
-    _imageSidebarPanel = null;
-    _imageWebUrlInput = null;
-    _imageWebAltInput = null;
-    _imageSiteAltInput = null;
-    _imageUploadCtrl = null;
-    _imageFileListCtrl = null;
-    _selectedSiteImage = null;
+    // public configuration properties
+    imageUploadUri = "";
+    imageBaseUri = "";
 
     /**
-     * Constructor to initialize the editor.
-     * @param {HTMLElement} element - The DOM element associated with the editor instance.
+     * Creates a new instance of the class.
+     * @param {HTMLElement} element - The host element for the editor (always a div).
      */
     constructor(element) {
         super(element);
-        const content = element.innerHTML;
-        this._formFieldName = element.getAttribute('name') || null;
-        element.removeAttribute('name');
-        element.innerHTML = '';
-        element.classList.add('wx-editor');
+        
+        // read content preferably from value attribute (form-item behavior), fallback to innerhtml
+        let content = element.getAttribute("value") || element.innerHTML || "";
+        this._formFieldName = element.getAttribute("name") || element.dataset.name || null;
 
-        // optional: read image integration endpoints from dataset
-        this._imageUploadUri = element.dataset.imageUploadUri || "";
-        this._imageBaseUri = element.dataset.imageBaseUri || "";
+        this._uiContainer = element;
+        
+        // clean up container
+        element.removeAttribute("name");
+        element.removeAttribute("value");
+        element.innerHTML = "";
+        element.classList.add("wx-editor");
 
-        this._createToolbar(element);
-        this._createEditorArea(element, content);
-        this._createStatusBar(element);
-        this._enableTableTabNavigation();
+        // create hidden input field directly inside the container
         if (this._formFieldName) {
-            this._ensureFormInput();
+            this._formInput = document.createElement("input");
+            this._formInput.type = "hidden";
+            this._formInput.name = this._formFieldName;
+            this._uiContainer.appendChild(this._formInput);
         }
-        const toolbar = element.querySelector('.wx-editor-toolbar');
-        if (toolbar) {
-            toolbar.addEventListener('mousedown', () => {
-                const sel = window.getSelection();
-                if (sel && sel.rangeCount > 0) {
-                    this._savedRange = sel.getRangeAt(0).cloneRange();
+
+        this.imageUploadUri = element.dataset.imageUploadUri || "";
+        this.imageBaseUri = element.dataset.imageBaseUri || "";
+
+        // ensure the container has an id
+        if (!this._uiContainer.id) {
+            this._uiContainer.id = "wx-editor-" + Math.floor(Math.random() * 100000);
+        }
+
+        this._createToolbar(this._uiContainer);
+        this._createEditorArea(this._uiContainer, content);
+        this._createStatusBar(this._uiContainer);
+        this._initContextMenu();
+
+        if (this._formInput) {
+            this._syncValue();
+            this._setupFormIntegration();
+        }
+
+        this._attachEventHandlers();
+        this._initializePlugins();
+        this._updateUndoRedoStates();
+        
+        // notify plugins first so tables are wrapped in frames
+        this._notifyPluginsContentChanged();
+        
+        // ensure typing space is available after initialization and upgrades
+        this._ensureTypingSpace();
+    }
+
+    /**
+     * Notifies all plugins that the content has been loaded or programmatically changed.
+     */
+    _notifyPluginsContentChanged() {
+        const plugins = webexpress.webui.EditorPlugins.getAll();
+        plugins.forEach((plugin) => {
+            if (typeof plugin.onContentChange === "function") {
+                plugin.onContentChange(this);
+            }
+        });
+    }
+
+    /**
+     * Ensures there is always an empty paragraph before, after, and between non-editable elements.
+     * This totally prevents the cursor trap issue.
+     */
+    _ensureTypingSpace() {
+        if (!this._editorElement) {
+            return;
+        }
+
+        let modified = false;
+        const editor = this._editorElement;
+
+        // find all non-editable blocks (like table frames)
+        const nonEditables = Array.from(editor.querySelectorAll('[contenteditable="false"]'));
+        
+        nonEditables.forEach(el => {
+            // skip elements that are nested inside OTHER non-editable elements
+            if (el.parentElement && el.parentElement.closest('[contenteditable="false"]')) {
+                return;
+            }
+
+            // un-nest from <p> if it accidentally got put inside one during insertion
+            const parentP = el.closest("p");
+            if (parentP && parentP.parentElement === editor) {
+                // move element out of the paragraph and place it after
+                editor.insertBefore(el, parentP.nextSibling);
+                modified = true;
+                
+                // cleanup the empty parent paragraph
+                if (parentP.textContent.trim() === "" && parentP.querySelectorAll("img, table, [contenteditable='false']").length === 0) {
+                    parentP.remove();
                 }
+            }
+
+            // strictly ensure el is a direct child of the editor before attempting to insert siblings
+            if (el.parentElement === editor) {
+                // ensure paragraph exists before the non-editable element
+                const prev = el.previousElementSibling;
+                if (!prev || (prev.tagName !== "P" && prev.getAttribute("contenteditable") === "false")) {
+                    const pBefore = document.createElement("p");
+                    pBefore.innerHTML = "<br>";
+                    editor.insertBefore(pBefore, el);
+                    modified = true;
+                }
+
+                // ensure paragraph exists after the non-editable element
+                const next = el.nextElementSibling;
+                if (!next || (next.tagName !== "P" && next.getAttribute("contenteditable") === "false")) {
+                    const pAfter = document.createElement("p");
+                    pAfter.innerHTML = "<br>";
+                    if (el.nextSibling) {
+                        editor.insertBefore(pAfter, el.nextSibling);
+                    } else {
+                        editor.appendChild(pAfter);
+                    }
+                    modified = true;
+                }
+            }
+        });
+
+        // ensure editor is never completely empty
+        const html = editor.innerHTML.trim();
+        if (!html || html === "<br>") {
+            editor.innerHTML = "<p><br></p>";
+            modified = true;
+        }
+
+        if (modified) {
+            this._syncValue();
+        }
+    }
+
+    /**
+     * Attaches all necessary event handlers to the editor and toolbar.
+     */
+    _attachEventHandlers() {
+        const toolbar = this._uiContainer.querySelector(".wx-editor-toolbar");
+        if (toolbar) {
+            // use capture to catch the event before it bubbles up
+            toolbar.addEventListener("mousedown", (e) => {
+                // stop propagation to prevent parent modals from closing due to "click outside" logic
+                e.stopPropagation();
+                this._saveCurrentSelection();
             }, true);
         }
-        this._editorElement.addEventListener('input', () => {
-            if (this._formInput) {
-                this._formInput.value = this._editorElement.innerHTML;
-            }
+
+        this._editorElement.addEventListener("change", () => {
+            this._editorElement.innerHTML = this._formInput.value;
         });
-    }
 
-    /**
-     * Creates the toolbar with all sub toolbars.
-     * @param {HTMLElement} element - The container element.
-     */
-    _createToolbar(element) {
-        const toolbar = document.createElement("div");
-        toolbar.classList.add("wx-editor-toolbar");
-        this._tableToolbar = this._createTableToolbar(element);
-        toolbar.appendChild(this._createFormatToolbar(element));
-        toolbar.appendChild(this._tableToolbar);
-        element.appendChild(toolbar);
-    }
-
-    /**
-     * Creates the format toolbar section.
-     * @param {HTMLElement} element - The container element.
-     * @returns {HTMLElement} The format toolbar element.
-     */
-    _createFormatToolbar(element) {
-        const toolbar = document.createElement("div");
-        toolbar.classList.add("wx-editor-format-toolbar");
-        toolbar.appendChild(this._createFormatDropdown());
-        toolbar.appendChild(this._createSeparator());
-        toolbar.appendChild(this._createFormattingButtons());
-        toolbar.appendChild(this._createStyleDropdown());
-        toolbar.appendChild(this._createColorDropdown());
-        toolbar.appendChild(this._createSeparator());
-        toolbar.appendChild(this._createListButtons());
-        toolbar.appendChild(this._createSeparator());
-        toolbar.appendChild(this._createIndentButtons());
-        toolbar.appendChild(this._createSeparator());
-        toolbar.appendChild(this._createAlignButtons());
-        toolbar.appendChild(this._createSeparator());
-        // link + image buttons
-        toolbar.appendChild(this._createLinkButton());
-        toolbar.appendChild(this._createImageButton());
-        toolbar.appendChild(this._createSeparator());
-        toolbar.appendChild(this._createTableInsertButton());
-        return toolbar;
-    }
-
-    /**
-     * Creates the floating table toolbar.
-     * @returns {HTMLElement} The table toolbar element.
-     */
-    _createTableToolbar() {
-        const tableToolbar = document.createElement("div");
-        tableToolbar.className = "wx-editor-table-toolbar";
-        tableToolbar.style.display = "none";
-        tableToolbar.appendChild(this._createInsertRowAboveButton());
-        tableToolbar.appendChild(this._createInsertRowBelowButton());
-        tableToolbar.appendChild(this._createDeleteRowButton());
-        tableToolbar.appendChild(this._createSeparator());
-        tableToolbar.appendChild(this._createInsertColumnLeftButton());
-        tableToolbar.appendChild(this._createInsertColumnRightButton());
-        tableToolbar.appendChild(this._createDeleteColumnButton());
-        tableToolbar.appendChild(this._createSeparator());
-        tableToolbar.appendChild(this._createMergeCellsButton());
-        tableToolbar.appendChild(this._createSplitCellButton());
-        tableToolbar.appendChild(this._createSeparator());
-        tableToolbar.appendChild(this._createCellBackgroundColorButton());
-        tableToolbar.appendChild(this._createSeparator());
-        tableToolbar.appendChild(this._createDeleteTableButton());
-        return tableToolbar;
-    }
-
-    /**
-     * Creates the block format dropdown (e.g., Paragraph, Heading 1).
-     * @returns {HTMLElement} The dropdown container element.
-     */
-    _createFormatDropdown() {
-        const container = document.createElement("div");
-        container.className = "wx-editor-btn-group";
-        const button = document.createElement("button");
-        button.className = "wx-editor-btn dropdown-toggle";
-        button.setAttribute("data-bs-toggle", "dropdown");
-        const buttonText = document.createElement("span");
-        buttonText.textContent = "Paragraph";
-        button.appendChild(buttonText);
-        const menu = document.createElement("ul");
-        menu.className = "dropdown-menu";
-        const formatOptions = [
-            { command: "p", label: "Paragraph" },
-            { command: "h1", label: "Heading 1" },
-            { command: "h2", label: "Heading 2" },
-            { command: "h3", label: "Heading 3" },
-            { command: "blockquote", label: "Quote" },
-            { command: "pre", label: "Code Block" }
-        ];
-        formatOptions.forEach(option => {
-            const item = document.createElement("li");
-            const optionButton = document.createElement("button");
-            optionButton.className = "dropdown-item";
-            optionButton.textContent = option.label;
-            optionButton.dataset.command = option.command;
-            optionButton.addEventListener("click", () => {
-                document.execCommand("formatBlock", false, option.command);
-                buttonText.textContent = option.label;
-            });
-            item.appendChild(optionButton);
-            menu.appendChild(item);
+        this._editorElement.addEventListener("blur", () => {
+            this._saveCurrentSelection();
         });
-        container.appendChild(button);
-        container.appendChild(menu);
-        const updateDropdownText = () => {
-            const selection = window.getSelection();
-            if (!selection || !selection.rangeCount) {
-                return;
-            }
-            const range = selection.getRangeAt(0);
-            let node = range.startContainer;
-            if (node && node.nodeType !== Node.ELEMENT_NODE) {
-                node = node.parentElement;
-            }
-            if (node && this._editorElement && this._editorElement.contains(node)) {
-                const currentFormat = document.queryCommandValue("formatBlock") || "p";
-                const foundOption = formatOptions.find(opt => { return opt.command === currentFormat; });
-                buttonText.textContent = foundOption ? foundOption.label : "Paragraph";
-            }
-        };
-        document.addEventListener("selectionchange", updateDropdownText);
-        return container;
-    }
 
-    /**
-     * Creates basic formatting buttons (bold, italic, underline).
-     * @returns {DocumentFragment} A fragment containing the buttons.
-     */
-    _createFormattingButtons() {
-        const fragment = document.createDocumentFragment();
-        const buttons = this._createButtons([
-            { command: "bold", icon: "fas fa-bold", label: "Bold" },
-            { command: "italic", icon: "fas fa-italic", label: "Italic" },
-            { command: "underline", icon: "fas fa-underline", label: "Underline" }
-        ]);
-        document.addEventListener("selectionchange", () => { this._updateButtonStates(); });
-        buttons.forEach(button => {
-            fragment.appendChild(button);
+        this._editorElement.addEventListener("input", () => {
+            this._syncValue();
+            this._updateUndoRedoStates();
         });
-        return fragment;
-    }
 
-    /**
-     * Creates a style dropdown for strikethrough, superscript, and subscript.
-     * @returns {HTMLElement} The dropdown element.
-     */
-    _createStyleDropdown() {
-        const container = document.createElement("div");
-        container.className = "wx-editor-btn-group";
-        const button = document.createElement("button");
-        button.className = "wx-editor-btn dropdown-toggle";
-        button.setAttribute("data-bs-toggle", "dropdown");
-        button.innerHTML = '<i class="fas fa-text-height"></i>';
-        const menu = document.createElement("ul");
-        menu.className = "dropdown-menu";
-        const options = [
-            { command: "strikethrough", label: "Strikethrough", icon: "fas fa-strikethrough" },
-            { command: "superscript", label: "Superscript", icon: "fas fa-superscript" },
-            { command: "subscript", label: "Subscript", icon: "fas fa-subscript" }
-        ];
-        options.forEach(option => {
-            const item = document.createElement("li");
-            const optionButton = document.createElement("button");
-            optionButton.className = "dropdown-item";
-            optionButton.innerHTML = `<i class="${option.icon}"></i> ${option.label}`;
-            optionButton.dataset.command = option.command;
-            optionButton.addEventListener("click", () => {
-                this._execCommand(option.command);
-            });
-            item.appendChild(optionButton);
-            menu.appendChild(item);
-        });
-        container.appendChild(button);
-        container.appendChild(menu);
-        return container;
-    }
+        this._editorElement.addEventListener("keydown", (e) => {
+            let actionModified = false;
 
-    /**
-     * Creates the text color dropdown with a color picker.
-     * @returns {HTMLElement} The dropdown group element.
-     */
-    _createColorDropdown() {
-        const container = document.createElement("div");
-        container.className = "wx-editor-btn-group";
-        const button = document.createElement("button");
-        button.className = "wx-editor-btn dropdown-toggle";
-        button.type = "button";
-        button.setAttribute("data-bs-toggle", "dropdown");
-        const icon = document.createElement("i");
-        icon.className = "fas fa-palette";
-        const updateIconColor = () => {
-            const selection = window.getSelection();
-            if (!selection || !selection.rangeCount) {
-                return;
-            }
-            const range = selection.getRangeAt(0);
-            let node = range.startContainer;
-            if (node && node.nodeType !== Node.ELEMENT_NODE) {
-                node = node.parentElement;
-            }
-            if (node && this._editorElement && this._editorElement.contains(node)) {
-                const color = document.queryCommandValue("foreColor") || "#000000";
-                icon.style.color = color;
-            }
-        };
-        updateIconColor();
-        button.appendChild(icon);
-        const menu = document.createElement("div");
-        menu.className = "dropdown-menu";
-        const colorPickerContainer = document.createElement("ul");
-        colorPickerContainer.className = "wx-editor-color-picker";
-        this._colors.forEach(color => {
-            const item = document.createElement("li");
-            const colorButton = document.createElement("button");
-            colorButton.className = "dropdown-item p-2";
-            colorButton.type = "button";
-            colorButton.style.backgroundColor = color;
-            colorButton.style.width = "24px";
-            colorButton.style.height = "24px";
-            colorButton.style.border = "none";
-            colorButton.style.cursor = "pointer";
-            colorButton.style.display = "inline-block";
-            colorButton.addEventListener("click", () => {
-                document.execCommand("foreColor", false, color);
-                icon.style.color = color;
-                this._restoreSavedRange();
-            });
-            item.appendChild(colorButton);
-            colorPickerContainer.appendChild(item);
-        });
-        menu.appendChild(colorPickerContainer);
-        container.appendChild(button);
-        container.appendChild(menu);
-        document.addEventListener("selectionchange", updateIconColor);
-        return container;
-    }
+            // prevent accidental deletion of empty paragraphs directly around non-editable elements
+            if (e.key === "Backspace" || e.key === "Delete") {
+                const sel = window.getSelection();
+                if (sel && sel.rangeCount > 0 && sel.isCollapsed) {
+                    let node = sel.getRangeAt(0).startContainer;
+                    
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        node = node.parentElement;
+                    }
 
-    /**
-     * Creates list buttons (unordered, ordered).
-     * @returns {DocumentFragment} A fragment containing the buttons.
-     */
-    _createListButtons() {
-        const fragment = document.createDocumentFragment();
-        const buttons = this._createButtons([
-            { command: "insertUnorderedList", icon: "fas fa-list-ul", label: "Bullet List" },
-            { command: "insertOrderedList", icon: "fas fa-list-ol", label: "Numbered List" }
-        ]);
-        document.addEventListener("selectionchange", () => { this._updateButtonStates(); });
-        buttons.forEach(button => {
-            fragment.appendChild(button);
-        });
-        return fragment;
-    }
-
-    /**
-     * Creates indent and outdent buttons.
-     * @returns {DocumentFragment} A fragment containing the buttons.
-     */
-    _createIndentButtons() {
-        const fragment = document.createDocumentFragment();
-        const buttons = this._createButtons([
-            { command: "outdent", icon: "fas fa-outdent", label: "Decrease Indent" },
-            { command: "indent", icon: "fas fa-indent", label: "Increase Indent" }
-        ]);
-        document.addEventListener("selectionchange", () => { this._updateButtonStates(); });
-        buttons.forEach(button => {
-            fragment.appendChild(button);
-        });
-        return fragment;
-    }
-
-    /**
-     * Creates alignment buttons (left, center, right, justify).
-     * @returns {DocumentFragment} A fragment containing the buttons.
-     */
-    _createAlignButtons() {
-        const fragment = document.createDocumentFragment();
-        const buttons = this._createButtons([
-            { command: "justifyLeft", icon: "fas fa-align-left", label: "Align Left" },
-            { command: "justifyCenter", icon: "fas fa-align-center", label: "Align Center" },
-            { command: "justifyRight", icon: "fas fa-align-right", label: "Align Right" },
-            { command: "justifyFull", icon: "fas fa-align-justify", label: "Justify Text" }
-        ]);
-        document.addEventListener("selectionchange", () => { this._updateButtonStates(); });
-        buttons.forEach(button => {
-            fragment.appendChild(button);
-        });
-        return fragment;
-    }
-
-    /**
-     * Creates a button to insert a hyperlink using a ModalSidebarPanel (fallback to prompts if unavailable).
-     * @returns {HTMLElement} The button element.
-     */
-    _createLinkButton() {
-        const button = document.createElement("button");
-        button.className = "wx-editor-btn";
-        button.type = "button";
-        button.title = "Insert Link";
-        button.innerHTML = '<i class="fas fa-link"></i>';
-        button.addEventListener("click", () => {
-            this._openLinkModal();
-        });
-        return button;
-    }
-
-    /**
-     * Creates a button to insert an image using a ModalSidebarPanel (fallback to prompts if unavailable).
-     * @returns {HTMLElement} The button element.
-     */
-    _createImageButton() {
-        const button = document.createElement("button");
-        button.className = "wx-editor-btn";
-        button.type = "button";
-        button.title = "Insert Image";
-        button.innerHTML = '<i class="fas fa-image"></i>';
-        button.addEventListener("click", () => {
-            this._openImageModal();
-        });
-        return button;
-    }
-
-    /**
-     * Sanitizes a URL to reduce risk of XSS via javascript: schemes.
-     * @param {string} url - raw url
-     * @returns {string|null} sanitized url or null if invalid
-     */
-    _sanitizeUrl(url) {
-        const trimmed = String(url).trim();
-        if (trimmed === "") {
-            return null;
-        }
-        if (/^javascript:/i.test(trimmed)) {
-            return null;
-        }
-        return trimmed;
-    }
-
-    /**
-     * Escapes HTML special characters in text nodes.
-     * @param {string} str - raw string
-     * @returns {string} escaped string
-     */
-    _escapeHtml(str) {
-        return String(str)
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#39;");
-    }
-
-    /**
-     * Creates the table insertion button with a size selection grid.
-     * @returns {HTMLElement} The button group container.
-     */
-    _createTableInsertButton() {
-        const container = document.createElement("div");
-        container.className = "wx-editor-btn-group";
-        const button = document.createElement("button");
-        button.className = "wx-editor-btn dropdown-toggle";
-        button.type = "button";
-        button.setAttribute("data-bs-toggle", "dropdown");
-        button.innerHTML = '<i class="fas fa-table"></i>';
-        const menu = document.createElement("div");
-        menu.className = "dropdown-menu p-3";
-        const grid = document.createElement("div");
-        grid.className = "wx-editor-insertable-grid";
-        const sizeDisplay = document.createElement("div");
-        sizeDisplay.className = "wx-editor-table-size-display";
-        sizeDisplay.textContent = "1 × 1";
-        const INITIAL_ROWS = 5;
-        const INITIAL_COLS = 5;
-        const ABS_MAX = 18;
-        let maxRows = INITIAL_ROWS;
-        let maxCols = INITIAL_COLS;
-        let matrix = [];
-        let selectedRows = 1;
-        let selectedCols = 1;
-
-        const highlightCells = (rows, cols, totalRows, totalCols) => {
-            totalRows = totalRows || maxRows;
-            totalCols = totalCols || maxCols;
-            for (let r = 0; r < totalRows; r++) {
-                for (let c = 0; c < totalCols; c++) {
-                    if (matrix[r] && matrix[r][c]) {
-                        if (r < rows && c < cols && rows > 0 && cols > 0) {
-                            matrix[r][c].classList.add("selected");
-                        } else {
-                            matrix[r][c].classList.remove("selected");
+                    // only intercept if we are inside a direct block like <p>
+                    const block = node.closest("p, div:not(.wx-editor-content)");
+                    if (block && block.parentElement === this._editorElement) {
+                        
+                        if (e.key === "Backspace") {
+                            const prev = block.previousElementSibling;
+                            if (prev && prev.getAttribute("contenteditable") === "false") {
+                                // check if cursor is at the very start with no content before it
+                                const range = sel.getRangeAt(0);
+                                const preCaretRange = range.cloneRange();
+                                preCaretRange.selectNodeContents(block);
+                                preCaretRange.setEnd(range.startContainer, range.startOffset);
+                                
+                                const frag = preCaretRange.cloneContents();
+                                const hasContent = frag.textContent.trim().length > 0 || 
+                                    Array.from(frag.querySelectorAll("*")).filter(el => el.tagName !== "BR").length > 0;
+                                
+                                if (!hasContent) {
+                                    e.preventDefault(); // don't delete the empty space paragraph
+                                    prev.remove(); // delete the non-editable block (table) instead
+                                    actionModified = true;
+                                }
+                            }
+                        } else if (e.key === "Delete") {
+                            const next = block.nextElementSibling;
+                            if (next && next.getAttribute("contenteditable") === "false") {
+                                // check if cursor is at the very end with no content after it
+                                const range = sel.getRangeAt(0);
+                                const postCaretRange = range.cloneRange();
+                                postCaretRange.selectNodeContents(block);
+                                postCaretRange.setStart(range.endContainer, range.endOffset);
+                                
+                                const frag = postCaretRange.cloneContents();
+                                const hasContent = frag.textContent.trim().length > 0 || 
+                                    Array.from(frag.querySelectorAll("*")).filter(el => el.tagName !== "BR").length > 0;
+                                
+                                if (!hasContent) {
+                                    e.preventDefault(); // don't delete the empty space paragraph
+                                    next.remove(); // delete the non-editable block (table) instead
+                                    actionModified = true;
+                                }
+                            }
                         }
                     }
                 }
             }
-        };
 
-        const updateSizeDisplay = (rows, cols) => {
-            sizeDisplay.textContent = `${rows} × ${cols}`;
-        };
-
-        const buildGrid = (rows, cols) => {
-            grid.innerHTML = "";
-            matrix = [];
-            grid.style.gridTemplateColumns = `repeat(${cols}, 24px)`;
-            grid.style.gridTemplateRows = `repeat(${rows}, 24px)`;
-            for (let r = 0; r < rows; r++) {
-                matrix[r] = [];
-                for (let c = 0; c < cols; c++) {
-                    const cell = document.createElement("div");
-                    cell.className = "wx-editor-insertable-cell";
-                    cell.dataset.row = r + 1;
-                    cell.dataset.col = c + 1;
-                    matrix[r][c] = cell;
-                    cell.addEventListener("mouseenter", () => {
-                        selectedRows = r + 1;
-                        selectedCols = c + 1;
-                        highlightCells(selectedRows, selectedCols, rows, cols);
-                        updateSizeDisplay(selectedRows, selectedCols);
-                        if ((selectedRows === maxRows || selectedCols === maxCols) && (maxRows < ABS_MAX || maxCols < ABS_MAX)) {
-                            if (maxRows < ABS_MAX && selectedRows === maxRows) {
-                                maxRows = Math.min(maxRows + 1, ABS_MAX);
-                            }
-                            if (maxCols < ABS_MAX && selectedCols === maxCols) {
-                                maxCols = Math.min(maxCols + 1, ABS_MAX);
-                            }
-                            buildGrid(maxRows, maxCols);
-                            highlightCells(selectedRows, selectedCols, maxRows, maxCols);
-                            updateSizeDisplay(selectedRows, selectedCols);
-                        }
-                    });
-                    cell.addEventListener("click", (e) => {
-                        this._insertTable(selectedRows, selectedCols);
-                        if (menu.classList.contains("show")) {
-                            menu.classList.remove("show");
-                        }
-                        resetGrid();
-                        e.preventDefault();
-                        e.stopPropagation();
-                    });
-                    grid.appendChild(cell);
-                }
-            }
-            highlightCells(selectedRows, selectedCols, rows, cols);
-        };
-
-        const resetGrid = () => {
-            maxRows = INITIAL_ROWS;
-            maxCols = INITIAL_COLS;
-            selectedRows = 1;
-            selectedCols = 1;
-            buildGrid(maxRows, maxCols);
-            updateSizeDisplay(1, 1);
-        };
-
-        resetGrid();
-        menu.appendChild(grid);
-        menu.appendChild(sizeDisplay);
-        container.appendChild(button);
-        container.appendChild(menu);
-
-        document.addEventListener("click", (event) => {
-            if (!container.contains(event.target)) {
-                resetGrid();
-            }
-        });
-
-        button.addEventListener('click', () => {
             setTimeout(() => {
-                resetGrid();
+                this._ensureTypingSpace();
+                this._updateUndoRedoStates();
+                if (actionModified) {
+                    this._syncValue();
+                }
             }, 0);
         });
 
-        const detectTableSelection = () => {
-            const selection = window.getSelection();
-            if (!selection.rangeCount) {
-                return false;
-            }
-            const range = selection.getRangeAt(0);
-            let node = range.startContainer;
-            if (node.nodeType === Node.TEXT_NODE) {
-                node = node.parentElement;
-            }
-            return this._editorElement.contains(node) && node.closest("table");
-        };
+        this._editorElement.addEventListener("mouseup", () => {
+            setTimeout(() => {
+                this._ensureTypingSpace();
+                this._updateUndoRedoStates();
+            }, 0);
+        });
+    }
 
-        document.addEventListener("selectionchange", () => {
-            if (detectTableSelection()) {
-                this._tableToolbar.style.display = "block";
-                this._tableToolbarShownOnce = true;
-            } else {
-                if (!this._tableToolbarShownOnce) {
-                    this._tableToolbar.style.display = "none";
-                }
+    /**
+     * Initializes all registered plugins.
+     */
+    _initializePlugins() {
+        const plugins = webexpress.webui.EditorPlugins.getAll();
+        plugins.forEach((plugin) => {
+            if (typeof plugin.init === "function") {
+                plugin.init(this);
             }
         });
-
-        return container;
     }
 
     /**
-     * Creates a button to insert a row above the current one.
-     * @returns {HTMLButtonElement} The button element.
+     * Creates the toolbar containing plugin buttons and undo/redo controls.
+     * @param {HTMLElement} element - The parent element (ui container).
      */
-    _createInsertRowAboveButton() {
-        const action = { command: "insertRowAbove", label: "Add Row Above", icon: "wx-icon add-row-above" };
-        return this._createTableButton(action);
-    }
+    _createToolbar(element) {
+        const toolbar = document.createElement("div");
+        toolbar.classList.add("wx-editor-toolbar");
+        toolbar.style.display = "flex";
+        toolbar.style.flexWrap = "wrap";
+        toolbar.style.alignItems = "center";
 
-    /**
-     * Creates a button to insert a row below the current one.
-     * @returns {HTMLButtonElement} The button element.
-     */
-    _createInsertRowBelowButton() {
-        const action = { command: "insertRowBelow", label: "Add Row Below", icon: "wx-icon add-row-below" };
-        return this._createTableButton(action);
-    }
-
-    /**
-     * Creates a button to delete the current row.
-     * @returns {HTMLButtonElement} The button element.
-     */
-    _createDeleteRowButton() {
-        const action = { command: "deleteRow", label: "Delete Row", icon: "wx-icon delete-row" };
-        return this._createTableButton(action);
-    }
-
-    /**
-     * Creates a button to insert a column to the left of the current one.
-     * @returns {HTMLButtonElement} The button element.
-     */
-    _createInsertColumnLeftButton() {
-        const action = { command: "insertColumnLeft", label: "Add Column Left", icon: "wx-icon add-col-above" };
-        return this._createTableButton(action);
-    }
-
-    /**
-     * Creates a button to insert a column to the right of the current one.
-     * @returns {HTMLButtonElement} The button element.
-     */
-    _createInsertColumnRightButton() {
-        const action = { command: "insertColumnRight", label: "Add Column Right", icon: "wx-icon add-col-below" };
-        return this._createTableButton(action);
-    }
-
-    /**
-     * Creates a button to merge selected cells.
-     * @returns {HTMLButtonElement} The button element.
-     */
-    _createMergeCellsButton() {
-        const button = document.createElement("button");
-        button.className = "wx-editor-btn";
-        button.title = "Merge cells";
-        button.innerHTML = '<i class="wx-icon merge-cells"></i>';
-        button.addEventListener("click", () => {
-            this._mergeCells();
-            this._restoreSavedRange();
-        });
-        return button;
-    }
-
-    /**
-     * Creates a button to split a merged cell.
-     * @returns {HTMLButtonElement} The button element.
-     */
-    _createSplitCellButton() {
-        const button = document.createElement("button");
-        button.className = "wx-editor-btn";
-        button.title = "Split cell";
-        button.innerHTML = '<i class="wx-icon split-cell"></i>';
-        button.addEventListener("click", () => {
-            this._splitCell();
-            this._restoreSavedRange();
-        });
-        return button;
-    }
-
-    /**
-     * Creates a dropdown to set the background color of a table cell.
-     * @returns {HTMLElement} The button group element.
-     */
-    _createCellBackgroundColorButton() {
-        const container = document.createElement("div");
-        container.className = "wx-editor-btn-group";
-        const button = document.createElement("button");
-        button.className = "wx-editor-btn dropdown-toggle";
-        button.type = "button";
-        button.setAttribute("data-bs-toggle", "dropdown");
-        const icon = document.createElement("i");
-        icon.className = "wx-icon cell-background";
-        button.appendChild(icon);
-        const menu = document.createElement("div");
-        menu.className = "dropdown-menu";
-        const colorPickerContainer = document.createElement("ul");
-        colorPickerContainer.className = "wx-editor-color-picker";
-        this._colors.forEach(color => {
-            const item = document.createElement("li");
-            const colorButton = document.createElement("button");
-            colorButton.className = "dropdown-item p-2";
-            colorButton.type = "button";
-            colorButton.style.backgroundColor = color;
-            colorButton.style.width = "24px";
-            colorButton.style.height = "24px";
-            colorButton.style.border = "none";
-            colorButton.style.cursor = "pointer";
-            colorButton.style.display = "inline-block";
-            colorButton.addEventListener("click", () => {
-                const selection = window.getSelection();
-                if (!selection.rangeCount) {
-                    return;
+        // append plugin toolbars
+        const plugins = webexpress.webui.EditorPlugins.getAll();
+        plugins.forEach((plugin) => {
+            if (typeof plugin.createToolbar === "function") {
+                const group = plugin.createToolbar(this);
+                if (group) {
+                    toolbar.appendChild(group);
                 }
-                let cell = selection.getRangeAt(0).startContainer;
-                if (cell.nodeType !== Node.ELEMENT_NODE) {
-                    cell = cell.parentElement;
-                }
-                cell = cell.closest('td,th');
-                if (cell) {
-                    cell.style.backgroundColor = color;
-                }
-            });
-            item.appendChild(colorButton);
-            colorPickerContainer.appendChild(item);
+            }
         });
-        menu.appendChild(colorPickerContainer);
-        container.appendChild(button);
-        container.appendChild(menu);
-        return container;
+
+        // append undo/redo controls
+        const historyGroup = this._createHistoryGroup();
+        toolbar.appendChild(historyGroup);
+        element.appendChild(toolbar);
     }
 
     /**
-     * Creates a button to delete the current column.
-     * @returns {HTMLButtonElement} The button element.
+     * Creates the undo/redo button group including the fullscreen toggle.
+     * @returns {HTMLElement} The history button group.
      */
-    _createDeleteColumnButton() {
-        const action = { command: "deleteColumn", label: "Delete Column", icon: "wx-icon delete-col" };
-        return this._createTableButton(action);
+    _createHistoryGroup() {
+        const historyGroup = document.createElement("div");
+        historyGroup.className = "wx-editor-btn-group";
+        historyGroup.style.marginLeft = "auto";
+
+        const undoBtn = this._createHistoryButton("undo", "Undo (Ctrl+Z)", "fas fa-undo");
+        const redoBtn = this._createHistoryButton("redo", "Redo (Ctrl+Y)", "fas fa-redo");
+
+        historyGroup.appendChild(undoBtn);
+        historyGroup.appendChild(redoBtn);
+
+        // add separator
+        const sep = document.createElement("div");
+        sep.className = "wx-editor-separator";
+        historyGroup.appendChild(sep);
+
+        // add fullscreen button
+        const fsBtn = document.createElement("button");
+        fsBtn.className = "wx-editor-btn";
+        fsBtn.title = "Toggle Fullscreen";
+        fsBtn.innerHTML = `<i class="fas fa-expand"></i>`;
+        fsBtn.type = "button";
+
+        // use the current action system targetting the container
+        fsBtn.dataset.wxPrimaryAction = "fullscreen";
+        fsBtn.dataset.wxPrimaryTarget = "#" + this._uiContainer.id;
+
+        historyGroup.appendChild(fsBtn);
+
+        return historyGroup;
     }
 
     /**
-     * Creates a button to delete the entire table.
-     * @returns {HTMLButtonElement} The button element.
+     * Creates a single history button (undo or redo).
+     * @param {string} command - The command name.
+     * @param {string} title - The button tooltip.
+     * @param {string} iconClass - The icon CSS class.
+     * @returns {HTMLElement} The button element.
      */
-    _createDeleteTableButton() {
-        const button = document.createElement("button");
-        button.className = "wx-editor-btn";
-        button.title = "Delete Table";
-        button.innerHTML = '<i class="wx-icon delete-table"></i> Delete Table';
-        button.addEventListener("click", () => {
-            this._deleteWholeTable();
-            this._restoreSavedRange();
+    _createHistoryButton(command, title, iconClass) {
+        const btn = document.createElement("button");
+        btn.className = "wx-editor-btn";
+        btn.title = title;
+        btn.dataset.command = command;
+        btn.innerHTML = `<i class="${iconClass}"></i>`;
+        btn.type = "button";
+
+        btn.addEventListener("click", () => {
+            this.execCommand(command);
+            this._updateUndoRedoStates();
         });
-        return button;
+
+        return btn;
     }
 
     /**
-     * Creates a visual separator for the toolbar.
-     * @returns {HTMLElement} The separator span element.
+     * Updates the enabled/disabled state of undo and redo buttons.
      */
-    _createSeparator() {
-        const separator = document.createElement("span");
-        separator.classList.add("wx-editor-separator");
-        return separator;
+    _updateUndoRedoStates() {
+        const undoBtn = this._uiContainer.querySelector('button[data-command="undo"]');
+        const redoBtn = this._uiContainer.querySelector('button[data-command="redo"]');
+
+        if (undoBtn) {
+            const canUndo = document.queryCommandEnabled("undo");
+            undoBtn.disabled = !canUndo;
+            undoBtn.style.opacity = canUndo ? "1" : "0.5";
+        }
+
+        if (redoBtn) {
+            const canRedo = document.queryCommandEnabled("redo");
+            redoBtn.disabled = !canRedo;
+            redoBtn.style.opacity = canRedo ? "1" : "0.5";
+        }
     }
 
     /**
-     * Creates generic command buttons.
-     * @param {Object[]} buttons - An array of button definitions.
-     * @returns {HTMLElement[]} An array of button elements.
-     */
-    _createButtons(buttons) {
-        return buttons.map(btn => {
-            const button = document.createElement("button");
-            button.className = "wx-editor-btn";
-            button.type = "button";
-            button.title = btn.label;
-            button.dataset.command = btn.command;
-            const icon = document.createElement("i");
-            icon.className = btn.icon;
-            button.appendChild(icon);
-            button.addEventListener("click", () => {
-                document.execCommand(btn.command);
-                this._updateButtonStates();
-                this._restoreSavedRange();
-            });
-            return button;
-        });
-    }
-
-    /**
-     * Creates a button for a table-specific command.
-     * @param {Object} action - The action definition.
-     * @returns {HTMLButtonElement} The button element.
-     */
-    _createTableButton(action) {
-        const button = document.createElement("button");
-        button.className = "wx-editor-btn";
-        button.type = "button";
-        button.title = action.label;
-        button.innerHTML = `<i class="${action.icon}"></i>`;
-        button.addEventListener("click", () => {
-            this._modifyTable(action.command);
-            this._restoreSavedRange();
-        });
-        return button;
-    }
-
-    /**
-     * Updates the active states of formatting buttons based on the current selection.
-     */
-    _updateButtonStates() {
-        const buttons = document.querySelectorAll(".wx-editor-btn");
-        buttons.forEach(button => {
-            const isActive = button.dataset.command ? document.queryCommandState(button.dataset.command) : false;
-            button.classList.toggle("active", isActive);
-        });
-    }
-
-    /**
-     * Creates the main editor area where content is edited.
+     * Creates the editable content area.
      * @param {HTMLElement} element - The parent element.
-     * @param {string} content - The initial HTML content.
+     * @param {string} content - The initial content.
      */
     _createEditorArea(element, content) {
-        this.editorContainer = document.createElement("div");
-        this.editorContainer.classList.add("wx-editor-container");
+        const container = document.createElement("div");
+        container.classList.add("wx-editor-container");
+
         this._editorElement = document.createElement("div");
         this._editorElement.classList.add("wx-editor-content");
         this._editorElement.setAttribute("contenteditable", "true");
         this._editorElement.style.minHeight = "200px";
+
         if (content) {
-            this._editorElement.innerHTML = content;
+            // sanitize initial content before inserting
+            const clean = this._sanitizeHtml(content);
+            this._editorElement.innerHTML = clean;
         }
-        this.editorContainer.appendChild(this._editorElement);
-        element.appendChild(this.editorContainer);
+
+        container.appendChild(this._editorElement);
+        element.appendChild(container);
     }
 
     /**
@@ -819,737 +408,655 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      * @param {HTMLElement} element - The parent element.
      */
     _createStatusBar(element) {
-        this.statusBar = document.createElement("div");
-        this.statusBar.classList.add("wx-editor-status");
-        element.appendChild(this.statusBar);
+        const statusBar = document.createElement("div");
+        statusBar.classList.add("wx-editor-status");
+
+        const doneBtn = document.createElement("button");
+        doneBtn.className = "btn btn-primary wx-button wx-editor-finish";
+        doneBtn.type = "button";
+        doneBtn.innerHTML = '<i class="fas fa-check-circle me-1"></i> Done';
+        doneBtn.setAttribute("aria-label", "Done");
+        doneBtn.title = "Done";
+
+        // wire to the controller's dismiss handler for css fullscreen
+        doneBtn.setAttribute("data-wx-dismiss", "fullscreen");
+        doneBtn.setAttribute("data-wx-target", "#" + this._uiContainer.id);
+
+        statusBar.appendChild(doneBtn);
+        element.appendChild(statusBar);
     }
 
     /**
-     * Inserts a table at the current cursor position.
-     * @param {number} rows - The number of rows for the table.
-     * @param {number} cols - The number of columns for the table.
+     * Initializes the context menu and its event handlers.
      */
-    _insertTable(rows, cols) {
-        let tableHTML = "<table class='wx-editor-table' border='1'><thead><tr>";
-        for (let c = 0; c < cols; c++) {
-            tableHTML += "<th><br></th>";
-        }
-        tableHTML += "</tr></thead><tbody>";
-        for (let r = 1; r < rows; r++) {
-            tableHTML += "<tr>";
-            for (let c = 0; c < cols; c++) {
-                tableHTML += "<td><br></td>";
-            }
-            tableHTML += "</tr>";
-        }
-        tableHTML += "</tbody></table>";
-        this._insertHtmlAtCursor(tableHTML);
-    }
+    _initContextMenu() {
+        this._contextMenu = document.createElement("div");
+        this._contextMenu.className = "dropdown-menu shadow";
+        this._contextMenu.style.position = "fixed";
+        this._contextMenu.style.display = "none";
+        this._contextMenu.style.zIndex = "1050";
+        document.body.appendChild(this._contextMenu);
 
-    /**
-     * Inserts raw HTML at the current cursor position.
-     * @param {string} html - The HTML string to insert.
-     */
-    _insertHtmlAtCursor(html) {
-        this._restoreSavedRange();
-        let sel = window.getSelection();
-        if (sel && sel.rangeCount) {
-            let range = sel.getRangeAt(0);
-            if (!this._editorElement.contains(range.startContainer)) {
-                this._editorElement.innerHTML += html;
-                return;
+        // close context menu on any document click
+        this._documentClickHandler = () => {
+            if (this._contextMenu.style.display === "block") {
+                this._contextMenu.style.display = "none";
             }
-            range.deleteContents();
-            let el = document.createElement("div");
-            el.innerHTML = html;
-            const marker = document.createElement("span");
-            marker.id = "wx-editor-marker-" + Date.now() + "-" + Math.random();
-            marker.style.display = "inline-block";
-            marker.style.width = "0";
-            marker.style.height = "0";
-            marker.style.overflow = "hidden";
-            let frag = document.createDocumentFragment();
-            let node;
-            let lastNode;
-            while ((node = el.firstChild)) {
-                lastNode = frag.appendChild(node);
-            }
-            frag.appendChild(marker);
-            range.insertNode(frag);
-            const newRange = document.createRange();
-            newRange.setStartAfter(marker);
-            newRange.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(newRange);
-            marker.parentNode.removeChild(marker);
-            if (lastNode && typeof lastNode.scrollIntoView === "function") {
-                lastNode.scrollIntoView({ block: "nearest" });
-            }
-        } else {
-            this._editorElement.innerHTML += html;
-        }
-    }
+        };
+        document.addEventListener("click", this._documentClickHandler);
 
-    /**
-     * Restores the previously saved selection range.
-     */
-    _restoreSavedRange() {
-        if (this._savedRange) {
-            let sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(this._savedRange);
-            this._savedRange = null;
-        }
-    }
-
-    /**
-     * Applies a block style tag (e.g., 'p', 'h1') to the selection.
-     * @param {string} style - The tag name of the style to apply.
-     */
-    _applyTextStyle(style) {
-        document.execCommand("formatBlock", false, style);
-        this._restoreSavedRange();
-    }
-
-    /**
-     * Executes a document command (e.g., 'bold', 'italic').
-     * @param {string} command - The name of the command to execute.
-     */
-    _execCommand(command) {
-        document.execCommand(command, false, null);
-        this._restoreSavedRange();
-    }
-
-    /**
-     * Returns the table editing context (cell, row, table) for current selection.
-     * @returns {{cell:HTMLTableCellElement,row:HTMLTableRowElement,table:HTMLTableElement}|null}
-     */
-    _getTableContext() {
-        const selection = window.getSelection();
-        if (!selection || !selection.rangeCount) {
-            return null;
-        }
-        let node = selection.getRangeAt(0).startContainer;
-        if (node.nodeType !== Node.ELEMENT_NODE) {
-            node = node.parentElement;
-        }
-        if (!node) {
-            return null;
-        }
-        const cell = node.closest('td,th');
-        if (!cell) {
-            return null;
-        }
-        const row = cell.parentElement;
-        const table = cell.closest('table');
-        if (!row || !table) {
-            return null;
-        }
-        return { cell, row, table };
-    }
-
-    /**
-     * Places the caret inside an element (start).
-     * @param {HTMLElement} el - target element
-     */
-    _placeCaret(el) {
-        if (!el) {
-            return;
-        }
-        const range = document.createRange();
-        range.selectNodeContents(el);
-        range.collapse(true);
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-    }
-
-    /**
-     * Inserts a new row above the reference row.
-     * @param {HTMLTableRowElement} row - reference row
-     * @returns {HTMLTableRowElement} new row
-     */
-    _insertRowAbove(row) {
-        const table = row.closest('table');
-        if (!table) {
-            return null;
-        }
-        const newRow = row.cloneNode(false);
-        for (let i = 0; i < row.cells.length; i++) {
-            const newCell = row.cells[i].cloneNode(false);
-            newCell.innerHTML = "<br>";
-            newRow.appendChild(newCell);
-        }
-        row.parentElement.insertBefore(newRow, row);
-        return newRow;
-    }
-
-    /**
-     * Inserts a new row below the reference row.
-     * @param {HTMLTableRowElement} row - reference row
-     * @returns {HTMLTableRowElement} new row
-     */
-    _insertRowBelow(row) {
-        const table = row.closest('table');
-        if (!table) {
-            return null;
-        }
-        const newRow = row.cloneNode(false);
-        for (let i = 0; i < row.cells.length; i++) {
-            const newCell = row.cells[i].cloneNode(false);
-            newCell.innerHTML = "<br>";
-            newRow.appendChild(newCell);
-        }
-        if (row.nextSibling) {
-            row.parentElement.insertBefore(newRow, row.nextSibling);
-        } else {
-            row.parentElement.appendChild(newRow);
-        }
-        return newRow;
-    }
-
-    /**
-     * Inserts a new column to the left of the given cell index.
-     * @param {HTMLTableCellElement} cell - reference cell
-     * @returns {number} new cell index
-     */
-    _insertColumnLeft(cell) {
-        const table = cell.closest('table');
-        if (!table) {
-            return -1;
-        }
-        const idx = cell.cellIndex;
-        for (let r = 0; r < table.rows.length; r++) {
-            const row = table.rows[r];
-            const ref = row.cells[idx];
-            const newCell = document.createElement(ref ? ref.tagName.toLowerCase() : 'td');
-            newCell.innerHTML = "<br>";
-            row.insertBefore(newCell, ref);
-        }
-        return idx;
-    }
-
-    /**
-     * Inserts a new column to the right of the given cell index.
-     * @param {HTMLTableCellElement} cell - reference cell
-     * @returns {number} new cell index
-     */
-    _insertColumnRight(cell) {
-        const table = cell.closest('table');
-        if (!table) {
-            return -1;
-        }
-        const idx = cell.cellIndex;
-        for (let r = 0; r < table.rows.length; r++) {
-            const row = table.rows[r];
-            const ref = row.cells[idx];
-            const newCell = document.createElement(ref ? ref.tagName.toLowerCase() : 'td');
-            newCell.innerHTML = "<br>";
-            if (ref && ref.nextSibling) {
-                row.insertBefore(newCell, ref.nextSibling);
-            } else {
-                row.appendChild(newCell);
-            }
-        }
-        return idx + 1;
-    }
-
-    /**
-     * Deletes a row with fallback to remove table if last row.
-     * @param {HTMLTableRowElement} row - row to delete
-     */
-    _deleteRow(row) {
-        const table = row.closest('table');
-        if (!table) {
-            return;
-        }
-        const totalRows = table.rows.length;
-        const nextFocus = row.nextElementSibling || row.previousElementSibling;
-        row.remove();
-        if (totalRows <= 1) {
-            table.remove();
-        } else {
-            if (nextFocus && nextFocus.cells && nextFocus.cells[0]) {
-                this._placeCaret(nextFocus.cells[0]);
-            }
-        }
-    }
-
-    /**
-     * Deletes a column at specified cell index with fallback to remove table.
-     * @param {HTMLTableCellElement} cell - reference cell
-     */
-    _deleteColumn(cell) {
-        const table = cell.closest('table');
-        if (!table) {
-            return;
-        }
-        const idx = cell.cellIndex;
-        let remainingCols = table.rows[0].cells.length;
-        if (remainingCols <= 1) {
-            table.remove();
-            return;
-        }
-        for (let r = 0; r < table.rows.length; r++) {
-            const row = table.rows[r];
-            if (row.cells[idx]) {
-                row.deleteCell(idx);
-            }
-        }
-        const focusRow = table.rows[0];
-        if (focusRow) {
-            const target = focusRow.cells[idx] || focusRow.cells[idx - 1];
-            if (target) {
-                this._placeCaret(target);
-            }
-        }
-    }
-
-    /**
-     * Modifies the table structure according to the given action.
-     * Supported: insertRowAbove, insertRowBelow, insertColumnLeft, insertColumnRight, deleteRow, deleteColumn,
-     * legacy: insertRow (below), insertColumn (right).
-     * @param {string} action - action identifier
-     */
-    _modifyTable(action) {
-        const ctx = this._getTableContext();
-        if (!ctx) {
-            return;
-        }
-        const { cell, row, table } = ctx;
-        switch (action) {
-            case "insertRowAbove": {
-                const newRow = this._insertRowAbove(row);
-                if (newRow && newRow.cells[0]) {
-                    this._placeCaret(newRow.cells[0]);
-                }
-                break;
-            }
-            case "insertRowBelow":
-            case "insertRow": {
-                const newRow = this._insertRowBelow(row);
-                if (newRow && newRow.cells[0]) {
-                    this._placeCaret(newRow.cells[0]);
-                }
-                break;
-            }
-            case "insertColumnLeft": {
-                const newIndex = this._insertColumnLeft(cell);
-                if (row.cells[newIndex]) {
-                    this._placeCaret(row.cells[newIndex]);
-                }
-                break;
-            }
-            case "insertColumnRight":
-            case "insertColumn": {
-                const newIndex = this._insertColumnRight(cell);
-                if (row.cells[newIndex]) {
-                    this._placeCaret(row.cells[newIndex]);
-                }
-                break;
-            }
-            case "deleteRow": {
-                this._deleteRow(row);
-                break;
-            }
-            case "deleteColumn": {
-                this._deleteColumn(cell);
-                break;
-            }
-            default: {
-                break;
-            }
-        }
-        if (!table.isConnected && this._tableToolbar) {
-            this._tableToolbar.style.display = "none";
-            this._tableToolbarShownOnce = false;
-        }
-    }
-
-    /**
-     * Merges horizontally adjacent selected cells within the same row.
-     */
-    _mergeCells() {
-        const selection = window.getSelection();
-        if (!selection.rangeCount) {
-            return;
-        }
-        const range = selection.getRangeAt(0);
-        let startCell = range.startContainer;
-        let endCell = range.endContainer;
-        while (startCell && startCell.nodeType !== 1) {
-            startCell = startCell.parentElement;
-        }
-        while (endCell && endCell.nodeType !== 1) {
-            endCell = endCell.parentElement;
-        }
-        startCell = startCell.closest('td,th');
-        endCell = endCell.closest('td,th');
-        if (!startCell || !endCell) {
-            return;
-        }
-        const row = startCell.parentElement;
-        if (row !== endCell.parentElement) {
-            return;
-        }
-        const cells = Array.from(row.children);
-        const startIdx = cells.indexOf(startCell);
-        const endIdx = cells.indexOf(endCell);
-        if (startIdx === -1 || endIdx === -1 || startIdx === endIdx) {
-            return;
-        }
-        const minIdx = Math.min(startIdx, endIdx);
-        const maxIdx = Math.max(startIdx, endIdx);
-        let mergedContent = '';
-        for (let i = minIdx; i <= maxIdx; i++) {
-            mergedContent += cells[i].innerHTML + ' ';
-        }
-        mergedContent = mergedContent.trim();
-        cells[minIdx].innerHTML = mergedContent;
-        cells[minIdx].setAttribute('colspan', maxIdx - minIdx + 1);
-        for (let i = maxIdx; i > minIdx; i--) {
-            row.removeChild(cells[i]);
-        }
-        this._placeCaret(cells[minIdx]);
-    }
-
-    /**
-     * Splits a cell with a colspan greater than 1 into individual cells.
-     */
-    _splitCell() {
-        const selection = window.getSelection();
-        if (!selection.rangeCount) {
-            return;
-        }
-        let cell = selection.getRangeAt(0).startContainer;
-        if (cell.nodeType !== Node.ELEMENT_NODE) {
-            cell = cell.parentElement;
-        }
-        cell = cell.closest('td,th');
-        if (!cell) {
-            return;
-        }
-        let colspan = parseInt(cell.getAttribute('colspan') || 1, 10);
-        if (colspan <= 1) {
-            return;
-        }
-        cell.removeAttribute('colspan');
-        for (let i = 1; i < colspan; i++) {
-            const newCell = cell.cloneNode(false);
-            newCell.innerHTML = '<br>';
-            cell.parentElement.insertBefore(newCell, cell.nextSibling);
-        }
-        this._placeCaret(cell);
-    }
-
-    /**
-     * Deletes the entire table containing the current cursor position.
-     */
-    _deleteWholeTable() {
-        const selection = window.getSelection();
-        if (!selection.rangeCount) {
-            return;
-        }
-        let node = selection.getRangeAt(0).startContainer;
-        if (node.nodeType !== Node.ELEMENT_NODE) {
-            node = node.parentElement;
-        }
-        const table = node.closest("table");
-        if (table) {
-            table.remove();
-            if (this._tableToolbar) {
-                if (!this._editorElement.querySelector("table")) {
-                    this._tableToolbar.style.display = "none";
-                    this._tableToolbarShownOnce = false;
-                }
-            }
-        }
-    }
-
-    /**
-     * Enables Tab and Shift+Tab navigation within tables.
-     */
-    _enableTableTabNavigation() {
-        this._editorElement.addEventListener('keydown', function (e) {
-            if (e.key === 'Tab') {
-                const sel = window.getSelection();
-                if (!sel.rangeCount) {
-                    return;
-                }
-                let cell = sel.anchorNode;
-                while (cell && cell.nodeType !== 1) {
-                    cell = cell.parentElement;
-                }
-                while (cell && !/^TD|TH$/i.test(cell.nodeName)) {
-                    cell = cell.parentElement;
-                }
-                if (cell && (cell.nodeName === 'TD' || cell.nodeName === 'TH')) {
-                    e.preventDefault();
-                    let targetCell;
-                    if (e.shiftKey) {
-                        targetCell = getPrevCell(cell);
-                    } else {
-                        targetCell = getNextCell(cell);
-                        if (!targetCell) {
-                            const table = cell.closest('table');
-                            if (table) {
-                                const rows = Array.from(table.rows);
-                                const lastRow = rows[rows.length - 1];
-                                const lastCell = lastRow.cells[lastRow.cells.length - 1];
-                                if (cell === lastCell) {
-                                    const colCount = lastRow.cells.length;
-                                    const newRow = table.insertRow(rows.length);
-                                    for (let c = 0; c < colCount; c++) {
-                                        newRow.insertCell(c).innerHTML = '...';
-                                    }
-                                    targetCell = newRow.cells[0];
-                                }
-                            }
-                        }
-                    }
-                    if (targetCell) {
-                        placeCaretInCell(targetCell);
-                    }
-                }
-            }
-            function getNextCell(cell) {
-                let next = cell.nextElementSibling;
-                if (next) {
-                    return next;
-                }
-                let row = cell.parentElement.nextElementSibling;
-                while (row && row.nodeName !== 'TR') {
-                    row = row.nextElementSibling;
-                }
-                if (row && row.children.length > 0) {
-                    return row.children[0];
-                }
-                return null;
-            }
-            function getPrevCell(cell) {
-                let prev = cell.previousElementSibling;
-                if (prev) {
-                    return prev;
-                }
-                let row = cell.parentElement.previousElementSibling;
-                while (row && row.nodeName !== 'TR') {
-                    row = row.previousElementSibling;
-                }
-                if (row && row.children.length > 0) {
-                    return row.children[row.children.length - 1];
-                }
-                return null;
-            }
-            function placeCaretInCell(cell) {
-                cell.focus();
-                let range = document.createRange();
-                range.selectNodeContents(cell);
-                range.collapse(true);
-                let sel = window.getSelection();
-                sel.removeAllRanges();
-                sel.addRange(range);
-            }
+        this._editorElement.addEventListener("contextmenu", (e) => {
+            this._saveCurrentSelection();
+            e.preventDefault();
+            this._buildAndShowContextMenu(e);
         });
     }
 
     /**
-     * Ensures a hidden form input exists and syncs its content on form submission.
+     * Saves the current selection range for later restoration.
      */
-    _ensureFormInput() {
-        let parent = this._editorElement;
-        while (parent && parent.nodeName !== "FORM") {
-            parent = parent.parentElement;
-        }
-        if (parent) {
-            let input = parent.querySelector(`input[type="hidden"][name="${this._formFieldName}"]`);
-            if (!input) {
-                input = document.createElement("input");
-                input.type = "hidden";
-                input.name = this._formFieldName;
-                parent.appendChild(input);
+    _saveCurrentSelection() {
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) {
+            if (this._editorElement.contains(sel.anchorNode)) {
+                this._savedRange = sel.getRangeAt(0).cloneRange();
             }
-            this._formInput = input;
-            parent.addEventListener("submit", () => {
-                if (this._formInput) {
-                    this._formInput.value = this._editorElement.innerHTML;
+        }
+    }
+
+    /**
+     * Builds and displays the context menu at the specified position.
+     * @param {MouseEvent} e - The context menu event.
+     */
+    _buildAndShowContextMenu(e) {
+        this._contextMenu.innerHTML = "";
+        const target = e.target;
+
+        const sel = window.getSelection();
+        const hasSelection = sel && sel.rangeCount > 0 && !sel.isCollapsed && this._editorElement.contains(sel.anchorNode);
+
+        // core clipboard operations
+        const coreItems = [
+            { label: "Cut", action: "cut", icon: "fas fa-cut", disabled: !hasSelection },
+            { label: "Copy", action: "copy", icon: "fas fa-copy", disabled: !hasSelection },
+            { label: "Paste", action: () => this._handlePaste(), icon: "fas fa-paste", disabled: false }
+        ];
+
+        this._renderMenuItems(coreItems);
+
+        // add plugin-specific context menu items
+        const plugins = webexpress.webui.EditorPlugins.getAll();
+        let hasPluginItems = false;
+
+        plugins.forEach((plugin) => {
+            if (typeof plugin.getContextMenuItems === "function") {
+                const items = plugin.getContextMenuItems(this, target);
+                if (items && items.length > 0) {
+                    if (!hasPluginItems) {
+                        this._addMenuSeparator();
+                        hasPluginItems = true;
+                    }
+                    this._renderMenuItems(items);
                 }
+            }
+        });
+
+        // position menu and ensure it stays on screen
+        this._positionContextMenu(e.clientX, e.clientY);
+        this._contextMenu.style.display = "block";
+    }
+
+    /**
+     * Positions the context menu, ensuring it stays within viewport bounds.
+     * @param {number} x - The x-coordinate.
+     * @param {number} y - The y-coordinate.
+     */
+    _positionContextMenu(x, y) {
+        const menuRect = this._contextMenu.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        let finalX = x;
+        let finalY = y;
+
+        // adjust if menu would overflow viewport
+        if (x + menuRect.width > viewportWidth) {
+            finalX = viewportWidth - menuRect.width - 5;
+        }
+        if (y + menuRect.height > viewportHeight) {
+            finalY = viewportHeight - menuRect.height - 5;
+        }
+
+        this._contextMenu.style.top = `${finalY}px`;
+        this._contextMenu.style.left = `${finalX}px`;
+    }
+
+    /**
+     * Handles paste operation from clipboard with fallback support.
+     */
+    async _handlePaste() {
+        try {
+            const items = await navigator.clipboard.read();
+            for (const item of items) {
+                if (item.types.includes("text/html")) {
+                    const blob = await item.getType("text/html");
+                    const html = await blob.text();
+                    this.insertHtmlAtCursor(html);
+                    return;
+                }
+                if (item.types.includes("text/plain")) {
+                    const blob = await item.getType("text/plain");
+                    const text = await blob.text();
+                    this.execCommand("insertText", text);
+                    return;
+                }
+            }
+        } catch (err) {
+            // fallback to plain text
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text) {
+                    this.execCommand("insertText", text);
+                }
+            } catch (fallbackErr) {
+                console.warn("Clipboard paste failed:", fallbackErr);
+                alert("Paste not supported or permitted by browser. Please use Ctrl+V.");
+            }
+        }
+    }
+
+    /**
+     * Renders menu items into the specified container.
+     * @param {Array} items - The menu item definitions.
+     * @param {HTMLElement} container - The target container.
+     */
+    _renderMenuItems(items, container = this._contextMenu) {
+        items.forEach(item => {
+            if (item.separator) {
+                this._addMenuSeparator(container);
+                return;
+            }
+
+            // handle submenu items
+            if (item.submenu && item.submenu.length > 0) {
+                this._createSubmenuItem(item, container);
+                return;
+            }
+
+            // handle custom element items
+            if (item.type === "custom-element" && item.element) {
+                container.appendChild(item.element);
+                return;
+            }
+
+            // handle color swatch items
+            if (item.type === "color") {
+                this._createColorItem(item, container);
+                return;
+            }
+
+            // handle standard button items
+            this._createStandardMenuItem(item, container);
+        });
+    }
+
+    /**
+     * Creates a submenu item with nested items.
+     * @param {Object} item - The submenu item definition.
+     * @param {HTMLElement} container - The target container.
+     */
+    _createSubmenuItem(item, container) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "position-relative";
+        wrapper.style.width = "100%";
+
+        const btn = document.createElement("button");
+        btn.className = "dropdown-item d-flex align-items-center justify-content-between gap-2";
+        btn.type = "button";
+
+        const iconHtml = this._getIconHtml(item.icon);
+        btn.innerHTML = `<div>${iconHtml} <span>${item.label}</span></div> <i class="fas fa-chevron-right" style="font-size:0.7em;"></i>`;
+
+        const subMenu = document.createElement("div");
+        subMenu.className = "dropdown-menu shadow";
+        subMenu.style.top = "0";
+        subMenu.style.left = "100%";
+        subMenu.style.marginTop = "-5px";
+        subMenu.style.marginLeft = "0";
+        subMenu.style.display = "none";
+        subMenu.style.maxHeight = "250px";
+        subMenu.style.overflowY = "auto";
+
+        let targetContainer = subMenu;
+        if (item.submenuClass) {
+            const gridList = document.createElement("ul");
+            gridList.className = item.submenuClass;
+            gridList.style.marginBottom = "0";
+            subMenu.appendChild(gridList);
+            targetContainer = gridList;
+        }
+
+        this._renderMenuItems(item.submenu, targetContainer);
+
+        wrapper.addEventListener("mouseenter", () => {
+            subMenu.style.display = "block";
+        });
+        wrapper.addEventListener("mouseleave", () => {
+            subMenu.style.display = "none";
+        });
+
+        wrapper.appendChild(btn);
+        wrapper.appendChild(subMenu);
+        container.appendChild(wrapper);
+    }
+
+    /**
+     * Creates a color swatch menu item.
+     * @param {Object} item - The color item definition.
+     * @param {HTMLElement} container - The target container.
+     */
+    _createColorItem(item, container) {
+        const li = document.createElement("li");
+        li.style.display = "inline-block";
+
+        const colorBtn = document.createElement("button");
+        colorBtn.type = "button";
+        colorBtn.className = "dropdown-item p-2";
+        colorBtn.style.backgroundColor = item.value;
+        colorBtn.style.width = "24px";
+        colorBtn.style.height = "24px";
+        colorBtn.style.borderRadius = "4px";
+        colorBtn.style.border = "1px solid #dee2e6";
+        colorBtn.title = item.value;
+
+        colorBtn.addEventListener("click", () => {
+            if (typeof item.action === "function") {
+                item.action();
+            }
+            this._contextMenu.style.display = "none";
+        });
+
+        li.appendChild(colorBtn);
+        container.appendChild(li);
+    }
+
+    /**
+     * Creates a standard menu item button.
+     * @param {Object} item - The menu item definition.
+     * @param {HTMLElement} container - The target container.
+     */
+    _createStandardMenuItem(item, container) {
+        const btn = document.createElement("button");
+        btn.className = "dropdown-item d-flex align-items-center gap-2";
+        btn.type = "button";
+
+        if (item.disabled) {
+            btn.classList.add("disabled");
+            btn.disabled = true;
+            btn.style.pointerEvents = "none";
+            btn.style.opacity = "0.6";
+        }
+
+        const iconHtml = this._getIconHtml(item.icon);
+        btn.innerHTML = `${iconHtml} <span>${item.label}</span>`;
+
+        if (!item.disabled) {
+            btn.addEventListener("click", () => {
+                if (typeof item.action === "function") {
+                    item.action();
+                } else if (typeof item.action === "string") {
+                    this.execCommand(item.action);
+                }
+                this._contextMenu.style.display = "none";
+            });
+        }
+
+        container.appendChild(btn);
+    }
+
+    /**
+     * Returns HTML markup for an icon.
+     * @param {string} icon - The icon class or identifier.
+     * @returns {string} The icon HTML markup.
+     */
+    _getIconHtml(icon) {
+        if (!icon) {
+            return `<span style="width:18px;"></span>`;
+        }
+        if (icon.startsWith("fas") || icon.startsWith("fa")) {
+            return `<i class="${icon}" style="width:18px;text-align:center;"></i>`;
+        }
+        return `<i class="${icon}"></i>`;
+    }
+
+    /**
+     * Adds a separator to the menu if one does not already exist at the end.
+     * @param {HTMLElement} container - The target container.
+     */
+    _addMenuSeparator(container = this._contextMenu) {
+        if (container.lastElementChild && container.lastElementChild.classList.contains("dropdown-divider")) {
+            return;
+        }
+        const sep = document.createElement("div");
+        sep.className = "dropdown-divider";
+        container.appendChild(sep);
+    }
+
+    /**
+     * Ensures form synchronization events are established.
+     */
+    _setupFormIntegration() {
+        const form = this._uiContainer.closest("form");
+        if (form) {
+            form.addEventListener("submit", () => {
+                this._syncValue();
             });
         }
     }
 
     /**
-     * opens the link modal using ModalSidebarPanel and autoloads pages via DialogPanels
+     * Synchronizes the editor content with the hidden form input.
      */
-    _openLinkModal() {
-        if (!this._linkModalEl) {
-            this._createLinkModal();
+    _syncValue() {
+        if (this._formInput) {
+            this._formInput.value = this._editorElement.innerHTML;
         }
+        this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this._editorElement.innerHTML });
+    }
 
-        // compute prefill from current selection
-        let selectedText = "";
-        let selectedUrl = "";
-        const sel = window.getSelection();
-        if (sel && sel.rangeCount && !sel.isCollapsed) {
-            selectedText = sel.toString();
-            let node = sel.getRangeAt(0).startContainer;
-            if (node && node.nodeType !== Node.ELEMENT_NODE) {
-                node = node.parentElement; // fix: use correct parentElement
-            }
-            if (node) {
-                const anchor = node.closest("a[href]");
-                if (anchor) {
-                    selectedUrl = anchor.getAttribute("href") || "";
-                    if (!selectedText) {
-                        selectedText = anchor.textContent || "";
+    /**
+     * Sanitizes an HTML string by removing unsafe tags and attributes.
+     * - uses a whitelist approach for tags and attributes
+     * - strips event handlers, style and javascript: urls
+     * - allows data-* and aria-* attributes
+     * @param {string} html - raw html input
+     * @returns {string} sanitized html
+     */
+    _sanitizeHtml(html) {
+        // parse html into a document
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html || "", "text/html");
+
+        // allowed tags whitelist
+        const allowedTags = new Set([
+            "a", "b", "strong", "i", "em", "u", "p", "br", "ul", "ol", "li",
+            "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "pre", "code",
+            "img", "span", "div", "table", "thead", "tbody", "tr", "th", "td",
+            "colgroup", "col", "hr", "small", "sub", "sup"
+        ]);
+
+        // allowed attributes per tag
+        const allowedAttrs = {
+            "a": ["href", "title", "target", "rel"],
+            "img": ["src", "alt", "title", "width", "height"],
+            "th": ["colspan", "rowspan", "scope", "contenteditable"],
+            "td": ["colspan", "rowspan", "contenteditable"],
+            "table": ["border", "cellpadding", "cellspacing"],
+            "div": ["draggable"],
+            // globally allow attributes relevant to the editor
+            "*": ["class", "id", "title", "role", "tabindex", "style", "contenteditable", "data-addon-id", "data-type"]
+        };
+
+        /**
+         * Sanitizes a node and its subtree recursively.
+         * @param {Node} node
+         */
+        function sanitizeNode(node) {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                const el = node;
+                const tag = el.tagName.toLowerCase();
+
+                // skip the body element itself; only sanitize its children
+                if (tag !== "body") {
+                    if (!allowedTags.has(tag)) {
+                        // unwrap: move children to parent, then remove the element
+                        const parent = el.parentNode;
+                        if (parent) {
+                            while (el.firstChild) {
+                                parent.insertBefore(el.firstChild, el);
+                            }
+                            parent.removeChild(el);
+                        } else {
+                            el.remove();
+                        }
+                        return;
                     }
+
+                    // remove unsafe attributes
+                    const attrs = Array.from(el.attributes);
+                    attrs.forEach((attr) => {
+                        const name = attr.name.toLowerCase();
+                        const value = attr.value;
+
+                        // always allow data-* and aria-*
+                        if (name.startsWith("data-") || name.startsWith("aria-")) {
+                            return;
+                        }
+
+                        const allowedForTag = allowedAttrs[tag] || [];
+                        const allowedGlobal = allowedAttrs["*"] || [];
+                        const isAllowed = allowedForTag.indexOf(name) !== -1 || allowedGlobal.indexOf(name) !== -1;
+
+                        if (!isAllowed) {
+                            el.removeAttribute(attr.name);
+                            return;
+                        }
+
+                        // block unsafe url protocols in href and src
+                        if ((name === "href" || name === "src") && value) {
+                            const trimmed = value.trim();
+                            if (!trimmed.match(/^(http|https|mailto|tel|\/|#|\.)/i)) {
+                                el.removeAttribute(attr.name);
+                                return;
+                            }
+
+                            // enforce rel for links opening in new tab
+                            if (name === "href" && el.tagName.toLowerCase() === "a") {
+                                if (!el.getAttribute("rel") && el.getAttribute("target") === "_blank") {
+                                    el.setAttribute("rel", "noopener noreferrer");
+                                }
+                            }
+                        }
+
+                        // block javascript: and expression() in style values
+                        if (name === "style" && value) {
+                            if (value.toLowerCase().includes("javascript:") || value.toLowerCase().includes("expression(")) {
+                                el.removeAttribute("style");
+                            }
+                        }
+                    });
                 }
             }
+
+            // recurse over a snapshot of children (list may change during sanitization)
+            const children = Array.from(node.childNodes);
+            children.forEach((child) => {
+                sanitizeNode(child);
+            });
         }
 
-        // pass prefill to modal state for the page to consume
-        if (this._linkSidebarPanel) {
-            this._linkSidebarPanel._editor = this;
-            this._linkSidebarPanel._linkPrefill = { url: selectedUrl, text: selectedText };
-            if (typeof this._linkSidebarPanel.show === "function") {
-                this._linkSidebarPanel.show();
-            }
+        if (doc.body) {
+            sanitizeNode(doc.body);
+            return doc.body.innerHTML;
         }
+
+        return "";
     }
 
     /**
-     * creates the link modal and sets up autoload of pages by key
-     */
-    _createLinkModal() {
-        const id = "wx-editor-link-msp-" + Date.now() + "-" + Math.random().toString(36).slice(2);
-
-        // create host element; data-key enables DialogPanels autoload
-        const el = document.createElement("div");
-        el.id = id;
-        el.setAttribute("aria-labelledby", id + "-label");
-        el.setAttribute("aria-hidden", "true");
-        el.setAttribute("data-key", "editor-link");
-        el.setAttribute("data-submit-id", "insert-link");
-        el.setAttribute("data-validate-active-only", "true");
-
-        // minimal dom as requested: header + footer + submit button
-        el.innerHTML = [
-            '<div class="wx-modal-header">Insert-Link</div>',
-            '<div class="wx-modal-footer"><button id="insert-link" class="btn btn-primary">Insert</button></div>'
-        ].join("");
-
-        // ensure a content container exists for ModalSidebarPanel body rendering
-        const footer = el.querySelector(".wx-modal-footer");
-        const content = document.createElement("div");
-        content.className = "wx-modal-content";
-        if (footer && footer.parentNode) {
-            footer.parentNode.insertBefore(content, footer);
-        } else {
-            el.appendChild(content);
-        }
-
-        // wire submit button id for ModalSidebarPanel
-        el.setAttribute("data-submit-id", "insert-link");
-
-        // mount element
-        document.body.appendChild(el);
-
-        // instantiate sidebar panel with element and store editor context
-        const modalCtrl = new webexpress.webui.ModalSidebarPanel(el);
-        modalCtrl._editor = this;
-
-        // cache refs
-        this._linkModalEl = el;
-        this._linkSidebarPanel = modalCtrl;
-    }
-
-    /**
-     * opens the image modal using ModalSidebarPanel and autoloads pages via DialogPanels
-     */
-    _openImageModal() {
-        if (!this._imageModalEl) {
-            this._createImageModal();
-        }
-
-        if (this._imageSidebarPanel) {
-            this._imageSidebarPanel._editor = this;
-            if (typeof this._imageSidebarPanel.show === "function") {
-                this._imageSidebarPanel.show();
-            }
-        }
-    }
-
-    /**
-     * creates the image modal and sets up autoload of pages by key
-     */
-    _createImageModal() {
-        const id = "wx-editor-image-msp-" + Date.now() + "-" + Math.random().toString(36).slice(2);
-
-        // create host element; data-key enables DialogPanels autoload
-        const el = document.createElement("div");
-        el.id = id;
-        el.setAttribute("aria-labelledby", id + "-label");
-        el.setAttribute("aria-hidden", "true");
-        el.setAttribute("data-key", "editor-image");
-        el.setAttribute("data-submit-id", "insert-image");
-        el.setAttribute("data-validate-active-only", "true");
-
-        // minimal dom: header + footer + submit button
-        el.innerHTML = [
-            '<div class="wx-modal-header">Insert-Image</div>',
-            '<div class="wx-modal-footer"><button id="insert-image" class="btn btn-primary">Insert</button></div>'
-        ].join("");
-
-        // ensure a content container exists for ModalSidebarPanel body rendering
-        const footer = el.querySelector(".wx-modal-footer");
-        const content = document.createElement("div");
-        content.className = "wx-modal-content";
-        if (footer && footer.parentNode) {
-            footer.parentNode.insertBefore(content, footer);
-        } else {
-            el.appendChild(content);
-        }
-
-        // wire submit button id for ModalSidebarPanel
-        el.setAttribute("data-submit-id", "insert-image");
-
-        // mount element
-        document.body.appendChild(el);
-
-        // instantiate sidebar panel with element and store editor context
-        const modalCtrl = new webexpress.webui.ModalSidebarPanel(el);
-        modalCtrl._editor = this;
-
-        // cache refs
-        this._imageModalEl = el;
-        this._imageSidebarPanel = modalCtrl;
-    }
-
-    /**
-     * Gets the current HTML content of the editor.
-     * @returns {string} The HTML content.
+     * Getter for the editor content (HTML).
+     * @returns {string} current editor HTML content
      */
     get value() {
         return this._editorElement ? this._editorElement.innerHTML : "";
     }
 
     /**
-     * Sets the HTML content of the editor and dispatches a change event if the content has changed.
-     * @param {string} html - The new HTML content.
+     * Setter for the editor content.
+     * Updates the editor DOM, synchronizes hidden form input and refreshes UI state.
+     * Incoming html is sanitized before insertion.
+     * @param {string} v - HTML string to set as editor content
      */
-    set value(html) {
-        const newHtml = html != null ? String(html) : "";
-        const oldHtml = this._editorElement ? this._editorElement.innerHTML : "";
-        if (this._editorElement) {
-            this._editorElement.innerHTML = newHtml;
+    set value(v) {
+        if (!this._editorElement) {
+            return;
         }
-        if (this._formInput) {
-            this._formInput.value = newHtml;
+        // sanitize incoming html before placing into editor
+        const clean = this._sanitizeHtml(v || "");
+        this._editorElement.innerHTML = clean;
+        
+        // notify plugins first to upgrade tables to frames
+        this._notifyPluginsContentChanged();
+        // then ensure typing space un-nests the newly upgraded frames
+        this._ensureTypingSpace();
+        
+        // update hidden input and dispatch change
+        this._syncValue();
+        this._updateUndoRedoStates();
+    }
+
+    /**
+     * Returns the editor content element.
+     * @returns {HTMLElement} The editor content element.
+     */
+    getEditorElement() {
+        return this._editorElement;
+    }
+
+    /**
+     * Restores the previously saved selection range.
+     * If no range is saved, sets cursor to the end of the content.
+     */
+    restoreSavedRange() {
+        this._editorElement.focus();
+
+        if (this._savedRange) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(this._savedRange);
+        } else {
+            // fallback: move cursor to end if no selection exists
+            const sel = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(this._editorElement);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
+
+            // save this position so subsequent calls use it
+            this._savedRange = range.cloneRange();
         }
-        if (oldHtml !== newHtml) {
-            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: newHtml });
+    }
+
+    /**
+     * Executes a document command on the editor content.
+     * @param {string} command - The command to execute.
+     * @param {*} value - The command value.
+     */
+    execCommand(command, value = null) {
+        this.restoreSavedRange();
+        document.execCommand(command, false, value);
+    }
+
+    /**
+     * Inserts HTML at the current cursor position.
+     * Replaces empty paragraphs with the block element to prevent nested invalid HTML structures.
+     * @param {string} html - The HTML to insert.
+     */
+    insertHtmlAtCursor(html) {
+        // sanitize html to avoid introducing unsafe content
+        const cleanHtml = this._sanitizeHtml(html || "");
+        this.restoreSavedRange();
+        const sel = window.getSelection();
+
+        if (sel && sel.rangeCount) {
+            const range = sel.getRangeAt(0);
+
+            if (!this._editorElement.contains(range.startContainer)) {
+                this._editorElement.innerHTML += cleanHtml;
+                this._notifyPluginsContentChanged();
+                this._ensureTypingSpace();
+                this._syncValue();
+                this._updateUndoRedoStates();
+                return;
+            }
+
+            let node = range.startContainer;
+            if (node.nodeType === Node.TEXT_NODE) {
+                node = node.parentElement;
+            }
+            const p = node.closest("p");
+
+            range.deleteContents();
+            const el = document.createElement("div");
+            el.innerHTML = cleanHtml;
+            const frag = document.createDocumentFragment();
+            let n, lastNode;
+
+            while ((n = el.firstChild)) {
+                lastNode = frag.appendChild(n);
+            }
+
+            // if we are inserting a block inside a paragraph, check if paragraph is empty
+            if (p && p.parentElement === this._editorElement) {
+                const pContent = p.textContent.trim();
+                // replace the empty paragraph entirely to prevent nesting
+                if (pContent === "" || p.innerHTML === "<br>") {
+                    p.parentNode.insertBefore(frag, p);
+                    p.remove();
+                    
+                    if (lastNode) {
+                        const newRange = document.createRange();
+                        newRange.setStartAfter(lastNode);
+                        newRange.collapse(true);
+                        sel.removeAllRanges();
+                        sel.addRange(newRange);
+                        this._saveCurrentSelection();
+                    }
+                    
+                    this._notifyPluginsContentChanged();
+                    this._ensureTypingSpace();
+                    this._syncValue();
+                    this._updateUndoRedoStates();
+                    return;
+                }
+            }
+
+            // fallback normal insertion
+            range.insertNode(frag);
+
+            if (lastNode) {
+                range.setStartAfter(lastNode);
+                range.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(range);
+                this._saveCurrentSelection();
+            }
+        } else {
+            this._editorElement.innerHTML += cleanHtml;
         }
+
+        this._notifyPluginsContentChanged();
+        this._ensureTypingSpace();
+        this._syncValue();
+        this._updateUndoRedoStates();
+    }
+
+    /**
+     * Cleans up resources when the control is destroyed.
+     */
+    destroy() {
+        if (this._documentClickHandler) {
+            document.removeEventListener("click", this._documentClickHandler);
+        }
+
+        if (this._contextMenu && this._contextMenu.parentElement) {
+            this._contextMenu.parentElement.removeChild(this._contextMenu);
+        }
+
+        super.destroy();
     }
 };
 
-// Register the class in the controller
+// register the class in the controller system
 webexpress.webui.Controller.registerClass("wx-webui-editor", webexpress.webui.EditorCtrl);

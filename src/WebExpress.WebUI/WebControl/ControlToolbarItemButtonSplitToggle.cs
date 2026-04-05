@@ -81,10 +81,10 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-color-style", Color?.ToStyle())
                 .AddUserAttribute("data-align", Alignment.ToValue())
                 .AddUserAttribute("data-overflow", Overflow.ToValue())
-                .AddUserAttribute("data-wx-toggle", "split")
+                .AddUserAttribute("data-wx-primary-action", "split")
                 .AddUserAttribute
                 (
-                    "data-wx-target",
+                    "data-wx-primary-target",
                     !string.IsNullOrWhiteSpace(SpltterId)
                         ? $"#{SpltterId}"
                         : null

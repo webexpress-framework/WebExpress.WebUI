@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.WebControl
                 DataTheme = Theme.ToValue()
             };
 
-            if (Title != null)
+            if (Title is not null)
             {
                 html.Add(new HtmlElementTextSemanticsSpan(new HtmlText(Title))
                 {

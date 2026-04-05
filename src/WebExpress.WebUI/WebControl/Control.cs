@@ -292,7 +292,7 @@ namespace WebExpress.WebUI.WebControl
         protected string GetClasses()
         {
             var list = _propertys.Values
-                .Where(x => x.Item2 != null)
+                .Where(x => x.Item2 is not null)
                 .Select(x => x.Item2())
                 .Where(x => !string.IsNullOrEmpty(x))
                 .Distinct();
@@ -307,7 +307,7 @@ namespace WebExpress.WebUI.WebControl
         protected string GetStyles()
         {
             var list = _propertys.Values
-                .Where(x => x.Item3 != null)
+                .Where(x => x.Item3 is not null)
                 .Select(x => x.Item3())
                 .Where(x => !string.IsNullOrEmpty(x))
                 .Distinct();
@@ -322,8 +322,8 @@ namespace WebExpress.WebUI.WebControl
         protected string GetAttributes()
         {
             var list = _propertys
-                .Where(x => x.Value.Item2 != null)
-                .Where(x => x.Value.Item3 != null)
+                .Where(x => x.Value.Item2 is not null)
+                .Where(x => x.Value.Item3 is not null)
                 .Select(x => $"{x.Key}=\"{x.Value.Item1}\"")
                 .Distinct();
 

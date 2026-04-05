@@ -43,7 +43,7 @@ namespace WebExpress.WebUI.WebControl
         /// <remarks>
         /// A separator is a visual divider used to group dropdown items.
         /// </remarks>
-        IControlDropdown AddSeperator();
+        IControlDropdown AddSeparator();
 
         /// <summary>
         /// Adds a new header to the dropdown.

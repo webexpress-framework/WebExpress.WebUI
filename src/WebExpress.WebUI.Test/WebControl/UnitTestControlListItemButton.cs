@@ -19,7 +19,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("id", @"<button id=""id"" class=""list-group-item-action""></button>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -27,9 +27,10 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -41,7 +42,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeActive.Active, @"<button class=""list-group-item-action active""></button>")]
         public void Active(TypeActive active, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -50,9 +51,58 @@ namespace WebExpress.WebUI.Test.WebControl
                 Active = active
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the primary action property of the list item button control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<button class=""list-group-item-action""></button>")]
+        [InlineData("modal", @"<button class=""list-group-item-action"" data-wx-primary-action=""modal"" data-wx-primary-target=""#modal""></button>")]
+        public void PrimaryAction(string modal, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlListItemButton()
+            {
+                PrimaryAction = string.IsNullOrWhiteSpace(modal) ? null : new ActionModal(modal)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the secondary action property of the list item button control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<button class=""list-group-item-action""></button>")]
+        [InlineData("modal", @"<button class=""list-group-item-action"" data-wx-secondary-action=""modal"" data-wx-secondary-target=""#modal""></button>")]
+        public void SecondaryAction(string modal, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlListItemButton()
+            {
+                SecondaryAction = string.IsNullOrWhiteSpace(modal) ? null : new ActionModal(modal)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -62,7 +112,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Fact]
         public void Add()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -73,7 +123,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control5 = new ControlListItemButton(null);
             var control6 = new ControlListItemButton(null);
 
-            // test execution
+            // act
             control4.Add(new ControlIcon() { Icon = new IconStar() });
             control5.Add([new ControlIcon() { Icon = new IconStar() }]);
             control6.Add(new List<ControlIcon>([new ControlIcon() { Icon = new IconStar() }]).ToArray());
@@ -85,6 +135,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var html5 = control5.Render(context, visualTree);
             var html6 = control6.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><i class=""fas fa-star""></i></button>", html1);
             AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><i class=""fas fa-star""></i></button>", html2);
             AssertExtensions.EqualWithPlaceholders(@"<button class=""list-group-item-action""><i class=""fas fa-star""></i></button>", html3);

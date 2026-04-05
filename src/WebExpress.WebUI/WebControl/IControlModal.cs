@@ -15,7 +15,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the header.
         /// </summary>
-        string Header { get; set; }
+        string Header { get; }
 
         /// <summary>  
         /// Returns or sets the size of the modal dialog.  
@@ -26,12 +26,12 @@ namespace WebExpress.WebUI.WebControl
         /// <remarks>  
         /// This property allows you to define the size of the modal dialog, such as Default, Small, Large, ExtraLarge, or Fullscreen.  
         /// </remarks>  
-        TypeModalSize Size { get; set; }
+        TypeModalSize Size { get; }
 
         /// <summary>
         /// Returns or sets the label for the close button of the modal.
         /// </summary>
-        string CloseLabel { get; set; }
+        string CloseLabel { get; }
 
         /// <summary> 
         /// Adds one or more controls to the content of the modal.

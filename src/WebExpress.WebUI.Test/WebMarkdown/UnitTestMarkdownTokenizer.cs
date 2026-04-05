@@ -18,13 +18,13 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("hello world", MarkdownTokenType.Text, MarkdownTokenType.Space, MarkdownTokenType.Text, MarkdownTokenType.EOF)]
         public void SimpleText(string input, params MarkdownTokenType[] expectedType)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize().ToList();
 
-            // test execution
+            // act
             Assert.Equal(expectedType.Length, tokens.Count);
             Assert.Equal(expectedType, tokens.Select(t => t.Type)); // Verify types match
         }
@@ -41,10 +41,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("This is [text] and 10 < 20!", "This is [text] and 10 < 20!")] // Mixed content
         public void SpecialCharacters(string input, string expectedValue)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize();
 
             // validation
@@ -58,10 +58,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [Fact]
         public void CodeBlockMarker()
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer("```");
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize().ToList();
 
             // validation
@@ -92,10 +92,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("----", MarkdownTokenType.MultiHyphen, "----", 4)]
         public void MultiCharSpecials(string input, MarkdownTokenType expectedType, string expectedValue, int expectedCount)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize().ToList();
 
             // validation
@@ -118,10 +118,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("~", MarkdownTokenType.Tilde)]
         public void SingleSpecials(string input, MarkdownTokenType expectedType)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize().ToList();
 
             // validation
@@ -140,10 +140,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("\r\n", "")]
         public void Newlines(string input, string expectedValue)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize().ToList();
 
             // validation
@@ -164,10 +164,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("Token1|Token2", MarkdownTokenType.Text, "Token1")]
         public void ComplexMarkdownString(string input, MarkdownTokenType firstExpectedType, string firstExpectedValue)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize().ToList();
 
             // validation
@@ -182,10 +182,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [Fact]
         public void TextUntilSpecialChar()
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer("foo*bar");
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize().ToList();
 
             // validation
@@ -204,7 +204,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [Fact]
         public void NullInput()
         {
-            // test execution
+            // act
             var tokenizer = new MarkdownTokenizer(null);
 
             // validation
@@ -223,10 +223,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("-------", MarkdownTokenType.MultiHyphen, "-------", 7)]
         public void LongMultiCharTokens(string input, MarkdownTokenType expectedType, string expectedValue, int expectedCount)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize().ToList();
 
             // validation
@@ -243,10 +243,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [Fact]
         public void Split()
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer("***___");
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize().ToList();
 
             // validation
@@ -264,10 +264,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData(" ", MarkdownTokenType.Space, " ")]
         public void Spaces(string input, MarkdownTokenType expectedType, string expectedValue)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize().ToList();
 
             // validation
@@ -289,10 +289,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("🎉", MarkdownTokenType.Emoji, "🎉")]
         public void Emojis(string input, MarkdownTokenType expectedType, string expectedValue)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize().ToList();
 
             // validation
@@ -312,10 +312,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
                     new string[] { "😊", " ", "🚀", " ", "😊" })]
         public void SpacesAndEmojis(string input, MarkdownTokenType[] expectedTypes, string[] expectedValues)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize().ToList();
 
             // validation
@@ -335,13 +335,13 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("😊🚀🎉", MarkdownTokenType.Emoji, MarkdownTokenType.Emoji, MarkdownTokenType.Emoji)]
         public void MultipleEmojis(string input, params MarkdownTokenType[] expectedTypes)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
             var expectedValues = Enumerable.Range(0, new StringInfo(input).LengthInTextElements)
                                .Select(i => new StringInfo(input).SubstringByTextElements(i, 1))
                                .ToList();
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize().ToList();
 
             // validation
@@ -365,10 +365,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("Contact us at mailto:user@example.com.", "mailto:user@example.com", MarkdownTokenType.Url)]
         public void Uri(string input, string expectedValue, MarkdownTokenType expectedType)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize();
 
             // validation
@@ -384,11 +384,11 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [Fact]
         public void Uri_Invalid()
         {
-            // preconditions
+            // arrange
             var input = "This text does not contain any URLs.";
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize();
 
             // validation
@@ -405,10 +405,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("[](https://example.com)", "", "https://example.com", MarkdownTokenType.Link)] // Optional link text
         public void Links(string input, string expectedLabel, string expectedUri, MarkdownTokenType expectedType)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize();
 
             // validation
@@ -434,10 +434,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("[]( )")] // Empty text and URL with space
         public void Links_Invalid(string input)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize();
 
             // validation
@@ -455,10 +455,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("!(https://img.com/test.png)", "", "https://img.com/test.png", MarkdownTokenType.Image)] // Optional alt text
         public void Images(string input, string expectedLabel, string expectedUrl, MarkdownTokenType expectedType)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize();
 
             // validation
@@ -481,10 +481,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("![Alt]())")] // Invalid image syntax: malformed URL
         public void Images_Invalid(string input)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize();
 
             // validation
@@ -502,10 +502,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("<a href=\"https://example.com\">Link</a>", "<a href=\"https://example.com\">Link</a>", MarkdownTokenType.Html)]
         public void Html(string input, string expectedValue, MarkdownTokenType expectedType)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize();
 
             // validation
@@ -526,10 +526,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("[ X ]", true)]
         public void Checkbox(string input, bool expected)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize();
 
             // validation
@@ -549,10 +549,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("[x")]
         public void Checkbox_Invalid(string input)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize();
 
             // validation
@@ -567,10 +567,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("        ", MarkdownTokenType.Tab, "\t\t\t\t")]
         public void SpacesToTabs(string input, MarkdownTokenType expected, string expectedValue)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize().ToList();
 
             // validation
@@ -591,10 +591,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("   ")] // Less than four spaces remain as spaces
         public void SpacesToTabs_Invalid(string input)
         {
-            // preconditions
+            // arrange
             var tokenizer = new MarkdownTokenizer(input);
 
-            // test execution
+            // act
             var tokens = tokenizer.Tokenize().ToList();
 
             // validation

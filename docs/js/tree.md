@@ -34,19 +34,18 @@ Initialization is handled entirely through `data-` attributes on the host elemen
 
 The tree structure is defined by `<div>` elements with the class `.wx-tree-node`. Nested nodes are placed as child elements within their parent node.
 
-| Attribute | Description |
-| :--- | :--- |
-| `id` | A unique ID for the node, used for events and programmatic control. |
-| `data-label` | The visible text of the node. |
-| `data-icon` | A base icon used for both the opened and closed states. |
-| `data-icon-opened` | A specific icon for the expanded state. |
-| `data-icon-closed` | A specific icon for the collapsed state. |
-| `data-image` / `data-image-opened` / `data-image-closed` | Corresponds to the icon attributes, but for using image URLs. |
-| `data-active` | If set to `"true"`, the node is marked as active (e.g., highlighted). |
-| `data-expand` | If set to `"true"`, the node is initially displayed in an expanded state. |
-| `data-uri` / `data-target` | Creates a link (`<a>`) instead of a button to point to a URL. |
-| `data-tooltip` | Adds a tooltip to the node. |
-| `data-render` | A JavaScript function as a string that allows for custom rendering of the node's content. |
+| Attribute                                                | Description                                                                       |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `id`                                                     | A unique ID for the node, used for events and programmatic control.               |
+| `data-label`                                             | The visible text of the node.                                                     |
+| `data-icon`                                              | A base icon used for both the opened and closed states.                           |
+| `data-icon-opened`                                       | A specific icon for the expanded state.                                           |
+| `data-icon-closed`                                       | A specific icon for the collapsed state.                                          |
+| `data-image` / `data-image-opened` / `data-image-closed` | Corresponds to the icon attributes, but for using image URLs.                     |
+| `data-active`                                            | If set to `"true"`, the node is marked as active (e.g., highlighted).            |
+| `data-expand`                                            | If set to `"true"`, the node is initially displayed in an expanded state.         |
+| `data-uri` / `data-target`                               | Creates a link (`<a>`) instead of a button to point to a URL.                     |
+| `data-tooltip`                                           | Adds a tooltip to the node.                                                       |
 
 ## Architecture and Functionality
 

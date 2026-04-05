@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using WebExpress.WebCore;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebComponent;
 using WebExpress.WebCore.WebEndpoint;
@@ -106,13 +107,10 @@ namespace WebExpress.WebUI.WebPage
         public VisualTreeControl(IComponentHub componentHub, IPageContext pageContext)
         {
             var contextPath = pageContext.ApplicationContext?.Route;
-            var baseUri = RouteEndpoint.Combine(contextPath, "webexpress.webui/assets");
-
             _componentHub = componentHub;
 
             Title = pageContext?.PageTitle;
-            _favicons.Add(new Favicon(RouteEndpoint.Combine(baseUri, "img/rocket.png")));
-
+            _favicons.Add(new Favicon(RouteEndpoint.Combine(contextPath, WebEx.Favicon)));
 
             foreach (var include in _componentHub.IncludeManager
                 .GetIncludes(pageContext.ApplicationContext))
@@ -244,7 +242,7 @@ namespace WebExpress.WebUI.WebPage
         /// <param name="script">The script content.</param>
         public virtual void AddScript(string id, string script)
         {
-            if (id != null)
+            if (id is not null)
             {
                 _scripts[id] = script;
             }
@@ -330,8 +328,8 @@ namespace WebExpress.WebUI.WebPage
             html.Head.Base = _base?.ToString();
             html.Body.Scripts = [.. Scripts.Values];
 
-            html.Head.CssLinks = CssLinks.Where(x => x != null).Select(x => x.ToString());
-            html.Head.ScriptLinks = HeaderScriptLinks?.Where(x => x != null).Select(x => x.ToString());
+            html.Head.CssLinks = CssLinks.Where(x => x is not null).Select(x => x.ToString());
+            html.Head.ScriptLinks = HeaderScriptLinks?.Where(x => x is not null).Select(x => x.ToString());
 
             return html;
         }

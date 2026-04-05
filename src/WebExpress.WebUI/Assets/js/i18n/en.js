@@ -5,14 +5,15 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "edit": "Edit",
     "copy": "Copy",
     "remove": "Remove",
+    "insert": "Insert",
     "save": "Save",
     "cancel": "Cancel",
     "close": "Close",
     "selected": "Selected",
     "available": "Available",
     "search": "Search",
-    "delete": "Delete",
-    "confirm": "confirm",
+    "rating": "Rating",
+    "fit": "Fit to view",
 
     "calendar.select_date": "Select date",
     "calendar.select_range": "Select range",
@@ -40,12 +41,6 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "calendar.today": "Today",
     "calendar.format": "M/D/YYYY",
 
-    "confirm.header": "Request Confirmation",
-    "confirm.description": "Are you sure you want to do this?",
-
-    "delete.header": "Confirm Deletion",
-    "delete.description": "Are you sure you want to delete this item?",
-
     "selection.placeholder": "Select an option",
 
     "upload.placeholder": "Drop file here or click to upload.",
@@ -58,9 +53,23 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "table.filter.columns.label": "Filter table columns",
     
     "avatar.zoom.label": "Zoom",
-    "avatar.upload.image.label": "Bild auswählen",
+    "avatar.upload.image.label": "Select image",
     "avatar.placeholder": "Drop image here or double click.",
     
-    "frame.contentNotLoaded.label": "Content could not be loaded.",
-    "frame.contentNotLoaded.details": "Please check your internet connection or try reloading the page. If the problem persists, the requested resource may be temporarily unavailable or a technical error may have occurred. You may also try refreshing the page or contact technical support if you need assistance."
+    "page.contentNotLoaded.label": "Content could not be loaded.",
+    "page.contentNotLoaded.details": "Please check your internet connection or try reloading the page. If the problem persists, the requested resource may be temporarily unavailable or a technical error may have occurred. You may also try refreshing the page or contact technical support if you need assistance.",
+    
+    "table.columns.manage": "Manage columns",
+    "table.columns.title": "Columns",
+    "page.table.columns.desc": "Toggle visibility and drag to reorder columns.",
+    "page.table.columns.search": "Search columns…",
+    "page.table.columns.drag": "Drag column",
+    "page.table.columns.default": "Column",
+
+    "color.custom": "Custom color",
+    
+    "editor.insert.link.title": "Insert Link",
+    "editor.insert.image.title": "Insert Image",
+    "editor.insert.addon.title" : "AddOn Library",
+    "editor.insert.addon.tooltip" : "Insert AddOn"
 });

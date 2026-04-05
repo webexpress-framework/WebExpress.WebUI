@@ -13,14 +13,14 @@ namespace WebExpress.WebUI.Test.WebControl
     public class UnitTestControlTileCard
     {
         /// <summary>
-        /// Tests the id property of the tile control.
+        /// Tests the id property of the tile card control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-tile-card""></div>")]
         [InlineData("id", @"<div id=""id"" class=""wx-tile-card""></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -28,14 +28,15 @@ namespace WebExpress.WebUI.Test.WebControl
             {
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
         /// <summary>
-        /// Tests the color property of the alert control.
+        /// Tests the color property of the tile card control.
         /// </summary>
         [Theory]
         [InlineData(TypeColorTile.Default, @"<div class=""wx-tile-card""></div>")]
@@ -49,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorTile.Transparent, @"<div class=""wx-tile-card"" data-color-css=""wx-tile-transparent""></div>")]
         public void Color(TypeColorTile color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -58,14 +59,15 @@ namespace WebExpress.WebUI.Test.WebControl
                 Color = new PropertyColorTile(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
         /// <summary>
-        /// Tests the header property of the panel card control.
+        /// Tests the header property of the tile card control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-tile-card""></div>")]
@@ -73,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-tile-card"" data-label=""WebExpress.WebUI""></div>")]
         public void Header(string header, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -82,55 +84,103 @@ namespace WebExpress.WebUI.Test.WebControl
                 Header = header
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
         /// <summary>
-        /// Tests the icon property of the form tile card control item.
+        /// Tests the icon property of the tile card control.
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-tile-card""></div>")]
         [InlineData(typeof(IconFolder), @"<div class=""wx-tile-card"" data-icon=""fas fa-folder""></div>")]
         public void Icon(Type iconType, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var icon = iconType != null ? Activator.CreateInstance(iconType) as IIcon : null;
+            var icon = iconType is not null ? Activator.CreateInstance(iconType) as IIcon : null;
             var control = new ControlTileCard(null)
             {
                 Icon = icon
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
         /// <summary>
-        /// Tests adding a item to the tile control.
+        /// Tests the primary action property of the tile card control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-tile-card""></div>")]
+        [InlineData("modal", @"<div class=""wx-tile-card"" data-wx-primary-action=""modal"" data-wx-primary-target=""#modal""></div>")]
+        public void PrimaryAction(string modal, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTileCard()
+            {
+                PrimaryAction = new ActionModal(modal)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the secondary action property of the tile card control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-tile-card""></div>")]
+        [InlineData("modal", @"<div class=""wx-tile-card"" data-wx-secondary-action=""modal"" data-wx-secondary-target=""#modal""></div>")]
+        public void SecondaryAction(string modal, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTileCard()
+            {
+                SecondaryAction = new ActionModal(modal)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests adding a item to the tile card control.
         /// </summary>
         [Fact]
         public void Add()
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTileCard(null);
 
-            // add column
+            // act
             control.Add(new ControlText());
 
-            // test execution
+            // validation
             var html = control.Render(context, visualTree);
-
-            // expected HTML
             var expected = @"<div class=""wx-tile-card""><div></div></div>";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);

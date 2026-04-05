@@ -59,7 +59,7 @@ namespace WebExpress.WebUI.WebControl
         {
             var img = default(HtmlElement);
 
-            if (Image != null)
+            if (Image is not null)
             {
                 img = new HtmlElementMultimediaImg() { Src = Image.ToString(), Class = "" };
             }
@@ -85,7 +85,7 @@ namespace WebExpress.WebUI.WebControl
                 .Add(img)
                 .Add
                 (
-                    Uri != null
+                    Uri is not null
                         ? new HtmlElementTextSemanticsA(User)
                         {
                             Href = Uri.ToString(),
@@ -94,7 +94,7 @@ namespace WebExpress.WebUI.WebControl
                         : new HtmlText(User)
                 );
 
-            if (Modal != null)
+            if (Modal is not null)
             {
                 html.AddUserAttribute("data-bs-toggle", "modal");
                 html.AddUserAttribute("data-bs-target", "#" + Modal.Id);

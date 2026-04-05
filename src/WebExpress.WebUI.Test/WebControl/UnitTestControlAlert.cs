@@ -19,7 +19,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("03C6031F-04A9-451F-B817-EBD6D32F8B0C", @"<div id=""03C6031F-04A9-451F-B817-EBD6D32F8B0C"" class=""alert"" role=""alert""></div>")]
         public void Id(string id, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -28,7 +28,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Dismissibility = TypeDismissibilityAlert.None
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -44,7 +44,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("abc", @"<div class=""alert"" role=""alert"">abc</div>")]
         public void Text(string text, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -54,7 +54,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Text = text
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -76,7 +76,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackgroundAlert.Transparent, @"<div class=""alert bg-transparent"" role=""alert""></div>")]
         public void BackgroundColor(TypeColorBackgroundAlert color, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -86,7 +86,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 BackgroundColor = new PropertyColorBackgroundAlert(color)
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation
@@ -98,10 +98,10 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeDismissibilityAlert.None, @"<div class=""alert"" role=""alert""></div>")]
-        [InlineData(TypeDismissibilityAlert.Dismissible, @"<div class=""alert alert-dismissible"" role=""alert""><button class=""btn"" data-bs-dismiss=""alert"" aria-label=""close""><i class=""fas fa-xmark""></i></button></div>")]
+        [InlineData(TypeDismissibilityAlert.Dismissible, @"<div class=""alert alert-dismissible"" role=""alert""><button class=""btn wx-button-close"" data-bs-dismiss=""alert"" aria-label=""close""><i class=""fas fa-times""></i></button></div>")]
         public void Dismissibility(TypeDismissibilityAlert dismissibility, string expected)
         {
-            // preconditions
+            // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
@@ -110,7 +110,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 Dismissibility = dismissibility
             };
 
-            // test execution
+            // act
             var html = control.Render(context, visualTree);
 
             // validation

@@ -22,6 +22,9 @@ confirm.label=Bestätigung
 confirm.header=Bestätigung einholen
 confirm.description=Sind Sie sicher das Sie das tun möchten?
 
+new.label=Neu
+edit.label=Speichern
+
 delete.label=Löschen
 delete.header=Löschen bestätigen
 delete.description=Sind Sie sicher, dass Sie dieses Element löschen möchten?

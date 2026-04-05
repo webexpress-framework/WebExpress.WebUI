@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Runtime.CompilerServices;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -16,14 +15,10 @@ namespace WebExpress.WebUI.WebControl
     public class ControlModalRemoteForm : ControlModalRemotePage
     {
         /// <summary>
-        /// Initializes a new instance of the class with an automatically assigned ID.
+        /// Initializes a new instance of the class.
         /// </summary>
-        /// <param name="instance">The name of the calling member. This is automatically provided by the compiler.</param>
-        /// <param name="file">The file path of the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="line">The line number in the source file where this instance is created. This is automatically provided by the compiler.</param>
-        /// <param name="content">The content of the html element.</param>
-        public ControlModalRemoteForm([CallerMemberName] string instance = null, [CallerFilePath] string file = null, [CallerLineNumber] int? line = null, params IControl[] content)
-            : this($"modal_{instance}_{file}_{line}".GetHashCode().ToString("X"), content)
+        public ControlModalRemoteForm()
+            : this(DeterministicId.Create())
         {
         }
 
@@ -45,7 +40,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(Header)))
+            var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Header)))
             {
                 Class = "wx-modal-header"
             };
@@ -66,9 +61,9 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("wx-webui-modal-form", GetClasses())
             }
             .AddUserAttribute("data-size", Size.ToClass())
-            .AddUserAttribute("data-close-label", I18N.Translate(CloseLabel))
+            .AddUserAttribute("data-close-label", I18N.Translate(renderContext, CloseLabel))
             .AddUserAttribute("data-uri", Uri?.ToString())
-            .AddUserAttribute("data-selector", Selector);
+            .AddUserAttribute("data-selector", !string.IsNullOrWhiteSpace(Selector) ? $"#{Selector}" : null);
 
             return html;
         }

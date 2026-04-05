@@ -12,14 +12,14 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="items">The carousel items to be added.</param>
         /// <returns>The current instance for method chaining.</returns>
-        IControlCarousel Add(params ControlCarouselItem[] items);
+        IControlCarousel Add(params IControlCarouselItem[] items);
 
         /// <summary>
         /// Adds a collection of carousel items to the carousel.
         /// </summary>
         /// <param name="items">The collection of carousel items to be added.</param>
         /// <returns>The current instance for method chaining.</returns>
-        IControlCarousel Add(IEnumerable<ControlCarouselItem> items);
+        IControlCarousel Add(IEnumerable<IControlCarouselItem> items);
 
         /// <summary>
         /// Clears all carousel items from the carousel.

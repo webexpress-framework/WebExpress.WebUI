@@ -1,339 +1,418 @@
-/* Base table layout */
+/* --- Base Grid Layout --- */
 .wx-table {
-    caption-side: bottom;
-    border-collapse: collapse;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: fit-content; 
+    margin-bottom: 0;
+    isolation: isolate;
+    
+    --wx-grid-template: none; 
+    --bs-table-bg: transparent;
+    --bs-table-accent-bg: transparent;
+    --bs-table-striped-color: var(--bs-body-color);
+    --bs-table-striped-bg: rgba(0, 0, 0, 0.05);
+    --bs-table-active-color: var(--bs-body-color);
+    --bs-table-active-bg: rgba(0, 0, 0, 0.1);
+    --bs-table-hover-color: var(--bs-body-color);
+    --bs-table-hover-bg: rgba(0, 0, 0, 0.075);
 }
 
-.wx-table > thead {
-    position: sticky;
-    top: 0;
-    z-index: 500;
-    box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
+/* --- Row Structure (Grid) --- */
+.wx-table-row,
+.wx-grid-row {
+    display: grid;
+    grid-template-columns: var(--wx-grid-template);
+    width: 100%;
+    align-items: center;
+    position: relative;
+    min-width: fit-content; 
+    transition: background-color 0.15s ease-in-out;
+}
+
+/* header group */
+.wx-table-header-group {
+    display: block;
+    width: 100%;
+    min-width: fit-content;
+    z-index: 1020;
+    background-color: var(--bs-table-head-bg, var(--bs-body-bg, #fff));
+    box-shadow: 0 1px 0 var(--bs-table-border-color, var(--bs-border-color));
+    flex-shrink: 0;
+}
+
+.wx-table-body-group {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    width: 100%;
+}
+
+.wx-table-footer-group {
+    border-top: 2px solid var(--bs-table-border-color, var(--bs-border-color));
+    background-color: var(--bs-body-bg, #fff);
+    min-width: fit-content;
+    flex-shrink: 0;
+}
+
+/* --- Cells --- */
+.wx-table-cell,
+.wx-grid-cell,
+.wx-grid-header-cell,
+.wx-col-header {
+    padding: 0.25rem 0.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap; 
+    border-bottom: 1px solid var(--bs-table-border-color, var(--bs-border-color));
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    height: 100%;
+    box-sizing: border-box;
 }
 
 /* header cells */
-.wx-table > thead > tr > th {
-    box-sizing: border-box;
+.wx-col-header,
+.wx-grid-header-cell {
+    font-weight: 700;
+    background-color: var(--bs-table-head-bg, var(--bs-body-bg, #fff));
     position: relative;
-    text-align: left;
-    padding-right: 34px;
-    outline: 0;
-    overflow: hidden;
-    white-space: nowrap;
-    align-items: center;
-    vertical-align: middle;
+    user-select: none;
+    border-bottom: none;
+    color: var(--bs-table-head-color, var(--bs-secondary));
+    transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
-/* header content wrapper */
-.wx-table > thead > tr > th > div {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5em;
+/* --- Variant Theme Management --- */
+.wx-table.table-primary {
+    --bs-table-color: #000;
+    --bs-table-bg: #cfe2ff;
+    --bs-table-border-color: #bacbe6;
+    --bs-table-striped-bg: #c5d7f2;
+    --bs-table-striped-color: #000;
+    --bs-table-active-bg: #bacbe6;
+    --bs-table-active-color: #000;
+    --bs-table-hover-bg: #bfd1ec;
+    --bs-table-hover-color: #000;
+}
+.wx-table.table-secondary {
+    --bs-table-color: #000;
+    --bs-table-bg: #e2e3e5;
+    --bs-table-border-color: #cbccce;
+    --bs-table-striped-bg: #d7d8da;
+    --bs-table-striped-color: #000;
+    --bs-table-active-bg: #cbccce;
+    --bs-table-active-color: #000;
+    --bs-table-hover-bg: #d3d6d8;
+    --bs-table-hover-color: #000;
+}
+.wx-table.table-success {
+    --bs-table-color: #000;
+    --bs-table-bg: #d1e7dd;
+    --bs-table-border-color: #bcd0c7;
+    --bs-table-striped-bg: #c7dbd2;
+    --bs-table-striped-color: #000;
+    --bs-table-active-bg: #bcd0c7;
+    --bs-table-active-color: #000;
+    --bs-table-hover-bg: #c1d6cc;
+    --bs-table-hover-color: #000;
+}
+.wx-table.table-info {
+    --bs-table-color: #000;
+    --bs-table-bg: #cff4fc;
+    --bs-table-border-color: #badce3;
+    --bs-table-striped-bg: #c5e8ef;
+    --bs-table-striped-color: #000;
+    --bs-table-active-bg: #badce3;
+    --bs-table-active-color: #000;
+    --bs-table-hover-bg: #bfe2e9;
+    --bs-table-hover-color: #000;
+}
+.wx-table.table-warning {
+    --bs-table-color: #000;
+    --bs-table-bg: #fff3cd;
+    --bs-table-border-color: #e6dbb9;
+    --bs-table-striped-bg: #f2e7c3;
+    --bs-table-striped-color: #000;
+    --bs-table-active-bg: #e6dbb9;
+    --bs-table-active-color: #000;
+    --bs-table-hover-bg: #ece1be;
+    --bs-table-hover-color: #000;
+}
+.wx-table.table-danger {
+    --bs-table-color: #000;
+    --bs-table-bg: #f8d7da;
+    --bs-table-border-color: #dfc2c4;
+    --bs-table-striped-bg: #eccccf;
+    --bs-table-striped-color: #000;
+    --bs-table-active-bg: #dfc2c4;
+    --bs-table-active-color: #000;
+    --bs-table-hover-bg: #e5c7ca;
+    --bs-table-hover-color: #000;
+}
+.wx-table.table-light {
+    --bs-table-color: #000;
+    --bs-table-bg: #f8f9fa;
+    --bs-table-border-color: #dfe0e1;
+    --bs-table-striped-bg: #ecedee;
+    --bs-table-striped-color: #000;
+    --bs-table-active-bg: #dfe0e1;
+    --bs-table-active-color: #000;
+    --bs-table-hover-bg: #e5e6e7;
+    --bs-table-hover-color: #000;
+}
+.wx-table.table-dark {
+    --bs-table-color: #fff;
+    --bs-table-bg: #212529;
+    --bs-table-border-color: #373b3e;
+    --bs-table-striped-bg: #2c3034;
+    --bs-table-striped-color: #fff;
+    --bs-table-active-bg: #373b3e;
+    --bs-table-active-color: #fff;
+    --bs-table-hover-bg: #323539;
+    --bs-table-hover-color: #fff;
 }
 
-/* shared image style for header/body icons */
-.wx-table > thead > tr > th > div > img,
-.wx-table > tbody > tr > td > div > img {
+.wx-table[class*="table-"] .wx-table-header-group,
+.wx-table[class*="table-"] .wx-table-header-group .wx-col-header,
+.wx-table[class*="table-"] .wx-table-header-group .wx-grid-header-cell {
+    background-color: var(--bs-table-bg);
+    color: var(--bs-table-color);
+    border-color: var(--bs-table-border-color);
 }
 
-/* hover state (light) */
-.wx-table > thead > tr > th:hover {
-    background-color: var(--bs-light);
+/* --- Header Hover Effect --- */
+.wx-col-header:hover,
+.wx-grid-header-cell:hover {
+    background-color: var(--bs-table-hover-bg);
+    color: var(--bs-table-hover-color);
     cursor: pointer;
 }
 
-/* hover state (dark) */
-[data-bs-theme=dark] .wx-table > thead > tr > th:hover {
-    background-color: var(--bs-dark);
-    color: var(--bs-light);
-}
-
-/* sorting indicators */
-.wx-table > thead > tr > th.wx-sort-asc::after,
-.wx-table > thead > tr > th.wx-sort-desc::after {
-    font-size: 0.5em;
-    position: absolute;
-    right: 18px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--bs-secondary);
-    line-height: 1;
-}
-
-.wx-table > thead > tr > th.wx-sort-asc::after { content: "▲"; }
-.wx-table > thead > tr > th.wx-sort-desc::after { content: "▼"; }
-
-/* actions header cell */
-.wx-table > thead > tr > th.wx-table-actions {
-    padding-right: .25rem;
-    min-width: 2.5rem;
-    text-align: center;
-    position: relative;
-}
-
-.wx-table-actions {
-    position: relative;
-}
-
-.wx-table-actions .dropdown-menu {
-    overflow: auto;
-    max-height: 60vh;
-}
-
-/* body cells */
-.wx-table > tbody > tr > td {
-    position: relative;
-}
-
-.wx-table > tbody > tr > td > div {
-    display: inline-flex;
+/* Header Content Wrapper */
+.wx-col-inner {
+    display: flex;
     align-items: center;
     gap: 0.5em;
     width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.wx-table > tbody > tr > td > div > .wx-inline-edit {
+/* --- Sorting Indicators --- */
+.wx-sort-asc .wx-col-inner::after,
+.wx-sort-desc .wx-col-inner::after {
+    font-size: 0.6em;
+    margin-left: auto;
+    color: currentColor;
+    opacity: 1;
+    line-height: 1;
+    font-weight: 700;
+    display: inline-block;
+    vertical-align: middle;
+    padding: 0.06rem 0.22rem;
+    border-radius: 0.25rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    max-width: 2.2em;
+    white-space: nowrap;
+    overflow: visible;
+}
+.wx-sort-asc .wx-col-inner::after { content: "▲"; }
+.wx-sort-desc .wx-col-inner::after { content: "▼"; }
+
+/* --- Actions Cell ---*/
+.wx-table-actions {
+    justify-content: center;
+    padding: 0;
+}
+.wx-table-actions .btn { border: none; }
+
+/* Allow overflow for specific interactive elements */
+.wx-table-cell:where(:has(.wx-smart-edit, .dropdown-menu.show, input, select)),
+.wx-grid-cell:where(:has(.wx-smart-edit, .dropdown-menu.show, input, select)) {
+    overflow: visible !important;
+}
+
+/* --- Content Wrappers & Images --- */
+.wx-cell-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
     width: 100%;
+    height: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: inherit;
+    text-decoration: none;
+}
+a.wx-cell-content { font-weight: 600; }
+a.wx-cell-content:hover { text-decoration: underline; color: var(--bs-link-hover-color, currentColor); }
+
+.wx-icon {
+    max-height: 1.2em;
+    width: auto;
+    object-fit: contain;
 }
 
-/* drag & drop common */
-.wx-table .wx-table-drag-handle {
+/* --- Row Drag & Drop --- */
+.wx-table-drag-handle {
     cursor: grab;
     color: var(--bs-secondary);
-    user-select: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.wx-table-drag-handle:active { cursor: grabbing; }
+
+.wx-table .wx-drag-over {
+    border-top: 2px solid var(--bs-primary);
 }
 
-.wx-table .wx-table-drag-handle:hover {
-    color: var(--bs-secondary);
-}
-
-.wx-table .wx-table-drag-indicator {
-  position: fixed;
-  pointer-events: none;
-  z-index: 2147483647;
-  width: 2px;
-  border-left: 2px dashed var(--bs-success);
-  opacity: .9;
-}
-
-/* header/row visual while dragging */
-.wx-table .wx-table-dragging {
-  opacity: .6;
-}
-
-.wx-table .wx-table-drag-placeholder {
-    background-color: var(--bs-success-bg-subtle);
-    border: 2px dashed var(--bs-success);
-    z-index: 1000;
-    pointer-events: none;
-}
-
-/* row drag placeholder cells (pattern background) */
-.wx-table .wx-table-drag-placeholder > td {
-    background: repeating-linear-gradient(
-        45deg,
-        #eee,
-        #eee 6px,
-        #f8f8f8 6px,
-        #f8f8f8 12px
-    ) !important;
-    outline: 2px dashed var(--bs-success);
-    outline-offset: 1px;
-    z-index: 20000;
-}
-
-/* column resizing */
-.wx-table .wx-table-column-resizer {
+/* --- Column Resizing --- */
+.wx-col-resizer {
     position: absolute;
-    right: 0;
     top: 0;
     bottom: 0;
+    right: 0;
     width: 5px;
     cursor: col-resize;
-    z-index: 1000;
+    z-index: 1030;
+    opacity: 0;
     touch-action: none;
+    background-clip: content-box;
+    border-right: 2px solid transparent; 
+}
+.wx-table[dir="rtl"] .wx-col-resizer {
+    right: auto;
+    left: 0;
+}
+.wx-col-resizer:hover,
+.wx-col-resizer:active {
+    opacity: 1;
+    background-color: var(--bs-primary);
 }
 
-.wx-table .wx-table-resizing {
-    cursor: col-resize !important;
-}
-
-/* Tree / hierarchical row support */
+/* --- Tree / Hierarchy --- */
 .wx-table .wx-tree {
     display: inline-flex;
     align-items: center;
-    gap: 0.25em;
     width: 100%;
+    min-width: 0;
 }
-
-/* angle icon */
-.wx-table .wx-tree-indicator-angle {
-    content: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+DQo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIJdmlld0JveD0iMCAwIDEzNSAxOTAiPg0KCTxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJPCFbQ0RBVEFbDQoJCS5zdDEge2ZpbGw6IzdmN2Y3ZjtzdHJva2U6bm9uZTt9DQoJXV0+DQoJPC9zdHlsZT4NCgkJPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTgsLTE4KSI+DQoJCQk8cGF0aCBkPSJNMS42NiAxNzMuMiBMMTguNyAxOTAuMjMgQTUuNjY5MjkgNS42NjkyOSAtMTgwIDAgMCAyNi43MiAxOTAuMjMgTDk4Ljg3IDExOC4wOCBBNS42NjkyOSA1LjY2OTI5IC0xODAgMCAwIDk4Ljg3DQoJCQkJCQkgMTEwLjA2IEwyNi43MiAzNy45IEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMTguNyAzNy45IEwxLjY2IDU0Ljk0IEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMS42NiA2Mi45Ng0KCQkJCQkJIEw0OC43NiAxMTAuMDYgQTUuNjY5MjkgNS42NjkyOSAwIDAgMSA0OC43NiAxMTguMDYgTDEuNjYgMTY1LjE4IEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMS42NiAxNzMuMiBaIg0KCQkJCQljbGFzcz0ic3QxIi8+DQoJCTwvZz4NCjwvc3ZnPg==');
-    height: 0.8rem;
-    width: 0.8rem;
-    display: inline-block;
-    vertical-align: middle;
-    transition: transform .18s ease;
-    transform-origin: 50% 50%;
-}
-
-.wx-table .wx-tree-expand {
-    transform: rotate(90deg);
-}
-
-/* lead container (indent + toggle) */
-.wx-table .wx-tree-lead {
-    font-size: inherit;
-    user-select: none;
-    display: inline-flex;
-    align-items: center;
-    gap: .25em;
-}
-
-/* indentation spacer */
 .wx-table .wx-tree-indent {
     display: inline-block;
     height: 1px;
+    flex-shrink: 0;
 }
-
-/* toggle button */
 .wx-table .wx-tree-toggle {
-    background: transparent;
-    border: none;
-    padding: 0;
-    margin: 0;
-    line-height: 1;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: 0.25rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    background: transparent;
+    border: 1px solid transparent;
+    padding: 0;
     cursor: pointer;
-    color: var(--bs-body-color);
-    min-width: 0.8rem;
-    min-height: 0.8rem;
-}
-
-.wx-table .wx-tree > div {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25em;
-}
-
-.wx-table .wx-tree > div > img{
-}
-
-.wx-table .wx-tree-toggle:focus-visible {
-    outline: 2px solid var(--bs-primary);
-    outline-offset: 2px;
-    border-radius: 2px;
-}
-
-/* placeholder when no toggle exists */
-.wx-table .wx-tree-toggle-placeholder {
-    opacity: 0;
-    width: 0.8rem;
-    display: inline-block;
-}
-
-/* keep text alignment after tree lead */
-.wx-table .wx-tree-lead + * {
-    flex-grow: 1;
-}
-
-/* drag handle focus synergy */
-.wx-table .wx-table-drag-handle:focus-visible {
-    outline: 2px solid var(--bs-primary);
-    outline-offset: -2px;
-    border-radius: 2px;
-}
-
-/* subtle row hover */
-.wx-table tbody tr {
-    transition: background-color .15s linear;
-}
-
-/* small screens */
-@media (max-width: 576px) {
-    .wx-table .wx-tree-toggle {
-        font-size: .65rem;
-    }
-}
-
-/* high contrast preference */
-@media (prefers-contrast: more) {
-    .wx-table .wx-tree-toggle:focus-visible {
-        outline-width: 3px;
-    }
-}
-
-/* reduced motion */
-@media (prefers-reduced-motion: reduce) {
-    .wx-table .wx-tree-indicator-angle {
-        transition: none;
-    }
-}
-
-/* Column dropdown drag & drop (reordering inside actions menu) */
-.wx-table .wx-columns-list {
-    position: relative;
-}
-
-.wx-table .wx-columns-list .wx-col-placeholder {
-    border: 2px dashed var(--bs-success);
-    margin: 2px 0;
-    height: 36px;
     border-radius: 4px;
-    background: repeating-linear-gradient(
-        45deg,
-        #fafafa,
-        #fafafa 6px,
-        #f0f0f0 6px,
-        #f0f0f0 12px
-    );
+    color: inherit;
+    transition: background-color 0.1s;
+}
+.wx-table .wx-tree-toggle:hover { background-color: rgba(0, 0, 0, 0.05); }
+.wx-table .wx-tree-toggle-placeholder {
+    width: 1.5rem;
+    margin-right: 0.25rem;
+    visibility: hidden;
+    flex-shrink: 0;
+}
+.wx-table .wx-tree-indicator-angle {
+    content: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+DQo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIJdmlld0JveD0iMCAwIDEzNSAxOTAiPg0KCTxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJPCFbQ0RBVEFbDQoJCS5zdHExIHtmaWxsOiM3ZjdmN2Y7c3Ryb2tlOm5vbmU7fQ0KCV1dPg0KCTwvc3R5bGU+DQoJCTxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE4LC0xOCkiPg0KCQkJPHBhdGggZD0iTTEuNjYgMTczLjIgTDE4LjcgMTkwLjIzIEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMjYuNzIgMTkwLjIzIEw5OC44NyAxMTguMDggQTUuNjY5MjkgNS42NjkyOSAtMTgwIDAgMCA5OC44Nw0KCQkJCQkJIDExMC4wNiBMMjYuNzIgMzcuOSBBNS42NjkyOSA1LjY2OTI5IC0xODAgMCAwIDEuNjYgNjIuOTYNCgkJCQkJCSBMNDguNzYgMTEwLjA2IEE1LjY2OTI5IDUuNjY5MjkgMCAwIDEgNDguNzYgMTE4LjA2IEwxLjY2IDE2NS4xOCBBNS42NjkyOSA1LjY2OTI5IC0xODAgMCAwIDEuNjYgMTczLjIgWiINCiAgICAgICAgICAgICAgICAgICAgICAgIGNsYXNzPSJzdHEiLz4NCgkJPC9nPg0KPC9zdmc+');
+    height: 0.8rem;
+    width: 0.8rem;
+    transition: transform .15s ease;
+    opacity: 0.6;
+}
+.wx-table .wx-tree-expand { transform: rotate(90deg); }
+
+/* --- Flash Animations --- */
+@keyframes wx-change-flash {
+    0% { background-color: rgba(var(--bs-warning-rgb, 255, 193, 7), 0.4); }
+    100% { background-color: transparent; }
+}
+.wx-change-flash > .wx-table-cell,
+.wx-change-flash > .wx-grid-cell { animation: wx-change-flash 1s ease-out; }
+
+/* --- Striping and Hover States --- */
+.wx-table.table-striped .wx-table-body-group .wx-table-row:nth-child(odd),
+.wx-table.table-striped .wx-table-body-group .wx-grid-row:nth-child(odd) {
+    background-color: var(--bs-table-striped-bg);
+    color: var(--bs-table-striped-color);
+}
+.wx-table-row:hover,
+.wx-grid-row:hover {
+    background-color: var(--bs-table-hover-bg);
+    color: var(--bs-table-hover-color);
+    z-index: 1;
+}
+.wx-table-row.active,
+.wx-table-row.wx-row-active,
+.wx-table-row:active,
+.wx-grid-row.active,
+.wx-grid-row.wx-row-active,
+.wx-grid-row:active {
+    background-color: var(--bs-table-active-bg);
+    color: var(--bs-table-active-color);
+}
+.wx-table-row:where(.active, [data-wx-primary-action]),
+.wx-grid-row:where(.active, [data-wx-primary-action]) {
+    cursor: pointer;
 }
 
-.wx-table .wx-columns-list .wx-col-item.dragging {
-    opacity: .4;
+/* --- Border Handling --- */
+.wx-table.table-bordered {
+    border: 1px solid var(--bs-table-border-color);
+}
+.wx-table.table-bordered .wx-table-cell,
+.wx-table.table-bordered .wx-grid-cell,
+.wx-table.table-bordered .wx-col-header,
+.wx-table.table-bordered .wx-grid-header-cell {
+    border-right: 1px solid var(--bs-table-border-color);
 }
 
-/* highlight row after content change (new or modified) */
-@keyframes wx-row-flash {
-    0% {
-        background-color: rgba(var(--bs-warning-rgb), 0.85);
-    }
-
-    100% {
-        background-color: transparent;
-    }
+/* Letztes Element in Zeilen und Headern (Entfernen des rechten Randes) */
+.wx-table.table-bordered .wx-table-row .wx-table-cell:last-child,
+.wx-table.table-bordered .wx-table-row .wx-grid-cell:last-child,
+.wx-table.table-bordered .wx-grid-row .wx-table-cell:last-child,
+.wx-table.table-bordered .wx-grid-row .wx-grid-cell:last-child,
+.wx-table.table-bordered .wx-table-header-group .wx-col-header:last-child,
+.wx-table.table-bordered .wx-table-header-group .wx-grid-header-cell:last-child {
+    border-right: none;
 }
 
-/* Table: animate the cells, because Bootstrap applies background to td/th */
-.wx-table tr.wx-row-flash > td {
-    animation: wx-row-flash 1.2s ease-out;
+/* RTL Support */
+.wx-table[dir="rtl"].table-bordered .wx-table-cell,
+.wx-table[dir="rtl"].table-bordered .wx-grid-cell,
+.wx-table[dir="rtl"].table-bordered .wx-col-header,
+.wx-table[dir="rtl"].table-bordered .wx-grid-header-cell {
+    border-right: none;
+    border-left: 1px solid var(--bs-table-border-color, #dee2e6);
+}
+.wx-table[dir="rtl"].table-bordered .wx-table-row .wx-table-cell:last-child,
+.wx-table[dir="rtl"].table-bordered .wx-table-row .wx-grid-cell:last-child,
+.wx-table[dir="rtl"].table-bordered .wx-grid-row .wx-table-cell:last-child,
+.wx-table[dir="rtl"].table-bordered .wx-grid-row .wx-grid-cell:last-child,
+.wx-table[dir="rtl"].table-bordered .wx-table-header-group .wx-col-header:last-child,
+.wx-table[dir="rtl"].table-bordered .wx-table-header-group .wx-grid-header-cell:last-child {
+    border-left: none;
 }
 
-/* List: animate the entire list item */
-.wx-list li.wx-row-flash,
-.wx-list .wx-row-flash {
-    animation: wx-row-flash 1.2s ease-out;
-}
-
-/* reduce motion for users that prefer it */
-@media (prefers-reduced-motion: reduce) {
-    .wx-table tr.wx-row-flash > td,
-    .wx-list li.wx-row-flash,
-    .wx-list .wx-row-flash {
-        animation-duration: 1ms;
-        animation-iteration-count: 1;
-    }
-}
-
-/* high-contrast mode: avoid animation, use outline hint */
-@media (forced-colors: active) {
-    .wx-table tr.wx-row-flash > td,
-    .wx-list li.wx-row-flash,
-    .wx-list .wx-row-flash {
-        animation: none;
-        outline: 2px solid currentColor;
-        outline-offset: -2px;
-    }
+/* Print handling */
+@media print {
+    .wx-table-actions, .wx-table-drag-handle, .wx-col-resizer { display: none !important; }
+    .wx-table { display: block; }
+    .wx-table-row, .wx-grid-row { page-break-inside: avoid; }
+    .wx-table-body-group { overflow: visible !important; height: auto !important; max-height: none !important; }
 }

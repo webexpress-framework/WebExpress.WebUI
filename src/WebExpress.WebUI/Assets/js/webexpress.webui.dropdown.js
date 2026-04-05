@@ -58,7 +58,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
             } else if (elem.classList.contains("wx-dropdown-header")) {
                 items.push({
                     type: "header",
-                    content: elem.textContent,
+                    text: elem.textContent,
                     icon: elem.dataset.icon || null,
                 });
             } else {
@@ -85,19 +85,16 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                     })
                     .map(attr => [attr.name, attr.value]);
 
-                // add modal toggle attribute when data-modal is present
-                if (elem.dataset.modal) {
-                    dataAttributes.push(["data-wx-toggle", "modal"]);
-                    dataAttributes.push(["data-wx-target", elem.dataset.modal]);
-                }
-
                 items.push({
                     id: elem.id || null,
                     uri: elem.dataset.uri || "javascript:void(0);",
                     image: elem.dataset.image || null,
                     icon: elem.dataset.icon || null,
-                    content: elem.textContent || null,
+                    text: elem.textContent || null,
                     color: elem.dataset.color || null,
+                    primaryAction: elem.primaryAction || null,
+                    secondaryAction: elem.secondaryAction || null,
+                    bind: elem.bind || null,
                     backgroundColor: itemClasses
                         .filter(cls => cls !== "wx-dropdown-item")
                         .find(cls => cls.startsWith("wx-")) || "",
@@ -134,7 +131,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                 icon.className = item.icon;
                 header.appendChild(icon);
             }
-            header.append(item.content);
+            header.append(item.text);
             li.appendChild(header);
         } else if (item.type === "divider") {
             // create a divider element
@@ -146,12 +143,33 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                 link.id = item.id;
                 link.className = "wx-link dropdown-item";
                 if (item.color) link.classList.add(item.color);
-                link.href = item.uri;
 
+                // apply action attributes
+                if (item.primaryAction) {
+                    for (const [key, value] of Object.entries(item.primaryAction)) {
+                        if (value) {
+                            const htmlName = `data-wx-primary-${key.toLowerCase()}`;
+                            link.setAttribute(htmlName, value);
+                        }
+                    }
+                }
+
+                if (item.secondaryAction) {
+                    for (const [key, value] of Object.entries(item.secondaryAction)) {
+                        if (value) {
+                            const htmlName = `data-wx-secondary-${key.toLowerCase()}`;
+                            link.setAttribute(htmlName, value);
+                        }
+                    }
+                }
+
+                if (item.uri) {
+                    link.href = item.uri;
+                }
                 if (item.image) {
                     const img = document.createElement("img");
                     img.src = item.image;
-                    img.alt = item.content;
+                    img.alt = item.text;
                     img.className = "wx-icon";
                     link.appendChild(img);
                 }
@@ -161,7 +179,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                     link.appendChild(icon);
                 }
                 const span = document.createElement("span");
-                span.textContent = item.content;
+                span.textContent = item.text;
                 link.appendChild(span);
                 
                 if (item.role) { link.setAttribute("role", item.role); }
@@ -176,17 +194,9 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
 
                 // register click handler for the menu item
                 link.addEventListener("click", () => {
-                    if (typeof item.action === "function") {
-                        item.action();
-                    }
-                    const event = new CustomEvent(webexpress.webui.Event.CLICK_EVENT, {
-                        detail: {
-                            sender: this._element,
-                            id: this._element.id || null,
-                            item: item
-                        }
+                    this._dispatch(webexpress.webui.Event.CLICK_EVENT, {
+                        item: item
                     });
-                    document.dispatchEvent(event);
                 });
 
                 li.appendChild(link);
@@ -200,7 +210,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                     icon.className = item.icon;
                     disabledItem.appendChild(icon);
                 }
-                disabledItem.append(item.content);
+                disabledItem.append(item.text);
                 li.appendChild(disabledItem);
             }
         }
@@ -264,22 +274,14 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
         // handle visibility change event
         // fires CHANGE_VISIBILITY_EVENT when the menu is shown or hidden
         button.addEventListener('show.bs.dropdown', () => {
-            const visEvent = new CustomEvent(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
-                detail: {
-                    sender: this._element,
-                    visible: true
-                }
+            this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
+                visible: true
             });
-            document.dispatchEvent(visEvent);
         });
         button.addEventListener('hide.bs.dropdown', () => {
-            const visEvent = new CustomEvent(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
-                detail: {
-                    sender: this._element,
-                    visible: false
-                }
+            this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
+                visible: false
             });
-            document.dispatchEvent(visEvent);
         });
     }
 

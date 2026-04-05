@@ -143,11 +143,11 @@ namespace WebExpress.WebUI.WebControl
         {
             var p1 = SidePanel
                 .Select(x => x.Render(renderContext, visualTree))
-                .Where(x => x != null)
+                .Where(x => x is not null)
                 .ToList();
             var p2 = MainPanel
                 .Select(x => x.Render(renderContext, visualTree))
-                .Where(x => x != null)
+                .Where(x => x is not null)
                 .ToList();
 
             if (p1.Count != 0 && p2.Count == 0)

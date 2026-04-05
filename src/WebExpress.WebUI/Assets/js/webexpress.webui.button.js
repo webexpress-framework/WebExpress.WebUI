@@ -4,6 +4,8 @@
  * - webexpress.webui.Event.CLICK_EVENT
  */
 webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
+    _lastColorClass = null;
+
     /**
      * Constructor
      * @param {HTMLElement} element - The DOM element associated with the instance.
@@ -11,28 +13,34 @@ webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
     constructor(element) {
         super(element);
 
-        // Initialize properties from data attributes or element content
-        this._label = element.textContent || "";
+        // initialize properties from data attributes or element content
+        this._label = (element.textContent || "").trim();
         this._icon = element.dataset.icon || null;
         this._image = element.dataset.image || null;
         this._color = element.dataset.color || null;
         this._size = element.dataset.size || null;
 
-        // Clean up the DOM element and set base classes for styling
-        element.innerHTML = "";
+        // clean up the dom element and set base classes for styling
+        element.textContent = "";
         element.removeAttribute("data-icon");
         element.removeAttribute("data-image");
         element.removeAttribute("data-color");
+        element.removeAttribute("data-size");
+        
         element.classList.add("btn", "wx-button");
         if (this._size) {
             element.classList.add(this._size);
         }
 
-        // Render the button UI
+        // render the button ui
         this.render();
 
-        // Attach the click event listener
-        element.addEventListener("click", () => {
+        // attach the click event listener
+        element.addEventListener("click", (e) => {
+            // prevent default action if it's a link-styled button acting as a control
+            if (element.tagName === "A" && element.getAttribute("href") === "#") {
+                e.preventDefault();
+            }
             this._dispatch(webexpress.webui.Event.CLICK_EVENT, { });
         });
     }
@@ -51,8 +59,10 @@ webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
      * @param {string} value - The new label value.
      */
     set label(value) {
-        this._label = value;
-        this.update();
+        if (this._label !== value) {
+            this._label = value;
+            this.render();
+        }
     }
 
     /**
@@ -69,8 +79,10 @@ webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
      * @param {string|null} value - The new icon class.
      */
     set icon(value) {
-        this._icon = value;
-        this.update();
+        if (this._icon !== value) {
+            this._icon = value;
+            this.render();
+        }
     }
 
     /**
@@ -87,8 +99,10 @@ webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
      * @param {string|null} value - The new color class.
      */
     set color(value) {
-        this._color = value;
-        this.update();
+        if (this._color !== value) {
+            this._color = value;
+            this._updateColorClass();
+        }
     }
 
     /**
@@ -96,33 +110,38 @@ webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
      * Updates the DOM element based on the current properties.
      */
     render() {
-        // Clear existing content
-        this._element.innerHTML = "";
+        // use document fragment to minimize reflows
+        const fragment = document.createDocumentFragment();
 
-        // Append image if defined
+        // append image if defined
         if (this._image) {
             const img = document.createElement("img");
             img.className = "wx-icon";
             img.src = this._image;
-            this._element.appendChild(img);
+            img.alt = ""; 
+            fragment.appendChild(img);
         }
 
-        // Append icon if defined
+        // append icon if defined
         if (this._icon) {
             const icon = document.createElement("i");
-            // Add all icon classes (supporting multiple)
-            this._icon.split(" ").forEach(cls => {
-                if (cls.trim()) icon.classList.add(cls.trim());
-            });
-            this._element.appendChild(icon);
+            // directly set classname for performance
+            icon.className = this._icon;
+            fragment.appendChild(icon);
         }
 
-        // Append label
-        const buttonText = document.createElement("span");
-        buttonText.textContent = this._label;
-        this._element.appendChild(buttonText);
+        // append label
+        if (this._label) {
+            const buttonText = document.createElement("span");
+            buttonText.textContent = this._label;
+            fragment.appendChild(buttonText);
+        }
 
-        // Update color classes
+        // clear existing content and append new structure
+        this._element.textContent = "";
+        this._element.appendChild(fragment);
+
+        // ensure color classes are applied
         this._updateColorClass();
     }
 
@@ -131,17 +150,19 @@ webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
      * Removes any existing color classes and applies the new color.
      */
     _updateColorClass() {
-        // Remove all classes starting with 'btn-' (such as Bootstrap classes)
-        this._element.className = this._element.className
-            .split(" ")
-            .filter(cls => !/^btn-\S+/.test(cls))
-            .join(" ");
-        // Add new color class if specified
+        // efficiently remove the previously set color class
+        if (this._lastColorClass) {
+            this._element.classList.remove(this._lastColorClass);
+            this._lastColorClass = null;
+        }
+
+        // add new color class if specified
         if (this._color) {
             this._element.classList.add(this._color);
+            this._lastColorClass = this._color;
         }
     }
 };
 
-// Register the class in the controller
+// register the class in the controller
 webexpress.webui.Controller.registerClass("wx-webui-button", webexpress.webui.ButtonCtrl);

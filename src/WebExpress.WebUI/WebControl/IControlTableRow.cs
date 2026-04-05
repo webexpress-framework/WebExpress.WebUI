@@ -30,6 +30,18 @@ namespace WebExpress.WebUI.WebControl
         IEnumerable<IControlTableRow> Children { get; }
 
         /// <summary>
+        /// Returns the secondary action, typically triggered by a 
+        /// click to open a modal or similar target.
+        /// </summary>
+        IAction PrimaryAction { get; }
+
+        /// <summary>
+        /// Returns the secondary action, typically triggered by a 
+        /// double‑click to open a modal or similar target.
+        /// </summary>
+        IAction SecondaryAction { get; }
+
+        /// <summary>
         /// Adds the specified cells to the row.
         /// </summary>
         /// <param name="cells">The cells to be added to the row.</param>
@@ -75,7 +87,7 @@ namespace WebExpress.WebUI.WebControl
         /// Adds a new separator.
         /// </summary>
         /// <returns>The current instance for method chaining.</returns>
-        IControlTableRow AddSeperator();
+        IControlTableRow AddSeparator();
 
         /// <summary>
         /// Adds a new head.

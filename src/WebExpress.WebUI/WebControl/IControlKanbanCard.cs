@@ -1,0 +1,37 @@
+﻿using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebPage;
+using WebExpress.WebUI.WebPage;
+
+namespace WebExpress.WebUI.WebControl
+{
+    /// <summary>
+    /// Represents a kanban card.
+    /// </summary>
+    public interface IControlKanbanCard : IWebUIElement<IRenderControlContext, IVisualTreeControl>
+    {
+        /// <summary>
+        /// Returns the title associated with the card.
+        /// </summary>
+        string Title { get; }
+
+        /// <summary>
+        /// Returns the color associated with the card.
+        /// </summary>
+        string Color { get; }
+
+        /// <summary>
+        /// Returns the icon associated with this card.
+        /// </summary>
+        IIcon Icon { get; }
+
+        /// <summary>
+        /// Returns the column id associated with this card.
+        /// </summary>
+        string ColumnId { get; }
+
+        /// <summary>
+        /// Returns the unique identifier of the swimlane associated with this card.
+        /// </summary>
+        string SwimlaneId { get; }
+    }
+}
