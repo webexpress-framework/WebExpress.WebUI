@@ -283,14 +283,20 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 target: dataset.target || null,
                 tooltip: dataset.tooltip || null,
                 parent: parent,
-                
-                // action attributes
-                primaryAction: dataset.wxPrimaryAction || null,
-                primaryTarget: dataset.wxPrimaryTarget || null,
-                primaryUri: dataset.wxPrimaryUri || null,
-                secondaryAction: dataset.wxSecondaryAction || null,
-                secondaryTarget: dataset.wxSecondaryTarget || null,
-                secondaryUri: dataset.wxSecondaryUri || null
+                primaryAction: Object.fromEntries(Object.entries(dataset)
+                    .filter(([k]) => k.startsWith("wxPrimary"))
+                    .map(([k, v]) => [
+                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                ),
+                secondaryAction: Object.fromEntries(Object.entries(dataset)
+                    .filter(([k]) => k.startsWith("wxSecondary"))
+                    .map(([k, v]) => [
+                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                )
             };
             // recursively parse children
             node.children = this._parseNodes(Array.from(elem.children).filter((e) => { return e.classList.contains("wx-tree-node"); }), node);

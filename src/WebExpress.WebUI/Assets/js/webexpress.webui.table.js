@@ -884,25 +884,20 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 target: div.dataset.target,
                 
                 // action attributes
-                primaryAction: Object.fromEntries(Object.entries(dataset)
+                primaryAction: Object.fromEntries(Object.entries(div.dataset)
                     .filter(([k]) => k.startsWith("wxPrimary"))
                     .map(([k, v]) => [
                         k.slice(9).replace(/^./, c => c.toLowerCase()),
                         v === "true" ? true : v === "false" ? false : v
                     ])
                 ),
-                secondaryAction: Object.fromEntries(Object.entries(dataset)
+                secondaryAction: Object.fromEntries(Object.entries(div.dataset)
                     .filter(([k]) => k.startsWith("wxSecondary"))
                     .map(([k, v]) => [
                         k.slice(9).replace(/^./, c => c.toLowerCase()),
                         v === "true" ? true : v === "false" ? false : v
                     ])
                 ),
-                // bind
-                bind: {
-                    source: div.dataset.wxSource || null,
-                },
-                
                 cells: [],
                 options: null,
                 children: [],

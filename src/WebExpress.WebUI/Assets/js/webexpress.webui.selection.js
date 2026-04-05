@@ -51,14 +51,14 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
                 content: elem.innerHTML || "",
                 disabled: elem.hasAttribute("disabled"),
                 // parse action attributes
-                primaryAction: Object.fromEntries(Object.entries(dataset)
+                primaryAction: Object.fromEntries(Object.entries(ds)
                     .filter(([k]) => k.startsWith("wxPrimary"))
                     .map(([k, v]) => [
                         k.slice(9).replace(/^./, c => c.toLowerCase()),
                         v === "true" ? true : v === "false" ? false : v
                     ])
                 ),
-                secondaryAction: Object.fromEntries(Object.entries(dataset)
+                secondaryAction: Object.fromEntries(Object.entries(ds)
                     .filter(([k]) => k.startsWith("wxSecondary"))
                     .map(([k, v]) => [
                         k.slice(9).replace(/^./, c => c.toLowerCase()),
