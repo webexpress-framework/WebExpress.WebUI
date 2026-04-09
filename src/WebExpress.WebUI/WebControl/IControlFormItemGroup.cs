@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.WebControl
         /// This method accepts any item that derives from <see cref="ControlFormItem"/>.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
-        IControlFormItemGroup Add(params ControlFormItem[] items);
+        IControlFormItemGroup Add(params IControlFormItem[] items);
 
         /// <summary>
         /// Adds a collection of form entries to the existing items.
@@ -31,7 +31,7 @@ namespace WebExpress.WebUI.WebControl
         /// This method accepts any item that derives from <see cref="ControlFormItem"/>.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
-        IControlFormItemGroup Add(IEnumerable<ControlFormItem> items);
+        IControlFormItemGroup Add(IEnumerable<IControlFormItem> items);
 
         /// <summary>
         /// Removes a specified form entry from the existing items.
@@ -43,6 +43,6 @@ namespace WebExpress.WebUI.WebControl
         /// This method accepts any item that derives from <see cref="ControlFormItem"/>.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
-        IControlFormItemGroup Remove(ControlFormItem item);
+        IControlFormItemGroup Remove(IControlFormItem item);
     }
 }

@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="id">The id of the control.</param>
         ///<param name="item">The form item.</param> 
-        public ControlFormItemGroup(string id = null, params ControlFormItem[] item)
+        public ControlFormItemGroup(string id = null, params IControlFormItem[] item)
             : base(id)
         {
             _items.AddRange(item);
@@ -38,7 +38,7 @@ namespace WebExpress.WebUI.WebControl
         /// This method accepts any item that derives from <see cref="ControlListItem"/>.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
-        public IControlFormItemGroup Add(params ControlFormItem[] items)
+        public IControlFormItemGroup Add(params IControlFormItem[] items)
         {
             _items.AddRange(items);
 
@@ -56,7 +56,7 @@ namespace WebExpress.WebUI.WebControl
         /// This method accepts any item that derives from <see cref="ControlListItem"/>.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
-        public virtual IControlFormItemGroup Add(IEnumerable<ControlFormItem> items)
+        public virtual IControlFormItemGroup Add(IEnumerable<IControlFormItem> items)
         {
             _items.AddRange(items);
 
@@ -73,7 +73,7 @@ namespace WebExpress.WebUI.WebControl
         /// This method accepts any item that derives from <see cref="ControlListItem"/>.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
-        public virtual IControlFormItemGroup Remove(ControlFormItem item)
+        public virtual IControlFormItemGroup Remove(IControlFormItem item)
         {
             _items.Remove(item);
 

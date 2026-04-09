@@ -10,12 +10,12 @@ namespace WebExpress.WebUI.WebControl
     /// </summary>
     public class ControlTab : Control, IControlTab
     {
-        private readonly List<IControlTabView> _pages = [];
+        private readonly List<IControlTabView> _views = [];
 
         /// <summary>
         /// Returns the pages of the tab.
         /// </summary>
-        public IEnumerable<IControlTabView> Pages => _pages;
+        public IEnumerable<IControlTabView> Views => _views;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -25,7 +25,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlTab(string id = null, IControlTabView[] pages = null)
             : base(id)
         {
-            _pages.AddRange(pages ?? []);
+            _views.AddRange(pages ?? []);
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public virtual IControlTab Add(params IControlTabView[] pages)
         {
-            _pages.AddRange(pages);
+            _views.AddRange(pages);
 
             return this;
         }
@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public virtual IControlTab Add(IEnumerable<IControlTabView> pages)
         {
-            _pages.AddRange(pages);
+            _views.AddRange(pages);
 
             return this;
         }
@@ -59,7 +59,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public virtual IControlTab Remove(IControlTabView page)
         {
-            _pages.Remove(page);
+            _views.Remove(page);
 
             return this;
         }
@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return Render(renderContext, visualTree, _pages);
+            return Render(renderContext, visualTree, _views);
         }
 
         /// <summary>

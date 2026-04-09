@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns the pages of the tab.
         /// </summary>
-        IEnumerable<IControlTabView> Pages { get; }
+        IEnumerable<IControlTabView> Views { get; }
 
         /// <summary>
         /// Adds one or more pages to the tab.
