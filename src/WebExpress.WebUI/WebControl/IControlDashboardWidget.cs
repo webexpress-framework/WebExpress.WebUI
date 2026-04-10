@@ -33,5 +33,10 @@ namespace WebExpress.WebUI.WebControl
         /// Returns a value indicating whether the widget can be moved.
         /// </summary>
         bool Movable { get; }
+
+        /// <summary>
+        /// Returns a value indicating whether the widget can be closed.
+        /// </summary>
+        bool Closeable { get; }
     }
 }

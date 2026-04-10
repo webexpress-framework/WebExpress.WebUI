@@ -42,6 +42,11 @@ namespace WebExpress.WebUI.WebControl
         public bool Movable { get; set; }
 
         /// <summary>
+        /// Returns or sets a value indicating whether the widget can be closed.
+        /// </summary>
+        public bool Closeable { get; set; }
+
+        /// <summary>
         /// Returns or sets the widget name or identifier associated with this instance.
         /// </summary>
         public string Widget { get; set; }
@@ -74,6 +79,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-color", Color)
                 .AddUserAttribute("data-column", Column < uint.MaxValue ? Column.ToString() : null)
                 .AddUserAttribute("data-movable", Movable ? "true" : null)
+                .AddUserAttribute("data-closeable", Closeable ? "true" : null)
                 .AddUserAttribute("data-widget", Widget);
 
             return html;

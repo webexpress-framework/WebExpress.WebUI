@@ -46,6 +46,11 @@ namespace WebExpress.WebUI.WebControl
         public bool Movable { get; set; }
 
         /// <summary>
+        /// Returns or sets a value indicating whether the widget can be closed.
+        /// </summary>
+        public bool Closeable { get; set; }
+
+        /// <summary>
         /// Returns or sets the collection of controls that make up the content of the container.
         /// </summary>
         public IEnumerable<IControl> Content => _content;
@@ -114,6 +119,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-color", Color)
                 .AddUserAttribute("data-column", Column < uint.MaxValue ? Column.ToString() : null)
                 .AddUserAttribute("data-movable", Movable ? "true" : null)
+                .AddUserAttribute("data-closeable", Closeable ? "true" : null)
                 .Add(_content.Select(x => x.Render(renderContext, visualTree)));
 
             return html;
