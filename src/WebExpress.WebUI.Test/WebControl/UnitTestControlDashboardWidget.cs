@@ -114,8 +114,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the movable property of the dashboard widget control.
         /// </summary>
         [Theory]
-        [InlineData(false, @"<div class=""wx-dashboard-widget""></div>")]
-        [InlineData(true, @"<div class=""wx-dashboard-widget"" data-movable=""true""></div>")]
+        [InlineData(false, @"<div class=""wx-dashboard-widget"" data-movable=""false""></div>")]
+        [InlineData(true, @"<div class=""wx-dashboard-widget""></div>")]
         public void Moveable(bool movable, string expected)
         {
             // arrange
@@ -125,6 +125,30 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlDashboardWidget()
             {
                 Movable = movable
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the closeable property of the dashboard widget control.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-dashboard-widget"" data-closeable=""false""></div>")]
+        [InlineData(true, @"<div class=""wx-dashboard-widget""></div>")]
+        public void Closeable(bool closeable, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlDashboardWidget()
+            {
+                Closeable = closeable
             };
 
             // act

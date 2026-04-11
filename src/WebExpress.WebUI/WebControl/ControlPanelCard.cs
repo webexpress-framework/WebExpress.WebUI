@@ -92,7 +92,7 @@ namespace WebExpress.WebUI.WebControl
                 content = headContent.Concat(Content);
             }
 
-            html.Add(new HtmlElementTextContentDiv(new HtmlElementTextContentDiv([.. content.Select(x => x.Render(renderContext, visualTree))])
+            html.Add(new HtmlElementTextContentDiv(new HtmlElementTextContentDiv([.. content.Select(x => x?.Render(renderContext, visualTree))])
             {
                 Class = "card-text"
             })

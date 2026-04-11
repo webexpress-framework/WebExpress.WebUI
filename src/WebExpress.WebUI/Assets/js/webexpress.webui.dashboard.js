@@ -5,9 +5,7 @@
  */
 webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
 
-    _columns = [];
-    _isMovable = true;
-    
+    _columns = [];  
     _dragWidget = null;
     _dragColIndex = -1;
 
@@ -19,10 +17,6 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         element.classList.add("wx-dashboard");
-        
-        if (element.dataset.movable === "false") {
-            this._isMovable = false;
-        }
 
         this._parseStaticConfig();
         this.render();
@@ -41,7 +35,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             columnNodes.forEach((node) => {
                 columns.push({
                     id: node.id || node.dataset.id,
-                    label: node.dataset.label || node.id || "column",
+                    title: node.dataset.title || node.id || "column",
                     size: node.dataset.size || "1fr",
                     widgets: []
                 });
@@ -128,7 +122,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
                 const widgetData = {
                     instanceId: "wx_inst_" + i + "_" + Date.now(),
                     id: widgetId || "w_custom_" + i,
-                    label: dataset.label || null,
+                    title: dataset.title || null,
                     icon: dataset.icon || null,
                     image: dataset.image || null,
                     color: dataset.color || null,
@@ -190,10 +184,10 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             const wrapperEl = document.createElement("div");
             wrapperEl.className = "wx-dashboard-lane-wrapper";
 
-            if (colData.label) {
+            if (colData.title) {
                 const titleEl = document.createElement("h5");
                 titleEl.className = "wx-dashboard-lane-title";
-                titleEl.textContent = colData.label;
+                titleEl.textContent = colData.title;
                 wrapperEl.appendChild(titleEl);
             }
 
@@ -202,7 +196,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             laneEl.dataset.columnIndex = colIdx;
             laneEl.dataset.columnId = colData.id;
 
-            if (this._isMovable) {
+            if (colData.movable) {
                 laneEl.addEventListener("dragover", (e) => {
                     e.preventDefault();
                     if (laneEl.children.length === 0) {
@@ -265,7 +259,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         const leftArea = document.createElement("div");
         leftArea.className = "d-flex align-items-center gap-2 overflow-hidden";
         
-        const isWidgetMovable = this._isMovable && widgetData.movable !== false && registeredWidget.movable !== false;
+        const isWidgetMovable = widgetData.movable !== false && registeredWidget.movable !== false;
 
         if (isWidgetMovable) {
             const dragHandle = document.createElement("span");
@@ -303,9 +297,9 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             titleArea.appendChild(icon);
         }
         
-        const widgetLabel = widgetData.label || registeredWidget.title || "";
+        const widgetTitle = widgetData.title || registeredWidget.title || "";
         const titleText = document.createElement("span");
-        titleText.textContent = widgetLabel;
+        titleText.textContent = widgetTitle;
         titleArea.appendChild(titleText);
         
         leftArea.appendChild(titleArea);
@@ -343,7 +337,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         cardEl.appendChild(body);
 
         // handle drops specifically on this widget
-        if (this._isMovable) {
+        if (isWidgetMovable) {
             cardEl.addEventListener("dragover", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
