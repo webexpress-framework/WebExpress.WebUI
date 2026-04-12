@@ -175,11 +175,11 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         const filterContainer = document.createElement("div");
         const filterInput = document.createElement("input");
         filterInput.type = "text";
-        filterInput.setAttribute("aria-label", "Filter");
+        filterInput.setAttribute("aria-label", this._i18n("webexpress.webui:selection.filter", "Filter"));
 
         const clearButton = document.createElement("a");
         clearButton.className = "fas fa-times";
-        clearButton.setAttribute("aria-label", "Clear Filter");
+        clearButton.setAttribute("aria-label", this._i18n("webexpress.webui:selection.filter.clear", "Clear Filter"));
         clearButton.setAttribute("role", "button");
         clearButton.style.cursor = "pointer";
 

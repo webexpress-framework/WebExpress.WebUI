@@ -60,7 +60,7 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
 
         // create upload button for manual uploads
         this._uploadButton = document.createElement("button");
-        this._uploadButton.textContent = "Upload Files";
+        this._uploadButton.textContent = this._i18n("webexpress.webui:upload.button", "Upload Files");
         this._uploadButton.className = "btn btn-primary mt-2";
         this._uploadButton.style.display = "none";
 
@@ -172,7 +172,7 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
 
         const removeBtn = document.createElement("button");
         removeBtn.className = "fas fa-times";
-        removeBtn.title = "Remove file";
+        removeBtn.title = this._i18n("webexpress.webui:upload.remove.file", "Remove file");
         removeBtn.onclick = (e) => {
             e.stopPropagation();
             this.files = this.files.filter(f => f.name !== file.name);

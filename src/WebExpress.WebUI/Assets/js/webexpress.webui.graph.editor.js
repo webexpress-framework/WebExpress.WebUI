@@ -358,45 +358,45 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
             this._toolbarContainer.appendChild(sep);
         };
 
-        this._btnUndo = createBtn("btn-undo", "fas fa-undo", "Undo", () => {
+        this._btnUndo = createBtn("btn-undo", "fas fa-undo", this._i18n("webexpress.webui:graph.undo", "Undo"), () => {
             this._undo();
         });
-        this._btnRedo = createBtn("btn-redo", "fas fa-redo", "Redo", () => {
+        this._btnRedo = createBtn("btn-redo", "fas fa-redo", this._i18n("webexpress.webui:graph.redo", "Redo"), () => {
             this._redo();
         });
 
         createSep();
 
-        createBtn("btn-add-node", "fas fa-plus-circle", "Add Node", () => {
+        createBtn("btn-add-node", "fas fa-plus-circle", this._i18n("webexpress.webui:graph.add.node", "Add Node"), () => {
             this._addNode();
             if (this._isAddEdgeMode) {
                 this._resetAddEdgeMode();
             }
         });
 
-        this._btnEdgeMode = createBtn("btn-add-edge", "fas fa-share-alt", "Add Edge (Toggle)", () => {
+        this._btnEdgeMode = createBtn("btn-add-edge", "fas fa-share-alt", this._i18n("webexpress.webui:graph.add.edge", "Add Edge (Toggle)"), () => {
             const isActive = !this._isAddEdgeMode;
             this._toggleAddEdgeMode(isActive);
         }, true);
 
         createSep();
 
-        this._btnEdit = createBtn("btn-edit", "fas fa-pen", "Edit Properties", () => {
+        this._btnEdit = createBtn("btn-edit", "fas fa-pen", this._i18n("webexpress.webui:graph.edit.properties", "Edit Properties"), () => {
             this._openPropertiesModal();
         });
         this._btnEdit.disabled = true;
 
-        this._btnDelete = createBtn("btn-delete", "fas fa-trash", "Delete Selected", () => {
+        this._btnDelete = createBtn("btn-delete", "fas fa-trash", this._i18n("webexpress.webui:graph.delete.selected", "Delete Selected"), () => {
             this._requestDelete();
         });
         this._btnDelete.disabled = true;
 
         createSep();
 
-        createBtn("btn-fit", "fas fa-expand", "Fit View", () => {
+        createBtn("btn-fit", "fas fa-expand", this._i18n("webexpress.webui:graph.fit.view", "Fit View"), () => {
             this._fitToView();
         });
-        createBtn("btn-export", "fas fa-file-export", "Export SVG", () => {
+        createBtn("btn-export", "fas fa-file-export", this._i18n("webexpress.webui:graph.export.svg", "Export SVG"), () => {
             this.exportSvg();
         });
     }
@@ -445,8 +445,8 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
     _requestDelete() {
         if (this._selectedNodeId) {
             this._openConfirmationModal(
-                "Delete Node",
-                "Are you sure you want to delete this node and all connected edges?",
+                this._i18n("webexpress.webui:graph.delete.node", "Delete Node"),
+                this._i18n("webexpress.webui:graph.delete.confirm", "Are you sure you want to delete this node and all connected edges?"),
                 () => {
                     this._deleteSelected();
                 }
@@ -491,7 +491,7 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
 
         const btnCancel = document.createElement("button");
         btnCancel.className = "wx-simple-btn";
-        btnCancel.textContent = "Cancel";
+        btnCancel.textContent = this._i18n("webexpress.webui:cancel", "Cancel");
         btnCancel.style.border = "1px solid #ccc";
         btnCancel.onclick = () => {
             this._element.removeChild(backdrop);
@@ -499,7 +499,7 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
 
         const btnConfirm = document.createElement("button");
         btnConfirm.className = "wx-simple-btn";
-        btnConfirm.textContent = "Delete";
+        btnConfirm.textContent = this._i18n("webexpress.webui:delete", "Delete");
         btnConfirm.style.background = "#dc3545";
         btnConfirm.style.color = "#fff";
         btnConfirm.style.border = "1px solid #dc3545";
@@ -588,7 +588,7 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
 
         const btnCancel = document.createElement("button");
         btnCancel.className = "wx-simple-btn";
-        btnCancel.textContent = "Cancel";
+        btnCancel.textContent = this._i18n("webexpress.webui:cancel", "Cancel");
         btnCancel.style.border = "1px solid #ccc";
         btnCancel.onclick = () => {
             this._element.removeChild(backdrop);
@@ -596,7 +596,7 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
 
         const btnSave = document.createElement("button");
         btnSave.className = "wx-simple-btn";
-        btnSave.textContent = "Apply";
+        btnSave.textContent = this._i18n("webexpress.webui:graph.apply", "Apply");
         btnSave.style.background = "#0d6efd";
         btnSave.style.color = "#fff";
         btnSave.style.border = "1px solid #0d6efd";
@@ -605,14 +605,14 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
 
         if (this._selectedNodeId) {
             targetObj = this._model.nodes.find(n => n.id === this._selectedNodeId);
-            titleSpan.textContent = "Edit Node";
+            titleSpan.textContent = this._i18n("webexpress.webui:graph.edit.node", "Edit Node");
             if (targetObj) {
-                this._addModalInput(body, "Label", "text", targetObj.label || "", "inp-label");
-                this._addModalInput(body, "Background", "color", targetObj.backgroundColor || "#ffffff", "inp-bgcolor");
-                this._addModalInput(body, "Text Color", "color", targetObj.foregroundColor || "#000000", "inp-fgcolor");
-                this._addModalSelect(body, "Shape", ["rect", "circle"], targetObj.shape, "inp-shape");
-                this._addModalSelect(body, "Layout", ["label-inside", "label-below"], targetObj.layout, "inp-layout");
-                this._addModalInput(body, "URI (Link)", "text", targetObj.uri || "", "inp-uri");
+                this._addModalInput(body, this._i18n("webexpress.webui:graph.label", "Label"), "text", targetObj.label || "", "inp-label");
+                this._addModalInput(body, this._i18n("webexpress.webui:graph.background", "Background"), "color", targetObj.backgroundColor || "#ffffff", "inp-bgcolor");
+                this._addModalInput(body, this._i18n("webexpress.webui:graph.textcolor", "Text Color"), "color", targetObj.foregroundColor || "#000000", "inp-fgcolor");
+                this._addModalSelect(body, this._i18n("webexpress.webui:graph.shape", "Shape"), ["rect", "circle"], targetObj.shape, "inp-shape");
+                this._addModalSelect(body, this._i18n("webexpress.webui:graph.layout", "Layout"), ["label-inside", "label-below"], targetObj.layout, "inp-layout");
+                this._addModalInput(body, this._i18n("webexpress.webui:graph.uri", "URI (Link)"), "text", targetObj.uri || "", "inp-uri");
             }
             btnSave.onclick = () => {
                 if (!targetObj) {
@@ -641,11 +641,11 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
             };
         } else if (this._selectedEdgeId) {
             targetObj = this._model.edges.find(e => (e.id || "") === this._selectedEdgeId);
-            titleSpan.textContent = "Edit Edge";
+            titleSpan.textContent = this._i18n("webexpress.webui:graph.edit.edge", "Edit Edge");
             if (targetObj) {
-                this._addModalInput(body, "Label", "text", targetObj.label || "", "inp-label");
-                this._addModalInput(body, "Color", "color", targetObj.color || "#000000", "inp-color");
-                this._addModalInput(body, "Dash Array", "text", targetObj.dasharray || "", "inp-dash");
+                this._addModalInput(body, this._i18n("webexpress.webui:graph.label", "Label"), "text", targetObj.label || "", "inp-label");
+                this._addModalInput(body, this._i18n("webexpress.webui:graph.color", "Color"), "color", targetObj.color || "#000000", "inp-color");
+                this._addModalInput(body, this._i18n("webexpress.webui:graph.dasharray", "Dash Array"), "text", targetObj.dasharray || "", "inp-dash");
             }
             btnSave.onclick = () => {
                 if (!targetObj) {
@@ -764,7 +764,7 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
         const centerY = (rect.height / 2 - (this._pan ? this._pan.y : 0)) / (this._scale || 1);
         const newNode = {
             id: "n-" + Date.now(),
-            label: "New Node",
+            label: this._i18n("webexpress.webui:graph.new.node", "New Node"),
             x: centerX,
             y: centerY,
             layout: "label-inside",

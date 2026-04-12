@@ -691,9 +691,7 @@ webexpress.webui.Controller = new class {
             if (icon) {
                 if (icon.classList.contains("fa-expand")) {
                     icon.classList.replace("fa-expand", "fa-compress");
-                    if (btn.title && btn.title.includes("Toggle")) {
-                        btn.title = "Exit Fullscreen";
-                    }
+                    btn.title = webexpress.webui.I18N.translate("webexpress.webui:fullscreen.exit");
                 }
             }
         } else {
@@ -702,9 +700,7 @@ webexpress.webui.Controller = new class {
             if (icon) {
                 if (icon.classList.contains("fa-compress")) {
                     icon.classList.replace("fa-compress", "fa-expand");
-                     if (btn.title && btn.title.includes("Exit")) {
-                        btn.title = "Toggle Fullscreen";
-                    }
+                    btn.title = webexpress.webui.I18N.translate("webexpress.webui:fullscreen.toggle");
                 }
             }
         }

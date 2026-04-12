@@ -90,7 +90,7 @@ webexpress.webui.InputRatingCtrl = class extends webexpress.webui.Ctrl {
             star.className = "wx-rating-star";
             star.setAttribute("data-index", String(i));
             star.setAttribute("role", "radio");
-            star.setAttribute("aria-label", i + " von " + this._total);
+            star.setAttribute("aria-label", i + " " + this._i18n("webexpress.webui:rating.of", "of") + " " + this._total);
             star.setAttribute("aria-checked", (i === this._value) ? "true" : "false");
             star.setAttribute("tabindex", (i - 1 === this._focusedIndex) ? "0" : "-1");
 

@@ -100,16 +100,16 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         button.type = "button";
         button.setAttribute("data-bs-toggle", "dropdown");
         const buttonText = document.createElement("span");
-        buttonText.textContent = "Paragraph";
+        buttonText.textContent = webexpress.webui.I18N.translate("webexpress.webui:editor.paragraph");
         button.appendChild(buttonText);
 
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu";
 
         const options = [
-            { cmd: "p", lbl: "Paragraph" }, { cmd: "h1", lbl: "Heading 1" },
-            { cmd: "h2", lbl: "Heading 2" }, { cmd: "h3", lbl: "Heading 3" },
-            { cmd: "blockquote", lbl: "Quote" }, { cmd: "pre", lbl: "Code Block" }
+            { cmd: "p", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.paragraph") }, { cmd: "h1", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.heading1") },
+            { cmd: "h2", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.heading2") }, { cmd: "h3", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.heading3") },
+            { cmd: "blockquote", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.quote") }, { cmd: "pre", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.codeblock") }
         ];
 
         options.forEach((opt) => {
@@ -137,9 +137,9 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
     _createBasicButtons: function(editor) {
         const frag = document.createDocumentFragment();
         const defs = [
-            { cmd: "bold", icon: "fas fa-bold", tip: "Bold (Ctrl+B)" },
-            { cmd: "italic", icon: "fas fa-italic", tip: "Italic (Ctrl+I)" },
-            { cmd: "underline", icon: "fas fa-underline", tip: "Underline (Ctrl+U)" }
+            { cmd: "bold", icon: "fas fa-bold", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.bold") },
+            { cmd: "italic", icon: "fas fa-italic", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.italic") },
+            { cmd: "underline", icon: "fas fa-underline", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.underline") }
         ];
         defs.forEach((d) => {
             frag.appendChild(this._createBtn(editor, d));
@@ -163,11 +163,11 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         menu.className = "dropdown-menu";
 
         const opts = [
-            { cmd: "strikethrough", icon: "fas fa-strikethrough", lbl: "Strike" },
-            { cmd: "superscript", icon: "fas fa-superscript", lbl: "Super" },
-            { cmd: "subscript", icon: "fas fa-subscript", lbl: "Sub" },
+            { cmd: "strikethrough", icon: "fas fa-strikethrough", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.strike") },
+            { cmd: "superscript", icon: "fas fa-superscript", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.super") },
+            { cmd: "subscript", icon: "fas fa-subscript", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.sub") },
             { separator: true },
-            { cmd: "removeFormat", icon: "fas fa-eraser", lbl: "Clear Format" }
+            { cmd: "removeFormat", icon: "fas fa-eraser", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.clearformat") }
         ];
 
         opts.forEach((o) => {
@@ -207,7 +207,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         const actionBtn = document.createElement("button");
         actionBtn.className = "wx-editor-btn";
         actionBtn.type = "button";
-        actionBtn.title = "Text Color";
+        actionBtn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.textcolor");
 
         const icon = document.createElement("i");
         icon.className = "fas fa-font";
@@ -266,7 +266,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         const actionBtn = document.createElement("button");
         actionBtn.className = "wx-editor-btn";
         actionBtn.type = "button";
-        actionBtn.title = "Highlight Color";
+        actionBtn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.highlightcolor");
 
         const icon = document.createElement("i");
         icon.className = "fas fa-highlighter";
@@ -291,10 +291,10 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
 
         // requested highlight colors
         const markColors = [
-            { val: "#FFFF00", name: "Yellow" },
-            { val: "#00FFFF", name: "Cyan (Light Blue)" },
-            { val: "#00FF00", name: "Lime (Light Green)" },
-            { val: "#FF00FF", name: "Magenta" },
+            { val: "#FFFF00", name: webexpress.webui.I18N.translate("webexpress.webui:editor.color.yellow") },
+            { val: "#00FFFF", name: webexpress.webui.I18N.translate("webexpress.webui:editor.color.cyan") },
+            { val: "#00FF00", name: webexpress.webui.I18N.translate("webexpress.webui:editor.color.lime") },
+            { val: "#FF00FF", name: webexpress.webui.I18N.translate("webexpress.webui:editor.color.magenta") },
         ];
 
         markColors.forEach((c) => {
@@ -336,8 +336,8 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
     _createListButtons: function(editor) {
         const frag = document.createDocumentFragment();
         [
-            { cmd: "insertUnorderedList", icon: "fas fa-list-ul", tip: "Bullet" },
-            { cmd: "insertOrderedList", icon: "fas fa-list-ol", tip: "Number" }
+            { cmd: "insertUnorderedList", icon: "fas fa-list-ul", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.list.bullet") },
+            { cmd: "insertOrderedList", icon: "fas fa-list-ol", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.list.number") }
         ].forEach((d) => {
             frag.appendChild(this._createBtn(editor, d));
         });
@@ -350,8 +350,8 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
     _createIndentButtons: function(editor) {
         const frag = document.createDocumentFragment();
         [
-            { cmd: "outdent", icon: "fas fa-outdent", tip: "Less" },
-            { cmd: "indent", icon: "fas fa-indent", tip: "More" }
+            { cmd: "outdent", icon: "fas fa-outdent", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.indent.less") },
+            { cmd: "indent", icon: "fas fa-indent", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.indent.more") }
         ].forEach((d) => {
             frag.appendChild(this._createBtn(editor, d));
         });
@@ -364,10 +364,10 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
     _createAlignButtons: function(editor) {
         const frag = document.createDocumentFragment();
         [
-            { cmd: "justifyLeft", icon: "fas fa-align-left", tip: "Left" },
-            { cmd: "justifyCenter", icon: "fas fa-align-center", tip: "Center" },
-            { cmd: "justifyRight", icon: "fas fa-align-right", tip: "Right" },
-            { cmd: "justifyFull", icon: "fas fa-align-justify", tip: "Justify" }
+            { cmd: "justifyLeft", icon: "fas fa-align-left", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.align.left") },
+            { cmd: "justifyCenter", icon: "fas fa-align-center", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.align.center") },
+            { cmd: "justifyRight", icon: "fas fa-align-right", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.align.right") },
+            { cmd: "justifyFull", icon: "fas fa-align-justify", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.align.justify") }
         ].forEach((d) => {
             frag.appendChild(this._createBtn(editor, d));
         });
@@ -399,8 +399,8 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
     _createHorizontalRuleButton: function(editor) {
         const btn = document.createElement("button");
         btn.className = "wx-editor-btn";
-        btn.title = "Horizontal Rule";
-        btn.setAttribute("aria-label", "Horizontal Rule");
+        btn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.horizontal.rule");
+        btn.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.horizontal.rule"));
         btn.type = "button";
         btn.innerHTML = '<i class="fas fa-minus"></i>';
         btn.addEventListener("click", () => {

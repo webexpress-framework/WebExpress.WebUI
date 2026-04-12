@@ -77,7 +77,7 @@ webexpress.webui.EditorPlugins.register("emojis", 2000, {
         const btn = document.createElement("button");
         btn.className = "wx-editor-btn dropdown-toggle";
         btn.type = "button";
-        btn.title = "Insert Emoji";
+        btn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.insert.emoji");
         btn.innerHTML = '<i class="far fa-smile"></i>';
         btn.setAttribute("data-bs-toggle", "dropdown");
         btn.setAttribute("aria-expanded", "false");
@@ -110,8 +110,8 @@ webexpress.webui.EditorPlugins.register("emojis", 2000, {
         const searchInput = document.createElement("input");
         searchInput.type = "text";
         searchInput.className = "form-control form-control-sm";
-        searchInput.placeholder = "Search emoji...";
-        searchInput.setAttribute("aria-label", "Search emoji");
+        searchInput.placeholder = webexpress.webui.I18N.translate("webexpress.webui:editor.emoji.search");
+        searchInput.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.emoji.search.label"));
         searchWrap.appendChild(searchInput);
         menu.appendChild(searchWrap);
 
@@ -215,7 +215,7 @@ webexpress.webui.EditorPlugins.register("emojis", 2000, {
         if (!found) {
             const msg = document.createElement("div");
             msg.className = "text-muted text-center p-3";
-            msg.textContent = "No emojis found";
+            msg.textContent = webexpress.webui.I18N.translate("webexpress.webui:editor.emoji.notfound");
             container.appendChild(msg);
         } else {
             container.appendChild(grid);

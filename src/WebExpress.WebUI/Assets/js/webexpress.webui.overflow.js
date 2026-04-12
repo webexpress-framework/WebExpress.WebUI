@@ -591,7 +591,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             if (item.submenuLabel && item.submenuLabel.length > 0) {
                 item.submenuLabel.forEach(function(n) { label.appendChild(n.cloneNode(true)); });
             } else {
-                label.textContent = "Submenu";
+                label.textContent = this._i18n("webexpress.webui:overflow.submenu", "Submenu");
             }
 
             const button = document.createElement("button");

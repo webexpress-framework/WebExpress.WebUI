@@ -463,7 +463,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
         const br = document.createElement("br");
         const span = document.createElement("span");
-        span.textContent = "Select an item to view details.";
+        span.textContent = this._i18n("webexpress.webui:view.select.item", "Select an item to view details.");
 
         centerBox.appendChild(icon);
         centerBox.appendChild(br);

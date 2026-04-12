@@ -312,7 +312,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             const removeBtn = document.createElement("button");
             removeBtn.type = "button";
             removeBtn.className = "btn wx-button-close";
-            removeBtn.setAttribute("aria-label", "Remove");
+            removeBtn.setAttribute("aria-label", this._i18n("webexpress.webui:remove", "Remove"));
             removeBtn.innerHTML = '<i class="fas fa-times"></i>';
             removeBtn.addEventListener("click", () => {
                 this._removeWidget(colIdx, widgetData.instanceId);
@@ -331,7 +331,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         } else if (widgetData.html) {
             body.innerHTML = widgetData.html;
         } else {
-            body.textContent = "Widget content not available.";
+            body.textContent = this._i18n("webexpress.webui:dashboard.widget.unavailable", "Widget content not available.");
         }
 
         cardEl.appendChild(body);

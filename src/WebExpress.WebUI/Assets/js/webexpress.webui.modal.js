@@ -67,7 +67,7 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
             this._fullscreenButton.type = "button";
             this._fullscreenButton.className = "btn wx-button-fullscreen ms-auto";
             this._fullscreenButton.innerHTML = '<i class="fas fa-expand"></i>';
-            this._fullscreenButton.setAttribute("aria-label", "Toggle Fullscreen");
+            this._fullscreenButton.setAttribute("aria-label", this._i18n("webexpress.webui:fullscreen.toggle", "Toggle Fullscreen"));
             this._fullscreenButton.addEventListener("click", () => {
                 this.toggleFullscreen();
             });

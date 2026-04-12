@@ -57,7 +57,7 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
         this._input.type = "text";
         this._input.className = "input";
         // placeholder will be set dynamically depending on tags present
-        this._input.setAttribute("aria-label", "add Tag");
+        this._input.setAttribute("aria-label", this._i18n("webexpress.webui:tag.add", "add Tag"));
 
         // initial rendering
         this.render();
