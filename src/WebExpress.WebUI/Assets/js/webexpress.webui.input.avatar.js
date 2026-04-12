@@ -1,4 +1,4 @@
-/*
+/**
  * A control for uploading and cropping a profile image with circular or rectangular mask.
  *
  * The following events are triggered:

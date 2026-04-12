@@ -422,7 +422,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
 
                 if (!this._toolbarElement._toolbarCtrl) {
                     // define as non-enumerable to prevent JSON.stringify circular reference issues
-                    Object.defineProperty(this._toolbarElement, '_toolbarCtrl', {
+                    Object.defineProperty(this._toolbarElement, "_toolbarCtrl", {
                         value: new webexpress.webui.ToolbarCtrl(this._toolbarElement),
                         writable: true,
                         configurable: true,

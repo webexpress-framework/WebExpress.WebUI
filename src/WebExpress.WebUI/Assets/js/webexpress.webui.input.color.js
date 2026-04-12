@@ -1,4 +1,4 @@
-﻿/**
+/**
  * A color selection control extending the base PopperCtrl class.
  * Shows only a color preview in collapsed state.
  * Provides a uniform grid of predefined colors and a custom selector in the dropdown.

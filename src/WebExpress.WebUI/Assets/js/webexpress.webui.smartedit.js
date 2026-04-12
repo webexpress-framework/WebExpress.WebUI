@@ -21,18 +21,18 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
 
         // lese optionen
         this._id = element.id || null;
-        this._objectId = element.getAttribute('data-object-id') || null;
-        this._objectName = element.getAttribute('data-object-name') || null;
-        this._formAction = element.getAttribute('data-form-action') || null;
-        this._formMethod = element.getAttribute('data-form-method') || null;
+        this._objectId = element.getAttribute("data-object-id") || null;
+        this._objectName = element.getAttribute("data-object-name") || null;
+        this._formAction = element.getAttribute("data-form-action") || null;
+        this._formMethod = element.getAttribute("data-form-method") || null;
 
         this._editor = this._detachElement(element.firstElementChild);
 
         // bereinige dom
-        element.removeAttribute('data-form-action');
-        element.removeAttribute('data-form-method');
-        element.removeAttribute('data-object-id');
-        element.removeAttribute('data-object-name');
+        element.removeAttribute("data-form-action");
+        element.removeAttribute("data-form-method");
+        element.removeAttribute("data-object-id");
+        element.removeAttribute("data-object-name");
         element.classList.add("wx-smart-edit");
 
         // events
@@ -52,16 +52,16 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
      * @param {HTMLElement} element target element
      */
     _showEditIcon(element) {
-        if (this._activeEdit || element.querySelector('button')) {
+        if (this._activeEdit || element.querySelector("button")) {
             return;
         }
-        const pencil = document.createElement('button');
-        const icon = document.createElement('i');
-        icon.className = 'fas fa-pencil';
+        const pencil = document.createElement("button");
+        const icon = document.createElement("i");
+        icon.className = "fas fa-pencil";
         icon.title = this._i18n("webexpress.webui:edit", "Edit");
         pencil.classList.add("pencil");
         pencil.appendChild(icon);
-        pencil.addEventListener('click', (e) => {
+        pencil.addEventListener("click", (e) => {
             e.stopPropagation();
             this._startEditing(element);
         });
@@ -87,15 +87,15 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         if (!this._activeEdit) {
             return;
         }
-        const spinnerButton = document.createElement('button');
-        const spinner = document.createElement('span');
-        spinner.className = 'spinner-border spinner-border-sm';
-        spinner.role = 'status';
-        spinner.setAttribute('aria-hidden', 'true');
+        const spinnerButton = document.createElement("button");
+        const spinner = document.createElement("span");
+        spinner.className = "spinner-border spinner-border-sm";
+        spinner.role = "status";
+        spinner.setAttribute("aria-hidden", "true");
         spinner.title = this._i18n("webexpress.webui:edit", "Edit");
-        spinnerButton.classList.add('spinner-button');
+        spinnerButton.classList.add("spinner-button");
         spinnerButton.appendChild(spinner);
-        spinnerButton.addEventListener('click', (e) => {
+        spinnerButton.addEventListener("click", (e) => {
             e.stopPropagation();
             this._startEditing(element);
         });
@@ -135,52 +135,52 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             window.getSelection().removeAllRanges();
         }
 
-        element.innerHTML = '';
-        const form = document.createElement('form');
+        element.innerHTML = "";
+        const form = document.createElement("form");
 
         if (this._editor) {
             form.appendChild(this._editor);
         }
 
         if (this._objectName) {
-            const hidden = document.createElement('input');
-            hidden.type = 'hidden';
+            const hidden = document.createElement("input");
+            hidden.type = "hidden";
             hidden.name = this._objectName;
             hidden.value = this.id;
             form.appendChild(hidden);
         }
 
         if (this._objectId) {
-            const hidden = document.createElement('input');
-            hidden.type = 'hidden';
+            const hidden = document.createElement("input");
+            hidden.type = "hidden";
             hidden.name = `_${this._id}_objectId_`;
             hidden.value = this._objectId;
             form.appendChild(hidden);
         }
 
         if (this._objectName) {
-            const hidden = document.createElement('input');
-            hidden.type = 'hidden';
+            const hidden = document.createElement("input");
+            hidden.type = "hidden";
             hidden.name = `_${this._id}_objectName_`;
             hidden.value = this._objectName;
             form.appendChild(hidden);
         }
 
-        const btnOk = document.createElement('button');
-        const iconOk = document.createElement('i');
-        iconOk.className = 'fas fa-check text-success';
-        btnOk.type = 'submit';
+        const btnOk = document.createElement("button");
+        const iconOk = document.createElement("i");
+        iconOk.className = "fas fa-check text-success";
+        btnOk.type = "submit";
         btnOk.appendChild(iconOk);
         btnOk.title = this._i18n("webexpress.webui:save", "Save");
 
-        const btnCancel = document.createElement('button');
-        const iconCancel = document.createElement('i');
-        iconCancel.className = 'fas fa-times text-danger';
-        btnCancel.type = 'button';
+        const btnCancel = document.createElement("button");
+        const iconCancel = document.createElement("i");
+        iconCancel.className = "fas fa-times text-danger";
+        btnCancel.type = "button";
         btnCancel.appendChild(iconCancel);
         btnCancel.title = this._i18n("webexpress.webui:cancel", "Cancel");
 
-        form.addEventListener('submit', async (e) => {
+        form.addEventListener("submit", async (e) => {
             e.preventDefault();
             const newValue = this._getEditorValue(element);
             const formData = new FormData(form);
@@ -206,7 +206,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
                     status: 500,
                     statusText: error.message || "Network Error"
                 });
-                console.error('failed to edit', error);
+                console.error("failed to edit", error);
                 // bei fehler wird dennoch save=true weitergegeben, die anwendung kann status prüfen
             } finally {
                 this._hideEditSpinner(element);
@@ -214,7 +214,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             }
         });
 
-        btnCancel.addEventListener('click', (e) => {
+        btnCancel.addEventListener("click", (e) => {
             e.preventDefault();
             // bei abbrechen alten wert wiederherstellen
             this._finishEditing(false, element, this._previousValue);
@@ -229,12 +229,12 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         };
 
         setTimeout(() => {
-            document.addEventListener('mousedown', this._outsideClickHandler);
-            document.addEventListener('touchstart', this._outsideClickHandler);
+            document.addEventListener("mousedown", this._outsideClickHandler);
+            document.addEventListener("touchstart", this._outsideClickHandler);
         }, 0);
 
-        const buttonWrapper = document.createElement('div');
-        buttonWrapper.className = 'form-buttons';
+        const buttonWrapper = document.createElement("div");
+        buttonWrapper.className = "form-buttons";
         buttonWrapper.appendChild(btnOk);
         buttonWrapper.appendChild(btnCancel);
 
@@ -252,35 +252,35 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
      */
     _finishEditing(save, element, value) {
         if (this._outsideClickHandler) {
-            document.removeEventListener('mousedown', this._outsideClickHandler);
-            document.removeEventListener('touchstart', this._outsideClickHandler);
+            document.removeEventListener("mousedown", this._outsideClickHandler);
+            document.removeEventListener("touchstart", this._outsideClickHandler);
             this._outsideClickHandler = null;
         }
 
-        element.innerHTML = '';
+        element.innerHTML = "";
         this._dispatch(webexpress.webui.Event.END_INLINE_EDIT_EVENT, { value: this.value });
 
-        if (save && typeof this.onSave === 'function') {
+        if (save && typeof this.onSave === "function") {
             this.onSave(element, value);
-        } else if (!save && typeof this.onCancel === 'function') {
+        } else if (!save && typeof this.onCancel === "function") {
             this.onCancel(element, value);
         }
 
         // editor zurücksetzen (falls kontrollinstanz vorhanden)
         if (this._editor) {
             const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
-            if (ctrl && typeof ctrl.value !== 'undefined') {
+            if (ctrl && typeof ctrl.value !== "undefined") {
                 ctrl.value = value;
-            } else if (this._editor.tagName === 'SELECT') {
-                const first = Array.isArray(value) ? value[0] : String(value || '').split(';')[0];
+            } else if (this._editor.tagName === "SELECT") {
+                const first = Array.isArray(value) ? value[0] : String(value || "").split(";")[0];
                 const opt = Array.from(this._editor.options).find(o => String(o.value) === String(first));
                 if (opt) {
                     this._editor.value = opt.value;
                 }
-            } else if (['INPUT', 'TEXTAREA'].includes(this._editor.tagName)) {
+            } else if (["INPUT", "TEXTAREA"].includes(this._editor.tagName)) {
                 this._editor.value = value;
             } else {
-                this._editor.innerHTML = value ?? '';
+                this._editor.innerHTML = value ?? "";
             }
         }
 
@@ -301,25 +301,25 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
      */
     _getEditorValue(element) {
         if (!this._editor) {
-            return (element.querySelector('[data-value]')?.getAttribute('data-value')) || element.textContent.trim();
+            return (element.querySelector("[data-value]")?.getAttribute("data-value")) || element.textContent.trim();
         }
         const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
         if (ctrl && ctrl instanceof webexpress.webui.EditorCtrl) {
             return ctrl._editorElement?.innerHTML;
         }
-        if (['INPUT', 'TEXTAREA'].includes(this._editor.tagName)) {
+        if (["INPUT", "TEXTAREA"].includes(this._editor.tagName)) {
             return this._editor.value;
         }
-        if (this._editor.tagName === 'SELECT') {
-            return this._editor.options[this._editor.selectedIndex]?.value ?? '';
+        if (this._editor.tagName === "SELECT") {
+            return this._editor.options[this._editor.selectedIndex]?.value ?? "";
         }
-        let el = this._editor.querySelector('input');
+        let el = this._editor.querySelector("input");
         if (el) {
             return el.value;
         }
-        el = element.querySelector('[data-value]');
+        el = element.querySelector("[data-value]");
         if (el) {
-            return el.getAttribute('data-value');
+            return el.getAttribute("data-value");
         }
         return this._editor.textContent.trim();
     }
@@ -331,8 +331,8 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
      */
     _getView(value) {
         if (!this._editor) {
-            const span = document.createElement('span');
-            span.textContent = value ?? '';
+            const span = document.createElement("span");
+            span.textContent = value ?? "";
             return span;
         }
 
@@ -341,14 +341,14 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         if (ctrl instanceof webexpress.webui.InputSelectionCtrl) {
             const container = document.createElement("div");
             const selection = new webexpress.webui.SelectionCtrl(container);
-            const ids = Array.isArray(value) ? value : String(value || '').split(';');
+            const ids = Array.isArray(value) ? value : String(value || "").split(";");
             selection.options = ctrl.options;
             selection.value = ids;
             return container;
         } else if (ctrl instanceof webexpress.webui.InputMoveCtrl) {
             const container = document.createElement("div");
             const move = new webexpress.webui.MoveCtrl(container);
-            const ids = Array.isArray(value) ? value : String(value || '').split(';');
+            const ids = Array.isArray(value) ? value : String(value || "").split(";");
             move.options = ctrl.options;
             move.value = ids;
             return container;
@@ -381,22 +381,22 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             color.value = value;
             return container;
         } else if (ctrl instanceof webexpress.webui.EditorCtrl) {
-            const span = document.createElement('span');
-            span.innerHTML = value ?? '';
+            const span = document.createElement("span");
+            span.innerHTML = value ?? "";
             return span;
-        } else if (this._editor.tagName === 'SELECT') {
-            const ids = Array.isArray(value) ? value : String(value || '').split(';');
+        } else if (this._editor.tagName === "SELECT") {
+            const ids = Array.isArray(value) ? value : String(value || "").split(";");
             const labels = ids.map((id) => {
                 const opt = Array.from(this._editor.options).find((o) => o.value === id);
                 return opt?.label || opt?.text || id;
             });
-            const span = document.createElement('span');
-            span.textContent = labels.join(', ');
+            const span = document.createElement("span");
+            span.textContent = labels.join(", ");
             return span;
         }
 
-        const span = document.createElement('span');
-        span.textContent = value ?? '';
+        const span = document.createElement("span");
+        span.textContent = value ?? "";
         return span;
     }
 
@@ -420,11 +420,11 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
     get value() {
         if (this._editor) {
             const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
-            if (ctrl && typeof ctrl.value !== 'undefined') {
+            if (ctrl && typeof ctrl.value !== "undefined") {
                 return ctrl.value;
-            } else if (this._editor.tagName === 'SELECT') {
+            } else if (this._editor.tagName === "SELECT") {
                 return this._editor.value;
-            } else if (['INPUT', 'TEXTAREA'].includes(this._editor.tagName)) {
+            } else if (["INPUT", "TEXTAREA"].includes(this._editor.tagName)) {
                 return this._editor.value;
             } else {
                 return this._editor.innerHTML;
@@ -440,23 +440,23 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
     set value(value) {
         if (this._editor) {
             const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
-            if (ctrl && typeof ctrl.value !== 'undefined') {
+            if (ctrl && typeof ctrl.value !== "undefined") {
                 ctrl.value = value;
-            } else if (this._editor.tagName === 'SELECT') {
-                const first = Array.isArray(value) ? value[0] : String(value || '').split(';')[0];
+            } else if (this._editor.tagName === "SELECT") {
+                const first = Array.isArray(value) ? value[0] : String(value || "").split(";")[0];
                 const opt = Array.from(this._editor.options).find((o) => String(o.value) === String(first));
                 if (opt) {
                     this._editor.value = opt.value;
                 }
-            } else if (['INPUT', 'TEXTAREA'].includes(this._editor.tagName)) {
+            } else if (["INPUT", "TEXTAREA"].includes(this._editor.tagName)) {
                 this._editor.value = value;
             } else {
-                this._editor.innerHTML = value ?? '';
+                this._editor.innerHTML = value ?? "";
             }
         }
 
         if (this._element && !this._activeEdit) {
-            this._element.innerHTML = '';
+            this._element.innerHTML = "";
             const displayValue = this._getView(value);
             this._element.appendChild(displayValue);
         }

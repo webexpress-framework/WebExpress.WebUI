@@ -1,4 +1,4 @@
-﻿var webexpress = webexpress || {}
+var webexpress = webexpress || {}
 webexpress.webui = webexpress.webui || {}
 
 /**
@@ -1130,10 +1130,10 @@ webexpress.webui.I18N = new class {
      */
     _detectBrowserLanguage() {
         if (navigator.language) {
-            return navigator.language.split('-')[0].toLowerCase();
+            return navigator.language.split("-")[0].toLowerCase();
         }
         if (navigator.languages && navigator.languages.length > 0) {
-            return navigator.languages[0].split('-')[0].toLowerCase();
+            return navigator.languages[0].split("-")[0].toLowerCase();
         }
         return "en";
     }

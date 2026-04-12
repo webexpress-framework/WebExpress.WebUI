@@ -90,7 +90,7 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         this._cancelButton.type = "button";
         this._cancelButton.className = "btn btn-secondary";
         this._cancelButton.setAttribute("data-wx-dismiss", "modal");
-        this._cancelButton.innerHTML = `<i class='fas fa-times me-2'></i>${this._closeLabel}`;
+        this._cancelButton.innerHTML = `<i class="fas fa-times me-2"></i>${this._closeLabel}`;
         this._cancelButton.addEventListener("click", () => {
             this.hide();
         });
