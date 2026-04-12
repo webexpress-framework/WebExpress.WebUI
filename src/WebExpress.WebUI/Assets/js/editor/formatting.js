@@ -59,6 +59,8 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         fragment.appendChild(this._createIndentButtons(editor));
         fragment.appendChild(this._createSeparator());
         fragment.appendChild(this._createAlignButtons(editor));
+        fragment.appendChild(this._createSeparator());
+        fragment.appendChild(this._createHorizontalRuleButton(editor));
 
         toolbar.appendChild(fragment);
         return toolbar;
@@ -135,9 +137,9 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
     _createBasicButtons: function(editor) {
         const frag = document.createDocumentFragment();
         const defs = [
-            { cmd: "bold", icon: "fas fa-bold", tip: "Bold" },
-            { cmd: "italic", icon: "fas fa-italic", tip: "Italic" },
-            { cmd: "underline", icon: "fas fa-underline", tip: "Underline" }
+            { cmd: "bold", icon: "fas fa-bold", tip: "Bold (Ctrl+B)" },
+            { cmd: "italic", icon: "fas fa-italic", tip: "Italic (Ctrl+I)" },
+            { cmd: "underline", icon: "fas fa-underline", tip: "Underline (Ctrl+U)" }
         ];
         defs.forEach((d) => {
             frag.appendChild(this._createBtn(editor, d));
@@ -379,11 +381,30 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         const btn = document.createElement("button");
         btn.className = "wx-editor-btn";
         btn.title = def.tip;
+        btn.setAttribute("aria-label", def.tip);
         btn.dataset.command = def.cmd;
         btn.type = "button";
         btn.innerHTML = `<i class="${def.icon}"></i>`;
         btn.addEventListener("click", () => {
             editor.execCommand(def.cmd);
+        });
+        return btn;
+    },
+
+    /**
+     * Creates the horizontal rule insertion button.
+     * @param {object} editor - The editor instance.
+     * @returns {HTMLElement} The button element.
+     */
+    _createHorizontalRuleButton: function(editor) {
+        const btn = document.createElement("button");
+        btn.className = "wx-editor-btn";
+        btn.title = "Horizontal Rule";
+        btn.setAttribute("aria-label", "Horizontal Rule");
+        btn.type = "button";
+        btn.innerHTML = '<i class="fas fa-minus"></i>';
+        btn.addEventListener("click", () => {
+            editor.execCommand("insertHorizontalRule");
         });
         return btn;
     }
