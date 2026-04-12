@@ -24,7 +24,7 @@ function ensureImageState(modal) {
 webexpress.webui.DialogPanels.register("editor-image", {
     id: "image-web",
     parentId: null,
-    title: "From the Web",
+    title: webexpress.webui.I18N.translate("webexpress.webui:editor.image.web.title"),
     iconClass: "fas fa-globe",
 
     /**
@@ -41,11 +41,11 @@ webexpress.webui.DialogPanels.register("editor-image", {
         urlGroup.className = "mb-3";
         const urlLabel = document.createElement("label");
         urlLabel.className = "form-label";
-        urlLabel.textContent = "Image URL";
+        urlLabel.textContent = webexpress.webui.I18N.translate("webexpress.webui:editor.image.url.label");
         const urlInput = document.createElement("input");
         urlInput.type = "url";
         urlInput.className = "form-control";
-        urlInput.placeholder = "https://example.com/image.png";
+        urlInput.placeholder = webexpress.webui.I18N.translate("webexpress.webui:editor.image.url.placeholder");
         urlGroup.appendChild(urlLabel);
         urlGroup.appendChild(urlInput);
 
@@ -53,11 +53,11 @@ webexpress.webui.DialogPanels.register("editor-image", {
         altGroup.className = "mb-3";
         const altLabel = document.createElement("label");
         altLabel.className = "form-label";
-        altLabel.textContent = "Alt Text";
+        altLabel.textContent = webexpress.webui.I18N.translate("webexpress.webui:editor.image.alt.label");
         const altInput = document.createElement("input");
         altInput.type = "text";
         altInput.className = "form-control";
-        altInput.placeholder = "Alternative text (optional)";
+        altInput.placeholder = webexpress.webui.I18N.translate("webexpress.webui:editor.image.alt.placeholder");
         altGroup.appendChild(altLabel);
         altGroup.appendChild(altInput);
 
@@ -140,12 +140,12 @@ webexpress.webui.DialogPanels.register("editor-image", {
         const state = ensureImageState(modal);
 
         if (!editor || !state.webUrlInput) {
-            return { valid: false, message: "Internal error: editor or field not available." };
+            return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.image.error.internal") };
         }
 
         const urlVal = state.webUrlInput.value.trim();
         if (urlVal === "" || urlVal.toLowerCase().startsWith("javascript:")) {
-            return { valid: false, message: "Please provide a valid image URL." };
+            return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.image.error.url") };
         }
 
         return true;
@@ -211,7 +211,7 @@ webexpress.webui.DialogPanels.register("editor-image", {
 webexpress.webui.DialogPanels.register("editor-image", {
     id: "image-site",
     parentId: null,
-    title: "From the Site",
+    title: webexpress.webui.I18N.translate("webexpress.webui:editor.image.site.title"),
     iconClass: "fas fa-image",
 
     /**
@@ -238,11 +238,11 @@ webexpress.webui.DialogPanels.register("editor-image", {
             '  </div>',
             '  <div class="col-12">',
             '    <div class="mb-2">',
-            '      <label class="form-label">Alt Text</label>',
-            '      <input type="text" class="form-control" placeholder="Alternative text (optional)" data-role="site-alt">',
+            '      <label class="form-label">' + webexpress.webui.I18N.translate("webexpress.webui:editor.image.alt.label") + '</label>',
+            '      <input type="text" class="form-control" placeholder="' + webexpress.webui.I18N.translate("webexpress.webui:editor.image.alt.placeholder") + '" data-role="site-alt">',
             '    </div>',
             '    <div class="wx-webui-file-list"></div>',
-            '    <div class="form-text">Click an entry in the list to select the image. Double-click inserts immediately.</div>',
+            '    <div class="form-text">' + webexpress.webui.I18N.translate("webexpress.webui:editor.image.site.hint") + '</div>',
             '  </div>',
             '</div>'
         ].join("");
@@ -449,16 +449,16 @@ webexpress.webui.DialogPanels.register("editor-image", {
         const state = ensureImageState(modal);
 
         if (!editor) {
-            return { valid: false, message: "Internal error: editor not available." };
+            return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.image.site.error.internal") };
         }
 
         if (!state.selectedSiteImage || !state.selectedSiteImage.src) {
-            return { valid: false, message: "Please select an image from the list." };
+            return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.image.site.error.select") };
         }
 
         const srcVal = state.selectedSiteImage.src.trim();
         if (srcVal === "" || srcVal.toLowerCase().startsWith("javascript:")) {
-            return { valid: false, message: "Please select a valid image URL." };
+            return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.image.site.error.url") };
         }
 
         return true;

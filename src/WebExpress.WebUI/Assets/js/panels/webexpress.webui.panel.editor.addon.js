@@ -4,7 +4,7 @@
 webexpress.webui.DialogPanels.register("editor-addon", {
     id: "editor-addon-page",
     parentId: null,
-    title: "AddOns",
+    title: webexpress.webui.I18N.translate("webexpress.webui:editor.addon.title"),
     iconClass: "fas fa-puzzle-piece",
 
     /**
@@ -33,7 +33,7 @@ webexpress.webui.DialogPanels.register("editor-addon", {
         const searchInput = document.createElement("input");
         searchInput.type = "text";
         searchInput.className = "form-control wx-addon-search";
-        searchInput.placeholder = "Search AddOns...";
+        searchInput.placeholder = webexpress.webui.I18N.translate("webexpress.webui:editor.addon.search.placeholder");
 
         const catSelect = document.createElement("select");
         catSelect.className = "form-select w-auto wx-addon-cat";
@@ -42,7 +42,7 @@ webexpress.webui.DialogPanels.register("editor-addon", {
         const categories = new Set();
         state.addons.forEach(a => categories.add(a.category || "General"));
 
-        catSelect.innerHTML = `<option value="all">All Categories</option>`;
+        catSelect.innerHTML = `<option value="all">${webexpress.webui.I18N.translate("webexpress.webui:editor.addon.all.categories")}</option>`;
         Array.from(categories).sort().forEach(cat => {
             const opt = document.createElement("option");
             opt.value = cat;
@@ -205,12 +205,12 @@ webexpress.webui.DialogPanels.register("editor-addon", {
     validate: function (modal) {
         const state = modal._addonState;
         if (!state || !state.selectedId) {
-            return { valid: false, message: "Please select an AddOn from the list." };
+            return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.addon.error.select") };
         }
 
         const editor = modal ? modal._editor : null;
         if (!editor) {
-            return { valid: false, message: "Internal error: Editor instance not found." };
+            return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.addon.error.internal") };
         }
 
         return true;

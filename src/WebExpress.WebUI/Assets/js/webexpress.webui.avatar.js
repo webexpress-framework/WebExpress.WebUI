@@ -54,13 +54,13 @@ webexpress.webui.AvatarCtrl = class extends webexpress.webui.Ctrl {
         this._thumb = document.createElement("div");
         this._thumb.className = "wx-avatar-thumb";
         this._thumb.setAttribute("role", "img");
-        this._thumb.setAttribute("aria-label", this._displayName ? ("Avatar of " + this._displayName) : "Avatar");
+        this._thumb.setAttribute("aria-label", this._displayName ? (this._i18n("webexpress.webui:avatar.of", "Avatar of") + " " + this._displayName) : this._i18n("webexpress.webui:avatar.label", "Avatar"));
         this._root.appendChild(this._thumb);
 
         // user img
         this._img = document.createElement("img");
         this._img.className = "wx-avatar-img";
-        this._img.alt = this._displayName || "Avatar";
+        this._img.alt = this._displayName || this._i18n("webexpress.webui:avatar.label", "Avatar");
         this._thumb.appendChild(this._img);
 
         // fallback initials if no img or img fails

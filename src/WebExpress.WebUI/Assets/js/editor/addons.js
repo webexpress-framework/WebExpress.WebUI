@@ -447,7 +447,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
 
         const headerDiv = document.createElement("div");
         headerDiv.className = "wx-modal-header";
-        headerDiv.textContent = "Properties";
+        headerDiv.textContent = webexpress.webui.I18N.translate("webexpress.webui:editor.addon.properties");
         this._propModal.appendChild(headerDiv);
 
         this._propBody = document.createElement("div");
@@ -460,7 +460,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
         const insertBtn = document.createElement("button");
         insertBtn.className = "btn btn-primary save-prop";
         insertBtn.type = "button";
-        insertBtn.textContent = "Insert";
+        insertBtn.textContent = webexpress.webui.I18N.translate("webexpress.webui:insert");
         insertBtn.addEventListener("click", () => {
             this._handlePropertySave();
         });

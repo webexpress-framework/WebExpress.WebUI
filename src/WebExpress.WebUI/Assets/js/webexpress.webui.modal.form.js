@@ -65,7 +65,7 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
                     .then(response => response.text())
                     .then(data => this._update(data))
                     .catch(error => {
-                        this._bodyDiv.innerHTML = error.message || "An error occurred.";
+                        this._bodyDiv.innerHTML = error.message || this._i18n("webexpress.webui:modal.form.error", "An error occurred.");
                     });
             };
 
@@ -117,7 +117,7 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
         alert.role = "alert";
 
         const text = errors.map(err => err.message).join("<br>");
-        alert.innerHTML = `<strong>Please correct the following:</strong><br>${text}`;
+        alert.innerHTML = `<strong>${this._i18n("webexpress.webui:modal.form.correct", "Please correct the following:")}</strong><br>${text}`;
 
         errors.forEach(error => {
             const input = this._form.querySelector(`[name="${error.field}"]`);

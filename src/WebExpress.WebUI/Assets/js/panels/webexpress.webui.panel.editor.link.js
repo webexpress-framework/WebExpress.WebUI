@@ -4,7 +4,7 @@
 webexpress.webui.DialogPanels.register("editor-link", {
     id: "editor-link-page",
     parentId: null,
-    title: "Link",
+    title: webexpress.webui.I18N.translate("webexpress.webui:editor.link.title"),
     iconClass: "fas fa-link",
 
     /**
@@ -19,11 +19,11 @@ webexpress.webui.DialogPanels.register("editor-link", {
         urlGroup.className = "mb-3";
         const urlLabel = document.createElement("label");
         urlLabel.className = "form-label";
-        urlLabel.textContent = "URL";
+        urlLabel.textContent = webexpress.webui.I18N.translate("webexpress.webui:editor.link.url.label");
         const urlInput = document.createElement("input");
         urlInput.type = "url";
         urlInput.className = "form-control";
-        urlInput.placeholder = "https://example.com";
+        urlInput.placeholder = webexpress.webui.I18N.translate("webexpress.webui:editor.link.url.placeholder");
         urlGroup.appendChild(urlLabel);
         urlGroup.appendChild(urlInput);
 
@@ -31,11 +31,11 @@ webexpress.webui.DialogPanels.register("editor-link", {
         textGroup.className = "mb-3";
         const textLabel = document.createElement("label");
         textLabel.className = "form-label";
-        textLabel.textContent = "Text";
+        textLabel.textContent = webexpress.webui.I18N.translate("webexpress.webui:editor.link.text.label");
         const textInput = document.createElement("input");
         textInput.type = "text";
         textInput.className = "form-control";
-        textInput.placeholder = "Link text (optional)";
+        textInput.placeholder = webexpress.webui.I18N.translate("webexpress.webui:editor.link.text.placeholder");
         textGroup.appendChild(textLabel);
         textGroup.appendChild(textInput);
 
@@ -122,12 +122,12 @@ webexpress.webui.DialogPanels.register("editor-link", {
         const urlInput = modal && modal._link ? modal._link.urlInput : null;
 
         if (!editor || !urlInput) {
-            return { valid: false, message: "Internal error: editor or field not available." };
+            return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.link.error.internal") };
         }
 
         const urlVal = urlInput.value.trim();
         if (urlVal === "") {
-            return { valid: false, message: "Please enter a valid URL." };
+            return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.link.error.url") };
         }
 
         return true;

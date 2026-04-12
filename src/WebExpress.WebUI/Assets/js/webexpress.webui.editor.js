@@ -359,8 +359,8 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         // add fullscreen button
         const fsBtn = document.createElement("button");
         fsBtn.className = "wx-editor-btn";
-        fsBtn.title = "Toggle Fullscreen";
-        fsBtn.setAttribute("aria-label", "Toggle Fullscreen");
+        fsBtn.title = this._i18n("webexpress.webui:fullscreen.toggle", "Toggle Fullscreen");
+        fsBtn.setAttribute("aria-label", this._i18n("webexpress.webui:fullscreen.toggle", "Toggle Fullscreen"));
         fsBtn.innerHTML = `<i class="fas fa-expand"></i>`;
         fsBtn.type = "button";
 
@@ -431,7 +431,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         this._editorElement.setAttribute("contenteditable", "true");
         this._editorElement.setAttribute("role", "textbox");
         this._editorElement.setAttribute("aria-multiline", "true");
-        this._editorElement.setAttribute("aria-label", "Editor content");
+        this._editorElement.setAttribute("aria-label", this._i18n("webexpress.webui:editor.content.label", "Editor content"));
         this._editorElement.style.minHeight = "200px";
 
         if (content) {
@@ -455,9 +455,9 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         const doneBtn = document.createElement("button");
         doneBtn.className = "btn btn-primary wx-button wx-editor-finish";
         doneBtn.type = "button";
-        doneBtn.innerHTML = '<i class="fas fa-check-circle me-1"></i> Done';
-        doneBtn.setAttribute("aria-label", "Done");
-        doneBtn.title = "Done";
+        doneBtn.innerHTML = '<i class="fas fa-check-circle me-1"></i> ' + this._i18n("webexpress.webui:editor.done", "Done");
+        doneBtn.setAttribute("aria-label", this._i18n("webexpress.webui:editor.done", "Done"));
+        doneBtn.title = this._i18n("webexpress.webui:editor.done", "Done");
 
         // wire to the controller's dismiss handler for css fullscreen
         doneBtn.setAttribute("data-wx-dismiss", "fullscreen");
@@ -601,7 +601,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                 }
             } catch (fallbackErr) {
                 console.warn("Clipboard paste failed:", fallbackErr);
-                alert("Paste not supported or permitted by browser. Please use Ctrl+V.");
+                alert(this._i18n("webexpress.webui:editor.paste.unsupported", "Paste not supported or permitted by browser. Please use Ctrl+V."));
             }
         }
     }

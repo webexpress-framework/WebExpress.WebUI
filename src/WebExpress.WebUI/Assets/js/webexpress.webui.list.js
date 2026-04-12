@@ -578,7 +578,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                         }
                     } catch (e) {
                         console.error("ListCtrl renderer error:", e);
-                        contentWrap.textContent = "Renderer Error";
+                        contentWrap.textContent = this._i18n("webexpress.webui:list.renderer.error", "Renderer Error");
                     }
                     body.appendChild(contentWrap);
                 } else {

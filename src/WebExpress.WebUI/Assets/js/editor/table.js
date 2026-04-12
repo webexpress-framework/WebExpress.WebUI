@@ -456,27 +456,27 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         });
 
         return [
-            { label: "Insert Row Above", action: () => this._modifyTable(editor, "insertRowAbove"), icon: "wx-icon add-row-above" },
-            { label: "Insert Row Below", action: () => this._modifyTable(editor, "insertRowBelow"), icon: "wx-icon add-row-below" },
-            { label: "Insert Column Left", action: () => this._modifyTable(editor, "insertColumnLeft"), icon: "wx-icon add-col-above" },
-            { label: "Insert Column Right", action: () => this._modifyTable(editor, "insertColumnRight"), icon: "wx-icon add-col-below" },
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.insert.row.above"), action: () => this._modifyTable(editor, "insertRowAbove"), icon: "wx-icon add-row-above" },
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.insert.row.below"), action: () => this._modifyTable(editor, "insertRowBelow"), icon: "wx-icon add-row-below" },
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.insert.col.left"), action: () => this._modifyTable(editor, "insertColumnLeft"), icon: "wx-icon add-col-above" },
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.insert.col.right"), action: () => this._modifyTable(editor, "insertColumnRight"), icon: "wx-icon add-col-below" },
             { separator: true },
-            { label: "Add Intermediate Header", action: () => this._modifyTable(editor, "insertIntermediateHeader"), icon: "wx-icon add-row-below" },
-            { label: "Toggle Left Header", action: () => this._modifyTable(editor, "toggleLeftHeader"), icon: "wx-icon cell-background" },
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.add.intermediate.header"), action: () => this._modifyTable(editor, "insertIntermediateHeader"), icon: "wx-icon add-row-below" },
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.toggle.left.header"), action: () => this._modifyTable(editor, "toggleLeftHeader"), icon: "wx-icon cell-background" },
             { separator: true },
-            { label: "Merge Cells", action: () => this._modifyTable(editor, "mergeCells"), icon: "wx-icon merge-cells" },
-            { label: "Split Cell", action: () => this._modifyTable(editor, "splitCell"), icon: "wx-icon split-cell" },
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.merge.cells"), action: () => this._modifyTable(editor, "mergeCells"), icon: "wx-icon merge-cells" },
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.split.cell"), action: () => this._modifyTable(editor, "splitCell"), icon: "wx-icon split-cell" },
             { separator: true },
             {
-                label: "Cell Background",
+                label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.cell.background"),
                 icon: "wx-icon cell-background",
                 submenu: colorItems,
                 submenuClass: "wx-editor-color-picker"
             },
             { separator: true },
-            { label: "Delete Row", action: () => this._modifyTable(editor, "deleteRow"), icon: "wx-icon delete-row" },
-            { label: "Delete Column", action: () => this._modifyTable(editor, "deleteColumn"), icon: "wx-icon delete-col" },
-            { label: "Delete Table", action: () => this._modifyTable(editor, "deleteTable"), icon: "wx-icon delete-table" }
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.delete.row"), action: () => this._modifyTable(editor, "deleteRow"), icon: "wx-icon delete-row" },
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.delete.col"), action: () => this._modifyTable(editor, "deleteColumn"), icon: "wx-icon delete-col" },
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.delete.table"), action: () => this._modifyTable(editor, "deleteTable"), icon: "wx-icon delete-table" }
         ];
     },
 
@@ -817,7 +817,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
             newTh.colSpan = maxCols;
             newTh.contentEditable = "true";
             newTh.className = "table-light text-center"; // simple visual class
-            newTh.innerHTML = "Intermediate Header";
+            newTh.innerHTML = webexpress.webui.I18N.translate("webexpress.webui:editor.table.intermediate.header");
             newRow.appendChild(newTh);
 
         } else if (action === "toggleLeftHeader") {

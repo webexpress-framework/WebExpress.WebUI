@@ -199,7 +199,7 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
 
         const removeBtn = document.createElement("button");
         removeBtn.className = "btn-close btn-close-white";
-        removeBtn.setAttribute("aria-label", "Remove");
+        removeBtn.setAttribute("aria-label", this._i18n("webexpress.webui:remove", "Remove"));
 
         // directly invoke the action mechanism via action attribute conventions
         removeBtn.dataset.wxPrimaryAction = "deactivate_quickfilter";
