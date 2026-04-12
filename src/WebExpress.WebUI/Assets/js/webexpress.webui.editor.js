@@ -185,6 +185,42 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
         this._editorElement.addEventListener("keydown", (e) => {
             let actionModified = false;
+            const isMod = e.ctrlKey || e.metaKey;
+
+            // keyboard shortcuts for common formatting and history actions
+            if (isMod && !e.altKey) {
+                switch (e.key.toLowerCase()) {
+                    case "b":
+                        e.preventDefault();
+                        this.execCommand("bold");
+                        actionModified = true;
+                        break;
+                    case "i":
+                        e.preventDefault();
+                        this.execCommand("italic");
+                        actionModified = true;
+                        break;
+                    case "u":
+                        e.preventDefault();
+                        this.execCommand("underline");
+                        actionModified = true;
+                        break;
+                    case "z":
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                            this.execCommand("redo");
+                        } else {
+                            this.execCommand("undo");
+                        }
+                        actionModified = true;
+                        break;
+                    case "y":
+                        e.preventDefault();
+                        this.execCommand("redo");
+                        actionModified = true;
+                        break;
+                }
+            }
 
             // prevent accidental deletion of empty paragraphs directly around non-editable elements
             if (e.key === "Backspace" || e.key === "Delete") {
@@ -324,6 +360,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         const fsBtn = document.createElement("button");
         fsBtn.className = "wx-editor-btn";
         fsBtn.title = "Toggle Fullscreen";
+        fsBtn.setAttribute("aria-label", "Toggle Fullscreen");
         fsBtn.innerHTML = `<i class="fas fa-expand"></i>`;
         fsBtn.type = "button";
 
@@ -347,6 +384,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         const btn = document.createElement("button");
         btn.className = "wx-editor-btn";
         btn.title = title;
+        btn.setAttribute("aria-label", title);
         btn.dataset.command = command;
         btn.innerHTML = `<i class="${iconClass}"></i>`;
         btn.type = "button";
@@ -391,6 +429,9 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         this._editorElement = document.createElement("div");
         this._editorElement.classList.add("wx-editor-content");
         this._editorElement.setAttribute("contenteditable", "true");
+        this._editorElement.setAttribute("role", "textbox");
+        this._editorElement.setAttribute("aria-multiline", "true");
+        this._editorElement.setAttribute("aria-label", "Editor content");
         this._editorElement.style.minHeight = "200px";
 
         if (content) {

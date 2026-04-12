@@ -112,6 +112,12 @@
     font-weight: bold;
 }
 
+.wx-editor-btn:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 1px;
+    border-radius: 4px;
+}
+
 .wx-editor-color-picker {
     display: grid;
     grid-template-columns: repeat(5, 24px);
@@ -133,6 +139,11 @@
 
 .wx-editor-color-picker button:hover {
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.wx-editor-color-picker button:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 1px;
 }
 
 .wx-editor-insertable-grid {

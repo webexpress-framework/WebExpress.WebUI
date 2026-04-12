@@ -11,6 +11,8 @@ The editor is initialized directly in the HTML. The initial content is taken fro
 | Attribute    | Description                                                                                         | Example
 |--------------|-----------------------------------------------------------------------------------------------------|-----------------
 | `name`       | Defines the name for a hidden input field that submits the editor's content with a form submission. | `name="content"`
+| `data-image-upload-uri` | The URI endpoint for image uploads. | `data-image-upload-uri="/api/upload"`
+| `data-image-base-uri` | The base URI for resolving image paths. | `data-image-base-uri="/images/"`
 | Text Content | The initial HTML content of the editor.                                                             | `<div class="wx-webui-editor">Initial <b>text</b>.</div>`
 
 ## Programmatic Control
@@ -28,10 +30,10 @@ const editorElement = document.getElementById('myEditor');
 // retrieve the controller instance associated with the element
 const editorCtrl = webexpress.webui.Controller.getInstanceByElement(editorElement);
 
-// get or set the content programmatically
+// get or set the content programmatically using the value property
 if (editorCtrl) {
-    const currentContent = editorCtrl.getValue();
-    editorCtrl.setValue('<p>New content that replaces the old one.</p>');
+    const currentContent = editorCtrl.value;
+    editorCtrl.value = '<p>New content that replaces the old one.</p>';
 }
 ```
 
@@ -46,13 +48,41 @@ const container = document.getElementById('editor-container');
 // create a new instance of EditorCtrl manually
 const dynamicEditorCtrl = new webexpress.webui.EditorCtrl(container);
 
-// set initial content
-dynamicEditorCtrl.setValue('<p>Dynamically created editor.</p>');
+// set initial content using the value property
+dynamicEditorCtrl.value = '<p>Dynamically created editor.</p>';
 ```
 
 ## Events
 
-The `EditorCtrl` component itself does not dispatch specific, public events. Interactions within the editor, such as clicking buttons in the toolbar, are handled internally to format the content. Synchronization with a form occurs automatically on the `submit` event of the enclosing form.
+The `EditorCtrl` dispatches a change event whenever its content is modified, enabling external components to react to content updates.
+
+| Event                 | Description                                                                                   |
+|-----------------------|-----------------------------------------------------------------------------------------------|
+| `change_value_event`  | Dispatched whenever the editor content changes. The event detail contains the current content. |
+
+```javascript
+const editorElement = document.getElementById('myEditor');
+const editorCtrl = webexpress.webui.Controller.getInstanceByElement(editorElement);
+
+editorCtrl.on(webexpress.webui.Event.CHANGE_VALUE_EVENT, (e) => {
+    console.log('Content changed:', e.detail.value);
+});
+```
+
+Synchronization with a form occurs automatically on the `submit` event of the enclosing form.
+
+## Keyboard Shortcuts
+
+The editor supports the following keyboard shortcuts:
+
+| Shortcut           | Action          |
+|--------------------|-----------------|
+| `Ctrl+B` / `⌘+B`  | Bold            |
+| `Ctrl+I` / `⌘+I`  | Italic          |
+| `Ctrl+U` / `⌘+U`  | Underline       |
+| `Ctrl+Z` / `⌘+Z`  | Undo            |
+| `Ctrl+Y` / `⌘+Y`  | Redo            |
+| `Ctrl+Shift+Z` / `⌘+Shift+Z` | Redo |
 
 ## Use Case Examples
 

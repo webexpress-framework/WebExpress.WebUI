@@ -33,6 +33,8 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
         const btnLink = document.createElement("button");
         btnLink.className = "wx-editor-btn";
         btnLink.type = "button";
+        btnLink.title = "Insert Link";
+        btnLink.setAttribute("aria-label", "Insert Link");
         btnLink.innerHTML = '<i class="fas fa-link"></i>';
 
         // save selection firmly before focus shifts away from the editor
@@ -60,6 +62,8 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
         const btnImg = document.createElement("button");
         btnImg.className = "wx-editor-btn";
         btnImg.type = "button";
+        btnImg.title = "Insert Image";
+        btnImg.setAttribute("aria-label", "Insert Image");
         btnImg.innerHTML = '<i class="fas fa-image"></i>';
 
         btnImg.addEventListener("mousedown", (e) => {
