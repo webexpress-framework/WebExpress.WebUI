@@ -205,6 +205,21 @@ namespace WebExpress.WebUI.WebMarkdown
         Footnote,
 
         /// <summary>
+        /// Inline plugin in the format {{plugin_name param1="val1"}}.
+        /// </summary>
+        InlinePlugin,
+
+        /// <summary>
+        /// Block plugin opening tag in the format {{% plugin_name param1="val1" %}}.
+        /// </summary>
+        PluginBlock,
+
+        /// <summary>
+        /// Block plugin closing tag in the format {{% /plugin_name %}}.
+        /// </summary>
+        PluginBlockEnd,
+
+        /// <summary>
         /// End of line.
         /// </summary>
         EOL,
