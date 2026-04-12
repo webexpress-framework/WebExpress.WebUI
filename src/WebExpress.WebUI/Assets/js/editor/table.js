@@ -817,7 +817,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
             newTh.colSpan = maxCols;
             newTh.contentEditable = "true";
             newTh.className = "table-light text-center"; // simple visual class
-            newTh.innerHTML = "Intermediate Header";
+            newTh.innerHTML = webexpress.webui.I18N.translate("webexpress.webui:editor.table.intermediate.header");
             newRow.appendChild(newTh);
 
         } else if (action === "toggleLeftHeader") {

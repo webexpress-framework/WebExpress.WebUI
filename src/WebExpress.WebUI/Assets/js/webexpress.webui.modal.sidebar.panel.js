@@ -703,7 +703,7 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
 
         if (!valid) {
             this._hasValidationErrors = true;
-            this._showValidation(message || "Please correct the highlighted errors.");
+            this._showValidation(message || this._i18n("webexpress.webui:modal.validation.error", "Please correct the highlighted errors."));
             return;
         }
 
@@ -727,7 +727,7 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
             }
         } catch (err) {
             this._hasValidationErrors = true;
-            const msg = (err && err.message) ? String(err.message) : "Submit failed.";
+            const msg = (err && err.message) ? String(err.message) : this._i18n("webexpress.webui:modal.submit.failed", "Submit failed.");
             this._showValidation(msg);
             return;
         }

@@ -719,7 +719,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 return tmpl.fn(cell?.content, this, row, cell, colDef.name || colDef.id, opts);
             } catch (e) {
                 console.error("renderer error", e);
-                return "Error";
+                return this._i18n("webexpress.webui:table.renderer.error", "Error");
             }
         }
         return cell?.content ?? "";

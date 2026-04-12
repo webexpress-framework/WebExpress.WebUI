@@ -207,5 +207,33 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "graph.uri": "URI (Link)",
     "graph.color": "Color",
     "graph.dasharray": "Dash Array",
-    "graph.new.node": "New Node"
+    "graph.new.node": "New Node",
+
+    "editor.table.intermediate.header": "Intermediate Header",
+
+    "modal.form.error": "An error occurred.",
+    "modal.form.correct": "Please correct the following:",
+    "modal.validation.error": "Please correct the highlighted errors.",
+    "modal.submit.failed": "Submit failed.",
+
+    "smartedit.network.error": "Network Error",
+
+    "websocket.error": "WebSocket connection error",
+    "websocket.failed": "WebSocket connection failed",
+
+    "table.renderer.error": "Error",
+
+    "widget.stats.title": "System Status",
+    "widget.stats.default.heading": "All systems operational",
+    "widget.stats.default.uptime": "Uptime: 99.9%",
+    "widget.alerts.title": "Recent Alerts",
+    "widget.alerts.cpu": "High CPU Load",
+    "widget.alerts.memory": "Memory above 80%",
+    "widget.alerts.backup": "Backup completed",
+    "widget.chart.title": "Chart",
+    "widget.info.title": "Info Card",
+    "widget.progress.title": "Progress",
+    "widget.avatar.title": "Avatar",
+    "widget.list.title": "Info List",
+    "widget.bignumber.title": "Big Number"
 });

@@ -2,7 +2,7 @@
  * Registers the system stats widget in the dashboard registry.
  */
 webexpress.webui.DashboardWidgets.register("widget_stats", {
-    title: "System Status",
+    title: webexpress.webui.I18N.translate("webexpress.webui:widget.stats.title"),
     icon: "fas fa-server",
     removable: false,
 
@@ -16,10 +16,10 @@ webexpress.webui.DashboardWidgets.register("widget_stats", {
         const params = data.params;
         const heading = document.createElement("h2");
         heading.className = "text-success";
-        heading.textContent = params.title || "All systems operational";
+        heading.textContent = params.title || webexpress.webui.I18N.translate("webexpress.webui:widget.stats.default.heading");
 
         const paragraph = document.createElement("p");
-        paragraph.textContent = params.uptime || "Uptime: 99.9%";
+        paragraph.textContent = params.uptime || webexpress.webui.I18N.translate("webexpress.webui:widget.stats.default.uptime");
 
         container.appendChild(heading);
         container.appendChild(paragraph);
@@ -32,7 +32,7 @@ webexpress.webui.DashboardWidgets.register("widget_stats", {
  * widget container to the required data-* attributes for the chart.
  */
 webexpress.webui.DashboardWidgets.register("widget_chart", {
-    title: "Chart",
+    title: webexpress.webui.I18N.translate("webexpress.webui:widget.chart.title"),
     icon: "fas fa-chart-line",
 
     /**
@@ -97,7 +97,7 @@ webexpress.webui.DashboardWidgets.register("widget_chart", {
  * Registers the recent alerts widget in the dashboard registry.
  */
 webexpress.webui.DashboardWidgets.register("widget_alerts", {
-    title: "Recent Alerts",
+    title: webexpress.webui.I18N.translate("webexpress.webui:widget.alerts.title"),
     icon: "fas fa-bell",
 
     /**
@@ -112,9 +112,9 @@ webexpress.webui.DashboardWidgets.register("widget_alerts", {
 
         // define the alert items
         const alerts = [
-            { text: "High CPU Load", className: "list-group-item text-danger" },
-            { text: "Memory above 80%", className: "list-group-item text-warning" },
-            { text: "Backup completed", className: "list-group-item" }
+            { text: webexpress.webui.I18N.translate("webexpress.webui:widget.alerts.cpu"), className: "list-group-item text-danger" },
+            { text: webexpress.webui.I18N.translate("webexpress.webui:widget.alerts.memory"), className: "list-group-item text-warning" },
+            { text: webexpress.webui.I18N.translate("webexpress.webui:widget.alerts.backup"), className: "list-group-item" }
         ];
 
         // append each alert to the list
@@ -133,7 +133,7 @@ webexpress.webui.DashboardWidgets.register("widget_alerts", {
  * Registers a generic info card.
  */
 webexpress.webui.DashboardWidgets.register("widget_info", {
-    title: "Info Card",
+    title: webexpress.webui.I18N.translate("webexpress.webui:widget.info.title"),
     icon: "fas fa-info-circle",
 
     /**
@@ -160,7 +160,7 @@ webexpress.webui.DashboardWidgets.register("widget_info", {
  * Registers a basic progress bar widget.
  */
 webexpress.webui.DashboardWidgets.register("widget_progress", {
-    title: "Progress",
+    title: webexpress.webui.I18N.translate("webexpress.webui:widget.progress.title"),
     icon: "fas fa-tasks",
     /**
      * Renders a simple progress bar.
@@ -192,7 +192,7 @@ webexpress.webui.DashboardWidgets.register("widget_progress", {
  * Registers a generic avatar widget.
  */
 webexpress.webui.DashboardWidgets.register("widget_avatar", {
-    title: "Avatar",
+    title: webexpress.webui.I18N.translate("webexpress.webui:widget.avatar.title"),
     icon: "fas fa-user",
 
     /**
@@ -204,7 +204,7 @@ webexpress.webui.DashboardWidgets.register("widget_avatar", {
         const params = data.params || {};
         const img = document.createElement("img");
         img.className = "rounded-circle mb-2";
-        img.alt = params.name || "Avatar";
+        img.alt = params.name || webexpress.webui.I18N.translate("webexpress.webui:widget.avatar.title");
         img.style.width = "64px";
         img.style.height = "64px";
         img.src = params.image;
@@ -230,7 +230,7 @@ webexpress.webui.DashboardWidgets.register("widget_avatar", {
  * Registers a generic bullet list widget.
  */
 webexpress.webui.DashboardWidgets.register("widget_list", {
-    title: "Info List",
+    title: webexpress.webui.I18N.translate("webexpress.webui:widget.list.title"),
     icon: "fas fa-list",
 
     /**
@@ -257,7 +257,7 @@ webexpress.webui.DashboardWidgets.register("widget_list", {
  * Registers a big number widget in the dashboard registry.
  */
 webexpress.webui.DashboardWidgets.register("widget_bignumber", {
-    title: "Big Number",
+    title: webexpress.webui.I18N.translate("webexpress.webui:widget.bignumber.title"),
     icon: "fas fa-hashtag",
 
     /**

@@ -204,7 +204,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
                 this._dispatch(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
                     value: this.value,
                     status: 500,
-                    statusText: error.message || "Network Error"
+                    statusText: error.message || this._i18n("webexpress.webui:smartedit.network.error", "Network Error")
                 });
                 console.error("failed to edit", error);
                 // bei fehler wird dennoch save=true weitergegeben, die anwendung kann status prüfen

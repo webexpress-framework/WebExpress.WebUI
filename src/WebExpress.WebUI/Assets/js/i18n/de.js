@@ -207,5 +207,33 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "graph.uri": "URI (Link)",
     "graph.color": "Farbe",
     "graph.dasharray": "Strichmuster",
-    "graph.new.node": "Neuer Knoten"
+    "graph.new.node": "Neuer Knoten",
+
+    "editor.table.intermediate.header": "Zwischenüberschrift",
+
+    "modal.form.error": "Ein Fehler ist aufgetreten.",
+    "modal.form.correct": "Bitte korrigieren Sie Folgendes:",
+    "modal.validation.error": "Bitte korrigieren Sie die markierten Fehler.",
+    "modal.submit.failed": "Übermittlung fehlgeschlagen.",
+
+    "smartedit.network.error": "Netzwerkfehler",
+
+    "websocket.error": "WebSocket-Verbindungsfehler",
+    "websocket.failed": "WebSocket-Verbindung fehlgeschlagen",
+
+    "table.renderer.error": "Fehler",
+
+    "widget.stats.title": "Systemstatus",
+    "widget.stats.default.heading": "Alle Systeme betriebsbereit",
+    "widget.stats.default.uptime": "Betriebszeit: 99,9%",
+    "widget.alerts.title": "Letzte Warnungen",
+    "widget.alerts.cpu": "Hohe CPU-Auslastung",
+    "widget.alerts.memory": "Speicher über 80%",
+    "widget.alerts.backup": "Sicherung abgeschlossen",
+    "widget.chart.title": "Diagramm",
+    "widget.info.title": "Infokarte",
+    "widget.progress.title": "Fortschritt",
+    "widget.avatar.title": "Avatar",
+    "widget.list.title": "Infoliste",
+    "widget.bignumber.title": "Große Zahl"
 });
