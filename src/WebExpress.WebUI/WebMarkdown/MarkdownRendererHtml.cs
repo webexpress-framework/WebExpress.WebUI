@@ -249,6 +249,38 @@ namespace WebExpress.WebUI.WebMarkdown
                 {
                     list.Add(new HtmlText(text.Text));
                 }
+                else if (element is MarkdownInlineElementPlugin inlinePlugin)
+                {
+                    var pluginDiv = new HtmlElementTextContentDiv()
+                    {
+                        Class = "wx-plugin wx-plugin-inline"
+                    };
+
+                    pluginDiv.AddUserAttribute("data-plugin", inlinePlugin.Name);
+
+                    foreach (var param in inlinePlugin.Parameters)
+                    {
+                        pluginDiv.AddUserAttribute($"data-plugin-{param.Key}", param.Value);
+                    }
+
+                    list.Add(pluginDiv);
+                }
+                else if (element is MarkdownBlockElementPlugin blockPlugin)
+                {
+                    var pluginDiv = new HtmlElementTextContentDiv(ConvertElement(blockPlugin.Content, renderContext))
+                    {
+                        Class = "wx-plugin wx-plugin-block"
+                    };
+
+                    pluginDiv.AddUserAttribute("data-plugin", blockPlugin.Name);
+
+                    foreach (var param in blockPlugin.Parameters)
+                    {
+                        pluginDiv.AddUserAttribute($"data-plugin-{param.Key}", param.Value);
+                    }
+
+                    list.Add(pluginDiv);
+                }
             }
 
             return list;
