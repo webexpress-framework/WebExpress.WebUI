@@ -11,6 +11,8 @@ namespace WebExpress.WebUI.WebMarkdown
     /// </summary>
     public class MarkdownParser
     {
+        private static readonly Regex _pluginParamRegex = new Regex(@"(?<key>[a-zA-Z_][a-zA-Z0-9_]*)=""(?<value>[^""]*)""", RegexOptions.Compiled);
+
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
@@ -832,7 +834,7 @@ namespace WebExpress.WebUI.WebMarkdown
                 return parameters;
             }
 
-            var paramRegex = new Regex(@"(?<key>[a-zA-Z_][a-zA-Z0-9_]*)=""(?<value>[^""]*)""");
+            var paramRegex = _pluginParamRegex;
             var matches = paramRegex.Matches(paramString);
 
             foreach (Match match in matches)

@@ -11,6 +11,12 @@ namespace WebExpress.WebUI.WebMarkdown
     /// </summary>
     public static class MarkdownRendererMarkdown
     {
+        private const string InlinePluginOpen = "{{";
+        private const string InlinePluginClose = "}}";
+        private const string BlockPluginOpen = "{{% ";
+        private const string BlockPluginClose = " %}}";
+        private const string BlockPluginCloseSlash = "{{% /";
+
         /// <summary>
         /// Converts the specified <see cref="MarkdownDocument"/> back into a Markdown string.
         /// </summary>
@@ -274,7 +280,7 @@ namespace WebExpress.WebUI.WebMarkdown
         private static void ConvertBlockPlugin(MarkdownBlockElementPlugin plugin, StringBuilder sb)
         {
             var paramStr = FormatPluginParameters(plugin.Parameters);
-            sb.AppendLine($"{{{{% {plugin.Name}{paramStr} %}}}}");
+            sb.AppendLine($"{BlockPluginOpen}{plugin.Name}{paramStr}{BlockPluginClose}");
 
             if (plugin.Content.Any())
             {
@@ -282,8 +288,7 @@ namespace WebExpress.WebUI.WebMarkdown
                 sb.AppendLine();
             }
 
-            sb.AppendLine($"{{{{% /{plugin.Name} %}}}}");
-        }
+            sb.AppendLine($"{BlockPluginCloseSlash}{plugin.Name}{BlockPluginClose}");        }
 
         /// <summary>
         /// Converts a collection of inline elements to Markdown text.
@@ -359,7 +364,7 @@ namespace WebExpress.WebUI.WebMarkdown
                     sb.Append($"[^{footnote.Id}]");
                     break;
                 case MarkdownInlineElementPlugin inlinePlugin:
-                    sb.Append($"{{{{{inlinePlugin.Name}{FormatPluginParameters(inlinePlugin.Parameters)}}}}}");
+                    sb.Append($"{InlinePluginOpen}{inlinePlugin.Name}{FormatPluginParameters(inlinePlugin.Parameters)}{InlinePluginClose}");
                     break;
             }
         }
