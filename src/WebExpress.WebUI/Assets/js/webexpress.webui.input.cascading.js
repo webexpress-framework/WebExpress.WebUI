@@ -195,7 +195,7 @@ webexpress.webui.InputCascadingCtrl = class extends webexpress.webui.Ctrl {
 
             // truncate path to current level, removing all subsequent selections
             this._path = this._path.slice(0, level);
-            
+
             // push new selection if valid
             if (selected) {
                 this._path.push(selected);

@@ -233,7 +233,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
     _openModal: function(editor, modalProperty, key, title, activeRange) {
         if (!this[modalProperty]) {
             this[modalProperty] = this._createModal(key, title);
-        } 
+        }
 
         if (this[modalProperty] && this[modalProperty].ctrl) {
             const ctrl = this[modalProperty].ctrl;
@@ -655,9 +655,9 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
 
         if (type === "inline") {
             return `
-                <span class="wx-addon-inline-frame" 
-                      contenteditable="false" 
-                      draggable="true" 
+                <span class="wx-addon-inline-frame"
+                      contenteditable="false"
+                      draggable="true"
                       data-addon-id="${addonDef.id}"
                       title="${addonDef.label}">
                     ${contentHtml}
@@ -673,21 +673,21 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
             const bodyClass = isContainer ? "wx-addon-body-container" : "wx-addon-body-widget";
 
             return `
-                <div class="wx-addon-frame card my-3 shadow-sm" 
-                     contenteditable="false" 
+                <div class="wx-addon-frame card my-3 shadow-sm"
+                     contenteditable="false"
                      draggable="false"
                      data-addon-id="${addonDef.id}">
-                    
+
                     <div class="card-header py-1 px-2 d-flex justify-content-between align-items-center">
                         <div class="small text-muted fw-bold d-flex align-items-center">
                             ${dragHandle}
-                            <i class="${addonDef.icon} me-2"></i> 
+                            <i class="${addonDef.icon} me-2"></i>
                             <span>${addonDef.label}</span>
                         </div>
                         <div>${settingsBtn}</div>
                     </div>
-                    
-                    <div class="card-body p-2 ${bodyClass}" 
+
+                    <div class="card-body p-2 ${bodyClass}"
                          contenteditable="${bodyEditable}">
                         ${contentHtml}
                     </div>

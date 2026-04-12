@@ -1,4 +1,4 @@
-/* 
+/*
  * Kanban Board aligned with Dashboard styling.
  * Forces columns side-by-side with horizontal scrolling even on small screens.
  */
@@ -26,7 +26,7 @@
 
 /* Header row sits visually closer to first swimlane */
 .wx-kanban-headers.wx-kanban-row {
-    margin-bottom: -0.5rem; 
+    margin-bottom: -0.5rem;
 }
 
 /* Column header styling */

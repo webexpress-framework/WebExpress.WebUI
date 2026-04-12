@@ -10,7 +10,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     _head = document.createElement("div");
     _body = document.createElement("div");
     _foot = null;
-    
+
     _columns = [];
     _rows = [];
     _footer = [];
@@ -59,7 +59,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     _setupDom(element) {
         this._table.className = "wx-table";
         this._table.setAttribute("role", "table");
-        
+
         const ds = element.dataset;
         if (ds.color) {
             this._table.classList.add(ds.color);
@@ -70,13 +70,13 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         if (ds.striped) {
             this._table.classList.add(...ds.striped.split(" "));
         }
-        
+
         // explicit check for string "true" to enable selection
         this._selectable = ds.selectable === "true";
 
         this._head.className = "wx-table-header-group";
         this._head.setAttribute("role", "rowgroup");
-        
+
         this._body.className = "wx-table-body-group";
         this._body.setAttribute("role", "rowgroup");
 
@@ -117,12 +117,12 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             if (!headerCell || this._isResizing) {
                 return;
             }
-            
+
             const colId = headerCell.dataset.columnId;
             if (!colId || !this._colIndexCache.has(colId)) {
                 return;
             }
-            
+
             const col = this._columns[this._colIndexCache.get(colId)];
             if (col) {
                 this._handleSortClick(headerCell, col);
@@ -134,7 +134,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             if (e.target.closest(".wx-dropdown-toggle, .wx-dropdown-menu, .dropdown-toggle, .dropdown-menu, .wx-table-actions")) {
                 return;
             }
-            
+
             // ignore interactive elements and content editable areas
             if (e.target.closest("a, button, input, select, textarea, [contenteditable='true'], .wx-prevent-row-select")) {
                 return;
@@ -151,11 +151,11 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         this._body.addEventListener("input", (e) => {
             const cellEl = e.target.closest(".wx-grid-cell");
             const rowEl = e.target.closest(".wx-grid-row");
-            
+
             if (cellEl && rowEl && rowEl._dataRowRef) {
                 const cellsInRow = Array.from(rowEl.children).filter(c => c.classList.contains("wx-grid-cell"));
                 const colIndex = cellsInRow.indexOf(cellEl);
-                
+
                 if (colIndex > -1) {
                     let visibleCount = 0;
                     for (let i = 0; i < this._columns.length; i++) {
@@ -350,10 +350,10 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     insertRow(rowData, parentId = null, index = null) {
         const buildRow = (data) => {
             if (Array.isArray(data)) {
-                return { 
-                    id: null, 
-                    cells: data.map(v => ({ content: String(v ?? "") })), 
-                    children: [], parent: null, expanded: true, options: null 
+                return {
+                    id: null,
+                    cells: data.map(v => ({ content: String(v ?? "") })),
+                    children: [], parent: null, expanded: true, options: null
                 };
             }
             return {
@@ -417,9 +417,9 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             return false;
         }
         const removed = this._removeRowRecursive(rowId, this._rows);
-        if (removed) { 
+        if (removed) {
             this._recalculateHasOptions();
-            this.render(); 
+            this.render();
         }
         return removed;
     }
@@ -455,7 +455,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             this._isTree = this._detectTree(this._rows);
 
             this._rebuildColumnIndexCache();
-            this._syncColumnWidths(); 
+            this._syncColumnWidths();
 
             this._renderColumns();
             this._renderRows(changedIds, newIds);
@@ -488,7 +488,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 th.className = "wx-grid-header-cell wx-col-header";
                 th.setAttribute("role", "columnheader");
                 th.dataset.columnId = col.id;
-                
+
                 if (col.color) {
                     th.classList.add(col.color);
                 }
@@ -515,7 +515,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
                 headRow.appendChild(th);
             }
-            
+
             if (this._hasOptions) {
                 const th = document.createElement("div");
                 th.className = "wx-grid-header-cell wx-table-actions";
@@ -560,7 +560,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         const tr = document.createElement("div");
         tr.className = "wx-grid-row";
         tr.setAttribute("role", "row");
-        
+
         if (row.color) {
             tr.classList.add(row.color);
         }
@@ -585,7 +585,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 tr.setAttribute(htmlName, value);
             }
         }
-                
+
         // apply selection state
         if (this._selectedRow === row) {
             tr.classList.add("active");
@@ -671,24 +671,24 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             tr.appendChild(td);
             firstVisible = false;
         }
-        
+
         if (this._hasOptions) {
             const tdOpt = document.createElement("div");
             tdOpt.className = "wx-grid-cell wx-table-actions";
             tdOpt.setAttribute("role", "gridcell");
-            
+
             const effectiveOptions = (row.options && row.options.length) ? row.options : this._options;
-            
+
             if (effectiveOptions && effectiveOptions.length > 0) {
                 const div = document.createElement("div");
                 div.dataset.icon = "fas fa-cog";
                 div.dataset.size = "btn-sm";
                 div.dataset.border = "false";
-                
+
                 div.addEventListener("click", (e) => {
                     e.stopPropagation();
                 });
-                
+
                 tdOpt.appendChild(div);
                 new webexpress.webui.DropdownCtrl(div).items = effectiveOptions;
             }
@@ -752,7 +752,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             if (!col.visible) {
                 continue;
             }
-            
+
             const td = document.createElement("div");
             td.className = "wx-grid-cell";
             td.setAttribute("role", "gridcell");
@@ -775,17 +775,17 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             c.sort = null;
         }
         col.sort = next;
-        
+
         if (next) {
             this.orderRows(col);
         } else {
             this.render();
         }
-        
-        this._dispatch(webexpress.webui.Event.TABLE_SORT_EVENT, { 
-            sender: this._element, 
-            columnId: col.id, 
-            sortDirection: col.sort 
+
+        this._dispatch(webexpress.webui.Event.TABLE_SORT_EVENT, {
+            sender: this._element,
+            columnId: col.id,
+            sortDirection: col.sort
         });
     }
 
@@ -798,7 +798,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         if (idx === undefined) {
             return;
         }
-        
+
         const dir = column.sort === "asc" ? 1 : -1;
         const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
 
@@ -809,7 +809,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             const cmp = collator.compare(va, vb);
             return cmp === 0 ? a.i - b.i : cmp * dir;
         });
-        
+
         this._rows = decorated.map(d => d.row);
         this.render();
     }
@@ -839,7 +839,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                     rendererOptions.children = Array.from(src);
                 }
             }
-            
+
             return {
                 id: el.id || `col_${idx}`,
                 index: idx,
@@ -882,7 +882,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 uri: div.dataset.uri || div.dataset.url,
                 restApi: div.dataset.restApi || div.dataset.editApi,
                 target: div.dataset.target,
-                
+
                 // action attributes
                 primaryAction: Object.fromEntries(Object.entries(div.dataset)
                     .filter(([k]) => k.startsWith("wxPrimary"))
@@ -947,13 +947,13 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         }
         return Array.from(div.children).map((el) => {
             const cls = el.classList;
-            if (cls.contains("wx-dropdown-divider") || cls.contains("wx-dropdownbutton-divider")) { 
-                return { type: "divider" }; 
+            if (cls.contains("wx-dropdown-divider") || cls.contains("wx-dropdownbutton-divider")) {
+                return { type: "divider" };
             }
-            if (cls.contains("wx-dropdown-header")) { 
-                return { type: "header", content: el.textContent.trim(), icon: el.dataset.icon }; 
+            if (cls.contains("wx-dropdown-header")) {
+                return { type: "header", content: el.textContent.trim(), icon: el.dataset.icon };
             }
-            
+
             const ds = el.dataset;
             return {
                 content: el.textContent.trim(),
@@ -964,7 +964,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 target: ds.target,
                 modal: ds.modal,
                 disabled: el.hasAttribute("disabled"),
-                
+
                 // parse action attributes for options
                 primaryAction: {
                     action: ds.dataset.wxPrimaryAction || null,
@@ -1004,7 +1004,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
      * @param {number} depth Hierarchy depth.
      */
     _injectTreeToggle(tr, row, depth) {
-        const firstCell = Array.from(tr.children).find(cell => 
+        const firstCell = Array.from(tr.children).find(cell =>
             cell.classList.contains("wx-grid-cell") && !cell.classList.contains("wx-table-drag-handle")
         );
         if (!firstCell) {
@@ -1041,8 +1041,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             wrapper.appendChild(dummy);
         }
 
-        while (firstCell.firstChild) { 
-            wrapper.appendChild(firstCell.firstChild); 
+        while (firstCell.firstChild) {
+            wrapper.appendChild(firstCell.firstChild);
         }
         firstCell.appendChild(wrapper);
     }
@@ -1075,8 +1075,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
      */
     _rebuildColumnIndexCache() {
         this._colIndexCache.clear();
-        for (let i = 0; i < this._columns.length; i++) { 
-            this._colIndexCache.set(this._columns[i].id, i); 
+        for (let i = 0; i < this._columns.length; i++) {
+            this._colIndexCache.set(this._columns[i].id, i);
         }
     }
 
@@ -1092,7 +1092,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             if (!c.visible) {
                 continue;
             }
-            
+
             if (c.id === lastVisibleId) {
                 const min = c.minWidth || `${webexpress.webui.TableCtrl.MIN_COL_WIDTH}px`;
                 parts.push(`minmax(${min}, 1fr)`);
@@ -1111,8 +1111,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 } else {
                     val = w;
                 }
-            } 
-            
+            }
+
             if (c.minWidth) {
                 val = `minmax(${c.minWidth}, ${val})`;
             } else if (val === "1fr" || val === "auto") {
@@ -1120,7 +1120,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             }
             parts.push(val);
         }
-        
+
         if (this._hasOptions) {
             parts.push("1.5rem");
         }
@@ -1154,19 +1154,19 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
      * @param {Object} row - The row object.
      * @returns {string} The resolved row key.
      */
-    _getRowKey(row) { 
-        return row.id || (row._uid || (row._uid = `r_${crypto.randomUUID()}`)); 
+    _getRowKey(row) {
+        return row.id || (row._uid || (row._uid = `r_${crypto.randomUUID()}`));
     }
 
     /**
      * Updates the internal snapshot.
      * @param {Array<{ key: string, signature: string }>} states.
      */
-    _updateSnapshot(states) { 
-        this._prevRowState.clear(); 
-        for (const s of states) { 
-            this._prevRowState.set(s.key, s.signature); 
-        } 
+    _updateSnapshot(states) {
+        this._prevRowState.clear();
+        for (const s of states) {
+            this._prevRowState.set(s.key, s.signature);
+        }
     }
 
     /**
@@ -1223,7 +1223,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             return;
         }
         const headers = this._head.querySelectorAll(".wx-col-header");
-        
+
         const visibleCols = this._columns.filter(c => c.visible);
         const lastVisibleId = visibleCols.length > 0 ? visibleCols[visibleCols.length - 1].id : null;
 
@@ -1295,13 +1295,13 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
         let maxWidth = 0;
         const inner = headerTh.querySelector(".wx-col-inner") || headerTh;
-        
+
         // measure header
         const thStyle = getComputedStyle(headerTh);
-        const headerWidth = Math.ceil(inner.getBoundingClientRect().width) 
+        const headerWidth = Math.ceil(inner.getBoundingClientRect().width)
             + parseFloat(thStyle.paddingLeft) + parseFloat(thStyle.paddingRight)
             + parseFloat(thStyle.borderLeftWidth) + parseFloat(thStyle.borderRightWidth);
-        
+
         maxWidth = Math.max(maxWidth, headerWidth);
 
         // measure cells (expensive loop)
@@ -1311,12 +1311,12 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             if (!td) {
                 continue;
             }
-            
+
             // use scrollWidth to detect content overflow
             const tdStyle = getComputedStyle(td);
             const contentW = Math.max(td.scrollWidth, Math.ceil(td.getBoundingClientRect().width));
             const totalW = contentW + parseFloat(tdStyle.borderLeftWidth) + parseFloat(tdStyle.borderRightWidth);
-            
+
             if (totalW > maxWidth) {
                 maxWidth = totalW;
             }
@@ -1324,8 +1324,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
         const buffer = 8;
         column.width = Math.max(Math.ceil(maxWidth) + buffer, webexpress.webui.TableCtrl.MIN_COL_WIDTH);
-        
-        this._syncColumnWidths(); 
+
+        this._syncColumnWidths();
         this._schedulePersistIfAvailable();
     }
 
@@ -1339,7 +1339,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         const colId = th.dataset.columnId;
         const index = this._colIndexCache.get(colId);
         const column = this._columns[index];
-        
+
         if (!column || !column.visible || column.resizable === false) {
             this._isResizing = false;
             return;
@@ -1357,7 +1357,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             const newWidth = Math.max(startWidth + signed, webexpress.webui.TableCtrl.MIN_COL_WIDTH);
             if (column.width !== newWidth) {
                 column.width = Math.round(newWidth);
-                this._syncColumnWidths(); 
+                this._syncColumnWidths();
             }
         };
 

@@ -37,11 +37,11 @@ webexpress.webui.DialogPanels.register("editor-addon", {
 
         const catSelect = document.createElement("select");
         catSelect.className = "form-select w-auto wx-addon-cat";
-        
+
         // populate categories
         const categories = new Set();
         state.addons.forEach(a => categories.add(a.category || "General"));
-        
+
         catSelect.innerHTML = `<option value="all">All Categories</option>`;
         Array.from(categories).sort().forEach(cat => {
             const opt = document.createElement("option");
@@ -70,7 +70,7 @@ webexpress.webui.DialogPanels.register("editor-addon", {
         // initialize input tile controller
         if (typeof webexpress.webui.InputTileCtrl === "function") {
             state.tileCtrl = new webexpress.webui.InputTileCtrl(tileHost);
-            
+
             state.tileCtrl.tiles = state.addons.map(addon => ({
                 id: addon.id,
                 label: addon.label,
@@ -92,7 +92,7 @@ webexpress.webui.DialogPanels.register("editor-addon", {
                 const addonId = input.value;
                 const addon = state.addons.find(a => a.id === addonId);
                 const col = input.closest(".wx-addon-card-wrapper");
-                
+
                 if (addon && col) {
                     const addonCat = addon.category || "General";
                     const isCatMatch = cat === "all" || addonCat === cat;
@@ -144,9 +144,9 @@ webexpress.webui.DialogPanels.register("editor-addon", {
         if (!modal._addonState) {
             return;
         }
-        
+
         const state = modal._addonState;
-        
+
         // reset form and selection
         state.selectedId = null;
         if (state.searchInput) {
@@ -168,15 +168,15 @@ webexpress.webui.DialogPanels.register("editor-addon", {
         if (state.tileHost) {
             const modalWrapper = state.tileHost.closest(".modal-content") || document;
             const submitBtn = modalWrapper.querySelector(".submit-btn");
-            
+
             if (submitBtn) {
                 submitBtn.disabled = true; // reset button
-                
+
                 if (state.tileCtrl?.value) {
                     state.selectedId = state.tileCtrl.value;
                     submitBtn.disabled = false;
                 }
-                
+
                 // ensure we only bind once
                 if (!state.submitBound) {
                     submitBtn.addEventListener("click", () => {
@@ -207,12 +207,12 @@ webexpress.webui.DialogPanels.register("editor-addon", {
         if (!state || !state.selectedId) {
             return { valid: false, message: "Please select an AddOn from the list." };
         }
-        
+
         const editor = modal ? modal._editor : null;
         if (!editor) {
             return { valid: false, message: "Internal error: Editor instance not found." };
         }
-        
+
         return true;
     },
 
@@ -250,7 +250,7 @@ webexpress.webui.DialogPanels.register("editor-addon", {
         const editor = modal._editor;
         if (editor && editor._addonPlugin) {
             const plugin = editor._addonPlugin;
-            
+
             // pass explicit cursor tracking to the plugin
             plugin._backupRange = modal._backupRange || null;
             plugin._activeAddonNode = null; // assure we insert new node

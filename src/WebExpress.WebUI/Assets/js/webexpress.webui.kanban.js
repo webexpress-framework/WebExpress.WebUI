@@ -80,10 +80,10 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             });
         } else if (el.dataset.swimlanes) {
             swimlanes = String(el.dataset.swimlanes).split(",").map((s) => {
-                return { 
-                    id: s.trim(), 
-                    label: s.trim(), 
-                    expanded: true 
+                return {
+                    id: s.trim(),
+                    label: s.trim(),
+                    expanded: true
                 };
             });
         }
@@ -91,7 +91,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         // apply board template constraints based on columns
         if (columns.length > 0) {
             el.style.setProperty("--wx-board-cols", columns.length);
-            
+
             const sizes = columns.map((col) => {
                 return col.size === "*" ? "1fr" : col.size;
             });
@@ -110,7 +110,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 colorCss: cardEl.dataset.colorCss || "",
                 icon: cardEl.dataset.icon || null,
                 image: cardEl.dataset.image || null,
-                
+
                 // primary actions
                 primaryAction: {
                     action: cardEl.dataset.wxPrimaryAction || null,
@@ -148,14 +148,14 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         if (hasSwimlanes) {
             const headerRow = document.createElement("div");
             headerRow.className = "wx-kanban-row wx-kanban-headers";
-            
+
             for (let c = 0; c < this._columns.length; c++) {
                 const header = document.createElement("div");
                 header.className = "wx-kanban-column-header";
                 header.textContent = this._columns[c].label;
                 headerRow.appendChild(header);
             }
-            
+
             el.appendChild(headerRow);
         }
 
@@ -192,7 +192,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 const cell = document.createElement("div");
                 cell.className = "wx-kanban-cell";
                 cell.dataset.colId = col.id;
-                
+
                 if (lane.id) {
                     cell.dataset.swimlaneId = lane.id;
                 }
@@ -210,7 +210,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                         }
                     }
                 });
-                
+
                 cell.addEventListener("dragleave", (e) => {
                     cell.classList.remove("wx-drag-over-empty");
                     const lastCard = cell.lastElementChild;
@@ -218,7 +218,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                         lastCard.classList.remove("wx-drag-over-bottom");
                     }
                 });
-                
+
                 cell.addEventListener("drop", (e) => {
                     this._onDropCell(e, col.id, lane.id, cell);
                 });
@@ -227,7 +227,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 const cellCards = this._cards.filter((card) => {
                     return card.columnId === col.id && (hasSwimlanes ? card.swimlaneId === lane.id : true);
                 });
-                
+
                 for (let k = 0; k < cellCards.length; k++) {
                     const cardEl = this._buildCardElement(cellCards[k], col.id, lane.id);
                     cell.appendChild(cardEl);
@@ -238,7 +238,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             }
             laneWrapper.appendChild(row);
             el.appendChild(laneWrapper);
-            
+
             // convert lane wrapper into an expandable component and sync state
             if (hasSwimlanes) {
                 new webexpress.webui.ExpandableCtrl(laneWrapper);
@@ -267,7 +267,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         // map bootstrap colors to hex for the top border highlight
         const colorCss = card.colorCss || "";
         let colorHex = "transparent";
-        
+
         if (colorCss.includes("success")) {
             colorHex = "#198754";
         } else if (colorCss.includes("warning")) {
@@ -277,7 +277,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         } else if (colorCss.includes("info")) {
             colorHex = "#0d6efd";
         }
-        
+
         cardEl.style.setProperty("--kanban-color", colorHex);
 
         // build card header
@@ -320,10 +320,10 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         cardEl.addEventListener("dragover", (e) => {
             e.preventDefault();
             e.stopPropagation();
-            
+
             const rect = cardEl.getBoundingClientRect();
             const isTopHalf = (e.clientY - rect.top) < (rect.height / 2);
-            
+
             if (isTopHalf) {
                 cardEl.classList.add("wx-drag-over-top");
                 cardEl.classList.remove("wx-drag-over-bottom");
@@ -362,18 +362,18 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         const sourceIndex = this._cards.findIndex((c) => {
             return c.id === this._dragCard.id;
         });
-        
+
         if (sourceIndex > -1) {
             const oldColId = this._dragCard.columnId;
             const oldSwimlaneId = this._dragCard.swimlaneId;
-            
+
             const [moved] = this._cards.splice(sourceIndex, 1);
             moved.columnId = colId;
             moved.swimlaneId = swimlaneId;
-            
+
             // append card at the end of the array
             this._cards.push(moved);
-            
+
             this._dispatchMoveEvent(moved, oldColId, oldSwimlaneId, colId, swimlaneId, this._cards.length - 1);
             this.render();
         }
@@ -393,11 +393,11 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         const sourceIndex = this._cards.findIndex((c) => {
             return c.id === this._dragCard.id;
         });
-        
+
         if (sourceIndex > -1) {
             const oldColId = this._dragCard.columnId;
             const oldSwimlaneId = this._dragCard.swimlaneId;
-            
+
             const [moved] = this._cards.splice(sourceIndex, 1);
             moved.columnId = colId;
             moved.swimlaneId = swimlaneId;
@@ -406,13 +406,13 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             let targetIndex = this._cards.findIndex((c) => {
                 return c.id === targetCard.id;
             });
-            
+
             if (!isTopHalf) {
                 targetIndex += 1;
             }
 
             this._cards.splice(targetIndex, 0, moved);
-            
+
             this._dispatchMoveEvent(moved, oldColId, oldSwimlaneId, colId, swimlaneId, targetIndex);
             this.render();
         }
@@ -431,7 +431,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Dispatches custom events when a card is moved.
      */
-    _dispatchMoveEvent(card, oldColId, oldSwimlaneId, newColId, newSwimlaneId, newIndex) {        
+    _dispatchMoveEvent(card, oldColId, oldSwimlaneId, newColId, newSwimlaneId, newIndex) {
         const layout = this._cards.map((c) => {
             return {
                 id: c.id,

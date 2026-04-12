@@ -419,7 +419,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
         for (const item of this._items) {
             if (item.type === "toolbar") {
                 this._toolbarElement = item.element;
-                
+
                 if (!this._toolbarElement._toolbarCtrl) {
                     // define as non-enumerable to prevent JSON.stringify circular reference issues
                     Object.defineProperty(this._toolbarElement, '_toolbarCtrl', {
@@ -429,7 +429,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                         enumerable: false
                     });
                 }
-                
+
                 this._element.appendChild(this._toolbarElement);
                 break;
             }

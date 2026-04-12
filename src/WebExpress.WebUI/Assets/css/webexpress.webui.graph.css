@@ -21,15 +21,15 @@
 }
 
 .wx-graph-fit-button {
-    position: absolute; 
-    top: 8px; 
-    right: 8px; 
-    padding: 4px 8px; 
-    border: 1px solid #ced4da; 
-    border-radius: 4px; 
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
     color: var(--bs-secondary);
-    background: #fff; 
-    cursor: pointer; 
+    background: #fff;
+    cursor: pointer;
 }
 
 [data-bs-theme="dark"] .wx-graph-fit-button {
@@ -76,8 +76,8 @@
     pointer-events: none;
 }
 
-.wx-graph-edge-arrow path { 
-    fill: var(--bs-secondary); 
+.wx-graph-edge-arrow path {
+    fill: var(--bs-secondary);
 }
 
 /* --- Graph Elements: Nodes --- */
@@ -147,17 +147,17 @@
     opacity: 0.8;
 }
 
-.wx-graph-node-hover rect, 
+.wx-graph-node-hover rect,
 .wx-graph-node-hover circle,
 .hover-highlight {
-    stroke: #28a745 !important; 
+    stroke: #28a745 !important;
     stroke-width: 3px !important;
-    stroke-dasharray: 6, 3; 
-    fill: rgba(40, 167, 69, 0.1); 
+    stroke-dasharray: 6, 3;
+    fill: rgba(40, 167, 69, 0.1);
     transition: all 0.1s ease;
 }
 
-.wx-graph-node-source rect, 
+.wx-graph-node-source rect,
 .wx-graph-node-source circle {
     stroke: #ffc107 !important;
     stroke-width: 3px !important;
@@ -193,9 +193,9 @@
 .wx-graph-viewer .bg-body { fill: var(--bs-body-bg); }
 .wx-graph-viewer .bg-white { fill: var(--bs-white); }
 
-.wx-graph-viewer .primary { 
-    stroke:var(--bs-primary); 
-    fill: var(--bs-primary); 
+.wx-graph-viewer .primary {
+    stroke:var(--bs-primary);
+    fill: var(--bs-primary);
 }
 
 .wx-graph-viewer .secondary {

@@ -155,7 +155,7 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
                 image: div.dataset.image || null,
                 colorCss: div.dataset.colorCss || div.dataset.color || null,
                 colorStyle: div.dataset.colorStyle || null,
-                
+
                 // parse action attributes
                 primaryAction: div.dataset.wxPrimaryAction || null,
                 primaryTarget: div.dataset.wxPrimaryTarget || null,

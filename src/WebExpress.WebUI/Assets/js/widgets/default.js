@@ -139,7 +139,7 @@ webexpress.webui.DashboardWidgets.register("widget_info", {
     /**
      * Renders a simple informational card with optional title/desc.
      * @param {HTMLElement} container - The container element to render into.
-     * @param {object} data - The widget data. 
+     * @param {object} data - The widget data.
      */
     render: function (container, data) {
         // show data.params.title/desc if available
@@ -165,7 +165,7 @@ webexpress.webui.DashboardWidgets.register("widget_progress", {
     /**
      * Renders a simple progress bar.
      * @param {HTMLElement} container - The container element to render into.
-     * @param {object} data - The widget data. 
+     * @param {object} data - The widget data.
      */
     render: function (container, data) {
         const params = data.params || {};
@@ -198,7 +198,7 @@ webexpress.webui.DashboardWidgets.register("widget_avatar", {
     /**
      * Renders a user/character avatar with name and optional caption.
      * @param {HTMLElement} container - The container element to render into.
-     * @param {object} data - The widget data. 
+     * @param {object} data - The widget data.
      */
     render: function (container, data) {
         const params = data.params || {};

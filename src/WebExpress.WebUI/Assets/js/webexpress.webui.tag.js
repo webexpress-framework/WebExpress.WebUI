@@ -88,7 +88,7 @@ webexpress.webui.TagCtrl = class extends webexpress.webui.Ctrl {
 
         this._list.appendChild(fragment);
     }
-    
+
     /**
      * Gets the tags as a string separated by semicolons.
      * @returns {string} Tags as semicolon-separated string.
@@ -104,7 +104,7 @@ webexpress.webui.TagCtrl = class extends webexpress.webui.Ctrl {
      */
     set value(value) {
         let newTags = [];
-        
+
         if (Array.isArray(value)) {
             newTags = value.map((t) => { return String(t).trim(); }).filter((t) => { return t.length > 0; });
         } else if (typeof value === "string") {

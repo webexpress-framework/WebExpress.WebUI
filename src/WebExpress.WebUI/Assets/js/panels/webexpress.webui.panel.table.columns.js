@@ -237,7 +237,7 @@ webexpress.webui.DialogPanels.register("table-columns", {
         searchInput.addEventListener("input", applyFilter);
         searchGrp.appendChild(searchInput);
         container.appendChild(searchGrp);
-        
+
         const desc = document.createElement("div");
         desc.className = "form-text mb-2";
         desc.textContent = modal._i18n("webexpress.webui:page.table.columns.desc");

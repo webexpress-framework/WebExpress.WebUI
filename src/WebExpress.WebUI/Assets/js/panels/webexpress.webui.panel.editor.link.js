@@ -52,7 +52,7 @@ webexpress.webui.DialogPanels.register("editor-link", {
         urlInput.addEventListener("input", function () {
             const modalWrapper = this.closest("[data-key]") || document;
             const submitBtn = modalWrapper.querySelector(".submit-btn");
-            
+
             if (submitBtn) {
                 if (this.value.trim() !== "") {
                     submitBtn.disabled = false;
@@ -72,7 +72,7 @@ webexpress.webui.DialogPanels.register("editor-link", {
         if (modal && modal._link && modal._link.urlInput) {
             const urlInput = modal._link.urlInput;
             const textInput = modal._link.textInput;
-            
+
             // reset or prefill fields on every show
             if (modal._linkPrefill) {
                 urlInput.value = modal._linkPrefill.url || "";
@@ -85,13 +85,13 @@ webexpress.webui.DialogPanels.register("editor-link", {
                     textInput.value = "";
                 }
             }
-            
+
             urlInput.focus();
             urlInput.select();
 
             const modalWrapper = urlInput.closest("[data-key]") || document;
             const submitBtn = modalWrapper.querySelector(".submit-btn");
-            
+
             if (submitBtn) {
                 if (urlInput.value.trim() !== "") {
                     submitBtn.disabled = false;
@@ -120,22 +120,22 @@ webexpress.webui.DialogPanels.register("editor-link", {
     validate: function (modal) {
         const editor = modal ? modal._editor : null;
         const urlInput = modal && modal._link ? modal._link.urlInput : null;
-        
+
         if (!editor || !urlInput) {
             return { valid: false, message: "Internal error: editor or field not available." };
         }
-        
+
         const urlVal = urlInput.value.trim();
         if (urlVal === "") {
             return { valid: false, message: "Please enter a valid URL." };
         }
-        
+
         return true;
     },
 
     /**
      * Handles submit and inserts the link into the editor.
-     * 
+     *
      * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
      * @returns {void}
      */
@@ -143,37 +143,37 @@ webexpress.webui.DialogPanels.register("editor-link", {
         const editor = modal ? modal._editor : null;
         const urlInput = modal && modal._link ? modal._link.urlInput : null;
         const textInput = modal && modal._link ? modal._link.textInput : null;
-        
+
         if (!editor || !urlInput) {
             return;
         }
-        
+
         let urlVal = urlInput.value.trim();
         if (urlVal === "") {
             return;
         }
-        
+
         // append protocol if missing to prevent sanitizer from stripping
         if (!/^https?:\/\//i.test(urlVal) && !urlVal.startsWith("/") && !urlVal.startsWith("#") && !urlVal.startsWith("mailto:")) {
             urlVal = "https://" + urlVal;
         }
-        
+
         const rawText = String((textInput && textInput.value) || "").trim() || urlVal.replace(/^https?:\/\//i, "");
         const safeUrl = urlVal.replace(/"/g, "%22");
-        
+
         const escapeHtml = function (text) {
             const div = document.createElement("div");
             div.textContent = text;
             return div.innerHTML;
         };
-        
+
         // strictly enforce backed up range to ensure exact selection replacement
         if (modal._backupRange) {
             editor._savedRange = modal._backupRange.cloneRange();
         }
-        
+
         editor.insertHtmlAtCursor(' <a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(rawText) + "</a> ");
-               
+
         // close modal
         if (typeof modal.hide === "function") {
             modal.hide();

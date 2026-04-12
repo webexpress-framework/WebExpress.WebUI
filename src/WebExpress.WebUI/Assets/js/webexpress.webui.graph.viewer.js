@@ -18,7 +18,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
         this._nodeStyle = (element.dataset.nodeStyle || "").toLowerCase();
         // read edge style configuration, default is 'smooth'
         this._edgeStyle = (element.dataset.edgeStyle || "smooth").toLowerCase();
-        
+
         // read physics configuration. true by default unless explicitly set to "false"
         const physicsAttr = element.dataset.physicsEnabled;
         this._configPhysics = physicsAttr !== "false";
@@ -101,13 +101,13 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
         if (this._fitBtn) {
             return;
         }
-        const btn = document.createElement("button"); 
-        btn.type = "button"; 
-        btn.className = "wx-graph-fit-button"; 
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "wx-graph-fit-button";
         btn.title = this._i18n("webexpress.webui:fit", "Fit to view");
-        const icon = document.createElement("i"); 
-        icon.className = "fa-solid fa-expand"; 
-        btn.appendChild(icon); 
+        const icon = document.createElement("i");
+        icon.className = "fa-solid fa-expand";
+        btn.appendChild(icon);
 
         btn.addEventListener("click", () => {
             this._fitToView();
@@ -207,7 +207,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
         const pt = this._svg.createSVGPoint();
         pt.x = e.clientX;
         pt.y = e.clientY;
-        const ctm = (this._viewport && typeof this._viewport.getScreenCTM === "function" ? this._viewport.getScreenCTM() : null) 
+        const ctm = (this._viewport && typeof this._viewport.getScreenCTM === "function" ? this._viewport.getScreenCTM() : null)
             || this._svg.getScreenCTM();
         return ctm ? pt.matrixTransform(ctm.inverse()) : { x: e.clientX, y: e.clientY };
     }
@@ -461,7 +461,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
         const hadMissing = this._assignMissingPositions();
         // start animation if missing positions were found AND physics is allowed by config
         const shouldRun = hadMissing && this._configPhysics;
-        
+
         if (shouldRun) {
             this._physicsEnabled = true;
         }
@@ -554,10 +554,10 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             }
             path.setAttribute("data-id", t.id || "");
             path.setAttribute("data-label", t.label || "");
-            
+
             // use helper to generate path data based on configuration
             path.setAttribute("d", this._generatePathData(pts));
-            
+
             path.setAttribute("fill", "none");
             path.setAttribute("stroke-linecap", "round");
             path.setAttribute("stroke-linejoin", "round");
@@ -664,21 +664,21 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
     _edgePointsWithWaypoints(from, to, wps, dissolve) {
         const srcC = { x: from.x, y: from.y };
         const dstC = { x: to.x, y: to.y };
-        
+
         if (from.id === to.id && (!wps || wps.length === 0)) {
             const w = from.rectWidth || from.width || 60;
             const h = from.rectHeight || from.height || 40;
-            
+
             // adjust offset based on layout to avoid overlapping with text/icon
             const isLabelBelow = (from.data.layout === "label-below");
             const loopOffset = isLabelBelow ? 28 : 20;
-                       
+
             const p1 = { x: srcC.x + w/4, y: srcC.y - h/2 };
             const p2 = { x: srcC.x + w/4, y: srcC.y - h/2 - loopOffset };
             const p3 = { x: srcC.x + w/2 + loopOffset, y: srcC.y - h/2 - loopOffset};
             const p4 = { x: srcC.x + w/2 + loopOffset, y: srcC.y - h/4 };
             const p5 = { x: srcC.x + w/2 + 5, y: srcC.y - h/8 };
-            
+
             return [p1, p2, p3, p4, p5];
         }
 
@@ -742,7 +742,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             const len = Math.hypot(dx, dy) || 1;
             return { x: cx + (dx / len) * r, y: cy + (dy / len) * r };
         }
-        
+
         // calculate top-left based on visual center and visual dimensions
         return this._rectEdgePointRaw({ x: node.x - w / 2, y: node.y - h / 2 }, toward, w, h);
     }
@@ -799,7 +799,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
             g.setAttribute("class", "wx-graph-node");
             g.setAttribute("data-id", n.id);
-            
+
             const layout = (n.data.layout || "").toLowerCase();
             const iconBoxSize = webexpress.webui.GraphViewerCtrl.ICON_SIZE;
             const rectW = n.rectWidth || n.width;
@@ -876,7 +876,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             if (n.data.foregroundColor) {
                 text.setAttribute("fill", n.data.foregroundColor);
             }
-            
+
             // if uri is present, add underline style class
             if (n.data.uri) {
                 text.classList.add("wx-graph-node-link");
@@ -916,13 +916,13 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
 
             g.addEventListener("click", (e) => {
                 e.stopPropagation();
-                
+
                 // if ctrl + click and uri is present, open url
                 if (e.ctrlKey && n.data.uri) {
                     window.open(n.data.uri, "_self");
                     return;
                 }
-                
+
                 const detail = { id: n.id, data: n.data };
                 this._dispatch(webexpress.webui.Event.CLICK_EVENT, { detail, bubbles: true });
             });
@@ -930,12 +930,12 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             g.addEventListener("dblclick", (e) => {
                 e.stopPropagation();
                 const detail = { id: n.id, data: n.data };
-                
+
                 // if uri is present, navigate to it on double click
                 if (n.data.uri) {
                     window.open(n.data.uri, "_self");
                 }
-                
+
                 this._dispatch(webexpress.webui.Event.DOUBLE_CLICK_EVENT, { detail, bubbles: true });
             });
 
@@ -987,7 +987,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                 return;
             }
             const p = this._toLocal(e);
-            
+
             // calculate delta of movement
             const dx = (p.x + this._drag.offsetX) - this._drag.node.x;
             const dy = (p.y + this._drag.offsetY) - this._drag.node.y;
@@ -1203,7 +1203,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             const rectW = n.rectWidth || n.width;
             const rectH = n.rectHeight || n.height;
             const imgSize = 22;
-            
+
             // determine the size actually used for centering logic
             const currentIconSize = n.data.image ? imgSize : iconBoxSize;
 
@@ -1235,10 +1235,10 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             if (existingClasses.includes("hover-highlight")) {
                 rectClasses.push("hover-highlight");
             }
-            
+
             // reset base class but keep dynamic ones
             shapeEl.setAttribute("class", rectClasses.join(" "));
-            
+
             if (n.data.backgroundColor) {
                 shapeEl.setAttribute("fill", n.data.backgroundColor);
             } else {
@@ -1274,7 +1274,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                 const rectHalfH = rectH / 2;
                 // use currentIconSize for correct vertical centering within the shape
                 let iconY = n.y - rectHalfH + (rectH - currentIconSize) / 2;
-                
+
                 if (imgIcon) {
                     imgIcon.setAttribute("x", centerX - imgSize / 2);
                     imgIcon.setAttribute("y", iconY);
@@ -1292,7 +1292,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                 text.setAttribute("x", textX);
                 text.setAttribute("y", n.y + 5);
                 text.removeAttribute("dominant-baseline");
-                
+
                 if (imgIcon) {
                     // center image icon vertically based on its own size
                     imgIcon.setAttribute("x", n.x - n.width / 2 + 12);
@@ -1305,7 +1305,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             }
 
             text.className.baseVal = ["wx-graph-node-label", n.data.foregroundCss || ""].filter(Boolean).join(" ");
-            
+
             // if uri is present, add link style
             if (n.data.uri) {
                 text.classList.add("wx-graph-node-link");
@@ -1343,7 +1343,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                 const pts = this._edgePointsWithWaypoints(a, b, t.waypoints || [], this._dissolveProgress);
                 // update d-attribute instead of points using the config-aware helper
                 el.setAttribute("d", this._generatePathData(pts));
-                
+
                 el.setAttribute("data-label", t.label || "");
                 el.className.baseVal = ["wx-graph-viewer-edge", t.colorCss || ""].filter(Boolean).join(" ");
                 if (t.color) {

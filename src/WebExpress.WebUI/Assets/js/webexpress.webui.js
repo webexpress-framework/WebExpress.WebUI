@@ -4,8 +4,8 @@ webexpress.webui = webexpress.webui || {}
 /**
  * Namespace webexpress.webui
  * The Controller class monitors changes in the DOM and creates instances
- * of registered classes for new DOM elements. These instances are managed 
- * in a map and are removed from the map when the corresponding DOM 
+ * of registered classes for new DOM elements. These instances are managed
+ * in a map and are removed from the map when the corresponding DOM
  * elements are removed.
  */
 webexpress.webui.Controller = new class {
@@ -17,7 +17,7 @@ webexpress.webui.Controller = new class {
         this.classRegistry = new Map();
         this._wxRegisteredElements = new WeakSet(); // prevent duplicate bindings
         this.observer = new MutationObserver(this.handleMutations.bind(this));
-        
+
         // observe attribute changes
         this.observer.observe(document, {
             childList: true,
@@ -30,22 +30,22 @@ webexpress.webui.Controller = new class {
                 "data-wx-bind"
             ]
         });
-        
+
         this.overrideCreateElement();
         this.initModalHandler();
 
         // re-added native fullscreen listeners
-        document.addEventListener("fullscreenchange", () => { 
-            this._onFullscreenChange(); 
+        document.addEventListener("fullscreenchange", () => {
+            this._onFullscreenChange();
         });
-        document.addEventListener("webkitfullscreenchange", () => { 
-            this._onFullscreenChange(); 
+        document.addEventListener("webkitfullscreenchange", () => {
+            this._onFullscreenChange();
         });
-        document.addEventListener("mozfullscreenchange", () => { 
-            this._onFullscreenChange(); 
+        document.addEventListener("mozfullscreenchange", () => {
+            this._onFullscreenChange();
         });
-        document.addEventListener("MSFullscreenChange", () => { 
-            this._onFullscreenChange(); 
+        document.addEventListener("MSFullscreenChange", () => {
+            this._onFullscreenChange();
         });
     }
 
@@ -169,7 +169,7 @@ webexpress.webui.Controller = new class {
             });
             bound = true;
         }
-        
+
         // css fullscreen toggle support
         if (element.matches("[data-wx-primary-action='fullscreen']")) {
             element.addEventListener("click", (e) => {
@@ -179,7 +179,7 @@ webexpress.webui.Controller = new class {
                 const targetSelector = element.getAttribute("data-wx-primary-target");
                 // default to body if no target is specified
                 const targetEl = targetSelector ? document.querySelector(targetSelector) : document.body;
-                
+
                 if (targetEl) {
                     this.toggleFullscreen(targetEl);
                 } else {
@@ -196,7 +196,7 @@ webexpress.webui.Controller = new class {
                 e.preventDefault();
                 const targetSelector = element.getAttribute("data-wx-primary-target") || null;
                 const targetEl = targetSelector ? document.querySelector(targetSelector) : document.documentElement;
-                
+
                 if (targetEl) {
                     this.toggleNativeFullscreen(targetEl);
                 }
@@ -204,7 +204,7 @@ webexpress.webui.Controller = new class {
             element.setAttribute("aria-pressed", "false");
             bound = true;
         }
-        
+
         // quickfilter actions
         if (element.matches("[data-wx-primary-action='filter']")) {
             element.addEventListener("click", (e) => {
@@ -356,7 +356,7 @@ webexpress.webui.Controller = new class {
             element.addEventListener("click", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                this._exitNativeFullscreen(); 
+                this._exitNativeFullscreen();
             });
             bound = true;
         }
@@ -439,7 +439,7 @@ webexpress.webui.Controller = new class {
             }
         }
     }
-    
+
     /**
      * Creates an instance from a registered classType string and a DOM element.
      * @param {string} classType - The registered class name (selector).
@@ -527,7 +527,7 @@ webexpress.webui.Controller = new class {
         if (element._wx_controller) {
             return element._wx_controller;
         }
-        
+
         if (this.instanceMap.has(element)) {
             const instance = this.instanceMap.get(element);
             if (ClassConstructor) {
@@ -555,16 +555,16 @@ webexpress.webui.Controller = new class {
         }
         return null;
     }
-    
+
     /**
      * Toggles "light" fullscreen state (CSS based) for the provided element.
      * @param {HTMLElement} el - target element to toggle fullscreen for
      */
     toggleFullscreen(el) {
-        if (!el) { 
-            return; 
+        if (!el) {
+            return;
         }
-        
+
         const isFullscreen = el.classList.toggle("wx-fullscreen-active");
 
         if (isFullscreen) {
@@ -584,8 +584,8 @@ webexpress.webui.Controller = new class {
      * @param {HTMLElement} el - target element
      */
     toggleNativeFullscreen(el) {
-        if (!el) { 
-            return; 
+        if (!el) {
+            return;
         }
         if (this._isNativeFullscreenElement(el)) {
             this._exitNativeFullscreen();
@@ -650,11 +650,11 @@ webexpress.webui.Controller = new class {
      */
     _onFullscreenChange(changedEl) {
         const nativeFsEl = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement || null;
-        
+
         document.querySelectorAll("[data-wx-primary-action='fullscreen']").forEach((btn) => {
             const targetSelector = btn.getAttribute("data-wx-primary-target") || null;
             const target = targetSelector ? document.querySelector(targetSelector) : document.documentElement;
-            
+
             const active = target && this._isCssFullscreenElement(target);
             this._updateButtonState(btn, active);
         });
@@ -662,7 +662,7 @@ webexpress.webui.Controller = new class {
         document.querySelectorAll("[data-wx-primary-action='native-fullscreen']").forEach((btn) => {
             const targetSelector = btn.getAttribute("data-wx-primary-target") || null;
             const target = targetSelector ? document.querySelector(targetSelector) : document.documentElement;
-            
+
             const active = target && (nativeFsEl === target);
             this._updateButtonState(btn, active);
         });
@@ -684,7 +684,7 @@ webexpress.webui.Controller = new class {
      */
     _updateButtonState(btn, active) {
         btn.setAttribute("aria-pressed", active ? "true" : "false");
-        
+
         if (active) {
             btn.setAttribute("data-wx-fullscreen-active", "true");
             const icon = btn.querySelector("i");
@@ -709,7 +709,7 @@ webexpress.webui.Controller = new class {
             }
         }
     }
-    
+
     /**
      * Registers a single bind type for a given element.
      * @param {HTMLElement} element - The bound DOM element.
@@ -746,7 +746,7 @@ webexpress.webui.Controller = new class {
                     }
                 });
                 return;
-            } 
+            }
         }
 
         if (bindName == "filter") {
@@ -760,7 +760,7 @@ webexpress.webui.Controller = new class {
             });
         }
     }
-    
+
     /**
      * Registers a quickfilter definition in the global FilterRegistry based on the given element.
      * Extracts relevant filter properties (id, name, group, exclusive) from the element's data attributes.
@@ -1230,7 +1230,7 @@ webexpress.webui.Syntax = new class {
 
         // store language-specific syntax configurations in syntax object
         this.syntax[language] = syntax || {};
-        
+
         // optional: Store under alias if provided
         if (alias) {
             this.syntax[alias] = syntax || {};
@@ -1288,10 +1288,10 @@ webexpress.webui.EditorPlugins = new class {
 
         if (!name || !definition) return this;
 
-        this._plugins.push({ 
-            name: name, 
+        this._plugins.push({
+            name: name,
             position: position,
-            definition: definition 
+            definition: definition
         });
 
         // ensure plugins are sorted by position
@@ -1342,9 +1342,9 @@ webexpress.webui.EditorAddOns = new class {
         // ensure the ID is included in the definition object for downstream usage
         definition.id = id;
 
-        this._addOns.push({ 
-            id: id, 
-            definition: definition 
+        this._addOns.push({
+            id: id,
+            definition: definition
         });
         return this;
     }
@@ -1683,7 +1683,7 @@ webexpress.webui.Ctrl = class {
         if (!element || !element.parentNode) return null;
 
         element.parentNode.removeChild(element);
-        
+
         return element;
     }
 
@@ -1703,7 +1703,7 @@ webexpress.webui.Ctrl = class {
             composed: true
         }));
     }
-    
+
     /**
      * Returns the translated text for the specified i18n key.
      * If no translation is configured or the I18N module is unavailable,

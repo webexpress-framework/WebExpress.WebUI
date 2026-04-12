@@ -103,7 +103,7 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
         if (tab.primaryAction !== null) {
             btn.dataset.wxPrimaryAction = tab.primaryAction;
         }
-        
+
         if (tab.primaryTarget !== null) {
             btn.dataset.wxPrimaryTarget = tab.primaryTarget;
         }
@@ -131,7 +131,7 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
         });
 
         li.appendChild(btn);
-        
+
         return li;
     }
 
@@ -149,10 +149,10 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
 
         // update active state on navigation links
         const navLinks = this._navElement.querySelectorAll(".nav-link");
-        
+
         for (let i = 0; i < navLinks.length; i++) {
             const link = navLinks[i];
-            
+
             if (link.dataset.tabId === tabId) {
                 link.classList.add("active");
                 link.setAttribute("aria-selected", "true");
@@ -165,7 +165,7 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
         // update active state on content panes
         for (let i = 0; i < this._tabs.length; i++) {
             const pane = this._tabs[i].paneElement;
-            
+
             if (pane.id === tabId) {
                 pane.classList.add("show", "active");
             } else {

@@ -34,10 +34,10 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
             const parts = value.split(" - ");
             const start = this._parseDate(parts[0].trim(), this._dateFormat);
             const end = this._parseDate(parts[1].trim(), this._dateFormat);
-            
+
             this._rangeStart = start || null;
             this._rangeEnd = end || null;
-            
+
             if (this._rangeStart) {
                 this._viewDate = new Date(this._rangeStart);
             } else {
@@ -224,7 +224,7 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
                 ? this._formatDateString(this._selectedDate, this._dateFormat)
                 : "";
         }
-        
+
         // disable copy button if nothing is selected
         const copyBtn = this._toolbar.querySelector('.wx-calendar-copy-btn');
         if ((this._rangeMode && (!this._rangeStart || !this._rangeEnd)) ||
@@ -633,7 +633,7 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
                 const td = document.createElement("td");
                 const button = document.createElement("button");
                 button.textContent = date.getDate().toString();
-                
+
                 // store timestamp for event delegation
                 button.dataset.ts = date.getTime().toString();
                 button.className = "wx-calendar-day";
@@ -689,10 +689,10 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
                 return;
             }
             e.stopPropagation();
-            
+
             const timestamp = parseInt(target.dataset.ts, 10);
             const currentDate = new Date(timestamp);
-            
+
             if (this._rangeMode) {
                 if (this._rangeStart && this._rangeEnd === null) {
                     if (currentDate < this._rangeStart) {
@@ -726,10 +726,10 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
                 if (!target || !target.dataset.ts) {
                     return;
                 }
-                
+
                 const hoverTs = parseInt(target.dataset.ts, 10);
                 const startTs = new Date(this._rangeStart).setHours(0, 0, 0, 0);
-                
+
                 const min = Math.min(startTs, hoverTs);
                 const max = Math.max(startTs, hoverTs);
 
@@ -744,7 +744,7 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
                     }
                 }
             });
-            
+
             tbody.addEventListener("mouseleave", () => {
                 const buttons = tbody.querySelectorAll(".wx-calendar-day");
                  for (let i = 0; i < buttons.length; i++) {

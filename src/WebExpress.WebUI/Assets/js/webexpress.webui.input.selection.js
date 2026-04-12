@@ -147,7 +147,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                 if (!this._multiselect) {
                     this.value = [];
                 }
-                
+
                 // toggle selection or add unique
                 if (!this._values.includes(item.id)) {
                     this.value = [...this.value, item.id];
@@ -278,7 +278,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                 li.className = "dropdown-item";
                 // store id for event delegation
                 li.dataset.id = item.id;
-                
+
                 if (item.disabled) {
                     li.classList.add("disabled");
                 }
@@ -301,11 +301,11 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                     contentWrapper.prepend(img);
                 }
                 li.appendChild(contentWrapper);
-               
+
                 fragment.appendChild(li);
             }
         });
-        
+
         // update dom in one go
         this._dropdownoptions.innerHTML = "";
         this._dropdownoptions.appendChild(fragment);
@@ -319,7 +319,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                 if (item.labelColor) {
                     li.className = item.labelColor;
                 }
-                
+
                 const span = document.createElement("span");
                 const closeButton = document.createElement("a");
                 closeButton.className = "fas fa-times";

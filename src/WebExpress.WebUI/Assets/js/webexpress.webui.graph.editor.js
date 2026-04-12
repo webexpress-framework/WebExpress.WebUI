@@ -27,7 +27,7 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
             this._arrowMarkers = {};
         }
 
-        // toolbar 
+        // toolbar
         this._toolbarContainer = document.createElement("div");
         this._toolbarContainer.className = "wx-graph-simple-toolbar";
 

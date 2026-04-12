@@ -241,12 +241,12 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             const inSubmenuPanel = !!self._element.querySelector(".wx-overflow-subpanel") &&
                 Array.from(self._element.querySelectorAll(".wx-overflow-subpanel")).some(function(p) { return p.contains(e.target); });
             const isMoreButton = self._moreButton.contains(e.target);
-            
+
             // check if click is inside a custom element that might be in overflow or main bar
             // and has its own dropdown logic (prevent closing the main overflow menu if interacting with custom item internals)
             const targetEl = e.target;
             const isInsideCustom = targetEl.closest(".wx-toolpanel, .wx-toolbar-custom");
-            
+
             if (!inMainMenu && !inSubmenuPanel && !isMoreButton && !isInsideCustom) {
                 self._closeAllSubmenus();
             }
@@ -600,7 +600,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             button.setAttribute("aria-haspopup", "true");
             button.setAttribute("aria-expanded", "false");
             button.dataset.itemId = item.id;
-            
+
             const icon = document.createElement("i");
             icon.className = "fas fa-chevron-right";
             button.appendChild(icon);
@@ -614,7 +614,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             wrapper.appendChild(triggerRow);
             this._insertOverflowOrdered(wrapper, item.index);
             item.inOverflowAsTrigger = true;
-            
+
         } else {
             const wrapper2 = document.createElement("div");
             wrapper2.className = "wx-overflow-menu-item";
@@ -624,13 +624,13 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             const el = item.element;
             const hasVisibleText = el.textContent && el.textContent.trim().length > 0;
             const isIconOnly = el.querySelector("i, img, svg") && !hasVisibleText;
-            
+
             // try to find a fallback text from attributes
             let fallbackText = null;
             if (isIconOnly || !hasVisibleText) {
-                fallbackText = el.getAttribute("title") || 
-                               el.getAttribute("aria-label") || 
-                               el.dataset.label || 
+                fallbackText = el.getAttribute("title") ||
+                               el.getAttribute("aria-label") ||
+                               el.dataset.label ||
                                el.dataset.originalTitle; // bootstrap tooltips sometimes move title here
             }
 
@@ -668,7 +668,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             this._closeSubmenu(item, null);
         } else {
             const parent = item.element.parentElement;
-            
+
             // remove the fallback label span if we created one
             if (item.overflowLabelSpan) {
                 if (item.overflowLabelSpan.parentElement === parent) {
@@ -676,7 +676,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
                 }
                 item.overflowLabelSpan = null;
             }
-            
+
             // restore original display style
             if (item.originalDisplay !== undefined) {
                 item.element.style.display = item.originalDisplay;
@@ -768,9 +768,9 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
 
         const need = classicalOverflow || geometricOverlap;
 
-        if (tempShown && 
-            !need && 
-            !this._items.some((i) => { return this._isRepresentedInOverflow(i); }) && 
+        if (tempShown &&
+            !need &&
+            !this._items.some((i) => { return this._isRepresentedInOverflow(i); }) &&
             !this._items.some(function(i) { return i.force; })) {
             this._moreButton.style.display = "none";
             this._moreButton.style.visibility = "";

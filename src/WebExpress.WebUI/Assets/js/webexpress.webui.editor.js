@@ -22,13 +22,13 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      */
     constructor(element) {
         super(element);
-        
+
         // read content preferably from value attribute (form-item behavior), fallback to innerhtml
         let content = element.getAttribute("value") || element.innerHTML || "";
         this._formFieldName = element.getAttribute("name") || element.dataset.name || null;
 
         this._uiContainer = element;
-        
+
         // clean up container
         element.removeAttribute("name");
         element.removeAttribute("value");
@@ -64,10 +64,10 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         this._attachEventHandlers();
         this._initializePlugins();
         this._updateUndoRedoStates();
-        
+
         // notify plugins first so tables are wrapped in frames
         this._notifyPluginsContentChanged();
-        
+
         // ensure typing space is available after initialization and upgrades
         this._ensureTypingSpace();
     }
@@ -98,7 +98,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
         // find all non-editable blocks (like table frames)
         const nonEditables = Array.from(editor.querySelectorAll('[contenteditable="false"]'));
-        
+
         nonEditables.forEach(el => {
             // skip elements that are nested inside OTHER non-editable elements
             if (el.parentElement && el.parentElement.closest('[contenteditable="false"]')) {
@@ -111,7 +111,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                 // move element out of the paragraph and place it after
                 editor.insertBefore(el, parentP.nextSibling);
                 modified = true;
-                
+
                 // cleanup the empty parent paragraph
                 if (parentP.textContent.trim() === "" && parentP.querySelectorAll("img, table, [contenteditable='false']").length === 0) {
                     parentP.remove();
@@ -191,7 +191,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                 const sel = window.getSelection();
                 if (sel && sel.rangeCount > 0 && sel.isCollapsed) {
                     let node = sel.getRangeAt(0).startContainer;
-                    
+
                     if (node.nodeType === Node.TEXT_NODE) {
                         node = node.parentElement;
                     }
@@ -199,7 +199,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                     // only intercept if we are inside a direct block like <p>
                     const block = node.closest("p, div:not(.wx-editor-content)");
                     if (block && block.parentElement === this._editorElement) {
-                        
+
                         if (e.key === "Backspace") {
                             const prev = block.previousElementSibling;
                             if (prev && prev.getAttribute("contenteditable") === "false") {
@@ -208,11 +208,11 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                                 const preCaretRange = range.cloneRange();
                                 preCaretRange.selectNodeContents(block);
                                 preCaretRange.setEnd(range.startContainer, range.startOffset);
-                                
+
                                 const frag = preCaretRange.cloneContents();
-                                const hasContent = frag.textContent.trim().length > 0 || 
+                                const hasContent = frag.textContent.trim().length > 0 ||
                                     Array.from(frag.querySelectorAll("*")).filter(el => el.tagName !== "BR").length > 0;
-                                
+
                                 if (!hasContent) {
                                     e.preventDefault(); // don't delete the empty space paragraph
                                     prev.remove(); // delete the non-editable block (table) instead
@@ -227,11 +227,11 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                                 const postCaretRange = range.cloneRange();
                                 postCaretRange.selectNodeContents(block);
                                 postCaretRange.setStart(range.endContainer, range.endOffset);
-                                
+
                                 const frag = postCaretRange.cloneContents();
-                                const hasContent = frag.textContent.trim().length > 0 || 
+                                const hasContent = frag.textContent.trim().length > 0 ||
                                     Array.from(frag.querySelectorAll("*")).filter(el => el.tagName !== "BR").length > 0;
-                                
+
                                 if (!hasContent) {
                                     e.preventDefault(); // don't delete the empty space paragraph
                                     next.remove(); // delete the non-editable block (table) instead
@@ -904,12 +904,12 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         // sanitize incoming html before placing into editor
         const clean = this._sanitizeHtml(v || "");
         this._editorElement.innerHTML = clean;
-        
+
         // notify plugins first to upgrade tables to frames
         this._notifyPluginsContentChanged();
         // then ensure typing space un-nests the newly upgraded frames
         this._ensureTypingSpace();
-        
+
         // update hidden input and dispatch change
         this._syncValue();
         this._updateUndoRedoStates();
@@ -1004,7 +1004,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                 if (pContent === "" || p.innerHTML === "<br>") {
                     p.parentNode.insertBefore(frag, p);
                     p.remove();
-                    
+
                     if (lastNode) {
                         const newRange = document.createRange();
                         newRange.setStartAfter(lastNode);
@@ -1013,7 +1013,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                         sel.addRange(newRange);
                         this._saveCurrentSelection();
                     }
-                    
+
                     this._notifyPluginsContentChanged();
                     this._ensureTypingSpace();
                     this._syncValue();
