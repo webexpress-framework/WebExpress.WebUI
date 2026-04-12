@@ -49,7 +49,7 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
      * @returns {string} - The corresponding Font Awesome icon class (e.g., "fas fa-file-pdf").
      */
     _getIconForFilename(filename) {
-        const ext = filename.split('.').pop().toLowerCase();
+        const ext = filename.split(".").pop().toLowerCase();
 
         const iconMap = {
             doc: "fas fa-file-word",

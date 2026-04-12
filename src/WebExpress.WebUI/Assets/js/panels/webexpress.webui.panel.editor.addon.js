@@ -76,7 +76,7 @@ webexpress.webui.DialogPanels.register("editor-addon", {
                 label: addon.label,
                 icon: addon.icon,
                 html: `<div class="d-none search-text">${addon.label} ${addon.description}</div>
-                       <p class="small text-muted mb-0">${addon.description || ''}</p>`,
+                       <p class="small text-muted mb-0">${addon.description || ""}</p>`,
                 class: "col-md-6 mb-2 wx-addon-card-wrapper"
             }));
         }

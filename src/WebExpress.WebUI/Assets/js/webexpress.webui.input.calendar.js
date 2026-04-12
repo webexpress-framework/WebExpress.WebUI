@@ -226,7 +226,7 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
         }
 
         // disable copy button if nothing is selected
-        const copyBtn = this._toolbar.querySelector('.wx-calendar-copy-btn');
+        const copyBtn = this._toolbar.querySelector(".wx-calendar-copy-btn");
         if ((this._rangeMode && (!this._rangeStart || !this._rangeEnd)) ||
             (!this._rangeMode && !this._selectedDate)) {
             if (copyBtn) {

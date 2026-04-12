@@ -273,12 +273,12 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
 
         // handle visibility change event
         // fires CHANGE_VISIBILITY_EVENT when the menu is shown or hidden
-        button.addEventListener('show.bs.dropdown', () => {
+        button.addEventListener("show.bs.dropdown", () => {
             this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
                 visible: true
             });
         });
-        button.addEventListener('hide.bs.dropdown', () => {
+        button.addEventListener("hide.bs.dropdown", () => {
             this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
                 visible: false
             });
