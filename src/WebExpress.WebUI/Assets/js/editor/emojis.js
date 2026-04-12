@@ -205,7 +205,7 @@ webexpress.webui.EditorPlugins.register("emojis", 2000, {
         Object.values(this._emojis).forEach(emojis => {
             emojis.forEach(emoji => {
                 const name = (this._emojiNames[emoji] || emoji).toLowerCase();
-                if (name.indexOf(query) !== -1 || emoji.indexOf(query) !== -1) {
+                if (name.includes(query) || emoji.includes(query)) {
                     found = true;
                     grid.appendChild(this._createEmojiButton(emoji, editor, menu));
                 }
