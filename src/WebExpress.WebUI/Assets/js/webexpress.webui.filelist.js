@@ -39,10 +39,10 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
         this._storage.className = "wx-upload-preview";
 
         element.appendChild(this._storage);
-       
+
         this.render();
     }
-        
+
     /**
      * Returns a Font Awesome icon class based on the file extension.
      * @param {string} filename - The name of the file (e.g., "report.pdf").
@@ -108,7 +108,7 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
             link.target = "_blank";
             link.rel = "noopener noreferrer";
             link.className = "wx-link";
-            
+
             divLeft.appendChild(link);
             left.appendChild(divLeft);
 
@@ -122,7 +122,7 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
                 divMiddle.appendChild(descIcon);
                 divMiddle.appendChild(document.createTextNode(file.description));
             }
-            
+
             middle.appendChild(divMiddle);
 
             // right: szie + date
@@ -146,7 +146,7 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
                 date.appendChild(document.createTextNode(file.date));
                 divRight.appendChild(date);
             }
-            
+
             right.appendChild(divRight);
 
             tr.appendChild(left);

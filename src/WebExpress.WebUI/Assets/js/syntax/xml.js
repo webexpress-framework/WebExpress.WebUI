@@ -28,7 +28,7 @@ webexpress.webui.Syntax.register("xml", "html", (code) => {
     .split("\n")
     .map(line => {
       line = line.trimEnd();
-      
+
       // 1) If we're currently inside a comment
       if (inComment) {
         if (/--&gt;/.test(line)) inComment = false;

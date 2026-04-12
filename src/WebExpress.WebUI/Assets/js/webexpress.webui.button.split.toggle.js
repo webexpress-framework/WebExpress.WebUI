@@ -73,7 +73,7 @@ webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCt
     get label() {
         return this._label;
     }
-    
+
     /**
      * Sets the label and triggers render.
      */
@@ -88,7 +88,7 @@ webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCt
     get iconCollapse() {
         return this._iconCollapse;
     }
-    
+
     /**
      * Sets the icon for collapse state and triggers render.
      */
@@ -103,7 +103,7 @@ webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCt
     get iconExpand() {
         return this._iconExpand;
     }
-    
+
     /**
      * Sets the icon for expand state and triggers render.
      */
@@ -118,7 +118,7 @@ webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCt
     get imageCollapse() {
         return this._imageCollapse;
     }
-    
+
     /**
      * Sets the image URL for collapse state and triggers render.
      */
@@ -126,14 +126,14 @@ webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCt
         this._imageCollapse = value;
         this.render();
     }
-    
+
     /**
      * Returns the image URL for expand state.
      */
     get imageExpand() {
         return this._imageExpand;
     }
-    
+
     /**
      * Sets the image URL for expand state and triggers render.
      */
@@ -141,14 +141,14 @@ webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCt
         this._imageExpand = value;
         this.render();
     }
-    
+
     /**
      * Returns true if collapsed.
      */
     get collapsed() {
         return this._collapsed;
     }
-    
+
     /**
      * Sets the collapsed state and updates the button view.
      */

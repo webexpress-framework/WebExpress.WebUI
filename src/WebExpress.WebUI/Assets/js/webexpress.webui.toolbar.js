@@ -18,35 +18,35 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
      */
     constructor(element) {
         super(element);
-        
+
         // parse toolbar items from dom
         this._parseItems(Array.from(element.querySelectorAll(
             ".wx-toolbar-button, .wx-toolbar-separator, .wx-toolbar-dropdown, .wx-toolbar-combo, .wx-toolbar-label, .wx-toolbar-custom, .wx-toolbar-modal-btn"
         )));
-        
+
         // parse more dropdown if available
         this._parseMoreDropdown(element.querySelector(".wx-toolbar-more"));
-        
+
         // prepare toolbar dom
         element.innerHTML = "";
         element.classList.add("wx-toolbar");
         element.addEventListener("contextmenu", (e) => {
             e.preventDefault();
         });
-        
+
         // render toolbar
         this._renderToolbar();
-        
+
         // always update layout after rendering
         this._scheduleLayoutUpdate();
-        
+
         // use resizeobserver for responsive label hiding and overflow logic
         this._resizeObserver = new ResizeObserver(() => {
             this._scheduleLayoutUpdate();
         });
         this._resizeObserver.observe(element);
     }
-    
+
     /**
      * Adds a generic item descriptor to the toolbar and re-renders.
      * @param {object} item - The item descriptor (see _parseItems for structure).
@@ -56,7 +56,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             console.error("ToolbarCtrl.addItem: Invalid item descriptor", item);
             return;
         }
-        
+
         // ensure element is created if not provided (for programmatic addition)
         if (!item.element) {
             item.element = this._createItemElement(item);
@@ -86,7 +86,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             disabled: !!opts.disabled,
             active: !!opts.active,
             overflow: opts.overflow || "",
-            
+
             // action attributes
             primaryAction: opts.primaryAction || null,
             primaryTarget: opts.primaryTarget || null,
@@ -114,7 +114,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             wrapper.appendChild(el);
             el = wrapper;
         }
-        
+
         this.addItem({
             type: "custom",
             align: opts.align || "left",
@@ -165,7 +165,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Add a label programmatically.
-     * @param {object} opts - { content, title, align, colorCss } 
+     * @param {object} opts - { content, title, align, colorCss }
      */
     addLabel(opts) {
         this.addItem({
@@ -181,7 +181,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Add a dropdown programmatically.
-     * @param {object} opts - { title, toggle, align, colorCss, element, primaryAction... } 
+     * @param {object} opts - { title, toggle, align, colorCss, element, primaryAction... }
      */
     addDropdown(opts) {
         let el = opts.element;
@@ -189,7 +189,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             el = document.createElement("div");
             el.className = "wx-toolbar-dropdown";
         }
-        
+
         this.addItem({
             type: "dropdown",
             colorCss: opts.colorCss || null,
@@ -226,7 +226,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             this._scheduleLayoutUpdate();
         }
     }
-    
+
     /**
      * Creates the DOM element for an item descriptor if it doesn't exist yet.
      * Used when adding items programmatically via add* methods.
@@ -293,7 +293,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 secondaryTarget: dataset.wxSecondaryTarget || null,
                 secondaryUri: dataset.wxSecondaryUri || null
             };
-            
+
             if (el.classList.contains("wx-toolbar-separator")) {
                 el.setAttribute("data-overflow", "hide");
                 return {
@@ -564,7 +564,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             item.element.classList.add("btn", "wx-toolbar-modal-btn");
             item.element.type = "button";
             item.element.innerHTML = ""; // clear
-            
+
             if (item.icon) {
                 const icon = document.createElement("i");
                 icon.className = item.icon;
@@ -579,7 +579,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             if (item.colorCss) {
                 item.element.classList.add(item.colorCss);
             }
-            
+
             // apply action attributes
             if (item.primaryAction) item.element.dataset.wxPrimaryAction = item.primaryAction;
             if (item.primaryTarget) item.element.dataset.wxPrimaryTarget = item.primaryTarget;
@@ -593,11 +593,11 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 e.preventDefault();
                 this._openModal(item.modalKey, item.modalTitle, item.modalSubmitId);
             });
-            
+
             // attributes for detection logic
             item.element.dataset.hasIcon = item.icon ? "true" : "false";
             item.element.dataset.labelHidden = "false";
-            
+
             return item.element;
         }
         if (item.type === "button") {
@@ -609,10 +609,10 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             }
             item.element.classList.add("btn");
             item.element.type = "button";
-            
+
             // clear content to rebuild (safe for non-controller elements)
             item.element.innerHTML = "";
-            
+
             let hasIconOrImage = false;
             if (item.image) {
                 const img = document.createElement("img");
@@ -633,10 +633,10 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 span.textContent = item.label;
                 item.element.appendChild(span);
             }
-            
+
             item.element.dataset.hasIcon = hasIconOrImage ? "true" : "false";
             item.element.dataset.labelHidden = "false";
-            
+
             if (item.colorCss) {
                 item.element.classList.add(item.colorCss);
             }
@@ -646,7 +646,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             if (item.title) {
                 item.element.title = item.title;
             }
-            
+
             // apply action attributes
             if (item.modal) {
                 item.element.setAttribute("data-wx-primary-action", "modal");
@@ -686,7 +686,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             if (item.title) {
                 dropdownCtrl._element.title = item.title;
             }
-            
+
             // apply action attributes
             if (item.primaryAction) dropdownCtrl._element.dataset.wxPrimaryAction = item.primaryAction;
             if (item.primaryTarget) dropdownCtrl._element.dataset.wxPrimaryTarget = item.primaryTarget;
@@ -768,7 +768,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { item: item });
             });
             combo.appendChild(select);
-            
+
             // apply action attributes
             if (item.primaryAction) combo.dataset.wxPrimaryAction = item.primaryAction;
             if (item.primaryTarget) combo.dataset.wxPrimaryTarget = item.primaryTarget;
@@ -812,9 +812,9 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
         if (!key) {
             return;
         }
-        
+
         let modalInstance = this._modalInstances[key];
-        
+
         if (!modalInstance) {
             const id = "wx-toolbar-msp-" + key + "-" + Date.now();
             const el = document.createElement("div");
@@ -828,7 +828,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             el.setAttribute("data-validate-active-only", "true");
 
             const submitBtnId = submitId || ("submit-" + id);
-            
+
             el.innerHTML = [
                 '<div class="wx-modal-header">' + (title || "Dialog") + '</div>',
                 '<div class="wx-modal-footer">',
@@ -839,7 +839,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             const footer = el.querySelector(".wx-modal-footer");
             const content = document.createElement("div");
             content.className = "wx-modal-content";
-            
+
             if (footer && footer.parentNode) {
                 footer.parentNode.insertBefore(content, footer);
             } else {
@@ -847,12 +847,12 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             }
 
             document.body.appendChild(el);
-            
+
             modalInstance = new webexpress.webui.ModalSidebarPanel(el);
             modalInstance._toolbar = this; // link back reference
             this._modalInstances[key] = modalInstance;
         }
-        
+
         if (modalInstance && typeof modalInstance.show === "function") {
             modalInstance.show();
         }

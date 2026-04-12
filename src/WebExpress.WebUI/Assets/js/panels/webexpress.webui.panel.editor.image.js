@@ -71,7 +71,7 @@ webexpress.webui.DialogPanels.register("editor-image", {
         urlInput.addEventListener("input", function () {
             const modalWrapper = this.closest("[data-key]") || document;
             const submitBtn = modalWrapper.querySelector(".submit-btn");
-            
+
             if (submitBtn) {
                 if (this.value.trim() !== "") {
                     submitBtn.disabled = false;
@@ -89,7 +89,7 @@ webexpress.webui.DialogPanels.register("editor-image", {
      */
     onShow: function (modal) {
         const state = ensureImageState(modal);
-        
+
         if (state.webUrlInput) {
             // apply prefill or reset entirely
             if (modal._imagePrefill) {
@@ -109,7 +109,7 @@ webexpress.webui.DialogPanels.register("editor-image", {
 
             const modalWrapper = state.webUrlInput.closest("[data-key]") || document;
             const submitBtn = modalWrapper.querySelector(".submit-btn");
-            
+
             if (submitBtn) {
                 if (state.webUrlInput.value.trim() !== "") {
                     submitBtn.disabled = false;
@@ -138,16 +138,16 @@ webexpress.webui.DialogPanels.register("editor-image", {
     validate: function (modal) {
         const editor = modal ? modal._editor : null;
         const state = ensureImageState(modal);
-        
+
         if (!editor || !state.webUrlInput) {
             return { valid: false, message: "Internal error: editor or field not available." };
         }
-        
+
         const urlVal = state.webUrlInput.value.trim();
         if (urlVal === "" || urlVal.toLowerCase().startsWith("javascript:")) {
             return { valid: false, message: "Please provide a valid image URL." };
         }
-        
+
         return true;
     },
 
@@ -158,24 +158,24 @@ webexpress.webui.DialogPanels.register("editor-image", {
     onSubmit: function (modal) {
         const editor = modal ? modal._editor : null;
         const state = ensureImageState(modal);
-        
+
         if (!editor || !state.webUrlInput) {
             return;
         }
-        
+
         let urlVal = state.webUrlInput.value.trim();
         if (urlVal === "" || urlVal.toLowerCase().startsWith("javascript:")) {
             return;
         }
-        
+
         // append protocol if missing to prevent sanitizer from stripping
         if (!/^https?:\/\//i.test(urlVal) && !urlVal.startsWith("/") && !urlVal.startsWith(".") && !urlVal.startsWith("data:")) {
             urlVal = "https://" + urlVal;
         }
-        
+
         const safeUrl = urlVal.replace(/"/g, "%22");
         const alt = String((state.webAltInput && state.webAltInput.value) || "").trim();
-        
+
         const escapeHtml = function (text) {
             const div = document.createElement("div");
             div.textContent = text;
@@ -188,7 +188,7 @@ webexpress.webui.DialogPanels.register("editor-image", {
         }
 
         editor.insertHtmlAtCursor('<img src="' + safeUrl + '" alt="' + escapeHtml(alt) + '">');
-        
+
         if (typeof modal.hide === "function") {
             modal.hide();
         } else if (modal.ctrl && typeof modal.ctrl.hide === "function") {
@@ -312,23 +312,23 @@ webexpress.webui.DialogPanels.register("editor-image", {
         container.addEventListener("click", function (e) {
             const link = e.target.closest(".wx-file-list a.link, .wx-webui-file-list a.link");
             const row = e.target.closest(".wx-file-list tr");
-            
+
             if (link) {
                 e.preventDefault();
                 let src = link.getAttribute("href");
                 const altGuess = link.textContent || "";
-                
+
                 // append protocol if needed
                 if (src && !/^https?:\/\//i.test(src) && !src.startsWith("/") && !src.startsWith(".") && !src.startsWith("data:")) {
                     src = "https://" + src;
                 }
-                
+
                 state.selectedSiteImage = { src: src, alt: altGuess };
-                
+
                 if (selectedRow) {
                     selectedRow.classList.remove("table-primary");
                 }
-                
+
                 if (row) {
                     selectedRow = row;
                     selectedRow.classList.add("table-primary");
@@ -348,23 +348,23 @@ webexpress.webui.DialogPanels.register("editor-image", {
                 return;
             }
             e.preventDefault();
-            
+
             if (!editor) {
                 return;
             }
-            
+
             let src = link.getAttribute("href") || "";
             if (src.trim() === "" || src.toLowerCase().startsWith("javascript:")) {
                 return;
             }
-            
+
             if (!/^https?:\/\//i.test(src) && !src.startsWith("/") && !src.startsWith(".") && !src.startsWith("data:")) {
                 src = "https://" + src;
             }
-            
+
             const safeSrc = src.replace(/"/g, "%22");
             const alt = String((state.siteAltInput && state.siteAltInput.value) || "").trim() || (link.textContent || "");
-            
+
             restoreAndInsert('<img src="' + safeSrc + '" alt="' + escapeHtml(alt) + '">');
             closeModal();
         });
@@ -376,24 +376,24 @@ webexpress.webui.DialogPanels.register("editor-image", {
             if (!ev || !ev.detail || ev.detail.sender !== uploadHost) {
                 return;
             }
-            
+
             const file = ev.detail.file;
             if (!file || !editor) {
                 return;
             }
-            
+
             if (editor.imageBaseUri || editor._imageBaseUri) {
                 const rawBase = editor.imageBaseUri || editor._imageBaseUri;
                 const base = rawBase.replace(/\/+$/, "");
                 const src = base + "/" + encodeURIComponent(file.name);
                 const safeSrc = src.replace(/"/g, "%22");
                 const alt = String((state.siteAltInput && state.siteAltInput.value) || "").trim() || file.name;
-                
+
                 restoreAndInsert('<img src="' + safeSrc + '" alt="' + escapeHtml(alt) + '">');
                 closeModal();
             }
         };
-        
+
         document.addEventListener(webexpress.webui.Event.UPLOAD_SUCCESS_EVENT, onUploadSuccess);
     },
 
@@ -404,11 +404,11 @@ webexpress.webui.DialogPanels.register("editor-image", {
      */
     onShow: function (modal) {
         const state = ensureImageState(modal);
-        
+
         if (state.siteAltInput) {
             const wrapper = state.siteAltInput.closest("[data-key]") || document;
             const submitBtn = wrapper.querySelector(".submit-btn");
-            
+
             // apply prefill or clear previous selection state
             if (!modal._imagePrefill) {
                 state.selectedSiteImage = null;
@@ -447,20 +447,20 @@ webexpress.webui.DialogPanels.register("editor-image", {
     validate: function (modal) {
         const editor = modal ? modal._editor : null;
         const state = ensureImageState(modal);
-        
+
         if (!editor) {
             return { valid: false, message: "Internal error: editor not available." };
         }
-        
+
         if (!state.selectedSiteImage || !state.selectedSiteImage.src) {
             return { valid: false, message: "Please select an image from the list." };
         }
-        
+
         const srcVal = state.selectedSiteImage.src.trim();
         if (srcVal === "" || srcVal.toLowerCase().startsWith("javascript:")) {
             return { valid: false, message: "Please select a valid image URL." };
         }
-        
+
         return true;
     },
 
@@ -471,24 +471,24 @@ webexpress.webui.DialogPanels.register("editor-image", {
     onSubmit: function (modal) {
         const editor = modal ? modal._editor : null;
         const state = ensureImageState(modal);
-        
+
         if (!editor || !state.selectedSiteImage || !state.selectedSiteImage.src) {
             return;
         }
-        
+
         let srcVal = state.selectedSiteImage.src.trim();
         if (srcVal === "" || srcVal.toLowerCase().startsWith("javascript:")) {
             return;
         }
-        
+
         // append protocol if missing to prevent sanitizer from stripping
         if (!/^https?:\/\//i.test(srcVal) && !srcVal.startsWith("/") && !srcVal.startsWith(".") && !srcVal.startsWith("data:")) {
             srcVal = "https://" + srcVal;
         }
-        
+
         const safeSrc = srcVal.replace(/"/g, "%22");
         const alt = String((state.siteAltInput && state.siteAltInput.value) || "").trim() || state.selectedSiteImage.alt || "";
-        
+
         const escapeHtml = function (text) {
             const div = document.createElement("div");
             div.textContent = text;
@@ -499,9 +499,9 @@ webexpress.webui.DialogPanels.register("editor-image", {
         if (modal._backupRange) {
             editor._savedRange = modal._backupRange.cloneRange();
         }
-        
+
         editor.insertHtmlAtCursor('<img src="' + safeSrc + '" alt="' + escapeHtml(alt) + '">');
-        
+
         if (typeof modal.hide === "function") {
             modal.hide();
         } else if (modal.ctrl && typeof modal.ctrl.hide === "function") {

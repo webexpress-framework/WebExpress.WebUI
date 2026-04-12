@@ -12,7 +12,7 @@ webexpress.webui.EditorAddOns.register("game-of-life", {
         const cellSize = data.cellSize || 10;
         const color = data.color || "#9ec5fe";
         return `
-            <div class="wx-webui-gameoflife" 
+            <div class="wx-webui-gameoflife"
                  style="width: 100%; height: 300px; background: #f8f9fa;"
                  data-cell-size="${cellSize}">
             </div>`;

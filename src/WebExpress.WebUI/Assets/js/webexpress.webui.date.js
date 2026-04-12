@@ -49,7 +49,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.Ctrl {
 
         this._span = document.createElement("span");
         span.appendChild(this._span);
-        
+
         element.appendChild(span);
 
         this.render();

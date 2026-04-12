@@ -600,11 +600,11 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
                     // index 0 for side-pane if order is side-main, but here it is main-side (index 1)
                     // wait, default is main-side, so side pane is index 1?
                     // SplitCtrl setMinSize takes index.
-                    // SplitCtrl implementation handles minSide internally as property, 
+                    // SplitCtrl implementation handles minSide internally as property,
                     // but we might need to expose a setter there if it changes per view.
                     // Assuming setMinSize(index, size) exists from previous context
 
-                    // Since _paneOrder is "main-side", side pane is typically index 1 
+                    // Since _paneOrder is "main-side", side pane is typically index 1
                     // but let's assume the split controller handles 'side' identification or we pass the side index.
                     // In the SplitCtrl provided previously, setMinSize logic handles 'isSide' check.
                     // We just need to pass an index. Main is 0, Side is 1.

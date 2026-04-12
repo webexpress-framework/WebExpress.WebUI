@@ -4,13 +4,13 @@
  * - webexpress.webui.Event.MODAL_SHOW_EVENT
  * - webexpress.webui.Event.MODAL_HIDE_EVENT
  * - webexpress.webui.DATA_REQUESTED_EVENT
- * - webexpress.webui.DATA_ARRIVED_EVENT 
- * - webexpress.webui.UPDATED_EVENT 
+ * - webexpress.webui.DATA_ARRIVED_EVENT
+ * - webexpress.webui.UPDATED_EVENT
  */
 webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
     _form = null;
     _submitHandler = null;
-    
+
     /**
      * Constructor
      * @param {HTMLElement} element - The DOM element associated with the modal control.
@@ -48,7 +48,7 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
 
             const method = form.getAttribute("method") || "POST";
             const action = form.getAttribute("action") || this._uri;
-            
+
             this._submitHandler = (event) => {
                 if (event.defaultPrevented) {
                     return; // keep other controllers in control
@@ -57,7 +57,7 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
                 event.preventDefault();
 
                 const formData = new FormData(this._form);
-                
+
                 fetch(action, {
                     method: method,
                     body: formData

@@ -45,7 +45,7 @@ webexpress.webui.EditorPlugins.register("emojis", 2000, {
 
         // create dropdown content
         this._dropdown = this._createDropdown(editor);
-        
+
         group.appendChild(btn);
         group.appendChild(this._dropdown);
 
@@ -84,7 +84,7 @@ webexpress.webui.EditorPlugins.register("emojis", 2000, {
             tab.type = "button";
             tab.className = "btn btn-sm btn-light border-0 rounded-0 px-3";
             tab.textContent = category;
-            
+
             if (firstCategory) {
                 tab.classList.add("active", "fw-bold");
                 this._renderCategory(content, category, editor, menu);
@@ -97,7 +97,7 @@ webexpress.webui.EditorPlugins.register("emojis", 2000, {
                     b.classList.remove("active", "fw-bold");
                 });
                 e.target.classList.add("active", "fw-bold");
-                
+
                 // render content for selected category
                 this._renderCategory(content, category, editor, menu);
             });
@@ -127,7 +127,7 @@ webexpress.webui.EditorPlugins.register("emojis", 2000, {
     _renderCategory: function(container, category, editor, menu) {
         // clear previous content
         container.innerHTML = "";
-        
+
         // create a responsive grid
         const grid = document.createElement("div");
         grid.style.display = "grid";

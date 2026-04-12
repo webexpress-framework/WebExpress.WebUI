@@ -62,7 +62,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         this._loadState();
         this.render();
     }
-    
+
     /**
      * Initializes or binds a pagination control and an information area.
      * @param {HTMLElement} host - The host element to search or attach the pager to.
@@ -70,7 +70,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
     _initTileContainer(host) {
         this._tileContainer = document.createElement("div");
         this._tileContainer.className = "wx-tile-container";
-        
+
         host.appendChild(this._tileContainer);
     }
 
@@ -130,7 +130,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
             colorCss: tileData.colorCss || tileData.color || null,
             colorStyle: tileData.colorStyle || null,
             visible: tileData.visible !== false,
-            
+
             // action attributes
             primaryAction: tileData.primaryAction,
             secondaryAction: tileData.secondaryAction,

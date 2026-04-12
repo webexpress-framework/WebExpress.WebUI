@@ -1,36 +1,36 @@
 /* Styles for the Tag Control */
 .wx-tag {
     box-sizing: border-box;
-	padding: 0.5em;
-	display: flex;
-	flex-wrap: wrap;
-	height: auto;
+    padding: 0.5em;
+    display: flex;
+    flex-wrap: wrap;
+    height: auto;
 }
 
 .wx-tag > ul {
     list-style: none;
-	padding: 0;
-	margin: 0;
-	display: inline-flex;
+    padding: 0;
+    margin: 0;
+    display: inline-flex;
     align-items: center;
-	flex-wrap: wrap;
+    flex-wrap: wrap;
     gap: 0.2em;
 }
 
 .wx-tag > ul > li {
-	padding: 0.2em;
+    padding: 0.2em;
     display: inline-flex;
     align-items: center;
     gap: 0.2em;
-	border-radius: 0.2em;
+    border-radius: 0.2em;
     height: 1.5em;
 }
 
 .wx-tag > ul > li > a {
     display:inline-flex;
-	text-decoration: none;
-	cursor: pointer;
-	color:inherit;
+    text-decoration: none;
+    cursor: pointer;
+    color:inherit;
 }
 
 .wx-tag > ul > li > a:hover {
@@ -39,12 +39,12 @@
 
 .wx-tag input {
     box-sizing: border-box;
-	flex-grow: 1;
-	border: none;
-	outline: none;
-	font-size: inherit;
-	font-family: inherit;
-	color: inherit;
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    font-size: inherit;
+    font-family: inherit;
+    color: inherit;
     background: var(--bs-body-bg);
 }
 

@@ -1,8 +1,8 @@
-/* 
+/*
  * A control for uploading and cropping a profile image with circular or rectangular mask.
  *
  * The following events are triggered:
- * - webexpress.webui.Event.FILE_SELECTED_EVENT 
+ * - webexpress.webui.Event.FILE_SELECTED_EVENT
  */
 webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
 

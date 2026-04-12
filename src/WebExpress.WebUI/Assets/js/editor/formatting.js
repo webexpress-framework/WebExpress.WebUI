@@ -1,12 +1,12 @@
 /**
  * Plugin for basic text formatting.
- * Provides toolbar controls for bold, italic, underline, fonts, colors, lists, 
+ * Provides toolbar controls for bold, italic, underline, fonts, colors, lists,
  * alignment, and block formatting options.
  */
 webexpress.webui.EditorPlugins.register("formatting", 0, {
     _lastColor: "#000000",
     _lastHighlight: "#FFFF00", // default highlight color (yellow)
-    
+
     _colors: [
         // basic colors
         "#000000", "#FF0000", "#008000", "#0000FF", "#FFFF00",
@@ -28,8 +28,8 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
      * @param {object} editor - The editor instance.
      */
     init: function(editor) {
-        document.addEventListener("selectionchange", () => { 
-            this._updateButtonStates(editor); 
+        document.addEventListener("selectionchange", () => {
+            this._updateButtonStates(editor);
         });
     },
 
@@ -41,25 +41,25 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
     createToolbar: function(editor) {
         const toolbar = document.createElement("div");
         toolbar.classList.add("wx-editor-format-toolbar");
-        
+
         const fragment = document.createDocumentFragment();
         fragment.appendChild(this._createFormatDropdown(editor));
         fragment.appendChild(this._createSeparator());
         fragment.appendChild(this._createBasicButtons(editor));
         fragment.appendChild(this._createStyleDropdown(editor));
-        
+
         // separate buttons for text color and highlight
         fragment.appendChild(this._createSeparator());
         fragment.appendChild(this._createTextColorDropdown(editor));
         fragment.appendChild(this._createHighlightDropdown(editor));
-        
+
         fragment.appendChild(this._createSeparator());
         fragment.appendChild(this._createListButtons(editor));
         fragment.appendChild(this._createSeparator());
         fragment.appendChild(this._createIndentButtons(editor));
         fragment.appendChild(this._createSeparator());
         fragment.appendChild(this._createAlignButtons(editor));
-        
+
         toolbar.appendChild(fragment);
         return toolbar;
     },
@@ -92,7 +92,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
     _createFormatDropdown: function(editor) {
         const container = document.createElement("div");
         container.className = "wx-editor-btn-group";
-        
+
         const button = document.createElement("button");
         button.className = "wx-editor-btn dropdown-toggle";
         button.type = "button";
@@ -100,10 +100,10 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         const buttonText = document.createElement("span");
         buttonText.textContent = "Paragraph";
         button.appendChild(buttonText);
-        
+
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu";
-        
+
         const options = [
             { cmd: "p", lbl: "Paragraph" }, { cmd: "h1", lbl: "Heading 1" },
             { cmd: "h2", lbl: "Heading 2" }, { cmd: "h3", lbl: "Heading 3" },
@@ -139,8 +139,8 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
             { cmd: "italic", icon: "fas fa-italic", tip: "Italic" },
             { cmd: "underline", icon: "fas fa-underline", tip: "Underline" }
         ];
-        defs.forEach((d) => { 
-            frag.appendChild(this._createBtn(editor, d)); 
+        defs.forEach((d) => {
+            frag.appendChild(this._createBtn(editor, d));
         });
         return frag;
     },
@@ -156,10 +156,10 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         btn.type = "button";
         btn.innerHTML = '<i class="fas fa-text-height"></i>';
         btn.setAttribute("data-bs-toggle", "dropdown");
-        
+
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu";
-        
+
         const opts = [
             { cmd: "strikethrough", icon: "fas fa-strikethrough", lbl: "Strike" },
             { cmd: "superscript", icon: "fas fa-superscript", lbl: "Super" },
@@ -179,8 +179,8 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
                 b.type = "button";
                 b.className = "dropdown-item";
                 b.innerHTML = `<i class="${o.icon}"></i> ${o.lbl}`;
-                b.addEventListener("click", () => { 
-                    editor.execCommand(o.cmd); 
+                b.addEventListener("click", () => {
+                    editor.execCommand(o.cmd);
                 });
                 li.appendChild(b);
                 menu.appendChild(li);
@@ -199,14 +199,14 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
     _createTextColorDropdown: function(editor) {
         const container = document.createElement("div");
         container.className = "wx-editor-btn-group";
-        container.style.gap = "0"; 
+        container.style.gap = "0";
 
         // action button (apply current text color)
         const actionBtn = document.createElement("button");
         actionBtn.className = "wx-editor-btn";
         actionBtn.type = "button";
         actionBtn.title = "Text Color";
-        
+
         const icon = document.createElement("i");
         icon.className = "fas fa-font";
         icon.style.borderBottom = `3px solid ${this._lastColor}`;
@@ -221,12 +221,12 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         toggleBtn.className = "wx-editor-btn dropdown-toggle dropdown-toggle-split";
         toggleBtn.type = "button";
         toggleBtn.setAttribute("data-bs-toggle", "dropdown");
-        
+
         const menu = document.createElement("div");
         menu.className = "dropdown-menu";
         const picker = document.createElement("ul");
         picker.className = "wx-editor-color-picker";
-        
+
         this._colors.forEach((c) => {
             const li = document.createElement("li");
             const b = document.createElement("button");
@@ -243,7 +243,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         });
 
         menu.appendChild(picker);
-        
+
         container.appendChild(actionBtn);
         container.appendChild(toggleBtn);
         container.appendChild(menu);
@@ -283,7 +283,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
 
         const menu = document.createElement("div");
         menu.className = "dropdown-menu";
-        
+
         const picker = document.createElement("ul");
         picker.className = "wx-editor-color-picker";
 
@@ -302,7 +302,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
             b.type = "button";
             b.style.backgroundColor = c.val;
             b.title = c.name;
-            b.style.border = "1px solid #dee2e6"; 
+            b.style.border = "1px solid #dee2e6";
 
             if (c.icon) {
                 b.innerHTML = `<i class="${c.icon}" style="font-size: 10px; color: #000;"></i>`;
@@ -336,8 +336,8 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         [
             { cmd: "insertUnorderedList", icon: "fas fa-list-ul", tip: "Bullet" },
             { cmd: "insertOrderedList", icon: "fas fa-list-ol", tip: "Number" }
-        ].forEach((d) => { 
-            frag.appendChild(this._createBtn(editor, d)); 
+        ].forEach((d) => {
+            frag.appendChild(this._createBtn(editor, d));
         });
         return frag;
     },
@@ -350,8 +350,8 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         [
             { cmd: "outdent", icon: "fas fa-outdent", tip: "Less" },
             { cmd: "indent", icon: "fas fa-indent", tip: "More" }
-        ].forEach((d) => { 
-            frag.appendChild(this._createBtn(editor, d)); 
+        ].forEach((d) => {
+            frag.appendChild(this._createBtn(editor, d));
         });
         return frag;
     },
@@ -366,8 +366,8 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
             { cmd: "justifyCenter", icon: "fas fa-align-center", tip: "Center" },
             { cmd: "justifyRight", icon: "fas fa-align-right", tip: "Right" },
             { cmd: "justifyFull", icon: "fas fa-align-justify", tip: "Justify" }
-        ].forEach((d) => { 
-            frag.appendChild(this._createBtn(editor, d)); 
+        ].forEach((d) => {
+            frag.appendChild(this._createBtn(editor, d));
         });
         return frag;
     },

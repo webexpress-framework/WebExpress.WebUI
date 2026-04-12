@@ -190,7 +190,7 @@
     line-height: 1.1;
 }
 
-.wx-sidebar-icon:not(.wx-sidebar-icon-small):hover .wx-sidebar-icon-edit, 
+.wx-sidebar-icon:not(.wx-sidebar-icon-small):hover .wx-sidebar-icon-edit,
 .wx-sidebar-icon:not(.wx-sidebar-icon-small):focus .wx-sidebar-icon-edit {
     display: inline-block;
 }

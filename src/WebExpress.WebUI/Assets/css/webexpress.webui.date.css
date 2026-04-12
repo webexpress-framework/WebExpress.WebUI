@@ -43,7 +43,7 @@
 }
 
 /* Highlight on focus */
-.wx-date .form-control:focus, 
+.wx-date .form-control:focus,
 .wx-date .form-control:active {
     outline: none;
     box-shadow: 0 0 0 0.15rem var(--bs-primary-bg-subtle, rgba(13,110,253,.25));

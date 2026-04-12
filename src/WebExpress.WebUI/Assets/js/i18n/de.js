@@ -44,21 +44,21 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "selection.placeholder": "Wähle eine Option aus.",
 
     "upload.placeholder": "Datei hier ablegen oder zum Hochladen klicken.",
-    
+
     "table.columns.label": "Spalten",
     "table.options.label": "Optionen",
     "table.columns.toggle": "Spalten ein-/ausblenden",
     "table.handle.title": "Spalte ziehen um Reihenfolge zu ändern",
     "table.search.placeholder": "Suche...",
     "table.filter.columns.label": "Spalten filtern",
-    
+
     "avatar.zoom.label": "Zoom",
     "avatar.upload.image.label": "Bild auswählen",
     "avatar.placeholder": "Bild auswählen durch Ziehen oder Doppelklick.",
-    
+
     "page.contentNotLoaded.label": "Der Inhalt konnte nicht geladen werden.",
     "page.contentNotLoaded.details": "Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie die Seite erneut zu laden. Falls das Problem weiterhin besteht, könnte die angeforderte Ressource momentan nicht verfügbar sein oder ein technischer Fehler vorliegen. Sie können auch versuchen, die Seite zu aktualisieren oder sich an den technischen Support wenden, falls Unterstützung benötigt wird.",
-    
+
     "table.columns.manage": "Spalten verwalten",
     "table.columns.title": "Spalten",
     "page.table.columns.desc": "Sichtbarkeit umschalten und Reihenfolge per Ziehen ändern.",
@@ -67,7 +67,7 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "page.table.columns.default": "Spalte",
 
     "color.custom": "Benutzerdefinierte Farbe",
-    
+
     "editor.insert.link.title": "Link einfügen",
     "editor.insert.image.title": "Bild einfügen",
     "editor.insert.addon.title": "AddOn-Bibliothek",

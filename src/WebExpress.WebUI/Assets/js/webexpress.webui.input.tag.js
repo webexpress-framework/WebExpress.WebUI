@@ -159,7 +159,7 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
         // update placeholder visibility
         this._updatePlaceholder();
     }
-    
+
     /**
      * Gets the tags as a string separated by semicolons.
      * @returns {string} Tags as semicolon-separated string.

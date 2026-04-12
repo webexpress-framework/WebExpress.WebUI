@@ -104,16 +104,15 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
     render() {
         if (!this._list) { return; }
         this._list.innerHTML = "";
-        
+
         // build lookup for selected ids
         const selected = new Set((this._values || []).map(v => String(v)));
         // filter items to render only selected ones (preserve original order)
         const itemsToRender = this._items.filter(item => selected.has(String(item.id)));
 
-
         itemsToRender.forEach(item => {
             const li = document.createElement("li");
-            
+
             // apply styles and state
             if (item.labelColor) { li.classList.add(item.labelColor); }
             if (item.disabled) { li.classList.add("is-disabled"); }
@@ -125,7 +124,7 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
             if (item.primaryAction) { li.dataset.wxPrimaryAction = item.primaryAction; }
             if (item.primaryTarget) { li.dataset.wxPrimaryTarget = item.primaryTarget; }
             if (item.primaryUri) { li.dataset.wxPrimaryUri = item.primaryUri; }
-            
+
             if (item.secondaryAction) { li.dataset.wxSecondaryAction = item.secondaryAction; }
             if (item.secondaryTarget) { li.dataset.wxSecondaryTarget = item.secondaryTarget; }
             if (item.secondaryUri) { li.dataset.wxSecondaryUri = item.secondaryUri; }

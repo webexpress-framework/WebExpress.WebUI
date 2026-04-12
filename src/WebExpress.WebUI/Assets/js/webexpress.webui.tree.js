@@ -412,7 +412,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             if (node.tooltip) {
                 labelContainer.setAttribute("title", node.tooltip);
             }
-            
+
             // apply action attributes
             if (node.primaryAction) labelContainer.dataset.wxPrimaryAction = node.primaryAction;
             if (node.primaryTarget) labelContainer.dataset.wxPrimaryTarget = node.primaryTarget;

@@ -372,7 +372,7 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
             this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: newSerialized });
         }
     }
-    
+
     /**
      * Gets current date format string.
      * @returns {string}

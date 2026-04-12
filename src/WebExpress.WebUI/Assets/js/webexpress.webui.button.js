@@ -26,7 +26,7 @@ webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
         element.removeAttribute("data-image");
         element.removeAttribute("data-color");
         element.removeAttribute("data-size");
-        
+
         element.classList.add("btn", "wx-button");
         if (this._size) {
             element.classList.add(this._size);
@@ -118,7 +118,7 @@ webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
             const img = document.createElement("img");
             img.className = "wx-icon";
             img.src = this._image;
-            img.alt = ""; 
+            img.alt = "";
             fragment.appendChild(img);
         }
 
