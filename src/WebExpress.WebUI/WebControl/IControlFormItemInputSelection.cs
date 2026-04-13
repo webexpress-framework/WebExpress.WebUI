@@ -24,6 +24,13 @@ namespace WebExpress.WebUI.WebControl
         public bool MultiSelect { get; }
 
         /// <summary>
+        /// Gets a value indicating whether sticky selection mode is enabled.
+        /// When enabled and a value has been selected, the selection cannot be
+        /// cleared through the user interface.
+        /// </summary>
+        public bool StickySelection { get; }
+
+        /// <summary>
         /// Adds one or more items to the selection options.
         /// </summary>
         /// <param name="items">The items to add to the selection options.</param>
