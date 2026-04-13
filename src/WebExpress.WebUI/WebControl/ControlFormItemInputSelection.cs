@@ -32,6 +32,13 @@ namespace WebExpress.WebUI.WebControl
         public bool MultiSelect { get; set; }
 
         /// <summary>
+        /// Returns or sets a value indicating whether sticky selection mode is enabled.
+        /// When enabled and a value has been selected, the selection cannot be
+        /// cleared through the user interface.
+        /// </summary>
+        public bool StickySelection { get; set; }
+
+        /// <summary>
         /// Returns or sets the OnChange attribute.
         /// </summary>
         public PropertyOnChange OnChange { get; set; }
@@ -117,6 +124,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("name", Name)
                 .AddUserAttribute("placeholder", I18N.Translate(Placeholder))
                 .AddUserAttribute("data-multiselection", MultiSelect ? "true" : null)
+                .AddUserAttribute("data-sticky-selection", StickySelection ? "true" : null)
                 .AddUserAttribute("data-value", value)
                 .Add(_options.Select(x => x.Render(renderContext, visualTree)));
 

@@ -12,6 +12,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
     _filterInput = null;
     _optionfilter = null;
     _multiselect = false;
+    _stickySelection = false;
     _placeholder = "";
 
     /**
@@ -26,6 +27,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         const value = element.dataset.value || null;
         this._placeholder = element.getAttribute("placeholder") || this._i18n("webexpress.webui:selection.placeholder", "Select an option");
         this._multiselect = element.dataset.multiselection === "true";
+        this._stickySelection = element.dataset.stickySelection === "true";
         this._values = [];
         this._items = [];
         // default filter logic
@@ -53,6 +55,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         element.removeAttribute("name");
         element.removeAttribute("placeholder");
         element.removeAttribute("data-multiselection");
+        element.removeAttribute("data-sticky-selection");
         element.innerHTML = "";
         element.classList.add("wx-selection");
         element.appendChild(hiddenInput);
@@ -61,6 +64,16 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
 
         // attach popper.js positioning for the dropdown menu
         this._initializePopper(dropdown, dropdownMenu);
+
+        // block keyboard deletion when sticky selection is active
+        element.addEventListener("keydown", (e) => {
+            if (this._stickySelection && this._values.length > 0) {
+                if (e.key === "Backspace" || e.key === "Delete") {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }
+        });
 
         this.render();
     }
@@ -321,14 +334,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                 }
 
                 const span = document.createElement("span");
-                const closeButton = document.createElement("a");
-                closeButton.className = "fas fa-times";
-                closeButton.style.cursor = "pointer";
-                closeButton.addEventListener("click", (e) => {
-                    e.stopPropagation();
-                    this.value = this._values.filter((v) => { return v !== value; });
-                    this.render();
-                });
+                const isStickyActive = this._stickySelection && this._values.length > 0;
 
                 if (item.image) {
                     const img = document.createElement("img");
@@ -346,7 +352,18 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                 span.appendChild(labelSpan);
 
                 li.appendChild(span);
-                li.appendChild(closeButton);
+
+                if (!isStickyActive) {
+                    const closeButton = document.createElement("a");
+                    closeButton.className = "fas fa-times";
+                    closeButton.style.cursor = "pointer";
+                    closeButton.addEventListener("click", (e) => {
+                        e.stopPropagation();
+                        this.value = this._values.filter((v) => { return v !== value; });
+                        this.render();
+                    });
+                    li.appendChild(closeButton);
+                }
                 this._selection.appendChild(li);
             }
         });
@@ -407,6 +424,26 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         }
 
         this.render(); // optional UI refresh
+    }
+
+    /**
+     * Gets whether sticky selection mode is enabled.
+     * @returns {boolean} True if the selection cannot be cleared once set.
+     */
+    get stickySelection() {
+        return this._stickySelection;
+    }
+
+    /**
+     * Sets whether sticky selection mode is enabled.
+     * When enabled and a value is selected, the selection cannot be cleared
+     * through the UI (remove icon or keyboard). The user may still replace
+     * the value by selecting another item.
+     * @param {boolean} enabled True to enable sticky selection.
+     */
+    set stickySelection(enabled) {
+        this._stickySelection = Boolean(enabled);
+        this.render();
     }
 
     /**
