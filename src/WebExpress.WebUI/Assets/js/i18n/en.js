@@ -235,5 +235,12 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "widget.progress.title": "Progress",
     "widget.avatar.title": "Avatar",
     "widget.list.title": "Info List",
-    "widget.bignumber.title": "Big Number"
+    "widget.bignumber.title": "Big Number",
+
+    "login.title": "Login",
+    "login.username": "Username",
+    "login.password": "Password",
+    "login.submit": "Login",
+    "login.failed": "Login failed. Please check your credentials.",
+    "login.error": "An error occurred. Please try again."
 });

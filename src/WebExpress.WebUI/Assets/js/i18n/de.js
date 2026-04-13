@@ -235,5 +235,12 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "widget.progress.title": "Fortschritt",
     "widget.avatar.title": "Avatar",
     "widget.list.title": "Infoliste",
-    "widget.bignumber.title": "Große Zahl"
+    "widget.bignumber.title": "Große Zahl",
+
+    "login.title": "Anmelden",
+    "login.username": "Benutzername",
+    "login.password": "Passwort",
+    "login.submit": "Anmelden",
+    "login.failed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Zugangsdaten.",
+    "login.error": "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
 });

@@ -65,16 +65,6 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         // attach popper.js positioning for the dropdown menu
         this._initializePopper(dropdown, dropdownMenu);
 
-        // block keyboard deletion when sticky selection is active
-        element.addEventListener("keydown", (e) => {
-            if (this._stickySelection && this._values.length > 0) {
-                if (e.key === "Backspace" || e.key === "Delete") {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-            }
-        });
-
         this.render();
     }
 
