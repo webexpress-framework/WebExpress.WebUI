@@ -109,12 +109,13 @@ The component's value is managed internally and synchronized with a hidden input
 
 The component is initialized on a host element and configured using `data-` attributes.
 
-| Attribute            | Description                                                   | Example
-|----------------------|---------------------------------------------------------------|----------------------------------
-| `name`               | The name for the hidden input field used for form submission. | `name="categories"`
-| `data-value`         | A semicolon-separated list of IDs for the initial selection.  | `data-value="id2;id3"`
-| `data-multiselection`| Set to `"true"` to enable multi-select mode.                  | `data-multiselection="true"`
-| `placeholder`        | The text displayed when no items are selected.                | `placeholder="Select an item..."`
+| Attribute              | Description                                                            | Example
+|------------------------|------------------------------------------------------------------------|----------------------------------
+| `name`                 | The name for the hidden input field used for form submission.          | `name="categories"`
+| `data-value`           | A semicolon-separated list of IDs for the initial selection.           | `data-value="id2;id3"`
+| `data-multiselection`  | Set to `"true"` to enable multi-select mode.                           | `data-multiselection="true"`
+|`data-sticky-selection` | Set to `"true"` to prevent deselection of items in single-select mode. | `data-sticky-selection="true"`
+| `placeholder`          | The text displayed when no items are selected.                         | `placeholder="Select an item..."`
 
 ### Options and Structural Elements
 
