@@ -137,7 +137,7 @@ namespace WebExpress.WebUI.WebControl
 
             if (AlignmentMenu != TypeAlignmentDropdownMenu.Default)
             {
-                menuCss = Css.Concatenate(AlignmentMenu.ToClass(), menuCss);
+                menuCss = AlignmentMenu.ToClass();
             }
 
             var html = new HtmlElementTextContentDiv()

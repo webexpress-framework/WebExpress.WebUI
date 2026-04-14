@@ -219,8 +219,12 @@ webexpress.webui.AvatarDropdownCtrl = class extends webexpress.webui.Ctrl {
         const sizePx = this._size + "px";
         thumb.style.width = sizePx;
         thumb.style.height = sizePx;
-        thumb.style.borderRadius = (this._shape === "rect") ? "0.24em" : "50%";
-        if (this._shape === "rect") thumb.classList.add("rect");
+        if (this._shape === "rect") {
+            thumb.style.borderRadius = "0.24em";
+            thumb.classList.add("rect");
+        } else {
+            thumb.style.borderRadius = "50%";
+        }
 
         // image
         const img = document.createElement("img");
@@ -233,7 +237,6 @@ webexpress.webui.AvatarDropdownCtrl = class extends webexpress.webui.Ctrl {
         fallback.textContent = this._initials || "";
 
         if (this._src) {
-            img.src = this._src;
             img.onload = () => {
                 img.style.display = "block";
                 fallback.style.display = "none";
@@ -242,6 +245,7 @@ webexpress.webui.AvatarDropdownCtrl = class extends webexpress.webui.Ctrl {
                 img.style.display = "none";
                 fallback.style.display = "flex";
             };
+            img.src = this._src;
             // show initials until image loads
             fallback.style.display = "flex";
             img.style.display = "none";
@@ -257,7 +261,7 @@ webexpress.webui.AvatarDropdownCtrl = class extends webexpress.webui.Ctrl {
         // dropdown menu
         const ul = document.createElement("ul");
         ul.className = "dropdown-menu";
-        if (this._menuCss) ul.classList.add(...this._menuCss.split(" "));
+        if (this._menuCss) ul.classList.add(...this._menuCss.split(/\s+/).filter(Boolean));
 
         this._items.forEach(item => {
             const li = this._createMenuItem(item);
@@ -304,9 +308,7 @@ webexpress.webui.AvatarDropdownCtrl = class extends webexpress.webui.Ctrl {
     _parseNumber(v, fallback, min, max) {
         const n = (v !== undefined) ? Number(v) : NaN;
         if (!Number.isFinite(n)) return fallback;
-        if (n < min) return min;
-        if (n > max) return max;
-        return n;
+        return Math.max(min, Math.min(max, n));
     }
 
     /**
