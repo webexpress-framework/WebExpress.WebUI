@@ -46,6 +46,15 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Returns or sets the gap type associated with the current instance.
+        /// </summary>
+        public virtual TypeGap Gap
+        {
+            get => (TypeGap)GetProperty(TypeGap.None);
+            set => SetProperty(value, () => value.ToClass());
+        }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
