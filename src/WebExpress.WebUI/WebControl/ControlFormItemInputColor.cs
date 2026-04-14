@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormItemInputColor : ControlFormItemInput<ControlFormInputValueString>
     {
         /// <summary>
-        /// Returns or sets the color value.
+        /// Gets or sets the color value.
         /// </summary>
         public string Color { get; set; }
 

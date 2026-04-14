@@ -40,22 +40,22 @@ namespace WebExpress.WebUI.WebControl
             .Select(x => x as IControlFormItemInput);
 
         /// <summary>
-        /// Returns or sets the id of the item.
+        /// Gets or sets the id of the item.
         /// </summary>
         public string ObjectId { get; set; }
 
         /// <summary>
-        /// Returns or sets the name of the item.
+        /// Gets or sets the name of the item.
         /// </summary>
         public string ObjectName { get => _form.Name; set => _form.Name = value; }
 
         /// <summary>
-        /// Returns or sets the target uri.
+        /// Gets or sets the target uri.
         /// </summary>
         public IUri Uri { get => _form.Uri; set => _form.Uri = value; }
 
         /// <summary>
-        /// Returns or sets the request method.
+        /// Gets or sets the request method.
         /// </summary>
         public RequestMethod Method { get => _form.Method; set => _form.Method = value; }
 

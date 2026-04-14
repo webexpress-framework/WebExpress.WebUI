@@ -18,17 +18,17 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<string> _acceptFile = [];
 
         /// <summary>
-        /// Returns or sets the description.
+        /// Gets or sets the description.
         /// </summary>
         public string Description { get; set; }
 
         /// <summary>
-        /// Returns or sets a placeholder text.
+        /// Gets or sets a placeholder text.
         /// </summary>
         public string Placeholder { get; set; }
 
         /// <summary>
-        /// Returns or sets the accepted files.
+        /// Gets or sets the accepted files.
         /// </summary>
         public IEnumerable<string> AcceptFile => _acceptFile;
 

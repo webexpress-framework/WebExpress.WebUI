@@ -21,37 +21,37 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlDropdownItem> Items => _items;
 
         /// <summary>
-        /// Returns or sets the display name for the avatar.
+        /// Gets or sets the display name for the avatar.
         /// </summary>
         public string User { get; set; }
 
         /// <summary>
-        /// Returns or sets the image source for the avatar.
+        /// Gets or sets the image source for the avatar.
         /// </summary>
         public IUri Image { get; set; }
 
         /// <summary>
-        /// Returns or sets the initials fallback for the avatar.
+        /// Gets or sets the initials fallback for the avatar.
         /// </summary>
         public string Initials { get; set; }
 
         /// <summary>
-        /// Returns or sets the shape of the avatar thumbnail (circle or rect).
+        /// Gets or sets the shape of the avatar thumbnail (circle or rect).
         /// </summary>
         public TypeShapeAvatar Shape { get; set; }
 
         /// <summary>
-        /// Returns or sets the size of the avatar thumbnail in pixels.
+        /// Gets or sets the size of the avatar thumbnail in pixels.
         /// </summary>
         public int Size { get; set; } = -1;
 
         /// <summary>
-        /// Returns or sets the color.
+        /// Gets or sets the color.
         /// </summary>
         public PropertyColorButton Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the orientation of the menu.
+        /// Gets or sets the orientation of the menu.
         /// </summary>
         public TypeAlignmentDropdownMenu AlignmentMenu { get; set; }
 

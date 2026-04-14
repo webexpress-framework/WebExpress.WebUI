@@ -15,22 +15,22 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<IControlLink> _links = [];
 
         /// <summary>
-        /// Returns or sets the links.
+        /// Gets or sets the links.
         /// </summary>
         public IEnumerable<IControlLink> Links => _links;
 
         /// <summary>
-        /// Returns or sets the color of the name text.
+        /// Gets or sets the color of the name text.
         /// </summary>
         public PropertyColorText NameColor { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the name.
+        /// Gets or sets the name.
         /// </summary>
         public string Name { get; set; }
 

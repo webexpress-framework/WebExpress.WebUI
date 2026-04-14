@@ -10,12 +10,12 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormItemLabel : ControlFormItem
     {
         /// <summary>
-        /// Returns or sets the text of the label.
+        /// Gets or sets the text of the label.
         /// </summary>
         public string Text { get; set; }
 
         /// <summary>
-        /// Returns or sets the associated form field.
+        /// Gets or sets the associated form field.
         /// </summary>
         public IControlFormItem FormItem { get; set; }
 

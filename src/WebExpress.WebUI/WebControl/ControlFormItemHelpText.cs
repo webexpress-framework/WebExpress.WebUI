@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormItemHelpText : ControlFormItem
     {
         /// <summary>
-        /// Returns or sets the size of the text.
+        /// Gets or sets the size of the text.
         /// </summary>
         public PropertySizeText Size
         {
@@ -19,7 +19,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the help text.
+        /// Gets or sets the help text.
         /// </summary>
         public string Text { get; set; }
 

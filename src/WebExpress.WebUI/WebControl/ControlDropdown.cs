@@ -21,62 +21,62 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlDropdownItem> Items => _items;
 
         /// <summary>
-        /// Returns or sets the color. 
+        /// Gets or sets the color. 
         /// </summary>
         public PropertyColorButton Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
         public TypeSizeButton Size { get; set; }
 
         /// <summary>
-        /// Returns or sets the outline property.
+        /// Gets or sets the outline property.
         /// </summary>
         public bool Outline { get; set; }
 
         /// <summary>
-        /// Returns or sets whether the button should take up the full width.
+        /// Gets or sets whether the button should take up the full width.
         /// </summary>
         public TypeBlockButton Block { get; set; }
 
         /// <summary>
-        /// Returns or sets an indicator that indicates that a menu is present.
+        /// Gets or sets an indicator that indicates that a menu is present.
         /// </summary>
         public TypeToggleDropdown Toggle { get; set; }
 
         /// <summary>
-        /// Returns or sets the label.
+        /// Gets or sets the label.
         /// </summary>
         public string Text { get; set; }
 
         /// <summary>
-        /// Returns or sets the tooltip.
+        /// Gets or sets the tooltip.
         /// </summary>
         public string Tooltip { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the activation status of the button.
+        /// Gets or sets the activation status of the button.
         /// </summary>
         public TypeActive Active { get; set; }
 
         /// <summary>
-        /// Returns or sets the orientation of the menu.
+        /// Gets or sets the orientation of the menu.
         /// </summary>
         public TypeAlignmentDropdownMenu AlignmentMenu { get; set; }
 
         /// <summary>
-        /// Returns or sets the height.
+        /// Gets or sets the height.
         /// </summary>
         public new int Height { get; set; } = -1;
 
         /// <summary>
-        /// Returns or sets the width.
+        /// Gets or sets the width.
         /// </summary>
         public new int Width { get; set; } = -1;
 

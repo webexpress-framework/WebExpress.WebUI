@@ -13,22 +13,22 @@ namespace WebExpress.WebUI.WebControl
         public string Id { get; }
 
         /// <summary>
-        /// Returns or sets the label text for the suggestion item.
+        /// Gets or sets the label text for the suggestion item.
         /// </summary>
         public string Label { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon associated with the suggestion item.
+        /// Gets or sets the icon associated with the suggestion item.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the CSS class for styling the suggestion item.
+        /// Gets or sets the CSS class for styling the suggestion item.
         /// </summary>
         public string Css { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the suggestion item is marked as a favorite.
+        /// Gets or sets a value indicating whether the suggestion item is marked as a favorite.
         /// </summary>
         public bool Favorited { get; set; }
 

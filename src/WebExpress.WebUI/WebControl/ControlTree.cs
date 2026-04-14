@@ -18,17 +18,17 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<ControlTreeItem> Nodes => _nodes;
 
         /// <summary>
-        /// Returns or sets the layout.
+        /// Gets or sets the layout.
         /// </summary>
         public TypeLayoutTree Layout { get; set; } = TypeLayoutTree.Default;
 
         /// <summary>
-        /// Returns or sets a value indicating whether to show an indicator for expandable nodes.
+        /// Gets or sets a value indicating whether to show an indicator for expandable nodes.
         /// </summary>
         public bool DisableIndicator { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the tree nodes are movable.
+        /// Gets or sets a value indicating whether the tree nodes are movable.
         /// </summary>
         public bool Movable { get; set; }
 

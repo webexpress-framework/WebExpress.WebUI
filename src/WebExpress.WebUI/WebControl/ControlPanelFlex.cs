@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlPanelFlex : ControlPanel
     {
         /// <summary>
-        /// Returns or sets whether the items should be displayed inline.
+        /// Gets or sets whether the items should be displayed inline.
         /// </summary>
         public virtual TypeLayoutFlex Layout
         {
@@ -19,7 +19,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the horizontal alignment of the items.
+        /// Gets or sets the horizontal alignment of the items.
         /// </summary>
         public virtual TypeJustifiedFlex Justify
         {
@@ -28,7 +28,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the vertical orientation of the items.
+        /// Gets or sets the vertical orientation of the items.
         /// </summary>
         public virtual TypeAlignFlex Align
         {
@@ -37,7 +37,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the overflow behavior of the items.
+        /// Gets or sets the overflow behavior of the items.
         /// </summary>
         public virtual TypeWrap Wrap
         {
@@ -46,7 +46,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the gap type associated with the current instance.
+        /// Gets or sets the gap type associated with the current instance.
         /// </summary>
         public virtual TypeGap Gap
         {

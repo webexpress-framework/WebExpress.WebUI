@@ -10,7 +10,7 @@
     public class ControlChartDatasetPointScalar : IControlChartDatasetPoint
     {
         /// <summary>
-        /// Returns or sets the numeric value represented by this instance.
+        /// Gets or sets the numeric value represented by this instance.
         /// </summary>
         public float Value { get; set; }
 

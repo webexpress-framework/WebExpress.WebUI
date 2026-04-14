@@ -24,7 +24,7 @@ namespace WebExpress.WebUI.WebControl
         bool Multiple { get; }
 
         /// <summary>
-        /// Returns or sets the accept file types for the upload control.
+        /// Gets or sets the accept file types for the upload control.
         /// </summary> 
         string Accept { get; }
 
@@ -34,7 +34,7 @@ namespace WebExpress.WebUI.WebControl
         bool AutoUpload { get; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the dropzone is displayed in full-screen mode.
+        /// Gets or sets a value indicating whether the dropzone is displayed in full-screen mode.
         /// </summary>
         bool FullScreenDropzone { get; }
 

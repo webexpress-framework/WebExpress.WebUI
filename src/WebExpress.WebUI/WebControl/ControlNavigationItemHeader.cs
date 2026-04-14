@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlNavigationItemHeader : Control, IControlNavigationItem
     {
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
         public string Text { get; set; }
 

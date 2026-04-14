@@ -23,7 +23,7 @@ namespace WebExpress.WebUI.WebControl
         public string Size => _size?.ToClass();
 
         /// <summary>
-        /// Returns or sets the target uri.
+        /// Gets or sets the target uri.
         /// </summary>
         public IUri Uri { get; set; }
 

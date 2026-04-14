@@ -12,22 +12,22 @@ namespace WebExpress.WebUI.WebControl
     public class ControlTableColumn : IControlTableColumn
     {
         /// <summary>
-        /// Returns or sets the unique identifier for the entity.
+        /// Gets or sets the unique identifier for the entity.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Returns or sets the header text.
+        /// Gets or sets the header text.
         /// </summary>
         public string Title { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the color scheme used for the column.
+        /// Gets or sets the color scheme used for the column.
         /// </summary>
         public TypeColorTable Color { get; set; } = TypeColorTable.Default;
 

@@ -25,32 +25,32 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlTableRow> Rows => _rows;
 
         /// <summary>
-        /// Returns or sets a value indicating whether the table is striped.
+        /// Gets or sets a value indicating whether the table is striped.
         /// </summary>
         public TypeStripedTable Striped { get; set; } = TypeStripedTable.Default;
 
         /// <summary>
-        /// Returns or sets the color scheme used for the table.
+        /// Gets or sets the color scheme used for the table.
         /// </summary>
         public TypeColorTable Color { get; set; } = TypeColorTable.Default;
 
         /// <summary>
-        /// Returns or sets the header color scheme used for the table.
+        /// Gets or sets the header color scheme used for the table.
         /// </summary>
         public TypeColorTable HeaderColor { get; set; } = TypeColorTable.Default;
 
         /// <summary>
-        /// Returns or sets a value indicating whether the table has a visible border.
+        /// Gets or sets a value indicating whether the table has a visible border.
         /// </summary>
         public TypeBorderTable TableBorder { get; set; } = TypeBorderTable.Default;
 
         /// <summary>
-        /// Returns or sets a value indicating whether the item can be selected.
+        /// Gets or sets a value indicating whether the item can be selected.
         /// </summary>
         public bool Selectable { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether columns should be hidden.
+        /// Gets or sets a value indicating whether columns should be hidden.
         /// </summary>
         public bool SuppressHeaders { get; set; }
 

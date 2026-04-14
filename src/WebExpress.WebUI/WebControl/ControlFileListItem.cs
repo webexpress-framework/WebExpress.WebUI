@@ -16,37 +16,37 @@ namespace WebExpress.WebUI.WebControl
         private readonly string _id;
 
         /// <summary>
-        /// Returns or sets the unique identifier for the entity.
+        /// Gets or sets the unique identifier for the entity.
         /// </summary>
         public string Id => _id;
 
         /// <summary>
-        /// Returns or sets the icon associated with this file.
+        /// Gets or sets the icon associated with this file.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the name of the file, including its extension.
+        /// Gets or sets the name of the file, including its extension.
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// Returns or sets the uri of the file.
+        /// Gets or sets the uri of the file.
         /// </summary>
         public IUri Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the size of the file in bytes.
+        /// Gets or sets the size of the file in bytes.
         /// </summary>
         public long Size { get; set; } = long.MinValue;
 
         /// <summary>
-        /// Returns or sets the date of the file.
+        /// Gets or sets the date of the file.
         /// </summary>
         public DateTime Date { get; set; } = DateTime.MinValue;
 
         /// <summary>
-        /// Returns or sets the description associated with the file.
+        /// Gets or sets the description associated with the file.
         /// </summary>
         public string Description { get; set; }
 

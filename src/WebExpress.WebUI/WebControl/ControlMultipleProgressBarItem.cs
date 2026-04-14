@@ -6,22 +6,22 @@
     public class ControlMultipleProgressBarItem
     {
         /// <summary>
-        /// Returns or sets the text color.
+        /// Gets or sets the text color.
         /// </summary>
         public PropertyColorText Color { get; set; } = new PropertyColorText(TypeColorText.Default);
 
         /// <summary>
-        /// Returns or sets the background color.
+        /// Gets or sets the background color.
         /// </summary>
         public PropertyColorBackground BackgroundColor { get; set; } = new PropertyColorBackground(TypeColorBackground.Default);
 
         /// <summary>
-        /// Returns or sets the value.
+        /// Gets or sets the value.
         /// </summary>
         public uint Value { get; set; }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
         public string Text { get; set; }
     }

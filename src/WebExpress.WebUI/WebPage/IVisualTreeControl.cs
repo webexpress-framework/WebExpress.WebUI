@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.WebPage
         string Title { get; set; }
 
         /// <summary>
-        /// Returns or sets the HTTP status code associated with the response.
+        /// Gets or sets the HTTP status code associated with the response.
         /// </summary>
         int StatusCode { get; set; }
 

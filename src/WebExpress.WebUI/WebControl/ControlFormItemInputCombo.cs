@@ -22,12 +22,12 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<ControlFormItemInputComboItem> Items => _items;
 
         /// <summary>
-        /// Returns or sets a placeholder text.
+        /// Gets or sets a placeholder text.
         /// </summary>
         public string Placeholder { get; set; }
 
         /// <summary>
-        /// Returns or sets the OnChange attribute.
+        /// Gets or sets the OnChange attribute.
         /// </summary>
         public PropertyOnChange OnChange { get; set; }
 

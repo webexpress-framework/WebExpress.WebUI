@@ -26,43 +26,43 @@ namespace WebExpress.WebUI.WebControl
         event Action<ControlFormEventFormProcess> ProcessForm;
 
         /// <summary>
-        /// Returns or sets the name of the form.
+        /// Gets or sets the name of the form.
         /// </summary>
         string Name { get; }
 
         /// <summary>
-        /// Returns or sets the target URI.
+        /// Gets or sets the target URI.
         /// </summary>
         IUri Uri { get; }
 
         /// <summary>
-        /// Returns or sets the redirect URI.
+        /// Gets or sets the redirect URI.
         /// </summary>
         IUri RedirectUri { get; }
 
         /// <summary>
-        /// Returns or sets the form items.
+        /// Gets or sets the form items.
         /// </summary>
         IEnumerable<IControlFormItem> Items { get; }
 
         /// <summary>
-        /// Returns or sets the request method.
+        /// Gets or sets the request method.
         /// </summary>
         RequestMethod Method { get; }
 
         /// <summary>
-        /// Returns or sets the confirmation control that is displayed 
+        /// Gets or sets the confirmation control that is displayed 
         /// instead of the form after the form has been successfully submitted.
         /// </summary>
         IControl Conformation { get; }
 
         /// <summary>
-        /// Returns or sets the form layout.
+        /// Gets or sets the form layout.
         /// </summary>
         TypeLayoutForm FormLayout { get; }
 
         /// <summary>
-        /// Returns or sets the item layout.
+        /// Gets or sets the item layout.
         /// </summary>
         TypeLayoutFormItem ItemLayout { get; }
 

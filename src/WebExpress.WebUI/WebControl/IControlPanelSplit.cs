@@ -19,32 +19,32 @@ namespace WebExpress.WebUI.WebControl
         IEnumerable<IControl> MainPanel { get; }
 
         /// <summary>
-        /// Returns or sets whether the splitter is horziontal or vertically oriented.
+        /// Gets or sets whether the splitter is horziontal or vertically oriented.
         /// </summary>
         TypeOrientationSplit Orientation { get; }
 
         /// <summary>
-        /// Returns or sets the color of the splitter.
+        /// Gets or sets the color of the splitter.
         /// </summary>
         PropertyColorBackground SplitterColor { get; }
 
         /// <summary>
-        /// Returns or sets the width of the splitter.
+        /// Gets or sets the width of the splitter.
         /// </summary>
         int SplitterSize { get; }
 
         /// <summary>
-        /// Returns or sets the minimum size of the left or top area in the ControlPanelSplit.
+        /// Gets or sets the minimum size of the left or top area in the ControlPanelSplit.
         /// </summary>
         int SidePanelMinSize { get; }
 
         /// <summary>
-        /// Returns or sets the initial size of the left or top area in the ControlPanelSplit in %.
+        /// Gets or sets the initial size of the left or top area in the ControlPanelSplit in %.
         /// </summary>
         int SidePanelInitialSize { get; }
 
         /// <summary>
-        /// Returns or sets the maximum size of the left or top area in the ControlPanelSplit.
+        /// Gets or sets the maximum size of the left or top area in the ControlPanelSplit.
         /// </summary>
         int SidePanelMaxSize { get; }
 
@@ -54,7 +54,7 @@ namespace WebExpress.WebUI.WebControl
         TypeSplitOrder Order { get; }
 
         /// <summary>
-        /// Returns or sets the unit of measurement for the type size.
+        /// Gets or sets the unit of measurement for the type size.
         /// </summary>
         TypeSizeUnit Unit { get; }
 

@@ -16,17 +16,17 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<IControl> _content = [];
 
         /// <summary>
-        /// Returns or sets the unique identifier for the entity.
+        /// Gets or sets the unique identifier for the entity.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Returns or sets the header text.
+        /// Gets or sets the header text.
         /// </summary>
         public string Header { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
         public IIcon Icon { get; set; }
 
@@ -41,13 +41,13 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControl> Content => _content;
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
         public IAction PrimaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
         public IAction SecondaryAction { get; set; }

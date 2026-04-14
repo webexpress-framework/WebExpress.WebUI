@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.WebControl
         public string Id => _id;
 
         /// <summary>
-        /// Returns or sets the alignment of the toolbar item.
+        /// Gets or sets the alignment of the toolbar item.
         /// </summary>
         public TypeToolbarItemAlignment Alignment { get; set; } = TypeToolbarItemAlignment.Default;
 

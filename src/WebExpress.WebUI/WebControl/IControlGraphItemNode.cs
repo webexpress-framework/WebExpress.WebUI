@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.WebControl
         IUri Uri { get; }
 
         /// <summary>
-        /// Returns or sets an optional label for the node.
+        /// Gets or sets an optional label for the node.
         /// </summary>
         string Label { get; }
 
@@ -26,7 +26,7 @@ namespace WebExpress.WebUI.WebControl
         Point? Point { get; }
 
         /// <summary>
-        /// Returns or sets the color for the node.
+        /// Gets or sets the color for the node.
         /// </summary>
         PropertyColorGraph Color { get; }
 

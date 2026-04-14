@@ -15,17 +15,17 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<IControlTableRow> _children = [];
 
         /// <summary>
-        /// Returns or sets the unique identifier for the entity.
+        /// Gets or sets the unique identifier for the entity.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Returns or sets the color scheme used for the row.
+        /// Gets or sets the color scheme used for the row.
         /// </summary>
         public TypeColorTable Color { get; set; } = TypeColorTable.Default;
 
         /// <summary>
-        /// Returns or sets the expand state of the type, indicating whether it is expanded or collapsed.
+        /// Gets or sets the expand state of the type, indicating whether it is expanded or collapsed.
         /// </summary>
         public TypeExpandState ExpandState { get; set; } = TypeExpandState.None;
 
@@ -45,13 +45,13 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlTableRow> Children => _children;
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
         public IAction PrimaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
         public IAction SecondaryAction { get; set; }

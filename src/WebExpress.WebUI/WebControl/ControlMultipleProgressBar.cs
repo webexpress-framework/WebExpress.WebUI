@@ -19,7 +19,7 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<ControlMultipleProgressBarItem> Items => _items;
 
         /// <summary>
-        /// Returns or sets the format of the progress bar.
+        /// Gets or sets the format of the progress bar.
         /// </summary>
         public TypeFormatProgress Format { get; set; }
 

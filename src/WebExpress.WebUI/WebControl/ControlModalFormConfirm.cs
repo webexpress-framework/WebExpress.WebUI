@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.WebControl
         public event EventHandler<ControlFormEvent> Confirm;
 
         /// <summary>
-        /// Returns or sets the submit button icon.
+        /// Gets or sets the submit button icon.
         /// </summary>
         public IIcon SubmitButtonIcon
         {
@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the submit button color.
+        /// Gets or sets the submit button color.
         /// </summary>
         public PropertyColorButton SubmitButtonColor
         {
@@ -36,17 +36,17 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the submit button label.
+        /// Gets or sets the submit button label.
         /// </summary>
         public string SubmitButtonLabel { get; set; }
 
         /// <summary>
-        /// Returns or sets the content.
+        /// Gets or sets the content.
         /// </summary>
         public new ControlFormItem Content { get; set; }
 
         /// <summary>
-        /// Returns or sets the submit button.
+        /// Gets or sets the submit button.
         /// </summary>
         private ControlFormItemButtonSubmit SubmitButton { get; } = new ControlFormItemButtonSubmit("submit");
 

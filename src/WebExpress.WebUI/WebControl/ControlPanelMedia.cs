@@ -11,22 +11,22 @@ namespace WebExpress.WebUI.WebControl
     public class ControlPanelMedia : ControlPanel
     {
         /// <summary>
-        /// Returns or sets the title.
+        /// Gets or sets the title.
         /// </summary>
         public string Title { get; set; }
 
         /// <summary>
-        /// Returns or sets the uri to the image.
+        /// Gets or sets the uri to the image.
         /// </summary>
         public string Image { get; set; }
 
         /// <summary>
-        /// Returns or sets the width of the image in pixel.
+        /// Gets or sets the width of the image in pixel.
         /// </summary>
         public uint? ImageWidth { get; set; }
 
         /// <summary>
-        /// Returns or sets the height of the image in pixel.
+        /// Gets or sets the height of the image in pixel.
         /// </summary>
         public uint? ImageHeight { get; set; }
 

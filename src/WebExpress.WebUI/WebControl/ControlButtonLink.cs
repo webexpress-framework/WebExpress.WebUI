@@ -13,12 +13,12 @@ namespace WebExpress.WebUI.WebControl
     public class ControlButtonLink : ControlButton
     {
         /// <summary>
-        /// Returns or sets the target uri.
+        /// Gets or sets the target uri.
         /// </summary>
         public IUri Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the tooltip.
+        /// Gets or sets the tooltip.
         /// </summary>
         public string Tooltip { get; set; }
 

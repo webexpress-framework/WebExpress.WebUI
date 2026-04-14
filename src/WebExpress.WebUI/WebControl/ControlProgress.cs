@@ -10,12 +10,12 @@ namespace WebExpress.WebUI.WebControl
     public class ControlProgress : Control
     {
         /// <summary>
-        /// Returns or sets the format of the progress bar.
+        /// Gets or sets the format of the progress bar.
         /// </summary>
         public TypeFormatProgress Format { get; set; }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
         public TypeSizeProgress Size
         {
@@ -24,32 +24,32 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the progress bar color.
+        /// Gets or sets the progress bar color.
         /// </summary>
         public PropertyColorProgress Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the text color.
+        /// Gets or sets the text color.
         /// </summary>
         public new PropertyColorText TextColor { get; set; }
 
         /// <summary>
-        /// Returns or sets the value.
+        /// Gets or sets the value.
         /// </summary>
         public uint Value { get; set; } = 0;
 
         /// <summary>
-        /// Returns or sets the minimum value.
+        /// Gets or sets the minimum value.
         /// </summary>
         public uint Min { get; set; } = 0;
 
         /// <summary>
-        /// Returns or sets the maximum value.
+        /// Gets or sets the maximum value.
         /// </summary>
         public uint Max { get; set; } = 100;
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
         public string Text { get; set; }
 

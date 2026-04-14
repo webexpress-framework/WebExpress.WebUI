@@ -25,12 +25,12 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlGraphItemEdge> Edges => _edges;
 
         /// <summary>
-        /// Returns or sets the style used to render nodes the type graph.
+        /// Gets or sets the style used to render nodes the type graph.
         /// </summary>
         public TypeStyleGraphNode NodeStyle { get; set; } = TypeStyleGraphNode.Default;
 
         /// <summary>
-        /// Returns or sets the style used to render edges in the type graph.
+        /// Gets or sets the style used to render edges in the type graph.
         /// </summary>
         public TypeStyleGraphEdge EdgeStyle { get; set; } = TypeStyleGraphEdge.Default;
 

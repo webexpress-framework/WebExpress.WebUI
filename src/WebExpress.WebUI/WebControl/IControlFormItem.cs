@@ -6,7 +6,7 @@
     public interface IControlFormItem : IControl
     {
         /// <summary>
-        /// Returns or sets the name of the input field.
+        /// Gets or sets the name of the input field.
         /// This name is used to identify the form item in the context of form submissions.
         /// </summary>
         string Name { get; }

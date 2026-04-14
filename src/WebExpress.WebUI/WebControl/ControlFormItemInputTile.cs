@@ -18,12 +18,12 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlTileCard> Items => _items;
 
         /// <summary>
-        /// Returns or sets a value indicating whether multiple items can be selected simultaneously.
+        /// Gets or sets a value indicating whether multiple items can be selected simultaneously.
         /// </summary>
         public bool MultiSelect { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether a large icon is displayed 
+        /// Gets or sets a value indicating whether a large icon is displayed 
         /// for the item.
         /// </summary>
         public bool LargeIcon { get; set; }

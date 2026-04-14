@@ -11,25 +11,25 @@ namespace WebExpress.WebUI.WebNotification
     public interface INotification
     {
         /// <summary>
-        /// Returns or sets the notification id.
+        /// Gets or sets the notification id.
         /// </summary>
         [JsonPropertyName("id")]
         Guid Id { get; }
 
         /// <summary>
-        /// Returns or sets the heading.
+        /// Gets or sets the heading.
         /// </summary>
         [JsonPropertyName("heading")]
         string Heading { get; set; }
 
         /// <summary>
-        /// Returns or sets the notification message.
+        /// Gets or sets the notification message.
         /// </summary>
         [JsonPropertyName("message")]
         string Message { get; set; }
 
         /// <summary>
-        /// Returns or sets the lifetime of the notification.
+        /// Gets or sets the lifetime of the notification.
         /// </summary>
         [JsonPropertyName("durability")]
         int Durability { get; set; }
@@ -53,13 +53,13 @@ namespace WebExpress.WebUI.WebNotification
         int Progress { get; set; }
 
         /// <summary>
-        /// Returns or sets the notification type.
+        /// Gets or sets the notification type.
         /// </summary>
         [JsonPropertyName("type"), JsonConverter(typeof(TypeNotificationConverter))]
         TypeNotification Type { get; set; }
 
         /// <summary>
-        /// Returns or sets the scopes associated with the notification.
+        /// Gets or sets the scopes associated with the notification.
         /// </summary>
         [JsonIgnore]
         IEnumerable<IScope> Scops { get; }

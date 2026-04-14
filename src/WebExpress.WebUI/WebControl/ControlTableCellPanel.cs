@@ -16,22 +16,22 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<IControl> _content = [];
 
         /// <summary>
-        /// Returns or sets the unique identifier for the entity.
+        /// Gets or sets the unique identifier for the entity.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Returns or sets the class or category associated with the current object.
+        /// Gets or sets the class or category associated with the current object.
         /// </summary>
         public virtual string Class { get; set; }
 
         /// <summary>
-        /// Returns or sets the style applied to the element.
+        /// Gets or sets the style applied to the element.
         /// </summary>
         public virtual string Style { get; set; }
 
         /// <summary>
-        /// Returns or sets the color scheme used for the cell.
+        /// Gets or sets the color scheme used for the cell.
         /// </summary>
         public virtual TypeColorTable Color { get; set; } = TypeColorTable.Default;
 

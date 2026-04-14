@@ -14,13 +14,13 @@ namespace WebExpress.WebUI.WebControl
     public class ControlListItemButton : ControlListItem
     {
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
         public IAction PrimaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
         public IAction SecondaryAction { get; set; }

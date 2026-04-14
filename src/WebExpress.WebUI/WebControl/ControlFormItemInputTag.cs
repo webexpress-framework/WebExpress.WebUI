@@ -12,12 +12,12 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormItemInputTag : ControlFormItemInput<ControlFormInputValueStringList>
     {
         /// <summary>
-        /// Returns or sets a placeholder text.
+        /// Gets or sets a placeholder text.
         /// </summary>
         public string Placeholder { get; set; }
 
         /// <summary>
-        /// Returns or sets the color of the tags.
+        /// Gets or sets the color of the tags.
         /// </summary>
         public PropertyColorTag Color { get; set; } = new PropertyColorTag(TypeColorTag.Default);
 

@@ -13,7 +13,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlAttribute : Control
     {
         /// <summary>
-        /// Returns or sets the text color of the key.
+        /// Gets or sets the text color of the key.
         /// </summary>
         public PropertyColorText Color
         {
@@ -22,34 +22,34 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the text color of the key.
+        /// Gets or sets the text color of the key.
         /// </summary>
         public PropertyColorText KeyColor { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon associated with the attribute, typically 
+        /// Gets or sets the icon associated with the attribute, typically 
         /// used to visually represent the attribute's meaning or category.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the key of the attribute, representing the name or 
+        /// Gets or sets the key of the attribute, representing the name or 
         /// identifier in the key-value pair.
         /// </summary>
         public string Key { get; set; }
 
         /// <summary>
-        /// Returns or sets the value.
+        /// Gets or sets the value.
         /// </summary>
         public string Value { get; set; }
 
         /// <summary>
-        /// Returns or sets a link.
+        /// Gets or sets a link.
         /// </summary>
         public IUri Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the character used to separate the key and value in the displayed attribute.
+        /// Gets or sets the character used to separate the key and value in the displayed attribute.
         /// Common separators include ':' or '='.
         /// </summary>
         public char Separator { get; set; } = ':';

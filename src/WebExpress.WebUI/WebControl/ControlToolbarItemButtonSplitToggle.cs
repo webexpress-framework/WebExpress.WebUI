@@ -23,27 +23,27 @@ namespace WebExpress.WebUI.WebControl
         public string Id => _id;
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets a tooltip text.
+        /// Gets or sets a tooltip text.
         /// </summary>
         public string Tooltip { get; set; }
 
         /// <summary>
-        /// Returns or sets the identifier for the splitter.
+        /// Gets or sets the identifier for the splitter.
         /// </summary>
         public string SpltterId { get; set; }
 
         /// <summary>
-        /// Returns or sets the link color.
+        /// Gets or sets the link color.
         /// </summary>
         public PropertyColorText Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the alignment of the toolbar item.
+        /// Gets or sets the alignment of the toolbar item.
         /// </summary>
         public TypeToolbarItemAlignment Alignment { get; set; } = TypeToolbarItemAlignment.Default;
 

@@ -48,27 +48,27 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlFormItem> Items => _items;
 
         /// <summary>
-        /// Returns or sets the name of the form.
+        /// Gets or sets the name of the form.
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// Returns or sets the target uri.
+        /// Gets or sets the target uri.
         /// </summary>
         public IUri Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the redirect uri.
+        /// Gets or sets the redirect uri.
         /// </summary>
         public IUri RedirectUri { get; set; }
 
         /// <summary>
-        /// Returns or sets the form layout.
+        /// Gets or sets the form layout.
         /// </summary>
         public TypeLayoutForm FormLayout { get; set; } = TypeLayoutForm.Default;
 
         /// <summary>
-        /// Returns or sets the item layout.
+        /// Gets or sets the item layout.
         /// </summary>
         public TypeLayoutFormItem ItemLayout { get; set; } = TypeLayoutFormItem.Vertical;
 
@@ -78,7 +78,7 @@ namespace WebExpress.WebUI.WebControl
         public TypeFormState State { get; protected set; } = TypeFormState.Default;
 
         /// <summary>
-        /// Returns or sets the hidden field that contains the session id.
+        /// Gets or sets the hidden field that contains the session id.
         /// </summary>
         public ControlFormItemInputHidden FormId { get; } = new ControlFormItemInputHidden().Initialize
         (
@@ -86,52 +86,52 @@ namespace WebExpress.WebUI.WebControl
         ) as ControlFormItemInputHidden;
 
         /// <summary>
-        /// Returns or sets the request method.
+        /// Gets or sets the request method.
         /// </summary>
         public RequestMethod Method { get; set; } = RequestMethod.POST;
 
         /// <summary>
-        /// Returns or sets the header preferences section.
+        /// Gets or sets the header preferences section.
         /// </summary>
         protected IEnumerable<IFragmentContext> HeaderPreferences { get; } = [];
 
         /// <summary>
-        /// Returns or sets the header primary section.
+        /// Gets or sets the header primary section.
         /// </summary>
         protected IEnumerable<IFragmentContext> HeaderPrimary { get; } = [];
 
         /// <summary>
-        /// Returns or sets the header secondary section.
+        /// Gets or sets the header secondary section.
         /// </summary>
         protected IEnumerable<IFragmentContext> HeaderSecondary { get; } = [];
 
         /// <summary>
-        /// Returns or sets the button panel preferences section.
+        /// Gets or sets the button panel preferences section.
         /// </summary>
         protected IEnumerable<IFragmentContext> ButtonPanelPreferences { get; } = [];
 
         /// <summary>
-        /// Returns or sets the button panel primary section.
+        /// Gets or sets the button panel primary section.
         /// </summary>
         protected IEnumerable<IFragmentContext> ButtonPanelPrimary { get; } = [];
 
         /// <summary>
-        /// Returns or sets the button panel secondary section.
+        /// Gets or sets the button panel secondary section.
         /// </summary>
         protected IEnumerable<IFragmentContext> ButtonPanelSecondary { get; } = [];
 
         /// <summary>
-        /// Returns or sets the footer preferences section.
+        /// Gets or sets the footer preferences section.
         /// </summary>
         protected IEnumerable<IFragmentContext> FooterPreferences { get; } = [];
 
         /// <summary>
-        /// Returns or sets the footer primary section.
+        /// Gets or sets the footer primary section.
         /// </summary>
         protected IEnumerable<IFragmentContext> FooterPrimary { get; } = [];
 
         /// <summary>
-        /// Returns or sets the footer secondary section.
+        /// Gets or sets the footer secondary section.
         /// </summary>
         protected IEnumerable<IFragmentContext> FooterSecondary { get; } = [];
 
@@ -141,7 +141,7 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlFormItemButton> Buttons => _preferencesButtons.Union(_primaryButtons).Union(_secondaryButtons);
 
         /// <summary>
-        /// Returns or sets the horizontal alignment of the items.
+        /// Gets or sets the horizontal alignment of the items.
         /// </summary>
         public virtual TypeJustifiedFlex Justify
         {
@@ -150,7 +150,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the confirmation control that is displayed 
+        /// Gets or sets the confirmation control that is displayed 
         /// instead of the form after the form has been successfully submitted.
         /// </summary>
         public IControl Conformation { get; set; }

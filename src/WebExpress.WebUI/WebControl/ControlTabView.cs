@@ -17,17 +17,17 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<IControl> _items = [];
 
         /// <summary>
-        /// Returns or sets the unique identifier for the view.
+        /// Gets or sets the unique identifier for the view.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Returns or sets the title text.
+        /// Gets or sets the title text.
         /// </summary>
         public string Title { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon associated with this view.
+        /// Gets or sets the icon associated with this view.
         /// </summary>
         public IIcon Icon { get; set; }
 

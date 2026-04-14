@@ -15,17 +15,17 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<ControlFormItemInputComboItem> SubItems => _subItems;
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
         public string Text { get; set; }
 
         /// <summary>
-        /// Returns or sets a value.
+        /// Gets or sets a value.
         /// </summary>
         public string Value { get; set; }
 
         /// <summary>
-        /// Returns or sets a tag value.
+        /// Gets or sets a tag value.
         /// </summary>
         public object Tag { get; set; }
 

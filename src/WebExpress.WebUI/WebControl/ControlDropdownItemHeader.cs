@@ -10,12 +10,12 @@ namespace WebExpress.WebUI.WebControl
     public class ControlDropdownItemHeader : IControlDropdownItem
     {
         /// <summary>
-        /// Returns or sets the unique identifier for the entity.
+        /// Gets or sets the unique identifier for the entity.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
         public string Text { get; set; }
 

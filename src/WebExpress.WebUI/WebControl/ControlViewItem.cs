@@ -16,42 +16,42 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<IControl> _content = [];
 
         /// <summary>
-        /// Returns or sets the unique identifier for the entity.
+        /// Gets or sets the unique identifier for the entity.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Returns or sets the title text.
+        /// Gets or sets the title text.
         /// </summary>
         public string Title { get; set; }
 
         /// <summary>
-        /// Returns or sets the description of the view.
+        /// Gets or sets the description of the view.
         /// </summary>
         public string Description { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the detail frame is enabled.
+        /// Gets or sets a value indicating whether the detail frame is enabled.
         /// </summary>
         public bool DetailFrame { get; set; }
 
         /// <summary>
-        /// Returns or sets the initial size of the detail pane (e.g. "300px" or "30%").
+        /// Gets or sets the initial size of the detail pane (e.g. "300px" or "30%").
         /// </summary>
         public string DetailSize { get; set; }
 
         /// <summary>
-        /// Returns or sets the minimum size of the detail pane in pixels.
+        /// Gets or sets the minimum size of the detail pane in pixels.
         /// </summary>
         public int? DetailMinSide { get; set; }
 
         /// <summary>
-        /// Returns or sets the maximum size of the detail pane in pixels.
+        /// Gets or sets the maximum size of the detail pane in pixels.
         /// </summary>
         public int? DetailMaxSide { get; set; }
 

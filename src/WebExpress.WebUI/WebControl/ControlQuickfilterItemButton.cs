@@ -17,34 +17,34 @@ namespace WebExpress.WebUI.WebControl
         public string Id { get; private set; }
 
         /// <summary>
-        /// Returns or sets the color.
+        /// Gets or sets the color.
         /// </summary>
         public PropertyColorButton BackgroundColor { get; set; }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
         public string Text { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
         public IAction PrimaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
         public IAction SecondaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the activation status of the button.
+        /// Gets or sets the activation status of the button.
         /// </summary>
         public TypeActive Active { get; set; }
 

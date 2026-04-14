@@ -24,32 +24,32 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControl> MainPanel => _mainPanel;
 
         /// <summary>
-        /// Returns or sets whether the splitter is horziontal or vertically oriented.
+        /// Gets or sets whether the splitter is horziontal or vertically oriented.
         /// </summary>
         public TypeOrientationSplit Orientation { get; set; }
 
         /// <summary>
-        /// Returns or sets the color of the splitter.
+        /// Gets or sets the color of the splitter.
         /// </summary>
         public PropertyColorBackground SplitterColor { get; set; } = new PropertyColorBackground(TypeColorBackground.Default);
 
         /// <summary>
-        /// Returns or sets the width of the splitter.
+        /// Gets or sets the width of the splitter.
         /// </summary>
         public int SplitterSize { get; set; } = -1;
 
         /// <summary>
-        /// Returns or sets the minimum size of the left or top area in the ControlPanelSplit.
+        /// Gets or sets the minimum size of the left or top area in the ControlPanelSplit.
         /// </summary>
         public int SidePanelMinSize { get; set; } = -1;
 
         /// <summary>
-        /// Returns or sets the initial size of the left or top area in the ControlPanelSplit in %.
+        /// Gets or sets the initial size of the left or top area in the ControlPanelSplit in %.
         /// </summary>
         public int SidePanelInitialSize { get; set; } = -1;
 
         /// <summary>
-        /// Returns or sets the maximum size of the left or top area in the ControlPanelSplit.
+        /// Gets or sets the maximum size of the left or top area in the ControlPanelSplit.
         /// </summary>
         public int SidePanelMaxSize { get; set; } = -1;
 
@@ -59,7 +59,7 @@ namespace WebExpress.WebUI.WebControl
         public TypeSplitOrder Order { get; set; } = TypeSplitOrder.Default;
 
         /// <summary>
-        /// Returns or sets the unit of measurement for the type size.
+        /// Gets or sets the unit of measurement for the type size.
         /// </summary>
         public TypeSizeUnit Unit { get; set; } = TypeSizeUnit.Default;
 

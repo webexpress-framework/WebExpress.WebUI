@@ -10,12 +10,12 @@ namespace WebExpress.WebUI.WebControl
     public class ControlPanelCallout : ControlPanel
     {
         /// <summary>
-        /// Returns or sets the title.
+        /// Gets or sets the title.
         /// </summary>
         public string Title { get; set; }
 
         /// <summary>
-        /// Returns or sets the color.
+        /// Gets or sets the color.
         /// </summary>
         public PropertyColorCallout Color
         {

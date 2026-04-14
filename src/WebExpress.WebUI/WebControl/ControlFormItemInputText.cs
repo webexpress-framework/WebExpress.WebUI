@@ -18,32 +18,32 @@ namespace WebExpress.WebUI.WebControl
         public TypeEditTextFormat Format { get; set; }
 
         /// <summary>
-        /// Returns or sets the description.
+        /// Gets or sets the description.
         /// </summary>
         public string Description { get; set; }
 
         /// <summary>
-        /// Returns or sets a placeholder text.
+        /// Gets or sets a placeholder text.
         /// </summary>
         public string Placeholder { get; set; }
 
         /// <summary>
-        /// Returns or sets the minimum length.
+        /// Gets or sets the minimum length.
         /// </summary>
         public uint? MinLength { get; set; }
 
         /// <summary>
-        /// Returns or sets the maximum length.
+        /// Gets or sets the maximum length.
         /// </summary>
         public uint? MaxLength { get; set; }
 
         /// <summary>
-        /// Returns or sets a search pattern that checks the content.
+        /// Gets or sets a search pattern that checks the content.
         /// </summary>
         public string Pattern { get; set; }
 
         /// <summary>
-        /// Returns or sets the height of the text field (for Multiline and WYSIWYG).
+        /// Gets or sets the height of the text field (for Multiline and WYSIWYG).
         /// </summary>
         public uint? Rows { get; set; } = 8;
 

@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.WebControl
         public string Target { get; private set; }
 
         /// <summary>
-        /// Returns or sets the target uri.
+        /// Gets or sets the target uri.
         /// </summary>
         public IUri Uri { get; set; }
 

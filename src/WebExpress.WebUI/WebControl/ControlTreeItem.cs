@@ -21,64 +21,64 @@ namespace WebExpress.WebUI.WebControl
         public string Id { get; }
 
         /// <summary>
-        /// Returns or sets the label of the tree item.
+        /// Gets or sets the label of the tree item.
         /// </summary>
         public string Text { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon associated with the tree item.
+        /// Gets or sets the icon associated with the tree item.
         /// </summary>
         public IIcon Icon { get { return IconOpen; } set { IconOpen = IconClose = value; } }
 
         /// <summary>
-        /// Returns or sets the icon associated with the tree item.
+        /// Gets or sets the icon associated with the tree item.
         /// </summary>
         public IIcon IconOpen { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon associated with the tree item.
+        /// Gets or sets the icon associated with the tree item.
         /// </summary>
         public IIcon IconClose { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the tree item is expanded.
+        /// Gets or sets a value indicating whether the tree item is expanded.
         /// </summary>
         public bool Expand { get; set; }
 
         /// <summary>
-        /// Returns or sets a tooltip text.
+        /// Gets or sets a tooltip text.
         /// </summary>
         public string Tooltip { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the tree item is active.
+        /// Gets or sets a value indicating whether the tree item is active.
         /// </summary>
         public bool Active { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
         public IAction PrimaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
         public IAction SecondaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the link color.
+        /// Gets or sets the link color.
         /// </summary>
         public TypeColorText Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the target uri.
+        /// Gets or sets the target uri.
         /// </summary>
         public IUri Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the target.
+        /// Gets or sets the target.
         /// </summary>
         public TypeTarget Target { get; set; }
 

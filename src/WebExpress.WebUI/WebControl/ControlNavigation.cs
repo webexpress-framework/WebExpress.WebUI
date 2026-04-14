@@ -17,7 +17,7 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlNavigationItem> Items => _items;
 
         /// <summary>
-        /// Returns or sets the layout.
+        /// Gets or sets the layout.
         /// </summary>
         public TypeLayoutTab Layout
         {
@@ -26,7 +26,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the horizontal arrangement.
+        /// Gets or sets the horizontal arrangement.
         /// </summary>
         public new TypeHorizontalAlignmentTab HorizontalAlignment
         {
@@ -35,7 +35,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets whether the tab tabs should be the same size.
+        /// Gets or sets whether the tab tabs should be the same size.
         /// </summary>
         public TypeJustifiedTab Justified
         {
@@ -44,7 +44,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the horizontal or vertical orientation.
+        /// Gets or sets the horizontal or vertical orientation.
         /// </summary>
         public TypeOrientationTab Orientation
         {
@@ -53,17 +53,17 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the active color.
+        /// Gets or sets the active color.
         /// </summary>
         public PropertyColorBackground ActiveColor { get; set; } = new PropertyColorBackground();
 
         /// <summary>
-        /// Returns or sets the active text color.
+        /// Gets or sets the active text color.
         /// </summary>
         public PropertyColorText ActiveTextColor { get; set; } = new PropertyColorText();
 
         /// <summary>
-        /// Returns or sets the link color.
+        /// Gets or sets the link color.
         /// </summary>
         public PropertyColorText LinkColor { get; set; } = new PropertyColorText();
 

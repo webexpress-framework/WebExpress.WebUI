@@ -14,7 +14,7 @@ namespace WebExpress.WebUI.WebControl
         public new PropertyColorBackground BackgroundColor { get; private set; }
 
         /// <summary>
-        /// Returns or sets the color.
+        /// Gets or sets the color.
         /// </summary>
         public PropertyColorLine Color
         {

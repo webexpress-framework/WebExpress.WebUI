@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<ControlListItem> Items => _items;
 
         /// <summary>
-        /// Returns or sets the layout.
+        /// Gets or sets the layout.
         /// </summary>
         public TypeLayoutList Layout
         {

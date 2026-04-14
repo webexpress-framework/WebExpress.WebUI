@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlTag : Control
     {
         /// <summary>
-        /// Returns or sets the color.
+        /// Gets or sets the color.
         /// </summary>
         public PropertyColorTag Color
         {
@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
         public string Value { get; set; }
 

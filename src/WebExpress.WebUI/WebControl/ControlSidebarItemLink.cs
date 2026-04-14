@@ -21,59 +21,59 @@ namespace WebExpress.WebUI.WebControl
         public string Id { get; }
 
         /// <summary>
-        /// Returns or sets whether the link is active or not.
+        /// Gets or sets whether the link is active or not.
         /// </summary>
         public TypeActive Active { get; set; }
 
         /// <summary>
-        /// Returns or sets the label.
+        /// Gets or sets the label.
         /// </summary>
         public string Text { get; set; }
 
         /// <summary>
-        /// Returns or sets the target uri.
+        /// Gets or sets the target uri.
         /// </summary>
         public IUri Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the target.
+        /// Gets or sets the target.
         /// </summary>
         public TypeTarget Target { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
         public IAction PrimaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
         public IAction SecondaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets a tooltip text.
+        /// Gets or sets a tooltip text.
         /// </summary>
         public string Tooltip { get; set; }
 
         /// <summary>
-        /// Returns or sets the link color.
+        /// Gets or sets the link color.
         /// </summary>
         public PropertyColorText Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the mode of the type sidebar, which determines its behavior.
+        /// Gets or sets the mode of the type sidebar, which determines its behavior.
         /// </summary>
         public virtual TypeSidebarMode Mode { get; set; }
 
         /// <summary>
-        /// Returns or sets the dismissibility behavior of the sidebar.
+        /// Gets or sets the dismissibility behavior of the sidebar.
         /// </summary>
         public TypeDismissibilitySidebar Dismissibility { get; set; }
 

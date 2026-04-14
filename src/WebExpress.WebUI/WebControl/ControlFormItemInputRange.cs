@@ -13,27 +13,27 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormItemInputRange : ControlFormItemInput<ControlFormInputValueFloat>
     {
         /// <summary>
-        /// Returns or sets the minimum allowable value.
+        /// Gets or sets the minimum allowable value.
         /// </summary>
         public float Min { get; set; } = 0;
 
         /// <summary>
-        /// Returns or sets the maximum allowable value.
+        /// Gets or sets the maximum allowable value.
         /// </summary>
         public float Max { get; set; } = 10;
 
         /// <summary>
-        /// Returns or sets the step size used for incrementing or decrementing values.
+        /// Gets or sets the step size used for incrementing or decrementing values.
         /// </summary>
         public float Step { get; set; } = 1;
 
         /// <summary>
-        /// Returns or sets the description.
+        /// Gets or sets the description.
         /// </summary>
         public string Description { get; set; }
 
         /// <summary>
-        /// Returns or sets whether the radio button is selected
+        /// Gets or sets whether the radio button is selected
         /// </summary>
         public bool Checked { get; set; }
 

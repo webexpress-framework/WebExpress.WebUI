@@ -12,17 +12,17 @@ namespace WebExpress.WebUI.WebControl
 
 
         /// <summary>
-        /// Returns or sets a value indicating whether columns can be removed.
+        /// Gets or sets a value indicating whether columns can be removed.
         /// </summary>
         public bool AllowColumnRemove { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether rows in the table can be moved.
+        /// Gets or sets a value indicating whether rows in the table can be moved.
         /// </summary>
         public bool MovableRow { get; set; }
 
         /// <summary>
-        /// Returns or sets the key used to persist data (column order, visibility, 
+        /// Gets or sets the key used to persist data (column order, visibility, 
         /// widths, active sort) across sessions.
         /// </summary>
         public string PersistKey { get; set; }

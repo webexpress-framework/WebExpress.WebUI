@@ -21,39 +21,39 @@ namespace WebExpress.WebUI.WebControl
         public string Id => _id;
 
         /// <summary>
-        /// Returns or sets the icon associated with this instance.
+        /// Gets or sets the icon associated with this instance.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the target uri.
+        /// Gets or sets the target uri.
         /// </summary>
         public IUri Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the text to display as the icon representation.
+        /// Gets or sets the text to display as the icon representation.
         /// </summary>
         public string Text { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the icon can be edited.
+        /// Gets or sets a value indicating whether the icon can be edited.
         /// </summary>
         public bool IconEdit { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
         public IAction PrimaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
         public IAction SecondaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the display mode of the type sidebar.
+        /// Gets or sets the display mode of the type sidebar.
         /// </summary>
         public virtual TypeSidebarMode Mode { get; set; }
 

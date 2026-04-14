@@ -13,27 +13,27 @@ namespace WebExpress.WebUI.WebControl
     public class ControlPanelCard : ControlPanel
     {
         /// <summary>
-        /// Returns or sets the header text.
+        /// Gets or sets the header text.
         /// </summary>
         public string Header { get; set; }
 
         /// <summary>
-        /// Returns or sets the header image.
+        /// Gets or sets the header image.
         /// </summary>
         public IUri HeaderImage { get; set; }
 
         /// <summary>
-        /// Returns or sets the headline.
+        /// Gets or sets the headline.
         /// </summary>
         public string Headline { get; set; }
 
         /// <summary>
-        /// Returns or sets the footer.
+        /// Gets or sets the footer.
         /// </summary>
         public string Footer { get; set; }
 
         /// <summary>
-        /// Returns or sets the footer image.
+        /// Gets or sets the footer image.
         /// </summary>
         public IUri FooterImage { get; set; }
 

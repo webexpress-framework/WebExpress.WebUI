@@ -6,7 +6,7 @@
     public interface IControlFormLabel
     {
         /// <summary>
-        /// Returns or sets the label.
+        /// Gets or sets the label.
         /// </summary>
         string Label { get; }
     }

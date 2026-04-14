@@ -19,12 +19,12 @@ namespace WebExpress.WebUI.WebControl
         public string Id => _id;
 
         /// <summary>
-        /// Returns or sets the link color.
+        /// Gets or sets the link color.
         /// </summary>
         public PropertyColorText Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the mode of the type sidebar, which determines its behavior.
+        /// Gets or sets the mode of the type sidebar, which determines its behavior.
         /// </summary>
         public virtual TypeSidebarMode Mode { get; set; }
 

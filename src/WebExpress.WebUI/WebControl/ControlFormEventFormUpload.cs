@@ -13,7 +13,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormEventFormUpload : ControlFormEvent
     {
         /// <summary>
-        /// Returns or sets the file.
+        /// Gets or sets the file.
         /// </summary>
         public ParameterFile File { get; set; }
 

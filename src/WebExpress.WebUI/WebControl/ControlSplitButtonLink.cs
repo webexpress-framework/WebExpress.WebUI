@@ -15,12 +15,12 @@ namespace WebExpress.WebUI.WebControl
     public class ControlSplitButtonLink : ControlSplitButton
     {
         /// <summary>
-        /// Returns or sets the target.
+        /// Gets or sets the target.
         /// </summary>
         public TypeTarget Target { get; set; }
 
         /// <summary>
-        /// Returns or sets the uri.
+        /// Gets or sets the uri.
         /// </summary>
         public IUri Uri { get; set; }
 

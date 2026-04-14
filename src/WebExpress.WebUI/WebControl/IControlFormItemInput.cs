@@ -26,7 +26,7 @@ namespace WebExpress.WebUI.WebControl
         bool Disabled { get; }
 
         /// <summary>
-        /// Returns or sets whether inputs are enforced.
+        /// Gets or sets whether inputs are enforced.
         /// </summary>
         bool Required { get; }
 

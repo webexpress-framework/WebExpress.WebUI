@@ -10,17 +10,17 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormItemInputDate : ControlFormItemInput<ControlFormInputValueDate>
     {
         /// <summary>
-        /// Returns or sets the description.
+        /// Gets or sets the description.
         /// </summary>
         public string Description { get; set; }
 
         /// <summary>
-        /// Returns or sets the placeholder text displayed when no date is selected.
+        /// Gets or sets the placeholder text displayed when no date is selected.
         /// </summary>
         public string Placeholder { get; set; }
 
         /// <summary>
-        /// Returns or sets the date format string used for formatting date values.
+        /// Gets or sets the date format string used for formatting date values.
         /// </summary>
         public string Format { get; set; }
 

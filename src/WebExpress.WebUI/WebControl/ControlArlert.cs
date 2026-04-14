@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets whether the control can be closed.
+        /// Gets or sets whether the control can be closed.
         /// </summary>
         public TypeDismissibilityAlert Dismissibility
         {
@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets whether the fader effect should be used.
+        /// Gets or sets whether the fader effect should be used.
         /// </summary>
         public TypeFade Fade
         {
@@ -36,12 +36,12 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the headline.
+        /// Gets or sets the headline.
         /// </summary>
         public string Head { get; set; }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
         public string Text { get; set; }
 

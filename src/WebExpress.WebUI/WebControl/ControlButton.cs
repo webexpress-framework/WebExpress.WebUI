@@ -23,7 +23,7 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControl> Content => _content;
 
         /// <summary>
-        /// Returns or sets the color.
+        /// Gets or sets the color.
         /// </summary>
         public new PropertyColorButton BackgroundColor
         {
@@ -32,7 +32,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
         public TypeSizeButton Size
         {
@@ -41,12 +41,12 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the outline property
+        /// Gets or sets the outline property
         /// </summary>
         public bool Outline { get; set; }
 
         /// <summary>
-        /// Returns or sets whether the button should take up the full width.
+        /// Gets or sets whether the button should take up the full width.
         /// </summary>
         public TypeBlockButton Block
         {
@@ -55,34 +55,34 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
         public string Text { get; set; }
 
         /// <summary>
-        /// Returns or sets the value.
+        /// Gets or sets the value.
         /// </summary>
         public string Value { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
         public IAction PrimaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
         public IAction SecondaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the activation status of the button.
+        /// Gets or sets the activation status of the button.
         /// </summary>
         public TypeActive Active
         {

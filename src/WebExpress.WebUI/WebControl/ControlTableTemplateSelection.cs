@@ -19,12 +19,12 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlFormItemInputSelectionItem> Options => _options;
 
         /// <summary>
-        /// Returns or sets the unique identifier for the object.
+        /// Gets or sets the unique identifier for the object.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the current template is editable or read-only.
+        /// Gets or sets a value indicating whether the current template is editable or read-only.
         /// </summary>
         public bool Editable { get; set; }
 
@@ -34,7 +34,7 @@ namespace WebExpress.WebUI.WebControl
         public bool MultiSelect { get; set; }
 
         /// <summary>
-        /// Returns or sets the placeholder text displayed when the input field is empty.
+        /// Gets or sets the placeholder text displayed when the input field is empty.
         /// </summary>
         public string Placeholder { get; set; }
 

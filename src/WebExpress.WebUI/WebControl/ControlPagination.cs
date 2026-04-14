@@ -9,17 +9,17 @@ namespace WebExpress.WebUI.WebControl
     public class ControlPagination : Control
     {
         /// <summary>
-        /// Returns or sets the number of pages.
+        /// Gets or sets the number of pages.
         /// </summary>
         public uint Total { get; set; }
 
         /// <summary>
-        /// Returns or sets the current page.
+        /// Gets or sets the current page.
         /// </summary>
         public uint Page { get; set; }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
         public TypeSizePagination Size
         {

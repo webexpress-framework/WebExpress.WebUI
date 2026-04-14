@@ -12,28 +12,28 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFormItemInputCascadingItem : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns or sets the label of the selection item.
+        /// Gets or sets the label of the selection item.
         /// </summary>
         string Text { get; }
 
         /// <summary>
-        /// Returns or sets the icon associated with the selection item.
+        /// Gets or sets the icon associated with the selection item.
         /// </summary>
         IIcon Icon { get; }
 
         /// <summary>
-        /// Returns or sets the color of the label.
+        /// Gets or sets the color of the label.
         /// </summary>
         TypeColorSelection LabelColor { get; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the selection item is disabled.
+        /// Gets or sets a value indicating whether the selection item is disabled.
         /// </summary>
         [JsonPropertyName("disabled")]
         bool Disabled { get; }
 
         /// <summary>
-        /// Returns or sets the content of the selection item.
+        /// Gets or sets the content of the selection item.
         /// </summary>
         public IControl Content { get; }
 

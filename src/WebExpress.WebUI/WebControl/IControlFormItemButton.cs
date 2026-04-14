@@ -6,47 +6,47 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFormItemButton : IControlFormItem
     {
         /// <summary>
-        /// Returns or sets the content.
+        /// Gets or sets the content.
         /// </summary>
         IEnumerable<IControl> Content { get; }
 
         /// <summary>
-        /// Returns or sets the color of the button.
+        /// Gets or sets the color of the button.
         /// </summary>
         PropertyColorButton Color { get; }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
         TypeSizeButton Size { get; }
 
         /// <summary>
-        /// Returns or sets the Outline property.
+        /// Gets or sets the Outline property.
         /// </summary>
         bool Outline { get; }
 
         /// <summary>
-        /// Returns or sets whether the button should take up the full width.
+        /// Gets or sets whether the button should take up the full width.
         /// </summary>
         TypeBlockButton Block { get; }
 
         /// <summary>
-        /// Returns or sets whether the button is disabled.
+        /// Gets or sets whether the button is disabled.
         /// </summary>
         bool Disabled { get; }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
         string Text { get; }
 
         /// <summary>
-        /// Returns or sets the type. (button, submit, reset)
+        /// Gets or sets the type. (button, submit, reset)
         /// </summary>
         TypeButton Type { get; }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
         IIcon Icon { get; }
 

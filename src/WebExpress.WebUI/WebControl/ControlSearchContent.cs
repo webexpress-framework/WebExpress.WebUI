@@ -12,22 +12,22 @@ namespace WebExpress.WebUI.WebControl
     public class ControlSearchContent : Control
     {
         /// <summary>
-        /// Returns or sets the placeholder text displayed in the search input.
+        /// Gets or sets the placeholder text displayed in the search input.
         /// </summary>
         public string Placeholder { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon displayed in the search control.
+        /// Gets or sets the icon displayed in the search control.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the content ID associated with the search control.
+        /// Gets or sets the content ID associated with the search control.
         /// </summary>
         public string[] TargetIds { get; set; }
 
         /// <summary>
-        /// Returns or sets the highlight color used for matching search terms.
+        /// Gets or sets the highlight color used for matching search terms.
         /// </summary>
         public string HighlightColor { get; set; }
 

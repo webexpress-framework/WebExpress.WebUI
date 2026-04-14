@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormInputValueDate : IControlFormInputValue
     {
         /// <summary>
-        /// Returns or sets the date.
+        /// Gets or sets the date.
         /// </summary>
         public DateTime? Date { get; set; }
 

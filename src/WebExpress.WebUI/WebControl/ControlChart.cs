@@ -37,7 +37,7 @@ namespace WebExpress.WebUI.WebControl
         private bool _xBeginAtZero;
 
         /// <summary>
-        /// Returns or sets the chart type. The setter returns the instance for fluent chaining.
+        /// Gets or sets the chart type. The setter returns the instance for fluent chaining.
         /// </summary>
         public TypeChart Type
         {
@@ -46,7 +46,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the chart title. The setter returns the instance for fluent chaining.
+        /// Gets or sets the chart title. The setter returns the instance for fluent chaining.
         /// </summary>
         public string Title
         {
@@ -55,7 +55,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the x-axis title. The setter returns the instance for fluent chaining.
+        /// Gets or sets the x-axis title. The setter returns the instance for fluent chaining.
         /// </summary>
         public string TitleX
         {
@@ -64,7 +64,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the y-axis title. The setter returns the instance for fluent chaining.
+        /// Gets or sets the y-axis title. The setter returns the instance for fluent chaining.
         /// </summary>
         public string TitleY
         {
@@ -73,7 +73,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the chart width. The setter returns the instance for fluent chaining.
+        /// Gets or sets the chart width. The setter returns the instance for fluent chaining.
         /// </summary>
         public new int Width
         {
@@ -82,7 +82,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the chart height. The setter returns the instance for fluent chaining.
+        /// Gets or sets the chart height. The setter returns the instance for fluent chaining.
         /// </summary>
         public new int Height
         {
@@ -91,7 +91,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the minimum y-value. The setter returns the instance for fluent chaining.
+        /// Gets or sets the minimum y-value. The setter returns the instance for fluent chaining.
         /// </summary>
         public float Minimum
         {
@@ -100,7 +100,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the maximum y-value. The setter returns the instance for fluent chaining.
+        /// Gets or sets the maximum y-value. The setter returns the instance for fluent chaining.
         /// </summary>
         public float Maximum
         {
@@ -109,7 +109,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets whether the chart is responsive. The setter returns the instance for fluent chaining.
+        /// Gets or sets whether the chart is responsive. The setter returns the instance for fluent chaining.
         /// </summary>
         public bool Responsive
         {
@@ -118,7 +118,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets whether the chart maintains aspect ratio. The setter returns the instance for fluent chaining.
+        /// Gets or sets whether the chart maintains aspect ratio. The setter returns the instance for fluent chaining.
         /// </summary>
         public bool MaintainAspectRatio
         {
@@ -127,7 +127,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets whether the legend is displayed. The setter returns the instance for fluent chaining.
+        /// Gets or sets whether the legend is displayed. The setter returns the instance for fluent chaining.
         /// </summary>
         public bool LegendDisplay
         {
@@ -136,7 +136,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets whether the title is displayed. The setter returns the instance for fluent chaining.
+        /// Gets or sets whether the title is displayed. The setter returns the instance for fluent chaining.
         /// </summary>
         public bool TitleDisplay
         {
@@ -145,7 +145,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets whether the y-axis begins at zero. The setter returns the instance for fluent chaining.
+        /// Gets or sets whether the y-axis begins at zero. The setter returns the instance for fluent chaining.
         /// </summary>
         public bool YBeginAtZero
         {
@@ -154,7 +154,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets whether the x-axis begins at zero. The setter returns the instance for fluent chaining.
+        /// Gets or sets whether the x-axis begins at zero. The setter returns the instance for fluent chaining.
         /// </summary>
         public bool XBeginAtZero
         {

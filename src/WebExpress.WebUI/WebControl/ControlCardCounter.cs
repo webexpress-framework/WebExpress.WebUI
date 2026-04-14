@@ -10,22 +10,22 @@ namespace WebExpress.WebUI.WebControl
     public class ControlCardCounter : Control
     {
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the counter value.
+        /// Gets or sets the counter value.
         /// </summary>
         public int? Value { get; set; }
 
         /// <summary>
-        /// Returns or sets the value of the progrss.
+        /// Gets or sets the value of the progrss.
         /// </summary>
         public uint? Progress { get; set; }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
         public string Text { get; set; }
 

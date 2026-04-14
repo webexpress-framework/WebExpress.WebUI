@@ -15,12 +15,12 @@ namespace WebExpress.WebUI.WebControl
         private readonly Dictionary<string, Tuple<object, Func<string>, Func<string>>> _propertys = [];
 
         /// <summary>
-        /// Returns or sets the id of the control.
+        /// Gets or sets the id of the control.
         /// </summary>
         public string Id { get; private set; }
 
         /// <summary>
-        /// Returns or sets the horizontal alignment.
+        /// Gets or sets the horizontal alignment.
         /// </summary>
         public virtual TypeHorizontalAlignment HorizontalAlignment
         {
@@ -29,7 +29,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the text color.
+        /// Gets or sets the text color.
         /// </summary>
         public virtual PropertyColorText TextColor
         {
@@ -38,7 +38,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the background color.
+        /// Gets or sets the background color.
         /// </summary>
         public virtual PropertyColorBackground BackgroundColor
         {
@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the border color.
+        /// Gets or sets the border color.
         /// </summary>
         public virtual PropertyColorBorder BorderColor
         {
@@ -56,7 +56,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the padding.
+        /// Gets or sets the padding.
         /// </summary>
         public virtual PropertySpacingPadding Padding
         {
@@ -65,7 +65,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the margin.
+        /// Gets or sets the margin.
         /// </summary>
         public virtual PropertySpacingMargin Margin
         {
@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the border.
+        /// Gets or sets the border.
         /// </summary>
         public virtual PropertyBorder Border
         {
@@ -83,7 +83,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the column property if the control is on a grid.
+        /// Gets or sets the column property if the control is on a grid.
         /// </summary>
         public virtual PropertyGrid GridColumn
         {
@@ -92,7 +92,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the width property of the control.
+        /// Gets or sets the width property of the control.
         /// </summary>
         public virtual TypeWidth Width
         {
@@ -101,7 +101,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the height property of the control.
+        /// Gets or sets the height property of the control.
         /// </summary>
         public virtual TypeHeight Height
         {
@@ -110,7 +110,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the flex grow property of the control.
+        /// Gets or sets the flex grow property of the control.
         /// </summary>
         public virtual TypeFlexGrow FlexGrow
         {
@@ -119,7 +119,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the display type for the current object.
+        /// Gets or sets the display type for the current object.
         /// </summary>
         /// <remarks>
         /// This property determines how the object is visually represented. Setting this
@@ -132,22 +132,22 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the css class.
+        /// Gets or sets the css class.
         /// </summary>
         public IEnumerable<string> Classes { get; set; } = [];
 
         /// <summary>
-        /// Returns or sets the css style.
+        /// Gets or sets the css style.
         /// </summary>
         public IEnumerable<string> Styles { get; set; } = [];
 
         /// <summary>
-        /// Returns or sets the role.
+        /// Gets or sets the role.
         /// </summary>
         public string Role { get; set; }
 
         /// <summary>
-        /// Returns or sets the OnClick attribute, which executes a java script on the client.
+        /// Gets or sets the OnClick attribute, which executes a java script on the client.
         /// </summary>
         public PropertyOnClick OnClick { get; set; }
 

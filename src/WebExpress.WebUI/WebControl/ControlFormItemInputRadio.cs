@@ -13,22 +13,22 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormItemInputRadio : ControlFormItemInput<ControlFormInputValueString>
     {
         /// <summary>
-        /// Returns or sets the value of the option.
+        /// Gets or sets the value of the option.
         /// </summary>
         public string Option { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the content should be rendered inline.
+        /// Gets or sets a value indicating whether the content should be rendered inline.
         /// </summary>
         public bool Inline { get; set; }
 
         /// <summary>
-        /// Returns or sets the description.
+        /// Gets or sets the description.
         /// </summary>
         public string Description { get; set; }
 
         /// <summary>
-        /// Returns or sets whether the radio button is selected
+        /// Gets or sets whether the radio button is selected
         /// </summary>
         public bool Checked { get; set; }
 

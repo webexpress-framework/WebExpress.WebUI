@@ -22,7 +22,7 @@ namespace WebExpress.WebUI.WebControl
         public IUri Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
         public TypeSizeText Size
         {

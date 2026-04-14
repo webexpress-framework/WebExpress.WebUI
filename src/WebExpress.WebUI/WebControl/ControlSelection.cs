@@ -13,7 +13,7 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<IControlFormItemInputSelectionItem> _options = [];
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
         public string Value { get; set; }
 

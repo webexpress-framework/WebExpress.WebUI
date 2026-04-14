@@ -22,7 +22,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlModalFormFileUpload : ControlModalForm, IControlModalFormFileUpload
     {
         /// <summary>
-        /// Returns or sets the files that are accepted.
+        /// Gets or sets the files that are accepted.
         /// </summary>
         public IEnumerable<string> AcceptFile { get => File.AcceptFile; }
 
@@ -32,7 +32,7 @@ namespace WebExpress.WebUI.WebControl
         public event Action<ControlFormEventFormUpload> UploadForm;
 
         /// <summary>
-        /// Returns or sets the file.
+        /// Gets or sets the file.
         /// </summary>
         private ControlFormItemInputFile File { get; } = new ControlFormItemInputFile()
         {
@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.WebControl
         };
 
         /// <summary>
-        /// Returns or sets the submit button icon.
+        /// Gets or sets the submit button icon.
         /// </summary>
         public IIcon SubmitButtonIcon
         {
@@ -59,7 +59,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the submit button color.
+        /// Gets or sets the submit button color.
         /// </summary>
         public PropertyColorButton SubmitButtonColor
         {
@@ -68,7 +68,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the submit button label.
+        /// Gets or sets the submit button label.
         /// </summary>
         public string SubmitButtonLabel
         {
@@ -77,17 +77,17 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the prologue area.
+        /// Gets or sets the prologue area.
         /// </summary>
         public ControlFormItem Prologue { get; set; }
 
         /// <summary>
-        /// Returns or sets the epilogue area.
+        /// Gets or sets the epilogue area.
         /// </summary>
         public ControlFormItem Epilogue { get; set; }
 
         /// <summary>
-        /// Returns or sets the submit button.
+        /// Gets or sets the submit button.
         /// </summary>
         private ControlFormItemButtonSubmit SubmitButton { get; set; }
             = new ControlFormItemButtonSubmit();

@@ -11,12 +11,12 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFrame : Control
     {
         /// <summary>
-        /// Returns or sets the URI associated with the current resource.
+        /// Gets or sets the URI associated with the current resource.
         /// </summary>
         public IUri Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the CSS selector used to identify elements in the DOM.
+        /// Gets or sets the CSS selector used to identify elements in the DOM.
         /// </summary>
         /// <remarks>
         /// The selector must be a valid CSS selector. If the value is null or empty, 

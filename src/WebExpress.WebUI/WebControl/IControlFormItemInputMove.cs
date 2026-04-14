@@ -13,12 +13,12 @@ namespace WebExpress.WebUI.WebControl
         IEnumerable<IControlFormItemInputMoveItem> Options { get; }
 
         /// <summary>
-        /// Returns or sets the label displayed for the selected options list.
+        /// Gets or sets the label displayed for the selected options list.
         /// </summary>
         string SelectedHeader { get; }
 
         /// <summary>
-        /// Returns or sets the label displayed for the available options list.
+        /// Gets or sets the label displayed for the available options list.
         /// </summary>
         string AvailableHeader { get; }
 

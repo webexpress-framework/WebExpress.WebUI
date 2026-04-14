@@ -14,7 +14,7 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlFormItemInputSelectionItem> Options { get; }
 
         /// <summary>
-        /// Returns or sets the label of the selected options.
+        /// Gets or sets the label of the selected options.
         /// </summary>
         public string Placeholder { get; }
 

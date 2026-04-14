@@ -24,7 +24,7 @@ namespace WebExpress.WebUI.WebControl
         TypeStripedTable Striped { get; }
 
         /// <summary>
-        /// Returns or sets the color scheme used for the table.
+        /// Gets or sets the color scheme used for the table.
         /// </summary>
         TypeColorTable Color { get; }
 
@@ -44,7 +44,7 @@ namespace WebExpress.WebUI.WebControl
         bool Selectable { get; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether columns should be hidden.
+        /// Gets or sets a value indicating whether columns should be hidden.
         /// </summary>
         bool SuppressHeaders { get; }
 

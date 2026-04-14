@@ -17,22 +17,22 @@ namespace WebExpress.WebUI.WebControl
         public string Id { get; private set; }
 
         /// <summary>
-        /// Returns or sets the title associated with the card.
+        /// Gets or sets the title associated with the card.
         /// </summary>
         public string Title { get; set; }
 
         /// <summary>
-        /// Returns or sets the color associated with the card.
+        /// Gets or sets the color associated with the card.
         /// </summary>
         public string Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon associated with this card.
+        /// Gets or sets the icon associated with this card.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the column id associated with this card.
+        /// Gets or sets the column id associated with this card.
         /// </summary>
         public string ColumnId { get; set; }
 

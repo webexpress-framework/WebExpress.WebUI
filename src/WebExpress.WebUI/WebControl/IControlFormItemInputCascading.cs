@@ -14,7 +14,7 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlFormItemInputCascadingItem> Options { get; }
 
         /// <summary>
-        /// Returns or sets the label of the cascading options.
+        /// Gets or sets the label of the cascading options.
         /// </summary>
         public string Placeholder { get; }
 

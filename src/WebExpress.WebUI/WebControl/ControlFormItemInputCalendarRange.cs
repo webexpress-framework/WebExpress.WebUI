@@ -10,17 +10,17 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormItemInputCalendarRange : ControlFormItemInput<ControlFormInputValueDateRange>
     {
         /// <summary>
-        /// Returns or sets the description of the calendar input.
+        /// Gets or sets the description of the calendar input.
         /// </summary>
         public string Description { get; set; }
 
         /// <summary>
-        /// Returns or sets the placeholder text displayed when no date is selected.
+        /// Gets or sets the placeholder text displayed when no date is selected.
         /// </summary>
         public string Placeholder { get; set; }
 
         /// <summary>
-        /// Returns or sets the format used to display the date.
+        /// Gets or sets the format used to display the date.
         /// </summary>
         public string Format { get; set; }
 

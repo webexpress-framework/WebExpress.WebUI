@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     public abstract class ControlFormInputValue<T> : IControlFormInputValue
     {
         /// <summary>
-        /// Returns or sets the typed value of the input.
+        /// Gets or sets the typed value of the input.
         /// </summary>
         public T Value { get; set; }
 

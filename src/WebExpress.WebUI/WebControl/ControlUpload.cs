@@ -25,32 +25,32 @@ namespace WebExpress.WebUI.WebControl
         public event Action<ControlFormEventItemProcess<ControlFormInputValueFile>> ProcessItem;
 
         /// <summary>
-        /// Returns or sets the placeholder text displayed in the file upload area.
+        /// Gets or sets the placeholder text displayed in the file upload area.
         /// </summary>
         public string Placeholder { get; set; }
 
         /// <summary>
-        /// Returns or sets the URI associated with the form.
+        /// Gets or sets the URI associated with the form.
         /// </summary>
         public IUri Uri { get => _form.Uri; set => _form.Uri = value; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether multiple selections are allowed.
+        /// Gets or sets a value indicating whether multiple selections are allowed.
         /// </summary>
         public bool Multiple { get; set; } = true;
 
         /// <summary>
-        /// Returns or sets the accept file types for the upload control.
+        /// Gets or sets the accept file types for the upload control.
         /// </summary> 
         public string Accept { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether automatic uploads are enabled.
+        /// Gets or sets a value indicating whether automatic uploads are enabled.
         /// </summary>
         public bool AutoUpload { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the dropzone is displayed in full-screen mode.
+        /// Gets or sets a value indicating whether the dropzone is displayed in full-screen mode.
         /// </summary>
         public bool FullScreenDropzone { get; set; }
 

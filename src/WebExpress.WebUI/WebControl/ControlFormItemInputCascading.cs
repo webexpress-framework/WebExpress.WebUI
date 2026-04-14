@@ -22,12 +22,12 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlFormItemInputCascadingItem> Options => _options;
 
         /// <summary>
-        /// Returns or sets the label of the selected options.
+        /// Gets or sets the label of the selected options.
         /// </summary>
         public string Placeholder { get; set; }
 
         /// <summary>
-        /// Returns or sets the OnChange attribute.
+        /// Gets or sets the OnChange attribute.
         /// </summary>
         public PropertyOnChange OnChange { get; set; }
 

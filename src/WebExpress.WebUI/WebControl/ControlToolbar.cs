@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual IEnumerable<IControlDropdownItem> More => _more;
 
         /// <summary>
-        /// Returns or sets the orientation of the toolbar.
+        /// Gets or sets the orientation of the toolbar.
         /// </summary>
         public virtual TypeOrientationToolBar Orientation
         {
@@ -36,7 +36,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the fixed position of the toolbar.
+        /// Gets or sets the fixed position of the toolbar.
         /// </summary>
         public virtual TypeFixed Fixed
         {
@@ -45,7 +45,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the sticky position of the toolbar.
+        /// Gets or sets the sticky position of the toolbar.
         /// </summary>
         public virtual TypeSticky Sticky
         {

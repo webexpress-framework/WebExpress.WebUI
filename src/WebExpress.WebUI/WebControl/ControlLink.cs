@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControl> Controls => _controls;
 
         /// <summary>
-        /// Returns or sets whether the link is active or not.
+        /// Gets or sets whether the link is active or not.
         /// </summary>
         public TypeActive Active
         {
@@ -36,7 +36,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets whether the link is underlined or not.
+        /// Gets or sets whether the link is underlined or not.
         /// </summary>
         public TypeTextDecoration Decoration
         {
@@ -45,49 +45,49 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
         public string Text { get; set; }
 
         /// <summary>
-        /// Returns or sets the title.
+        /// Gets or sets the title.
         /// </summary>
         public string Title { get; set; }
 
         /// <summary>
-        /// Returns or sets the target uri.
+        /// Gets or sets the target uri.
         /// </summary>
         public IUri Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the target.
+        /// Gets or sets the target.
         /// </summary>
         public TypeTarget Target { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
         public IAction PrimaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
         public IAction SecondaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets a tooltip text.
+        /// Gets or sets a tooltip text.
         /// </summary>
         public string Tooltip { get; set; }
 
         /// <summary>
-        /// Returns or sets the parameters that apply to the link.
+        /// Gets or sets the parameters that apply to the link.
         /// </summary>
         public List<Parameter> Params { get; set; } = [];
 
@@ -101,7 +101,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
         public PropertySizeText Size
         {

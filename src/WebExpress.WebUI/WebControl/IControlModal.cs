@@ -13,12 +13,12 @@ namespace WebExpress.WebUI.WebControl
         IEnumerable<IControl> Content { get; }
 
         /// <summary>
-        /// Returns or sets the header.
+        /// Gets or sets the header.
         /// </summary>
         string Header { get; }
 
         /// <summary>  
-        /// Returns or sets the size of the modal dialog.  
+        /// Gets or sets the size of the modal dialog.  
         /// </summary>  
         /// <value>  
         /// One of the values of the <see cref="TypeModalSize"/> enumeration, specifying the size of the modal.  
@@ -29,7 +29,7 @@ namespace WebExpress.WebUI.WebControl
         TypeModalSize Size { get; }
 
         /// <summary>
-        /// Returns or sets the label for the close button of the modal.
+        /// Gets or sets the label for the close button of the modal.
         /// </summary>
         string CloseLabel { get; }
 

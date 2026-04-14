@@ -17,37 +17,37 @@ namespace WebExpress.WebUI.WebControl
         public string Id { get; private set; }
 
         /// <summary>
-        /// Returns or sets the title associated with the widget.
+        /// Gets or sets the title associated with the widget.
         /// </summary>
         public string Title { get; set; }
 
         /// <summary>
-        /// Returns or sets the color associated with the widget.
+        /// Gets or sets the color associated with the widget.
         /// </summary>
         public string Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon associated with this widget.
+        /// Gets or sets the icon associated with this widget.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the column index associated with this widget.
+        /// Gets or sets the column index associated with this widget.
         /// </summary>
         public uint Column { get; set; } = uint.MaxValue;
 
         /// <summary>
-        /// Returns or sets a value indicating whether the widget can be moved.
+        /// Gets or sets a value indicating whether the widget can be moved.
         /// </summary>
         public bool Movable { get; set; } = true;
 
         /// <summary>
-        /// Returns or sets a value indicating whether the widget can be closed.
+        /// Gets or sets a value indicating whether the widget can be closed.
         /// </summary>
         public bool Closeable { get; set; } = true;
 
         /// <summary>
-        /// Returns or sets the widget name or identifier associated with this instance.
+        /// Gets or sets the widget name or identifier associated with this instance.
         /// </summary>
         public string Widget { get; set; }
 

@@ -10,12 +10,12 @@ namespace WebExpress.WebUI.WebControl
     public class ControlLogin : Control
     {
         /// <summary>
-        /// Returns or sets the login name associated with the user.
+        /// Gets or sets the login name associated with the user.
         /// </summary>
         public string Username { get; set; }
 
         /// <summary>
-        /// Returns or sets the title of the login dialog.
+        /// Gets or sets the title of the login dialog.
         /// </summary>
         public string Title { get; set; }
 

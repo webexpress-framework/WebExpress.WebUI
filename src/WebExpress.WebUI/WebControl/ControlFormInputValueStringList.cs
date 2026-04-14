@@ -12,7 +12,7 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<string> _items = [];
 
         /// <summary>
-        /// Returns or sets the list of strings.
+        /// Gets or sets the list of strings.
         /// </summary>
         public IEnumerable<string> Items => _items;
 

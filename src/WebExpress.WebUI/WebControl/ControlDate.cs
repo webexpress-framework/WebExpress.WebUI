@@ -10,17 +10,17 @@ namespace WebExpress.WebUI.WebControl
     public class ControlDate : Control, IControlTableTemplate
     {
         /// <summary>
-        /// Returns or sets the date format string used for formatting date values.
+        /// Gets or sets the date format string used for formatting date values.
         /// </summary>
         public string Format { get; set; } = "yyyy-MM-dd";
 
         /// <summary>
-        /// Returns or sets the color associated with this date.
+        /// Gets or sets the color associated with this date.
         /// </summary>
         public PropertyColorDate Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the date associated with the current instance.
+        /// Gets or sets the date associated with the current instance.
         /// </summary>
         public DateTime Date { get; set; }
 

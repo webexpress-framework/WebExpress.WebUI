@@ -22,7 +22,7 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControl> Content => _content;
 
         /// <summary>
-        /// Returns or sets the arrangement of the content.
+        /// Gets or sets the arrangement of the content.
         /// </summary>
         public TypeDirection Direction
         {
@@ -40,7 +40,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the theme of the control.
+        /// Gets or sets the theme of the control.
         /// </summary>
         public virtual TypeTheme Theme
         {

@@ -23,31 +23,31 @@ namespace WebExpress.WebUI.WebControl
         public string Id { get; }
 
         /// <summary>
-        /// Returns or sets the label of the selection item.
+        /// Gets or sets the label of the selection item.
         /// </summary>
         [JsonPropertyName("label")]
         public string Text { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon associated with the selection item.
+        /// Gets or sets the icon associated with the selection item.
         /// </summary>
         [JsonPropertyName("icon")]
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the color of the label.
+        /// Gets or sets the color of the label.
         /// </summary>
         [JsonPropertyName("labelcolor")]
         public TypeColorSelection LabelColor { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the selection item is disabled.
+        /// Gets or sets a value indicating whether the selection item is disabled.
         /// </summary>
         [JsonPropertyName("disabled")]
         public bool Disabled { get; set; }
 
         /// <summary>
-        /// Returns or sets the content of the selection item.
+        /// Gets or sets the content of the selection item.
         /// </summary>
         public IControl Content { get; set; }
 

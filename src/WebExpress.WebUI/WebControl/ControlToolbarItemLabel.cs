@@ -17,27 +17,27 @@ namespace WebExpress.WebUI.WebControl
         public string Id => _id;
 
         /// <summary>
-        /// Returns or sets the label.
+        /// Gets or sets the label.
         /// </summary>
         public string Text { get; set; }
 
         /// <summary>
-        /// Returns or sets a tooltip text.
+        /// Gets or sets a tooltip text.
         /// </summary>
         public string Tooltip { get; set; }
 
         /// <summary>
-        /// Returns or sets the link color.
+        /// Gets or sets the link color.
         /// </summary>
         public PropertyColorText Color { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the feature is disabled.
+        /// Gets or sets a value indicating whether the feature is disabled.
         /// </summary>
         public bool Disabled { get; set; } = false;
 
         /// <summary>
-        /// Returns or sets the alignment of the toolbar item.
+        /// Gets or sets the alignment of the toolbar item.
         /// </summary>
         public TypeToolbarItemAlignment Alignment { get; set; } = TypeToolbarItemAlignment.Default;
 

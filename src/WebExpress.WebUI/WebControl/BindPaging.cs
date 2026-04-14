@@ -9,12 +9,12 @@ namespace WebExpress.WebUI.WebControl
     public class BindPaging : IBind
     {
         /// <summary>
-        /// Returns the binding name.
+        /// Gets the binding name.
         /// </summary>
         public string Name => "paging";
 
         /// <summary>
-        /// Returns or sets the source of the data.
+        /// Gets or sets the source of the data.
         /// </summary>
         public string Source { get; set; }
 

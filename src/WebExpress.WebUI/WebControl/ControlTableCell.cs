@@ -18,54 +18,54 @@ namespace WebExpress.WebUI.WebControl
     public class ControlTableCell : IControlTableCell
     {
         /// <summary>
-        /// Returns or sets the unique identifier for the entity.
+        /// Gets or sets the unique identifier for the entity.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Returns or sets the class or category associated with the current object.
+        /// Gets or sets the class or category associated with the current object.
         /// </summary>
         public virtual string Class { get; set; }
 
         /// <summary>
-        /// Returns or sets the style applied to the element.
+        /// Gets or sets the style applied to the element.
         /// </summary>
         public virtual string Style { get; set; }
 
         /// <summary>
-        /// Returns or sets the color scheme used for the cell.
+        /// Gets or sets the color scheme used for the cell.
         /// </summary>
         public virtual TypeColorTable Color { get; set; } = TypeColorTable.Default;
 
         /// <summary>
-        /// Returns or sets the icon associated with this instance.
+        /// Gets or sets the icon associated with this instance.
         /// </summary>
         public virtual IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the URI associated with the current resource.
+        /// Gets or sets the URI associated with the current resource.
         /// </summary>
         public virtual IUri Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the target.
+        /// Gets or sets the target.
         /// </summary>
         public virtual TypeTarget Target { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
         public virtual IAction PrimaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
         public virtual IAction SecondaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the content associated with this cell.
+        /// Gets or sets the content associated with this cell.
         /// </summary>
         public virtual string Text { get; set; }
 

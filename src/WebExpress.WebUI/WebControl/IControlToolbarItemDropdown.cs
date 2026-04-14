@@ -14,7 +14,7 @@ namespace WebExpress.WebUI.WebControl
         IEnumerable<IControlDropdownItem> Items { get; }
 
         /// <summary>
-        /// Returns or sets the color. 
+        /// Gets or sets the color. 
         /// </summary>
         PropertyColorText Color { get; }
 

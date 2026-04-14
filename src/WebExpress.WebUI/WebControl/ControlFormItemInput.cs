@@ -33,27 +33,27 @@ namespace WebExpress.WebUI.WebControl
         public event Action<ControlFormEventItemProcess<TValue>> ProcessItem;
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the label.
+        /// Gets or sets the label.
         /// </summary>
         public string Label { get; set; }
 
         /// <summary>
-        /// Returns or sets an optional help text.
+        /// Gets or sets an optional help text.
         /// </summary>
         public string Help { get; set; }
 
         /// <summary>
-        /// Returns or sets whether the input element is disabled.
+        /// Gets or sets whether the input element is disabled.
         /// </summary>
         public bool Disabled { get; set; }
 
         /// <summary>
-        /// Returns or sets whether inputs are enforced.
+        /// Gets or sets whether inputs are enforced.
         /// </summary>
         public bool Required { get; set; }
 
@@ -69,7 +69,7 @@ namespace WebExpress.WebUI.WebControl
 
 
         /// <summary>
-        /// Returns or sets an object that is linked to the control.
+        /// Gets or sets an object that is linked to the control.
         /// </summary>
         public object Tag { get; set; }
 

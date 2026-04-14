@@ -15,7 +15,7 @@ namespace WebExpress.WebUI.WebControl
         public string Name => "search";
 
         /// <summary>
-        /// Returns or sets the source of the data.
+        /// Gets or sets the source of the data.
         /// </summary>
         public string Source { get; set; }
 

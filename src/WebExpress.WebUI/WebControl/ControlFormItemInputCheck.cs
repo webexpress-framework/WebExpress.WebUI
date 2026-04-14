@@ -11,17 +11,17 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormItemInputCheck : ControlFormItemInput<ControlFormInputValueBool>
     {
         /// <summary>
-        /// Returns or sets whether the checkbox should be displayed on a new line.
+        /// Gets or sets whether the checkbox should be displayed on a new line.
         /// </summary>
         public bool Inline { get; set; }
 
         /// <summary>
-        /// Returns or sets the description.
+        /// Gets or sets the description.
         /// </summary>
         public string Description { get; set; }
 
         /// <summary>
-        /// Returns or sets the layout configuration for the type.
+        /// Gets or sets the layout configuration for the type.
         /// </summary>
         public TypeLayoutCheck Layout { get; set; } = TypeLayoutCheck.Default;
 

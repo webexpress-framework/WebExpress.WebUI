@@ -15,7 +15,7 @@ namespace WebExpress.WebUI.WebControl
         public IRenderControlContext RenderContext { get; }
 
         /// <summary>
-        /// Returns or sets the items to retrieve.
+        /// Gets or sets the items to retrieve.
         /// </summary>
         public IEnumerable<ControlListItem> Items { get; set; }
 

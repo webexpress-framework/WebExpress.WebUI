@@ -36,7 +36,7 @@ namespace WebExpress.WebUI.WebPage
         protected IComponentHub ComponentHub => _componentHub;
 
         /// <summary>
-        /// Returns or sets the HTTP status code associated with the response.
+        /// Gets or sets the HTTP status code associated with the response.
         /// </summary>
         public int StatusCode
         {

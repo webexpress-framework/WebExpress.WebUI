@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormItemInputRating : ControlFormItemInput<ControlFormInputValueUInt>
     {
         /// <summary>
-        /// Returns or sets the maximum rating value (stars) that can be assigned.
+        /// Gets or sets the maximum rating value (stars) that can be assigned.
         /// </summary>
         public uint MaxRating { get; set; } = uint.MaxValue;
 

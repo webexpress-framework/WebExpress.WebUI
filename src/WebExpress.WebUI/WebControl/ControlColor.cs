@@ -10,12 +10,12 @@ namespace WebExpress.WebUI.WebControl
     public class ControlColor : Control
     {
         /// <summary>
-        /// Returns or sets the color.
+        /// Gets or sets the color.
         /// </summary>
         public string Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the tooltip text.
+        /// Gets or sets the tooltip text.
         /// </summary>
         public string Tooltip { get; set; }
 

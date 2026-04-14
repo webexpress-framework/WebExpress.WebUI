@@ -10,37 +10,37 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlSplitButton : IControl
     {
         /// <summary>
-        /// Returns or sets the color. der Schaltfläche
+        /// Gets or sets the color. der Schaltfläche
         /// </summary>
         new PropertyColorButton BackgroundColor { get; }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
         TypeSizeButton Size { get; }
 
         /// <summary>
-        /// Returns or sets the outline property
+        /// Gets or sets the outline property
         /// </summary>
         bool Outline { get; }
 
         /// <summary>
-        /// Returns or sets whether the button should take up the full width.
+        /// Gets or sets whether the button should take up the full width.
         /// </summary>
         TypeBlockButton Block { get; }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
         string Text { get; }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
         IIcon Icon { get; }
 
         /// <summary>
-        /// Returns or sets the activation status of the button.
+        /// Gets or sets the activation status of the button.
         /// </summary>
         TypeActive Active { get; }
 

@@ -10,22 +10,22 @@ namespace WebExpress.WebUI.WebControl
     public class ControlImage : Control
     {
         /// <summary>
-        /// Returns or sets the image source.
+        /// Gets or sets the image source.
         /// </summary>
         public IUri Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the width.
+        /// Gets or sets the width.
         /// </summary>
         public new int Width { get; set; }
 
         /// <summary>
-        /// Returns or sets the height.
+        /// Gets or sets the height.
         /// </summary>
         public new int Height { get; set; }
 
         /// <summary>
-        /// Returns or sets a tooltip text.
+        /// Gets or sets a tooltip text.
         /// </summary>
         public string Tooltip { get; set; }
 

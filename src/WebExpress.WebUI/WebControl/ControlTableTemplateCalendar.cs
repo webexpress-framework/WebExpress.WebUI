@@ -10,27 +10,27 @@ namespace WebExpress.WebUI.WebControl
     public class ControlTableTemplateCalendar : IControlTableTemplateEditable
     {
         /// <summary>
-        /// Returns or sets the unique identifier for the object.
+        /// Gets or sets the unique identifier for the object.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the current template is editable or read-only.
+        /// Gets or sets a value indicating whether the current template is editable or read-only.
         /// </summary>
         public bool Editable { get; set; }
 
         /// <summary>
-        /// Returns or sets the color associated with this date.
+        /// Gets or sets the color associated with this date.
         /// </summary>
         public PropertyColorDate Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the placeholder text displayed when the input field is empty.
+        /// Gets or sets the placeholder text displayed when the input field is empty.
         /// </summary>
         public string Placeholder { get; set; }
 
         /// <summary>
-        /// Returns or sets the format string used to control how the value is displayed or processed.
+        /// Gets or sets the format string used to control how the value is displayed or processed.
         /// </summary>
         public string Format { get; set; }
 

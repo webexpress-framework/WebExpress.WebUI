@@ -22,22 +22,22 @@ namespace WebExpress.WebUI.WebControl
         public string Id { get; private set; }
 
         /// <summary>
-        /// Returns or sets the id of the source node.
+        /// Gets or sets the id of the source node.
         /// </summary>
         public string Source { get; set; }
 
         /// <summary>
-        /// Returns or sets the id of the target node.
+        /// Gets or sets the id of the target node.
         /// </summary>
         public string Target { get; set; }
 
         /// <summary>
-        /// Returns or sets an optional label for the edge.
+        /// Gets or sets an optional label for the edge.
         /// </summary>
         public string Label { get; set; }
 
         /// <summary>
-        /// Returns or sets the color for the edge.
+        /// Gets or sets the color for the edge.
         /// </summary>
         public PropertyColorGraph Color { get; set; }
 

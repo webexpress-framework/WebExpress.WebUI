@@ -20,37 +20,37 @@ namespace WebExpress.WebUI.WebControl
         public string Id { get; private set; }
 
         /// <summary>
-        /// Returns or sets an optional label for the node.
+        /// Gets or sets an optional label for the node.
         /// </summary>
         public string Label { get; set; }
 
         /// <summary>
-        /// Returns or sets the URI associated with the resource.
+        /// Gets or sets the URI associated with the resource.
         /// </summary>
         public IUri Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the coordinates of the point for the node.
+        /// Gets or sets the coordinates of the point for the node.
         /// </summary>
         public Point? Point { get; set; }
 
         /// <summary>
-        /// Returns or sets the color for the node.
+        /// Gets or sets the color for the node.
         /// </summary>
         public PropertyColorGraph Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the background color for the node.
+        /// Gets or sets the background color for the node.
         /// </summary>
         public PropertyColorBackgroundGraph BackgroundColor { get; set; }
 
         /// <summary>
-        /// Returns or sets the shape type associated with this node.
+        /// Gets or sets the shape type associated with this node.
         /// </summary>
         public TypeShapeGraphNode Shape { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon associated with this node.
+        /// Gets or sets the icon associated with this node.
         /// </summary>
         public IIcon Icon { get; set; }
 

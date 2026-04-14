@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlText : Control
     {
         /// <summary>
-        /// Returns or sets the text color.
+        /// Gets or sets the text color.
         /// </summary>
         public new virtual PropertyColorText TextColor
         {
@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the format of the text.
+        /// Gets or sets the format of the text.
         /// </summary>
         /// <value>The format of the text.</value>
         /// <remarks>
@@ -29,7 +29,7 @@ namespace WebExpress.WebUI.WebControl
         public TypeFormatText Format { get; set; }
 
         /// <summary>
-        /// Returns or sets the size of the text.
+        /// Gets or sets the size of the text.
         /// </summary>
         public PropertySizeText Size
         {
@@ -38,12 +38,12 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
         public string Text { get; set; }
 
         /// <summary>
-        /// Returns or sets a tooltip text.
+        /// Gets or sets a tooltip text.
         /// </summary>
         public string Title { get; set; }
 

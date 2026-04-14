@@ -11,22 +11,22 @@ namespace WebExpress.WebUI.WebControl
     public class ControlAvatar : Control
     {
         /// <summary>
-        /// Returns or sets the avatar image.
+        /// Gets or sets the avatar image.
         /// </summary>
         public IUri Image { get; set; }
 
         /// <summary>
-        /// Returns or sets the name of the user.
+        /// Gets or sets the name of the user.
         /// </summary>
         public string Username { get; set; }
 
         /// <summary>
-        /// Returns or sets a link.
+        /// Gets or sets a link.
         /// </summary>
         public IUri Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
         public TypeSizeAvatar Size
         {
@@ -35,13 +35,13 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
         public IAction PrimaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
         public IAction SecondaryAction { get; set; }

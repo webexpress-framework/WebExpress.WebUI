@@ -16,12 +16,12 @@ namespace WebExpress.WebUI.WebControl
     public class ControlModalRemotePage : ControlModal
     {
         /// <summary>
-        /// Returns or sets the URI of the page to be displayed in the modal.
+        /// Gets or sets the URI of the page to be displayed in the modal.
         /// </summary>
         public IUri Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the selector for the content to be loaded into the modal.
+        /// Gets or sets the selector for the content to be loaded into the modal.
         /// </summary>
         public string Selector { get; set; }
 

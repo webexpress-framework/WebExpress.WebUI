@@ -13,7 +13,7 @@ namespace WebExpress.WebUI.WebControl
     public abstract class ControlFormItem : Control, IControlFormItem
     {
         /// <summary>
-        /// Returns or sets the name of the input field.
+        /// Gets or sets the name of the input field.
         /// This name is used to identify the form item in the context of form submissions.
         /// </summary>
         public string Name { get; set; }

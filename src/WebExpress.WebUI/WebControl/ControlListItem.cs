@@ -18,7 +18,7 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControl> Content => _content;
 
         /// <summary>
-        /// Returns or sets the ativity state of the list item.
+        /// Gets or sets the ativity state of the list item.
         /// </summary>
         public TypeActive Active
         {

@@ -22,7 +22,7 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlFormItemInputSelectionItem> Options => _options;
 
         /// <summary>
-        /// Returns or sets the label of the selected options.
+        /// Gets or sets the label of the selected options.
         /// </summary>
         public string Placeholder { get; set; }
 
@@ -32,14 +32,14 @@ namespace WebExpress.WebUI.WebControl
         public bool MultiSelect { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether sticky selection mode is enabled.
+        /// Gets or sets a value indicating whether sticky selection mode is enabled.
         /// When enabled and a value has been selected, the selection cannot be
         /// cleared through the user interface.
         /// </summary>
         public bool StickySelection { get; set; }
 
         /// <summary>
-        /// Returns or sets the OnChange attribute.
+        /// Gets or sets the OnChange attribute.
         /// </summary>
         public PropertyOnChange OnChange { get; set; }
 

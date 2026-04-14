@@ -11,12 +11,12 @@ namespace WebExpress.WebUI.WebControl
     public class ControlIcon : Control
     {
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the title.
+        /// Gets or sets the title.
         /// </summary>
         public string Title { get; set; }
 
@@ -30,7 +30,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
         public PropertySizeText Size
         {

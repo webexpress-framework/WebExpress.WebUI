@@ -18,17 +18,17 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlTileCard> Items => _items;
 
         /// <summary>
-        /// Returns or sets a value indicating whether cards in the tile can be moved.
+        /// Gets or sets a value indicating whether cards in the tile can be moved.
         /// </summary>
         public bool Movable { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether items can be removed.
+        /// Gets or sets a value indicating whether items can be removed.
         /// </summary>
         public bool AllowRemove { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether a large icon is displayed 
+        /// Gets or sets a value indicating whether a large icon is displayed 
         /// for the item.
         /// </summary>
         public bool LargeIcon { get; set; }

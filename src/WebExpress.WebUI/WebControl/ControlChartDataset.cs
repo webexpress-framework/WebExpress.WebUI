@@ -6,37 +6,37 @@
     public class ControlChartDataset
     {
         /// <summary>
-        /// Returns or sets the title.
+        /// Gets or sets the title.
         /// </summary>
         public string Title { get; set; }
 
         /// <summary>
-        /// Returns or sets the data. Accepts scalar values or objects for scatter/bubble charts.
+        /// Gets or sets the data. Accepts scalar values or objects for scatter/bubble charts.
         /// </summary>
         public IControlChartDatasetPointCollection Data { get; set; }
 
         /// <summary>
-        /// Returns or sets the background color.
+        /// Gets or sets the background color.
         /// </summary>
         public string BackgroundColor { get; set; }
 
         /// <summary>
-        /// Returns or sets the border color.
+        /// Gets or sets the border color.
         /// </summary>
         public string BorderColor { get; set; }
 
         /// <summary>
-        /// Returns or sets the border width (optional).
+        /// Gets or sets the border width (optional).
         /// </summary>
         public int BorderWidth { get; set; }
 
         /// <summary>
-        /// Returns or sets how the data series are populated.
+        /// Gets or sets how the data series are populated.
         /// </summary>
         public TypeFillChart Fill { get; set; } = TypeFillChart.None;
 
         /// <summary>
-        /// Returns or sets how the data series are populated.
+        /// Gets or sets how the data series are populated.
         /// </summary>
         public TypePointChart Point { get; set; } = TypePointChart.Circle;
 

@@ -32,17 +32,17 @@ namespace WebExpress.WebUI.WebControl
         public event Action<ControlFormEventFormProcess> ProcessForm;
 
         /// <summary>
-        /// Returns or sets the name of the form.
+        /// Gets or sets the name of the form.
         /// </summary>
         public string Name { get => _form.Name; set => _form.Name = value; }
 
         /// <summary>
-        /// Returns or sets the target uri.
+        /// Gets or sets the target uri.
         /// </summary>
         public IUri Uri { get => _form.Uri; set => _form.Uri = value; }
 
         /// <summary>
-        /// Returns or sets the redirect uri.
+        /// Gets or sets the redirect uri.
         /// </summary>
         public IUri RedirectUri { get => _form.RedirectUri; set => _form.RedirectUri = value; }
 
@@ -52,23 +52,23 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlFormItem> Items => _form.Items;
 
         /// <summary>
-        /// Returns or sets the request method.
+        /// Gets or sets the request method.
         /// </summary>
         public RequestMethod Method { get => _form.Method; set => _form.Method = value; }
 
         /// <summary>
-        /// Returns or sets the confirmation control that is displayed 
+        /// Gets or sets the confirmation control that is displayed 
         /// instead of the form after the form has been successfully submitted.
         /// </summary>
         public IControl Conformation { get => _form.Conformation; set => _form.Conformation = value; }
 
         /// <summary>
-        /// Returns or sets the form layout.
+        /// Gets or sets the form layout.
         /// </summary>
         public TypeLayoutForm FormLayout { get => _form.FormLayout; set => _form.FormLayout = value; }
 
         /// <summary>
-        /// Returns or sets the item layout.
+        /// Gets or sets the item layout.
         /// </summary>
         public TypeLayoutFormItem ItemLayout { get => _form.ItemLayout; set => _form.ItemLayout = value; }
 

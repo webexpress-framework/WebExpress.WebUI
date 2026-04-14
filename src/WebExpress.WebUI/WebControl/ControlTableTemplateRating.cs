@@ -9,17 +9,17 @@ namespace WebExpress.WebUI.WebControl
     public class ControlTableTemplateRating : IControlTableTemplateEditable
     {
         /// <summary>
-        /// Returns or sets the unique identifier for the object.
+        /// Gets or sets the unique identifier for the object.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the current template is editable or read-only.
+        /// Gets or sets a value indicating whether the current template is editable or read-only.
         /// </summary>
         public bool Editable { get; set; }
 
         /// <summary>
-        /// Returns or sets the maximum rating value (stars) that can be assigned.
+        /// Gets or sets the maximum rating value (stars) that can be assigned.
         /// </summary>
         public uint MaxRating { get; set; } = uint.MaxValue;
 

@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormItemInputDateRange : ControlFormItemInput<ControlFormInputValueDateRange>
     {
         /// <summary>
-        /// Returns or sets the description.
+        /// Gets or sets the description.
         /// </summary>
         public string Description { get; set; }
 
@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.WebControl
         public string Placeholder { get; set; }
 
         /// <summary>
-        /// Returns or sets the date format string used for formatting date values.
+        /// Gets or sets the date format string used for formatting date values.
         /// </summary>
         public string Format { get; set; }
 

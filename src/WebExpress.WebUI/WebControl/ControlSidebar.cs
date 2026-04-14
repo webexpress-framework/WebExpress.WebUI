@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual IEnumerable<IControlToolbarItem> ToolbarItems => _toolbarItems;
 
         /// <summary>
-        /// Returns or sets the breakpoint value that determines when the layout switches between 
+        /// Gets or sets the breakpoint value that determines when the layout switches between 
         /// reduced and extended behavior.
         /// </summary>
         public virtual int Breakpoint { get; set; } = -1;

@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormInputValueFloat : IControlFormInputValue
     {
         /// <summary>
-        /// Returns or sets the float value.
+        /// Gets or sets the float value.
         /// </summary>
         public float Number { get; set; }
 

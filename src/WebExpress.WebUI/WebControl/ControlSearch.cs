@@ -21,27 +21,27 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<ControlSearchItemSuggestion> Suggestions => _suggestion;
 
         /// <summary>
-        /// Returns or sets the value of the search input.
+        /// Gets or sets the value of the search input.
         /// </summary>
         public string Value { get; set; }
 
         /// <summary>
-        /// Returns or sets the placeholder text displayed in the search input.
+        /// Gets or sets the placeholder text displayed in the search input.
         /// </summary>
         public string Placeholder { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon displayed in the search control.
+        /// Gets or sets the icon displayed in the search control.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the footer control displayed below the search suggestions.
+        /// Gets or sets the footer control displayed below the search suggestions.
         /// </summary>
         public IControl Footer { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether favorited suggestions are enabled.
+        /// Gets or sets a value indicating whether favorited suggestions are enabled.
         /// </summary>
         public bool EnableFavorited { get; set; }
 

@@ -19,13 +19,13 @@ namespace WebExpress.WebUI.WebControl
         public string Id { get; }
 
         /// <summary>
-        /// Returns or sets the text of the selection item.
+        /// Gets or sets the text of the selection item.
         /// </summary>
         [JsonPropertyName("text")]
         public string Text { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon associated with the selection item.
+        /// Gets or sets the icon associated with the selection item.
         /// </summary>
         [JsonPropertyName("icon")]
         public IIcon Icon { get; set; }

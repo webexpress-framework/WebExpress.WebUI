@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlCode : Control
     {
         /// <summary>
-        /// Returns or sets the size of the text.
+        /// Gets or sets the size of the text.
         /// </summary>
         public PropertySizeText Size
         {
@@ -20,17 +20,17 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the code.
+        /// Gets or sets the code.
         /// </summary>
         public string Code { get; set; }
 
         /// <summary>
-        /// Returns or sets the programming language type.
+        /// Gets or sets the programming language type.
         /// </summary>
         public TypeLanguage Language { get; set; } = TypeLanguage.Default;
 
         /// <summary>
-        /// Returns or sets a value indicating whether line numbers should be displayed.
+        /// Gets or sets a value indicating whether line numbers should be displayed.
         /// </summary>
         public bool LineNumbers { get; set; }
 

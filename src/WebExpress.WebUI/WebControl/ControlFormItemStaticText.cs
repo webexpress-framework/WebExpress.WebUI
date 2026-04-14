@@ -10,12 +10,12 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormItemStaticText : ControlFormItem, IControlFormLabel
     {
         /// <summary>
-        /// Returns or sets the label.
+        /// Gets or sets the label.
         /// </summary>
         public string Label { get; set; }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
         public string Text { get; set; }
 

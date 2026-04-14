@@ -15,22 +15,22 @@ namespace WebExpress.WebUI.WebControl
         private readonly ControlFormItemGroupColumnVertical _group = new();
 
         /// <summary>
-        /// Returns or sets the unique identifier for the view.
+        /// Gets or sets the unique identifier for the view.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Returns or sets the title text.
+        /// Gets or sets the title text.
         /// </summary>
         public string Title { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon associated with this view.
+        /// Gets or sets the icon associated with this view.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the name of the group.
+        /// Gets or sets the name of the group.
         /// </summary>
         public string Name
         {
@@ -39,7 +39,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the horizontal alignment of the group content.
+        /// Gets or sets the horizontal alignment of the group content.
         /// </summary>
         public TypeHorizontalAlignment HorizontalAlignment
         {
@@ -58,7 +58,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the color used to display text within the group.
+        /// Gets or sets the color used to display text within the group.
         /// </summary>
         public PropertyColorText TextColor
         {
@@ -67,7 +67,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the background color for the group.
+        /// Gets or sets the background color for the group.
         /// </summary>
         public PropertyColorBackground BackgroundColor
         {
@@ -85,7 +85,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the padding applied to the property group content.
+        /// Gets or sets the padding applied to the property group content.
         /// </summary>
         public PropertySpacingPadding Padding
         {
@@ -94,7 +94,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the margin applied to the property group layout.
+        /// Gets or sets the margin applied to the property group layout.
         /// </summary>
         public PropertySpacingMargin Margin
         {
@@ -103,7 +103,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the border settings for the group.
+        /// Gets or sets the border settings for the group.
         /// </summary>
         public PropertyBorder Border
         {
@@ -112,7 +112,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the grid column associated with this group.
+        /// Gets or sets the grid column associated with this group.
         /// </summary>
         public PropertyGrid GridColumn
         {
@@ -121,7 +121,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the width type for the group.
+        /// Gets or sets the width type for the group.
         /// </summary>
         public TypeWidth Width
         {
@@ -130,7 +130,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the height value for the group.
+        /// Gets or sets the height value for the group.
         /// </summary>
         public TypeHeight Height
         {
@@ -139,7 +139,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the display settings for the type group.
+        /// Gets or sets the display settings for the type group.
         /// </summary>
         public TypeDisplay Display
         {
@@ -148,7 +148,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the collection of CSS class names applied to the group.
+        /// Gets or sets the collection of CSS class names applied to the group.
         /// </summary>
         public IEnumerable<string> Classes
         {
@@ -157,7 +157,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the collection of style names associated with the group.
+        /// Gets or sets the collection of style names associated with the group.
         /// </summary>
         public IEnumerable<string> Styles
         {
@@ -166,7 +166,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the role associated with the group.
+        /// Gets or sets the role associated with the group.
         /// </summary>
         public string Role
         {
@@ -175,7 +175,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the action to perform when the associated element is clicked.
+        /// Gets or sets the action to perform when the associated element is clicked.
         /// </summary>
         public PropertyOnClick OnClick
         {
@@ -184,7 +184,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the group is enabled.
+        /// Gets or sets a value indicating whether the group is enabled.
         /// </summary>
         public bool Enable
         {

@@ -16,12 +16,12 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<IControl> _content = [];
 
         /// <summary>
-        /// Returns or sets the content.
+        /// Gets or sets the content.
         /// </summary>
         public IEnumerable<IControl> Content => _content;
 
         /// <summary>
-        /// Returns or sets the color of the button.
+        /// Gets or sets the color of the button.
         /// </summary>
         public PropertyColorButton Color
         {
@@ -30,7 +30,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
         public TypeSizeButton Size
         {
@@ -39,12 +39,12 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the Outline property.
+        /// Gets or sets the Outline property.
         /// </summary>
         public bool Outline { get; set; }
 
         /// <summary>
-        /// Returns or sets whether the button should take up the full width.
+        /// Gets or sets whether the button should take up the full width.
         /// </summary>
         public TypeBlockButton Block
         {
@@ -53,7 +53,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets whether the button is disabled.
+        /// Gets or sets whether the button is disabled.
         /// </summary>
         public bool Disabled { get; set; }
 
@@ -63,17 +63,17 @@ namespace WebExpress.WebUI.WebControl
         public EventHandler<ControlFormEvent> Click;
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
         public string Text { get; set; }
 
         /// <summary>
-        /// Returns or sets the type. (button, submit, reset)
+        /// Gets or sets the type. (button, submit, reset)
         /// </summary>
         public TypeButton Type { get; set; } = TypeButton.Default;
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
         public IIcon Icon { get; set; }
 

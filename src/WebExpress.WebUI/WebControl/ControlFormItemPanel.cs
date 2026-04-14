@@ -22,7 +22,7 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControl> Content => _content;
 
         /// <summary>
-        /// Returns or sets the arrangement of the content.
+        /// Gets or sets the arrangement of the content.
         /// </summary>
         public TypeDirection Direction
         {

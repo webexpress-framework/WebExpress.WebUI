@@ -25,27 +25,27 @@ namespace WebExpress.WebUI.WebControl
         public string Id => _id;
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets a tooltip text.
+        /// Gets or sets a tooltip text.
         /// </summary>
         public string Tooltip { get; set; }
 
         /// <summary>
-        /// Returns or sets the link color.
+        /// Gets or sets the link color.
         /// </summary>
         public PropertyColorText Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the delegate responsible for rendering a control into an HTML node.
+        /// Gets or sets the delegate responsible for rendering a control into an HTML node.
         /// </summary>
         public Func<IRenderControlContext, IVisualTreeControl, IHtmlNode> RenderControl { get; set; }
 
         /// <summary>
-        /// Returns or sets the mode of the type sidebar, which determines its behavior.
+        /// Gets or sets the mode of the type sidebar, which determines its behavior.
         /// </summary>
         public virtual TypeSidebarModeExtended Mode { get; set; }
 

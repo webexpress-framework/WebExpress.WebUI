@@ -14,52 +14,52 @@ namespace WebExpress.WebUI.WebControl
     public partial class ControlFormItemInputAvatar : ControlFormItemInput<ControlFormInputValueFile>
     {
         /// <summary>
-        /// Returns or sets the description.
+        /// Gets or sets the description.
         /// </summary>
         public string Description { get; set; }
 
         /// <summary>
-        /// Returns or sets the placeholder text displayed when no date is selected.
+        /// Gets or sets the placeholder text displayed when no date is selected.
         /// </summary>
         public string Placeholder { get; set; }
 
         /// <summary>
-        /// Returns or sets the URI endpoint for avatar image upload.
+        /// Gets or sets the URI endpoint for avatar image upload.
         /// </summary>
         public IUri Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the clipping shape of the avatar image. Supported values are "circle" and "rect".
+        /// Gets or sets the clipping shape of the avatar image. Supported values are "circle" and "rect".
         /// </summary>
         public TypeAvatarShape Shape { get; set; }
 
         /// <summary>
-        /// Returns or sets the size of the cropping viewport in pixels.
+        /// Gets or sets the size of the cropping viewport in pixels.
         /// </summary>
         public int Viewport { get; set; } = -1;
 
         /// <summary>
-        /// Returns or sets the final resolution of the avatar image in pixels.
+        /// Gets or sets the final resolution of the avatar image in pixels.
         /// </summary>
         public int OutputSize { get; set; } = -1;
 
         /// <summary>
-        /// Returns or sets the MIME type of the exported avatar image.
+        /// Gets or sets the MIME type of the exported avatar image.
         /// </summary>
         public ContentType OutputFormat { get; set; } = ContentType.Unknown;
 
         /// <summary>
-        /// Returns or sets the compression quality for formats like JPEG or WebP. Ranges from 0 to 1.
+        /// Gets or sets the compression quality for formats like JPEG or WebP. Ranges from 0 to 1.
         /// </summary>
         public float OutputQuality { get; set; } = -1;
 
         /// <summary>
-        /// Returns or sets the accepted MIME types for avatar upload.
+        /// Gets or sets the accepted MIME types for avatar upload.
         /// </summary>
         public ContentType[] Accept { get; set; } = [];
 
         /// <summary>
-        /// Returns or sets the transparency level of the cropping overlay. Ranges from 0 (transparent) to 1 (opaque).
+        /// Gets or sets the transparency level of the cropping overlay. Ranges from 0 (transparent) to 1 (opaque).
         /// </summary>
         public float OverlayAlpha { get; set; } = -1;
 

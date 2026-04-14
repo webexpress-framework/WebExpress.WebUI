@@ -31,12 +31,12 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlViewFooter> Footers => _footers;
 
         /// <summary>
-        /// Returns or sets the explicit Id for the detail frame.
+        /// Gets or sets the explicit Id for the detail frame.
         /// </summary>
         public string DetailId { get; set; }
 
         /// <summary>
-        /// Returns or sets the selector for the detail frame.
+        /// Gets or sets the selector for the detail frame.
         /// </summary>
         public string DetailSelector { get; set; }
 
