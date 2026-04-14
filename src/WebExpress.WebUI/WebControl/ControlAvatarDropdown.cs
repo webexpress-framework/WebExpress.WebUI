@@ -23,7 +23,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the display name for the avatar.
         /// </summary>
-        public string Name { get; set; }
+        public string User { get; set; }
 
         /// <summary>
         /// Returns or sets the image source for the avatar.
@@ -133,6 +133,19 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            return Render(renderContext, visualTree, User, Image);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="username">The display name for the avatar.</param>
+        /// <param name="image">The image source for the avatar.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, string username, IUri image)
+        {
             var menuCss = "";
 
             if (AlignmentMenu != TypeAlignmentDropdownMenu.Default)
@@ -146,7 +159,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("wx-webui-avatar-dropdown", GetClasses()),
                 Role = Role ?? "button"
             }
-                .AddUserAttribute("data-name", I18N.Translate(renderContext, Name))
+                .AddUserAttribute("data-name", I18N.Translate(renderContext, username))
                 .AddUserAttribute("data-src", Image?.ToString())
                 .AddUserAttribute("data-initials", Initials)
                 .AddUserAttribute("data-shape", Shape != TypeShapeAvatar.Circle ? Shape.ToValue() : null)

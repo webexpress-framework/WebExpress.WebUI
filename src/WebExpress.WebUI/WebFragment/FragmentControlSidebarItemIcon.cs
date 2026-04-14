@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebFragment
     /// <summary>
     /// Represents a icon item within a split button control that is part of a fragment.
     /// </summary>
-    public class FragmentControlSidebarItemIcon : ControlSidebarItemIcon, IFragmentWebUIElement<IRenderControlContext, IVisualTreeControl>, IFragmentControlSidebarItem
+    public abstract class FragmentControlSidebarItemIcon : ControlSidebarItemIcon, IFragmentWebUIElement<IRenderControlContext, IVisualTreeControl>, IFragmentControlSidebarItem
     {
         /// <summary>
         /// Returns the context of the fragment.

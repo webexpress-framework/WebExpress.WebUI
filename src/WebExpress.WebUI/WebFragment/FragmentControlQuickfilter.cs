@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebFragment
     /// <summary>
     /// Represents a quickfilter control for a fragment, implementing the IFragmentControl interface.
     /// </summary>
-    public class FragmentControlQuickfilter : ControlQuickfilter, IFragmentControl<ControlQuickfilter>
+    public abstract class FragmentControlQuickfilter : ControlQuickfilter, IFragmentControl<ControlQuickfilter>
     {
         /// <summary>
         /// Returns the context of the fragment.

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
@@ -19,7 +18,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or sets the name of the user.
         /// </summary>
-        public string User { get; set; }
+        public string Username { get; set; }
 
         /// <summary>
         /// Returns or sets a link.
@@ -36,9 +35,16 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets a modal dialogue.
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// click to open a modal or similar target.
         /// </summary>
-        public ControlModal Modal { get; set; }
+        public IAction PrimaryAction { get; set; }
+
+        /// <summary>
+        /// Returns or sets the secondary action, typically triggered by a 
+        /// double‑click to open a modal or similar target.
+        /// </summary>
+        public IAction SecondaryAction { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -57,17 +63,38 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            return Render(renderContext, visualTree, Username, Image, Uri, PrimaryAction, SecondaryAction);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="username">The display name for the avatar.</param>
+        /// <param name="image">The image source for the avatar.</param>
+        /// <param name="uri">The link associated with the avatar.</param>
+        /// <param name="primaryAction">
+        /// The primary action to associate with the button. If specified, this action is 
+        /// invoked when the button is  activated. Can be null.
+        /// </param>
+        /// <param name="secondaryAction">
+        /// An optional secondary action to associate with the button. Can be null.
+        /// </param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, string username, IUri image, IUri uri, IAction primaryAction, IAction secondaryAction)
+        {
             var img = default(HtmlElement);
 
-            if (Image is not null)
+            if (image is not null)
             {
-                img = new HtmlElementMultimediaImg() { Src = Image.ToString(), Class = "" };
+                img = new HtmlElementMultimediaImg() { Src = image.ToString(), Class = "" };
             }
-            else if (!string.IsNullOrWhiteSpace(User))
+            else if (!string.IsNullOrWhiteSpace(Username))
             {
-                var split = User.Split(' ');
+                var split = Username.Split(' ');
                 var i = split[0].FirstOrDefault().ToString();
-                i += split.Count() > 1 ? split[1].FirstOrDefault().ToString() : "";
+                i += split.Length > 1 ? split[1].FirstOrDefault().ToString() : "";
 
                 img = new HtmlElementTextSemanticsB(new HtmlText(i))
                 {
@@ -86,21 +113,16 @@ namespace WebExpress.WebUI.WebControl
                 .Add
                 (
                     Uri is not null
-                        ? new HtmlElementTextSemanticsA(User)
+                        ? new HtmlElementTextSemanticsA(username)
                         {
-                            Href = Uri.ToString(),
+                            Href = uri.ToString(),
                             Class = "wx-link"
                         }
-                        : new HtmlText(User)
+                        : new HtmlText(username)
                 );
 
-            if (Modal is not null)
-            {
-                html.AddUserAttribute("data-bs-toggle", "modal");
-                html.AddUserAttribute("data-bs-target", "#" + Modal.Id);
-
-                return new HtmlList(html, Modal.Render(renderContext, visualTree));
-            }
+            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

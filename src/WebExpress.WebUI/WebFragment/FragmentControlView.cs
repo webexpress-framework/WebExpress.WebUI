@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebFragment
     /// <summary>
     /// Represents a control view for a fragment, implementing the IFragmentControl interface.
     /// </summary>
-    public class FragmentControlView : ControlView, IFragmentControl<ControlView>
+    public abstract class FragmentControlView : ControlView, IFragmentControl<ControlView>
     {
         /// <summary>
         /// Returns the context of the fragment.

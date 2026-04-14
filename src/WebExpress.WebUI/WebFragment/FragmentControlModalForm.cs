@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebFragment
     /// <summary>
     /// Represents a modal form control fragment that can display a form in a modal dialog.
     /// </summary>
-    public class FragmentControlModalForm : ControlModalForm, IFragmentControl<ControlModalForm>
+    public abstract class FragmentControlModalForm : ControlModalForm, IFragmentControl<ControlModalForm>
     {
         /// <summary>
         /// Returns the context of the fragment.

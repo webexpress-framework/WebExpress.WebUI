@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebFragment
     /// Represents a control tile for a fragment, implementing the IFragmentControl interface.
     /// </summary>
     /// <typeparam name="ControlTree">The type of control tile.</typeparam>
-    public class FragmentControlTile : ControlTile, IFragmentControl<ControlTile>
+    public abstract class FragmentControlTile : ControlTile, IFragmentControl<ControlTile>
     {
         /// <summary>
         /// Returns the context of the fragment.

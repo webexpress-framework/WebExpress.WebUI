@@ -15,6 +15,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/popper.min.js")]
     [Asset("/assets/js/webexpress.webui.js")]
     [Asset("/assets/js/webexpress.webui.avatar.js")]
+    [Asset("/assets/js/webexpress.webui.avatar.dropdown.js")]
     [Asset("/assets/js/webexpress.webui.button.js")]
     [Asset("/assets/js/webexpress.webui.button.split.toggle.js")]
     [Asset("/assets/js/webexpress.webui.chart.js")]

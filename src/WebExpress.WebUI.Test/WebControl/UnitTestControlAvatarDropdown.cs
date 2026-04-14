@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatarDropdown()
             {
-                Name = name
+                User = name
             };
 
             // act
@@ -267,7 +267,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatarDropdown()
             {
-                Name = "Max Mustermann",
+                User = "Max Mustermann",
                 Image = new UriEndpoint("http://example.com/avatar.png")
             };
 
@@ -289,7 +289,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatarDropdown()
             {
-                Name = "Max Mustermann",
+                User = "Max Mustermann",
                 Initials = "MM",
                 Shape = TypeShapeAvatar.Rect,
                 Size = 48

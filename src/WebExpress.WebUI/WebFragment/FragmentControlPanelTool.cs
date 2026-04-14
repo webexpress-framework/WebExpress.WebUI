@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebFragment
     /// <summary>
     /// Represents a control panel tool that is part of a fragment and implements the IFragmentControl interface.
     /// </summary>
-    public class FragmentControlPanelTool : ControlPanelTool, IFragmentControl<ControlPanelTool>
+    public abstract class FragmentControlPanelTool : ControlPanelTool, IFragmentControl<ControlPanelTool>
     {
         /// <summary>
         /// Returns the context of the fragment.

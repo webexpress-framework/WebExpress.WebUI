@@ -23,7 +23,7 @@ webexpress.webui.AvatarDropdownCtrl = class extends webexpress.webui.Ctrl {
         this._src = element.dataset.src || "";
         this._initials = element.dataset.initials || this._deriveInitials(this._name);
         this._shape = (element.dataset.shape === "rect") ? "rect" : "circle";
-        this._size = this._parseNumber(element.dataset.size, 36, 24, 512);
+        this._size = this._parseNumber(element.dataset.size, 28, 24, 512);
 
         // dropdown configuration from data-* attributes
         this._menuCss = element.dataset.menucss || null;

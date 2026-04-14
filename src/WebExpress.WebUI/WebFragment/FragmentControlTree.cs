@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebFragment
     /// Represents a control tree for a fragment, implementing the IFragmentControl interface.
     /// </summary>
     /// <typeparam name="ControlTree">The type of control tree.</typeparam>
-    public class FragmentControlTree : ControlTree, IFragmentControl<ControlTree>
+    public abstract class FragmentControlTree : ControlTree, IFragmentControl<ControlTree>
     {
         /// <summary>
         /// Returns the context of the fragment.

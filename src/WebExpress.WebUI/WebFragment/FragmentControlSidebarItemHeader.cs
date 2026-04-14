@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebFragment
     /// <summary>
     /// Represents a sidebar item header control within a fragment context.
     /// </summary>
-    public class FragmentControlSidebarItemHeader : ControlSidebarItemHeader, IFragmentWebUIElement<IRenderControlContext, IVisualTreeControl>, IFragmentControlSidebarItem
+    public abstract class FragmentControlSidebarItemHeader : ControlSidebarItemHeader, IFragmentWebUIElement<IRenderControlContext, IVisualTreeControl>, IFragmentControlSidebarItem
     {
         /// <summary>
         /// Returns the context of the fragment.

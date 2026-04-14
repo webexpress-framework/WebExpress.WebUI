@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebFragment
     /// <summary>
     /// Represents a dashboard control for a fragment, implementing the IFragmentControl interface.
     /// </summary>
-    public class FragmentControlDashboard : ControlDashboard, IFragmentControl<ControlDashboard>
+    public abstract class FragmentControlDashboard : ControlDashboard, IFragmentControl<ControlDashboard>
     {
         /// <summary>
         /// Returns the context of the fragment.

@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatar()
             {
-                User = user
+                Username = user
             };
 
             // act

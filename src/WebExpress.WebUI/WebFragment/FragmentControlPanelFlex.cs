@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebFragment
     /// <summary>
     /// Represents a control panel that uses a flexbox layout to arrange its child controls within a fragment context.
     /// </summary>
-    public class FragmentControlPanelFlex : ControlPanelFlex, IFragmentControl<ControlPanelFlex>
+    public abstract class FragmentControlPanelFlex : ControlPanelFlex, IFragmentControl<ControlPanelFlex>
     {
         /// <summary>
         /// Returns the context of the fragment.
