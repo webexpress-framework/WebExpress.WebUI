@@ -9,12 +9,12 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlPanelSplit : IControl
     {
         /// <summary>
-        /// Returns the left or top panel in the ControlPanelSplit.
+        /// Gets the left or top panel in the ControlPanelSplit.
         /// </summary>
         IEnumerable<IControl> SidePanel { get; }
 
         /// <summary>
-        /// Returns the right or bottom pane in the ControlPanelSplit.
+        /// Gets the right or bottom pane in the ControlPanelSplit.
         /// </summary>
         IEnumerable<IControl> MainPanel { get; }
 

@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebMarkdown.Element
     public class MarkdownInlineElementUnderline : MarkdownInlineElement
     {
         /// <summary>
-        /// Returns the collection of inline elements contained within the underlined text segment.
+        /// Gets the collection of inline elements contained within the underlined text segment.
         /// </summary>
         public IEnumerable<MarkdownInlineElement> Content { get; } = [];
 

@@ -17,7 +17,7 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<Point> _waypoints = [];
 
         /// <summary>
-        /// Returns the unique identifier of the edge.
+        /// Gets the unique identifier of the edge.
         /// </summary>
         public string Id { get; private set; }
 

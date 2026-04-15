@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.WebFragment
     public abstract class FragmentControlToolbarItemCombo : ControlToolbarItemCombo, IFragmentWebUIElement<IRenderControlContext, IVisualTreeControl>, IFragmentControlToolbarItem
     {
         /// <summary>
-        /// Returns the context of the fragment.
+        /// Gets the context of the fragment.
         /// </summary>
         public IFragmentContext FragmentContext { get; }
 

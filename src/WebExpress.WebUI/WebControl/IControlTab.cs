@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlTab : IControl
     {
         /// <summary>
-        /// Returns the pages of the tab.
+        /// Gets the pages of the tab.
         /// </summary>
         IEnumerable<IControlTabView> Views { get; }
 

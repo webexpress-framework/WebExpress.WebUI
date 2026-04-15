@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebMarkdown.Element
     public class MarkdownInlineElementMarked : MarkdownInlineElement
     {
         /// <summary>
-        /// Returns the collection of inline elements that are enclosed by the mark syntax.
+        /// Gets the collection of inline elements that are enclosed by the mark syntax.
         /// </summary>
         public IEnumerable<MarkdownInlineElement> Content { get; } = [];
 

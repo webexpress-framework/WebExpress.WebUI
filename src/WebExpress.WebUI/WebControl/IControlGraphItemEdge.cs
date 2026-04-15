@@ -10,27 +10,27 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlGraphItemEdge : IControlGraphItem
     {
         /// <summary>
-        /// Returns the id of the source node.
+        /// Gets the id of the source node.
         /// </summary>
         string Source { get; }
 
         /// <summary>
-        /// Returns the id of the target node.
+        /// Gets the id of the target node.
         /// </summary>
         string Target { get; }
 
         /// <summary>
-        /// Returns an optional label for the edge.
+        /// Gets an optional label for the edge.
         /// </summary>
         string Label { get; }
 
         /// <summary>
-        /// Returns the color for the node.
+        /// Gets the color for the node.
         /// </summary>
         PropertyColorGraph Color { get; }
 
         /// <summary>
-        /// Returns the collection of waypoints that define the path.
+        /// Gets the collection of waypoints that define the path.
         /// </summary>
         IEnumerable<Point> Waypoints { get; }
 

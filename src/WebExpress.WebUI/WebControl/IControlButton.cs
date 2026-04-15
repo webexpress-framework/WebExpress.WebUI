@@ -49,13 +49,13 @@ namespace WebExpress.WebUI.WebControl
         TypeActive Active { get; }
 
         /// <summary>
-        /// Returns the secondary action, typically triggered by a 
+        /// Gets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
         IAction PrimaryAction { get; }
 
         /// <summary>
-        /// Returns the secondary action, typically triggered by a 
+        /// Gets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
         IAction SecondaryAction { get; }

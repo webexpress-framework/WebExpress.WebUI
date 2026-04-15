@@ -6,12 +6,12 @@
     public class PropertyOnChange
     {
         /// <summary>
-        /// Returns the system value.
+        /// Gets the system value.
         /// </summary>
         public TypeOnChange SystemValue { get; protected set; }
 
         /// <summary>
-        /// Returns the user-defined value.
+        /// Gets the user-defined value.
         /// </summary>
         public string UserValue { get; protected set; }
 

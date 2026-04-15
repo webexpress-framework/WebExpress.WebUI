@@ -33,7 +33,7 @@ namespace WebExpress.WebUI.WebNotification
         public event EventHandler<INotification> DestroyNotification;
 
         /// <summary>
-        /// Returns the reference to the context of the host.
+        /// Gets the reference to the context of the host.
         /// </summary>
         public IHttpServerContext HttpServerContext { get; private set; }
 

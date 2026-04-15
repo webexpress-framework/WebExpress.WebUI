@@ -38,7 +38,7 @@ namespace WebExpress.WebUI.WebControl
         public IControl Content { get; }
 
         /// <summary>
-        /// Returns the child cascading items.
+        /// Gets the child cascading items.
         /// </summary>
         IEnumerable<IControlFormItemInputCascadingItem> Children { get; }
 

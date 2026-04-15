@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlToolbarItemDropdown : IControlToolbarItem
     {
         /// <summary>
-        /// Returns the items in the dropdown.
+        /// Gets the items in the dropdown.
         /// </summary>
         IEnumerable<IControlDropdownItem> Items { get; }
 
@@ -24,42 +24,42 @@ namespace WebExpress.WebUI.WebControl
         TypeSizeButton Size { get; }
 
         /// <summary>
-        /// Returns the outline property.
+        /// Gets the outline property.
         /// </summary>
         bool Outline { get; }
 
         /// <summary>
-        /// Returns whether the button should take up the full width.
+        /// Gets whether the button should take up the full width.
         /// </summary>
         TypeBlockButton Block { get; }
 
         /// <summary>
-        /// Returns an indicator that indicates that a menu is present.
+        /// Gets an indicator that indicates that a menu is present.
         /// </summary>
         TypeToggleDropdown Toggle { get; }
 
         /// <summary>
-        /// Returns the label.
+        /// Gets the label.
         /// </summary>
         string Text { get; }
 
         /// <summary>
-        /// Returns the tooltip.
+        /// Gets the tooltip.
         /// </summary>
         string Tooltip { get; }
 
         /// <summary>
-        /// Returns the icon.
+        /// Gets the icon.
         /// </summary>
         IIcon Icon { get; }
 
         /// <summary>
-        /// Returns the activation status of the button.
+        /// Gets the activation status of the button.
         /// </summary>
         TypeActive Active { get; }
 
         /// <summary>
-        /// Returns the orientation of the menu.
+        /// Gets the orientation of the menu.
         /// </summary>
         TypeAlignmentDropdownMenu AlignmentMenu { get; }
 

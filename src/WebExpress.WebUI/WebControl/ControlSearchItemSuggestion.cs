@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlSearchItemSuggestion
     {
         /// <summary>
-        /// Returns the unique identifier for the suggestion item.
+        /// Gets the unique identifier for the suggestion item.
         /// </summary>
         public string Id { get; }
 

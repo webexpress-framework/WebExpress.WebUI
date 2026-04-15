@@ -15,7 +15,7 @@ namespace WebExpress.WebUI.WebFragment
     public abstract class FragmentControlNavigationItemLink : ControlNavigationItemLink, IFragmentControl<ControlNavigationItemLink>, IFragmentControlNavigationItem
     {
         /// <summary>
-        /// Returns the context of the fragment.
+        /// Gets the context of the fragment.
         /// </summary>
         public IFragmentContext FragmentContext { get; private set; }
 

@@ -31,7 +31,7 @@ namespace WebExpress.WebUI.WebControl
         public IIcon Icon { get; set; }
 
         /// <summary>
-        /// Returns or set the background color.
+        /// Gets or set the background color.
         /// </summary>
         public PropertyColorTile Color { get; set; } = new PropertyColorTile(TypeColorTile.Default);
 

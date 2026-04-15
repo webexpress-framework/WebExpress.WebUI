@@ -13,7 +13,7 @@ namespace WebExpress.WebUI.WebControl
         private readonly TypeModalSize? _size;
 
         /// <summary>
-        /// Returns the unique identifier for this modal.
+        /// Gets the unique identifier for this modal.
         /// </summary>
         public string Target { get; private set; }
 

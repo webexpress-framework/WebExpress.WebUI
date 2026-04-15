@@ -6,7 +6,7 @@ namespace WebExpress.WebUI.WebMarkdown.Element
     public interface IMarkdownElement
     {
         /// <summary>
-        /// Returns the plain text representation of this node and its children.
+        /// Gets the plain text representation of this node and its children.
         /// </summary>
         string PlainText { get; }
     }

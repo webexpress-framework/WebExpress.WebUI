@@ -8,81 +8,81 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlChart : IControl
     {
         /// <summary>
-        /// Returns the chart type. The setter returns the instance for fluent chaining.
+        /// Gets the chart type. The setter returns the instance for fluent chaining.
         /// </summary>
         TypeChart Type { get; }
 
         /// <summary>
-        /// Returns the chart title. The setter returns the instance for fluent chaining.
+        /// Gets the chart title. The setter returns the instance for fluent chaining.
         /// </summary>
         string Title { get; }
 
         /// <summary>
-        /// Returns the x-axis title. The setter returns the instance for fluent chaining.
+        /// Gets the x-axis title. The setter returns the instance for fluent chaining.
         /// </summary>
         string TitleX { get; }
 
         /// <summary>
-        /// Returns the y-axis title. The setter returns the instance for fluent chaining.
+        /// Gets the y-axis title. The setter returns the instance for fluent chaining.
         /// </summary>
         string TitleY { get; }
 
         /// <summary>
-        /// Returns the chart width. The setter returns the instance for fluent chaining.
+        /// Gets the chart width. The setter returns the instance for fluent chaining.
         /// </summary>
         new int Width { get; }
 
         /// <summary>
-        /// Returns the chart height. The setter returns the instance for fluent chaining.
+        /// Gets the chart height. The setter returns the instance for fluent chaining.
         /// </summary>
         new int Height { get; }
 
         /// <summary>
-        /// Returns the minimum y-value. The setter returns the instance for fluent chaining.
+        /// Gets the minimum y-value. The setter returns the instance for fluent chaining.
         /// </summary>
         float Minimum { get; }
 
         /// <summary>
-        /// Returns the maximum y-value. The setter returns the instance for fluent chaining.
+        /// Gets the maximum y-value. The setter returns the instance for fluent chaining.
         /// </summary>
         float Maximum { get; }
 
         /// <summary>
-        /// Returns whether the chart is responsive. The setter returns the instance for fluent chaining.
+        /// Gets whether the chart is responsive. The setter returns the instance for fluent chaining.
         /// </summary>
         bool Responsive { get; }
 
         /// <summary>
-        /// Returns whether the chart maintains aspect ratio. The setter returns the instance for fluent chaining.
+        /// Gets whether the chart maintains aspect ratio. The setter returns the instance for fluent chaining.
         /// </summary>
         bool MaintainAspectRatio { get; }
 
         /// <summary>
-        /// Returns whether the legend is displayed. The setter returns the instance for fluent chaining.
+        /// Gets whether the legend is displayed. The setter returns the instance for fluent chaining.
         /// </summary>
         bool LegendDisplay { get; }
 
-        /// Returns whether the title is displayed. The setter returns the instance for fluent chaining.
+        /// Gets whether the title is displayed. The setter returns the instance for fluent chaining.
         /// </summary>
         bool TitleDisplay { get; }
 
         /// <summary>
-        /// Returns whether the y-axis begins at zero. The setter returns the instance for fluent chaining.
+        /// Gets whether the y-axis begins at zero. The setter returns the instance for fluent chaining.
         /// </summary>
         bool YBeginAtZero { get; }
 
         /// <summary>
-        /// Returns whether the x-axis begins at zero. The setter returns the instance for fluent chaining.
+        /// Gets whether the x-axis begins at zero. The setter returns the instance for fluent chaining.
         /// </summary>
         bool XBeginAtZero { get; }
 
         /// <summary>
-        /// Returns the datasets.
+        /// Gets the datasets.
         /// </summary>
         IEnumerable<ControlChartDataset> Data { get; }
 
         /// <summary>
-        /// Returns the labels. The setter returns the instance for fluent chaining.
+        /// Gets the labels. The setter returns the instance for fluent chaining.
         /// </summary>
         IEnumerable<string> Labels { get; }
 

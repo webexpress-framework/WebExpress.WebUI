@@ -6,7 +6,7 @@ namespace WebExpress.WebUI.WebMarkdown.Element
     public class MarkdownInlineElementPlainText : MarkdownInlineElement
     {
         /// <summary>
-        /// Returns the plain text content.
+        /// Gets the plain text content.
         /// </summary>
         public string Text { get; }
 

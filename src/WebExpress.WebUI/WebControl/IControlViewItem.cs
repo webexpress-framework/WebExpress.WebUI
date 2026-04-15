@@ -10,22 +10,22 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlViewItem : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the title text.
+        /// Gets the title text.
         /// </summary>
         string Title { get; }
 
         /// <summary>
-        /// Returns the description of the view.
+        /// Gets the description of the view.
         /// </summary>
         string Description { get; }
 
         /// <summary>
-        /// Returns a value indicating whether the detail frame is enabled.
+        /// Gets a value indicating whether the detail frame is enabled.
         /// </summary>
         bool DetailFrame { get; }
 
         /// <summary>
-        /// Returns the content of the view control.
+        /// Gets the content of the view control.
         /// </summary>
         IEnumerable<IControl> Content { get; }
 

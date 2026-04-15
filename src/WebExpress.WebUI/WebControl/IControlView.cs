@@ -8,18 +8,18 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlView : IControl
     {
         /// <summary>
-        /// Returns the collection of headers that define the structure 
+        /// Gets the collection of headers that define the structure 
         /// and metadata of the control view.
         /// </summary>
         IEnumerable<IControlViewHeader> Headers { get; }
 
         /// <summary>
-        /// Returns the views of the control.
+        /// Gets the views of the control.
         /// </summary>
         IEnumerable<IControlViewItem> Views { get; }
 
         /// <summary>
-        /// Returns the collection of footers associated with the 
+        /// Gets the collection of footers associated with the 
         /// control view.
         /// </summary>
         IEnumerable<IControlViewFooter> Footers { get; }

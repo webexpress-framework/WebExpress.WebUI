@@ -6,7 +6,7 @@
     public interface IRenderControlFormGroupContext : IRenderControlFormContext
     {
         /// <summary>
-        /// Returns the group of form items associated with the control.
+        /// Gets the group of form items associated with the control.
         /// </summary>
         public ControlFormItemGroup Group { get; }
     }

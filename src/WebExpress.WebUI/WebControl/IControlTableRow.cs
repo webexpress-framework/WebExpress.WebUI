@@ -10,33 +10,33 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlTableRow : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the color scheme used for the row.
+        /// Gets the color scheme used for the row.
         /// </summary>
         TypeColorTable Color { get; }
 
         /// <summary>
-        /// Returns the cells.
+        /// Gets the cells.
         /// </summary>
         IEnumerable<IControlTableCell> Cells { get; }
 
         /// <summary>
-        /// Returns the options.
+        /// Gets the options.
         /// </summary>
         IEnumerable<IControlDropdownItem> Options { get; }
 
         /// <summary>
-        /// Returns the collection of child rows associated with the current control table row.
+        /// Gets the collection of child rows associated with the current control table row.
         /// </summary>
         IEnumerable<IControlTableRow> Children { get; }
 
         /// <summary>
-        /// Returns the secondary action, typically triggered by a 
+        /// Gets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
         IAction PrimaryAction { get; }
 
         /// <summary>
-        /// Returns the secondary action, typically triggered by a 
+        /// Gets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
         IAction SecondaryAction { get; }

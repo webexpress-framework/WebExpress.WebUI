@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     public interface IBinding
     {
         /// <summary>
-        /// Returns the collection of binds associated with this instance.
+        /// Gets the collection of binds associated with this instance.
         /// </summary>
         IEnumerable<IBind> Binds { get; }
 

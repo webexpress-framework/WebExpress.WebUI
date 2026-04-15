@@ -6,7 +6,7 @@ namespace WebExpress.WebUI.WebMarkdown.Element
     public class MarkdownInlineElementImage : MarkdownInlineElement
     {
         /// <summary>
-        /// Returns the alternative text for the image.
+        /// Gets the alternative text for the image.
         /// </summary>
         public string AltText { get; }
         /// <summary>

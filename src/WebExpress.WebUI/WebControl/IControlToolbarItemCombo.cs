@@ -9,52 +9,52 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlToolbarItemCombo : IControlToolbarItem
     {
         /// <summary>
-        /// Returns the items in the dropdown.
+        /// Gets the items in the dropdown.
         /// </summary>
         public IEnumerable<ControlFormItemInputComboItem> Items { get; }
 
         /// <summary>
-        /// Returns the color. 
+        /// Gets the color. 
         /// </summary>
         public PropertyColorText Color { get; }
 
         /// <summary>
-        /// Returns the size.
+        /// Gets the size.
         /// </summary>
         public TypeSizeButton Size { get; }
 
         /// <summary>
-        /// Returns the outline property.
+        /// Gets the outline property.
         /// </summary>
         public bool Outline { get; }
 
         /// <summary>
-        /// Returns whether the button should take up the full width.
+        /// Gets whether the button should take up the full width.
         /// </summary>
         public TypeBlockButton Block { get; }
 
         /// <summary>
-        /// Returns an indicator that indicates that a menu is present.
+        /// Gets an indicator that indicates that a menu is present.
         /// </summary>
         public TypeToggleDropdown Toggle { get; }
 
         /// <summary>
-        /// Returns the label.
+        /// Gets the label.
         /// </summary>
         public string Text { get; }
 
         /// <summary>
-        /// Returns the tooltip.
+        /// Gets the tooltip.
         /// </summary>
         public string Tooltip { get; }
 
         /// <summary>
-        /// Returns the icon.
+        /// Gets the icon.
         /// </summary>
         public IIcon Icon { get; }
 
         /// <summary>
-        /// Returns the activation status of the button.
+        /// Gets the activation status of the button.
         /// </summary>
         public TypeActive Active { get; }
 

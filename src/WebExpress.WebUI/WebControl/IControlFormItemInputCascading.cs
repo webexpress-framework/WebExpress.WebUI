@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFormItemInputCascading : IControlFormItemInput<ControlFormInputValueStringList>
     {
         /// <summary>
-        /// Returns the entries.
+        /// Gets the entries.
         /// </summary>
         public IEnumerable<IControlFormItemInputCascadingItem> Options { get; }
 

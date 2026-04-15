@@ -10,17 +10,17 @@ namespace WebExpress.WebUI.WebControl
     public sealed class ControlKanbanSwimlane : IControlKanbanSwimlane
     {
         /// <summary>
-        /// Returns the id of the control.
+        /// Gets the id of the control.
         /// </summary>
         public string Id { get; private set; }
 
         /// <summary>
-        /// Returns the title associated with the swimlane.
+        /// Gets the title associated with the swimlane.
         /// </summary>
         public string Title { get; }
 
         /// <summary>
-        /// Returns a value indicating whether the content is currently expanded.
+        /// Gets a value indicating whether the content is currently expanded.
         /// </summary>
         public bool Expanded { get; }
 

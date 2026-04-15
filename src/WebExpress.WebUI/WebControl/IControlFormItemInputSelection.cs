@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFormItemInputSelection : IControlFormItemInput<ControlFormInputValueString>
     {
         /// <summary>
-        /// Returns the entries.
+        /// Gets the entries.
         /// </summary>
         public IEnumerable<IControlFormItemInputSelectionItem> Options { get; }
 

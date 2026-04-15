@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.WebMarkdown.Element
         private readonly List<IMarkdownElement> _content = [];
 
         /// <summary>
-        /// Returns the header level (1-6).
+        /// Gets the header level (1-6).
         /// </summary>
         public int Level { get; }
 

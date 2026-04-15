@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.WebPage
     public interface IVisualTreeControl : IVisualTree
     {
         /// <summary>
-        /// Returns the title of the html document.
+        /// Gets the title of the html document.
         /// </summary>
         string Title { get; set; }
 
@@ -21,47 +21,47 @@ namespace WebExpress.WebUI.WebPage
         int StatusCode { get; set; }
 
         /// <summary>
-        /// Returns the favicons.
+        /// Gets the favicons.
         /// </summary>
         IEnumerable<Favicon> Favicons { get; }
 
         /// <summary>
-        /// Returns the internal stylesheet.  
+        /// Gets the internal stylesheet.  
         /// </summary>
         IEnumerable<string> Styles { get; }
 
         /// <summary>
-        /// Returns the links to the java script files to be used, which are inserted in the header.
+        /// Gets the links to the java script files to be used, which are inserted in the header.
         /// </summary>
         IEnumerable<string> HeaderScriptLinks { get; }
 
         /// <summary>
-        /// Returns the links to the java script files to be used.
+        /// Gets the links to the java script files to be used.
         /// </summary>
         IEnumerable<string> ScriptLinks { get; }
 
         /// <summary>
-        /// Returns the links to the java script files to be used, which are inserted in the header.
+        /// Gets the links to the java script files to be used, which are inserted in the header.
         /// </summary>
         IEnumerable<string> HeaderScripts { get; }
 
         /// <summary>
-        /// Returns the links to the java script files to be used.
+        /// Gets the links to the java script files to be used.
         /// </summary>
         IReadOnlyDictionary<string, string> Scripts { get; }
 
         /// <summary>
-        /// Returns the links to the css files to be used.
+        /// Gets the links to the css files to be used.
         /// </summary>
         IEnumerable<string> CssLinks { get; }
 
         /// <summary>
-        /// Returns the meta information.
+        /// Gets the meta information.
         /// </summary>
         IReadOnlyDictionary<string, string> Meta { get; }
 
         /// <summary>
-        /// Returns the content.
+        /// Gets the content.
         /// </summary>
         IEnumerable<IControl> Content { get; }
 

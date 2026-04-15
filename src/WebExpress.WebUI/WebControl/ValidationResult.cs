@@ -6,12 +6,12 @@
     public class ValidationResult
     {
         /// <summary>
-        /// Returns the type of the validation result.
+        /// Gets the type of the validation result.
         /// </summary>
         public TypeInputValidity Type { get; private set; }
 
         /// <summary>
-        /// Returns the error text.
+        /// Gets the error text.
         /// </summary>
         public string Text { get; private set; }
 

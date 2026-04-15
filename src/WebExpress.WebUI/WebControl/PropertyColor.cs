@@ -7,12 +7,12 @@
     public abstract class PropertyColor<T> : IProperty where T : System.Enum
     {
         /// <summary>
-        /// Returns the system-defined color.
+        /// Gets the system-defined color.
         /// </summary>
         public T SystemColor { get; protected set; }
 
         /// <summary>
-        /// Returns the user-defined color.
+        /// Gets the user-defined color.
         /// </summary>
         public string UserColor { get; protected set; }
 

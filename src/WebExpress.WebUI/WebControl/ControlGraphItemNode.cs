@@ -15,7 +15,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlGraphItemNode : IControlGraphItemNode
     {
         /// <summary>
-        /// Returns the unique identifier of the node.
+        /// Gets the unique identifier of the node.
         /// </summary>
         public string Id { get; private set; }
 

@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFormItemInputMove : IControlFormItemInput<ControlFormInputValueStringList>
     {
         /// <summary>
-        /// Returns the collection of available options for the control.
+        /// Gets the collection of available options for the control.
         /// </summary>
         IEnumerable<IControlFormItemInputMoveItem> Options { get; }
 

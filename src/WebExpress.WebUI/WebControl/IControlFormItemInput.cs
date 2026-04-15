@@ -11,17 +11,17 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFormItemInput : IControlFormItem, IControlFormLabel, IControlFormInitialize, IControlFormValidation, IControlFormProcess
     {
         /// <summary>
-        /// Returns the icon associated with the input control.
+        /// Gets the icon associated with the input control.
         /// </summary>
         IIcon Icon { get; }
 
         /// <summary>
-        /// Returns an optional help text for the input control.
+        /// Gets an optional help text for the input control.
         /// </summary>
         string Help { get; }
 
         /// <summary>
-        /// Returns a value indicating whether the input element is disabled.
+        /// Gets a value indicating whether the input element is disabled.
         /// </summary>
         bool Disabled { get; }
 
@@ -31,17 +31,17 @@ namespace WebExpress.WebUI.WebControl
         bool Required { get; }
 
         /// <summary>
-        /// Returns the elements that are displayed in front of the control.
+        /// Gets the elements that are displayed in front of the control.
         /// </summary>
         IEnumerable<IControl> Prepend { get; }
 
         /// <summary>
-        /// Returns the elements that are displayed after the control.
+        /// Gets the elements that are displayed after the control.
         /// </summary>
         IEnumerable<IControl> Append { get; }
 
         /// <summary>
-        /// Returns an object that is linked to the control.
+        /// Gets an object that is linked to the control.
         /// </summary>
         object Tag { get; }
     }

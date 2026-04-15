@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlDashboard : IControl
     {
         /// <summary>
-        /// Returns the collection of widgets.
+        /// Gets the collection of widgets.
         /// </summary>
         IEnumerable<IControlDashboardWidget> Widgets { get; }
 
