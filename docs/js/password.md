@@ -2,16 +2,12 @@
 
 # InputPasswordCtrl
 
-The `InputPasswordCtrl` component provides a password input field with an integrated toggle button that allows the user to reveal or hide the entered password. The control manages a hidden input for form submission and a visible input whose type switches between `password` and `text` depending on the current visibility state. A Font Awesome eye icon inside the toggle button reflects the current state. The component is fully configurable via `data-*` attributes on the host element and integrates cleanly into Bootstrap-styled forms.
+The `InputPasswordCtrl` component provides a password input field. The component is fully configurable via `data-*` attributes on the host element and integrates cleanly into Bootstrap-styled forms.
 
 ```
-   ┌────────────────────────────┬────────┐
-   │ ••••••••                   │  👁   │
-   └────────────────────────────┴────────┘
-                                    ↕ toggles visibility
-   ┌────────────────────────────┬────────┐
-   │ mypassword                 │  🙈   │
-   └────────────────────────────┴────────┘
+   ┌────────────────────────────┐
+   │ ••••••••                   │
+   └────────────────────────────┘
 ```
 
 ## Configuration
@@ -32,11 +28,9 @@ All `data-*` configuration attributes are removed from the host element during i
 
 ## Functionality
 
-The control renders an [Bootstrap input group](https://getbootstrap.com/docs/5.0/forms/input-group/) consisting of a password input and a toggle button:
+The control renders an [Bootstrap input group](https://getbootstrap.com/docs/5.0/forms/input-group/) consisting of a password input:
 
-- A **hidden input** (`<input type="hidden">`) is created with the configured `name` and keeps the submitted form value synchronized with the visible input at all times.
 - The **visible input** starts as `<input type="password">` and is updated to `<input type="text">` when the user reveals the password.
-- The **toggle button** uses a Font Awesome icon (`fa-eye` / `fa-eye-slash`) and fires the `render()` method on each click to update the input type and icon.
 - Every keystroke in the visible input fires `CHANGE_VALUE_EVENT` with the current value as payload.
 - The `data-disabled` flag disables both the input and the toggle button simultaneously.
 

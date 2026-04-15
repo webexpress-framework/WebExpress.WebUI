@@ -83,20 +83,39 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var html = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Text)))
+            return Render(renderContext, visualTree, Text, Tooltip, Icon, Color, Uri, Target, PrimaryAction, SecondaryAction);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="text">The text to display for the link.</param>
+        /// <param name="tooltip">The tooltip text to display on hover.</param>
+        /// <param name="icon">The icon to display alongside the link.</param>
+        /// <param name="color">The color to apply to the link text.</param>
+        /// <param name="uri">The URI to navigate to when the link is clicked.</param>
+        /// <param name="target">The target specifying where to open the linked document.</param>
+        /// <param name="primaryAction">The primary action to apply to the link, typically triggered by a click.</param>
+        /// <param name="secondaryAction">The secondary action to apply to the link, typically triggered by a double-click.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, string text, string tooltip, IIcon icon, TypeColorText color, IUri uri, TypeTarget target, IAction primaryAction, IAction secondaryAction)
+        {
+            var html = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, text)))
             {
                 Id = Id,
                 Class = "wx-dropdown-item"
             }
-                .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-tooltip", Tooltip)
-                .AddUserAttribute("data-color", Color.ToClass())
-                .AddUserAttribute("data-uri", Uri?.ToString())
-                .AddUserAttribute("data-target", Target.ToValue());
+                .AddUserAttribute("data-icon", (icon as Icon)?.Class)
+                .AddUserAttribute("data-image", (icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-tooltip", tooltip)
+                .AddUserAttribute("data-color", color.ToClass())
+                .AddUserAttribute("data-uri", uri?.ToString())
+                .AddUserAttribute("data-target", target.ToValue());
 
-            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
-            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
+            primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            secondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }
