@@ -98,235 +98,34 @@ webexpress.webui.Controller = new class {
 
         let bound = false;
 
-        // primary actions
-        // modal
-        if (element.matches("[data-wx-primary-action='modal']")) {
-            element.addEventListener("click", () => {
-                const target = element.getAttribute("data-wx-primary-target") || null;
-                const uri = element.getAttribute("data-wx-primary-uri") || null;
-                const size = element.getAttribute("data-wx-primary-size") || null;
-                const instance = this.getInstance(target);
-
-                if (!instance) {
-                    // no instance found
-                } else if (typeof instance.show === "function") {
-                    if (size) {
-                        instance.size = size;
-                    }
-                    if (uri) {
-                        instance.uri = uri;
-                    }
-                    instance.show();
+        // primary actions – delegate to the Actions registry
+        const primaryAction = element.getAttribute("data-wx-primary-action");
+        if (primaryAction) {
+            const actionDef = webexpress.webui.Actions.get(primaryAction);
+            if (actionDef) {
+                element.addEventListener("click", (e) => {
+                    actionDef.execute(element, "primary", this, e);
+                });
+                if (typeof actionDef.init === "function") {
+                    actionDef.init(element, "primary", this);
                 }
-            });
-            bound = true;
+                bound = true;
+            }
         }
 
-        // frame
-        if (element.matches("[data-wx-primary-action='frame']")) {
-            element.addEventListener("click", () => {
-                const target = element.getAttribute("data-wx-primary-target") || null;
-                const uri = element.getAttribute("data-wx-primary-uri") || null;
-                const instance = this.getInstance(target);
-
-                if (!instance) {
-                    // no instance found
-                } else if (uri) {
-                    instance.uri = uri;
+        // secondary actions – delegate to the Actions registry
+        const secondaryAction = element.getAttribute("data-wx-secondary-action");
+        if (secondaryAction) {
+            const actionDef = webexpress.webui.Actions.get(secondaryAction);
+            if (actionDef) {
+                element.addEventListener("dblclick", (e) => {
+                    actionDef.execute(element, "secondary", this, e);
+                });
+                if (typeof actionDef.init === "function") {
+                    actionDef.init(element, "secondary", this);
                 }
-            });
-            bound = true;
-        }
-
-        // split
-        if (element.matches("[data-wx-primary-action='split']")) {
-            element.addEventListener("click", () => {
-                const target = element.getAttribute("data-wx-primary-target");
-                const instance = this.getInstance(target);
-                if (instance && typeof instance.toggleSidePane === "function") {
-                    instance.toggleSidePane();
-                }
-            });
-
-            document.addEventListener(webexpress.webui.Event.HIDE_EVENT, (e) => {
-                if (e.detail.sender === element) {
-                    const target = element.getAttribute("data-wx-primary-target");
-                    const instance = this.getInstance(target);
-                    if (instance) {
-                        instance.collapsed = true;
-                    }
-                }
-            });
-
-            document.addEventListener(webexpress.webui.Event.SHOW_EVENT, (e) => {
-                if (e.detail.sender === element) {
-                    const target = element.getAttribute("data-wx-primary-target");
-                    const instance = this.getInstance(target);
-                    if (instance) {
-                        instance.collapsed = false;
-                    }
-                }
-            });
-            bound = true;
-        }
-
-        // css fullscreen toggle support
-        if (element.matches("[data-wx-primary-action='fullscreen']")) {
-            element.addEventListener("click", (e) => {
-                e.preventDefault();
-                e.stopPropagation(); // stop bubbling to prevent parent handlers from closing
-
-                const targetSelector = element.getAttribute("data-wx-primary-target");
-                // default to body if no target is specified
-                const targetEl = targetSelector ? document.querySelector(targetSelector) : document.body;
-
-                if (targetEl) {
-                    this.toggleFullscreen(targetEl);
-                } else {
-                    console.warn("Fullscreen target not found:", targetSelector);
-                }
-            });
-            element.setAttribute("aria-pressed", "false");
-            bound = true;
-        }
-
-        // native browser fullscreen toggle support
-        if (element.matches("[data-wx-primary-action='native-fullscreen']")) {
-            element.addEventListener("click", (e) => {
-                e.preventDefault();
-                const targetSelector = element.getAttribute("data-wx-primary-target") || null;
-                const targetEl = targetSelector ? document.querySelector(targetSelector) : document.documentElement;
-
-                if (targetEl) {
-                    this.toggleNativeFullscreen(targetEl);
-                }
-            });
-            element.setAttribute("aria-pressed", "false");
-            bound = true;
-        }
-
-        // quickfilter actions
-        if (element.matches("[data-wx-primary-action='filter']")) {
-            element.addEventListener("click", (e) => {
-                e.preventDefault();
-                webexpress.webui.FilterRegistry.toggle(element.id);
-            });
-            bound = true;
-        }
-
-        // secondary actions
-        // modal
-        if (element.matches("[data-wx-secondary-action='modal']")) {
-            element.addEventListener("dblclick", () => {
-                const target = element.getAttribute("data-wx-secondary-target") || null;
-                const uri = element.getAttribute("data-wx-secondary-uri") || null;
-                const size = element.getAttribute("data-wx-secondary-size") || null;
-                const instance = this.getInstance(target);
-
-                if (!instance) {
-                    // no instance found
-                } else if (typeof instance.show === "function") {
-                    if (size) {
-                        instance.size = size;
-                    }
-                    if (uri) {
-                        instance.uri = uri;
-                    }
-                    instance.show();
-                }
-            });
-            bound = true;
-        }
-
-        // frame
-        if (element.matches("[data-wx-secondary-action='frame']")) {
-            element.addEventListener("dblclick", () => {
-                const target = element.getAttribute("data-wx-secondary-target") || null;
-                const uri = element.getAttribute("data-wx-secondary-uri") || null;
-                const instance = this.getInstance(target);
-
-                if (!instance) {
-                    // no instance found
-                } else if (uri) {
-                    instance.uri = uri;
-                }
-            });
-            bound = true;
-        }
-
-        // split
-        if (element.matches("[data-wx-secondary-action='split']")) {
-            element.addEventListener("dblclick", () => {
-                const target = element.getAttribute("data-wx-secondary-target");
-                const instance = this.getInstance(target);
-                if (instance && typeof instance.toggleSidePane === "function") {
-                    instance.toggleSidePane();
-                }
-            });
-
-            document.addEventListener(webexpress.webui.Event.HIDE_EVENT, (e) => {
-                if (e.detail.sender === element) {
-                    const target = element.getAttribute("data-wx-secondary-target");
-                    const instance = this.getInstance(target);
-                    if (instance) {
-                        instance.collapsed = true;
-                    }
-                }
-            });
-
-            document.addEventListener(webexpress.webui.Event.SHOW_EVENT, (e) => {
-                if (e.detail.sender === element) {
-                    const target = element.getAttribute("data-wx-secondary-target");
-                    const instance = this.getInstance(target);
-                    if (instance) {
-                        instance.collapsed = false;
-                    }
-                }
-            });
-            bound = true;
-        }
-
-        // css fullscreen toggle support
-        if (element.matches("[data-wx-secondary-action='fullscreen']")) {
-            element.addEventListener("dblclick", (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-
-                const targetSelector = element.getAttribute("data-wx-secondary-target");
-                const targetEl = targetSelector ? document.querySelector(targetSelector) : document.body;
-
-                if (targetEl) {
-                    this.toggleFullscreen(targetEl);
-                } else {
-                    console.warn("Fullscreen target not found:", targetSelector);
-                }
-            });
-            element.setAttribute("aria-pressed", "false");
-            bound = true;
-        }
-
-        // native browser fullscreen toggle support
-        if (element.matches("[data-wx-secondary-action='native-fullscreen']")) {
-            element.addEventListener("dblclick", (e) => {
-                e.preventDefault();
-                const targetSelector = element.getAttribute("data-wx-secondary-target") || null;
-                const targetEl = targetSelector ? document.querySelector(targetSelector) : document.documentElement;
-
-                if (targetEl) {
-                    this.toggleNativeFullscreen(targetEl);
-                }
-            });
-            element.setAttribute("aria-pressed", "false");
-            bound = true;
-        }
-
-        // quickfilter actions
-        if (element.matches("[data-wx-secondary-action='filter']")) {
-            element.addEventListener("dblclick", (e) => {
-                e.preventDefault();
-                webexpress.webui.FilterRegistry.toggle(element.id);
-            });
-            bound = true;
+                bound = true;
+            }
         }
 
         // dismiss actions
@@ -1246,6 +1045,94 @@ webexpress.webui.Syntax = new class {
 
         // return the syntax configuration for the given language or null if not found
         return this.syntax[language] || null;
+    }
+};
+
+/**
+ * Registry for action plugins.
+ * Allows actions to be extended freely from external files.
+ * Each action is identified by a name (e.g. "modal", "frame") and provides
+ * an execute callback that is invoked when the action is triggered.
+ */
+webexpress.webui.Actions = new class {
+    /**
+     * Creates a new instance of the class.
+     */
+    constructor() {
+        this._actions = {};
+    }
+
+    /**
+     * Registers a new action.
+     * @param {string} name - The unique action name (e.g. "modal", "frame").
+     * @param {object} definition - The action definition object.
+     * @param {Function} definition.execute - Called when the action is triggered.
+     *   Receives (element, prefix, controller, event) where prefix is "primary" or "secondary".
+     * @param {Function} [definition.init] - Optional initialization hook called once per element binding.
+     * @returns {this} The registry instance for chaining.
+     */
+    register(name, definition) {
+        if (!name || !definition) return this;
+
+        this._actions[name] = definition;
+        return this;
+    }
+
+    /**
+     * Retrieves an action definition by name.
+     * @param {string} name - The action name.
+     * @returns {object|null} The action definition or null if not found.
+     */
+    get(name) {
+        if (typeof name !== "string" || name.trim() === "") {
+            return null;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(this._actions, name)) {
+            return this._actions[name];
+        }
+
+        return null;
+    }
+
+    /**
+     * Checks whether an action is registered.
+     * @param {string} name - The action name.
+     * @returns {boolean} True if registered.
+     */
+    has(name) {
+        return Object.prototype.hasOwnProperty.call(this._actions, name);
+    }
+
+    /**
+     * Returns all registered action names.
+     * @returns {Array<string>} List of action names.
+     */
+    getAll() {
+        return Object.keys(this._actions);
+    }
+
+    /**
+     * Unregisters an action by name.
+     * @param {string} name - The action name to remove.
+     * @returns {void}
+     */
+    unregister(name) {
+        if (typeof name !== "string" || name.trim() === "") {
+            return;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(this._actions, name)) {
+            delete this._actions[name];
+        }
+    }
+
+    /**
+     * Clears the entire registry.
+     * @returns {void}
+     */
+    clear() {
+        this._actions = {};
     }
 };
 
