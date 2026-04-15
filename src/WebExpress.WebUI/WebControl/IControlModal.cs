@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlModal : IControl
     {
         /// <summary>
-        /// Returns the content.
+        /// Gets the content.
         /// </summary>
         IEnumerable<IControl> Content { get; }
 

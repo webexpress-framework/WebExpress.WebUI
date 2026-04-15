@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlPanelTool : ControlPanel
     {
         /// <summary>
-        /// Returns the tools.
+        /// Gets the tools.
         /// </summary>
         public ControlDropdown Tools { get; } = new ControlDropdown();
 

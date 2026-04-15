@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlSelection : IControl
     {
         /// <summary>
-        /// Returns the text.
+        /// Gets the text.
         /// </summary>
         string Value { get; }
 

@@ -10,32 +10,32 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlDashboardWidget : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the title associated with the widget.
+        /// Gets the title associated with the widget.
         /// </summary>
         string Title { get; }
 
         /// <summary>
-        /// Returns the color associated with the widget.
+        /// Gets the color associated with the widget.
         /// </summary>
         string Color { get; }
 
         /// <summary>
-        /// Returns the icon associated with this widget.
+        /// Gets the icon associated with this widget.
         /// </summary>
         IIcon Icon { get; }
 
         /// <summary>
-        /// Returns the column index associated with this widget.
+        /// Gets the column index associated with this widget.
         /// </summary>
         uint Column { get; }
 
         /// <summary>
-        /// Returns a value indicating whether the widget can be moved.
+        /// Gets a value indicating whether the widget can be moved.
         /// </summary>
         bool Movable { get; }
 
         /// <summary>
-        /// Returns a value indicating whether the widget can be closed.
+        /// Gets a value indicating whether the widget can be closed.
         /// </summary>
         bool Closeable { get; }
     }

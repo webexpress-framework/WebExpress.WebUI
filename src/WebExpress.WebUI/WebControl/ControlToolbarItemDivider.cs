@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.WebControl
         public TypeToolbarItemAlignment Alignment { get; set; } = TypeToolbarItemAlignment.Default;
 
         /// <summary>
-        /// Returns the overflow behavior of the toolbar item.
+        /// Gets the overflow behavior of the toolbar item.
         /// </summary>
         public TypeToolbarItemOverflow Overflow { get; set; } = TypeToolbarItemOverflow.Default;
 

@@ -12,7 +12,7 @@ namespace WebExpress.WebUI.WebFragment
     public abstract class FragmentControlAvatar : ControlAvatar, IFragmentControl<ControlAvatar>
     {
         /// <summary>
-        /// Returns the context of the fragment.
+        /// Gets the context of the fragment.
         /// </summary>
         public IFragmentContext FragmentContext { get; private set; }
 

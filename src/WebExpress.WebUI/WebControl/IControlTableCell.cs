@@ -10,17 +10,17 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlTableCell : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the class or category associated with the current object.
+        /// Gets the class or category associated with the current object.
         /// </summary>
         string Class { get; }
 
         /// <summary>
-        /// Returns the style applied to the element.
+        /// Gets the style applied to the element.
         /// </summary>
         string Style { get; }
 
         /// <summary>
-        /// Returns the color scheme used for the cell.
+        /// Gets the color scheme used for the cell.
         /// </summary>
         TypeColorTable Color { get; }
     }

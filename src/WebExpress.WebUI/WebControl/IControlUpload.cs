@@ -9,17 +9,17 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlUpload : IControl
     {
         /// <summary>
-        /// Returns the placeholder text displayed in the file upload area.
+        /// Gets the placeholder text displayed in the file upload area.
         /// </summary>
         string Placeholder { get; }
 
         /// <summary>
-        /// Returns the URI associated with the form.
+        /// Gets the URI associated with the form.
         /// </summary>
         IUri Uri { get; }
 
         /// <summary>
-        /// Returns a value indicating whether multiple selections are allowed.
+        /// Gets a value indicating whether multiple selections are allowed.
         /// </summary>
         bool Multiple { get; }
 
@@ -29,7 +29,7 @@ namespace WebExpress.WebUI.WebControl
         string Accept { get; }
 
         /// <summary>
-        /// Returns a value indicating whether automatic uploads are enabled.
+        /// Gets a value indicating whether automatic uploads are enabled.
         /// </summary>
         bool AutoUpload { get; }
 

@@ -11,17 +11,17 @@ namespace WebExpress.WebUI.WebControl
     public sealed class ControlDashboardColumn : IControlDashboardColumn
     {
         /// <summary>
-        /// Returns the id of the control.
+        /// Gets the id of the control.
         /// </summary>
         public string Id { get; }
 
         /// <summary>
-        /// Returns the title associated with the object.
+        /// Gets the title associated with the object.
         /// </summary>
         public string Title { get; }
 
         /// <summary>
-        /// Returns the size descriptor associated with the object.
+        /// Gets the size descriptor associated with the object.
         /// </summary>
         public string Size { get; }
 

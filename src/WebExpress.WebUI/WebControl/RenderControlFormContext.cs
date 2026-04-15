@@ -14,7 +14,7 @@ namespace WebExpress.WebUI.WebControl
         private readonly Dictionary<IControlFormItemInput, IControlFormInputValue> _values = [];
 
         /// <summary>
-        /// Returns the form in which the control is rendered.
+        /// Gets the form in which the control is rendered.
         /// </summary>
         public IControlForm Form { get; private set; }
 

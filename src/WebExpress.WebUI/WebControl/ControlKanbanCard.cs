@@ -12,7 +12,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlKanbanCard : IControlKanbanCard
     {
         /// <summary>
-        /// Returns the id of the control.
+        /// Gets the id of the control.
         /// </summary>
         public string Id { get; private set; }
 
@@ -37,7 +37,7 @@ namespace WebExpress.WebUI.WebControl
         public string ColumnId { get; set; }
 
         /// <summary>
-        /// Returns the unique identifier of the swimlane associated with this card.
+        /// Gets the unique identifier of the swimlane associated with this card.
         /// </summary>
         public string SwimlaneId { get; set; }
 

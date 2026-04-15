@@ -8,12 +8,12 @@ namespace WebExpress.WebUI.WebControl
     public class PropertySizeText : IProperty
     {
         /// <summary>
-        /// Returns the system-defined size.
+        /// Gets the system-defined size.
         /// </summary>
         public TypeSizeText SystemSize { get; protected set; }
 
         /// <summary>
-        /// Returns the user-defined size in REM.
+        /// Gets the user-defined size in REM.
         /// </summary>
         public float? UserSize { get; protected set; }
 

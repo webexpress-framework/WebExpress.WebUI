@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.WebFragment
     public abstract class FragmentControlAttribute : ControlAttribute, IFragmentControl<ControlAttribute>
     {
         /// <summary>
-        /// Returns the context of the fragment.
+        /// Gets the context of the fragment.
         /// </summary>
         public IFragmentContext FragmentContext { get; }
 

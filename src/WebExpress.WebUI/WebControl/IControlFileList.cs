@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFileList : IControl
     {
         /// <summary>
-        /// Returns the collection of tree nodes.
+        /// Gets the collection of tree nodes.
         /// </summary>
         IEnumerable<IControlFileListItem> Files { get; }
 

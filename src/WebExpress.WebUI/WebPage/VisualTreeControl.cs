@@ -45,7 +45,7 @@ namespace WebExpress.WebUI.WebPage
         }
 
         /// <summary>
-        /// Returns the title of the html document.
+        /// Gets the title of the html document.
         /// </summary>
         public string Title { get; set; }
 

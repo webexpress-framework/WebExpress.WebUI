@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormItemInputGroup : ControlFormItemInput<ControlFormInputValueString>
     {
         /// <summary>
-        /// Returns the group.
+        /// Gets the group.
         /// </summary>
         public ControlFormItemGroup Group { get; private set; }
 

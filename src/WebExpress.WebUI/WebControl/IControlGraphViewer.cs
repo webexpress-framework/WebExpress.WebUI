@@ -9,22 +9,22 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlGraphViewer : IControl
     {
         /// <summary>
-        /// Returns the collection of nodes displayed in the graph.
+        /// Gets the collection of nodes displayed in the graph.
         /// </summary>
         IEnumerable<IControlGraphItemNode> Nodes { get; }
 
         /// <summary>
-        /// Returns the collection of edges displayed in the graph.
+        /// Gets the collection of edges displayed in the graph.
         /// </summary>
         IEnumerable<IControlGraphItemEdge> Edges { get; }
 
         /// <summary>
-        /// Returns the style used to render nodes the type graph.
+        /// Gets the style used to render nodes the type graph.
         /// </summary>
         TypeStyleGraphNode NodeStyle { get; }
 
         /// <summary>
-        /// Returns the style used to render edges in the type graph.
+        /// Gets the style used to render edges in the type graph.
         /// </summary>
         TypeStyleGraphEdge EdgeStyle { get; }
 

@@ -9,12 +9,12 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlToolbarItem : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the alignment of the toolbar item.
+        /// Gets the alignment of the toolbar item.
         /// </summary>
         TypeToolbarItemAlignment Alignment { get; }
 
         /// <summary>
-        /// Returns the overflow behavior of the toolbar item.
+        /// Gets the overflow behavior of the toolbar item.
         /// </summary>
         TypeToolbarItemOverflow Overflow { get; }
     }

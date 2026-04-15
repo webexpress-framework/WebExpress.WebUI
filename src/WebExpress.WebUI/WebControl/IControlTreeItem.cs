@@ -10,12 +10,12 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlTreeItem : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the label of the tree item.
+        /// Gets the label of the tree item.
         /// </summary>
         string Text { get; }
 
         /// <summary>
-        /// Returns the child tree items.
+        /// Gets the child tree items.
         /// </summary>
         IEnumerable<IControlTreeItem> Children { get; }
 

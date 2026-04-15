@@ -8,17 +8,17 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlTile : IControl
     {
         /// <summary>
-        /// Returns the items of the tile control.
+        /// Gets the items of the tile control.
         /// </summary>
         IEnumerable<IControlTileCard> Items { get; }
 
         /// <summary>
-        /// Returns a value indicating whether cards in the tile can be moved.
+        /// Gets a value indicating whether cards in the tile can be moved.
         /// </summary>
         bool Movable { get; }
 
         /// <summary>
-        /// Returns a value indicating whether items can be removed.
+        /// Gets a value indicating whether items can be removed.
         /// </summary>
         bool AllowRemove { get; }
 

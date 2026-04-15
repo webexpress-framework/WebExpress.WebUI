@@ -6,7 +6,7 @@
     public interface IBindSearch : IBind
     {
         /// <summary>
-        /// Returns the source of the data.
+        /// Gets the source of the data.
         /// </summary>
         string Source { get; }
     }

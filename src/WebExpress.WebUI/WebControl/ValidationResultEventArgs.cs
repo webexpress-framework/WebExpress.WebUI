@@ -9,12 +9,12 @@ namespace WebExpress.WebUI.WebControl
     public class ValidationResultEventArgs : EventArgs
     {
         /// <summary>
-        /// Returns whether validation has completed successfully.
+        /// Gets whether validation has completed successfully.
         /// </summary>
         public bool Valid { get; private set; }
 
         /// <summary>
-        /// Returns the validation results.
+        /// Gets the validation results.
         /// </summary>
         public List<ValidationResult> Results { get; private set; } = new List<ValidationResult>();
 

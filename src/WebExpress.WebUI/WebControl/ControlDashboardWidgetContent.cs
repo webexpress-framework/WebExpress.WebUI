@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<IControl> _content = [];
 
         /// <summary>
-        /// Returns the id of the control.
+        /// Gets the id of the control.
         /// </summary>
         public string Id { get; private set; }
 

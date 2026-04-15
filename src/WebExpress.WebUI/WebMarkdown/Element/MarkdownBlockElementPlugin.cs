@@ -13,12 +13,12 @@ namespace WebExpress.WebUI.WebMarkdown.Element
         private readonly List<IMarkdownElement> _content = [];
 
         /// <summary>
-        /// Returns the name of the plugin.
+        /// Gets the name of the plugin.
         /// </summary>
         public string Name { get; }
 
         /// <summary>
-        /// Returns the parameters of the plugin as key-value pairs.
+        /// Gets the parameters of the plugin as key-value pairs.
         /// </summary>
         public IReadOnlyDictionary<string, string> Parameters { get; }
 

@@ -11,17 +11,17 @@ namespace WebExpress.WebUI.WebControl
     public sealed class ControlKanbanColumn : IControlKanbanColumn
     {
         /// <summary>
-        /// Returns the id of the control.
+        /// Gets the id of the control.
         /// </summary>
         public string Id { get; private set; }
 
         /// <summary>
-        /// Returns the title associated with the column.
+        /// Gets the title associated with the column.
         /// </summary>
         public string Title { get; }
 
         /// <summary>
-        /// Returns the size descriptor associated with the column.
+        /// Gets the size descriptor associated with the column.
         /// </summary>
         public string Size { get; }
 

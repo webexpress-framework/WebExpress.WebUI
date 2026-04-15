@@ -10,12 +10,12 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFormItemGroupTabView : IWebUIElement<IRenderControlContext, IVisualTreeControl>, IControlFormItemGroup
     {
         /// <summary>
-        /// Returns the title text.
+        /// Gets the title text.
         /// </summary>
         string Title { get; }
 
         /// <summary>
-        /// Returns the icon associated with this view.
+        /// Gets the icon associated with this view.
         /// </summary>
         IIcon Icon { get; }
     }

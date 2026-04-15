@@ -6,17 +6,17 @@
     public interface IControlCarouselItem
     {
         /// <summary>
-        /// Returns the headline.
+        /// Gets the headline.
         /// </summary>
         public string Headline { get; }
 
         /// <summary>
-        /// Returns the text.
+        /// Gets the text.
         /// </summary>
         public string Text { get; }
 
         /// <summary>
-        /// Returns the slideshow element, such as an image.
+        /// Gets the slideshow element, such as an image.
         /// </summary>
         public IControl Control { get; }
     }

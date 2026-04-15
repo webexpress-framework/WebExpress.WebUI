@@ -10,32 +10,32 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFormItemInputSelectionItem : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the text of the selection item.
+        /// Gets the text of the selection item.
         /// </summary>
         string Text { get; }
 
         /// <summary>
-        /// Returns the icon associated with the selection item.
+        /// Gets the icon associated with the selection item.
         /// </summary>
         IIcon Icon { get; }
 
         /// <summary>
-        /// Returns the color of the label.
+        /// Gets the color of the label.
         /// </summary>
         TypeColorSelection LabelColor { get; }
 
         /// <summary>
-        /// Returns a value indicating whether the selection item is selected.
+        /// Gets a value indicating whether the selection item is selected.
         /// </summary>
         bool Selected { get; }
 
         /// <summary>
-        /// Returns a value indicating whether the selection item is disabled.
+        /// Gets a value indicating whether the selection item is disabled.
         /// </summary>
         bool Disabled { get; }
 
         /// <summary>
-        /// Returns the content of the selection item.
+        /// Gets the content of the selection item.
         /// </summary>
         IControl Content { get; }
     }

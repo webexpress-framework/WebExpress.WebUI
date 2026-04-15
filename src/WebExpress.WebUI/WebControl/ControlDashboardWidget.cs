@@ -12,7 +12,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlDashboardWidget : IControlDashboardWidget
     {
         /// <summary>
-        /// Returns the id of the control.
+        /// Gets the id of the control.
         /// </summary>
         public string Id { get; private set; }
 

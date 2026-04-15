@@ -10,12 +10,12 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFormItemInputMoveItem : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the text of the selection item.
+        /// Gets the text of the selection item.
         /// </summary>
         string Text { get; set; }
 
         /// <summary>
-        /// Returns the icon associated with the selection item.
+        /// Gets the icon associated with the selection item.
         /// </summary>
         IIcon Icon { get; }
     }

@@ -9,12 +9,12 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlDashboardColumn : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the title associated with the column.
+        /// Gets the title associated with the column.
         /// </summary>
         string Title { get; }
 
         /// <summary>
-        /// Returns the size descriptor associated with the column.
+        /// Gets the size descriptor associated with the column.
         /// </summary>
         string Size { get; }
     }

@@ -9,17 +9,17 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlTable : IControl
     {
         /// <summary>
-        /// Returns the columns of the table.
+        /// Gets the columns of the table.
         /// </summary>
         IEnumerable<IControlTableColumn> Columns { get; }
 
         /// <summary>
-        /// Returns the rows of the table.
+        /// Gets the rows of the table.
         /// </summary>
         IEnumerable<IControlTableRow> Rows { get; }
 
         /// <summary>
-        /// Returns a value indicating whether the table is striped.
+        /// Gets a value indicating whether the table is striped.
         /// </summary>
         TypeStripedTable Striped { get; }
 
@@ -29,17 +29,17 @@ namespace WebExpress.WebUI.WebControl
         TypeColorTable Color { get; }
 
         /// <summary>
-        /// Returns the header color scheme used for the table.
+        /// Gets the header color scheme used for the table.
         /// </summary>
         TypeColorTable HeaderColor { get; }
 
         /// <summary>
-        /// Returns a value indicating whether the table has a visible border.
+        /// Gets a value indicating whether the table has a visible border.
         /// </summary>
         TypeBorderTable TableBorder { get; }
 
         /// <summary>
-        /// Returns a value indicating whether the item can be selected.
+        /// Gets a value indicating whether the item can be selected.
         /// </summary>
         bool Selectable { get; }
 

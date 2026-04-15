@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.WebFragment
     public abstract class FragmentControlButtonLink : ControlButtonLink, IFragmentControl<ControlButtonLink>
     {
         /// <summary>
-        /// Returns the context of the fragment.
+        /// Gets the context of the fragment.
         /// </summary>
         public IFragmentContext FragmentContext { get; }
 

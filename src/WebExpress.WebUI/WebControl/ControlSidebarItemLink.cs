@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlSidebarItemLink : IControlSidebarItem
     {
         /// <summary>
-        /// Returns the unique identifier for the entity.
+        /// Gets the unique identifier for the entity.
         /// </summary>
         public string Id { get; }
 

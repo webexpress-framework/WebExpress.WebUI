@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<IControlTreeItem> _children = [];
 
         /// <summary>
-        /// Returns the unique identifier of the tree item.
+        /// Gets the unique identifier of the tree item.
         /// </summary>
         public string Id { get; }
 

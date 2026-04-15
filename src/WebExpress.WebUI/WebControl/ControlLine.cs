@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlLine : Control, IControlSplitButtonItem, IControlDropdownItem
     {
         /// <summary>
-        /// Returns or set the background color.
+        /// Gets or set the background color.
         /// </summary>
         public new PropertyColorBackground BackgroundColor { get; private set; }
 

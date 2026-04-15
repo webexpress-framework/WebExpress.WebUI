@@ -11,12 +11,12 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlTabView : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the title text.
+        /// Gets the title text.
         /// </summary>
         string Title { get; }
 
         /// <summary>
-        /// Returns the icon associated with this view.
+        /// Gets the icon associated with this view.
         /// </summary>
         IIcon Icon { get; }
 

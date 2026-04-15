@@ -8,12 +8,12 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFormItemInputTile : IControlFormItemInput<ControlFormInputValueStringList>
     {
         /// <summary>
-        /// Returns the items of the tile control.
+        /// Gets the items of the tile control.
         /// </summary>
         IEnumerable<IControlTileCard> Items { get; }
 
         /// <summary>
-        /// Returns a value indicating whether multiple items can be selected simultaneously.
+        /// Gets a value indicating whether multiple items can be selected simultaneously.
         /// </summary>
         bool MultiSelect { get; }
 

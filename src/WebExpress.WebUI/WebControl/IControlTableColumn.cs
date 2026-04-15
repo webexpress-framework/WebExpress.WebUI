@@ -10,17 +10,17 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlTableColumn : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the header text.
+        /// Gets the header text.
         /// </summary>
         string Title { get; }
 
         /// <summary>
-        /// Returns the icon.
+        /// Gets the icon.
         /// </summary>
         IIcon Icon { get; }
 
         /// <summary>
-        /// Returns the color scheme used for the column.
+        /// Gets the color scheme used for the column.
         /// </summary>
         TypeColorTable Color { get; }
     }

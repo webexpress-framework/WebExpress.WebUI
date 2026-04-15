@@ -8,22 +8,22 @@ namespace WebExpress.WebUI.WebControl
     public class PropertyBorder : IProperty
     {
         /// <summary>
-        /// Returns the top border.
+        /// Gets the top border.
         /// </summary>
         public bool Top { get; private set; }
 
         /// <summary>
-        /// Returns te bottom border.
+        /// Gets te bottom border.
         /// </summary>
         public bool Bottom { get; private set; }
 
         /// <summary>
-        /// Returns the left border.
+        /// Gets the left border.
         /// </summary>
         public bool Left { get; private set; }
 
         /// <summary>
-        /// Returns the right border.
+        /// Gets the right border.
         /// </summary>
         public bool Right { get; private set; }
 
