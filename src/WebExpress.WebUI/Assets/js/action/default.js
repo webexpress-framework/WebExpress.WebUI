@@ -5,22 +5,22 @@
  */
 
 /**
- * Helper to read a data attribute for the given prefix (primary/secondary).
+ * Reads a data attribute for the given action prefix (primary/secondary).
  * @param {HTMLElement} element - The source element.
  * @param {string} prefix - "primary" or "secondary".
  * @param {string} name - Attribute suffix (e.g. "target", "uri", "size").
  * @returns {string|null} The attribute value or null.
  */
-function _attr(element, prefix, name) {
+function getActionAttribute(element, prefix, name) {
     return element.getAttribute("data-wx-" + prefix + "-" + name) || null;
 }
 
 // modal action
 webexpress.webui.Actions.register("modal", {
     execute: function (element, prefix, controller) {
-        const target = _attr(element, prefix, "target");
-        const uri = _attr(element, prefix, "uri");
-        const size = _attr(element, prefix, "size");
+        const target = getActionAttribute(element, prefix, "target");
+        const uri = getActionAttribute(element, prefix, "uri");
+        const size = getActionAttribute(element, prefix, "size");
         const instance = controller.getInstance(target);
 
         if (!instance) {
@@ -40,8 +40,8 @@ webexpress.webui.Actions.register("modal", {
 // frame action
 webexpress.webui.Actions.register("frame", {
     execute: function (element, prefix, controller) {
-        const target = _attr(element, prefix, "target");
-        const uri = _attr(element, prefix, "uri");
+        const target = getActionAttribute(element, prefix, "target");
+        const uri = getActionAttribute(element, prefix, "uri");
         const instance = controller.getInstance(target);
 
         if (!instance) {
@@ -55,7 +55,7 @@ webexpress.webui.Actions.register("frame", {
 // split action
 webexpress.webui.Actions.register("split", {
     execute: function (element, prefix, controller) {
-        const target = _attr(element, prefix, "target");
+        const target = getActionAttribute(element, prefix, "target");
         const instance = controller.getInstance(target);
         if (instance && typeof instance.toggleSidePane === "function") {
             instance.toggleSidePane();
@@ -64,7 +64,7 @@ webexpress.webui.Actions.register("split", {
     init: function (element, prefix, controller) {
         document.addEventListener(webexpress.webui.Event.HIDE_EVENT, function (e) {
             if (e.detail.sender === element) {
-                const target = _attr(element, prefix, "target");
+                const target = getActionAttribute(element, prefix, "target");
                 const instance = controller.getInstance(target);
                 if (instance) {
                     instance.collapsed = true;
@@ -74,7 +74,7 @@ webexpress.webui.Actions.register("split", {
 
         document.addEventListener(webexpress.webui.Event.SHOW_EVENT, function (e) {
             if (e.detail.sender === element) {
-                const target = _attr(element, prefix, "target");
+                const target = getActionAttribute(element, prefix, "target");
                 const instance = controller.getInstance(target);
                 if (instance) {
                     instance.collapsed = false;
@@ -90,7 +90,7 @@ webexpress.webui.Actions.register("fullscreen", {
         e.preventDefault();
         e.stopPropagation(); // stop bubbling to prevent parent handlers from closing
 
-        const targetSelector = _attr(element, prefix, "target");
+        const targetSelector = getActionAttribute(element, prefix, "target");
         // default to body if no target is specified
         const targetEl = targetSelector ? document.querySelector(targetSelector) : document.body;
 
@@ -110,7 +110,7 @@ webexpress.webui.Actions.register("native-fullscreen", {
     execute: function (element, prefix, controller, e) {
         e.preventDefault();
 
-        const targetSelector = _attr(element, prefix, "target");
+        const targetSelector = getActionAttribute(element, prefix, "target");
         const targetEl = targetSelector ? document.querySelector(targetSelector) : document.documentElement;
 
         if (targetEl) {
