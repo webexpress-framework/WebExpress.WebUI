@@ -16,6 +16,10 @@ form.inputtextbox.validation.required=Das Textfeld darf nicht leer sein!
 form.inputtextbox.validation.min=The text. entspricht nicht der minimalen Länge von {0}!
 form.inputtextbox.validation.max=The text. ist größer als die maximalen Länge von {0}!
 
+form.inputpassword.validation.required=Das Passwortfeld darf nicht leer sein!
+form.inputpassword.validation.min=Das Passwort entspricht nicht der minimalen Länge von {0} Zeichen!
+form.inputpassword.validation.max=Das Passwort ist länger als die maximale Länge von {0} Zeichen!
+
 modal.close.label=Schließen
 
 confirm.label=Bestätigung
