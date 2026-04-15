@@ -81,7 +81,7 @@ webexpress.webui.LoginCtrl = class extends webexpress.webui.Ctrl {
         passLabel.textContent = this._i18n("webexpress.webui:login.password", "Password");
 
         this._passwordInput = document.createElement("input");
-        this._passwordInput.className = "form-control";
+        this._passwordInput.className = "form-control wx-webui-input-password";
         this._passwordInput.type = "password";
         this._passwordInput.id = "password";
         this._passwordInput.name = "password";

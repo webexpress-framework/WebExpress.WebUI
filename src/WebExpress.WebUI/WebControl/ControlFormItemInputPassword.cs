@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -75,12 +74,12 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(),
                 Role = Role,
             }
-            .AddUserAttribute("name", Name)
-            .AddUserAttribute("data-value", value?.Text)
-            .AddUserAttribute("data-placeholder", I18N.Translate(renderContext.Request?.Culture, Placeholder))
-            .AddUserAttribute("data-disabled", Disabled ? "true" : null)
-            .AddUserAttribute("data-minlength", MinLength?.ToString())
-            .AddUserAttribute("data-maxlength", MaxLength?.ToString());
+                .AddUserAttribute("name", Name)
+                .AddUserAttribute("data-value", value?.Text)
+                .AddUserAttribute("data-placeholder", I18N.Translate(renderContext.Request?.Culture, Placeholder))
+                .AddUserAttribute("data-disabled", Disabled ? "true" : null)
+                .AddUserAttribute("data-minlength", MinLength?.ToString())
+                .AddUserAttribute("data-maxlength", MaxLength?.ToString());
 
             return html;
         }

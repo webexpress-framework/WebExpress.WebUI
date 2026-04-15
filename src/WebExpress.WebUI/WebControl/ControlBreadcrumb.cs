@@ -71,7 +71,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IUri uri)
         {
             var siteManager = WebEx.ComponentHub.SitemapManager;
-            var lastEndpointContext = default(IEndpointContext);
+            var lastEndpointContext = default(WebCore.WebEndpoint.IEndpointContext);
 
             var html = new HtmlElementTextContentOl()
             {

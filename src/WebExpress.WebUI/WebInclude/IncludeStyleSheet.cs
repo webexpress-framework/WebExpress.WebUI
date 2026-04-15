@@ -37,6 +37,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/css/webexpress.webui.move.css")]
     [Asset("/assets/css/webexpress.webui.overflow.css")]
     [Asset("/assets/css/webexpress.webui.pagination.css")]
+    [Asset("/assets/css/webexpress.webui.password.css")]
     [Asset("/assets/css/webexpress.webui.quickfilter.css")]
     [Asset("/assets/css/webexpress.webui.rating.css")]
     [Asset("/assets/css/webexpress.webui.search.css")]

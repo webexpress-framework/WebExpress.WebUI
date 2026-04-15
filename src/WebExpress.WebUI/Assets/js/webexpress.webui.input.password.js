@@ -1,52 +1,15 @@
 /// <summary>
-/// Represents a password input control with a toggle button to show or hide the password.
+/// Represents a native password input control relying on the browser's built-in show/hide functionality.
 /// </summary>
 webexpress.webui.InputPasswordCtrl = class extends webexpress.webui.Ctrl {
-    /**
-     * The current password value.
-     * @type {string}
-     */
     _value = "";
-
-    /**
-     * Whether the password is currently visible.
-     * @type {boolean}
-     */
-    _visible = false;
-
-    /**
-     * Whether the control is disabled.
-     * @type {boolean}
-     */
     _disabled = false;
-
-    /**
-     * The hidden input that stores the value for form submission.
-     * @type {HTMLInputElement}
-     */
     _hiddenInput = null;
-
-    /**
-     * The visible input element.
-     * @type {HTMLInputElement}
-     */
     _input = null;
 
     /**
-     * The toggle button element.
-     * @type {HTMLButtonElement}
-     */
-    _toggleBtn = null;
-
-    /**
-     * The icon element inside the toggle button.
-     * @type {HTMLElement}
-     */
-    _toggleIcon = null;
-
-    /**
-     * Construct new InputPasswordCtrl.
-     * @param {HTMLElement} element - host element for the password control.
+     * Constructs a new InputPasswordCtrl.
+     * @param {HTMLElement} element - The host element for the password control.
      */
     constructor(element) {
         super(element);
@@ -74,10 +37,6 @@ webexpress.webui.InputPasswordCtrl = class extends webexpress.webui.Ctrl {
         this._hiddenInput.name = name;
         this._hiddenInput.value = this._value;
 
-        // create input group wrapper
-        var inputGroup = document.createElement("div");
-        inputGroup.className = "input-group";
-
         // create password input
         this._input = document.createElement("input");
         this._input.type = "password";
@@ -89,29 +48,16 @@ webexpress.webui.InputPasswordCtrl = class extends webexpress.webui.Ctrl {
         if (minLength !== null) {
             this._input.minLength = parseInt(minLength, 10);
         }
+
         if (maxLength !== null) {
             this._input.maxLength = parseInt(maxLength, 10);
         }
 
-        // create toggle button
-        this._toggleBtn = document.createElement("button");
-        this._toggleBtn.type = "button";
-        this._toggleBtn.className = "btn btn-outline-secondary";
-        this._toggleBtn.disabled = this._disabled;
-        this._toggleBtn.title = this._i18n("webexpress.webui:password.toggle", "Show password");
-
-        this._toggleIcon = document.createElement("i");
-        this._toggleIcon.className = "fas fa-eye";
-        this._toggleBtn.appendChild(this._toggleIcon);
-
-        // assemble DOM
-        inputGroup.appendChild(this._input);
-        inputGroup.appendChild(this._toggleBtn);
-
+        // assemble dom
         element.appendChild(this._hiddenInput);
-        element.appendChild(inputGroup);
+        element.appendChild(this._input);
 
-        // attach event handlers
+        // update values on input change
         this._input.addEventListener("input", () => {
             this._value = this._input.value;
             this._hiddenInput.value = this._value;
@@ -120,26 +66,6 @@ webexpress.webui.InputPasswordCtrl = class extends webexpress.webui.Ctrl {
                 value: this._value
             });
         });
-
-        this._toggleBtn.addEventListener("click", () => {
-            this._visible = !this._visible;
-            this.render();
-        });
-    }
-
-    /**
-     * Renders the control, updating the input type and toggle icon.
-     */
-    render() {
-        if (this._visible) {
-            this._input.type = "text";
-            this._toggleIcon.className = "fas fa-eye-slash";
-            this._toggleBtn.title = this._i18n("webexpress.webui:password.hide", "Hide password");
-        } else {
-            this._input.type = "password";
-            this._toggleIcon.className = "fas fa-eye";
-            this._toggleBtn.title = this._i18n("webexpress.webui:password.toggle", "Show password");
-        }
     }
 
     /**
