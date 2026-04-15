@@ -237,6 +237,9 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "widget.list.title": "Infoliste",
     "widget.bignumber.title": "Große Zahl",
 
+    "password.toggle": "Passwort anzeigen",
+    "password.hide": "Passwort verbergen",
+
     "login.title": "Anmelden",
     "login.username": "Benutzername",
     "login.password": "Passwort",
