@@ -1,4 +1,4 @@
-﻿![WebExpress](https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png)
+![WebExpress](https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png)
 
 The `View` control acts as an intelligent container for applications with multiple views. It enables switching between different work areas within a single DOM container and optionally provides a master-detail logic. Each view is defined by a child element with the `.wx-view` class and can be configured using attributes such as `data-title`, `data-description`, and `data-icon-css`. The controller automatically generates a toolbar with a title and a dropdown menu for switching between views.
 
@@ -79,6 +79,7 @@ if (viewCtrl) {
     // switch to the second defined view (index 1)
     viewCtrl.switchView(1);
 }
+```
 
 ## Events
 

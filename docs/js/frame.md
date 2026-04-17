@@ -1,8 +1,8 @@
 ![WebExpress](https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png)
 
-# InlinePageCtrl
+# FrameCtrl
 
-The InlinePageCtrl is a lightweight component for embedding external HTML content into a regular container element, serving as a minimal alternative to iframes. It loads a target document via URI, extracts the content of a specified selector (default: `body`), and injects the markup into the host element. During the loading process, events are emitted before and after the request to signal status changes and enable UI reactions. A skeleton placeholder visualizes the loading state, while errors are displayed using a collapsible alert.
+The FrameCtrl is a lightweight component for embedding external HTML content into a regular container element, serving as a minimal alternative to iframes. It loads a target document via URI, extracts the content of a specified selector (default: `body`), and injects the markup into the host element. During the loading process, events are emitted before and after the request to signal status changes and enable UI reactions. A skeleton placeholder visualizes the loading state, while errors are displayed using a collapsible alert.
 
 ## Configuration
 
@@ -26,10 +26,10 @@ During construction, `data-uri`, `data-selector`, and `data-autoload` are read a
 The `load()` method first inserts a placeholder and emits `webexpress.webui.Event.DATA_REQUESTED_EVENT`. The resource is loaded using `fetch(this._uri, { credentials: "same-origin" })`. Upon a successful response, the HTML text is parsed, the desired area is determined via `this._selector` (fallback: `document.body`), and its `innerHTML` is transferred to the host element. Afterwards, `webexpress.webui.Event.DATA_ARRIVED_EVENT` is emitted.
 
 If an error occurs (network error or `!response.ok`), the container is cleared and a collapsible error alert with headline, details, and stacktrace is shown. The alert uses i18n keys:
-- `webexpress.webui:page.contentNotLoaded.label` (default: "Content could not be loaded.")
-- `webexpress.webui:page.contentNotLoaded.details` (default: empty)
+- `webexpress.webui:frame.contentNotLoaded.label` (default: "Content could not be loaded.")
+- `webexpress.webui:frame.contentNotLoaded.details` (default: empty)
 
-The class is registered under the key `"wx-webui-inline-page"` and can be automatically instantiated via `data-controller`.
+The class is registered under the key `"wx-webui-frame"` and can be automatically instantiated via `data-controller`.
 
 ## Programmatic Control
 
@@ -38,7 +38,7 @@ After initialization, the instance can be controlled using the API.
 ### Accessing an Automatically Created Instance
 
 ```html
-<div id="my-inline" data-controller="wx-webui-inline-page"
+<div id="my-inline" data-controller="wx-webui-frame"
      data-uri="/docs/partials/intro.html"
      data-selector="#content"
      data-autoload="true"></div>
@@ -81,7 +81,7 @@ container.id = "dynamic-inline";
 document.body.appendChild(container);
 
 // create controller instance manually
-const ctrl = new webexpress.webui.InlinePageCtrl(container);
+const ctrl = new webexpress.webui.FrameCtrl(container);
 
 // configure source and load content
 ctrl.setUri("/pages/snippets/help.html", false);
@@ -96,7 +96,7 @@ if (ctrl) {
 
 ## Events
 
-InlinePageCtrl emits two core events to inform application state.
+FrameCtrl emits two core events to inform application state.
 
 - `webexpress.webui.Event.DATA_REQUESTED_EVENT`: Emitted immediately before the network request starts.
   - Payload: `{ uri: string }`
@@ -113,7 +113,7 @@ Note on event handling: For component-local reactions, it is recommended to chec
     The #article-content area of the loaded document will be displayed.
 -->
 <div id="article-view"
-     data-controller="wx-webui-inline-page"
+     data-controller="wx-webui-frame"
      data-uri="/articles/intro.html"
      data-selector="#article-content"
      data-autoload="true">
@@ -133,11 +133,11 @@ if (instance) {
 
 ```html
 <!--
-    Error demo: invalid URL. InlinePageCtrl shows a collapsible error alert,
+    Error demo: invalid URL. FrameCtrl shows a collapsible error alert,
     including localized headline, icon, red alert styling, and stacktrace.
 -->
 <div id="broken-view"
-     data-controller="wx-webui-inline-page"
+     data-controller="wx-webui-frame"
      data-uri="/not/found.html"
      data-autoload="true">
 </div>
@@ -164,6 +164,6 @@ document.addEventListener(webexpress.webui.Event.DATA_ARRIVED_EVENT, function (e
 ```
 
 ```javascript
-// registration: the controller is available via the registry key "wx-webui-inline-page".
-webexpress.webui.Controller.registerClass("wx-webui-inline-page", webexpress.webui.InlinePageCtrl);
+// registration: the controller is available via the registry key "wx-webui-frame".
+webexpress.webui.Controller.registerClass("wx-webui-frame", webexpress.webui.FrameCtrl);
 ```
