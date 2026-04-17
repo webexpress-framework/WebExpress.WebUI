@@ -142,10 +142,10 @@
     opacity: 50%;
     background: repeating-linear-gradient(
         45deg,
-        #eee,
-        #eee 6px,
-        #f8f8f8 6px,
-        #f8f8f8 12px
+        var(--bs-secondary-bg),
+        var(--bs-secondary-bg) 6px,
+        var(--bs-tertiary-bg) 6px,
+        var(--bs-tertiary-bg) 12px
     );
 }
 
@@ -157,10 +157,10 @@
     opacity: 50%;
     background: repeating-linear-gradient(
         45deg,
-        #eee,
-        #eee 6px,
-        #f8f8f8 6px,
-        #f8f8f8 12px
+        var(--bs-secondary-bg),
+        var(--bs-secondary-bg) 6px,
+        var(--bs-tertiary-bg) 6px,
+        var(--bs-tertiary-bg) 12px
     );
 }
 
@@ -202,7 +202,7 @@
 
 .wx-tile-picker {
     display: block;
-    background: var(--bs-body-bg, #fff);
+    background: var(--bs-body-bg);
     padding: 1.2rem 1.5rem;
     min-height: 180px;
 }
@@ -227,32 +227,32 @@
 /* Color variants (applied to .wx-tile-card) */
 .wx-tile-primary {
     background: var(--bs-primary);
-    color: var(--bs-light, #fff);
+    color: var(--bs-light);
 }
 
 .wx-tile-secondary {
     background: var(--bs-secondary);
-    color: var(--bs-light, #fff);
+    color: var(--bs-light);
 }
 
 .wx-tile-success {
     background: var(--bs-success);
-    color: var(--bs-light, #fff);
+    color: var(--bs-light);
 }
 
 .wx-tile-info {
     background: var(--bs-info);
-    color: var(--bs-dark, #031b21);
+    color: var(--bs-dark);
 }
 
 .wx-tile-warning {
     background: var(--bs-warning);
-    color: var(--bs-dark, #2d2300);
+    color: var(--bs-dark);
 }
 
 .wx-tile-danger {
     background: var(--bs-danger);
-    color: var(--bs-light, #fff);
+    color: var(--bs-light);
 }
 
 .wx-tile-light {
@@ -262,11 +262,11 @@
 
 .wx-tile-dark {
     background: var(--bs-dark);
-    color: var(--bs-light, #fff);
+    color: var(--bs-light);
 }
 
 .wx-tile-white {
-    background: #ffffff;
+    background: var(--bs-white);
     color: var(--bs-body-color);
 }
 

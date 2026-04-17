@@ -176,26 +176,26 @@ img.wx-icon {
     line-height: 2em;
 }
 
-.wx-prifile-sm > b {
+.wx-profile-sm > b {
     width: 1.75em;
     height: 1.75em;
     line-height: 1.75em;
     font-size: 0.75em;
 }
 
-.wx-prifile-sm > img {
+.wx-profile-sm > img {
     width: 1.75em;
     height: 1.75em;
 }
 
-.wx-prifile-lg > b {
+.wx-profile-lg > b {
     width: 2.5em;
     height: 2.5em;
     line-height: 2.5em;
     font-size: 2em;
 }
 
-.wx-prifile-lg > img {
+.wx-profile-lg > img {
     width: 4em;
     height: 4em;
 }
@@ -275,10 +275,10 @@ img.wx-icon {
 .wx-drag-over {
     background: repeating-linear-gradient(
         45deg,
-        #eee,
-        #eee 6px,
-        #f8f8f8 6px,
-        #f8f8f8 12px
+        var(--bs-secondary-bg),
+        var(--bs-secondary-bg) 6px,
+        var(--bs-tertiary-bg) 6px,
+        var(--bs-tertiary-bg) 12px
     );
     outline: 2px dashed var(--bs-success); /* Adds a dashed border for visual emphasis */
     border-radius: 0.5rem;

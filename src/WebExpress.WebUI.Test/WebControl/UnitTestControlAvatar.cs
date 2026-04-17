@@ -1,4 +1,4 @@
-﻿using WebExpress.WebCore.WebUri;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
@@ -167,8 +167,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeSizeAvatar.Default, @"<div class=""wx-profile""></div>")]
-        [InlineData(TypeSizeAvatar.Small, @"<div class=""wx-profile wx-prifile-sm""></div>")]
-        [InlineData(TypeSizeAvatar.Large, @"<div class=""wx-profile wx-prifile-lg""></div>")]
+        [InlineData(TypeSizeAvatar.Small, @"<div class=""wx-profile wx-profile-sm""></div>")]
+        [InlineData(TypeSizeAvatar.Large, @"<div class=""wx-profile wx-profile-lg""></div>")]
         public void Size(TypeSizeAvatar size, string expected)
         {
             // arrange
