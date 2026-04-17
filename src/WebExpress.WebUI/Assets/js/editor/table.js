@@ -67,13 +67,13 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
 
         const tables = Array.from(root.querySelectorAll("table"));
         tables.forEach(table => {
-            // ensure the table itself is not editable
-            table.setAttribute("contenteditable", "false");
+            // allow selection across multiple cells by making the table editable
+            table.setAttribute("contenteditable", "true");
 
-            // ensure all cells are editable
+            // remove explicit contenteditable from cells to inherit from table
             const cells = table.querySelectorAll("td, th");
             cells.forEach(c => {
-                c.setAttribute("contenteditable", "true");
+                c.removeAttribute("contenteditable");
             });
 
             // check if the table already has a wrapper frame
@@ -205,7 +205,6 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                     if (i === 0 && firstCellIsHeader) {
                         newCell.scope = "row";
                     }
-                    newCell.contentEditable = "true";
                     newCell.innerHTML = "<br>";
                     newRow.appendChild(newCell);
                 }
@@ -616,20 +615,18 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
      * @param {number} cols - Number of columns.
      */
     _insertTable: function(editor, rows, cols) {
-        // the table itself is contenteditable="false"
-        let tableHtml = '<table class="table table-striped table-bordered wx-native-table" contenteditable="false">';
+        // the table itself is contenteditable="true" to allow multi-cell selection
+        let tableHtml = '<table class="table table-striped table-bordered wx-native-table" contenteditable="true">';
         tableHtml += "<thead><tr>";
         for (let c = 0; c < cols; c++) {
-            // only the th inner is editable
-            tableHtml += `<th scope="col" contenteditable="true">Header ${c + 1}</th>`;
+            tableHtml += `<th scope="col">Header ${c + 1}</th>`;
         }
         tableHtml += "</tr></thead>";
         tableHtml += "<tbody>";
         for (let r = 0; r < rows; r++) {
             tableHtml += "<tr>";
             for (let c = 0; c < cols; c++) {
-                // only the td inner is editable
-                tableHtml += '<td contenteditable="true"><br></td>';
+                tableHtml += '<td><br></td>';
             }
             tableHtml += "</tr>";
         }
@@ -773,7 +770,6 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                 if (i === 0 && firstCellIsHeader && tbody.tagName !== "THEAD") {
                     newCell.scope = "row";
                 }
-                newCell.contentEditable = "true";
                 newCell.innerHTML = "<br>";
                 newRow.appendChild(newCell);
             }
@@ -800,7 +796,6 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                     continue;
                 }
                 const newCell = document.createElement(tr.parentElement.tagName === "THEAD" ? "th" : "td");
-                newCell.contentEditable = "true";
                 newCell.innerHTML = "<br>";
                 if (tr.cells.length > colIndex) {
                     tr.insertBefore(newCell, tr.cells[colIndex]);
@@ -815,7 +810,6 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
             const newRow = table.insertRow(row.rowIndex);
             const newTh = document.createElement("th");
             newTh.colSpan = maxCols;
-            newTh.contentEditable = "true";
             newTh.className = "table-light text-center"; // simple visual class
             newTh.innerHTML = webexpress.webui.I18N.translate("webexpress.webui:editor.table.intermediate.header");
             newRow.appendChild(newTh);
@@ -841,7 +835,6 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                     if (targetTag === "th") {
                         newCell.scope = "row";
                     }
-                    newCell.contentEditable = "true";
                     newCell.innerHTML = firstCell.innerHTML;
                     // copy styles and classes
                     if (firstCell.className) {
@@ -882,7 +875,6 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                     if (cell.tagName === "TH" && cell.scope) {
                         newCell.scope = cell.scope;
                     }
-                    newCell.contentEditable = "true";
                     newCell.innerHTML = "<br>";
                     row.insertBefore(newCell, cell.nextElementSibling);
                 }
