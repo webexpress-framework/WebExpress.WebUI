@@ -686,7 +686,6 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 div.dataset.border = "false";
 
                 div.addEventListener("click", (e) => {
-                    e.stopPropagation();
                 });
 
                 tdOpt.appendChild(div);

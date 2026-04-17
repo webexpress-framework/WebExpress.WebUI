@@ -103,12 +103,10 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         dropdown.appendChild(icon);
 
         icon.addEventListener("click", (e) => {
-            e.stopPropagation();
             this._showCalendarPopup();
         });
 
         dropdown.addEventListener("click", (e) => {
-            e.stopPropagation();
             this._showCalendarPopup();
         });
 

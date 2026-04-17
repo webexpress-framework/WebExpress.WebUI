@@ -606,8 +606,8 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             button.appendChild(icon);
 
             // event listeners for submenu
-             label.addEventListener("click", (e) => { e.stopPropagation(); this._openSubmenu(item, button); });
-            button.addEventListener("click", (e) => { e.stopPropagation(); this._openSubmenu(item, button); });
+             label.addEventListener("click", (e) => { this._openSubmenu(item, button); });
+            button.addEventListener("click", (e) => { this._openSubmenu(item, button); });
 
             triggerRow.appendChild(label);
             triggerRow.appendChild(button);

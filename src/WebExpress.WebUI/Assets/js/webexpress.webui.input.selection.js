@@ -100,7 +100,6 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
 
         // toggle the dropdown menu on click
         dropdown.addEventListener("click", (e) => {
-            e.stopPropagation();
             if (this._dropdownmenu.style.display === "flex") {
                 this._dropdownmenu.dispatchEvent(new Event("hide"));
                 this._dropdownmenu.style.display = "none";
@@ -108,7 +107,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                 this._dropdownmenu.style.display = "flex";
                 this._dropdownmenu.dispatchEvent(new Event("show"));
                 if (this._filterInput) {
-                    this._filterInput.focus();
+                    this._filterInput.focus({ preventScroll: true });
                 }
             }
         });

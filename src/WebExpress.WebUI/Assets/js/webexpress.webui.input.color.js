@@ -122,8 +122,6 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.PopperCtrl {
 
         // toggle the dropdown menu on click
         dropdown.addEventListener("click", (e) => {
-            e.stopPropagation();
-
             // block interaction if disabled
             if (this._disabled) {
                 return;
