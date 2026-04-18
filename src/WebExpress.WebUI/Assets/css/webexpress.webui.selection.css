@@ -65,7 +65,7 @@
     float: left;
     display: inline-flex;
     align-items: center;
-    padding-left: 0.5em;
+    padding: 0.2em;
     border-radius: 0.2em;
     white-space: nowrap;
     gap: 0.2em;

@@ -22,7 +22,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the color of the label.
         /// </summary>
-        TypeColorSelection LabelColor { get; }
+        TypeColorSelection Color { get; }
 
         /// <summary>
         /// Gets a value indicating whether the selection item is selected.

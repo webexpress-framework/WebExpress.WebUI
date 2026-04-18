@@ -231,7 +231,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                 items.push({
                     id: id,
                     label: elem.dataset.label || elem.textContent,
-                    labelColor: elem.dataset.labelColor,
+                    color: elem.dataset.color,
                     icon: elem.dataset.icon,
                     image: elem.dataset.image,
                     content: elem.innerHTML || elem.dataset.label,
@@ -318,8 +318,8 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
             const item = this._items.find((i) => { return i.id === value; });
             if (item) {
                 const li = document.createElement("li");
-                if (item.labelColor) {
-                    li.className = item.labelColor;
+                if (item.color) {
+                    li.className = item.color;
                 }
 
                 const span = document.createElement("span");
@@ -459,7 +459,6 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         let normalized = [];
         if (values === null || values === undefined) {
             normalized = [];
-            this._valueMetadata.clear();
         } else if(Array.isArray(values)) {
             if (values.length === 0) {
                 normalized = [];

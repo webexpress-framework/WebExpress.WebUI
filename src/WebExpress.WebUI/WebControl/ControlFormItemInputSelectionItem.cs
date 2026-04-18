@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using WebExpress.WebCore.Internationalization;
+﻿using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.WebIcon;
@@ -15,37 +14,31 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns the unique identifier of the selection item.
         /// </summary>
-        [JsonPropertyName("id")]
         public string Id { get; }
 
         /// <summary>
         /// Gets or sets the text of the selection item.
         /// </summary>
-        [JsonPropertyName("label")]
         public string Text { get; set; }
 
         /// <summary>
         /// Gets or sets the icon associated with the selection item.
         /// </summary>
-        [JsonPropertyName("icon")]
         public IIcon Icon { get; set; }
 
         /// <summary>
         /// Gets or sets the color of the label.
         /// </summary>
-        [JsonPropertyName("labelcolor")]
-        public TypeColorSelection LabelColor { get; set; }
+        public TypeColorSelection Color { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the selection item is selected.
         /// </summary>
-        [JsonPropertyName("selected")]
         public bool Selected { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the selection item is disabled.
         /// </summary>
-        [JsonPropertyName("disabled")]
         public bool Disabled { get; set; }
 
         /// <summary>
@@ -88,8 +81,8 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-image", Icon is ImageIcon
                     ? (Icon as ImageIcon).Uri?.ToString()
                     : null)
-                .AddUserAttribute("data-label-color", LabelColor != TypeColorSelection.Default
-                    ? LabelColor.ToClass()
+                .AddUserAttribute("data-color", Color != TypeColorSelection.Default
+                    ? Color.ToClass()
                     : null)
                 .Add(Content?.Render(renderContext, visualTree));
 

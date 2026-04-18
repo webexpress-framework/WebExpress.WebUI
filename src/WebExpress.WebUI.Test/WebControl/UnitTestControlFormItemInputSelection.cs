@@ -287,24 +287,25 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeColorSelection.Default, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item""></div></div>")]
-        [InlineData(TypeColorSelection.Primary, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label-color=""wx-selection-primary""></div></div>")]
-        [InlineData(TypeColorSelection.Secondary, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label-color=""wx-selection-secondary""></div></div>")]
-        [InlineData(TypeColorSelection.Success, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label-color=""wx-selection-success""></div></div>")]
-        [InlineData(TypeColorSelection.Info, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label-color=""wx-selection-info""></div></div>")]
-        [InlineData(TypeColorSelection.Warning, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label-color=""wx-selection-warning""></div></div>")]
-        [InlineData(TypeColorSelection.Danger, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label-color=""wx-selection-danger""></div></div>")]
-        [InlineData(TypeColorSelection.Light, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label-color=""wx-selection-light""></div></div>")]
-        [InlineData(TypeColorSelection.Dark, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label-color=""wx-selection-dark""></div></div>")]
-        public void LabelColor(TypeColorSelection color, string expected)
+        [InlineData(TypeColorSelection.Primary, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-primary""></div></div>")]
+        [InlineData(TypeColorSelection.Secondary, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-secondary""></div></div>")]
+        [InlineData(TypeColorSelection.Success, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-success""></div></div>")]
+        [InlineData(TypeColorSelection.Info, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-info""></div></div>")]
+        [InlineData(TypeColorSelection.Warning, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-warning""></div></div>")]
+        [InlineData(TypeColorSelection.Danger, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-danger""></div></div>")]
+        [InlineData(TypeColorSelection.Light, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-light""></div></div>")]
+        [InlineData(TypeColorSelection.Dark, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-dark""></div></div>")]
+        public void Color(TypeColorSelection color, string expected)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { LabelColor = color })
+            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null)
             {
-            };
+                Color = color
+            });
 
             // act
             var html = control.Render(context, visualTree);
