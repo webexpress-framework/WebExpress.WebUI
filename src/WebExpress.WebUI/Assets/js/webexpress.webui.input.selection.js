@@ -447,6 +447,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
      * Sets the value(s) of the selection and triggers events and rendering.
      * Accepts:
      * - Array of ids
+     * - Array of objects with an id property (e.g. [{id: "abc", name: "Item"}])
      * - single id string
      * - semicolon separated string "id1;id2"
      * - null/undefined (clears selection)
@@ -458,8 +459,20 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         let normalized = [];
         if (values === null || values === undefined) {
             normalized = [];
-        } else if (Array.isArray(values)) {
-            normalized = values;
+            this._valueMetadata.clear();
+        } else if(Array.isArray(values)) {
+            if (values.length === 0) {
+                normalized = [];
+            } else if (typeof values[0] === "string") {
+                // array of id strings
+                normalized = values.map(v => String(v));
+            } else if (typeof values[0] === "object" && values[0].id != null) {
+                // array of objects with id
+                normalized = values.map(v => String(v.id));
+            } else {
+                // fallback: unknown structure
+                normalized = [];
+            }
         } else if (typeof values === "string") {
             const trimmed = values.trim();
             if (trimmed.length > 0) {

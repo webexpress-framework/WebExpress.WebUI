@@ -158,8 +158,16 @@ if (selectionCtrl) {
     // get the current selection (array of IDs)
     const currentSelection = selectionCtrl.value;
 
-    // set a new selection programmatically
+    // set a new selection programmatically using an array of IDs
     selectionCtrl.value = ['id1', 'id4'];
+
+    // set a new selection using an array of objects
+    // objects that are not already registered as options are added automatically.
+    // the display label is resolved from 'label', 'name', 'text', or 'title' (in that order).
+    selectionCtrl.value = [
+        { id: 'game-1', name: 'The Secret of Monkey Island', releaseYear: 1990 },
+        { id: 'game-2', name: 'Monkey Island 2: LeChuck\'s Revenge', releaseYear: 1991 }
+    ];
 
     // update the available options
     selectionCtrl.options = [
@@ -168,6 +176,18 @@ if (selectionCtrl) {
     ];
 }
 ```
+
+### Accepted Value Formats
+
+The `value` setter accepts the following formats:
+
+| Format                  | Example                                                              | Description
+|-------------------------|----------------------------------------------------------------------|--------------------------------------------------------------
+| Array of IDs            | `['id1', 'id2']`                                                     | Selects items whose IDs match.
+| Array of objects        | `[{ id: 'id1', name: 'Item 1' }]`                                   | Extracts IDs; stores display metadata for rendering selected items. Does not add entries to the dropdown options.
+| Semicolon-separated     | `'id1;id2'`                                                          | Splits by `;` and selects matching items.
+| Single ID string        | `'id1'`                                                              | Selects a single item.
+| `null` / `undefined`    | `null`                                                               | Clears the selection.
 
 ## Events
 

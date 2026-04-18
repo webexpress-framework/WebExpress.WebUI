@@ -1,3 +1,13 @@
+:root {
+    /* Unified dropdown shadow: subtle elevation for dropdown menus against white backgrounds */
+    --wx-dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* Global dropdown menu shadow for consistent elevation across all dropdown variants */
+.dropdown-menu {
+    box-shadow: var(--wx-dropdown-shadow);
+}
+
 body, html {
     height: 100%;
 }
