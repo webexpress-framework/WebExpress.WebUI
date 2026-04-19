@@ -314,7 +314,8 @@ namespace WebExpress.WebUI.WebControl
                     {
                         return new HtmlElementFormForm(Conformation.Render(renderContext, visualTree))
                         {
-                            Id = Id
+                            Id = Id,
+                            Class = "wx-form"
                         };
                     }
                 }
@@ -325,8 +326,8 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id,
                 Class = FormLayout == TypeLayoutForm.Inline
-                    ? Css.Concatenate("wx-form-inline", GetClasses())
-                    : GetClasses(),
+                    ? Css.Concatenate("wx-form wx-form-inline", GetClasses())
+                    : Css.Concatenate("wx-form", GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
                 Action = Uri?.ToString() ?? renderContext.Uri?.ToString(),

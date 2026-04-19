@@ -54,12 +54,12 @@ namespace WebExpress.WebUI.WebControl
 
             var html = new HtmlElementTextContentDiv()
             {
-                Id = Id,
                 Class = Css.Concatenate(Layout.ToClass(), Inline ? "form-check-inline" : null, GetClasses()),
                 Style = GetStyles(),
             }
                 .Add(new HtmlElementFieldInput()
                 {
+                    Id = Id,
                     Name = Name,
                     Type = "checkbox",
                     Disabled = Disabled,

@@ -14,8 +14,10 @@ webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         // configuration from attributes and data-* settings
-        this._id = this._element.id;
+        this._id = this._element.getAttribute("id");
         this._name = this._element.getAttribute("name") || "avatar";
+        this._element.removeAttribute("id");
+        this._element.removeAttribute("name");
         this._uploadUri = this._element.dataset.uri || "";
         this._shape = (this._element.dataset.shape === "rect") ? "rect" : "circle";
         this._viewport = parseInt(this._element.dataset.viewport || "320", 10);

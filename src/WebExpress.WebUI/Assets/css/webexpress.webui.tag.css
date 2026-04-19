@@ -45,7 +45,7 @@
     font-size: inherit;
     font-family: inherit;
     color: inherit;
-    background: var(--bs-body-bg);
+    background: inherit;
 }
 
 .wx-tag-primary {

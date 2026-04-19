@@ -146,6 +146,10 @@
     color: var(--bs-body-color);
 }
 
+[data-bs-theme="dark"] .wx-selection div:nth-child(3) > div:nth-child(1) > input {
+    background-color: black;
+}
+
 .wx-selection div:nth-child(3) > div:nth-child(1) > a {
     cursor: pointer;
     color: var(--bs-border-color);

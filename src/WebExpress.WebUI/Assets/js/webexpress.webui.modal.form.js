@@ -30,55 +30,59 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
         const doc = parser.parseFromString(response, "text/html");
 
         const form = doc.querySelector(this._selector);
+
         if (form) {
+            // remove previous submit handler to avoid duplicate bindings
             if (this._submitHandler && this._form) {
-                this._form.removeEventListener("submit", this._submitHandler); // prevent duplicate bindings
+                this._form.removeEventListener("submit", this._submitHandler);
             }
 
             this._form = form;
 
-            // remove all classes except those starting with "wx"
+            // keep only CSS classes starting with "wx"
             this._form.className = [...this._form.classList]
                 .filter(cls => cls.startsWith("wx"))
                 .join(" ");
+
+            // ensure the form behaves like a transparent container
             this._form.style.display = "contents";
 
+            // extract submit/reset buttons before clearing the form
             const buttons = Array.from(form.querySelectorAll("button[type='submit'], button[type='reset']"))
                 .map(btn => this._detachElement(btn));
 
             const method = form.getAttribute("method") || "POST";
             const action = form.getAttribute("action") || this._uri;
 
+            // submit handler for AJAX form submission
             this._submitHandler = (event) => {
-                if (event.defaultPrevented) {
-                    return; // keep other controllers in control
-                }
+                if (event.defaultPrevented) return;
 
                 event.preventDefault();
-
                 const formData = new FormData(this._form);
 
-                fetch(action, {
-                    method: method,
-                    body: formData
-                })
-                    .then(response => response.text())
+                fetch(action, { method, body: formData })
+                    .then(r => r.text())
                     .then(data => this._update(data))
                     .catch(error => {
-                        this._bodyDiv.innerHTML = error.message || this._i18n("webexpress.webui:modal.form.error", "An error occurred.");
+                        this._bodyDiv.innerHTML =
+                            error.message ||
+                            this._i18n("webexpress.webui:modal.form.error", "An error occurred.");
                     });
             };
 
             this._form.addEventListener("submit", this._submitHandler);
 
+            // extract all content except <footer>
             const formContent = [...form.children].filter(el => !el.matches("footer"));
 
-            form.innerHTML = ""; // clear form content to avoid duplication
-
+            form.innerHTML = "";
             this._footerDiv.innerHTML = "";
+
             buttons.forEach(btn => this._footerDiv.appendChild(btn));
             this._footerDiv.appendChild(this._cancelButton);
 
+            // fill modal body with form content
             this._bodyDiv.innerHTML = "";
             formContent.forEach(el => this._bodyDiv.appendChild(el));
 
@@ -88,16 +92,48 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
             this._element.innerHTML = "";
             this._element.appendChild(this._form);
 
+            // bind dismiss buttons
             this._dialogDiv.querySelectorAll("[data-wx-dismiss='modal']").forEach(button => {
                 button.addEventListener("click", () => this.hide());
             });
 
+            // notify listeners that the modal has been updated
             this._element.dispatchEvent(new CustomEvent(webexpress.webui.Event.UPDATED_EVENT, {
-                detail: {
-                    form: this._form
-                }
+                detail: { form: this._form }
             }));
+
+            return;
         }
+
+        // fallback: try to find a wx-content-main
+        const contentMain = doc.querySelector("#wx-content-main");
+
+        this._titleH1.textContent = doc.title?.trim();
+
+        if (contentMain) {
+            this._bodyDiv.innerHTML = "";
+            this._bodyDiv.appendChild(contentMain.cloneNode(true));
+
+            this._footerDiv.innerHTML = "";
+            this._footerDiv.appendChild(this._cancelButton);
+
+            this._element.innerHTML = "";
+            this._element.appendChild(this._dialogDiv);
+
+            return; // content successfully displayed
+        }
+
+        // final fallback
+        this._bodyDiv.innerHTML = this._i18n(
+            "webexpress.webui:modal.form.notfound",
+            "No form or content could be loaded."
+        );
+
+        this._footerDiv.innerHTML = "";
+        this._footerDiv.appendChild(this._cancelButton);
+
+        this._element.innerHTML = "";
+        this._element.appendChild(this._dialogDiv);
     }
 
     /**

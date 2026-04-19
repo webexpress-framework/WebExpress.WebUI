@@ -20,6 +20,7 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
      */
     constructor(element) {
         super(element);
+        const id = element.getAttribute("id");
         const name = element.getAttribute("name") || element.id;
 
         // check for multiselect option
@@ -29,6 +30,9 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         this._largeIcon = element.dataset.largeIcon === "true";
 
         this._hidden = this._createHiddenInput();
+        if (id) {
+            this._hidden.id = id;
+        }
         if (name) {
             this._hidden.name = name;
         }
@@ -42,10 +46,11 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         this._tileList = document.createElement("div");
         this._tileList.className = "wx-tile-picker-tiles";
         element.innerHTML = "";
+        element.removeAttribute("id");
         element.removeAttribute("name");
         element.removeAttribute("data-value");
         element.appendChild(this._tileList);
-        if (name) {
+        if (name || id) {
             element.appendChild(this._hidden);
         }
         element.classList.add("wx-tile-picker");

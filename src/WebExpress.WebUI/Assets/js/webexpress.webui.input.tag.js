@@ -14,6 +14,7 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         // extract configuration from attributes
+        const fieldId = element.getAttribute("id");
         const fieldName = element.getAttribute("name") || "tags";
         const initialTags = (element.getAttribute("data-value") || "")
             .split(";")
@@ -36,6 +37,7 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
 
         // clean up the DOM element
         element.innerHTML = "";
+        element.removeAttribute("id");
         element.removeAttribute("name");
         element.removeAttribute("placeholder");
         element.removeAttribute("data-tags");
@@ -49,6 +51,9 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
         // hidden field for form
         this._hidden = document.createElement("input");
         this._hidden.type = "hidden";
+        if (fieldId) {
+            this._hidden.id = fieldId;
+        }
         this._hidden.name = fieldName;
         element.appendChild(this._hidden);
 

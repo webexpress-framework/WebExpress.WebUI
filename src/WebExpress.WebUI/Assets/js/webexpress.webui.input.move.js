@@ -36,6 +36,7 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
         this._hidden = this._createHiddenInput();
 
         // Read all relevant data attributes for labels and state
+        const id = element.getAttribute("id");
         const name = element.getAttribute("name") || element.id;
         const selectedHeaderLabel = element.dataset.headerSelected || this._i18n("webexpress.webui:selected", "");
         const availableHeaderLabel = element.dataset.headerAvailable || this._i18n("webexpress.webui:available", "");
@@ -57,6 +58,7 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
 
         // Clean up the DOM and remove all data attributes
         element.innerHTML = "";
+        element.removeAttribute("id");
         element.removeAttribute("name");
         element.removeAttribute("data-value");
         element.removeAttribute("data-header-selected");
@@ -66,7 +68,10 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
         element.removeAttribute("data-button-available");
         element.removeAttribute("data-button-availableall");
 
-        // Set hidden input name if available
+        // Set hidden input id and name if available
+        if (id) {
+            this._hidden.id = id;
+        }
         if (name) {
             this._hidden.name = name;
         }
@@ -102,7 +107,7 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
         element.appendChild(buttonContainer);
         element.appendChild(availableContainer);
         element.classList.add("wx-move");
-        if (name) element.appendChild(this._hidden);
+        if (name || id) element.appendChild(this._hidden);
         if (value) this.value = String(value).split(";");
 
         // Render the UI for the first time

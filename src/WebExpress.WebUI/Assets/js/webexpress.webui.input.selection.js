@@ -23,6 +23,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         super(element);
 
         // initialize properties from attributes and dataset
+        const id = element.getAttribute("id");
         const name = element.getAttribute("name");
         const value = element.dataset.value || null;
         this._placeholder = element.getAttribute("placeholder") || this._i18n("webexpress.webui:selection.placeholder", "Select an option");
@@ -36,7 +37,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         };
 
         // create and append ui components
-        const hiddenInput = this._createHiddenInput(name);
+        const hiddenInput = this._createHiddenInput(id, name);
         const dropdown = this._createDropdown();
         const dropdownMenu = this._createDropdownMenu();
 
@@ -52,6 +53,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         }
 
         // clean up the element before adding new structure
+        element.removeAttribute("id");
         element.removeAttribute("name");
         element.removeAttribute("placeholder");
         element.removeAttribute("data-multiselection");
@@ -70,12 +72,16 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
 
     /**
      * Creates a hidden input for form submission.
+     * @param {string} id - The id attribute for the hidden input.
      * @param {string} name - The name attribute for the hidden input.
      * @returns {HTMLInputElement} The hidden input element.
      */
-    _createHiddenInput(name) {
+    _createHiddenInput(id, name) {
         const hiddenInput = document.createElement("input");
         hiddenInput.type = "hidden";
+        if (id) {
+            hiddenInput.id = id;
+        }
         hiddenInput.name = name || "";
         this._hidden = hiddenInput;
         return hiddenInput;

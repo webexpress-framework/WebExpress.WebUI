@@ -23,6 +23,7 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         // read configuration from data attributes and set initial state
+        const id = element.getAttribute("id");
         const name = element.getAttribute("name");
         this._dateFormat = element.getAttribute("data-format") || this._i18n("webexpress.webui:calendar.format");
         this._rangeMode = element.getAttribute("data-range") === "true";
@@ -63,9 +64,10 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
             });
         }
 
-        this._hidden = this._createHiddenInput(name);
+        this._hidden = this._createHiddenInput(id, name);
 
         // clean up element attributes and prepare dom structure
+        element.removeAttribute("id");
         element.removeAttribute("name");
         element.removeAttribute("placeholder");
         element.removeAttribute("data-holidays");
@@ -193,12 +195,16 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Creates a hidden input for form submission.
+     * @param {string} id - The input id attribute.
      * @param {string} name - The input name attribute.
      * @returns {HTMLInputElement} Hidden input element.
      */
-    _createHiddenInput(name) {
+    _createHiddenInput(id, name) {
         const hiddenInput = document.createElement("input");
         hiddenInput.type = "hidden";
+        if (id) {
+            hiddenInput.id = id;
+        }
         hiddenInput.name = name || "";
         return hiddenInput;
     }

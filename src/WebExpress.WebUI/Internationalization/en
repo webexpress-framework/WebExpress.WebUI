@@ -38,3 +38,6 @@ fileupload.header=Upload document
 fileupload.file.label=Document
 fileupload.file.description=Please select a document from your local device.
 fileupload.file.validation.error.nofile=No file was specified.
+
+darkmode.text.light=Activate dark mode
+darkmode.text.dark=Activate light mode

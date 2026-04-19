@@ -209,8 +209,8 @@
 [data-bs-theme="dark"] .wx-toolbar-combo .form-select,
 [data-bs-theme="dark"] .wx-toolbar-label,
 [data-bs-theme="dark"] label {
-    color: var(--bs-light); /* Light text color */
-    background-color: var(--bs-dark); /* Dark background */
+    color: var(--bs-light); 
+    background-color: inherit;
 }
 
 [data-bs-theme="dark"] .wx-toolbar-button.active,

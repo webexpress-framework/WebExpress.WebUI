@@ -1,3 +1,12 @@
+.wx-form {
+    padding: 0.5em;
+    background-color: var(--bs-light);
+}
+
+[data-bs-theme="dark"] .wx-form {
+    background-color: var(--bs-body-bg);
+}
+
 .wx-form-label {
     display: inline-flex;
     gap: 0;
@@ -129,6 +138,10 @@
 
 .wx-form > footer {
     margin-top: 0.5em;
+}
+
+[data-bs-theme="dark"] .wx-form .form-control {
+    background-color: black;
 }
 
 .wx-validation-alert {

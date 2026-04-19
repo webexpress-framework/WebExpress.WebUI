@@ -129,3 +129,50 @@ webexpress.webui.Actions.register("filter", {
         webexpress.webui.FilterRegistry.toggle(element.id);
     }
 });
+
+// darkmode toggle action
+webexpress.webui.Actions.register("darkmode", {
+    execute: function (element, prefix, controller, e) {
+        if (e) {
+            e.preventDefault();
+        }
+        webexpress.webui.DarkMode.toggle();
+    },
+    init: function (element, prefix) {
+        const iconLight = getActionAttribute(element, prefix, "icon-light") || "fas fa-moon";
+        const iconDark = getActionAttribute(element, prefix, "icon-dark") || "fas fa-sun";
+        const textLight = getActionAttribute(element, prefix, "text-light");
+        const textDark = getActionAttribute(element, prefix, "text-dark");
+
+        const sync = function (mode) {
+            const isDark = mode === "dark";
+
+            // swap icon — look up each time since dropdown JS may build the <i> after init
+            const iconEl = element.querySelector("i");
+            if (iconEl) {
+                iconEl.className = isDark ? iconDark : iconLight;
+            }
+
+            // swap text — dropdown items wrap text in a <span>; plain buttons use text nodes
+            if (textLight || textDark) {
+                const label = isDark ? (textDark || textLight) : (textLight || textDark);
+                const spanEl = element.querySelector("span");
+                if (spanEl) {
+                    spanEl.textContent = label;
+                } else {
+                    Array.from(element.childNodes)
+                        .filter(function (n) { return n.nodeType === Node.TEXT_NODE && n.textContent.trim(); })
+                        .forEach(function (n) { n.textContent = " " + label; });
+                }
+            }
+
+            element.setAttribute("aria-pressed", isDark ? "true" : "false");
+        };
+
+        sync(webexpress.webui.DarkMode.current);
+
+        document.addEventListener(webexpress.webui.Event.CHANGE_DARKMODE_EVENT, function (e) {
+            sync(e.detail && e.detail.mode);
+        });
+    }
+});

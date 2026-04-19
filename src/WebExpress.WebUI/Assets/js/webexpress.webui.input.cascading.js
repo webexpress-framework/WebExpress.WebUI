@@ -15,11 +15,12 @@ webexpress.webui.InputCascadingCtrl = class extends webexpress.webui.Ctrl {
     constructor(element) {
         super(element);
 
+        const id = element.getAttribute("id");
         const name = element.getAttribute("name");
         this._placeholder = element.getAttribute("placeholder") || this._i18n("webexpress.webui:selection.placeholder", "Select an option");
 
         // hidden input for form submission
-        this._hidden = this._createHiddenInput(name);
+        this._hidden = this._createHiddenInput(id, name);
 
         // container that will hold per-level inputselection hosts
         this._levelsContainer = document.createElement("div");
@@ -30,6 +31,7 @@ webexpress.webui.InputCascadingCtrl = class extends webexpress.webui.Ctrl {
         this._path = [];
 
         // clean up source element and attach control root
+        element.removeAttribute("id");
         element.removeAttribute("name");
         element.removeAttribute("placeholder");
         element.removeAttribute("data-multiselection");
@@ -44,12 +46,16 @@ webexpress.webui.InputCascadingCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Creates hidden input for form submission.
+     * @param {string} id - Input id attribute.
      * @param {string} name - Input name attribute.
      * @returns {HTMLInputElement} The created hidden input.
      */
-    _createHiddenInput(name) {
+    _createHiddenInput(id, name) {
         const hiddenInput = document.createElement("input");
         hiddenInput.type = "hidden";
+        if (id) {
+            hiddenInput.id = id;
+        }
         hiddenInput.name = name || "";
         return hiddenInput;
     }
