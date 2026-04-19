@@ -28,7 +28,7 @@
 
 /* Splitter styles */
 .wx-split .wx-splitter {
-    background: var(--bs-gray-300);
+    background: var(--bs-border-color);
     z-index: 10;
     flex: 0 0 auto;
     user-select: none;
@@ -41,7 +41,7 @@
 
 .wx-split .wx-splitter:active,
 .wx-split .wx-splitter:focus {
-    background: #bbb;
+    background: var(--bs-secondary-color);
 }
 
 .wx-split .wx-splitter-horizontal {

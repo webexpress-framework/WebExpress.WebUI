@@ -1811,4 +1811,6 @@ webexpress.webui.Event = class {
     static UPDATE_PAGINATION_EVENT = "webexpress.webui.update.pagination";
     // Event triggered when a tab is selected.
     static SELECTED_TAB_EVENT = "webexpress.webui.tab.selected";
+    // Event triggered when dark mode is toggled.
+    static CHANGE_DARKMODE_EVENT = "webexpress.webui.change.darkmode";
 }

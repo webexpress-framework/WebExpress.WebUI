@@ -466,6 +466,7 @@ The `Event` class defines all event name constants used across the framework. Us
 | `SELECT_ITEM_EVENT`         | `webexpress.webui.select.item`               | An item was selected.
 | `UPDATE_PAGINATION_EVENT`   | `webexpress.webui.update.pagination`         | Pagination was updated.
 | `SELECTED_TAB_EVENT`        | `webexpress.webui.tab.selected`              | A tab was selected.
+| `CHANGE_DARKMODE_EVENT`     | `webexpress.webui.change.darkmode`           | The dark mode was toggled.
 
 ### Usage
 
