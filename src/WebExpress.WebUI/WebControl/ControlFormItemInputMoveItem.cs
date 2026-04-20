@@ -1,7 +1,8 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
@@ -31,6 +32,11 @@ namespace WebExpress.WebUI.WebControl
         public IIcon Icon { get; set; }
 
         /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        public IUri Image { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The unique identifier of the selection item. Optional.</param>
@@ -53,9 +59,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("wx-webui-move-option"),
             }
                 .AddUserAttribute("data-icon", Icon is Icon ? (Icon as Icon).Class : null)
-                .AddUserAttribute("data-image", Icon is ImageIcon
-                    ? (Icon as ImageIcon).Uri?.ToString()
-                    : null);
+                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon is ImageIcon imageIcon ? imageIcon.Uri?.ToString() : null));
 
             return html;
         }

@@ -17,6 +17,7 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
     constructor(element) {
         super(element);
 
+        this._id = element.getAttribute("id");
         this._name = element.getAttribute("name");
         this._dateFormat = element.getAttribute("data-format") || this._i18n("webexpress.webui:calendar.format");
         const value = element.dataset.value || null;
@@ -25,7 +26,7 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         this._rangeMode = element.getAttribute("data-range") === "true";
 
         // clean up element attributes and prepare DOM structure
-        ["name", "placeholder", "data-holidays", "data-value", "data-format", "data-range"].forEach(attr => element.removeAttribute(attr));
+        ["id", "name", "placeholder", "data-holidays", "data-value", "data-format", "data-range"].forEach(attr => element.removeAttribute(attr));
         element.innerHTML = "";
         element.classList.add("wx-date");
 
@@ -65,6 +66,9 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         dropdown.style.alignItems = "center";
 
         this._input = document.createElement("input");
+        if (this._id) {
+            this._input.id = this._id;
+        }
         this._input.name = this._name || "";
         this._input.type = "text";
         this._input.className = "wx-date-input";

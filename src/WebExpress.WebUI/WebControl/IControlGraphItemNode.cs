@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebUri;
 
@@ -39,6 +39,11 @@ namespace WebExpress.WebUI.WebControl
         /// Gets the icon associated with this node.
         /// </summary>
         IIcon Icon { get; }
+
+        /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        IUri Image { get; set; }
 
         /// <summary>
         /// Gets the shape type associated with this node.

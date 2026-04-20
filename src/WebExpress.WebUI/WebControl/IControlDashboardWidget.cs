@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
@@ -23,6 +24,11 @@ namespace WebExpress.WebUI.WebControl
         /// Gets the icon associated with this widget.
         /// </summary>
         IIcon Icon { get; }
+
+        /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        IUri Image { get; set; }
 
         /// <summary>
         /// Gets the column index associated with this widget.

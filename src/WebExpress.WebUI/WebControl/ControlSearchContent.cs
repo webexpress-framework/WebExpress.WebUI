@@ -1,6 +1,7 @@
-﻿using WebExpress.WebCore.Internationalization;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
@@ -20,6 +21,11 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the icon displayed in the search control.
         /// </summary>
         public IIcon Icon { get; set; }
+
+        /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        public IUri Image { get; set; }
 
         /// <summary>
         /// Gets or sets the content ID associated with the search control.
@@ -60,7 +66,7 @@ namespace WebExpress.WebUI.WebControl
                     : null)
                 .AddUserAttribute("data-highlight-color", HighlightColor)
                 .AddUserAttribute("data-icon", Icon is Icon icon ? icon.Class : null)
-                .AddUserAttribute("data-image", Icon is ImageIcon image ? image.Uri?.ToString() : null);
+                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon is ImageIcon image ? image.Uri?.ToString() : null));
 
             return html;
         }

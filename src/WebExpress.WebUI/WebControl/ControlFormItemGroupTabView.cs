@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
@@ -12,7 +13,7 @@ namespace WebExpress.WebUI.WebControl
     /// </summary>
     public class ControlFormItemGroupTabView : IControlFormItemGroupTabView
     {
-        private readonly ControlFormItemGroupColumnVertical _group = new();
+        private readonly ControlFormItemGroupVertical _group = new();
 
         /// <summary>
         /// Gets or sets the unique identifier for the view.
@@ -28,6 +29,11 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the icon associated with this view.
         /// </summary>
         public IIcon Icon { get; set; }
+
+        /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        public IUri Image { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the group.
@@ -255,7 +261,20 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <param name="visualTree">The visual tree representing the control's structure.</param>
         /// <returns>An HTML node representing the rendered control.</returns>
-        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
+        public IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
+        {
+            var renderControlFormContext = new RenderControlFormContext(renderContext, null);
+
+            return Render(renderControlFormContext, visualTree);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var html = new HtmlElementTextContentDiv()
             {
@@ -264,7 +283,7 @@ namespace WebExpress.WebUI.WebControl
             }
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, Title))
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri.ToString())
+                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString())
                 .Add(_group.Render(renderContext, visualTree));
 
             return html;

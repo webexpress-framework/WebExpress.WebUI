@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="views">The tab views to add. Cannot be null.</param>
         /// <returns>The current instance of the group, enabling method chaining.</returns>
-        public virtual IControlFormItemGroupTab Add(params IControlFormItemGroupTabView[] views)
+        public virtual IControlFormItemGroupTab AddView(params IControlFormItemGroupTabView[] views)
         {
             _views.AddRange(views);
 
@@ -62,7 +62,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="views">The tab views to add. Cannot be null.</param>
         /// <returns>The current instance of the group, enabling method chaining.</returns>
-        public virtual IControlFormItemGroupTab Add(IEnumerable<IControlFormItemGroupTabView> views)
+        public virtual IControlFormItemGroupTab AddView(IEnumerable<IControlFormItemGroupTabView> views)
         {
             _views.AddRange(views);
 
@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="view">The tab view to remove from the group. Cannot be null.</param>
         /// <returns>The current instance of the group tab after the specified view has been removed.</returns>
-        public virtual IControlFormItemGroupTab Remove(IControlFormItemGroupTabView view)
+        public virtual IControlFormItemGroupTab RemoveView(IControlFormItemGroupTabView view)
         {
             _views.Remove(view);
 

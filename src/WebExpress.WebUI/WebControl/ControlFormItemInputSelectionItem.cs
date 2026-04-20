@@ -1,6 +1,7 @@
-﻿using WebExpress.WebCore.Internationalization;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
@@ -25,6 +26,11 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the icon associated with the selection item.
         /// </summary>
         public IIcon Icon { get; set; }
+
+        /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        public IUri Image { get; set; }
 
         /// <summary>
         /// Gets or sets the color of the label.
@@ -78,9 +84,7 @@ namespace WebExpress.WebUI.WebControl
             }
                 .AddUserAttribute("data-label", I18N.Translate(Text))
                 .AddUserAttribute("data-icon", Icon is Icon ? (Icon as Icon).Class : null)
-                .AddUserAttribute("data-image", Icon is ImageIcon
-                    ? (Icon as ImageIcon).Uri?.ToString()
-                    : null)
+                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon is ImageIcon imageIcon ? imageIcon.Uri?.ToString() : null))
                 .AddUserAttribute("data-color", Color != TypeColorSelection.Default
                     ? Color.ToClass()
                     : null)

@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -52,6 +53,11 @@ namespace WebExpress.WebUI.WebControl
         /// Gets the icon.
         /// </summary>
         IIcon Icon { get; }
+
+        /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        IUri Image { get; set; }
 
         /// <summary>
         /// Gets the activation status of the button.

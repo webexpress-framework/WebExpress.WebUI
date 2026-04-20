@@ -1,4 +1,4 @@
-﻿using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
@@ -43,6 +43,11 @@ namespace WebExpress.WebUI.WebControl
         public virtual IIcon Icon { get; set; }
 
         /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        public virtual IUri Image { get; set; }
+
+        /// <summary>
         /// Gets or sets the URI associated with the current resource.
         /// </summary>
         public virtual IUri Uri { get; set; }
@@ -60,7 +65,7 @@ namespace WebExpress.WebUI.WebControl
 
         /// <summary>
         /// Gets or sets the secondary action, typically triggered by a 
-        /// double‑click to open a modal or similar target.
+        /// double-click to open a modal or similar target.
         /// </summary>
         public virtual IAction SecondaryAction { get; set; }
 
@@ -93,7 +98,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = Style
             }
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-color", Color.ToClass())
                 .AddUserAttribute("data-uri", Uri?.ToString())
                 .AddUserAttribute("data-target", Target.ToValue());

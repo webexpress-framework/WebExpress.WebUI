@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebCore.WebUri;
@@ -15,6 +15,11 @@ namespace WebExpress.WebUI.WebControl
         /// Gets the icon associated with this file.
         /// </summary>
         IIcon Icon { get; }
+
+        /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        IUri Image { get; set; }
 
         /// <summary>
         /// Gets the name of the file, including its extension.

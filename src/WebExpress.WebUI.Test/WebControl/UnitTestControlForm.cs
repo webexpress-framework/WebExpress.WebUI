@@ -16,8 +16,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the form control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData("id", @"<form id=""id"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(null, @"<form class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData("id", @"<form id=""id"" class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -39,14 +39,14 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the backgroundcolor property of the form control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorBackground.Default, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Primary, @"<form id=""*"" class=""bg-primary"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Secondary, @"<form id=""*"" class=""bg-secondary"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Warning, @"<form id=""*"" class=""bg-warning"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Danger, @"<form id=""*"" class=""bg-danger"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Dark, @"<form id=""*"" class=""bg-dark"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Light, @"<form id=""*"" class=""bg-light"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Transparent, @"<form id=""*"" class=""bg-transparent"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Default, @"<form id=""*"" class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Primary, @"<form id=""*"" class=""wx-form bg-primary"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Secondary, @"<form id=""*"" class=""wx-form bg-secondary"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Warning, @"<form id=""*"" class=""wx-form bg-warning"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Danger, @"<form id=""*"" class=""wx-form bg-danger"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Dark, @"<form id=""*"" class=""wx-form bg-dark"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Light, @"<form id=""*"" class=""wx-form bg-light"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Transparent, @"<form id=""*"" class=""wx-form bg-transparent"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void BackgroundColor(TypeColorBackground color, string expected)
         {
             // arrange
@@ -146,8 +146,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the form layout property of the form control.
         /// </summary>
         [Theory]
-        [InlineData(TypeLayoutForm.Default, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeLayoutForm.Inline, @"<form id=""*"" class=""wx-form-inline"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeLayoutForm.Default, @"<form id=""*"" class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeLayoutForm.Inline, @"<form id=""*"" class=""wx-form wx-form-inline"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void FormLayout(TypeLayoutForm formLayout, string expected)
         {
             // arrange
@@ -195,11 +195,11 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the justify property of the form control.
         /// </summary>
         [Theory]
-        [InlineData(TypeJustifiedFlex.None, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeJustifiedFlex.Start, @"<form id=""*"" class=""justify-content-start"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeJustifiedFlex.Around, @"<form id=""*"" class=""justify-content-around"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeJustifiedFlex.Between, @"<form id=""*"" class=""justify-content-between"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeJustifiedFlex.End, @"<form id=""*"" class=""justify-content-end"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeJustifiedFlex.None, @"<form id=""*"" class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeJustifiedFlex.Start, @"<form id=""*"" class=""wx-form justify-content-start"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeJustifiedFlex.Around, @"<form id=""*"" class=""wx-form justify-content-around"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeJustifiedFlex.Between, @"<form id=""*"" class=""wx-form justify-content-between"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeJustifiedFlex.End, @"<form id=""*"" class=""wx-form justify-content-end"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void Justify(TypeJustifiedFlex justify, string expected)
         {
             // arrange

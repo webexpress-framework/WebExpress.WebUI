@@ -16,8 +16,10 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         // configuration from data attributes
-        this._id = this._element.id;
+        this._id = this._element.getAttribute("id");
         this._name = this._element.getAttribute("name") || null;
+        this._element.removeAttribute("id");
+        this._element.removeAttribute("name");
         this._uploadUri = this._element.dataset.uri || "";
         this._multiple = this._element.dataset.multiple !== "false";
         this._accept = this._element.dataset.accept || "*/*";
@@ -50,6 +52,12 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
         // create a file input for triggering the file dialog
         this._fileInput = document.createElement("input");
         this._fileInput.type = "file";
+        if (this._id) {
+            this._fileInput.id = this._id;
+        }
+        if (this._name) {
+            this._fileInput.name = this._name;
+        }
         this._fileInput.style.display = "none";
         this._fileInput.multiple = this._multiple;
         this._fileInput.accept = this._accept;

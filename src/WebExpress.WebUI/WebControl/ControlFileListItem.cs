@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebUri;
@@ -24,6 +24,11 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the icon associated with this file.
         /// </summary>
         public IIcon Icon { get; set; }
+
+        /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        public IUri Image { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the file, including its extension.
@@ -77,7 +82,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = "wx-webui-file",
             }
                 .AddUserAttribute("data-file-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-file-image", (Icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-file-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-file-uri", Uri?.ToString())
                 .AddUserAttribute("data-file-size", Size >= 0 ? size : null)
                 .AddUserAttribute("data-file-date", Date != DateTime.MinValue ? Date.ToShortDateString() : null)

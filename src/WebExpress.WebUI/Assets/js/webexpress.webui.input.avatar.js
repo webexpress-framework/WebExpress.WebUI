@@ -74,6 +74,9 @@ webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
         // hidden file input
         this._fileInput = document.createElement("input");
         this._fileInput.type = "file";
+        if (this._id) {
+            this._fileInput.id = this._id;
+        }
         this._fileInput.accept = this._accept;
         this._fileInput.style.display = "none";
         this._element.appendChild(this._fileInput);

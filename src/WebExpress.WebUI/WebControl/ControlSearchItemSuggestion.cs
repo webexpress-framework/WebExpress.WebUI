@@ -1,4 +1,5 @@
 ﻿using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -21,6 +22,11 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the icon associated with the suggestion item.
         /// </summary>
         public IIcon Icon { get; set; }
+
+        /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        public IUri Image { get; set; }
 
         /// <summary>
         /// Gets or sets the CSS class for styling the suggestion item.

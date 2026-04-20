@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
@@ -31,6 +32,11 @@ namespace WebExpress.WebUI.WebControl
         public IIcon Icon { get; set; }
 
         /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        public IUri Image { get; set; }
+
+        /// <summary>
         /// Gets or set the background color.
         /// </summary>
         public PropertyColorTile Color { get; set; } = new PropertyColorTile(TypeColorTile.Default);
@@ -48,7 +54,7 @@ namespace WebExpress.WebUI.WebControl
 
         /// <summary>
         /// Gets or sets the secondary action, typically triggered by a 
-        /// double‑click to open a modal or similar target.
+        /// double-click to open a modal or similar target.
         /// </summary>
         public IAction SecondaryAction { get; set; }
 
@@ -114,7 +120,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-color-css", Color.ToClass())
                 .AddUserAttribute("data-color-style", Color.ToStyle())
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri.ToString())
+                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString())
                 .Add(_content.Select(x => x.Render(renderContext, visualTree)));
 
             PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);

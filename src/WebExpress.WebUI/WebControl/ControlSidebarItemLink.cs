@@ -1,4 +1,4 @@
-﻿using WebExpress.WebCore.Internationalization;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebUri;
@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.WebControl
 
         /// <summary>
         /// Gets or sets the secondary action, typically triggered by a 
-        /// double‑click to open a modal or similar target.
+        /// double-click to open a modal or similar target.
         /// </summary>
         public IAction SecondaryAction { get; set; }
 
@@ -56,6 +56,11 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the icon.
         /// </summary>
         public IIcon Icon { get; set; }
+
+        /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        public IUri Image { get; set; }
 
         /// <summary>
         /// Gets or sets a tooltip text.
@@ -123,7 +128,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-dismissibility", Dismissibility != TypeDismissibilitySidebar.None ? "true" : null)
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, text))
                 .AddUserAttribute("data-icon", (icon as Icon)?.Class)
-                .AddUserAttribute("data-image", (icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-uri", resultUri?.ToString())
                 .AddUserAttribute("data-target", Target.ToValue())
                 .AddUserAttribute("data-title", I18N.Translate(renderContext, tooltip))

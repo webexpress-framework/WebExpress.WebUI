@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
@@ -20,6 +21,11 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the icon associated with the selection item.
         /// </summary>
         IIcon Icon { get; }
+
+        /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        IUri Image { get; set; }
 
         /// <summary>
         /// Gets or sets the color of the label.

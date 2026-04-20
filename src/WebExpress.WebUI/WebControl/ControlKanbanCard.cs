@@ -1,6 +1,7 @@
-﻿using WebExpress.WebCore.Internationalization;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
@@ -30,6 +31,11 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the icon associated with this card.
         /// </summary>
         public IIcon Icon { get; set; }
+
+        /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        public IUri Image { get; set; }
 
         /// <summary>
         /// Gets or sets the column id associated with this card.
@@ -65,7 +71,7 @@ namespace WebExpress.WebUI.WebControl
             }
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, Title))
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-color", Color)
                 .AddUserAttribute("data-column-id", ColumnId)
                 .AddUserAttribute("data-swimlane-id", SwimlaneId);

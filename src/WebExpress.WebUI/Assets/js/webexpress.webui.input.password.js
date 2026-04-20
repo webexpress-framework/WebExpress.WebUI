@@ -17,12 +17,15 @@ webexpress.webui.InputPasswordCtrl = class extends webexpress.webui.Ctrl {
         this._value = element.dataset.value || "";
         this._disabled = element.dataset.disabled === "true";
 
+        var id = element.getAttribute("id") || "";
         var name = element.getAttribute("name") || element.dataset.name || "";
         var placeholder = element.dataset.placeholder || "";
         var minLength = element.dataset.minlength || null;
         var maxLength = element.dataset.maxlength || null;
 
         // clean up data attributes
+        element.removeAttribute("id");
+        element.removeAttribute("name");
         element.removeAttribute("data-value");
         element.removeAttribute("data-disabled");
         element.removeAttribute("data-name");
@@ -40,6 +43,9 @@ webexpress.webui.InputPasswordCtrl = class extends webexpress.webui.Ctrl {
         // create password input
         this._input = document.createElement("input");
         this._input.type = "password";
+        if (id) {
+            this._input.id = id;
+        }
         this._input.className = "form-control";
         this._input.value = this._value;
         this._input.disabled = this._disabled;

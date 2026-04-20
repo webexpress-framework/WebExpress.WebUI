@@ -1,4 +1,4 @@
-﻿using WebExpress.WebCore.Internationalization;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebUri;
@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.WebControl
 
         /// <summary>
         /// Gets or sets the secondary action, typically triggered by a 
-        /// double‑click to open a modal or similar target.
+        /// double-click to open a modal or similar target.
         /// </summary>
         public IAction SecondaryAction { get; set; }
 
@@ -55,6 +55,11 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the icon.
         /// </summary>
         public IIcon Icon { get; set; }
+
+        /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        public IUri Image { get; set; }
 
         /// <summary>
         /// Gets or sets a tooltip text.
@@ -65,6 +70,11 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the link color.
         /// </summary>
         public TypeColorText Color { get; set; }
+
+        /// <summary>
+        /// Gets or sets the binding.
+        /// </summary>
+        public IBinding Bind { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -108,7 +118,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = "wx-dropdown-item"
             }
                 .AddUserAttribute("data-icon", (icon as Icon)?.Class)
-                .AddUserAttribute("data-image", (icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-tooltip", tooltip)
                 .AddUserAttribute("data-color", color.ToClass())
                 .AddUserAttribute("data-uri", uri?.ToString())
@@ -116,6 +126,7 @@ namespace WebExpress.WebUI.WebControl
 
             primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
             secondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
+            Bind?.ApplyUserAttributes(html);
 
             return html;
         }

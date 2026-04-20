@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
@@ -34,6 +35,11 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the icon displayed in the search control.
         /// </summary>
         public IIcon Icon { get; set; }
+
+        /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        public IUri Image { get; set; }
 
         /// <summary>
         /// Gets or sets the footer control displayed below the search suggestions.
@@ -91,9 +97,9 @@ namespace WebExpress.WebUI.WebControl
                         div.AddUserAttribute("data-icon", icon.Class);
                     }
 
-                    if (x.Icon is ImageIcon image)
+                    if (x.Image != null || x.Icon is ImageIcon)
                     {
-                        div.AddUserAttribute("data-image", image.Uri?.ToString());
+                        div.AddUserAttribute("data-image", x.Image?.ToString() ?? (x.Icon as ImageIcon)?.Uri?.ToString());
                     }
 
                     if (x.Favorited)
@@ -118,7 +124,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-favorited", EnableFavorited ? "true" : null)
                 .AddUserAttribute("data-value", Value)
                 .AddUserAttribute("data-icon", Icon is Icon icon ? icon.Class : null)
-                .AddUserAttribute("data-image", Icon is ImageIcon image ? image.Uri?.ToString() : null);
+                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon is ImageIcon image ? image.Uri?.ToString() : null));
 
             return html;
         }

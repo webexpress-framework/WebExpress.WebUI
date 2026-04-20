@@ -1,4 +1,4 @@
-﻿using WebExpress.WebCore.Internationalization;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
@@ -61,7 +61,7 @@ namespace WebExpress.WebUI.WebControl
             }
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, Title))
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-color", Color.ToClass())
                 .Add(_template?.Render(renderContext, visualTree));
 

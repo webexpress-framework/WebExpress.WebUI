@@ -27,7 +27,11 @@ webexpress.webui.Controller = new class {
                 "data-wx-primary-action",
                 "data-wx-secondary-action",
                 "data-wx-dismiss",
-                "data-wx-bind"
+                "data-wx-bind",
+                "data-wx-bind-icon-light",
+                "data-wx-bind-icon-dark",
+                "data-wx-bind-text-light",
+                "data-wx-bind-text-dark"
             ]
         });
 
@@ -554,6 +558,46 @@ webexpress.webui.Controller = new class {
                 }
             });
         }
+
+        if (bindName == "darkmode") {
+            const iconLight = element.getAttribute("data-wx-bind-icon-light") || "fas fa-moon";
+            const iconDark = element.getAttribute("data-wx-bind-icon-dark") || "fas fa-sun";
+            const textLight = element.getAttribute("data-wx-bind-text-light");
+            const textDark = element.getAttribute("data-wx-bind-text-dark");
+
+            const syncDarkmode = (mode) => {
+                const isDark = mode === "dark";
+
+                // swap icon — look up each time since dropdown JS may build the <i> after init
+                const iconEl = element.querySelector("i");
+                if (iconEl) {
+                    iconEl.className = isDark ? iconDark : iconLight;
+                }
+
+                // swap text — dropdown items wrap text in a <span>; plain buttons use text nodes
+                if (textLight || textDark) {
+                    const label = isDark ? (textDark || textLight) : (textLight || textDark);
+                    const spanEl = element.querySelector("span");
+                    if (spanEl) {
+                        spanEl.textContent = label;
+                    } else {
+                        Array.from(element.childNodes)
+                            .filter((n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim())
+                            .forEach((n) => { n.textContent = " " + label; });
+                    }
+                }
+
+                element.setAttribute("aria-pressed", isDark ? "true" : "false");
+            };
+
+            // sync on initialization
+            syncDarkmode(webexpress.webui.DarkMode.current);
+
+            // sync on every darkmode change event
+            document.addEventListener(webexpress.webui.Event.CHANGE_DARKMODE_EVENT, (e) => {
+                syncDarkmode(e.detail && e.detail.mode);
+            });
+        }
     }
 
     /**
@@ -900,6 +944,122 @@ webexpress.webui.FilterRegistry = new class {
                 }
             }
         }
+    }
+};
+
+/**
+ * Central singleton that tracks the current color scheme (light or dark),
+ * persists it to a cookie, applies it to the root element via
+ * <c>data-bs-theme</c>, and notifies observers via
+ * <c>webexpress.webui.Event.CHANGE_DARKMODE_EVENT</c>.
+ */
+webexpress.webui.DarkMode = new class {
+    /**
+     * Creates a new instance of the class.
+     */
+    constructor() {
+        this._cookieName = "wx_darkmode";
+        this._cookieMaxAgeDays = 365;
+        this._current = this._resolveInitialMode();
+
+        // apply the resolved mode so the cookie wins over the server-rendered default
+        this._apply(this._current);
+    }
+
+    /**
+     * Gets the current color mode.
+     * @returns {"light"|"dark"} The currently active mode.
+     */
+    get current() {
+        return this._current;
+    }
+
+    /**
+     * Sets the current color mode, updates the root element, persists the
+     * cookie and notifies observers. A no-op if the mode is unchanged.
+     * @param {"light"|"dark"} mode - The mode to switch to.
+     */
+    set current(mode) {
+        const normalized = mode === "dark" ? "dark" : "light";
+        if (normalized === this._current) {
+            return;
+        }
+        this._current = normalized;
+        this._apply(normalized);
+        this._writeCookie(normalized);
+        this._notify(normalized);
+    }
+
+    /**
+     * Toggles between the light and dark color modes.
+     * @returns {"light"|"dark"} The newly active mode.
+     */
+    toggle() {
+        this.current = this._current === "dark" ? "light" : "dark";
+        return this._current;
+    }
+
+    /**
+     * Determines the initial mode: cookie first, then the server-rendered
+     * attribute on the root element, then falling back to "light".
+     * @returns {"light"|"dark"} The initial mode.
+     */
+    _resolveInitialMode() {
+        const fromCookie = this._readCookie();
+        if (fromCookie === "dark" || fromCookie === "light") {
+            return fromCookie;
+        }
+        const attr = document.documentElement.getAttribute("data-bs-theme");
+        return attr === "dark" ? "dark" : "light";
+    }
+
+    /**
+     * Applies the given mode to the root element's <c>data-bs-theme</c>.
+     * @param {"light"|"dark"} mode - The mode to apply.
+     */
+    _apply(mode) {
+        document.documentElement.setAttribute("data-bs-theme", mode);
+    }
+
+    /**
+     * Dispatches the change event on the document.
+     * @param {"light"|"dark"} mode - The new mode.
+     */
+    _notify(mode) {
+        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_DARKMODE_EVENT, {
+            detail: { mode: mode },
+            bubbles: true
+        }));
+    }
+
+    /**
+     * Persists the given mode to the document cookie.
+     * @param {"light"|"dark"} mode - The mode to persist.
+     */
+    _writeCookie(mode) {
+        const date = new Date();
+        date.setTime(date.getTime() + (this._cookieMaxAgeDays * 24 * 60 * 60 * 1000));
+        const expires = "expires=" + date.toUTCString();
+        document.cookie = this._cookieName + "=" + encodeURIComponent(mode) + ";" + expires + ";path=/;SameSite=Strict";
+    }
+
+    /**
+     * Reads the persisted mode from the document cookie.
+     * @returns {string} The decoded cookie value or an empty string.
+     */
+    _readCookie() {
+        const nameEq = this._cookieName + "=";
+        const ca = document.cookie.split(";");
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === " ") {
+                c = c.substring(1, c.length);
+            }
+            if (c.indexOf(nameEq) === 0) {
+                return decodeURIComponent(c.substring(nameEq.length, c.length));
+            }
+        }
+        return "";
     }
 };
 
@@ -1716,124 +1876,6 @@ webexpress.webui.PopperCtrl = class extends webexpress.webui.Ctrl {
         });
     }
 }
-
-/**
- * Dark mode state holder.
- * Toggles the `data-bs-theme` attribute on the document root between
- * "light" and "dark" and persists the current state in a cookie so that
- * the mode survives reloads.
- *
- * The actual toggle trigger is wired up through the "darkmode" action
- * registered in `action/default.js`. This module only owns the state,
- * the persistence and the event dispatch so other components can stay
- * in sync via `webexpress.webui.Event.CHANGE_DARKMODE_EVENT`.
- */
-webexpress.webui.DarkMode = new class {
-    /**
-     * Creates a new instance and initializes the state from the cookie.
-     */
-    constructor() {
-        this._cookieName = "wx_darkmode";
-        this._cookieMaxAgeDays = 365;
-        this._current = this._readCookie() || "light";
-        // apply the initial state as soon as possible so the FOUC is minimized
-        this.apply(this._current);
-    }
-
-    /**
-     * Gets the current mode ("light" or "dark").
-     * @returns {string} the current mode.
-     */
-    get current() {
-        return this._current;
-    }
-
-    /**
-     * Sets the mode explicitly, persists it and applies it to the DOM.
-     * @param {string} mode - Either "light" or "dark".
-     */
-    set(mode) {
-        const normalized = mode === "dark" ? "dark" : "light";
-        if (this._current === normalized) {
-            return normalized;
-        }
-        this._current = normalized;
-        this.apply(normalized);
-        this._writeCookie(normalized);
-        this._notify(normalized);
-        return normalized;
-    }
-
-    /**
-     * Toggles between light and dark and returns the new mode.
-     * @returns {string} the new mode.
-     */
-    toggle() {
-        return this.set(this._current === "dark" ? "light" : "dark");
-    }
-
-    /**
-     * Applies the given mode to the document root element.
-     * Sets `data-bs-theme="dark"` for dark mode and removes/sets it to
-     * "light" when switching back.
-     * @param {string} mode - Either "light" or "dark".
-     */
-    apply(mode) {
-        const root = document.documentElement;
-        if (!root) {
-            return;
-        }
-
-        if (mode === "dark") {
-            root.setAttribute("data-bs-theme", "dark");
-        } else {
-            root.setAttribute("data-bs-theme", "light");
-        }
-    }
-
-    /**
-     * Writes the current mode to a persistent cookie.
-     * @param {string} mode - Either "light" or "dark".
-     */
-    _writeCookie(mode) {
-        const date = new Date();
-        date.setTime(date.getTime() + (this._cookieMaxAgeDays * 24 * 60 * 60 * 1000));
-        const expires = "expires=" + date.toUTCString();
-        document.cookie = this._cookieName + "=" + encodeURIComponent(mode) + ";" + expires + ";path=/;SameSite=Strict";
-    }
-
-    /**
-     * Reads the mode from the cookie.
-     * @returns {string|null} the persisted mode or null if not set.
-     */
-    _readCookie() {
-        const nameEq = this._cookieName + "=";
-        const ca = document.cookie ? document.cookie.split(";") : [];
-
-        for (let i = 0; i < ca.length; i++) {
-            let c = ca[i];
-            while (c.charAt(0) === " ") {
-                c = c.substring(1, c.length);
-            }
-            if (c.indexOf(nameEq) === 0) {
-                const raw = decodeURIComponent(c.substring(nameEq.length, c.length));
-                return raw === "dark" ? "dark" : "light";
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Notifies listeners about the mode change.
-     * @param {string} mode - The new mode.
-     */
-    _notify(mode) {
-        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_DARKMODE_EVENT, {
-            detail: { mode: mode },
-            bubbles: true
-        }));
-    }
-};
 
 /**
  * A utility class for defining and managing event names within the WebExpress UI framework.

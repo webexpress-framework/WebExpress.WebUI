@@ -1,4 +1,4 @@
-﻿using WebExpress.WebCore.Internationalization;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebUri;
@@ -26,6 +26,11 @@ namespace WebExpress.WebUI.WebControl
         public IIcon Icon { get; set; }
 
         /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        public IUri Image { get; set; }
+
+        /// <summary>
         /// Gets or sets the target uri.
         /// </summary>
         public IUri Uri { get; set; }
@@ -48,7 +53,7 @@ namespace WebExpress.WebUI.WebControl
 
         /// <summary>
         /// Gets or sets the secondary action, typically triggered by a 
-        /// double‑click to open a modal or similar target.
+        /// double-click to open a modal or similar target.
         /// </summary>
         public IAction SecondaryAction { get; set; }
 

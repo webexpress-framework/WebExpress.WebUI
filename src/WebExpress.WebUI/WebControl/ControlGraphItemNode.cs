@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
@@ -55,6 +55,11 @@ namespace WebExpress.WebUI.WebControl
         public IIcon Icon { get; set; }
 
         /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        public IUri Image { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -79,7 +84,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, Label))
                 .AddUserAttribute("data-uri", Uri?.ToString())
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-x", Point.HasValue ? Point.Value.X.ToString() : null)
                 .AddUserAttribute("data-y", Point.HasValue ? Point.Value.Y.ToString() : null)
                 .AddUserAttribute("data-foreground-css", Color?.ToClass())

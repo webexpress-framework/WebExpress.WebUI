@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
@@ -29,6 +29,11 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the icon associated with the tree item.
         /// </summary>
         public IIcon Icon { get { return IconOpen; } set { IconOpen = IconClose = value; } }
+
+        /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        public IUri Image { get; set; }
 
         /// <summary>
         /// Gets or sets the icon associated with the tree item.
@@ -63,7 +68,7 @@ namespace WebExpress.WebUI.WebControl
 
         /// <summary>
         /// Gets or sets the secondary action, typically triggered by a 
-        /// double‑click to open a modal or similar target.
+        /// double-click to open a modal or similar target.
         /// </summary>
         public IAction SecondaryAction { get; set; }
 
@@ -170,9 +175,9 @@ namespace WebExpress.WebUI.WebControl
                 html.AddUserAttribute("data-icon-closed", iconClose.Class);
             }
 
-            if (IconOpen == IconClose && Icon is ImageIcon image)
+            if (IconOpen == IconClose && (Image != null || Icon is ImageIcon))
             {
-                html.AddUserAttribute("data-image", image.Uri?.ToString());
+                html.AddUserAttribute("data-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString());
             }
 
             if (IconOpen != IconClose && IconOpen is ImageIcon imageOpen)
