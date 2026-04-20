@@ -174,7 +174,12 @@ webexpress.webui.Controller = new class {
             });
 
             binds.forEach((bindName) => {
-                this._registerBind(element, bindName);
+                const bindDef = webexpress.webui.Binds.get(bindName);
+                if (bindDef) {
+                    bindDef.bind(element, this);
+                } else {
+                    console.warn(`Bind "${bindName}" is not registered.`);
+                }
             });
 
             bound = true;
@@ -506,97 +511,6 @@ webexpress.webui.Controller = new class {
                     btn.title = webexpress.webui.I18N.translate("webexpress.webui:fullscreen.toggle");
                 }
             }
-        }
-    }
-
-    /**
-     * Registers a single bind type for a given element.
-     * @param {HTMLElement} element - The bound DOM element.
-     * @param {string} bindName - The bind type identifier.
-     */
-    _registerBind(element, bindName) {
-        const sourceSelector = element.getAttribute(`data-wx-source-${bindName}`) ||
-            element.getAttribute("data-wx-source");
-
-        if (sourceSelector) {
-            const sourceElement = document.querySelector(sourceSelector);
-
-            if (!sourceElement) {
-                console.warn(`Source element not found for bind "${bindName}":`, sourceSelector);
-                return;
-            }
-
-            if (bindName == "search") {
-                sourceElement?.addEventListener(webexpress.webui.Event.CHANGE_FILTER_EVENT, (e) => {
-                    const query = e.detail?.value;
-                    const searchType = e.detail?.searchType;
-                    const instance = this.getInstanceByElement(element);
-                    if (typeof instance?.search === "function") {
-                        instance.search(query, searchType);
-                    }
-                });
-                return;
-            } else if (bindName == "paging") {
-                sourceElement?.addEventListener(webexpress.webui.Event.CHANGE_PAGE_EVENT, (e) => {
-                    const page = e.detail?.page;
-                    const instance = this.getInstanceByElement(element);
-                    if (typeof instance?.search === "function") {
-                        instance.paging(page);
-                    }
-                });
-                return;
-            }
-        }
-
-        if (bindName == "filter") {
-            document?.addEventListener(webexpress.webui.Event.CHANGE_FILTER_EVENT, (e) => {
-                const instance = this.getInstanceByElement(element);
-                if (typeof instance?.filter === "function") {
-                    instance.filter(webexpress.webui.FilterRegistry.getActiveFilters());
-                } else {
-                    element.dispatchEvent(new Event("change", { bubbles: true }));
-                }
-            });
-        }
-
-        if (bindName == "darkmode") {
-            const iconLight = element.getAttribute("data-wx-bind-icon-light") || "fas fa-moon";
-            const iconDark = element.getAttribute("data-wx-bind-icon-dark") || "fas fa-sun";
-            const textLight = element.getAttribute("data-wx-bind-text-light");
-            const textDark = element.getAttribute("data-wx-bind-text-dark");
-
-            const syncDarkmode = (mode) => {
-                const isDark = mode === "dark";
-
-                // swap icon — look up each time since dropdown JS may build the <i> after init
-                const iconEl = element.querySelector("i");
-                if (iconEl) {
-                    iconEl.className = isDark ? iconDark : iconLight;
-                }
-
-                // swap text — dropdown items wrap text in a <span>; plain buttons use text nodes
-                if (textLight || textDark) {
-                    const label = isDark ? (textDark || textLight) : (textLight || textDark);
-                    const spanEl = element.querySelector("span");
-                    if (spanEl) {
-                        spanEl.textContent = label;
-                    } else {
-                        Array.from(element.childNodes)
-                            .filter((n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim())
-                            .forEach((n) => { n.textContent = " " + label; });
-                    }
-                }
-
-                element.setAttribute("aria-pressed", isDark ? "true" : "false");
-            };
-
-            // sync on initialization
-            syncDarkmode(webexpress.webui.DarkMode.current);
-
-            // sync on every darkmode change event
-            document.addEventListener(webexpress.webui.Event.CHANGE_DARKMODE_EVENT, (e) => {
-                syncDarkmode(e.detail && e.detail.mode);
-            });
         }
     }
 
@@ -1293,6 +1207,93 @@ webexpress.webui.Actions = new class {
      */
     clear() {
         this._actions = {};
+    }
+};
+
+/**
+ * Registry for bind plugins.
+ * Allows bindings to be extended freely from external files.
+ * Each bind is identified by a name (e.g. "filter", "darkmode") and provides
+ * a bind callback that is invoked once per element when the binding is registered.
+ */
+webexpress.webui.Binds = new class {
+    /**
+     * Creates a new instance of the class.
+     */
+    constructor() {
+        this._binds = {};
+    }
+
+    /**
+     * Registers a new bind.
+     * @param {string} name - The unique bind name (e.g. "filter", "darkmode").
+     * @param {object} definition - The bind definition object.
+     * @param {Function} definition.bind - Called once when the binding is established for an element.
+     *   Receives (element, controller) where element carries all data-wx-bind-* attributes.
+     * @returns {this} The registry instance for chaining.
+     */
+    register(name, definition) {
+        if (!name || !definition) return this;
+
+        this._binds[name] = definition;
+        return this;
+    }
+
+    /**
+     * Retrieves a bind definition by name.
+     * @param {string} name - The bind name.
+     * @returns {object|null} The bind definition or null if not found.
+     */
+    get(name) {
+        if (typeof name !== "string" || name.trim() === "") {
+            return null;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(this._binds, name)) {
+            return this._binds[name];
+        }
+
+        return null;
+    }
+
+    /**
+     * Checks whether a bind is registered.
+     * @param {string} name - The bind name.
+     * @returns {boolean} True if registered.
+     */
+    has(name) {
+        return Object.prototype.hasOwnProperty.call(this._binds, name);
+    }
+
+    /**
+     * Returns all registered bind names.
+     * @returns {Array<string>} List of bind names.
+     */
+    getAll() {
+        return Object.keys(this._binds);
+    }
+
+    /**
+     * Unregisters a bind by name.
+     * @param {string} name - The bind name to remove.
+     * @returns {void}
+     */
+    unregister(name) {
+        if (typeof name !== "string" || name.trim() === "") {
+            return;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(this._binds, name)) {
+            delete this._binds[name];
+        }
+    }
+
+    /**
+     * Clears the entire registry.
+     * @returns {void}
+     */
+    clear() {
+        this._binds = {};
     }
 };
 

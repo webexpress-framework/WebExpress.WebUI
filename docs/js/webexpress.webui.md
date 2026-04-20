@@ -74,13 +74,17 @@ Dismiss actions are handled directly by the Controller, independently of the Act
 
 ### Data Binding
 
-The `data-wx-bind` attribute connects a UI element to event-driven data sources:
+The `data-wx-bind` attribute connects a UI element to event-driven data sources. Binds are registered
+as plugins in `webexpress.webui.Binds` (see [Binds](#binds)) and can be freely extended.
 
 | Bind Type  | Description
 |------------|------------------------------------------------------------
 | `search`   | Listens for `CHANGE_FILTER_EVENT` on the source element and calls `instance.search(query, searchType)`.
 | `paging`   | Listens for `CHANGE_PAGE_EVENT` on the source element and calls `instance.paging(page)`.
 | `filter`   | Listens for global `CHANGE_FILTER_EVENT` and calls `instance.filter(activeFilters)`.
+| `darkmode` | Syncs icon and text of the element to the current dark-mode state.
+| `hide`     | Hides the element (or its enclosing `fieldset.wx-form-group`) when the source value matches.
+| `disable`  | Disables the element (or its enclosing `fieldset.wx-form-group`) when the source value matches.
 
 ```html
 <div id="myTable"
@@ -93,6 +97,233 @@ The `data-wx-bind` attribute connects a UI element to event-driven data sources:
 ---
 
 ## Actions
+
+The `Actions` singleton provides a dynamic registry for action plugins. Actions are loaded from external files (e.g., `action/default.js`) and can be freely extended without modifying the framework core.
+
+### Methods
+
+| Method                          | Description
+|---------------------------------|--------------------------------------------------------------
+| `register(name, definition)`    | Registers an action under the given name. The definition must contain an `execute` function.
+| `get(name)`                     | Returns the action definition for the given name, or `null`.
+| `has(name)`                     | Returns `true` if an action is registered under the given name.
+| `getAll()`                      | Returns an array of all registered action names.
+| `unregister(name)`              | Removes the action registered under the given name.
+| `clear()`                       | Removes all registered actions.
+
+### Action Definition Contract
+
+```javascript
+webexpress.webui.Actions.register("my-action", {
+    /**
+     * Called when the action is triggered (click for primary, dblclick for secondary).
+     * @param {HTMLElement} element - The element that triggered the action.
+     * @param {string} prefix - "primary" or "secondary".
+     * @param {object} controller - The Controller singleton.
+     * @param {Event} event - The original DOM event.
+     */
+    execute: function (element, prefix, controller, event) {
+        // action logic
+    },
+
+    /**
+     * Optional one-time initialization hook, called once per element binding.
+     * @param {HTMLElement} element - The bound element.
+     * @param {string} prefix - "primary" or "secondary".
+     * @param {object} controller - The Controller singleton.
+     */
+    init: function (element, prefix, controller) {
+        // setup logic (e.g., aria attributes)
+    }
+});
+```
+
+### Built-in Actions
+
+The following actions are registered in `action/default.js`:
+
+| Action Name          | Description                                                         | Supported Attributes
+|----------------------|---------------------------------------------------------------------|-------------------------------------
+| `modal`              | Shows a modal dialog instance.                                      | `target`, `uri`, `size`
+| `frame`              | Sets the URI on a frame control instance.                           | `target`, `uri`
+| `split`              | Toggles the side pane of a split control.                           | `target`
+| `fullscreen`         | Toggles CSS-based fullscreen for the target element.                | `target`
+| `native-fullscreen`  | Toggles native browser fullscreen for the target element.           | `target`
+| `filter`             | Toggles a quick-filter in the `FilterRegistry`.                     | _(uses element ID)_
+
+### Example: Registering a Custom Action
+
+```javascript
+// file: action/custom.js
+webexpress.webui.Actions.register("redirect", {
+    execute: function (element, prefix, controller, event) {
+        event.preventDefault();
+        const uri = element.getAttribute("data-wx-" + prefix + "-uri");
+        if (uri) {
+            window.location.href = uri;
+        }
+    }
+});
+```
+
+```html
+<a data-wx-primary-action="redirect"
+   data-wx-primary-uri="/dashboard">
+    Go to Dashboard
+</a>
+```
+
+---
+
+## Binds
+
+The `Binds` singleton provides a dynamic registry for bind plugins. Binds are loaded from external
+files (e.g., `bind/default.js`) and can be freely extended without modifying the framework core.
+Each bind is established once per element when the `data-wx-bind` attribute is processed.
+
+### Methods
+
+| Method                          | Description
+|---------------------------------|--------------------------------------------------------------
+| `register(name, definition)`    | Registers a bind under the given name. The definition must contain a `bind` function.
+| `get(name)`                     | Returns the bind definition for the given name, or `null`.
+| `has(name)`                     | Returns `true` if a bind is registered under the given name.
+| `getAll()`                      | Returns an array of all registered bind names.
+| `unregister(name)`              | Removes the bind registered under the given name.
+| `clear()`                       | Removes all registered binds.
+
+### Bind Definition Contract
+
+```javascript
+webexpress.webui.Binds.register("my-bind", {
+    /**
+     * Called once when the binding is established for an element.
+     * @param {HTMLElement} element    - The element carrying all data-wx-bind-* attributes.
+     * @param {object}      controller - The Controller singleton.
+     */
+    bind: function (element, controller) {
+        // setup logic: attach event listeners, read data-wx-bind-* attributes, etc.
+    }
+});
+```
+
+### Built-in Binds
+
+The following binds are registered in `bind/default.js`:
+
+| Bind Name   | Source Attribute          | Extra Attributes                   | Description
+|-------------|---------------------------|------------------------------------|--------------------------------------------
+| `search`    | `data-wx-source-search`   | –                                  | Forwards `CHANGE_FILTER_EVENT` → `instance.search(query, searchType)`.
+| `paging`    | `data-wx-source-paging`   | –                                  | Forwards `CHANGE_PAGE_EVENT` → `instance.paging(page)`.
+| `filter`    | –                         | –                                  | Reacts to global `CHANGE_FILTER_EVENT` → `instance.filter(activeFilters)`.
+| `darkmode`  | –                         | `data-wx-bind-icon-light`, `data-wx-bind-icon-dark`, `data-wx-bind-text-light`, `data-wx-bind-text-dark` | Syncs icon and text to the current dark-mode state.
+| `hide`      | `data-wx-source-hide`     | `data-wx-bind-value-hide`          | Hides the element (or `fieldset.wx-form-group`) when the source value equals the trigger value.
+| `disable`   | `data-wx-source-disable`  | `data-wx-bind-value-disable`       | Disables the element (or `fieldset.wx-form-group`) when the source value equals the trigger value.
+
+#### `hide` bind — conditional visibility
+
+When the source element's value equals `data-wx-bind-value-hide` the target gains the `d-none` class
+and `aria-hidden="true"`. If the bound element is inside a `fieldset.wx-form-group` the whole
+fieldset is toggled so the label and help text are hidden together with the input.
+
+```html
+<!-- hide the second field when the type selector is set to "internal" -->
+<select id="type">
+  <option value="external">External</option>
+  <option value="internal">Internal</option>
+</select>
+
+<input id="url"
+       type="text"
+       data-wx-bind="hide"
+       data-wx-source-hide="#type"
+       data-wx-bind-value-hide="internal">
+```
+
+#### `disable` bind — conditional disabling
+
+When the source element's value equals `data-wx-bind-value-disable` the target gains `disabled=true`
+and `aria-disabled="true"`. For a `fieldset.wx-form-group` the native `disabled` attribute is set,
+which automatically propagates to all descendant form controls.
+
+```html
+<!-- disable the email field when "no notification" is chosen -->
+<select id="notify">
+  <option value="yes">Yes</option>
+  <option value="no">No</option>
+</select>
+
+<input id="email"
+       type="email"
+       data-wx-bind="disable"
+       data-wx-source-disable="#notify"
+       data-wx-bind-value-disable="no">
+```
+
+Both binds can be combined on the same element:
+
+```html
+<input id="email"
+       type="email"
+       data-wx-bind="hide, disable"
+       data-wx-source-hide="#showEmail"
+       data-wx-bind-value-hide="false"
+       data-wx-source-disable="#notify"
+       data-wx-bind-value-disable="no">
+```
+
+#### C# usage
+
+The corresponding C# classes `BindHide` and `BindDisable` emit the required attributes automatically:
+
+```csharp
+// hide the field when the source value equals "internal"
+Bind = new Binding().Add(new BindHide { Source = "type", Value = "internal" });
+
+// disable the field when the source value equals "no"
+Bind = new Binding().Add(new BindDisable { Source = "notify", Value = "no" });
+
+// combine both on one element
+Bind = new Binding()
+    .Add(new BindHide    { Source = "showEmail", Value = "false" })
+    .Add(new BindDisable { Source = "notify",    Value = "no" });
+```
+
+### Example: Registering a Custom Bind
+
+```javascript
+// file: bind/custom.js
+webexpress.webui.Binds.register("highlight", {
+    bind: function (element) {
+        const sourceElement = document.querySelector(
+            element.getAttribute("data-wx-source-highlight")
+        );
+        if (!sourceElement) return;
+
+        const color = element.getAttribute("data-wx-bind-highlight-color") || "yellow";
+
+        const sync = () => {
+            element.style.backgroundColor =
+                sourceElement.value.trim() !== "" ? color : "";
+        };
+
+        sync();
+        sourceElement.addEventListener("input", sync);
+    }
+});
+```
+
+```html
+<input id="name" type="text">
+<div data-wx-bind="highlight"
+     data-wx-source-highlight="#name"
+     data-wx-bind-highlight-color="lightblue">
+    I turn blue when the name field is filled.
+</div>
+```
+
+---
+
 
 The `Actions` singleton provides a dynamic registry for action plugins. Actions are loaded from external files (e.g., `action/default.js`) and can be freely extended without modifying the framework core.
 

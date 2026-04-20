@@ -74,6 +74,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/webexpress.webui.upload.js")]
     [Asset("/assets/js/webexpress.webui.view.js")]
     [Asset("/assets/js/action/default.js")]
+    [Asset("/assets/js/bind/default.js")]
     [Asset("/assets/js/editor/addons.js")]
     [Asset("/assets/js/editor/emojis.js")]
     [Asset("/assets/js/editor/formatting.js")]

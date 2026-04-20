@@ -148,6 +148,8 @@ namespace WebExpress.WebUI.WebControl
                         fieldset.Add(help.Render(renderGroupContext, visualTree));
                     }
 
+                    input.Bind?.ApplyUserAttributes(fieldset);
+
                     div.Add(fieldset);
                 }
                 else

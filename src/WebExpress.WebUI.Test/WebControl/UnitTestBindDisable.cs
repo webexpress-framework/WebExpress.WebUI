@@ -1,0 +1,143 @@
+using WebExpress.WebCore.WebHtml;
+using WebExpress.WebUI.Test.Fixture;
+using WebExpress.WebUI.WebControl;
+
+namespace WebExpress.WebUI.Test.WebControl
+{
+    /// <summary>
+    /// Tests the BindDisable binding class.
+    /// </summary>
+    [Collection("NonParallelTests")]
+    public class UnitTestBindDisable
+    {
+        /// <summary>
+        /// Tests that ApplyUserAttributes sets no attributes when Source is null.
+        /// </summary>
+        [Theory]
+        [InlineData(null, "trigger", @"<input type=""text"">")]
+        [InlineData("", "trigger", @"<input type=""text"">")]
+        [InlineData("  ", "trigger", @"<input type=""text"">")]
+        public void NullOrEmptySourceProducesNoAttributes(string source, string value, string expected)
+        {
+            // arrange
+            var input = new HtmlElementFieldInput { Type = "text" };
+            var bind = new BindDisable { Source = source, Value = value };
+
+            // act
+            bind.ApplyUserAttributes(input);
+
+            // assert
+            AssertExtensions.EqualWithPlaceholders(expected, input.ToString());
+        }
+
+        /// <summary>
+        /// Tests that ApplyUserAttributes normalises the source ID by adding a leading '#'.
+        /// </summary>
+        [Theory]
+        [InlineData("mySelect", @"<input type=""text"" data-wx-bind=""disable"" data-wx-source-disable=""#mySelect"" data-wx-bind-value-disable=""yes"">")]
+        [InlineData("#mySelect", @"<input type=""text"" data-wx-bind=""disable"" data-wx-source-disable=""#mySelect"" data-wx-bind-value-disable=""yes"">")]
+        public void SourceIsNormalisedWithHashPrefix(string source, string expected)
+        {
+            // arrange
+            var input = new HtmlElementFieldInput { Type = "text" };
+            var bind = new BindDisable { Source = source, Value = "yes" };
+
+            // act
+            bind.ApplyUserAttributes(input);
+
+            // assert
+            AssertExtensions.EqualWithPlaceholders(expected, input.ToString());
+        }
+
+        /// <summary>
+        /// Tests that ApplyUserAttributes sets the trigger value attribute correctly.
+        /// </summary>
+        [Theory]
+        [InlineData("active", @"<input type=""text"" data-wx-bind=""disable"" data-wx-source-disable=""#ctrl"" data-wx-bind-value-disable=""active"">")]
+        [InlineData("", @"<input type=""text"" data-wx-bind=""disable"" data-wx-source-disable=""#ctrl"">")]
+        [InlineData(null, @"<input type=""text"" data-wx-bind=""disable"" data-wx-source-disable=""#ctrl"">")]
+        public void ValueAttributeIsSetCorrectly(string value, string expected)
+        {
+            // arrange
+            var input = new HtmlElementFieldInput { Type = "text" };
+            var bind = new BindDisable { Source = "ctrl", Value = value };
+
+            // act
+            bind.ApplyUserAttributes(input);
+
+            // assert
+            AssertExtensions.EqualWithPlaceholders(expected, input.ToString());
+        }
+
+        /// <summary>
+        /// Tests that the binding name is 'disable'.
+        /// </summary>
+        [Fact]
+        public void NameIsDisable()
+        {
+            Assert.Equal("disable", new BindDisable().Name);
+        }
+
+        /// <summary>
+        /// Tests that ApplyUserAttributes with Binding produces a combined data-wx-bind attribute.
+        /// </summary>
+        [Fact]
+        public void CombinedBindingProducesCommaSeperatedBindAttribute()
+        {
+            // arrange
+            var input = new HtmlElementFieldInput { Type = "text" };
+            var binding = new Binding().Add(new BindDisable { Source = "ctrl", Value = "yes" });
+
+            // act
+            binding.ApplyUserAttributes(input);
+
+            // assert
+            var html = input.ToString();
+            Assert.Contains(@"data-wx-bind=""disable""", html);
+            Assert.Contains(@"data-wx-source-disable=""#ctrl""", html);
+            Assert.Contains(@"data-wx-bind-value-disable=""yes""", html);
+        }
+
+        /// <summary>
+        /// Tests that ToJson returns the correct structure.
+        /// </summary>
+        [Fact]
+        public void ToJsonContainsExpectedKeys()
+        {
+            // arrange
+            var bind = new BindDisable { Source = "ctrl", Value = "yes" };
+
+            // act
+            var json = bind.ToJson();
+
+            // assert
+            Assert.Equal("disable", json["bind"]);
+            Assert.Equal("#ctrl", json["source"]);
+            Assert.Equal("yes", json["value"]);
+        }
+
+        /// <summary>
+        /// Tests that combining BindHide and BindDisable in one Binding produces
+        /// a comma-separated data-wx-bind attribute covering both names.
+        /// </summary>
+        [Fact]
+        public void CombinedHideAndDisableBindingProducesBothNames()
+        {
+            // arrange
+            var input = new HtmlElementFieldInput { Type = "text" };
+            var binding = new Binding()
+                .Add(new BindHide { Source = "srcA", Value = "1" })
+                .Add(new BindDisable { Source = "srcB", Value = "2" });
+
+            // act
+            binding.ApplyUserAttributes(input);
+
+            // assert
+            var html = input.ToString();
+            Assert.Contains("hide", html);
+            Assert.Contains("disable", html);
+            Assert.Contains(@"data-wx-source-hide=""#srcA""", html);
+            Assert.Contains(@"data-wx-source-disable=""#srcB""", html);
+        }
+    }
+}

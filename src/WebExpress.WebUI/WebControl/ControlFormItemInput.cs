@@ -74,6 +74,13 @@ namespace WebExpress.WebUI.WebControl
         public object Tag { get; set; }
 
         /// <summary>
+        /// Gets or sets the binding that is applied to the enclosing form group element.
+        /// Use this to attach binds such as <see cref="BindHide"/> or <see cref="BindDisable"/>
+        /// so the entire fieldset (label, input, help text) reacts as a unit.
+        /// </summary>
+        public IBinding Bind { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
