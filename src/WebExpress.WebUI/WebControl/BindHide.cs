@@ -5,8 +5,8 @@ namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// Represents a binding that hides the target element (or its enclosing
-    /// <c>fieldset.wx-form-group</c>) whenever a source element's value matches
-    /// the configured <see cref="Value"/>. The binding reacts both on
+    /// <c>fieldset.wx-form-group</c>) whenever a source element's value satisfies
+    /// the configured <see cref="Condition"/>. The binding reacts both on
     /// initialization and on every subsequent <c>change</c> / <c>input</c> event
     /// of the source.
     /// </summary>
@@ -24,11 +24,18 @@ namespace WebExpress.WebUI.WebControl
         public string Source { get; set; }
 
         /// <summary>
-        /// Gets or sets the trigger value that causes the target element to be hidden.
-        /// When the source element's current value equals this string the target is
-        /// hidden; otherwise it is shown.
+        /// Gets or sets the condition expression evaluated against the source value.
+        /// When the condition is satisfied the target element is hidden; otherwise it is shown.
+        /// <para>Supported formats:</para>
+        /// <list type="bullet">
+        ///   <item><description><c>value</c> — equality (boolean-normalised; "true", "1", "yes", "on" are equivalent)</description></item>
+        ///   <item><description><c>=value</c> — explicit equality prefix</description></item>
+        ///   <item><description><c>!=value</c> — not-equal</description></item>
+        ///   <item><description><c>&gt;number</c>, <c>&gt;=number</c>, <c>&lt;number</c>, <c>&lt;=number</c> — numeric comparison</description></item>
+        ///   <item><description><c>/pattern/flags</c> — regular-expression match, e.g. <c>/^foo/i</c></description></item>
+        /// </list>
         /// </summary>
-        public string Value { get; set; }
+        public string Condition { get; set; }
 
         /// <summary>
         /// Applies user-defined attributes to the specified HTML node.
@@ -48,7 +55,7 @@ namespace WebExpress.WebUI.WebControl
 
             htmlNode?.AddUserAttribute("data-wx-bind", Name);
             htmlNode?.AddUserAttribute("data-wx-source-hide", sourceSelector);
-            htmlNode?.AddUserAttribute("data-wx-bind-value-hide", Value);
+            htmlNode?.AddUserAttribute("data-wx-bind-condition-hide", Condition);
 
             return this;
         }
@@ -69,9 +76,9 @@ namespace WebExpress.WebUI.WebControl
                 dict["source"] = Source.StartsWith('#') ? Source : $"#{Source}";
             }
 
-            if (!string.IsNullOrWhiteSpace(Value))
+            if (!string.IsNullOrWhiteSpace(Condition))
             {
-                dict["value"] = Value;
+                dict["condition"] = Condition;
             }
 
             return dict;

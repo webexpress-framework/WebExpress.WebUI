@@ -133,11 +133,11 @@ function matchesCondition(rawSourceValue, condition) {
         return normaliseBoolValue(rawSourceValue) === normaliseBoolValue(condition.slice(1));
     }
 
-    // 5. plain equality â€” default / current behavior
+    // 5. plain equality — default / backward-compatible behavior
     return normaliseBoolValue(rawSourceValue) === normaliseBoolValue(condition ?? "");
 }
 
-// search bind â€” forwards CHANGE_FILTER_EVENT from a source element to the bound control's search() method
+// search bind — forwards CHANGE_FILTER_EVENT from a source element to the bound control's search() method
 webexpress.webui.Binds.register("search", {
     bind(element, controller) {
         const sourceElement = resolveSourceElement(element, "search");
@@ -157,7 +157,7 @@ webexpress.webui.Binds.register("search", {
     }
 });
 
-// paging bind â€” forwards CHANGE_PAGE_EVENT from a source element to the bound control's paging() method
+// paging bind — forwards CHANGE_PAGE_EVENT from a source element to the bound control's paging() method
 webexpress.webui.Binds.register("paging", {
     bind(element, controller) {
         const sourceElement = resolveSourceElement(element, "paging");
@@ -176,7 +176,7 @@ webexpress.webui.Binds.register("paging", {
     }
 });
 
-// filter bind â€” reacts to global CHANGE_FILTER_EVENT and forwards active filters to the bound control
+// filter bind — reacts to global CHANGE_FILTER_EVENT and forwards active filters to the bound control
 webexpress.webui.Binds.register("filter", {
     bind(element, controller) {
         document.addEventListener(webexpress.webui.Event.CHANGE_FILTER_EVENT, () => {
@@ -190,24 +190,24 @@ webexpress.webui.Binds.register("filter", {
     }
 });
 
-// darkmode bind â€” syncs the icon and text of the bound element to the current dark mode state
+// darkmode bind — syncs the icon and text of the bound element to the current dark mode state
 webexpress.webui.Binds.register("darkmode", {
     bind(element) {
         const iconLight = element.getAttribute("data-wx-bind-icon-light") || "fas fa-moon";
-        const iconDark = element.getAttribute("data-wx-bind-icon-dark") || "fas fa-sun";
+        const iconDark  = element.getAttribute("data-wx-bind-icon-dark")  || "fas fa-sun";
         const textLight = element.getAttribute("data-wx-bind-text-light");
-        const textDark = element.getAttribute("data-wx-bind-text-dark");
+        const textDark  = element.getAttribute("data-wx-bind-text-dark");
 
         const sync = (mode) => {
             const isDark = mode === "dark";
 
-            // swap icon â€” look up each time since dropdown JS may build the <i> after init
+            // swap icon — look up each time since dropdown JS may build the <i> after init
             const iconEl = element.querySelector("i");
             if (iconEl) {
                 iconEl.className = isDark ? iconDark : iconLight;
             }
 
-            // swap text â€” dropdown items wrap text in a <span>; plain buttons use text nodes
+            // swap text — dropdown items wrap text in a <span>; plain buttons use text nodes
             if (textLight || textDark) {
                 const label = isDark ? (textDark || textLight) : (textLight || textDark);
                 const spanEl = element.querySelector("span");
@@ -233,7 +233,7 @@ webexpress.webui.Binds.register("darkmode", {
     }
 });
 
-// hide bind â€” hides the element (or its enclosing fieldset.wx-form-group) when the source value satisfies the condition
+// hide bind — hides the element (or its enclosing fieldset.wx-form-group) when the source value satisfies the condition
 webexpress.webui.Binds.register("hide", {
     bind(element) {
         const sourceElement = resolveSourceElement(element, "hide");
@@ -242,7 +242,7 @@ webexpress.webui.Binds.register("hide", {
             return;
         }
 
-        const condition = element.getAttribute("data-wx-bind-value-hide") ?? "";
+        const condition = element.getAttribute("data-wx-bind-condition-hide") ?? "";
         const target = resolveFormTarget(element);
 
         const sync = () => {
@@ -260,7 +260,7 @@ webexpress.webui.Binds.register("hide", {
     }
 });
 
-// disable bind â€” disables the element (or its enclosing fieldset.wx-form-group) when the source value satisfies the condition
+// disable bind — disables the element (or its enclosing fieldset.wx-form-group) when the source value satisfies the condition
 webexpress.webui.Binds.register("disable", {
     bind(element) {
         const sourceElement = resolveSourceElement(element, "disable");
@@ -269,7 +269,7 @@ webexpress.webui.Binds.register("disable", {
             return;
         }
 
-        const condition = element.getAttribute("data-wx-bind-value-disable") ?? "";
+        const condition = element.getAttribute("data-wx-bind-condition-disable") ?? "";
         const target = resolveFormTarget(element);
 
         const sync = () => {
@@ -291,3 +291,4 @@ webexpress.webui.Binds.register("disable", {
         sourceElement.addEventListener("change", sync);
         sourceElement.addEventListener("input", sync);
     }
+});

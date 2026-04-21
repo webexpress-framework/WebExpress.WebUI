@@ -1,4 +1,4 @@
-using WebExpress.WebUI.Test.Fixture;
+﻿using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
 
@@ -28,7 +28,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var input = new ControlFormItemInputText("email")
             {
                 Label = "E-Mail",
-                Bind = new Binding().Add(new BindHide { Source = "type", Value = "internal" })
+                Bind = new Binding().Add(new BindHide { Source = "type", Condition = "internal" })
             };
 
             var group = new ControlFormItemGroupVertical();
@@ -40,7 +40,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // assert — attributes must be on the fieldset, not only on the inner input
             Assert.Contains(@"data-wx-bind=""hide""", html);
             Assert.Contains(@"data-wx-source-hide=""#type""", html);
-            Assert.Contains(@"data-wx-bind-value-hide=""internal""", html);
+            Assert.Contains(@"data-wx-bind-condition-hide=""internal""", html);
             // the fieldset class must remain intact
             Assert.Contains("wx-form-group", html);
         }
@@ -61,7 +61,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var input = new ControlFormItemInputText("email")
             {
                 Label = "E-Mail",
-                Bind = new Binding().Add(new BindDisable { Source = "notify", Value = "no" })
+                Bind = new Binding().Add(new BindDisable { Source = "notify", Condition = "no" })
             };
 
             var group = new ControlFormItemGroupVertical();
@@ -73,7 +73,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // assert
             Assert.Contains(@"data-wx-bind=""disable""", html);
             Assert.Contains(@"data-wx-source-disable=""#notify""", html);
-            Assert.Contains(@"data-wx-bind-value-disable=""no""", html);
+            Assert.Contains(@"data-wx-bind-condition-disable=""no""", html);
             Assert.Contains("wx-form-group", html);
         }
 
@@ -94,8 +94,8 @@ namespace WebExpress.WebUI.Test.WebControl
             {
                 Label = "E-Mail",
                 Bind = new Binding()
-                    .Add(new BindHide    { Source = "showEmail", Value = "false" })
-                    .Add(new BindDisable { Source = "notify",    Value = "no" })
+                    .Add(new BindHide    { Source = "showEmail", Condition = "false" })
+                    .Add(new BindDisable { Source = "notify",    Condition = "no" })
             };
 
             var group = new ControlFormItemGroupVertical();
@@ -105,10 +105,66 @@ namespace WebExpress.WebUI.Test.WebControl
             var html = group.Render(context, visualTree).ToString();
 
             // assert — both bind names must appear
-            Assert.Contains("hide", html);
+            Assert.Contains("hide",    html);
             Assert.Contains("disable", html);
-            Assert.Contains(@"data-wx-source-hide=""#showEmail""", html);
+            Assert.Contains(@"data-wx-source-hide=""#showEmail""",    html);
             Assert.Contains(@"data-wx-source-disable=""#notify""", html);
+        }
+
+        /// <summary>
+        /// Tests that a numeric comparison condition is written to the fieldset attribute.
+        /// </summary>
+        [Fact]
+        public void NumericConditionAppliedToFieldsetInVerticalGroup()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+
+            var input = new ControlFormItemInputText("url")
+            {
+                Label = "URL",
+                Bind = new Binding().Add(new BindDisable { Source = "count", Condition = ">=5" })
+            };
+
+            var group = new ControlFormItemGroupVertical();
+            group.Add(input);
+
+            // act
+            var html = group.Render(context, visualTree).ToString();
+
+            // assert
+            Assert.Contains(@"data-wx-bind-condition-disable="">=5""", html);
+        }
+
+        /// <summary>
+        /// Tests that a regex condition is written to the fieldset attribute.
+        /// </summary>
+        [Fact]
+        public void RegexConditionAppliedToFieldsetInVerticalGroup()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+
+            var input = new ControlFormItemInputText("url")
+            {
+                Label = "URL",
+                Bind = new Binding().Add(new BindHide { Source = "mode", Condition = "/^internal/i" })
+            };
+
+            var group = new ControlFormItemGroupVertical();
+            group.Add(input);
+
+            // act
+            var html = group.Render(context, visualTree).ToString();
+
+            // assert
+            Assert.Contains(@"data-wx-bind-condition-hide=""/^internal/i""", html);
         }
 
         /// <summary>
@@ -154,7 +210,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var input = new ControlFormItemInputText("url")
             {
                 Label = "URL",
-                Bind = new Binding().Add(new BindHide { Source = "type", Value = "internal" })
+                Bind = new Binding().Add(new BindHide { Source = "type", Condition = "internal" })
             };
 
             var group = new ControlFormItemGroupColumnVertical();
@@ -166,7 +222,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // assert
             Assert.Contains(@"data-wx-bind=""hide""", html);
             Assert.Contains(@"data-wx-source-hide=""#type""", html);
-            Assert.Contains(@"data-wx-bind-value-hide=""internal""", html);
+            Assert.Contains(@"data-wx-bind-condition-hide=""internal""", html);
             Assert.Contains("wx-form-group", html);
         }
     }
