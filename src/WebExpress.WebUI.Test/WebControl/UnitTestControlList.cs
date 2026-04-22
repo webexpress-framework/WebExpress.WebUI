@@ -14,9 +14,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the list control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<ul></ul>")]
-        [InlineData("id", @"<ul id=""id""></ul>")]
-        [InlineData("03C6031F-04A9-451F-B817-EBD6D32F8B0C", @"<ul id=""03C6031F-04A9-451F-B817-EBD6D32F8B0C""></ul>")]
+        [InlineData(null, @"<div class=""wx-webui-list""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-list""></div>")]
+        [InlineData("03C6031F-04A9-451F-B817-EBD6D32F8B0C", @"<div id=""03C6031F-04A9-451F-B817-EBD6D32F8B0C"" class=""wx-webui-list""></div>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -37,14 +37,14 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the background color property of the list control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorBackground.Default, @"<ul></ul>")]
-        [InlineData(TypeColorBackground.Primary, @"<ul class=""bg-primary""></ul>")]
-        [InlineData(TypeColorBackground.Secondary, @"<ul class=""bg-secondary""></ul>")]
-        [InlineData(TypeColorBackground.Warning, @"<ul class=""bg-warning""></ul>")]
-        [InlineData(TypeColorBackground.Danger, @"<ul class=""bg-danger""></ul>")]
-        [InlineData(TypeColorBackground.Dark, @"<ul class=""bg-dark""></ul>")]
-        [InlineData(TypeColorBackground.Light, @"<ul class=""bg-light""></ul>")]
-        [InlineData(TypeColorBackground.Transparent, @"<ul class=""bg-transparent""></ul>")]
+        [InlineData(TypeColorBackground.Default, @"<div class=""wx-webui-list""></div>")]
+        [InlineData(TypeColorBackground.Primary, @"<div class=""wx-webui-list bg-primary""></div>")]
+        [InlineData(TypeColorBackground.Secondary, @"<div class=""wx-webui-list bg-secondary""></div>")]
+        [InlineData(TypeColorBackground.Warning, @"<div class=""wx-webui-list bg-warning""></div>")]
+        [InlineData(TypeColorBackground.Danger, @"<div class=""wx-webui-list bg-danger""></div>")]
+        [InlineData(TypeColorBackground.Dark, @"<div class=""wx-webui-list bg-dark""></div>")]
+        [InlineData(TypeColorBackground.Light, @"<div class=""wx-webui-list bg-light""></div>")]
+        [InlineData(TypeColorBackground.Transparent, @"<div class=""wx-webui-list bg-transparent""></div>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {
             // arrange
@@ -66,11 +66,11 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the layout property of the list control.
         /// </summary>
         [Theory]
-        [InlineData(TypeLayoutList.Default, @"<ul></ul>")]
-        [InlineData(TypeLayoutList.Simple, @"<ul class=""list-unstyled""></ul>")]
-        [InlineData(TypeLayoutList.Group, @"<ul class=""list-group""></ul>")]
-        [InlineData(TypeLayoutList.Horizontal, @"<ul class=""list-group list-group-horizontal""></ul>")]
-        [InlineData(TypeLayoutList.Flush, @"<ul class=""list-group list-group-flush""></ul>")]
+        [InlineData(TypeLayoutList.Default, @"<div class=""wx-webui-list""></div>")]
+        [InlineData(TypeLayoutList.Simple, @"<div class=""wx-webui-list"" data-layout=""list-unstyled""></div>")]
+        [InlineData(TypeLayoutList.Group, @"<div class=""wx-webui-list"" data-layout=""list-group""></div>")]
+        [InlineData(TypeLayoutList.Horizontal, @"<div class=""wx-webui-list"" data-layout=""list-group list-group-horizontal""></div>")]
+        [InlineData(TypeLayoutList.Flush, @"<div class=""wx-webui-list"" data-layout=""list-group list-group-flush""></div>")]
         public void Layout(TypeLayoutList layout, string expected)
         {
             // arrange
@@ -89,17 +89,20 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the add function of the list control.
+        /// Tests that the Title property emits a data-title attribute.
         /// </summary>
         [Theory]
-        [MemberData(nameof(GetControlListItemsData))]
-        public void Add(IEnumerable<ControlListItem> items, string expected)
+        [InlineData(null, @"<div class=""wx-webui-list""></div>")]
+        [InlineData("", @"<div class=""wx-webui-list""></div>")]
+        [InlineData("My List", @"<div class=""wx-webui-list"" data-title=""My List""></div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-list"" data-title=""WebExpress.WebUI""></div>")]
+        public void Title(string title, string expected)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlList(null, items.ToArray());
+            var control = new ControlList(null) { Title = title };
 
             // act
             var html = control.Render(context, visualTree);
@@ -108,17 +111,43 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Provides test data for the Add method of the UnitTestControlList class.
+        /// Tests that Sortable=true emits data-sortable="true" and Sortable=false omits the attribute.
         /// </summary>
-        /// <returns>An enumerable collection of object arrays, each containing test data.</returns>
-        public static TheoryData<IEnumerable<ControlListItem>, string> GetControlListItemsData()
+        [Theory]
+        [InlineData(false, @"<div class=""wx-webui-list""></div>")]
+        [InlineData(true, @"<div class=""wx-webui-list"" data-sortable=""true""></div>")]
+        public void Sortable(bool sortable, string expected)
         {
-            return new TheoryData<IEnumerable<ControlListItem>, string>
-            {
-                { new List<ControlListItem> { new(null, new ControlText() { Text = "Item 1" }) }, @"<ul><li><div>Item 1</div></li></ul>" },
-                { new List<ControlListItem> { new("id") }, @"<ul><li id=""id""></li></ul>" },
-                { new List<ControlListItem> { }, "<ul></ul>" }
-            };
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlList(null) { Sortable = sortable };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that Title and Sortable can be combined on the same control.
+        /// </summary>
+        [Fact]
+        public void TitleAndSortableTogetherEmitBothAttributes()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlList(null) { Title = "Characters", Sortable = true };
+
+            // act
+            var html = control.Render(context, visualTree).ToString();
+
+            // assert
+            Assert.Contains(@"data-title=""Characters""", html);
+            Assert.Contains(@"data-sortable=""true""", html);
         }
     }
 }
