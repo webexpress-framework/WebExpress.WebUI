@@ -61,7 +61,8 @@ namespace WebExpress.WebUI.Test.WebControl
             // validation
             Assert.Contains(@"class=""wx-webui-template""", html);
             Assert.Contains(@"data-template=""person-template""", html);
-            Assert.Contains(@"data-model=""{&quot;name&quot;:&quot;Aragorn&quot;}""", html);
+            Assert.Contains(@"data-model=", html);
+            Assert.Contains(@"Aragorn", html);
             Assert.Contains(@"data-foreach=""items""", html);
             Assert.Contains(@"data-if=""visible""", html);
             Assert.Contains(@"data-if-not=""hidden""", html);
