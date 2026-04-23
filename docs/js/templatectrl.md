@@ -28,6 +28,8 @@ The control is configured via `data-` attributes on the host element and inside 
 
 ### Template Node Attributes
 
+> Note: `data-template` on the **host element** selects the root template source, while `data-template` on a **template node** includes/renders a nested template at that node.
+
 | Attribute | Description | Example |
 |-----------|-------------|---------|
 | `data-foreach` | Repeats the node for each item in the referenced list. | `data-foreach="items"` |
