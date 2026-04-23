@@ -70,6 +70,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/webexpress.webui.tag.js")]
     [Asset("/assets/js/webexpress.webui.tile.js")]
     [Asset("/assets/js/webexpress.webui.toolbar.js")]
+    [Asset("/assets/js/webexpress.webui.template.js")]
     [Asset("/assets/js/webexpress.webui.tree.js")]
     [Asset("/assets/js/webexpress.webui.upload.js")]
     [Asset("/assets/js/webexpress.webui.view.js")]
