@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -21,21 +20,11 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the layout.
         /// </summary>
-        public TypeLayoutList Layout { get; set; }
-
-        /// <summary>
-        /// Gets or sets the title displayed in the list header.
-        /// Set to <c>null</c> (default) to hide the header entirely.
-        /// </summary>
-        public string Title { get; set; }
-
-        /// <summary>
-        /// Gets or sets whether the header shows a sort-toggle button that lets the
-        /// user cycle through ascending → descending → unsorted order.
-        /// Requires <see cref="Title"/> to be set <em>or</em> <c>Sortable = true</c>
-        /// to make the header visible.
-        /// </summary>
-        public bool Sortable { get; set; }
+        public TypeLayoutList Layout
+        {
+            get => (TypeLayoutList)GetProperty(TypeLayoutList.Default);
+            set => SetProperty(value, () => value.ToClass());
+        }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -148,17 +137,23 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<ControlListItem> items)
         {
-            var html = new HtmlElementTextContentDiv()
+            var li = items.Where(x => x.Enable).Select(x => x.Render(renderContext, visualTree)).ToList();
+            switch (Layout)
+            {
+                case TypeLayoutList.Horizontal:
+                case TypeLayoutList.Flush:
+                case TypeLayoutList.Group:
+                    li.ForEach(x => x.AddClass("list-group-item"));
+                    break;
+            }
+
+            var html = new HtmlElementTextContentUl([.. li])
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-list", GetClasses()),
+                Class = Css.Concatenate("", GetClasses()),
                 Style = GetStyles(),
                 Role = Role
-            }
-                .AddUserAttribute("data-title", I18N.Translate(renderContext, Title))
-                .AddUserAttribute("data-sortable", Sortable ? "true" : null)
-                .AddUserAttribute("data-layout", Layout.ToClass())
-                .Add(_items.Select(x => x.Render(renderContext, visualTree)));
+            };
 
             return html;
         }

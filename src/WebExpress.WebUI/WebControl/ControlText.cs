@@ -334,8 +334,6 @@ namespace WebExpress.WebUI.WebControl
                     break;
                 case TypeFormatText.Markdown:
                     return MarkdownParser.Parse(text).ConvertToHtml(renderContext);
-                case TypeFormatText.Raw:
-                    return new HtmlText(text);
                 default:
                     html = new HtmlElementTextContentDiv(new HtmlText(text))
                     {
