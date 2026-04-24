@@ -2,7 +2,6 @@
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
-using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebParameter;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
@@ -20,11 +19,6 @@ namespace WebExpress.WebUI.WebControl
         public IUri Uri { get; set; }
 
         /// <summary>
-        /// Gets or sets the text.
-        /// </summary>
-        public string Text { get; set; }
-
-        /// <summary>
         /// Gets or sets the target.
         /// </summary>
         public TypeTarget Target { get; set; }
@@ -40,34 +34,16 @@ namespace WebExpress.WebUI.WebControl
         public string Tooltip { get; set; }
 
         /// <summary>
-        /// Gets or sets the icon.
-        /// </summary>
-        public IIcon Icon { get; set; }
-
-        /// <summary>
         /// Gets or sets the parameters that apply to the link.
         /// </summary>
         public List<Parameter> Params { get; set; }
 
         /// <summary>
-        /// Gets or sets the secondary action, typically triggered by a 
-        /// click to open a modal or similar target.
-        /// </summary>
-        public IAction PrimaryAction { get; set; }
-
-        /// <summary>
-        /// Gets or sets the secondary action, typically triggered by a 
-        /// double‑click to open a modal or similar target.
-        /// </summary>
-        public IAction SecondaryAction { get; set; }
-
-        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        /// <param name="content">The content of the html element.</param>
-        public ControlListItemLink(string id = null, params Control[] content)
-            : base(id, content)
+        public ControlListItemLink(string id = null)
+            : base(id)
         {
         }
 
@@ -109,56 +85,14 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var param = GetParams();
-            var link = new HtmlElementTextSemanticsA(Content.Select(x => x.Render(renderContext, visualTree)).ToArray())
-            {
-                Id = Id,
-                Class = Css.Concatenate("wx-link"),
-                Style = GetStyles(),
-                Role = Role,
-                Href = Uri?.ToString() + (param.Length > 0 ? "?" + param : string.Empty),
-                Target = Target,
-                Title = Title,
-                OnClick = OnClick?.ToString()
-            };
+            var html = base.Render(renderContext, visualTree);
+            html.AddClass("wx-list-item-link");
+            html.RemoveClass("wx-list-item");
 
-            if (Icon is not null)
-            {
-                link.Add(new ControlIcon()
-                {
-                    Icon = Icon,
-                    Margin = !string.IsNullOrWhiteSpace(Text) ? new PropertySpacingMargin
-                    (
-                        PropertySpacing.Space.None,
-                        PropertySpacing.Space.Two,
-                        PropertySpacing.Space.None,
-                        PropertySpacing.Space.None
-                    ) : new PropertySpacingMargin(PropertySpacing.Space.None),
-                    VerticalAlignment = TypeVerticalAlignment.Default
-                }.Render(renderContext, visualTree));
-            }
-
-            if (!string.IsNullOrWhiteSpace(Text))
-            {
-                link.Add(new HtmlText(I18N.Translate(renderContext.Request?.Culture, Text)));
-            }
-
-            if (!string.IsNullOrWhiteSpace(Tooltip))
-            {
-                link.AddUserAttribute("data-bs-toggle", "tooltip");
-            }
-
-            PrimaryAction?.ApplyUserAttributes(link, TypeAction.Primary);
-            SecondaryAction?.ApplyUserAttributes(link, TypeAction.Secondary);
-
-            var html = new HtmlElementTextContentLi(link)
-            {
-                Id = Id,
-                Class = Css.Concatenate("list-group-item-action", GetClasses()),
-                Style = GetStyles(),
-                Role = Role,
-                OnClick = OnClick?.ToString()
-            };
+            html.AddUserAttribute("data-title", I18N.Translate(renderContext, Title));
+            html.AddUserAttribute("data-tooltip", I18N.Translate(renderContext, Tooltip));
+            html.AddUserAttribute("data-uri", Uri?.ToString());
+            html.AddUserAttribute("data-target", Target.ToValue());
 
             return html;
         }

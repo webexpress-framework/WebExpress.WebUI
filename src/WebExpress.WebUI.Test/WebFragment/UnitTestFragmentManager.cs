@@ -99,7 +99,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlList()
         {
             // arrange
-            var expected = @"<ul id=""webexpress-webui-test-testfragmentcontrollist""><li></li></ul>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrollist"" class=""wx-webui-list""><div class=""wx-list-item""></div></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
@@ -385,7 +385,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlTree()
         {
             // arrange
-            var expected = @"<ul id=""webexpress-webui-test-testfragmentcontroltree""><li></li></ul>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroltree"" class=""wx-webui-list""><div class=""wx-list-item""></div></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
