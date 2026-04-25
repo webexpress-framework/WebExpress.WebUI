@@ -13,6 +13,10 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
     // dom nodes
     _navElement = null;
     _contentElement = null;
+    _toolbarLi = null;
+    
+    // controllers
+    _toolbarCtrl = null;
 
     /**
      * Creates a tab controller for the root element.
@@ -36,14 +40,31 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
         const el = this._element;
         el.classList.add("wx-tab-container");
 
+        const layout = el.dataset.layout || "default";
+
         // create navigation wrapper
         this._navElement = document.createElement("ul");
-        this._navElement.className = "nav nav-tabs wx-tab-nav";
+        
+        let navClass = "nav wx-tab-nav";
+        if (layout === "underline") {
+            navClass += " nav-underline";
+        } else if (layout === "pill") {
+            navClass += " nav-pills";
+        } else {
+            navClass += " nav-tabs";
+        }
+        
+        this._navElement.className = navClass;
         this._navElement.setAttribute("role", "tablist");
 
         // create content wrapper
         this._contentElement = document.createElement("div");
-        this._contentElement.className = "tab-content wx-tab-content p-3 border border-top-0";
+        
+        let contentClass = "tab-content wx-tab-content p-3";
+        if (layout === "default" || layout === "tab") {
+            contentClass += " border border-top-0";
+        }
+        this._contentElement.className = contentClass;
 
         // find all predefined tab views
         const children = Array.from(el.querySelectorAll(":scope > .wx-tab-view"));
@@ -76,6 +97,17 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
 
             // move pane into content wrapper safely
             this._contentElement.appendChild(pane);
+        }
+
+        // find and append toolbar if it exists
+        const toolbarElement = el.querySelector(":scope > .wx-tab-toolbar");
+        if (toolbarElement) {
+            this._toolbarCtrl = new webexpress.webui.ToolbarCtrl(toolbarElement);
+
+            this._toolbarLi = document.createElement("li");
+            this._toolbarLi.className = "nav-item ms-auto d-flex align-items-center";
+            this._toolbarLi.appendChild(toolbarElement);
+            this._navElement.appendChild(this._toolbarLi);
         }
 
         el.appendChild(this._navElement);
@@ -184,6 +216,14 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
         this._dispatch(webexpress.webui.Event.SELECTED_TAB_EVENT, {
             tabId: tabId
         });
+    }
+
+    /**
+     * Returns the toolbar controller instance associated with this tab control, if any.
+     * @returns {webexpress.webui.ToolbarCtrl}
+     */
+    get toolbar() {
+        return this._toolbarCtrl;
     }
 };
 

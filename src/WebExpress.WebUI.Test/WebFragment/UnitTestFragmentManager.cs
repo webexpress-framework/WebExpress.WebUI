@@ -1,4 +1,4 @@
-﻿using WebExpress.WebCore.WebScope;
+using WebExpress.WebCore.WebScope;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebPage;
 
@@ -803,7 +803,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlTab()
         {
             // arrange
-            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroltab"" class=""wx-webui-tab""><div class=""wx-tab-view""></div></div>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroltab"" class=""wx-webui-tab"" data-layout=""default""><div class=""wx-tab-view""></div></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);

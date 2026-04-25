@@ -1,4 +1,4 @@
-﻿namespace WebExpress.WebUI.WebControl
+namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// The layout options for the tab control element.
@@ -23,7 +23,12 @@
         /// <summary>
         /// The pill layout.
         /// </summary>
-        Pill
+        Pill,
+
+        /// <summary>
+        /// The underline layout.
+        /// </summary>
+        Underline
     }
 
     /// <summary>
@@ -42,6 +47,7 @@
             {
                 TypeLayoutTab.Tab => "nav-tabs",
                 TypeLayoutTab.Pill => "nav-pills",
+                TypeLayoutTab.Underline => "nav-underline",
                 _ => string.Empty,
             };
         }
