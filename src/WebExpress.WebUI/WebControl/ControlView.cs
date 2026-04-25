@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -15,7 +15,7 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<IControlViewFooter> _footers = [];
 
         /// <summary>
-        /// Returns the collection of headers that define the structure 
+        /// Returns the collection of headers that define the structure
         /// and metadata of the control view.
         /// </summary>
         public IEnumerable<IControlViewHeader> Headers => _headers;
@@ -31,21 +31,14 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlViewFooter> Footers => _footers;
 
         /// <summary>
-        /// Gets or sets the explicit Id for the detail frame.
+        /// Gets or sets the layout used to render the view control.
         /// </summary>
-        public string DetailId { get; set; }
-
-        /// <summary>
-        /// Gets or sets the selector for the detail frame.
-        /// </summary>
-        public string DetailSelector { get; set; }
+        public TypeLayoutView Layout { get; set; } = TypeLayoutView.Default;
 
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        /// <param name="columns">The columns to add to the table.</param>
-        /// <param name="rows">The rows to add to the table.</param>
         public ControlView(string id = null)
             : base(id)
         {
@@ -176,8 +169,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(),
                 Role = Role
             }
-                .AddUserAttribute("data-detail-id", DetailId)
-                .AddUserAttribute("data-detail-selector", DetailSelector)
+                .AddUserAttribute("data-layout", Layout == TypeLayoutView.Default ? null : Layout.ToValue())
                 .Add(_headers.Select(x => x.Render(renderContext, visualTree)))
                 .Add(_views.Select(x => x.Render(renderContext, visualTree)))
                 .Add(_footers.Select(x => x.Render(renderContext, visualTree)));

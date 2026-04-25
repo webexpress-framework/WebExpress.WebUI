@@ -19,10 +19,15 @@ namespace WebExpress.WebUI.WebControl
         IEnumerable<IControlViewItem> Views { get; }
 
         /// <summary>
-        /// Gets the collection of footers associated with the 
+        /// Gets the collection of footers associated with the
         /// control view.
         /// </summary>
         IEnumerable<IControlViewFooter> Footers { get; }
+
+        /// <summary>
+        /// Gets the layout used to render the view control.
+        /// </summary>
+        TypeLayoutView Layout { get; }
 
         /// <summary>
         /// Adds one or more headers to the view control.

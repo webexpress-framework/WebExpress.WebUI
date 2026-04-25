@@ -1,4 +1,4 @@
-﻿using WebExpress.WebUI.Test.Fixture;
+using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
 
@@ -33,12 +33,12 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the detail id property of the view control.
+        /// Tests the layout property of the view control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-view""></div>")]
-        [InlineData("id", @"<div class=""wx-webui-view"" data-detail-id=""id""></div>")]
-        public void DetailId(string id, string expected)
+        [InlineData(TypeLayoutView.Default, @"<div class=""wx-webui-view""></div>")]
+        [InlineData(TypeLayoutView.ToggleGroup, @"<div class=""wx-webui-view"" data-layout=""togglegroup""></div>")]
+        public void Layout(TypeLayoutView layout, string expected)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -46,30 +46,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlView(null)
             {
-                DetailId = id
-            };
-
-            // act
-            var html = control.Render(context, visualTree);
-
-            AssertExtensions.EqualWithPlaceholders(expected, html);
-        }
-
-        /// <summary>
-        /// Tests the detail selector property of the view control.
-        /// </summary>
-        [Theory]
-        [InlineData(null, @"<div class=""wx-webui-view""></div>")]
-        [InlineData("#id", @"<div class=""wx-webui-view"" data-detail-selector=""#id""></div>")]
-        public void DetailSelector(string selector, string expected)
-        {
-            // arrange
-            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CreateRenderContextMock();
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlView(null)
-            {
-                DetailSelector = selector
+                Layout = layout
             };
 
             // act

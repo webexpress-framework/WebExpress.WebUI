@@ -42,26 +42,6 @@ namespace WebExpress.WebUI.WebControl
         public IUri Image { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the detail frame is enabled.
-        /// </summary>
-        public bool DetailFrame { get; set; }
-
-        /// <summary>
-        /// Gets or sets the initial size of the detail pane (e.g. "300px" or "30%").
-        /// </summary>
-        public string DetailSize { get; set; }
-
-        /// <summary>
-        /// Gets or sets the minimum size of the detail pane in pixels.
-        /// </summary>
-        public int? DetailMinSide { get; set; }
-
-        /// <summary>
-        /// Gets or sets the maximum size of the detail pane in pixels.
-        /// </summary>
-        public int? DetailMaxSide { get; set; }
-
-        /// <summary>
         /// Returns the content of the view control.
         /// </summary>
         public IEnumerable<IControl> Content => _content;
@@ -128,10 +108,6 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-description", I18N.Translate(renderContext, Description))
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
                 .AddUserAttribute("data-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-has-details", DetailFrame ? "true" : null)
-                .AddUserAttribute("data-detail-size", DetailSize)
-                .AddUserAttribute("data-detail-min-side", DetailMinSide?.ToString())
-                .AddUserAttribute("data-detail-max-side", DetailMaxSide?.ToString())
                 .Add(_content.Select(x => x.Render(renderContext, visualTree)));
 
             return html;

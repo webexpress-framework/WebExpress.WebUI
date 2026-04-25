@@ -20,11 +20,6 @@ namespace WebExpress.WebUI.WebControl
         string Description { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the detail frame is enabled.
-        /// </summary>
-        bool DetailFrame { get; }
-
-        /// <summary>
         /// Gets the content of the view control.
         /// </summary>
         IEnumerable<IControl> Content { get; }

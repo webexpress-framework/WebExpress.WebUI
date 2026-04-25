@@ -1,5 +1,9 @@
 /**
- * ViewCtrl - Simple Multi-View Switcher with optional Split Detail Pane.
+ * ViewCtrl - Multi-View Switcher.
+ * Supports two layouts:
+ * - default:     toolbar with the active view's title/description and a dropdown for switching.
+ * - togglegroup: compact toggle bar with all available views as labels/icons. No title/description.
+ *
  * The following events are triggered:
  * - webexpress.webui.Event.CHANGE_VISIBILITY_EVENT
  */
@@ -9,10 +13,9 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     _viewsConfig = [];
     _activeViewIndex = -1;
     _storageKey = "";
-    _globalDetailId = null;
-    _globalDetailSelector = null;
+    _layout = "default";
 
-    // dropdown control instance and host element
+    // dropdown control instance and host element (default layout only)
     _viewDropdownCtrl = null;
     _viewDropdownHost = null;
 
@@ -24,27 +27,24 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     _views = {
         toolbar: null,
         statusbar: null,
-        splitHost: null,
         masterPane: null,
-        detailPane: null,
         bodyWrapper: null,
         header: null,
         footer: null
     };
 
     _ctrls = {
-        activeMaster: null,
-        detailFrame: null,
-        split: null
+        activeMaster: null
     };
 
     _elements = {
         title: null,
         desc: null,
         icon: null,
-        viewBtnLabel: null,
         viewDropdownMenu: null,
-        viewDropdownTrigger: null
+        viewDropdownTrigger: null,
+        toggleGroup: null,
+        toggleButtons: []
     };
 
     /**
@@ -58,9 +58,9 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         const baseId = element.id || "wx-view-ctrl";
         this._storageKey = `wx_view_state_${baseId}`;
 
-        // read global detail id from host element
-        this._globalDetailId = element.dataset.detailId || null;
-        this._globalDetailSelector = element.dataset.detailSelector || null;
+        // resolve layout (default | togglegroup)
+        const rawLayout = (element.dataset.layout || "default").trim().toLowerCase();
+        this._layout = rawLayout === "togglegroup" ? "togglegroup" : "default";
 
         this._parseViews(element);
         this._buildLayout(element);
@@ -79,7 +79,6 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         // use requestAnimationFrame to ensure dom is ready before switching
         requestAnimationFrame(() => {
             if (this._viewsConfig.length > 0) {
-                // validate index against config length
                 if (initialIndex >= this._viewsConfig.length) {
                     initialIndex = 0;
                 }
@@ -92,7 +91,6 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
      * Cleanup resources when controller is destroyed.
      */
     dispose() {
-        // disconnect observers
         if (this._headerObserver) {
             this._headerObserver.disconnect();
             this._headerObserver = null;
@@ -102,14 +100,10 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
             this._footerObserver = null;
         }
 
-        // destroy child controllers
         if (this._viewDropdownCtrl && typeof this._viewDropdownCtrl.destroy === "function") {
             this._viewDropdownCtrl.destroy();
         }
 
-        this._teardownDetailStructure();
-
-        // clear references
         this._viewsConfig = [];
         this._views = {};
         this._ctrls = {};
@@ -144,32 +138,20 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
                 fragment.appendChild(node.firstChild);
             }
             wrapper.appendChild(fragment);
-            const contentNode = wrapper;
 
             const ds = node.dataset;
             const title = ds.title || ds.label || `View ${index + 1}`;
             const description = ds.description || ds.desc || "";
             const iconCss = ds.iconCss || ds.icon || null;
-            const iconImg = ds.iconImg || null;
-            const hasDetails = ((ds.hasDetails || "").trim().toLowerCase() === "true");
-
-            // read sizing config from item (still per item possible) or defaults
-            const detailSize = ds.detailSize || null;
-            const detailMin = ds.detailMinSide ? parseInt(ds.detailMinSide, 10) : null;
-            const detailMax = ds.detailMaxSide ? parseInt(ds.detailMaxSide, 10) : null;
+            const iconImg = ds.iconImg || ds.image || null;
 
             const config = {
                 index: index,
-                type: null,
                 title: title,
                 description: description,
                 iconCss: iconCss,
                 iconImg: iconImg,
-                hasDetails: hasDetails,
-                detailSize: detailSize,
-                detailMin: detailMin,
-                detailMax: detailMax,
-                contentNode: contentNode,
+                contentNode: wrapper,
                 container: null,
                 controller: null
             };
@@ -191,7 +173,11 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     _buildLayout(host) {
         host.classList.add("wx-view");
 
-        this._buildToolbar(host);
+        if (this._layout === "togglegroup") {
+            this._buildToggleBar(host);
+        } else {
+            this._buildToolbar(host);
+        }
 
         if (this._views.header) {
             host.appendChild(this._views.header);
@@ -215,7 +201,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Build toolbar.
+     * Build the default toolbar with title/description and a dropdown.
      * @param {HTMLElement} host host element
      */
     _buildToolbar(host) {
@@ -253,6 +239,25 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Build the toggle bar used by the togglegroup layout.
+     * @param {HTMLElement} host host element
+     */
+    _buildToggleBar(host) {
+        const tb = document.createElement("div");
+        tb.className = "wx-view-toolbar wx-view-togglegroup d-flex align-items-center p-2 gap-2";
+
+        const group = document.createElement("div");
+        group.className = "btn-group";
+        group.setAttribute("role", "group");
+
+        tb.appendChild(group);
+        host.appendChild(tb);
+
+        this._views.toolbar = tb;
+        this._elements.toggleGroup = group;
+    }
+
+    /**
      * Build status bar (footer).
      * @param {HTMLElement} host host element
      */
@@ -274,11 +279,9 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Initialize sub-views.
+     * Initialize sub-views and the active switcher (dropdown or toggle bar).
      */
     _initSubViews() {
-        const dropdownFragment = document.createDocumentFragment();
-
         this._viewsConfig.forEach(cfg => {
             const container = document.createElement("div");
             container.className = "wx-view-container h-100 w-100 d-none";
@@ -292,7 +295,24 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
             if (cfg.contentNode && cfg.contentNode.controller) {
                 cfg.controller = cfg.contentNode.controller;
             }
+        });
 
+        if (this._layout === "togglegroup") {
+            this._initToggleButtons();
+        } else {
+            this._initDropdown();
+        }
+
+        this._updateHeaderFooterBorders();
+    }
+
+    /**
+     * Populate the dropdown for the default layout.
+     */
+    _initDropdown() {
+        const fragment = document.createDocumentFragment();
+
+        this._viewsConfig.forEach(cfg => {
             const itemEl = document.createElement("a");
             itemEl.className = "wx-dropdown-item";
             itemEl.href = "#";
@@ -301,23 +321,15 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
                 itemEl.setAttribute("data-icon", cfg.iconCss);
             }
             itemEl.textContent = cfg.title;
-            dropdownFragment.appendChild(itemEl);
+            fragment.appendChild(itemEl);
         });
 
         if (this._viewDropdownHost) {
-            this._viewDropdownHost.appendChild(dropdownFragment);
+            this._viewDropdownHost.appendChild(fragment);
         }
 
         this._viewDropdownCtrl = new webexpress.webui.DropdownCtrl(this._viewDropdownHost);
-        this._setupDropdownEvents();
 
-        this._updateHeaderFooterBorders();
-    }
-
-    /**
-     * Setup events for dropdown interaction.
-     */
-    _setupDropdownEvents() {
         this._viewDropdownHost.addEventListener(webexpress.webui.Event.CLICK_EVENT, (ev) => {
             ev.preventDefault();
             ev.stopPropagation();
@@ -332,6 +344,49 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
                     }
                 }
             }
+        });
+    }
+
+    /**
+     * Build toggle buttons for the togglegroup layout.
+     */
+    _initToggleButtons() {
+        const group = this._elements.toggleGroup;
+        if (!group) {
+            return;
+        }
+
+        this._elements.toggleButtons = this._viewsConfig.map(cfg => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "btn btn-outline-primary";
+            btn.dataset.index = cfg.index;
+            btn.title = cfg.title;
+
+            if (cfg.iconCss) {
+                const icon = document.createElement("i");
+                icon.className = `${cfg.iconCss} me-1`;
+                btn.appendChild(icon);
+            } else if (cfg.iconImg) {
+                const img = document.createElement("img");
+                img.src = cfg.iconImg;
+                img.style.height = "16px";
+                img.style.width = "auto";
+                img.className = "me-1";
+                btn.appendChild(img);
+            }
+
+            const label = document.createElement("span");
+            label.textContent = cfg.title;
+            btn.appendChild(label);
+
+            btn.addEventListener("click", (ev) => {
+                ev.preventDefault();
+                this.switchView(cfg.index);
+            });
+
+            group.appendChild(btn);
+            return btn;
         });
     }
 
@@ -394,125 +449,6 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Ensure detail structure exists (lazy creation).
-     * Uses the global detail id if configured on the host element.
-     */
-    _ensureDetailStructure() {
-        if (this._views.detailPane && this._views.splitHost) {
-            return;
-        }
-
-        const splitHost = document.createElement("div");
-        splitHost.dataset.orientation = "horizontal";
-        splitHost.dataset.saveState = "true";
-        splitHost.dataset.order = "main-side";
-        splitHost.className = "h-100 w-100";
-
-        // generate base id for sub-components based on controller id
-        const baseId = this._element.id || `wx_view_${Math.floor(Math.random() * 10000)}`;
-
-        // assign id to splitter host to enable cookie state persistence in split-controller
-        splitHost.id = `${baseId}-split`;
-
-        // apply configuration from current view if available for initial setup
-        const activeCfg = this._viewsConfig[this._activeViewIndex];
-        if (activeCfg) {
-            if (activeCfg.detailSize) {
-                splitHost.dataset.size = activeCfg.detailSize;
-            }
-            if (activeCfg.detailMin) {
-                splitHost.dataset.minSide = activeCfg.detailMin;
-            }
-            if (activeCfg.detailMax) {
-                splitHost.dataset.maxSide = activeCfg.detailMax;
-            }
-        }
-
-        if (this._views.bodyWrapper && this._views.bodyWrapper.parentNode) {
-            this._views.bodyWrapper.parentNode.replaceChild(splitHost, this._views.bodyWrapper);
-        }
-
-        this._views.bodyWrapper = splitHost;
-        this._views.splitHost = splitHost;
-
-        // IMPORTANT: remove w-100 and flex-fill so splitter can control the width
-        this._views.masterPane.className = "wx-main-pane";
-
-        this._views.detailPane = document.createElement("div");
-        this._views.detailPane.className = "wx-side-pane wx-webui-frame";
-
-        // assign the global id if present, otherwise generate one based on host id
-        if (this._globalDetailId) {
-            this._views.detailPane.id = this._globalDetailId;
-        } else {
-            this._views.detailPane.id = `${baseId}-detail-frame`;
-        }
-
-        if (this._globalDetailSelector) {
-            this._views.detailPane.dataset.selector = this._globalDetailSelector;
-        }
-
-        const placeholderWrapper = document.createElement("div");
-        placeholderWrapper.className = "d-flex h-100 align-items-center justify-content-center text-muted";
-
-        const centerBox = document.createElement("div");
-        centerBox.className = "text-center p-4";
-
-        const icon = document.createElement("i");
-        icon.className = "fa-regular fa-file-lines fa-3x mb-3 text-secondary";
-
-        const br = document.createElement("br");
-        const span = document.createElement("span");
-        span.textContent = this._i18n("webexpress.webui:view.select.item", "Select an item to view details.");
-
-        centerBox.appendChild(icon);
-        centerBox.appendChild(br);
-        centerBox.appendChild(span);
-        placeholderWrapper.appendChild(centerBox);
-        this._views.detailPane.appendChild(placeholderWrapper);
-
-        this._views.splitHost.appendChild(this._views.masterPane);
-        this._views.splitHost.appendChild(this._views.detailPane);
-
-        if (webexpress.webui.SplitCtrl) {
-            this._ctrls.split = new webexpress.webui.SplitCtrl(this._views.splitHost);
-        }
-    }
-
-    /**
-     * Remove detail structure when not needed.
-     */
-    _teardownDetailStructure() {
-        if (this._views.detailPane && this._views.detailPane.parentNode) {
-            this._views.detailPane.parentNode.removeChild(this._views.detailPane);
-        }
-        this._views.detailPane = null;
-
-        if (this._ctrls.split) {
-            if (typeof this._ctrls.split.destroy === "function") {
-                this._ctrls.split.destroy();
-            }
-            this._ctrls.split = null;
-        }
-
-        if (this._views.splitHost && this._views.splitHost.parentNode) {
-            const parent = this._views.splitHost.parentNode;
-
-            const bodyWrapper = document.createElement("div");
-            bodyWrapper.className = "wx-view-body flex-fill position-relative overflow-hidden d-flex";
-
-            this._views.masterPane.removeAttribute("style");
-            this._views.masterPane.className = "wx-main-pane flex-fill w-100 h-100";
-
-            bodyWrapper.appendChild(this._views.masterPane);
-            parent.replaceChild(bodyWrapper, this._views.splitHost);
-
-            this._views.splitHost = null;
-            this._views.bodyWrapper = bodyWrapper;
-        }
-    }
-
-    /**
      * Switch active view and save state.
      * @param {number} index target view index
      */
@@ -529,12 +465,12 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
             if (oldCfg.container) {
                 oldCfg.container.classList.add("d-none");
             }
-        }
 
-        this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
-            visible: true,
-            index: this._activeViewIndex
-        });
+            this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
+                visible: false,
+                index: this._activeViewIndex
+            });
+        }
 
         this._activeViewIndex = index;
         const cfg = this._viewsConfig[index];
@@ -544,14 +480,10 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         }
         this._ctrls.activeMaster = cfg.controller;
 
-        if (this._elements.title) {
-            this._elements.title.textContent = cfg.title;
-        }
-        if (this._elements.desc) {
-            this._elements.desc.textContent = cfg.description;
-        }
-        if (this._elements.viewBtnLabel) {
-            this._elements.viewBtnLabel.textContent = cfg.title;
+        if (this._layout === "togglegroup") {
+            this._updateToggleButtonStates();
+        } else {
+            this._updateToolbarMetadata(cfg);
         }
 
         if (cfg.contentNode && cfg.contentNode.children.length > 0) {
@@ -562,6 +494,23 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
             }
         }
 
+        this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
+            visible: true,
+            index: index
+        });
+    }
+
+    /**
+     * Update title, description and icon shown in the default toolbar.
+     * @param {Object} cfg active view configuration
+     */
+    _updateToolbarMetadata(cfg) {
+        if (this._elements.title) {
+            this._elements.title.textContent = cfg.title;
+        }
+        if (this._elements.desc) {
+            this._elements.desc.textContent = cfg.description;
+        }
         if (this._elements.icon) {
             this._elements.icon.innerHTML = "";
             if (cfg.iconCss) {
@@ -576,99 +525,19 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
                 this._elements.icon.appendChild(img);
             }
         }
+    }
 
-        this._handleDetailState(cfg);
-
-        this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
-            visible: true,
-            index: index
+    /**
+     * Reflect the active view in the toggle bar.
+     */
+    _updateToggleButtonStates() {
+        const buttons = this._elements.toggleButtons || [];
+        buttons.forEach(btn => {
+            const idx = parseInt(btn.dataset.index, 10);
+            const isActive = idx === this._activeViewIndex;
+            btn.classList.toggle("active", isActive);
+            btn.setAttribute("aria-pressed", isActive ? "true" : "false");
         });
-    }
-
-    /**
-     * Handle the state of the detail pane based on configuration.
-     * @param {Object} cfg view configuration
-     */
-    _handleDetailState(cfg) {
-        if (cfg.hasDetails) {
-            this._ensureDetailStructure();
-
-            // apply sizing constraints if defined for this specific view
-            if (this._ctrls.split) {
-                // if min side is defined
-                if (cfg.detailMin !== null && typeof this._ctrls.split.setMinSize === "function") {
-                    // index 0 for side-pane if order is side-main, but here it is main-side (index 1)
-                    // wait, default is main-side, so side pane is index 1?
-                    // SplitCtrl setMinSize takes index.
-                    // SplitCtrl implementation handles minSide internally as property,
-                    // but we might need to expose a setter there if it changes per view.
-                    // Assuming setMinSize(index, size) exists from previous context
-
-                    // Since _paneOrder is "main-side", side pane is typically index 1
-                    // but let's assume the split controller handles 'side' identification or we pass the side index.
-                    // In the SplitCtrl provided previously, setMinSize logic handles 'isSide' check.
-                    // We just need to pass an index. Main is 0, Side is 1.
-                    this._ctrls.split.setMinSize(1, cfg.detailMin);
-                }
-            }
-
-            const isHidden = this._views.detailPane?.classList.contains("d-none");
-
-            if (isHidden) {
-                this._views.detailPane.classList.remove("d-none");
-            }
-
-            this._updateToggleBtnState(true);
-
-        } else {
-            this._teardownDetailStructure();
-        }
-
-        if (this._ctrls.split) {
-            requestAnimationFrame(() => window.dispatchEvent(new Event("resize")));
-        }
-    }
-
-    /**
-     * Helper to update any toggle button state if one exists (placeholder).
-     * @param {boolean} visible
-     */
-    _updateToggleBtnState(visible) {
-        // placeholder
-    }
-
-    /**
-     * Toggle details pane visibility.
-     * @param {boolean} forceOpen force open if true
-     */
-    _toggleDetails(forceOpen = false) {
-        const cfg = this._viewsConfig[this._activeViewIndex];
-        if (!cfg || !cfg.hasDetails) {
-            return;
-        }
-
-        this._ensureDetailStructure();
-        const pane = this._views.detailPane;
-        if (!pane) {
-            return;
-        }
-
-        let shouldShow = pane.classList.contains("d-none");
-        if (forceOpen) {
-            shouldShow = true;
-        }
-
-        if (shouldShow) {
-            pane.classList.remove("d-none");
-            this._updateToggleBtnState(true);
-        } else {
-            pane.classList.add("d-none");
-            this._updateToggleBtnState(false);
-        }
-
-        if (this._ctrls.split) {
-            window.dispatchEvent(new Event("resize"));
-        }
     }
 
     /**
