@@ -30,6 +30,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     _renderScheduled = false;
     _isResizing = false;
     _initialized = false;
+    _autoSelected = false;
 
     // caches
     _prevRowState = new Map();
@@ -73,6 +74,9 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
         // explicit check for string "true" to enable selection
         this._selectable = ds.selectable === "true";
+        if (this._selectable) {
+            this._table.classList.add("wx-table-selectable");
+        }
 
         this._head.className = "wx-table-header-group";
         this._head.setAttribute("role", "rowgroup");
@@ -465,7 +469,43 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             this._suppressFlashOnce = false;
             this._updateSnapshot(currentStates);
             this._initialized = true;
+
+            // auto-select the first row on the very first render when the
+            // table is selectable. The primary action of the row is triggered
+            // afterwards so a paired panel (e.g. preview / detail view) can
+            // populate itself without requiring an explicit user click.
+            if (this._selectable && !this._autoSelected && this._rows.length > 0 && this._selectedRow === null) {
+                this._autoSelected = true;
+                const firstRow = this._rows[0];
+                this._selectRowInternal(firstRow, null);
+                this._triggerPrimaryAction(firstRow);
+            }
         });
+    }
+
+    /**
+     * Triggers the row's `data-wx-primary-action` via the central Actions
+     * registry so callers don't have to dispatch synthetic clicks.
+     * @param {Object} row Data row whose anchor element carries the action.
+     */
+    _triggerPrimaryAction(row) {
+        const el = row?._anchorTr;
+        if (!el) {
+            return;
+        }
+        const actionName = el.getAttribute("data-wx-primary-action");
+        if (!actionName) {
+            return;
+        }
+        const actionDef = webexpress?.webui?.Actions?.get?.(actionName);
+        if (!actionDef || typeof actionDef.execute !== "function") {
+            return;
+        }
+        try {
+            actionDef.execute(el, "primary", this, null);
+        } catch (e) {
+            console.error("table: primary action execute failed", e);
+        }
     }
 
     /**

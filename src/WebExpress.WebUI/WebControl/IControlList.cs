@@ -8,6 +8,13 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlList : IControl
     {
         /// <summary>
+        /// Gets or sets a value indicating whether list rows are selectable. When
+        /// enabled the active row is highlighted with a primary-color left
+        /// accent and the first row is auto-selected on initialization.
+        /// </summary>
+        bool Selectable { get; set; }
+
+        /// <summary>
         /// Adds a collection of list entries to the existing items.
         /// </summary>
         /// <param name="items">The list entries to add.</param>

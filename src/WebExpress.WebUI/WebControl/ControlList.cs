@@ -38,6 +38,13 @@ namespace WebExpress.WebUI.WebControl
         public bool Sortable { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether list rows are selectable. When
+        /// enabled the active row is highlighted with a primary-color left
+        /// accent and the first row is auto-selected on initialization.
+        /// </summary>
+        public bool Selectable { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -157,6 +164,7 @@ namespace WebExpress.WebUI.WebControl
             }
                 .AddUserAttribute("data-title", I18N.Translate(renderContext, Title))
                 .AddUserAttribute("data-sortable", Sortable ? "true" : null)
+                .AddUserAttribute("data-selectable", Selectable ? "true" : null)
                 .AddUserAttribute("data-layout", Layout.ToClass())
                 .Add(_items.Select(x => x.Render(renderContext, visualTree)));
 

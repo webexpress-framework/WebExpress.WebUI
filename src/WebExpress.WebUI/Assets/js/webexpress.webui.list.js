@@ -61,6 +61,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
 
     // selection state
     _selectedItem = null;
+    _autoSelected = false;
 
     /**
      * Creates a new list control instance.
@@ -106,6 +107,9 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         ]);
 
         element.className = "wx-list";
+        if (this._selectable) {
+            element.classList.add("wx-list-selectable");
+        }
 
         if (layout) {
             layout.split(" ").forEach(cls => this._list.classList.add(cls));
@@ -131,6 +135,40 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
 
         // inline editing integration
         this._bindInlineEditSaveListener();
+
+        // auto-select the first item on init when the list is selectable, and
+        // trigger its primary action so paired panels populate immediately.
+        if (this._selectable && !this._autoSelected && this._items.length > 0 && this._selectedItem === null) {
+            this._autoSelected = true;
+            const firstItem = this._items[0];
+            this._handleSelectionChange(firstItem, null, true);
+            this._triggerPrimaryAction(firstItem);
+        }
+    }
+
+    /**
+     * Triggers the item's `data-wx-primary-action` via the central Actions
+     * registry so callers don't have to dispatch synthetic clicks.
+     * @param {Object} item Data item whose anchor element carries the action.
+     */
+    _triggerPrimaryAction(item) {
+        const el = item?._anchorLi;
+        if (!el) {
+            return;
+        }
+        const actionName = el.getAttribute("data-wx-primary-action");
+        if (!actionName) {
+            return;
+        }
+        const actionDef = webexpress?.webui?.Actions?.get?.(actionName);
+        if (!actionDef || typeof actionDef.execute !== "function") {
+            return;
+        }
+        try {
+            actionDef.execute(el, "primary", this, null);
+        } catch (e) {
+            console.error("list: primary action execute failed", e);
+        }
     }
 
     /**

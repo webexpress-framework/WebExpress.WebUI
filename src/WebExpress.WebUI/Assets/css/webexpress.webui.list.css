@@ -82,6 +82,11 @@
     transition: background-color 120ms ease-in;
 }
 
+/* selectable lists: rows are clickable and the first row is auto-activated */
+.wx-list.wx-list-selectable .wx-list-li {
+    cursor: pointer;
+}
+
     .wx-list-li:hover {
         /* use bootstrap subtle background for hover */
         background-color: var(--bs-tertiary-bg);

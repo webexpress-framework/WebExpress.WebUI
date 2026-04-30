@@ -7,15 +7,25 @@
     margin-bottom: 0;
     isolation: isolate;
 
+    /* Forms.html-style card wrapper. The Bootstrap variant classes (.table-*)
+       still override --bs-table-* tokens so themed tables keep working. */
+    background-color: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius, 10px);
+    overflow: hidden;
+
     --wx-grid-template: none;
     --bs-table-bg: transparent;
     --bs-table-accent-bg: transparent;
     --bs-table-striped-color: var(--bs-body-color);
     --bs-table-striped-bg: rgba(0, 0, 0, 0.05);
     --bs-table-active-color: var(--bs-body-color);
-    --bs-table-active-bg: rgba(0, 0, 0, 0.1);
+    --bs-table-active-bg: var(--bs-primary-bg-subtle, rgba(var(--bs-primary-rgb), 0.08));
     --bs-table-hover-color: var(--bs-body-color);
-    --bs-table-hover-bg: rgba(0, 0, 0, 0.075);
+    --bs-table-hover-bg: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.04));
+    --bs-table-head-bg: var(--bs-tertiary-bg, var(--bs-secondary-bg, #f5f7fa));
+    --bs-table-head-color: var(--bs-secondary-color);
+    --bs-table-border-color: var(--bs-border-color);
 }
 
 /* --- Row Structure (Grid) --- */
@@ -60,7 +70,7 @@
 .wx-grid-cell,
 .wx-grid-header-cell,
 .wx-col-header {
-    padding: 0.25rem 0.5rem;
+    padding: 0.625rem 1rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -70,18 +80,28 @@
     min-width: 0;
     height: 100%;
     box-sizing: border-box;
+    font-size: 13px;
 }
 
-/* header cells */
+/* header cells (Forms.html: surface-2 bg, 11px uppercase, letter-spaced) */
 .wx-col-header,
 .wx-grid-header-cell {
-    font-weight: 700;
-    background-color: var(--bs-table-head-bg, var(--bs-body-bg));
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background-color: var(--bs-table-head-bg, var(--bs-tertiary-bg));
     position: relative;
     user-select: none;
     border-bottom: none;
-    color: var(--bs-table-head-color, var(--bs-secondary));
+    color: var(--bs-table-head-color, var(--bs-secondary-color));
     transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+/* hide the bottom border on the last visible row so the card edge is clean */
+.wx-table-body-group > .wx-grid-row:last-child > .wx-grid-cell,
+.wx-table-body-group > .wx-table-row:last-child > .wx-table-cell {
+    border-bottom: 0;
 }
 
 /* --- Variant Theme Management --- */
@@ -369,6 +389,30 @@ a.wx-cell-content:hover { text-decoration: underline; color: var(--bs-link-hover
 .wx-table-row:where(.active, [data-wx-primary-action]),
 .wx-grid-row:where(.active, [data-wx-primary-action]) {
     cursor: pointer;
+}
+
+/* --- Selectable variant (data-selectable="true") --- */
+.wx-table.wx-table-selectable .wx-table-row,
+.wx-table.wx-table-selectable .wx-grid-row {
+    cursor: pointer;
+}
+
+/* The active row gets a primary-color left accent. Implemented as an
+   absolutely positioned ::before so the grid layout is not pushed; the
+   parent row already has position: relative. */
+.wx-table.wx-table-selectable .wx-table-row.active::before,
+.wx-table.wx-table-selectable .wx-table-row.wx-row-active::before,
+.wx-table.wx-table-selectable .wx-grid-row.active::before,
+.wx-table.wx-table-selectable .wx-grid-row.wx-row-active::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    background-color: var(--bs-primary);
+    pointer-events: none;
+    z-index: 2;
 }
 
 /* --- Border Handling --- */
