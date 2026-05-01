@@ -165,12 +165,13 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         if (!actionName) {
             return;
         }
-        const actionDef = webexpress?.webui?.Actions?.get?.(actionName);
+        const actionDef = webexpress?.webui?.Actions?.get(actionName);
         if (!actionDef || typeof actionDef.execute !== "function") {
             return;
         }
         try {
-            actionDef.execute(el, "primary", this, null);
+            const controller = webexpress.webui.Controller.getInstanceByElement ? webexpress.webui.Controller : webexpress.webui.Controller.prototype;
+            actionDef.execute(el, "primary", controller, null);
         } catch (e) {
             console.error("list: primary action execute failed", e);
         }
