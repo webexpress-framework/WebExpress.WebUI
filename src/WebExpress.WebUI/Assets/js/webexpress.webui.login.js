@@ -22,6 +22,7 @@ webexpress.webui.LoginCtrl = class extends webexpress.webui.Ctrl {
 
         // clean up the host element
         element.textContent = "";
+        element.classList.add("wx-login");
         element.removeAttribute("data-username");
         element.removeAttribute("data-title");
 
@@ -114,7 +115,6 @@ webexpress.webui.LoginCtrl = class extends webexpress.webui.Ctrl {
 
         // attach to host
         this._element.appendChild(dialog);
-        this._element.classList.add("wx-login-ctrl-host");
     }
 
     /**

@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="21" height="21" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+  <style>.st1 {display:none}
+		.st2 {fill:#000000;stroke:#000000;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.24}
+		.st3 {fill:none;fill-rule:evenodd;font-size:12px;overflow:visible;stroke-linecap:square;stroke-miterlimit:3}</style>
+  <g transform="scale(0.074083)">
+<g>
+		
+		
+		<g id="shape1-1" transform="translate(0.000280035,-0.0004331)">
+			
+			<rect x="0" y="-0.035" width="283.5" height="283.5" class="st1"/>
+		</g>
+		<g id="shape18-3" transform="translate(72.0001,-74.7841)">
+			
+			<path d="M29.03 203.36 L29.03 191.79 L110.47 191.79 L110.47 203.36 L29.03 203.36 ZM29.03 181.67 L29.03 170.1 L110.47
+						 170.1 L110.47 181.67 L29.03 181.67 ZM29.03 225.05 L29.03 213.48 L102.07 213.48 L102.07 225.05 L29.03 225.05
+						 ZM113.47 254.16 L128.43 254.16 A11.0728 11.0728 -180 0 0 139.5 243.08 L139.5 160.61 A11.0728 11.0728 -180
+						 0 0 128.43 149.53 L11.07 149.53 A11.0728 11.0728 -180 0 0 0 160.61 L0 243.08 A11.0728 11.0728 -180 0 0 11.07
+						 254.16 L63.7 254.16 L79.27 278.38 A11.0728 11.0728 -180 0 0 97.9 278.38 L113.47 254.16 Z" class="st2"/>
+		</g>
+	</g>
+  </g>
+</svg>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Process/pipeline function: three stages connected by down-arrows -->
+<svg width="21" height="21" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+  <path
+     id="process-stage-1"
+     d="M 5,1 H 16 V 6 H 5 Z M 6.5,2.5 H 14.5 V 4.5 H 6.5 Z"
+     style="fill:#000000;fill-rule:evenodd" />
+  <path
+     id="process-arrow-1"
+     d="M 9.75,6 V 7.5 H 8.5 L 10.5,9.5 L 12.5,7.5 H 11.25 V 6 Z"
+     style="fill:#000000" />
+  <path
+     id="process-stage-2"
+     d="M 5,9.5 H 16 V 14.5 H 5 Z M 6.5,11 H 14.5 V 13 H 6.5 Z"
+     style="fill:#000000;fill-rule:evenodd" />
+  <path
+     id="process-arrow-2"
+     d="M 9.75,14.5 V 16 H 8.5 L 10.5,18 L 12.5,16 H 11.25 V 14.5 Z"
+     style="fill:#000000" />
+  <path
+     id="process-stage-3"
+     d="M 5,18 H 16 V 21 H 5 Z M 6.5,19 H 14.5 V 20.5 H 6.5 Z"
+     style="fill:#000000;fill-rule:evenodd" />
+</svg>

@@ -1,18 +1,48 @@
-﻿using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebPage;
 
 namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
-    /// Represents an icon that aligns content to the center.
+    /// Represents an icon that can be rendered in either the default (FontAwesome) theme
+    /// or the lightweight SVG-based <see cref="TypeIconTheme.Light"/> theme.
     /// </summary>
     public abstract class Icon : IIcon
     {
         /// <summary>
-        /// Gets the CSS class associated with the icon.
+        /// Gets the theme that was selected for this icon instance. The theme is fixed
+        /// at construction time and chooses between the FontAwesome glyph
+        /// (<see cref="TypeIconTheme.Default"/>) and the lightweight SVG variant
+        /// (<see cref="TypeIconTheme.Light"/>).
+        /// </summary>
+        public TypeIconTheme Theme { get; }
+
+        /// <summary>
+        /// Gets the CSS class associated with the icon for the currently selected theme.
+        /// Subclasses return the FontAwesome class here; classes that ship a dedicated
+        /// light variant override this property to switch on <see cref="Theme"/>.
         /// </summary>
         public abstract string Class { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Icon"/> class using the
+        /// <see cref="TypeIconTheme.Default"/> theme.
+        /// </summary>
+        protected Icon()
+            : this(TypeIconTheme.Default)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Icon"/> class using the
+        /// specified theme.
+        /// </summary>
+        /// <param name="theme">The theme to use when rendering the icon.</param>
+        protected Icon(TypeIconTheme theme)
+        {
+            Theme = theme;
+        }
 
         /// <summary>
         /// Converts the icon to an HTML representation.

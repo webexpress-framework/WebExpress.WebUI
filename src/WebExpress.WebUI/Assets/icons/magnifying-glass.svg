@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="21" height="21" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+  <path
+     id="magnifying-glass"
+     d="M 8.5,2 A 6,6 0 0 0 8.5,14 6,6 0 0 0 13.05,11.95 L 17.05,15.95 18.45,14.55 14.45,10.55 A 6,6 0 0 0 8.5,2 Z M 8.5,3.5 A 4.5,4.5 0 1 1 8.5,12.5 4.5,4.5 0 1 1 8.5,3.5 Z"
+     style="fill:#000000;fill-rule:evenodd" />
+</svg>

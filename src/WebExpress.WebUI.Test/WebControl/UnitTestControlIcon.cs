@@ -135,5 +135,52 @@ namespace WebExpress.WebUI.Test.WebControl
 
             AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
         }
+
+        /// <summary>
+        /// Tests that the parameterless constructor selects the default theme and
+        /// that an explicit <see cref="TypeIconTheme"/> argument switches the rendered
+        /// CSS class to the light SVG variant.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeIconTheme.Default, @"<i class=""fas fa-star""></i>")]
+        [InlineData(TypeIconTheme.Light, @"<i class=""wx-icon-light wx-icon-light-star""></i>")]
+        public void Theme(TypeIconTheme theme, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlIcon()
+            {
+                Icon = new IconStar(theme)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
+        }
+
+        /// <summary>
+        /// Tests that omitting the constructor argument falls back to
+        /// <see cref="TypeIconTheme.Default"/> and that the icon's <see cref="Icon.Theme"/>
+        /// property reflects the selected value.
+        /// </summary>
+        [Fact]
+        public void ThemeDefaultsToDefault()
+        {
+            // arrange
+            var implicitDefault = new IconStar();
+            var explicitDefault = new IconStar(TypeIconTheme.Default);
+            var light = new IconStar(TypeIconTheme.Light);
+
+            // assert
+            Assert.Equal(TypeIconTheme.Default, implicitDefault.Theme);
+            Assert.Equal(TypeIconTheme.Default, explicitDefault.Theme);
+            Assert.Equal(TypeIconTheme.Light, light.Theme);
+            Assert.Equal("fas fa-star", implicitDefault.Class);
+            Assert.Equal("fas fa-star", explicitDefault.Class);
+            Assert.Equal("wx-icon-light wx-icon-light-star", light.Class);
+        }
     }
 }

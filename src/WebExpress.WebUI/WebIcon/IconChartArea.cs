@@ -1,4 +1,4 @@
-namespace WebExpress.WebUI.WebIcon
+﻿namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon for a chart-area.
@@ -6,8 +6,30 @@ namespace WebExpress.WebUI.WebIcon
     public class IconChartArea : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Initializes a new instance of the <see cref="IconChartArea"/> class using the
+        /// <see cref="TypeIconTheme.Default"/> theme.
         /// </summary>
-        public override string Class => "fas fa-chart-area";
+        public IconChartArea()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IconChartArea"/> class using the
+        /// specified theme.
+        /// </summary>
+        /// <param name="theme">The theme to use when rendering the icon.</param>
+        public IconChartArea(TypeIconTheme theme)
+            : base(theme)
+        {
+        }
+
+        /// <summary>
+        /// Returns the CSS class associated with the icon. In the
+        /// <see cref="TypeIconTheme.Light"/> theme the lightweight SVG variant is rendered;
+        /// otherwise the FontAwesome glyph is used.
+        /// </summary>
+        public override string Class => Theme == TypeIconTheme.Light
+            ? "wx-icon-light wx-icon-light-chart-area"
+            : "fas fa-chart-area";
     }
 }

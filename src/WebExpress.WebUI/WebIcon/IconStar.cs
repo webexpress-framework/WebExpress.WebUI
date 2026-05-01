@@ -6,8 +6,30 @@
     public class IconStar : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Initializes a new instance of the <see cref="IconStar"/> class using the
+        /// <see cref="TypeIconTheme.Default"/> theme.
         /// </summary>
-        public override string Class => "fas fa-star";
+        public IconStar()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IconStar"/> class using the
+        /// specified theme.
+        /// </summary>
+        /// <param name="theme">The theme to use when rendering the icon.</param>
+        public IconStar(TypeIconTheme theme)
+            : base(theme)
+        {
+        }
+
+        /// <summary>
+        /// Returns the CSS class associated with the icon. In the
+        /// <see cref="TypeIconTheme.Light"/> theme the lightweight SVG variant is rendered;
+        /// otherwise the FontAwesome glyph is used.
+        /// </summary>
+        public override string Class => Theme == TypeIconTheme.Light
+            ? "wx-icon-light wx-icon-light-star"
+            : "fas fa-star";
     }
 }

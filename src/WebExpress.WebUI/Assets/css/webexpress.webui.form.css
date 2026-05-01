@@ -153,3 +153,7 @@
     font-size: 0.95rem;
     margin-bottom: 1rem;
 }
+
+.wx-login {
+    height: 100vh;
+}

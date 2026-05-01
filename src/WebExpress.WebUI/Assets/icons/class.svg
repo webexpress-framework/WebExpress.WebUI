@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="21" height="21" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+  <path
+     id="class"
+     d="M 2,2 H 19 V 19 H 2 Z M 3.5,3.5 H 17.5 V 17.5 H 3.5 Z"
+     style="fill:#000000;fill-rule:evenodd" />
+  <rect x="3.5" y="7.5" width="14" height="1.5" style="fill:#000000" />
+  <rect x="3.5" y="12.5" width="14" height="1.5" style="fill:#000000" />
+</svg>

@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="21" height="21" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+  <path
+     id="expand"
+     d="M 3,3 V 8 H 4.5 V 5.5 H 8 V 4 H 4 A 1,1 0 0 0 3,5 Z M 13,3 V 4.5 H 16.5 V 8 H 18 V 4 A 1,1 0 0 0 17,3 Z M 3,13 V 17 A 1,1 0 0 0 4,18 H 8 V 16.5 H 4.5 V 13 Z M 16.5,13 V 16.5 H 13 V 18 H 17 A 1,1 0 0 0 18,17 V 13 Z"
+     style="fill:#000000;fill-rule:evenodd" />
+</svg>
