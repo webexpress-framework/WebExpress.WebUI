@@ -48,7 +48,7 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
                         })
                         .map(([k, v]) => {
                             return [
-                                k.slice(9).replace(/^./, (c) => { return c.toLowerCase(); }),
+                                k.slice(11).replace(/^./, (c) => { return c.toLowerCase(); }),
                                 v === "true" ? true : v === "false" ? false : v
                             ];
                         })

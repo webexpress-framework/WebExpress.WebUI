@@ -94,6 +94,9 @@ namespace WebExpress.WebUI.WebControl
             html.AddUserAttribute("data-uri", Uri?.ToString());
             html.AddUserAttribute("data-target", Target.ToValue());
 
+            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
+
             return html;
         }
     }

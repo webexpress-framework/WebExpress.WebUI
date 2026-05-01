@@ -27,7 +27,6 @@
 
 /* Splitter styles */
 .wx-split .wx-splitter {
-    background: var(--bs-border-color);
     z-index: 10;
     flex: 0 0 auto;
     user-select: none;

@@ -293,7 +293,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 secondaryAction: Object.fromEntries(Object.entries(dataset)
                     .filter(([k]) => k.startsWith("wxSecondary"))
                     .map(([k, v]) => [
-                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        k.slice(11).replace(/^./, c => c.toLowerCase()),
                         v === "true" ? true : v === "false" ? false : v
                     ])
                 )

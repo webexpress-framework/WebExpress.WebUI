@@ -1697,7 +1697,6 @@ webexpress.webui.Ctrl = class {
      * This method must be implemented in the derived class.
      */
     render() {
-        throw new Error("The 'render()' method must be implemented in the derived class.");
     }
 
     /**
