@@ -1357,3 +1357,215 @@
     -webkit-mask-image: url("../icons/window-function.svg");
     mask-image: url("../icons/window-function.svg");
 }
+
+/* Generated from icons.csv as external SVG references */
+.wx-icon-light-table-row-add {
+    -webkit-mask-image: url("../icons/table-row-add.svg");
+    mask-image: url("../icons/table-row-add.svg");
+}
+
+.wx-icon-light-table-row-delete {
+    -webkit-mask-image: url("../icons/table-row-delete.svg");
+    mask-image: url("../icons/table-row-delete.svg");
+}
+
+.wx-icon-light-table-row-edit {
+    -webkit-mask-image: url("../icons/table-row-edit.svg");
+    mask-image: url("../icons/table-row-edit.svg");
+}
+
+.wx-icon-light-table-sort {
+    -webkit-mask-image: url("../icons/table-sort.svg");
+    mask-image: url("../icons/table-sort.svg");
+}
+
+.wx-icon-light-table-filter {
+    -webkit-mask-image: url("../icons/table-filter.svg");
+    mask-image: url("../icons/table-filter.svg");
+}
+
+.wx-icon-light-table-merge-cells {
+    -webkit-mask-image: url("../icons/table-merge-cells.svg");
+    mask-image: url("../icons/table-merge-cells.svg");
+}
+
+.wx-icon-light-table-column-delete {
+    -webkit-mask-image: url("../icons/table-column-delete.svg");
+    mask-image: url("../icons/table-column-delete.svg");
+}
+
+.wx-icon-light-table-column-add {
+    -webkit-mask-image: url("../icons/table-column-add.svg");
+    mask-image: url("../icons/table-column-add.svg");
+}
+
+.wx-icon-light-ui-layout {
+    -webkit-mask-image: url("../icons/ui-layout.svg");
+    mask-image: url("../icons/ui-layout.svg");
+}
+
+.wx-icon-light-ui-components {
+    -webkit-mask-image: url("../icons/ui-components.svg");
+    mask-image: url("../icons/ui-components.svg");
+}
+
+.wx-icon-light-ui-properties {
+    -webkit-mask-image: url("../icons/ui-properties.svg");
+    mask-image: url("../icons/ui-properties.svg");
+}
+
+.wx-icon-light-ui-drag-handle {
+    -webkit-mask-image: url("../icons/ui-drag-handle.svg");
+    mask-image: url("../icons/ui-drag-handle.svg");
+}
+
+.wx-icon-light-ui-grid-tools {
+    -webkit-mask-image: url("../icons/ui-grid-tools.svg");
+    mask-image: url("../icons/ui-grid-tools.svg");
+}
+
+.wx-icon-light-code-code {
+    -webkit-mask-image: url("../icons/code-code.svg");
+    mask-image: url("../icons/code-code.svg");
+}
+
+.wx-icon-light-code-file {
+    -webkit-mask-image: url("../icons/code-file.svg");
+    mask-image: url("../icons/code-file.svg");
+}
+
+.wx-icon-light-code-class {
+    -webkit-mask-image: url("../icons/code-class.svg");
+    mask-image: url("../icons/code-class.svg");
+}
+
+.wx-icon-light-code-interface {
+    -webkit-mask-image: url("../icons/code-interface.svg");
+    mask-image: url("../icons/code-interface.svg");
+}
+
+.wx-icon-light-code-namespace {
+    -webkit-mask-image: url("../icons/code-namespace.svg");
+    mask-image: url("../icons/code-namespace.svg");
+}
+
+.wx-icon-light-code-build {
+    -webkit-mask-image: url("../icons/code-build.svg");
+    mask-image: url("../icons/code-build.svg");
+}
+
+.wx-icon-light-code-debug {
+    -webkit-mask-image: url("../icons/code-debug.svg");
+    mask-image: url("../icons/code-debug.svg");
+}
+
+.wx-icon-light-code-breakpoint {
+    -webkit-mask-image: url("../icons/code-breakpoint.svg");
+    mask-image: url("../icons/code-breakpoint.svg");
+}
+
+.wx-icon-light-code-error {
+    -webkit-mask-image: url("../icons/code-error.svg");
+    mask-image: url("../icons/code-error.svg");
+}
+
+.wx-icon-light-code-warning {
+    -webkit-mask-image: url("../icons/code-warning.svg");
+    mask-image: url("../icons/code-warning.svg");
+}
+
+.wx-icon-light-git-commit {
+    -webkit-mask-image: url("../icons/git-commit.svg");
+    mask-image: url("../icons/git-commit.svg");
+}
+
+.wx-icon-light-git-branch {
+    -webkit-mask-image: url("../icons/git-branch.svg");
+    mask-image: url("../icons/git-branch.svg");
+}
+
+.wx-icon-light-git-merge {
+    -webkit-mask-image: url("../icons/git-merge.svg");
+    mask-image: url("../icons/git-merge.svg");
+}
+
+.wx-icon-light-git-pull {
+    -webkit-mask-image: url("../icons/git-pull.svg");
+    mask-image: url("../icons/git-pull.svg");
+}
+
+.wx-icon-light-git-push {
+    -webkit-mask-image: url("../icons/git-push.svg");
+    mask-image: url("../icons/git-push.svg");
+}
+
+.wx-icon-light-git-rebase {
+    -webkit-mask-image: url("../icons/git-rebase.svg");
+    mask-image: url("../icons/git-rebase.svg");
+}
+
+.wx-icon-light-git-stash {
+    -webkit-mask-image: url("../icons/git-stash.svg");
+    mask-image: url("../icons/git-stash.svg");
+}
+
+.wx-icon-light-git-tag {
+    -webkit-mask-image: url("../icons/git-tag.svg");
+    mask-image: url("../icons/git-tag.svg");
+}
+
+.wx-icon-light-git-history {
+    -webkit-mask-image: url("../icons/git-history.svg");
+    mask-image: url("../icons/git-history.svg");
+}
+
+.wx-icon-light-git-compare {
+    -webkit-mask-image: url("../icons/git-compare.svg");
+    mask-image: url("../icons/git-compare.svg");
+}
+
+.wx-icon-light-process-start {
+    -webkit-mask-image: url("../icons/process-start.svg");
+    mask-image: url("../icons/process-start.svg");
+}
+
+.wx-icon-light-process-end {
+    -webkit-mask-image: url("../icons/process-end.svg");
+    mask-image: url("../icons/process-end.svg");
+}
+
+.wx-icon-light-process-decision {
+    -webkit-mask-image: url("../icons/process-decision.svg");
+    mask-image: url("../icons/process-decision.svg");
+}
+
+.wx-icon-light-process-transition {
+    -webkit-mask-image: url("../icons/process-transition.svg");
+    mask-image: url("../icons/process-transition.svg");
+}
+
+.wx-icon-light-process-node {
+    -webkit-mask-image: url("../icons/process-node.svg");
+    mask-image: url("../icons/process-node.svg");
+}
+
+.wx-icon-light-process-status {
+    -webkit-mask-image: url("../icons/process-status.svg");
+    mask-image: url("../icons/process-status.svg");
+}
+
+.wx-icon-light-process-automation {
+    -webkit-mask-image: url("../icons/process-automation.svg");
+    mask-image: url("../icons/process-automation.svg");
+}
+
+.wx-icon-light-process-timer {
+    -webkit-mask-image: url("../icons/process-timer.svg");
+    mask-image: url("../icons/process-timer.svg");
+}
+
+.wx-icon-light-process-user-task {
+    -webkit-mask-image: url("../icons/process-user-task.svg");
+    mask-image: url("../icons/process-user-task.svg");
+}
+

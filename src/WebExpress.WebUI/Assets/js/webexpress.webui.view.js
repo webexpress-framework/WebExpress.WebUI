@@ -131,7 +131,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
         viewNodes.forEach((node, index) => {
             const wrapper = document.createElement("div");
-            wrapper.className = "wx-view-content";
+            wrapper.className = "wx-view-content d-flex flex-column flex-fill";
 
             const fragment = document.createDocumentFragment();
             while (node.firstChild) {
@@ -193,7 +193,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         host.appendChild(this._views.bodyWrapper);
 
         this._views.masterPane = document.createElement("div");
-        this._views.masterPane.className = "wx-main-pane flex-fill w-100 h-100";
+        this._views.masterPane.className = "wx-main-pane flex-fill w-100 h-100 d-flex flex-column";
         this._views.bodyWrapper.appendChild(this._views.masterPane);
 
         this._buildStatusbar(host);
