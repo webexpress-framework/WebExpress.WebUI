@@ -1283,6 +1283,51 @@
     mask-image: url("../icons/webexpress.svg");
 }
 
+.wx-icon-light-table-columns {
+    -webkit-mask-image: url("../icons/table-columns.svg");
+    mask-image: url("../icons/table-columns.svg");
+}
+
+.wx-icon-light-table-cells-large {
+    -webkit-mask-image: url("../icons/table-cells-large.svg");
+    mask-image: url("../icons/table-cells-large.svg");
+}
+
+.wx-icon-light-grip-lines-vertical {
+    -webkit-mask-image: url("../icons/grip-lines-vertical.svg");
+    mask-image: url("../icons/grip-lines-vertical.svg");
+}
+
+.wx-icon-light-file-code {
+    -webkit-mask-image: url("../icons/file-code.svg");
+    mask-image: url("../icons/file-code.svg");
+}
+
+.wx-icon-light-ticket {
+    -webkit-mask-image: url("../icons/ticket.svg");
+    mask-image: url("../icons/ticket.svg");
+}
+
+.wx-icon-light-ticket-simple {
+    -webkit-mask-image: url("../icons/ticket-simple.svg");
+    mask-image: url("../icons/ticket-simple.svg");
+}
+
+.wx-icon-light-moon {
+    -webkit-mask-image: url("../icons/moon.svg");
+    mask-image: url("../icons/moon.svg");
+}
+
+.wx-icon-light-gauge {
+    -webkit-mask-image: url("../icons/gauge.svg");
+    mask-image: url("../icons/gauge.svg");
+}
+
+.wx-icon-light-gauge-high {
+    -webkit-mask-image: url("../icons/gauge-high.svg");
+    mask-image: url("../icons/gauge-high.svg");
+}
+
 .wx-icon-light-wizard {
     -webkit-mask-image: url("../icons/wizard.svg");
     mask-image: url("../icons/wizard.svg");
