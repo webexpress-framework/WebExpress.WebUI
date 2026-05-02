@@ -269,10 +269,17 @@
 a.wx-cell-content { font-weight: 600; }
 a.wx-cell-content:hover { text-decoration: underline; color: var(--bs-link-hover-color, currentColor); }
 
-.wx-icon {
+.wx-table .wx-icon {
     max-height: 1.2em;
     width: auto;
     object-fit: contain;
+}
+
+.wx-table .wx-icon-large {
+    width: auto;
+    height: 2.2em;
+    max-height: 2.2em;
+    border-radius: 0.5em;
 }
 
 /* --- Row Drag & Drop --- */

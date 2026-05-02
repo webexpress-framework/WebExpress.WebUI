@@ -48,6 +48,10 @@ img.wx-icon {
     vertical-align: middle;
 }
 
+img.wx-icon-large {
+    height: 2.2em;
+}
+
 .wx-esm {
     font-size: 0.55em;
 }

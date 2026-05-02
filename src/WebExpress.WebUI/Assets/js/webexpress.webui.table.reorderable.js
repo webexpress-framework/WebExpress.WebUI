@@ -635,12 +635,12 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
                     }
                     if (row.icon) {
                         const icon = document.createElement("i");
-                        icon.className = row.icon;
+                        icon.className = row.icon + " wx-icon-large";
                         wrap.appendChild(icon);
                     }
                     if (row.image) {
                         const img = document.createElement("img");
-                        img.className = "wx-icon";
+                        img.className = "wx-icon wx-icon-large";
                         img.src = row.image;
                         wrap.appendChild(img);
                     }

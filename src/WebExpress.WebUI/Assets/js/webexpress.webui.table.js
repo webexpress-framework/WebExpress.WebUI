@@ -548,6 +548,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                     const img = document.createElement("img");
                     img.className = "wx-icon";
                     img.src = col.image;
+                    img.loading = "lazy";
                     inner.appendChild(img);
                 }
                 inner.appendChild(document.createTextNode(col.label));
@@ -684,9 +685,17 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                         }
                         wrap.rel = "noopener noreferrer";
                     }
+                    if (row.image) {
+                        const img = document.createElement("img");
+                        img.className = "wx-icon wx-icon-large";
+                        img.src = row.image;
+                        img.alt = "";
+                        img.loading = "lazy";
+                        wrap.appendChild(img);
+                    }
                     if (row.icon) {
                         const icon = document.createElement("i");
-                        icon.className = row.icon;
+                        icon.className = row.icon + " wx-icon-large";
                         wrap.appendChild(icon);
                     }
                     if (content instanceof Node) {

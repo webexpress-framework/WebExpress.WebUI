@@ -944,7 +944,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
     _renderDefaultContent(it, contentWrap, body) {
         if (it.image) {
             const img = document.createElement("img");
-            img.className = "wx-icon";
+            img.className = "wx-icon wx-icon-large";
             img.src = it.image;
             img.alt = "";
             img.loading = "lazy";
@@ -952,7 +952,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         }
         if (it.icon) {
             const i = document.createElement("i");
-            i.className = it.icon;
+            i.className = it.icon + " wx-icon-large";
             contentWrap.appendChild(i);
         }
 
