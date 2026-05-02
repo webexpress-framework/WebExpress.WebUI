@@ -212,40 +212,94 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            return Render(renderContext, visualTree, Text, Uri, Tooltip, PrimaryAction, SecondaryAction, Icon, [.. _controls]);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">
+        /// The rendering context that provides information and services required during control 
+        /// rendering.
+        /// </param>
+        /// <param name="visualTree">
+        /// The visual tree context used to resolve control hierarchies and relationships during 
+        /// rendering.
+        /// </param>
+        /// <param name="text">
+        /// The text label to display within the button. This value is localized before 
+        /// rendering. Can be null or empty.
+        /// </param>
+        /// <param name="uri">
+        /// The URI to navigate to when the button is clicked. Ignored if a modal is specified.
+        /// </param>
+        /// <param name="tooltip">
+        /// The tooltip text to display when the user hovers over the button. This value is 
+        /// localized before rendering. Can be null or empty.
+        /// </param>
+        /// <param name="primaryAction">
+        /// The primary action to associate with the button. If specified, this action is 
+        /// invoked when the button is  activated. Can be null.
+        /// </param>
+        /// <param name="secondaryAction">
+        /// An optional secondary action to associate with the button. Can be null.
+        /// </param>
+        /// <param name="icon">
+        /// The icon to display within the button. Can be null if no icon is required.
+        /// </param>
+        /// <param name="content">
+        /// Additional controls to render as child content within the button. Can be empty.
+        /// </param>
+        /// An <see cref="IHtmlNode"/> representing the rendered button element, including any 
+        /// specified icon, text, tooltip, modal attributes, and child content.
+        /// </returns>
+        public virtual IHtmlNode Render
+        (
+            IRenderControlContext renderContext,
+            IVisualTreeControl visualTree,
+            string text,
+            IUri uri,
+            string tooltip,
+            IAction primaryAction,
+            IAction secondaryAction,
+            IIcon icon,
+            params IControl[] content
+        )
+        {
             var param = GetParams(renderContext?.Request);
 
-            var html = new HtmlElementTextSemanticsA([.. _controls.Select(x => x.Render(renderContext, visualTree))])
+            var html = new HtmlElementTextSemanticsA([.. content.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-link", Icon is ImageIcon ? "d-inline-flex align-items-baseline" : null, GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
-                Href = Uri?.ToString() + (param.Length > 0 ? "?" + param : string.Empty),
+                Href = uri?.ToString() + (param.Length > 0 ? "?" + param : string.Empty),
                 Target = Target,
-                Title = string.IsNullOrEmpty(Title) ? I18N.Translate(renderContext.Request, Tooltip) : I18N.Translate(renderContext.Request, Title),
+                Title = string.IsNullOrEmpty(Title) ? I18N.Translate(renderContext.Request, tooltip) : I18N.Translate(renderContext.Request, Title),
                 OnClick = OnClick?.ToString()
             };
 
-            if (Icon is not null)
+            if (icon is not null)
             {
                 html.Add(new ControlIcon()
                 {
-                    Icon = Icon
+                    Icon = icon
                 }.Render(renderContext, visualTree));
             }
 
-            if (!string.IsNullOrWhiteSpace(Text))
+            if (!string.IsNullOrWhiteSpace(text))
             {
-                html.Add(new HtmlText(I18N.Translate(renderContext.Request, Text)));
+                html.Add(new HtmlText(I18N.Translate(renderContext.Request, text)));
             }
 
-            if (!string.IsNullOrWhiteSpace(Tooltip))
+            if (!string.IsNullOrWhiteSpace(tooltip))
             {
                 html.AddUserAttribute("data-bs-toggle", "tooltip");
             }
 
-            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
-            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
+            primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            secondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }
