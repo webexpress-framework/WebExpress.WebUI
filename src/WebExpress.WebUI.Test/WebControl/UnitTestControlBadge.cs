@@ -95,6 +95,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Light, @"<span class=""badge text-light""></span>")]
         [InlineData(TypeColorText.Dark, @"<span class=""badge text-dark""></span>")]
         [InlineData(TypeColorText.Muted, @"<span class=""badge text-muted""></span>")]
+        [InlineData(TypeColorText.Highlight, @"<span class=""badge text-highlight""></span>")]
         public void TextColor(TypeColorText color, string expected)
         {
             // arrange
@@ -123,6 +124,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackgroundBadge.Danger, @"<span class=""badge text-bg-danger""></span>")]
         [InlineData(TypeColorBackgroundBadge.Dark, @"<span class=""badge text-bg-dark""></span>")]
         [InlineData(TypeColorBackgroundBadge.Light, @"<span class=""badge text-bg-light""></span>")]
+        [InlineData(TypeColorBackgroundBadge.Highlight, @"<span class=""badge text-bg-highlight""></span>")]
         public void BackgroundColor(TypeColorBackgroundBadge backgroundColor, string expected)
         {
             // arrange

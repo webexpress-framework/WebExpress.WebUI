@@ -95,6 +95,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<button type=""submit"" class=""btn bg-danger *"">*</button>")]
         [InlineData(TypeColorBackground.Dark, @"<button type=""submit"" class=""btn bg-dark *"">*</button>")]
         [InlineData(TypeColorBackground.Light, @"<button type=""submit"" class=""btn bg-light *"">*</button>")]
+        [InlineData(TypeColorBackground.Highlight, @"<button type=""submit"" class=""btn bg-highlight *"">*</button>")]
         [InlineData(TypeColorBackground.White, @"<button type=""submit"" class=""btn bg-white *"">*</button>")]
         [InlineData(TypeColorBackground.Transparent, @"<button type=""submit"" class=""btn bg-transparent *"">*</button>")]
         public void BackgroundColor(TypeColorBackground color, string expected)
@@ -126,6 +127,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorButton.Danger, @"<button type=""submit"" class=""btn me-2 btn-danger"">*</button>")]
         [InlineData(TypeColorButton.Dark, @"<button type=""submit"" class=""btn me-2 btn-dark"">*</button>")]
         [InlineData(TypeColorButton.Light, @"<button type=""submit"" class=""btn me-2 btn-light"">*</button>")]
+        [InlineData(TypeColorButton.Highlight, @"<button type=""submit"" class=""btn me-2 btn-highlight"">*</button>")]
         public void Color(TypeColorButton color, string expected)
         {
             // arrange

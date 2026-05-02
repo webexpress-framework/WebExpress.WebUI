@@ -45,6 +45,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackgroundAlert.Danger, @"<div class=""alert alert-danger"" role=""alert""><div></div><button class=""btn"" data-bs-dismiss=""alert"" aria-label=""close""><i class=""fas fa-xmark""></i></button></div>")]
         [InlineData(TypeColorBackgroundAlert.Dark, @"<div class=""alert alert-dark"" role=""alert""><div></div><button class=""btn"" data-bs-dismiss=""alert"" aria-label=""close""><i class=""fas fa-xmark""></i></button></div>")]
         [InlineData(TypeColorBackgroundAlert.Light, @"<div class=""alert alert-light"" role=""alert""><div></div><button class=""btn"" data-bs-dismiss=""alert"" aria-label=""close""><i class=""fas fa-xmark""></i></button></div>")]
+        [InlineData(TypeColorBackgroundAlert.Highlight, @"<div class=""alert alert-highlight"" role=""alert""><div></div><button class=""btn"" data-bs-dismiss=""alert"" aria-label=""close""><i class=""fas fa-xmark""></i></button></div>")]
         [InlineData(TypeColorBackgroundAlert.Transparent, @"<div class=""alert bg-transparent"" role=""alert""><div></div><button class=""btn"" data-bs-dismiss=""alert"" aria-label=""close""><i class=""fas fa-xmark""></i></button></div>")]
         public void BackgroundColor(TypeColorBackgroundAlert backgroundColor, string expected)
         {

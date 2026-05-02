@@ -46,6 +46,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<form id=""*"" class=""wx-form bg-danger"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         [InlineData(TypeColorBackground.Dark, @"<form id=""*"" class=""wx-form bg-dark"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         [InlineData(TypeColorBackground.Light, @"<form id=""*"" class=""wx-form bg-light"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Highlight, @"<form id=""*"" class=""wx-form bg-highlight"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         [InlineData(TypeColorBackground.Transparent, @"<form id=""*"" class=""wx-form bg-transparent"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void BackgroundColor(TypeColorBackground color, string expected)
         {

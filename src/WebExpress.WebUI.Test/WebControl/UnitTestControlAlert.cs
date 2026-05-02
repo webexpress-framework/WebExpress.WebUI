@@ -74,6 +74,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackgroundAlert.Dark, @"<div class=""alert alert-dark"" role=""alert""></div>")]
         [InlineData(TypeColorBackgroundAlert.White, @"<div class=""alert bg-white"" role=""alert""></div>")]
         [InlineData(TypeColorBackgroundAlert.Transparent, @"<div class=""alert bg-transparent"" role=""alert""></div>")]
+        [InlineData(TypeColorBackgroundAlert.Highlight, @"<div class=""alert alert-highlight"" role=""alert""></div>")]
         public void BackgroundColor(TypeColorBackgroundAlert color, string expected)
         {
             // arrange

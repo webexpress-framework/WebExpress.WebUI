@@ -91,6 +91,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorButton.Warning, @"<div class=""btn-group"" role=""button""><a class=""btn btn-warning""></a><span class=""btn dropdown-toggle dropdown-toggle-split btn-warning"" *</div>")]
         [InlineData(TypeColorButton.Danger, @"<div class=""btn-group"" role=""button""><a class=""btn btn-danger""></a><span class=""btn dropdown-toggle dropdown-toggle-split btn-danger"" *</div>")]
         [InlineData(TypeColorButton.Dark, @"<div class=""btn-group"" role=""button""><a class=""btn btn-dark""></a><span class=""btn dropdown-toggle dropdown-toggle-split btn-dark"" *</div>")]
+        [InlineData(TypeColorButton.Highlight, @"<div class=""btn-group"" role=""button""><a class=""btn btn-highlight""></a><span class=""btn dropdown-toggle dropdown-toggle-split btn-highlight"" *</div>")]
         public void BackgroundColor(TypeColorButton color, string expected)
         {
             // arrange

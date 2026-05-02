@@ -70,6 +70,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Warning, @"<div><span class=""text-warning"">abc</span></div>")]
         [InlineData(TypeColorText.Danger, @"<div><span class=""text-danger"">abc</span></div>")]
         [InlineData(TypeColorText.Light, @"<div><span class=""text-light"">abc</span></div>")]
+        [InlineData(TypeColorText.Highlight, @"<div><span class=""text-highlight"">abc</span></div>")]
         [InlineData(TypeColorText.Dark, @"<div><span class=""text-dark"">abc</span></div>")]
         [InlineData(TypeColorText.Muted, @"<div><span class=""text-muted"">abc</span></div>")]
         public void NameColor(TypeColorText color, string expected)
@@ -124,6 +125,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Warning, @"<div class=""bg-warning""></div>")]
         [InlineData(TypeColorBackground.Danger, @"<div class=""bg-danger""></div>")]
         [InlineData(TypeColorBackground.Light, @"<div class=""bg-light""></div>")]
+        [InlineData(TypeColorBackground.Highlight, @"<div class=""bg-highlight""></div>")]
         [InlineData(TypeColorBackground.Dark, @"<div class=""bg-dark""></div>")]
         [InlineData(TypeColorBackground.White, @"<div class=""bg-white""></div>")]
         [InlineData(TypeColorBackground.Transparent, @"<div class=""bg-transparent""></div>")]

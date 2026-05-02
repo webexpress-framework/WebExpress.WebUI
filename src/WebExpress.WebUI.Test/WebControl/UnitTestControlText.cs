@@ -70,6 +70,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Warning, @"<div class=""text-warning""></div>")]
         [InlineData(TypeColorText.Danger, @"<div class=""text-danger""></div>")]
         [InlineData(TypeColorText.Light, @"<div class=""text-light""></div>")]
+        [InlineData(TypeColorText.Highlight, @"<div class=""text-highlight""></div>")]
         [InlineData(TypeColorText.Dark, @"<div class=""text-dark""></div>")]
         [InlineData(TypeColorText.Muted, @"<div class=""text-muted""></div>")]
         public void TextColor(TypeColorText color, string expected)

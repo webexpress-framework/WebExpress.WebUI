@@ -118,6 +118,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorGraph.Danger, @"<div class=""wx-graph-edge"" data-color-css=""danger""></div>")]
         [InlineData(TypeColorGraph.Dark, @"<div class=""wx-graph-edge"" data-color-css=""dark""></div>")]
         [InlineData(TypeColorGraph.Light, @"<div class=""wx-graph-edge"" data-color-css=""light""></div>")]
+        [InlineData(TypeColorGraph.Highlight, @"<div class=""wx-graph-edge"" data-color-css=""highlight""></div>")]
         public void SystemColor(TypeColorGraph color, string expected)
         {
             // arrange

@@ -221,6 +221,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorSelection.Warning, @"<div class=""wx-webui-input-cascading""><div class=""wx-cascading-item"" data-label-color=""wx-selection-warning""></div></div>")]
         [InlineData(TypeColorSelection.Danger, @"<div class=""wx-webui-input-cascading""><div class=""wx-cascading-item"" data-label-color=""wx-selection-danger""></div></div>")]
         [InlineData(TypeColorSelection.Light, @"<div class=""wx-webui-input-cascading""><div class=""wx-cascading-item"" data-label-color=""wx-selection-light""></div></div>")]
+        [InlineData(TypeColorSelection.Highlight, @"<div class=""wx-webui-input-cascading""><div class=""wx-cascading-item"" data-label-color=""wx-selection-highlight""></div></div>")]
         [InlineData(TypeColorSelection.Dark, @"<div class=""wx-webui-input-cascading""><div class=""wx-cascading-item"" data-label-color=""wx-selection-dark""></div></div>")]
         public void LabelColor(TypeColorSelection color, string expected)
         {

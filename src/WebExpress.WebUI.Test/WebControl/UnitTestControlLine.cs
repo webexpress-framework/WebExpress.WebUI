@@ -43,6 +43,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorLine.Warning, @"<hr class=""text-warning"">")]
         [InlineData(TypeColorLine.Danger, @"<hr class=""text-danger"">")]
         [InlineData(TypeColorLine.Light, @"<hr class=""text-light"">")]
+        [InlineData(TypeColorLine.Highlight, @"<hr class=""text-highlight"">")]
         [InlineData(TypeColorLine.Dark, @"<hr class=""text-dark"">")]
         public void Color(TypeColorLine color, string expected)
         {

@@ -73,6 +73,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackgroundList.Danger, @"<div class=""wx-list-item-link"" data-bgcolor-css=""wx-list-bg-danger""></div>")]
         [InlineData(TypeColorBackgroundList.Dark, @"<div class=""wx-list-item-link"" data-bgcolor-css=""wx-list-bg-dark""></div>")]
         [InlineData(TypeColorBackgroundList.Light, @"<div class=""wx-list-item-link"" data-bgcolor-css=""wx-list-bg-light""></div>")]
+        [InlineData(TypeColorBackgroundList.Highlight, @"<div class=""wx-list-item-link"" data-bgcolor-css=""wx-list-bg-highlight""></div>")]
         [InlineData(TypeColorBackgroundList.Transparent, @"<div class=""wx-list-item-link"" data-bgcolor-css=""wx-list-bg-transparent""></div>")]
         public void BackgroundColor(TypeColorBackgroundList backgroundColor, string expected)
         {

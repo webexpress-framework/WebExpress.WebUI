@@ -45,6 +45,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorTag.Warning, @"<template data-type=""tag"" data-color-css=""wx-tag-warning""></template>")]
         [InlineData(TypeColorTag.Danger, @"<template data-type=""tag"" data-color-css=""wx-tag-danger""></template>")]
         [InlineData(TypeColorTag.Light, @"<template data-type=""tag"" data-color-css=""wx-tag-light""></template>")]
+        [InlineData(TypeColorTag.Highlight, @"<template data-type=""tag"" data-color-css=""wx-tag-highlight""></template>")]
         [InlineData(TypeColorTag.Dark, @"<template data-type=""tag"" data-color-css=""wx-tag-dark""></template>")]
         public void SystemColor(TypeColorTag color, string expected)
         {

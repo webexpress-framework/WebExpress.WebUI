@@ -68,7 +68,12 @@
         /// <summary>
         /// User-defined color.
         /// </summary>
-        User = 12
+        User = 12,
+
+        /// <summary>
+        /// Highlight color.
+        /// </summary>
+        Highlight = 13
     }
 
     /// <summary>
@@ -96,6 +101,7 @@
                 TypeColor.White => "white",
                 TypeColor.Transparent => "transparent",
                 TypeColor.Mute => "mute",
+                TypeColor.Highlight => "highlight",
                 _ => string.Empty,
             };
         }

@@ -48,7 +48,12 @@
         /// <summary>
         /// The dark color.
         /// </summary>
-        Dark
+        Dark,
+
+        /// <summary>
+        /// The highlight color.
+        /// </summary>
+        Highlight
     }
 
     /// <summary>
@@ -73,6 +78,7 @@
                 TypeColorTable.Danger => "table-danger",
                 TypeColorTable.Light => "table-light",
                 TypeColorTable.Dark => "table-dark",
+                TypeColorTable.Highlight => "table-highlight",
                 _ => string.Empty,
             };
         }

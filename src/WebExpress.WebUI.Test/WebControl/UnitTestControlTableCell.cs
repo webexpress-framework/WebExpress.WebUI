@@ -238,6 +238,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorTable.Warning, @"<div data-color=""table-warning""></div>")]
         [InlineData(TypeColorTable.Danger, @"<div data-color=""table-danger""></div>")]
         [InlineData(TypeColorTable.Light, @"<div data-color=""table-light""></div>")]
+        [InlineData(TypeColorTable.Highlight, @"<div data-color=""table-highlight""></div>")]
         [InlineData(TypeColorTable.Dark, @"<div data-color=""table-dark""></div>")]
         public void Color(TypeColorTable color, string expected)
         {

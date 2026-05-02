@@ -68,6 +68,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<div * data-splitter-class=""bg-danger"">*</div>")]
         [InlineData(TypeColorBackground.Dark, @"<div * data-splitter-class=""bg-dark"">*</div>")]
         [InlineData(TypeColorBackground.Light, @"<div * data-splitter-class=""bg-light"">*</div>")]
+        [InlineData(TypeColorBackground.Highlight, @"<div * data-splitter-class=""bg-highlight"">*</div>")]
         [InlineData(TypeColorBackground.Transparent, @"<div * data-splitter-class=""bg-transparent"">*</div>")]
         public void SplitterColor(TypeColorBackground splitterColor, string expected)
         {

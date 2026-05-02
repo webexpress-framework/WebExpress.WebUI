@@ -47,6 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<nav class=""wx-webui-toolbar bg-danger px-2 navbar-expand-sm""></nav>")]
         [InlineData(TypeColorBackground.Dark, @"<nav class=""wx-webui-toolbar bg-dark px-2 navbar-expand-sm""></nav>")]
         [InlineData(TypeColorBackground.Light, @"<nav class=""wx-webui-toolbar bg-light px-2 navbar-expand-sm""></nav>")]
+        [InlineData(TypeColorBackground.Highlight, @"<nav class=""wx-webui-toolbar bg-highlight px-2 navbar-expand-sm""></nav>")]
         [InlineData(TypeColorBackground.White, @"<nav class=""wx-webui-toolbar bg-white px-2 navbar-expand-sm""></nav>")]
         [InlineData(TypeColorBackground.Transparent, @"<nav class=""wx-webui-toolbar bg-transparent px-2 navbar-expand-sm""></nav>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)

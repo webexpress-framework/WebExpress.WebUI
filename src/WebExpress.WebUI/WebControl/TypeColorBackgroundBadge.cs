@@ -47,7 +47,12 @@
         /// <summary>
         /// Light background color.
         /// </summary>
-        Light = 8
+        Light = 8,
+
+        /// <summary>
+        /// Highlight background color.
+        /// </summary>
+        Highlight = 13
     }
 
     /// <summary>
@@ -72,6 +77,7 @@
                 TypeColorBackgroundBadge.Danger => "text-bg-danger",
                 TypeColorBackgroundBadge.Light => "text-bg-light",
                 TypeColorBackgroundBadge.Dark => "text-bg-dark",
+                TypeColorBackgroundBadge.Highlight => "text-bg-highlight",
                 _ => string.Empty,
             };
         }

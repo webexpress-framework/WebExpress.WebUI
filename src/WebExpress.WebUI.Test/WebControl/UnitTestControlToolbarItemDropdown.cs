@@ -168,6 +168,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Danger, @"<div class=""wx-toolbar-dropdown"" data-color-css=""text-danger""></div>")]
         [InlineData(TypeColorText.Dark, @"<div class=""wx-toolbar-dropdown"" data-color-css=""text-dark""></div>")]
         [InlineData(TypeColorText.Light, @"<div class=""wx-toolbar-dropdown"" data-color-css=""text-light""></div>")]
+        [InlineData(TypeColorText.Highlight, @"<div class=""wx-toolbar-dropdown"" data-color-css=""text-highlight""></div>")]
         public void Color(TypeColorText color, string expected)
         {
             // arrange

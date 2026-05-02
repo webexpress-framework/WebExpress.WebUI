@@ -45,6 +45,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorDate.Warning, @"<template data-type=""calendar"" data-color-css=""bg-warning""></template>")]
         [InlineData(TypeColorDate.Danger, @"<template data-type=""calendar"" data-color-css=""bg-danger""></template>")]
         [InlineData(TypeColorDate.Light, @"<template data-type=""calendar"" data-color-css=""bg-light""></template>")]
+        [InlineData(TypeColorDate.Highlight, @"<template data-type=""calendar"" data-color-css=""bg-highlight""></template>")]
         [InlineData(TypeColorDate.Dark, @"<template data-type=""calendar"" data-color-css=""bg-dark""></template>")]
         public void SystemColor(TypeColorDate color, string expected)
         {

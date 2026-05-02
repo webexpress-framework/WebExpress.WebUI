@@ -93,6 +93,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorDate.Warning, @"<div class=""wx-webui-date"" data-color-css=""bg-warning"" data-format=""yyyy-MM-dd""></div>")]
         [InlineData(TypeColorDate.Danger, @"<div class=""wx-webui-date"" data-color-css=""bg-danger"" data-format=""yyyy-MM-dd""></div>")]
         [InlineData(TypeColorDate.Light, @"<div class=""wx-webui-date"" data-color-css=""bg-light"" data-format=""yyyy-MM-dd""></div>")]
+        [InlineData(TypeColorDate.Highlight, @"<div class=""wx-webui-date"" data-color-css=""bg-highlight"" data-format=""yyyy-MM-dd""></div>")]
         [InlineData(TypeColorDate.Dark, @"<div class=""wx-webui-date"" data-color-css=""bg-dark"" data-format=""yyyy-MM-dd""></div>")]
         public void SystemColor(TypeColorDate color, string expected)
         {

@@ -92,6 +92,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Dark, @"<div class=""wx-toolbar-label"" data-color-css=""text-dark""></div>")]
         [InlineData(TypeColorText.Light, @"<div class=""wx-toolbar-label"" data-color-css=""text-light""></div>")]
         [InlineData(TypeColorText.Muted, @"<div class=""wx-toolbar-label"" data-color-css=""text-muted""></div>")]
+        [InlineData(TypeColorText.Highlight, @"<div class=""wx-toolbar-label"" data-color-css=""text-highlight""></div>")]
         public void Color(TypeColorText color, string expected)
         {
             // arrange

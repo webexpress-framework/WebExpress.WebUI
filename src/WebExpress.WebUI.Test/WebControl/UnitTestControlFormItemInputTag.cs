@@ -121,6 +121,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorTag.Warning, @"<div class=""wx-webui-input-tag"" data-color-css=""wx-tag-warning""></div>")]
         [InlineData(TypeColorTag.Danger, @"<div class=""wx-webui-input-tag"" data-color-css=""wx-tag-danger""></div>")]
         [InlineData(TypeColorTag.Light, @"<div class=""wx-webui-input-tag"" data-color-css=""wx-tag-light""></div>")]
+        [InlineData(TypeColorTag.Highlight, @"<div class=""wx-webui-input-tag"" data-color-css=""wx-tag-highlight""></div>")]
         [InlineData(TypeColorTag.Dark, @"<div class=""wx-webui-input-tag"" data-color-css=""wx-tag-dark""></div>")]
         public void SystemColor(TypeColorTag color, string expected)
         {

@@ -97,6 +97,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Warning, @"<div class=""text-warning""><span>:</span><span></span></div>")]
         [InlineData(TypeColorText.Danger, @"<div class=""text-danger""><span>:</span><span></span></div>")]
         [InlineData(TypeColorText.Light, @"<div class=""text-light""><span>:</span><span></span></div>")]
+        [InlineData(TypeColorText.Highlight, @"<div class=""text-highlight""><span>:</span><span></span></div>")]
         [InlineData(TypeColorText.Dark, @"<div class=""text-dark""><span>:</span><span></span></div>")]
         [InlineData(TypeColorText.Muted, @"<div class=""text-muted""><span>:</span><span></span></div>")]
         public void Color(TypeColorText color, string expected)
@@ -129,6 +130,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Warning, @"<div><span class=""text-warning"">:</span><span></span></div>")]
         [InlineData(TypeColorText.Danger, @"<div><span class=""text-danger"">:</span><span></span></div>")]
         [InlineData(TypeColorText.Light, @"<div><span class=""text-light"">:</span><span></span></div>")]
+        [InlineData(TypeColorText.Highlight, @"<div><span class=""text-highlight"">:</span><span></span></div>")]
         [InlineData(TypeColorText.Dark, @"<div><span class=""text-dark"">:</span><span></span></div>")]
         [InlineData(TypeColorText.Muted, @"<div><span class=""text-muted"">:</span><span></span></div>")]
         public void KeyColor(TypeColorText color, string expected)
@@ -161,6 +163,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<div class=""bg-danger""><span>:</span><span></span></div>")]
         [InlineData(TypeColorBackground.Dark, @"<div class=""bg-dark""><span>:</span><span></span></div>")]
         [InlineData(TypeColorBackground.Light, @"<div class=""bg-light""><span>:</span><span></span></div>")]
+        [InlineData(TypeColorBackground.Highlight, @"<div class=""bg-highlight""><span>:</span><span></span></div>")]
         [InlineData(TypeColorBackground.White, @"<div class=""bg-white""><span>:</span><span></span></div>")]
         [InlineData(TypeColorBackground.Transparent, @"<div class=""bg-transparent""><span>:</span><span></span></div>")]
         public void BackgroundColor(TypeColorBackground color, string expected)

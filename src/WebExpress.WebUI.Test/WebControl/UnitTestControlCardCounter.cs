@@ -147,6 +147,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Warning, @"<span class=""card-counter text-warning"">*</span>")]
         [InlineData(TypeColorText.Danger, @"<span class=""card-counter text-danger"">*</span>")]
         [InlineData(TypeColorText.Light, @"<span class=""card-counter text-light"">*</span>")]
+        [InlineData(TypeColorText.Highlight, @"<span class=""card-counter text-highlight"">*</span>")]
         [InlineData(TypeColorText.Dark, @"<span class=""card-counter text-dark"">*</span>")]
         [InlineData(TypeColorText.Muted, @"<span class=""card-counter text-muted"">*</span>")]
         public void TextColor(TypeColorText color, string expected)
@@ -178,6 +179,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<span class=""card-counter bg-danger"">*</span>")]
         [InlineData(TypeColorBackground.Dark, @"<span class=""card-counter bg-dark"">*</span>")]
         [InlineData(TypeColorBackground.Light, @"<span class=""card-counter bg-light""><*/span>")]
+        [InlineData(TypeColorBackground.Highlight, @"<span class=""card-counter bg-highlight""><*/span>")]
         [InlineData(TypeColorBackground.Transparent, @"<span class=""card-counter bg-transparent"">*</span>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {

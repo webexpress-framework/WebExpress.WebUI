@@ -43,6 +43,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<div class=""media bg-danger""><img class=""me-3 mt-3 ""><div class=""media-body""></div></div>")]
         [InlineData(TypeColorBackground.Dark, @"<div class=""media bg-dark""><img class=""me-3 mt-3 ""><div class=""media-body""></div></div>")]
         [InlineData(TypeColorBackground.Light, @"<div class=""media bg-light""><img class=""me-3 mt-3 ""><div class=""media-body""></div></div>")]
+        [InlineData(TypeColorBackground.Highlight, @"<div class=""media bg-highlight""><img class=""me-3 mt-3 ""><div class=""media-body""></div></div>")]
         [InlineData(TypeColorBackground.Transparent, @"<div class=""media bg-transparent""><img class=""me-3 mt-3 ""><div class=""media-body""></div></div>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {

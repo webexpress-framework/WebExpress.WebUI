@@ -48,6 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorTile.Dark, @"<div class=""wx-tile-card"" data-color-css=""wx-tile-dark""></div>")]
         [InlineData(TypeColorTile.White, @"<div class=""wx-tile-card"" data-color-css=""wx-tile-white""></div>")]
         [InlineData(TypeColorTile.Transparent, @"<div class=""wx-tile-card"" data-color-css=""wx-tile-transparent""></div>")]
+        [InlineData(TypeColorTile.Highlight, @"<div class=""wx-tile-card"" data-color-css=""wx-tile-highlight""></div>")]
         public void Color(TypeColorTile color, string expected)
         {
             // arrange

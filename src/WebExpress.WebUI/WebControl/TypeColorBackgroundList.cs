@@ -58,7 +58,12 @@
         /// <summary>
         /// Transparent background color.
         /// </summary>
-        Transparent = 10
+        Transparent = 10,
+
+        /// <summary>
+        /// Highlight background color.
+        /// </summary>
+        Highlight = 13
     }
 
     /// <summary>
@@ -85,6 +90,7 @@
                 TypeColorBackgroundList.Dark => "wx-list-bg-dark",
                 TypeColorBackgroundList.White => "wx-list-bg-white",
                 TypeColorBackgroundList.Transparent => "wx-list-bg-transparent",
+                TypeColorBackgroundList.Highlight => "wx-list-bg-highlight",
                 _ => string.Empty,
             };
         }

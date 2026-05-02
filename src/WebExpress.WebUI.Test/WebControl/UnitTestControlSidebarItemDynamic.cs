@@ -95,6 +95,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Danger, @"<div class=""wx-sidebar-control"" data-color-css=""text-danger""></div>")]
         [InlineData(TypeColorText.Dark, @"<div class=""wx-sidebar-control"" data-color-css=""text-dark""></div>")]
         [InlineData(TypeColorText.Light, @"<div class=""wx-sidebar-control"" data-color-css=""text-light""></div>")]
+        [InlineData(TypeColorText.Highlight, @"<div class=""wx-sidebar-control"" data-color-css=""text-highlight""></div>")]
         [InlineData(TypeColorText.Muted, @"<div class=""wx-sidebar-control"" data-color-css=""text-muted""></div>")]
         public void Color(TypeColorText color, string expected)
         {

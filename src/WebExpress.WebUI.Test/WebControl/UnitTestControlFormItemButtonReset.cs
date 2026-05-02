@@ -95,6 +95,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<button type=""reset"" class=""btn bg-danger *"">*</button>")]
         [InlineData(TypeColorBackground.Dark, @"<button type=""reset"" class=""btn bg-dark *"">*</button>")]
         [InlineData(TypeColorBackground.Light, @"<button type=""reset"" class=""btn bg-light *"">*</button>")]
+        [InlineData(TypeColorBackground.Highlight, @"<button type=""reset"" class=""btn bg-highlight *"">*</button>")]
         [InlineData(TypeColorBackground.White, @"<button type=""reset"" class=""btn bg-white *"">*</button>")]
         [InlineData(TypeColorBackground.Transparent, @"<button type=""reset"" class=""btn bg-transparent *"">*</button>")]
         public void BackgroundColor(TypeColorBackground color, string expected)
@@ -126,6 +127,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorButton.Danger, @"<button type=""reset"" class=""btn me-2 btn-danger"">*</button>")]
         [InlineData(TypeColorButton.Dark, @"<button type=""reset"" class=""btn me-2 btn-dark"">*</button>")]
         [InlineData(TypeColorButton.Light, @"<button type=""reset"" class=""btn me-2 btn-light"">*</button>")]
+        [InlineData(TypeColorButton.Highlight, @"<button type=""reset"" class=""btn me-2 btn-highlight"">*</button>")]
         public void Color(TypeColorButton color, string expected)
         {
             // arrange

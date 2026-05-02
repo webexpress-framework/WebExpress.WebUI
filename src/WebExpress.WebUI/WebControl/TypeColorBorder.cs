@@ -58,7 +58,12 @@
         /// <summary>
         /// Transparent border color.
         /// </summary>
-        Transparent = 10
+        Transparent = 10,
+
+        /// <summary>
+        /// Highlight border color.
+        /// </summary>
+        Highlight = 13
     }
 
     /// <summary>
@@ -85,6 +90,7 @@
                 TypeColorBorder.Dark => "border-dark",
                 TypeColorBorder.White => "border-white",
                 TypeColorBorder.Transparent => "border-transparent",
+                TypeColorBorder.Highlight => "border-highlight",
                 _ => string.Empty,
             };
         }

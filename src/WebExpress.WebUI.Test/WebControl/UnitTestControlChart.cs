@@ -45,6 +45,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Warning, @"<div class=""wx-webui-chart text-warning"" data-type=""line""></div>")]
         [InlineData(TypeColorText.Danger, @"<div class=""wx-webui-chart text-danger"" data-type=""line""></div>")]
         [InlineData(TypeColorText.Light, @"<div class=""wx-webui-chart text-light"" data-type=""line""></div>")]
+        [InlineData(TypeColorText.Highlight, @"<div class=""wx-webui-chart text-highlight"" data-type=""line""></div>")]
         [InlineData(TypeColorText.Dark, @"<div class=""wx-webui-chart text-dark"" data-type=""line""></div>")]
         [InlineData(TypeColorText.Muted, @"<div class=""wx-webui-chart text-muted"" data-type=""line""></div>")]
         public void TextColor(TypeColorText color, string expected)
@@ -76,6 +77,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<div class=""wx-webui-chart bg-danger"" data-type=""line""></div>")]
         [InlineData(TypeColorBackground.Dark, @"<div class=""wx-webui-chart bg-dark"" data-type=""line""></div>")]
         [InlineData(TypeColorBackground.Light, @"<div class=""wx-webui-chart bg-light"" data-type=""line""></div>")]
+        [InlineData(TypeColorBackground.Highlight, @"<div class=""wx-webui-chart bg-highlight"" data-type=""line""></div>")]
         [InlineData(TypeColorBackground.Transparent, @"<div class=""wx-webui-chart bg-transparent"" data-type=""line""></div>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {

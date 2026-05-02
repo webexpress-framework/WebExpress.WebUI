@@ -47,6 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<div class=""wx-webui-sidebar bg-danger""></div>")]
         [InlineData(TypeColorBackground.Dark, @"<div class=""wx-webui-sidebar bg-dark""></div>")]
         [InlineData(TypeColorBackground.Light, @"<div class=""wx-webui-sidebar bg-light""></div>")]
+        [InlineData(TypeColorBackground.Highlight, @"<div class=""wx-webui-sidebar bg-highlight""></div>")]
         [InlineData(TypeColorBackground.White, @"<div class=""wx-webui-sidebar bg-white""></div>")]
         [InlineData(TypeColorBackground.Transparent, @"<div class=""wx-webui-sidebar bg-transparent""></div>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)

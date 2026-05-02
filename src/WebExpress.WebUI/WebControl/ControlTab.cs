@@ -186,6 +186,11 @@ namespace WebExpress.WebUI.WebControl
                 {
                     html.AddStyle($"--bs-nav-underline-border-color: {HighlightColor.UserColor};", $"--bs-nav-underline-link-active-color: {HighlightColor.UserColor};");
                 }
+                else if ((TypeColor)HighlightColor.SystemColor == TypeColor.Highlight)
+                {
+                    var colorVar = "var(--wx-highlight)";
+                    html.AddStyle($"--bs-nav-underline-border-color: {colorVar};", $"--bs-nav-underline-link-active-color: {colorVar};");
+                }
                 else if ((TypeColor)HighlightColor.SystemColor != TypeColor.Default)
                 {
                     var colorVar = $"var(--bs-{((TypeColor)HighlightColor.SystemColor).ToClass()})";

@@ -120,6 +120,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorProgress.Warning, @"<div class=""progress""><* class=""progress-bar bg-warning"" */div>")]
         [InlineData(TypeColorProgress.Danger, @"<div class=""progress""><* class=""progress-bar bg-danger"" */div>")]
         [InlineData(TypeColorProgress.Light, @"<div class=""progress""><* class=""progress-bar bg-light"" */div>")]
+        [InlineData(TypeColorProgress.Highlight, @"<div class=""progress""><* class=""progress-bar bg-highlight"" */div>")]
         [InlineData(TypeColorProgress.White, @"<div class=""progress""><* class=""progress-bar bg-white"" */div>")]
         public void Color(TypeColorProgress color, string expected)
         {
@@ -150,6 +151,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Warning, @"<div class=""progress""><* class=""progress-bar text-warning"" */div>")]
         [InlineData(TypeColorText.Danger, @"<div class=""progress""><* class=""progress-bar text-danger"" */div>")]
         [InlineData(TypeColorText.Light, @"<div class=""progress""><* class=""progress-bar text-light"" */div>")]
+        [InlineData(TypeColorText.Highlight, @"<div class=""progress""><* class=""progress-bar text-highlight"" */div>")]
         [InlineData(TypeColorText.White, @"<div class=""progress""><* class=""progress-bar text-white"" */div>")]
         [InlineData(TypeColorText.Muted, @"<div class=""progress""><* class=""progress-bar text-muted"" */div>")]
         public void TextColor(TypeColorText textColor, string expected)

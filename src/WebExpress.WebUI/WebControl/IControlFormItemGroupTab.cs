@@ -8,6 +8,11 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFormItemGroupTab : IControlFormItemGroup
     {
         /// <summary>
+        /// Gets or sets the layout.
+        /// </summary>
+        TypeLayoutTab Layout { get; set; }
+
+        /// <summary>
         /// Adds the specified view to the tab.
         /// </summary>
         /// <param name="views">The tab views to add. Cannot be null.</param>

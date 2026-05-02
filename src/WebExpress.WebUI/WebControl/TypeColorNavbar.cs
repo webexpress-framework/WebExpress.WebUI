@@ -58,7 +58,12 @@
         /// <summary>
         /// Transparent color.
         /// </summary>
-        Transparent = 10
+        Transparent = 10,
+
+        /// <summary>
+        /// Highlight color.
+        /// </summary>
+        Highlight = 13
     }
 
     /// <summary>
@@ -85,6 +90,7 @@
                 TypeColorNavbar.Dark => "navbar-dark",
                 TypeColorNavbar.White => "navbar-white",
                 TypeColorNavbar.Transparent => "navbar-transparent",
+                TypeColorNavbar.Highlight => "navbar-highlight",
                 _ => string.Empty,
             };
         }

@@ -43,6 +43,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<nav class=""navbar bg-danger""></nav>")]
         [InlineData(TypeColorBackground.Dark, @"<nav class=""navbar bg-dark""></nav>")]
         [InlineData(TypeColorBackground.Light, @"<nav class=""navbar bg-light""></nav>")]
+        [InlineData(TypeColorBackground.Highlight, @"<nav class=""navbar bg-highlight""></nav>")]
         [InlineData(TypeColorBackground.Transparent, @"<nav class=""navbar bg-transparent""></nav>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {

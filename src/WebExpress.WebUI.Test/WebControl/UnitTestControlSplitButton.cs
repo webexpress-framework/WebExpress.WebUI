@@ -91,6 +91,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorButton.Warning, @"<div class=""btn-group""><button class=""btn btn-warning""></button><button class=""btn * btn-warning"" *")]
         [InlineData(TypeColorButton.Danger, @"<div class=""btn-group""><button class=""btn btn-danger""></button><button class=""btn * btn-danger"" *")]
         [InlineData(TypeColorButton.Dark, @"<div class=""btn-group""><button class=""btn btn-dark""></button><button class=""btn * btn-dark"" *")]
+        [InlineData(TypeColorButton.Highlight, @"<div class=""btn-group""><button class=""btn btn-highlight""></button><button class=""btn * btn-highlight"" *")]
         public void BackgroundColor(TypeColorButton color, string expected)
         {
             // arrange

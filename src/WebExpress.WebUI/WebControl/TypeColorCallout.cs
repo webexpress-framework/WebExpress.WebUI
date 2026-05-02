@@ -48,7 +48,12 @@
         /// <summary>
         /// Light color callout.
         /// </summary>
-        Light = 8
+        Light = 8,
+
+        /// <summary>
+        /// Highlight callout color.
+        /// </summary>
+        Highlight = 13
     }
 
     /// <summary>
@@ -73,6 +78,7 @@
                 TypeColorCallout.Danger => "wx-callout-danger",
                 TypeColorCallout.Light => "wx-callout-light",
                 TypeColorCallout.Dark => "wx-callout-dark",
+                TypeColorCallout.Highlight => "wx-callout-highlight",
                 _ => string.Empty,
             };
         }

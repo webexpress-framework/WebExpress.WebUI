@@ -48,7 +48,12 @@
         /// <summary>
         /// Light button color.
         /// </summary>
-        Light = 8
+        Light = 8,
+
+        /// <summary>
+        /// Highlight button color.
+        /// </summary>
+        Highlight = 13
     }
 
     /// <summary>
@@ -82,6 +87,8 @@
                         return "btn-outline-danger";
                     case TypeColorButton.Dark:
                         return "btn-outline-dark";
+                    case TypeColorButton.Highlight:
+                        return "btn-outline-highlight";
                 }
             }
             else
@@ -104,6 +111,8 @@
                         return "btn-light";
                     case TypeColorButton.Dark:
                         return "btn-dark";
+                    case TypeColorButton.Highlight:
+                        return "btn-highlight";
                 }
             }
 

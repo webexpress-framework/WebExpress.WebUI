@@ -45,6 +45,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorButton.Warning, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-warning""></div>")]
         [InlineData(TypeColorButton.Danger, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-danger""></div>")]
         [InlineData(TypeColorButton.Light, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-light""></div>")]
+        [InlineData(TypeColorButton.Highlight, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-highlight""></div>")]
         [InlineData(TypeColorButton.Dark, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-dark""></div>")]
         public void Color(TypeColorButton color, string expected)
         {

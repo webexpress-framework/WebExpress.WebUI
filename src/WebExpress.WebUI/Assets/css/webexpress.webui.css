@@ -1,6 +1,11 @@
 :root {
     /* Unified dropdown shadow: subtle elevation for dropdown menus against white backgrounds */
     --wx-dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    
+    /* Central highlight color */
+    --wx-highlight: #ff8c00;
+    --wx-highlight-rgb: 255, 140, 0;
+    --wx-highlight-contrast: #212529;
 }
 
 /* Global dropdown menu shadow for consistent elevation across all dropdown variants */
@@ -316,4 +321,105 @@ img.wx-icon {
 
 .list-group-item.active a:hover {
     color: var(--bs-light);
+}
+
+/* Highlight color utilities  */
+.text-highlight {
+    color: var(--wx-highlight) !important;
+}
+
+.bg-highlight {
+    background-color: var(--wx-highlight) !important;
+    color: var(--wx-highlight-contrast) !important;
+}
+
+.text-bg-highlight {
+    background-color: var(--wx-highlight) !important;
+    color: var(--wx-highlight-contrast) !important;
+}
+
+.border-highlight {
+    border-color: var(--wx-highlight) !important;
+}
+
+.btn-highlight {
+    background-color: var(--wx-highlight);
+    border-color: var(--wx-highlight);
+    color: var(--wx-highlight-contrast);
+}
+
+.btn-highlight:hover,
+.btn-highlight:focus,
+.btn-highlight:active {
+    background-color: var(--wx-highlight);
+    border-color: var(--wx-highlight);
+    color: var(--wx-highlight-contrast);
+    filter: brightness(0.95);
+}
+
+.btn-outline-highlight {
+    background-color: transparent;
+    border-color: var(--wx-highlight);
+    color: var(--wx-highlight);
+}
+
+.btn-outline-highlight:hover,
+.btn-outline-highlight:focus,
+.btn-outline-highlight:active {
+    background-color: var(--wx-highlight);
+    border-color: var(--wx-highlight);
+    color: var(--wx-highlight-contrast);
+}
+
+.alert-highlight {
+    background-color: rgba(var(--wx-highlight-rgb), 0.25);
+    border-color: rgba(var(--wx-highlight-rgb), 0.6);
+    color: var(--wx-highlight-contrast);
+}
+
+.navbar-highlight {
+    background-color: var(--wx-highlight);
+    color: var(--wx-highlight-contrast);
+}
+
+.table-highlight {
+    --bs-table-bg: rgba(var(--wx-highlight-rgb), 0.25);
+    --bs-table-color: var(--wx-highlight-contrast);
+    --bs-table-border-color: rgba(var(--wx-highlight-rgb), 0.6);
+    color: var(--wx-highlight-contrast);
+    background-color: rgba(var(--wx-highlight-rgb), 0.25);
+}
+
+.wx-callout-highlight {
+    border-left-color: var(--wx-highlight);
+    background-color: var(--bs-body-bg);
+}
+
+.wx-tag-highlight {
+    background-color: rgba(var(--wx-highlight-rgb), 0.25);
+    color: var(--wx-highlight-contrast);
+    border-color: var(--wx-highlight);
+}
+
+.wx-tile-highlight {
+    background-color: var(--wx-highlight);
+    color: var(--wx-highlight-contrast);
+    border-color: var(--wx-highlight);
+}
+
+.wx-list-bg-highlight {
+    background-color: var(--wx-highlight);
+    color: var(--wx-highlight-contrast);
+}
+
+.wx-selection-highlight {
+    background-color: rgba(var(--wx-highlight-rgb), 0.25);
+    color: var(--wx-highlight-contrast);
+    border-color: var(--wx-highlight);
+}
+
+/* Highlight breadcrumb support, mirroring the existing per-color rules */
+.wx-breadcrumb.text-highlight > li > a,
+.wx-breadcrumb.text-highlight > li > i {
+    color: var(--wx-highlight);
 }

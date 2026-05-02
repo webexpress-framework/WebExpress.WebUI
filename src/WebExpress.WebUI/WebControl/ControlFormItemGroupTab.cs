@@ -13,6 +13,15 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<IControlFormItemGroupTabView> _views = [];
 
         /// <summary>
+        /// Gets or sets the layout.
+        /// </summary>
+        public TypeLayoutTab Layout
+        {
+            get => (TypeLayoutTab)GetProperty(TypeLayoutTab.Default);
+            set => SetProperty(value, () => value.ToClass());
+        }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -98,6 +107,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(),
                 Role = Role
             }
+                .AddUserAttribute("data-layout", Layout.ToString().ToLower())
                 .Add(_views.Select(x => x.Render(renderContext, visualTree)));
 
             return html;

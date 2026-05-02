@@ -44,6 +44,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<canvas class=""bg-danger"">")]
         [InlineData(TypeColorBackground.Dark, @"<canvas class=""bg-dark"">")]
         [InlineData(TypeColorBackground.Light, @"<canvas class=""bg-light"">")]
+        [InlineData(TypeColorBackground.Highlight, @"<canvas class=""bg-highlight"">")]
         [InlineData(TypeColorBackground.Transparent, @"<canvas class=""bg-transparent"">")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {

@@ -45,6 +45,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Warning, @"<template data-type=""text"" data-color-css=""text-warning""></template>")]
         [InlineData(TypeColorText.Danger, @"<template data-type=""text"" data-color-css=""text-danger""></template>")]
         [InlineData(TypeColorText.Light, @"<template data-type=""text"" data-color-css=""text-light""></template>")]
+        [InlineData(TypeColorText.Highlight, @"<template data-type=""text"" data-color-css=""text-highlight""></template>")]
         [InlineData(TypeColorText.Dark, @"<template data-type=""text"" data-color-css=""text-dark""></template>")]
         public void SystemColor(TypeColorText color, string expected)
         {

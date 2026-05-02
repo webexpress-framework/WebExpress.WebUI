@@ -58,7 +58,12 @@
         /// <summary>
         /// Transparent background color.
         /// </summary>
-        Transparent = 10
+        Transparent = 10,
+
+        /// <summary>
+        /// Highlight background color.
+        /// </summary>
+        Highlight = 13
     }
 
     /// <summary>
@@ -85,6 +90,7 @@
                 TypeColorBackground.Dark => "bg-dark",
                 TypeColorBackground.White => "bg-white",
                 TypeColorBackground.Transparent => "bg-transparent",
+                TypeColorBackground.Highlight => "bg-highlight",
                 _ => string.Empty,
             };
         }

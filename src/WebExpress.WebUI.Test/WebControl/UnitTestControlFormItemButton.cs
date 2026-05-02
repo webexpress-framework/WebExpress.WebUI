@@ -95,6 +95,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<button type=""button"" class=""btn bg-danger""></button>")]
         [InlineData(TypeColorBackground.Dark, @"<button type=""button"" class=""btn bg-dark""></button>")]
         [InlineData(TypeColorBackground.Light, @"<button type=""button"" class=""btn bg-light""></button>")]
+        [InlineData(TypeColorBackground.Highlight, @"<button type=""button"" class=""btn bg-highlight""></button>")]
         [InlineData(TypeColorBackground.White, @"<button type=""button"" class=""btn bg-white""></button>")]
         [InlineData(TypeColorBackground.Transparent, @"<button type=""button"" class=""btn bg-transparent""></button>")]
         public void BackgroundColor(TypeColorBackground color, string expected)
@@ -126,6 +127,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorButton.Danger, @"<button type=""button"" class=""btn btn-danger""></button>")]
         [InlineData(TypeColorButton.Dark, @"<button type=""button"" class=""btn btn-dark""></button>")]
         [InlineData(TypeColorButton.Light, @"<button type=""button"" class=""btn btn-light""></button>")]
+        [InlineData(TypeColorButton.Highlight, @"<button type=""button"" class=""btn btn-highlight""></button>")]
         public void Color(TypeColorButton color, string expected)
         {
             // arrange

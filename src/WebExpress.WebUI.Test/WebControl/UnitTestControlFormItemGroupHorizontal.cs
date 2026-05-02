@@ -30,6 +30,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -54,6 +55,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
     }

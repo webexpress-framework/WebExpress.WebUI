@@ -44,6 +44,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorTable.Warning, @"<div class=""wx-table-row"" data-color=""table-warning""></div>")]
         [InlineData(TypeColorTable.Danger, @"<div class=""wx-table-row"" data-color=""table-danger""></div>")]
         [InlineData(TypeColorTable.Light, @"<div class=""wx-table-row"" data-color=""table-light""></div>")]
+        [InlineData(TypeColorTable.Highlight, @"<div class=""wx-table-row"" data-color=""table-highlight""></div>")]
         [InlineData(TypeColorTable.Dark, @"<div class=""wx-table-row"" data-color=""table-dark""></div>")]
         public void Color(TypeColorTable color, string expected)
         {

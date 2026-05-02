@@ -294,6 +294,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorSelection.Warning, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-warning""></div></div>")]
         [InlineData(TypeColorSelection.Danger, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-danger""></div></div>")]
         [InlineData(TypeColorSelection.Light, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-light""></div></div>")]
+        [InlineData(TypeColorSelection.Highlight, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-highlight""></div></div>")]
         [InlineData(TypeColorSelection.Dark, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-dark""></div></div>")]
         public void Color(TypeColorSelection color, string expected)
         {

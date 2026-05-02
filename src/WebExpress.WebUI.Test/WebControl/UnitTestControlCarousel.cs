@@ -45,6 +45,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Warning, @"<div id=""carousel"" class=""carousel slide text-warning"" data-bs-ride=""carousel"">*</div>")]
         [InlineData(TypeColorText.Danger, @"<div id=""carousel"" class=""carousel slide text-danger"" data-bs-ride=""carousel"">*</div>")]
         [InlineData(TypeColorText.Light, @"<div id=""carousel"" class=""carousel slide text-light"" data-bs-ride=""carousel"">*</div>")]
+        [InlineData(TypeColorText.Highlight, @"<div id=""carousel"" class=""carousel slide text-highlight"" data-bs-ride=""carousel"">*</div>")]
         [InlineData(TypeColorText.Dark, @"<div id=""carousel"" class=""carousel slide text-dark"" data-bs-ride=""carousel"">*</div>")]
         [InlineData(TypeColorText.Muted, @"<div id=""carousel"" class=""carousel slide text-muted"" data-bs-ride=""carousel"">*</div>")]
         public void TextColor(TypeColorText color, string expected)
@@ -76,6 +77,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<div id=""carousel"" class=""carousel slide bg-danger"" data-bs-ride=""carousel"">*</div>")]
         [InlineData(TypeColorBackground.Dark, @"<div id=""carousel"" class=""carousel slide bg-dark"" data-bs-ride=""carousel"">*</div>")]
         [InlineData(TypeColorBackground.Light, @"<div id=""carousel"" class=""carousel slide bg-light"" data-bs-ride=""carousel"">*</div>")]
+        [InlineData(TypeColorBackground.Highlight, @"<div id=""carousel"" class=""carousel slide bg-highlight"" data-bs-ride=""carousel"">*</div>")]
         [InlineData(TypeColorBackground.Transparent, @"<div id=""carousel"" class=""carousel slide bg-transparent"" data-bs-ride=""carousel"">*</div>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {
