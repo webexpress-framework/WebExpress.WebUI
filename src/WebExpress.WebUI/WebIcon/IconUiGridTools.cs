@@ -1,3 +1,5 @@
+using WebExpress.WebCore.WebIcon;
+
 namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>

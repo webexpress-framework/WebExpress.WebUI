@@ -1,3 +1,5 @@
+using WebExpress.WebCore.WebIcon;
+
 namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
@@ -6,7 +8,7 @@ namespace WebExpress.WebUI.WebIcon
     public class IconTicketSimple : Icon
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="IconTicketSimple"/> class using the
+        /// Initializes a new instance of the class using the
         /// <see cref="TypeIconTheme.Default"/> theme.
         /// </summary>
         public IconTicketSimple()
@@ -14,7 +16,7 @@ namespace WebExpress.WebUI.WebIcon
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="IconTicketSimple"/> class using the
+        /// Initializes a new instance of the class using the
         /// specified theme.
         /// </summary>
         /// <param name="theme">The theme to use when rendering the icon.</param>

@@ -1,4 +1,6 @@
-﻿namespace WebExpress.WebUI.WebIcon
+﻿using WebExpress.WebCore.WebIcon;
+
+namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon for a database.

@@ -1,4 +1,6 @@
-﻿namespace WebExpress.WebUI.WebIcon
+﻿using WebExpress.WebCore.WebIcon;
+
+namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon for a robot.
@@ -6,7 +8,7 @@
     public class IconRobot : Icon
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="IconRobot"/> class using the
+        /// Initializes a new instance of the class using the
         /// <see cref="TypeIconTheme.Default"/> theme.
         /// </summary>
         public IconRobot()
@@ -14,7 +16,7 @@
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="IconRobot"/> class using the
+        /// Initializes a new instance of the class using the
         /// specified theme.
         /// </summary>
         /// <param name="theme">The theme to use when rendering the icon.</param>
