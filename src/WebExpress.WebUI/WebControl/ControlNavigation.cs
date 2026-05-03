@@ -177,8 +177,8 @@ namespace WebExpress.WebUI.WebControl
 
                 if (item is ControlNavigationItemLink link)
                 {
-                    i.RemoveClass(link.TextColor?.ToClass());
-                    i.RemoveStyle(link.TextColor?.ToStyle());
+                    i.RemoveClass(link.TextColor?.Invoke(renderContext)?.ToClass());
+                    i.RemoveStyle(link.TextColor?.Invoke(renderContext)?.ToStyle());
 
                     i.AddClass
                     (
@@ -203,8 +203,8 @@ namespace WebExpress.WebUI.WebControl
                 }
                 else if (item is ControlNavigationItemDropdown dropdown)
                 {
-                    i.RemoveClass(dropdown.TextColor?.ToClass());
-                    i.RemoveStyle(dropdown.TextColor?.ToStyle());
+                    i.RemoveClass(dropdown.TextColor?.Invoke(renderContext)?.ToClass());
+                    i.RemoveStyle(dropdown.TextColor?.Invoke(renderContext)?.ToStyle());
 
                     i.AddClass
                     (

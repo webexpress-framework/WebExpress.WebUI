@@ -31,10 +31,10 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the text color.
         /// </summary>
-        public virtual PropertyColorText TextColor
+        public virtual Func<IRenderControlContext, PropertyColorText> TextColor
         {
-            get => (PropertyColorText)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+            get => (Func<IRenderControlContext, PropertyColorText>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>
@@ -217,6 +217,21 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Returns a property.
+        /// </summary>
+        /// <param name="propertyName">The name of the property.</param>
+        /// <returns>The value.</returns>
+        protected object GetPropertyObjectValue([CallerMemberName] string propertyName = "")
+        {
+            if (_propertys.TryGetValue(propertyName, out Tuple<object, Func<string>, Func<string>> item))
+            {
+                return item.Item1;
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Returns a property value.
         /// </summary>
         /// <param name="propertyName">The name of the property.</param>
@@ -283,6 +298,24 @@ namespace WebExpress.WebUI.WebControl
             }
 
             _propertys[propertyName] = new Tuple<object, Func<string>, Func<string>>(null, callbackClass, callbackStyle);
+        }
+
+        /// <summary>
+        /// Stores a property.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="callbackClass">The callback function to determine the css class.</param>
+        /// <param name="callbackStyle">The callback function to determine the css style.</param>
+        /// <param name="propertyName">The name of the property.</param>
+        protected void SetProperty(object value, Func<string> callbackClass, Func<string> callbackStyle = null, [CallerMemberName] string propertyName = "")
+        {
+            if (!_propertys.ContainsKey(propertyName))
+            {
+                _propertys.Add(propertyName, new Tuple<object, Func<string>, Func<string>>(value, callbackClass, callbackStyle));
+                return;
+            }
+
+            _propertys[propertyName] = new Tuple<object, Func<string>, Func<string>>(value, callbackClass, callbackStyle);
         }
 
         /// <summary>

@@ -30,7 +30,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemHelpText(string id = null)
             : base(id)
         {
-            TextColor = new PropertyColorText(TypeColorText.Muted);
+            TextColor = _ => new PropertyColorText(TypeColorText.Muted);
         }
 
         /// <summary>

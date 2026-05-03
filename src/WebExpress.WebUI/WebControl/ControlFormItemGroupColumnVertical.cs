@@ -105,7 +105,7 @@ namespace WebExpress.WebUI.WebControl
                         {
                             Text = "*",
                             Classes = ["wx-form-required"],
-                            TextColor = new PropertyColorText(TypeColorText.Danger)
+                            TextColor = _ => new PropertyColorText(TypeColorText.Danger)
                         };
 
                         l.Initialize(renderGroupContext);

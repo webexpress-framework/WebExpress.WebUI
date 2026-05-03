@@ -135,7 +135,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlMultipleProgressBar()
             {
-                TextColor = new PropertyColorText(textColor),
+                TextColor = _ => new PropertyColorText(textColor),
                 Format = TypeFormatProgress.Colored
             };
 

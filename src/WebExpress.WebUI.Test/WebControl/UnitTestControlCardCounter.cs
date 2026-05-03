@@ -158,7 +158,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlCardCounter()
             {
-                TextColor = new PropertyColorText(color)
+                TextColor = _ => new PropertyColorText(color)
             };
 
             // act

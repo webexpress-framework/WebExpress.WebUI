@@ -36,7 +36,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlCardCounter(string id = null)
             : base(id)
         {
-            TextColor = new PropertyColorText(TypeColorText.Default);
+            TextColor = _ => new PropertyColorText(TypeColorText.Default);
         }
 
         /// <summary>

@@ -102,7 +102,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatar()
             {
-                TextColor = new PropertyColorText(color)
+                TextColor = _ => new PropertyColorText(color)
             };
 
             // act

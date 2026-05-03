@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -64,16 +65,16 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Gets or sets the color used to display text within the group.
+        /// Gets or sets the text color.
         /// </summary>
-        public PropertyColorText TextColor
+        public Func<IRenderControlContext, PropertyColorText> TextColor
         {
             get => _group.TextColor;
             set => _group.TextColor = value;
         }
 
         /// <summary>
-        /// Gets or sets the background color for the group.
+        /// Gets or sets the background color.
         /// </summary>
         public PropertyColorBackground BackgroundColor
         {

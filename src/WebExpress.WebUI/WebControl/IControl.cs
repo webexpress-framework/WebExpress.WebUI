@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
@@ -22,7 +23,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the text color.
         /// </summary>
-        PropertyColorText TextColor { get; }
+        Func<IRenderControlContext, PropertyColorText> TextColor { get; }
 
         /// <summary>
         /// Gets or sets the background color.
