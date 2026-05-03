@@ -318,6 +318,11 @@
     mask-image: url("../icons/clipboard.svg");
 }
 
+.wx-icon-light-clone {
+    -webkit-mask-image: url("../icons/clone.svg");
+    mask-image: url("../icons/clone.svg");
+}
+
 .wx-icon-light-cloud {
     -webkit-mask-image: url("../icons/cloud.svg");
     mask-image: url("../icons/cloud.svg");
@@ -1351,6 +1356,11 @@
 .wx-icon-light-users {
     -webkit-mask-image: url("../icons/users.svg");
     mask-image: url("../icons/users.svg");
+}
+
+.wx-icon-light-user-shield {
+    -webkit-mask-image: url("../icons/user-shield.svg");
+    mask-image: url("../icons/user-shield.svg");
 }
 
 .wx-icon-light-virus {
