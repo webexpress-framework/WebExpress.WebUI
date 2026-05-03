@@ -23,7 +23,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the outline property
         /// </summary>
-        bool Outline { get; }
+        Func<IRenderControlContext, bool> Outline { get; set; }
 
         /// <summary>
         /// Gets or sets whether the button should take up the full width.
@@ -33,17 +33,17 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the text.
         /// </summary>
-        Func<IRenderControlContext, string> Text { get; }
+        Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
         /// Gets or sets the value.
         /// </summary>
-        string Value { get; }
+        Func<IRenderControlContext, string> Value { get; set; }
 
         /// <summary>
         /// Gets or sets the icon.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
         /// Gets or sets the activation status of the button.
@@ -54,13 +54,13 @@ namespace WebExpress.WebUI.WebControl
         /// Gets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
-        IAction PrimaryAction { get; }
+        Func<IRenderControlContext, IAction> PrimaryAction { get; set; }
 
         /// <summary>
         /// Gets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
-        IAction SecondaryAction { get; }
+        Func<IRenderControlContext, IAction> SecondaryAction { get; set; }
 
         /// <summary>
         /// Adds one or more controls to the content.

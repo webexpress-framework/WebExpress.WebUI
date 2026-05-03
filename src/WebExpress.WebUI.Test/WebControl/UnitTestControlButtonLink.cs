@@ -154,7 +154,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
-                Outline = outline,
+                Outline = _ => outline,
                 BackgroundColor = new PropertyColorButton(color)
             };
 
@@ -201,7 +201,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -224,7 +224,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
-                PrimaryAction = new ActionModal(modal)
+                PrimaryAction = _ => new ActionModal(modal)
             };
 
             // act
@@ -248,7 +248,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
-                SecondaryAction = new ActionModal(modal)
+                SecondaryAction = _ => new ActionModal(modal)
             };
 
             // act

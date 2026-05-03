@@ -53,11 +53,15 @@ namespace WebExpress.WebUI.WebControl
                 OnClick = OnClick?.ToString()
             };
 
-            if (Icon is not null)
+            var icon = Icon?.Invoke(renderContext);
+            var primaryAction = PrimaryAction?.Invoke(renderContext);
+            var secondaryAction = SecondaryAction?.Invoke(renderContext);
+
+            if (icon is not null)
             {
                 html.Add(new ControlIcon()
                 {
-                    Icon = Icon,
+                    Icon = icon,
                     Margin = !string.IsNullOrWhiteSpace(text) ? new PropertySpacingMargin
                     (
                         PropertySpacing.Space.None,
@@ -84,8 +88,8 @@ namespace WebExpress.WebUI.WebControl
                 html.AddUserAttribute("data-bs-toggle", "tooltip");
             }
 
-            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
-            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
+            primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            secondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

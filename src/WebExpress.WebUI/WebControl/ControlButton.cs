@@ -29,7 +29,7 @@ namespace WebExpress.WebUI.WebControl
         public new PropertyColorButton BackgroundColor
         {
             get => (PropertyColorButton)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(Outline), () => value?.ToStyle(Outline));
+            set => SetProperty(value, () => value?.ToClass(Outline?.Invoke(null) ?? false), () => value?.ToStyle(Outline?.Invoke(null) ?? false));
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the outline property
         /// </summary>
-        public bool Outline { get; set; }
+        public Func<IRenderControlContext, bool> Outline { get; set; } = _ => false;
 
         /// <summary>
         /// Gets or sets whether the button should take up the full width.
@@ -63,24 +63,24 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the value.
         /// </summary>
-        public string Value { get; set; }
+        public Func<IRenderControlContext, string> Value { get; set; }
 
         /// <summary>
-        /// Gets or sets the secondary action, typically triggered by a 
+        /// Gets or sets the primary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
-        public IAction PrimaryAction { get; set; }
+        public Func<IRenderControlContext, IAction> PrimaryAction { get; set; }
 
         /// <summary>
         /// Gets or sets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
-        public IAction SecondaryAction { get; set; }
+        public Func<IRenderControlContext, IAction> SecondaryAction { get; set; }
 
         /// <summary>
         /// Gets or sets the icon.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
         /// Gets or sets the activation status of the button.
@@ -148,23 +148,28 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var text = Text?.Invoke(renderContext);
+            var value = Value?.Invoke(renderContext);
+            var icon = Icon?.Invoke(renderContext);
+            var outline = Outline?.Invoke(renderContext) ?? false;
+            var primaryAction = PrimaryAction?.Invoke(renderContext);
+            var secondaryAction = SecondaryAction?.Invoke(renderContext);
 
             var html = new HtmlElementFieldButton()
             {
                 Id = Id,
                 Type = "button",
-                Value = Value,
+                Value = value,
                 Class = Css.Concatenate("wx-button btn", GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
                 Disabled = Active == TypeActive.Disabled
             };
 
-            if (Icon is not null)
+            if (icon is not null)
             {
                 html.Add(new ControlIcon()
                 {
-                    Icon = Icon
+                    Icon = icon
                 }.Render(renderContext, visualTree));
             }
 
@@ -183,8 +188,8 @@ namespace WebExpress.WebUI.WebControl
                 html.Add(_content.Select(x => x.Render(renderContext, visualTree)).ToArray());
             }
 
-            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
-            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
+            primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            secondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }
