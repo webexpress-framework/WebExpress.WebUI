@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
-                Text = text
+                Text = (c) => text
             };
 
             // act

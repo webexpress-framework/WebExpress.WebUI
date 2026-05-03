@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -57,7 +58,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the text.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
         /// Gets or sets the value.
@@ -146,6 +147,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var text = Text?.Invoke(renderContext);
+
             var html = new HtmlElementFieldButton()
             {
                 Id = Id,
@@ -165,9 +168,9 @@ namespace WebExpress.WebUI.WebControl
                 }.Render(renderContext, visualTree));
             }
 
-            if (!string.IsNullOrWhiteSpace(Text))
+            if (!string.IsNullOrWhiteSpace(text))
             {
-                html.Add(new HtmlText(I18N.Translate(renderContext.Request.Culture, Text)));
+                html.Add(new HtmlText(I18N.Translate(renderContext.Request.Culture, text)));
             }
 
             if (!string.IsNullOrWhiteSpace(OnClick?.ToString()))
