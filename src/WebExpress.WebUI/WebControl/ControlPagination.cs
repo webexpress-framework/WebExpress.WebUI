@@ -44,11 +44,14 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var backgroundColor = BackgroundColor?.Invoke(renderContext);
+            var borderColor = BorderColor?.Invoke(renderContext);
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-pagination", Css.Remove(GetClasses(), BackgroundColor?.ToClass(), BorderColor?.ToClass())),
-                Style = Style.Remove(GetStyles(), BackgroundColor.ToStyle()),
+                Class = Css.Concatenate("wx-webui-pagination", Css.Remove(GetClasses(), backgroundColor?.ToClass(), borderColor?.ToClass())),
+                Style = Style.Remove(GetStyles(), backgroundColor.ToStyle()),
                 Role = Role
             }
                 .AddUserAttribute("data-page", Page > 0 ? Page.ToString() : null)

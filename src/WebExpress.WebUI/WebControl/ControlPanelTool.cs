@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlPanelTool(string id = null, params Control[] items)
             : base(id, items)
         {
-            Border = new PropertyBorder(true);
+            Border = _ => new PropertyBorder(true);
         }
 
         /// <summary>

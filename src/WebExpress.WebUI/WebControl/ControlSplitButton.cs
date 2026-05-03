@@ -164,10 +164,13 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var margin = Margin?.Invoke(renderContext);
+            var horizontalAlignment = HorizontalAlignment?.Invoke(renderContext);
+
             var button = new HtmlElementFieldButton()
             {
                 Id = string.IsNullOrWhiteSpace(Id) ? "" : Id + "_btn",
-                Class = Css.Concatenate("btn", Css.Remove(GetClasses(), Margin.ToClass())),
+                Class = Css.Concatenate("btn", Css.Remove(GetClasses(), margin.ToClass())),
                 Style = GetStyles()
             };
 
@@ -176,7 +179,7 @@ namespace WebExpress.WebUI.WebControl
                 button.Add(new ControlIcon()
                 {
                     Icon = Icon,
-                    Margin = !string.IsNullOrWhiteSpace(Text) ? new PropertySpacingMargin
+                    Margin = _ => !string.IsNullOrWhiteSpace(Text) ? new PropertySpacingMargin
                     (
                         PropertySpacing.Space.None,
                         PropertySpacing.Space.Two,
@@ -198,7 +201,7 @@ namespace WebExpress.WebUI.WebControl
             var dropdownButton = new HtmlElementFieldButton(new HtmlElementTextSemanticsSpan() { Class = "caret" })
             {
                 Id = string.IsNullOrWhiteSpace(Id) ? "" : Id + "_toggle",
-                Class = Css.Concatenate("btn dropdown-toggle dropdown-toggle-split", Css.Remove(GetClasses(), "btn-block", Margin.ToClass())),
+                Class = Css.Concatenate("btn dropdown-toggle dropdown-toggle-split", Css.Remove(GetClasses(), "btn-block", margin.ToClass())),
                 Style = GetStyles(),
                 DataToggle = "dropdown"
             };
@@ -218,7 +221,7 @@ namespace WebExpress.WebUI.WebControl
                     ).ToArray()
                 )
             {
-                Class = HorizontalAlignment == TypeHorizontalAlignment.Right ? "dropdown-menu dropdown-menu-right" : "dropdown-menu"
+                Class = horizontalAlignment == TypeHorizontalAlignment.Right ? "dropdown-menu dropdown-menu-right" : "dropdown-menu"
             };
 
             var html = new HtmlElementTextContentDiv
@@ -232,7 +235,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate
                 (
                     "btn-group",
-                    Margin.ToClass(),
+                    margin.ToClass(),
                     (Block == TypeBlockButton.Block ? "btn-block" : "")
                 ),
                 Role = Role

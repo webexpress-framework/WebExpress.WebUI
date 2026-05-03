@@ -107,7 +107,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButtonReset()
             {
-                BackgroundColor = new PropertyColorBackground(color)
+                BackgroundColor = _ => new PropertyColorBackground(color)
             };
 
             // act

@@ -62,7 +62,7 @@ namespace WebExpress.WebUI.WebControl
             : base(id)
         {
             Orientation = TypeOrientationToolBar.Default;
-            Padding = new PropertySpacingPadding(PropertySpacing.Space.Two, PropertySpacing.Space.None);
+            Padding = _ => new PropertySpacingPadding(PropertySpacing.Space.Two, PropertySpacing.Space.None);
 
             _items.AddRange(items);
         }

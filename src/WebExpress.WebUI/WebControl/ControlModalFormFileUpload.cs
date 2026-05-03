@@ -40,7 +40,7 @@ namespace WebExpress.WebUI.WebControl
             Help = "fileupload.file.description",
             Icon = new IconImage(),
             //AcceptFile = new string[] { "image/*, video/*, audio/*, .pdf, .doc, .docx, .txt" },
-            Margin = new PropertySpacingMargin
+            Margin = _ => new PropertySpacingMargin
             (
                 PropertySpacing.Space.None,
                 PropertySpacing.Space.None,

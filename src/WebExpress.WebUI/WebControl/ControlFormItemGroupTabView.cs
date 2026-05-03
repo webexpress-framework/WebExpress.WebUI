@@ -46,9 +46,9 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Gets or sets the horizontal alignment of the group content.
+        /// Gets or sets the horizontal alignment.
         /// </summary>
-        public TypeHorizontalAlignment HorizontalAlignment
+        public Func<IRenderControlContext, TypeHorizontalAlignment> HorizontalAlignment
         {
             get => _group.HorizontalAlignment;
             set => _group.HorizontalAlignment = value;
@@ -58,7 +58,7 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the flex grow factor that determines how much available space 
         /// the element should take up relative to its siblings.
         /// </summary>
-        public TypeFlexGrow FlexGrow
+        public Func<IRenderControlContext, TypeFlexGrow> FlexGrow
         {
             get => _group.FlexGrow;
             set => _group.FlexGrow = value;
@@ -76,7 +76,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the background color.
         /// </summary>
-        public PropertyColorBackground BackgroundColor
+        public Func<IRenderControlContext, PropertyColorBackground> BackgroundColor
         {
             get => _group.BackgroundColor;
             set => _group.BackgroundColor = value;
@@ -85,7 +85,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns the border color configuration for the element.
         /// </summary>
-        public PropertyColorBorder BorderColor
+        public Func<IRenderControlContext, PropertyColorBorder> BorderColor
         {
             get => _group.BorderColor;
             set => _group.BorderColor = value;
@@ -94,7 +94,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the padding applied to the property group content.
         /// </summary>
-        public PropertySpacingPadding Padding
+        public Func<IRenderControlContext, PropertySpacingPadding> Padding
         {
             get => _group.Padding;
             set => _group.Padding = value;
@@ -103,7 +103,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the margin applied to the property group layout.
         /// </summary>
-        public PropertySpacingMargin Margin
+        public Func<IRenderControlContext, PropertySpacingMargin> Margin
         {
             get => _group.Margin;
             set => _group.Margin = value;
@@ -112,7 +112,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the border settings for the group.
         /// </summary>
-        public PropertyBorder Border
+        public Func<IRenderControlContext, PropertyBorder> Border
         {
             get => _group.Border;
             set => _group.Border = value;
@@ -121,7 +121,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the grid column associated with this group.
         /// </summary>
-        public PropertyGrid GridColumn
+        public Func<IRenderControlContext, PropertyGrid> GridColumn
         {
             get => _group.GridColumn;
             set => _group.GridColumn = value;
@@ -130,7 +130,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the width type for the group.
         /// </summary>
-        public TypeWidth Width
+        public Func<IRenderControlContext, TypeWidth> Width
         {
             get => _group.Width;
             set => _group.Width = value;
@@ -139,7 +139,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the height value for the group.
         /// </summary>
-        public TypeHeight Height
+        public Func<IRenderControlContext, TypeHeight> Height
         {
             get => _group.Height;
             set => _group.Height = value;
@@ -148,7 +148,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the display settings for the type group.
         /// </summary>
-        public TypeDisplay Display
+        public Func<IRenderControlContext, TypeDisplay> Display
         {
             get => _group.Display;
             set => _group.Display = value;

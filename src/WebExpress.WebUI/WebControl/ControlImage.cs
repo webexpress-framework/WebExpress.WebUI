@@ -47,10 +47,12 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var horizontalAlignment = HorizontalAlignment?.Invoke(renderContext);
+
             var html = new HtmlElementMultimediaImg()
             {
                 Id = Id,
-                Class = Css.Concatenate(HorizontalAlignment.ToClass(), GetClasses()),
+                Class = Css.Concatenate(horizontalAlignment?.ToClass(), GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
                 Alt = Tooltip,

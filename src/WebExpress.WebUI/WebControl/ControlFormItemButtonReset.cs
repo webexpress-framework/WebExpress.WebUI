@@ -19,7 +19,7 @@ namespace WebExpress.WebUI.WebControl
             Icon = new IconRotateLeft();
             Color = new PropertyColorButton(TypeColorButton.Secondary);
             Type = TypeButton.Reset;
-            Margin = new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.Two, PropertySpacing.Space.None, PropertySpacing.Space.None);
+            Margin = _ => new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.Two, PropertySpacing.Space.None, PropertySpacing.Space.None);
         }
     }
 }

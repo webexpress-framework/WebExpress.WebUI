@@ -20,15 +20,6 @@ namespace WebExpress.WebUI.WebControl
         public string Id { get; private set; }
 
         /// <summary>
-        /// Gets or sets the horizontal alignment.
-        /// </summary>
-        public virtual TypeHorizontalAlignment HorizontalAlignment
-        {
-            get => (TypeHorizontalAlignment)GetProperty(TypeHorizontalAlignment.Default);
-            set => SetProperty(value, () => value.ToClass());
-        }
-
-        /// <summary>
         /// Gets or sets the text color.
         /// </summary>
         public virtual Func<IRenderControlContext, PropertyColorText> TextColor
@@ -40,82 +31,82 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the background color.
         /// </summary>
-        public virtual PropertyColorBackground BackgroundColor
+        public virtual Func<IRenderControlContext, PropertyColorBackground> BackgroundColor
         {
-            get => (PropertyColorBackground)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+            get => (Func<IRenderControlContext, PropertyColorBackground>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>
         /// Gets or sets the border color.
         /// </summary>
-        public virtual PropertyColorBorder BorderColor
+        public virtual Func<IRenderControlContext, PropertyColorBorder> BorderColor
         {
-            get => (PropertyColorBorder)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+            get => (Func<IRenderControlContext, PropertyColorBorder>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>
         /// Gets or sets the padding.
         /// </summary>
-        public virtual PropertySpacingPadding Padding
+        public virtual Func<IRenderControlContext, PropertySpacingPadding> Padding
         {
-            get => (PropertySpacingPadding)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass());
+            get => (Func<IRenderControlContext, PropertySpacingPadding>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass());
         }
 
         /// <summary>
         /// Gets or sets the margin.
         /// </summary>
-        public virtual PropertySpacingMargin Margin
+        public virtual Func<IRenderControlContext, PropertySpacingMargin> Margin
         {
-            get => (PropertySpacingMargin)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass());
+            get => (Func<IRenderControlContext, PropertySpacingMargin>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass());
         }
 
         /// <summary>
         /// Gets or sets the border.
         /// </summary>
-        public virtual PropertyBorder Border
+        public virtual Func<IRenderControlContext, PropertyBorder> Border
         {
-            get => (PropertyBorder)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass());
+            get => (Func<IRenderControlContext, PropertyBorder>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass());
         }
 
         /// <summary>
         /// Gets or sets the column property if the control is on a grid.
         /// </summary>
-        public virtual PropertyGrid GridColumn
+        public virtual Func<IRenderControlContext, PropertyGrid> GridColumn
         {
-            get => (PropertyGrid)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass());
+            get => (Func<IRenderControlContext, PropertyGrid>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass());
         }
 
         /// <summary>
         /// Gets or sets the width property of the control.
         /// </summary>
-        public virtual TypeWidth Width
+        public virtual Func<IRenderControlContext, TypeWidth> Width
         {
-            get => (TypeWidth)GetProperty(TypeWidth.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeWidth>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
         /// Gets or sets the height property of the control.
         /// </summary>
-        public virtual TypeHeight Height
+        public virtual Func<IRenderControlContext, TypeHeight> Height
         {
-            get => (TypeHeight)GetProperty(TypeHeight.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeHeight>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
         /// Gets or sets the flex grow property of the control.
         /// </summary>
-        public virtual TypeFlexGrow FlexGrow
+        public virtual Func<IRenderControlContext, TypeFlexGrow> FlexGrow
         {
-            get => (TypeFlexGrow)GetProperty(TypeFlexGrow.None);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeFlexGrow>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
@@ -125,10 +116,19 @@ namespace WebExpress.WebUI.WebControl
         /// This property determines how the object is visually represented. Setting this
         /// property may involve converting the value to a class representation.
         /// </remarks>
-        public virtual TypeDisplay Display
+        public virtual Func<IRenderControlContext, TypeDisplay> Display
         {
-            get => (TypeDisplay)GetProperty(TypeDisplay.None);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeDisplay>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+        }
+
+        /// <summary>
+        /// Gets or sets the horizontal alignment.
+        /// </summary>
+        public virtual Func<IRenderControlContext, TypeHorizontalAlignment> HorizontalAlignment
+        {
+            get => (Func<IRenderControlContext, TypeHorizontalAlignment>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
@@ -164,10 +164,10 @@ namespace WebExpress.WebUI.WebControl
         {
             Id = id?.Replace('.', '-');
 
-            HorizontalAlignment = TypeHorizontalAlignment.Default;
-            BackgroundColor = new PropertyColorBackground(TypeColorBackground.Default);
-            Padding = new PropertySpacingPadding(PropertySpacing.Space.None);
-            Margin = new PropertySpacingMargin(PropertySpacing.Space.None);
+            HorizontalAlignment = _ => TypeHorizontalAlignment.Default;
+            BackgroundColor = _ => new PropertyColorBackground(TypeColorBackground.Default);
+            Padding = _ => new PropertySpacingPadding(PropertySpacing.Space.None);
+            Margin = _ => new PropertySpacingMargin(PropertySpacing.Space.None);
         }
 
         /// <summary>

@@ -43,7 +43,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemInputTile(string id)
             : base(id)
         {
-            Margin = new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.Two, PropertySpacing.Space.None, PropertySpacing.Space.None);
+            Margin = _ => new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.Two, PropertySpacing.Space.None, PropertySpacing.Space.None);
         }
 
         /// <summary>

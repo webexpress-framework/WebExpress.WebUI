@@ -61,7 +61,7 @@ namespace WebExpress.WebUI.WebControl
                 {
                     Icon = Icon,
                     TextColor = TextColor,
-                    HorizontalAlignment = TypeHorizontalAlignment.Right
+                    HorizontalAlignment = _ => TypeHorizontalAlignment.Right
                 }.Render(renderContext, visualTree));
             }
 

@@ -106,7 +106,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlText()
             {
-                Margin = new PropertySpacingMargin(spaceLeft, spaceRight, spaceTop, spaceBottom)
+                Margin = _ => new PropertySpacingMargin(spaceLeft, spaceRight, spaceTop, spaceBottom)
             };
 
             // act

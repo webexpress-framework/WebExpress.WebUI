@@ -195,7 +195,7 @@ namespace WebExpress.WebUI.WebControl
                 html.Add(new ControlIcon()
                 {
                     Icon = Icon,
-                    Margin = !string.IsNullOrWhiteSpace(Text) ? new PropertySpacingMargin
+                    Margin = _ => !string.IsNullOrWhiteSpace(Text) ? new PropertySpacingMargin
                     (
                         PropertySpacing.Space.None,
                         PropertySpacing.Space.Two,

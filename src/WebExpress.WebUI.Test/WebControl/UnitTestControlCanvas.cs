@@ -54,7 +54,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlCanvas()
             {
-                BackgroundColor = new PropertyColorBackground(backgroundColor)
+                BackgroundColor = _ => new PropertyColorBackground(backgroundColor)
             };
 
             // act
@@ -81,7 +81,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlCanvas()
             {
-                Width = width,
+                Width = _ => width,
             };
 
             // act
@@ -108,7 +108,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlCanvas()
             {
-                Height = height,
+                Height = _ => height,
             };
 
             // act

@@ -45,7 +45,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlPanelCard(string id = null, params IControl[] controls)
             : base(id, controls)
         {
-            Border = new PropertyBorder(true);
+            Border = _ => new PropertyBorder(true);
         }
 
         /// <summary>

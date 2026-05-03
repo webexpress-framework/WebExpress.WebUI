@@ -60,7 +60,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlProgress(string id = null)
             : base(id)
         {
-            BackgroundColor = new PropertyColorBackground(TypeColorBackground.Default);
+            BackgroundColor = _ => new PropertyColorBackground(TypeColorBackground.Default);
         }
 
         /// <summary>
