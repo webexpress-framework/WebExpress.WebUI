@@ -159,7 +159,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlLinkList();
 
             // act
-            control.Add(new ControlLink() { Text = "abc" });
+            control.Add(new ControlLink() { Text = _ => "abc" });
 
             var html = control.Render(context, visualTree);
 

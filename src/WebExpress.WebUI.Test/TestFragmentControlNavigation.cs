@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.Test
         public TestFragmentControlNavigation(IFragmentContext fragmentContext)
             : base(fragmentContext)
         {
-            Text = "TestFragmentControlNavigation";
+            Text = _ => "TestFragmentControlNavigation";
         }
     }
 }

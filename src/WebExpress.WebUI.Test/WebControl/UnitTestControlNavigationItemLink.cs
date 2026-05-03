@@ -52,7 +52,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemLink()
             {
-                Text = text,
+                Text = _ => text,
             };
 
             // act
@@ -77,7 +77,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemLink()
             {
-                Uri = uri is not null ? new UriEndpoint(uri) : null,
+                Uri = _ => uri is not null ? new UriEndpoint(uri) : null,
             };
 
             // act
@@ -102,7 +102,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemLink()
             {
-                Title = title,
+                Title = _ => title,
             };
 
             // act
@@ -129,7 +129,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemLink()
             {
-                Target = target,
+                Target = _ => target,
             };
 
             // act
@@ -155,7 +155,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemLink()
             {
-                Tooltip = tooltip
+                Tooltip = _ => tooltip
             };
 
             // act
@@ -179,7 +179,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemLink()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act

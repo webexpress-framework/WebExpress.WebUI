@@ -194,17 +194,17 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control1 = new ControlSplitButton(null, new ControlSplitButtonItemLink() { Text = "abc" });
-            var control2 = new ControlSplitButton(null, [new ControlSplitButtonItemLink() { Text = "abc" }]);
-            var control3 = new ControlSplitButton(null, new List<IControlSplitButtonItem>([new ControlSplitButtonItemLink() { Text = "abc" }]).ToArray());
+            var control1 = new ControlSplitButton(null, new ControlSplitButtonItemLink() { Text = _ => "abc" });
+            var control2 = new ControlSplitButton(null, [new ControlSplitButtonItemLink() { Text = _ => "abc" }]);
+            var control3 = new ControlSplitButton(null, new List<IControlSplitButtonItem>([new ControlSplitButtonItemLink() { Text = _ => "abc" }]).ToArray());
             var control4 = new ControlSplitButton(null);
             var control5 = new ControlSplitButton(null);
             var control6 = new ControlSplitButton(null);
 
             // act
-            control4.Add(new ControlSplitButtonItemLink() { Text = "abc" });
-            control5.Add([new ControlSplitButtonItemLink() { Text = "abc" }]);
-            control6.Add(new List<IControlSplitButtonItem>([new ControlSplitButtonItemLink() { Text = "abc" }]).ToArray());
+            control4.Add(new ControlSplitButtonItemLink() { Text = _ => "abc" });
+            control5.Add([new ControlSplitButtonItemLink() { Text = _ => "abc" }]);
+            control6.Add(new List<IControlSplitButtonItem>([new ControlSplitButtonItemLink() { Text = _ => "abc" }]).ToArray());
 
             var html1 = control1.Render(context, visualTree);
             var html2 = control2.Render(context, visualTree);

@@ -185,8 +185,8 @@ namespace WebExpress.WebUI.WebControl
                         Css.Concatenate
                         (
                             "nav-link",
-                            link.Active == TypeActive.Active ? ActiveColor?.ToClass() : "",
-                            link.Active == TypeActive.Active ? ActiveTextColor?.ToClass() : LinkColor?.ToClass()
+                            link.Active?.Invoke(renderContext) == TypeActive.Active ? ActiveColor?.ToClass() : "",
+                            link.Active?.Invoke(renderContext) == TypeActive.Active ? ActiveTextColor?.ToClass() : LinkColor?.ToClass()
                         )
                     );
 
@@ -194,8 +194,8 @@ namespace WebExpress.WebUI.WebControl
                     (
                         Style.Concatenate
                         (
-                            link.Active == TypeActive.Active ? ActiveColor?.ToStyle() : "",
-                            link.Active == TypeActive.Active ? ActiveTextColor?.ToStyle() : LinkColor?.ToStyle()
+                            link.Active?.Invoke(renderContext) == TypeActive.Active ? ActiveColor?.ToStyle() : "",
+                            link.Active?.Invoke(renderContext) == TypeActive.Active ? ActiveTextColor?.ToStyle() : LinkColor?.ToStyle()
                         )
                     );
 

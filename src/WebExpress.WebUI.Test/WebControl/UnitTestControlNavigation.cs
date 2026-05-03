@@ -100,7 +100,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlNavigation();
 
             // act
-            control.Add(new ControlNavigationItemLink() { Text = "abc" });
+            control.Add(new ControlNavigationItemLink() { Text = _ => "abc" });
 
             var html = control.Render(context, visualTree);
 

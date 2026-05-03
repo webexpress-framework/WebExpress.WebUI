@@ -26,19 +26,19 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the color.
         /// </summary>
-        public new PropertyColorButton BackgroundColor
+        public new Func<IRenderControlContext, PropertyColorButton> BackgroundColor
         {
-            get => (PropertyColorButton)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(Outline?.Invoke(null) ?? false), () => value?.ToStyle(Outline?.Invoke(null) ?? false));
+            get => (Func<IRenderControlContext, PropertyColorButton>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(Outline?.Invoke(null) ?? false), () => value?.Invoke(null)?.ToStyle(Outline?.Invoke(null) ?? false));
         }
 
         /// <summary>
         /// Gets or sets the size.
         /// </summary>
-        public TypeSizeButton Size
+        public Func<IRenderControlContext, TypeSizeButton> Size
         {
-            get => (TypeSizeButton)GetProperty(TypeSizeButton.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeSizeButton>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
@@ -49,10 +49,10 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets whether the button should take up the full width.
         /// </summary>
-        public TypeBlockButton Block
+        public Func<IRenderControlContext, TypeBlockButton> Block
         {
-            get => (TypeBlockButton)GetProperty(TypeBlockButton.None);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeBlockButton>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
@@ -85,10 +85,10 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the activation status of the button.
         /// </summary>
-        public TypeActive Active
+        public Func<IRenderControlContext, TypeActive> Active
         {
-            get => (TypeActive)GetProperty(TypeActive.None);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeActive>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
@@ -99,8 +99,12 @@ namespace WebExpress.WebUI.WebControl
         public ControlButton(string id = null, params IControl[] content)
             : base(id)
         {
-            Size = TypeSizeButton.Default;
             _content.AddRange(content);
+
+            BackgroundColor = _ => new PropertyColorButton(TypeColorButton.Default);
+            Size = _ => TypeSizeButton.Default;
+            Block = _ => TypeBlockButton.None;
+            Active = _ => TypeActive.None;
         }
 
         /// <summary>
@@ -157,12 +161,12 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementFieldButton()
             {
                 Id = Id,
-                Type = "button",
                 Value = value,
+                Type = "button",
                 Class = Css.Concatenate("wx-button btn", GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
-                Disabled = Active == TypeActive.Disabled
+                Disabled = Active?.Invoke(renderContext) == TypeActive.Disabled
             };
 
             if (icon is not null)

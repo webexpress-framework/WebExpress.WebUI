@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.Test
         public TestFragmentControlLink(IFragmentContext fragmentContext)
             : base(fragmentContext)
         {
-            Text = "TestFragmentControlLink";
+            Text = _ => "TestFragmentControlLink";
         }
     }
 }

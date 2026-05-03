@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebUri;
@@ -14,12 +15,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the target uri.
         /// </summary>
-        public IUri Uri { get; set; }
+        public Func<IRenderControlContext, IUri> Uri { get; set; }
 
         /// <summary>
         /// Gets or sets the tooltip.
         /// </summary>
-        public string Tooltip { get; set; }
+        public Func<IRenderControlContext, string> Tooltip { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -48,8 +49,8 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("btn", GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
-                Href = Uri?.BindParameters(renderContext.Request.Parameters).ToString(),
-                Title = I18N.Translate(renderContext, Tooltip),
+                Href = Uri?.Invoke(renderContext)?.BindParameters(renderContext.Request.Parameters).ToString(),
+                Title = I18N.Translate(renderContext, Tooltip?.Invoke(renderContext)),
                 OnClick = OnClick?.ToString()
             };
 
@@ -78,12 +79,12 @@ namespace WebExpress.WebUI.WebControl
                 html.Add(new HtmlText(text));
             }
 
-            if (Content.Count() != 0)
+            if (Content.Any())
             {
                 html.Add(Content.Select(x => x.Render(renderContext, visualTree)).ToArray());
             }
 
-            if (!string.IsNullOrWhiteSpace(Tooltip))
+            if (!string.IsNullOrWhiteSpace(Tooltip?.Invoke(renderContext)))
             {
                 html.AddUserAttribute("data-bs-toggle", "tooltip");
             }

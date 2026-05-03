@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButton()
             {
-                Size = size
+                Size = _ => size
             };
 
             // act
@@ -101,7 +101,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButton()
             {
-                BackgroundColor = new PropertyColorButton(color)
+                BackgroundColor = _ => new PropertyColorButton(color)
             };
 
             // act
@@ -130,7 +130,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlButton()
             {
                 Outline = _ => outline,
-                BackgroundColor = new PropertyColorButton(color)
+                BackgroundColor = _ => new PropertyColorButton(color)
             };
 
             // act
@@ -153,7 +153,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButton()
             {
-                Block = block
+                Block = _ => block
             };
 
             // act
