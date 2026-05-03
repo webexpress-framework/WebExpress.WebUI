@@ -133,6 +133,11 @@
     mask-image: url("../icons/bars.svg");
 }
 
+.wx-icon-light-bars-vertical {
+    -webkit-mask-image: url("../icons/bars-vertical.svg");
+    mask-image: url("../icons/bars-vertical.svg");
+}
+
 .wx-icon-light-battery {
     -webkit-mask-image: url("../icons/battery.svg");
     mask-image: url("../icons/battery.svg");
@@ -268,6 +273,11 @@
     mask-image: url("../icons/chevron-up.svg");
 }
 
+.wx-icon-light-chevrons-left {
+    -webkit-mask-image: url("../icons/chevrons-left.svg");
+    mask-image: url("../icons/chevrons-left.svg");
+}
+
 .wx-icon-light-chip {
     -webkit-mask-image: url("../icons/chip.svg");
     mask-image: url("../icons/chip.svg");
@@ -331,6 +341,11 @@
 .wx-icon-light-code {
     -webkit-mask-image: url("../icons/code.svg");
     mask-image: url("../icons/code.svg");
+}
+
+.wx-icon-light-columns {
+    -webkit-mask-image: url("../icons/columns.svg");
+    mask-image: url("../icons/columns.svg");
 }
 
 .wx-icon-light-cog {
@@ -423,6 +438,11 @@
     mask-image: url("../icons/database.svg");
 }
 
+.wx-icon-light-dash {
+    -webkit-mask-image: url("../icons/dash.svg");
+    mask-image: url("../icons/dash.svg");
+}
+
 .wx-icon-light-del-column {
     -webkit-mask-image: url("../icons/del-column.svg");
     mask-image: url("../icons/del-column.svg");
@@ -451,6 +471,16 @@
 .wx-icon-light-dividers {
     -webkit-mask-image: url("../icons/dividers.svg");
     mask-image: url("../icons/dividers.svg");
+}
+
+.wx-icon-light-dots {
+    -webkit-mask-image: url("../icons/dots.svg");
+    mask-image: url("../icons/dots.svg");
+}
+
+.wx-icon-light-drag {
+    -webkit-mask-image: url("../icons/drag.svg");
+    mask-image: url("../icons/drag.svg");
 }
 
 .wx-icon-light-division {
@@ -523,6 +553,11 @@
     mask-image: url("../icons/field.svg");
 }
 
+.wx-icon-light-fields {
+    -webkit-mask-image: url("../icons/fields.svg");
+    mask-image: url("../icons/fields.svg");
+}
+
 .wx-icon-light-file {
     -webkit-mask-image: url("../icons/file.svg");
     mask-image: url("../icons/file.svg");
@@ -571,6 +606,11 @@
 .wx-icon-light-ghost {
     -webkit-mask-image: url("../icons/ghost.svg");
     mask-image: url("../icons/ghost.svg");
+}
+
+.wx-icon-light-grid {
+    -webkit-mask-image: url("../icons/grid.svg");
+    mask-image: url("../icons/grid.svg");
 }
 
 .wx-icon-light-glossary {
@@ -708,6 +748,11 @@
     mask-image: url("../icons/layer.svg");
 }
 
+.wx-icon-light-layers {
+    -webkit-mask-image: url("../icons/layers.svg");
+    mask-image: url("../icons/layers.svg");
+}
+
 .wx-icon-light-left {
     -webkit-mask-image: url("../icons/left.svg");
     mask-image: url("../icons/left.svg");
@@ -731,6 +776,11 @@
 .wx-icon-light-lighthouse {
     -webkit-mask-image: url("../icons/lighthouse.svg");
     mask-image: url("../icons/lighthouse.svg");
+}
+
+.wx-icon-light-lightning {
+    -webkit-mask-image: url("../icons/lightning.svg");
+    mask-image: url("../icons/lightning.svg");
 }
 
 .wx-icon-light-link {
@@ -808,6 +858,11 @@
     mask-image: url("../icons/monitor-heart-rate.svg");
 }
 
+.wx-icon-light-more {
+    -webkit-mask-image: url("../icons/more.svg");
+    mask-image: url("../icons/more.svg");
+}
+
 .wx-icon-light-mountains {
     -webkit-mask-image: url("../icons/mountains.svg");
     mask-image: url("../icons/mountains.svg");
@@ -851,6 +906,11 @@
 .wx-icon-light-operation-manual {
     -webkit-mask-image: url("../icons/operation-manual.svg");
     mask-image: url("../icons/operation-manual.svg");
+}
+
+.wx-icon-light-overview {
+    -webkit-mask-image: url("../icons/overview.svg");
+    mask-image: url("../icons/overview.svg");
 }
 
 .wx-icon-light-organisation {
@@ -1073,6 +1133,11 @@
     mask-image: url("../icons/script.svg");
 }
 
+.wx-icon-light-search {
+    -webkit-mask-image: url("../icons/search.svg");
+    mask-image: url("../icons/search.svg");
+}
+
 .wx-icon-light-server {
     -webkit-mask-image: url("../icons/server.svg");
     mask-image: url("../icons/server.svg");
@@ -1143,6 +1208,11 @@
     mask-image: url("../icons/success.svg");
 }
 
+.wx-icon-light-status {
+    -webkit-mask-image: url("../icons/status.svg");
+    mask-image: url("../icons/status.svg");
+}
+
 .wx-icon-light-suspension-bridge {
     -webkit-mask-image: url("../icons/suspension-bridge.svg");
     mask-image: url("../icons/suspension-bridge.svg");
@@ -1183,6 +1253,11 @@
     mask-image: url("../icons/team.svg");
 }
 
+.wx-icon-light-template {
+    -webkit-mask-image: url("../icons/template.svg");
+    mask-image: url("../icons/template.svg");
+}
+
 .wx-icon-light-textfile {
     -webkit-mask-image: url("../icons/textfile.svg");
     mask-image: url("../icons/textfile.svg");
@@ -1191,6 +1266,16 @@
 .wx-icon-light-thumbtack {
     -webkit-mask-image: url("../icons/thumbtack.svg");
     mask-image: url("../icons/thumbtack.svg");
+}
+
+.wx-icon-light-tweaks {
+    -webkit-mask-image: url("../icons/tweaks.svg");
+    mask-image: url("../icons/tweaks.svg");
+}
+
+.wx-icon-light-tile {
+    -webkit-mask-image: url("../icons/tile.svg");
+    mask-image: url("../icons/tile.svg");
 }
 
 .wx-icon-light-time {
@@ -1401,6 +1486,11 @@
 .wx-icon-light-window-function {
     -webkit-mask-image: url("../icons/window-function.svg");
     mask-image: url("../icons/window-function.svg");
+}
+
+.wx-icon-light-workflow {
+    -webkit-mask-image: url("../icons/workflow.svg");
+    mask-image: url("../icons/workflow.svg");
 }
 
 /* Generated from icons.csv as external SVG references */
@@ -1614,3 +1704,7 @@
     mask-image: url("../icons/process-user-task.svg");
 }
 
+.wx-icon-light-undo {
+    -webkit-mask-image: url("../icons/undo.svg");
+    mask-image: url("../icons/undo.svg");
+}

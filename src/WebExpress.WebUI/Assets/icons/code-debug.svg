@@ -1,3 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-    <path d='M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83'/><circle cx='12' cy='12' r='4'/>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+ <g transform="matrix(.9238 0 0 .9238 -.5856 -.5856)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3531">
+  <path d="m12 2v4m0 12v4m-7.07-17.07 2.83 2.83m8.48 8.48 2.83 2.83m-17.07-7.07h4m12 0h4m-17.07 7.07 2.83-2.83m8.48-8.48 2.83-2.83"/>
+  <circle cx="12" cy="12" r="4"/>
+ </g>
 </svg>

@@ -1,3 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-    <path d='M18 15V3M6 3v12'/><circle cx='6' cy='18' r='3'/><circle cx='18' cy='18' r='3'/><path d='M18 3l-3 3M18 3l3 3M18 15A9 9 0 0 0 9 6'/>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+ <g transform="translate(-1.5,-1.5)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
+  <path d="m18 15v-12m-12 0v12"/>
+  <circle cx="6" cy="18" r="3"/>
+  <circle cx="18" cy="18" r="3"/>
+  <path d="m18 3-3 3m3-3 3 3m-3 9a9 9 0 0 0-9-9"/>
+ </g>
 </svg>

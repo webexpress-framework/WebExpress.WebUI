@@ -1,3 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-    <path d='M18 3v12M6 21V9'/><path d='M15 6l3-3 3 3M3 18l3 3 3-3'/>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+ <g transform="translate(-1.5,-1.5)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
+  <path d="m18 3v12m-12 6v-12"/>
+  <path d="m15 6 3-3 3 3m-18 12 3 3 3-3"/>
+ </g>
 </svg>

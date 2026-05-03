@@ -1,3 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-    <path d='M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z'/><line x1='7' y1='7' x2='7.01' y2='7'/>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+ <g transform="matrix(.96128 0 0 .96128 -.63575 -.6333)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3003">
+  <path d="m20.59 13.41-7.17 7.17a2 2 0 0 1-2.83 0l-8.59-8.58v-10h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
+  <line x1="7" x2="7.01" y1="7" y2="7"/>
+ </g>
 </svg>

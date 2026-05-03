@@ -1,3 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-    <path d='M4 6v12M20 6v12M4 6h16M4 18h16M9 6v12'/>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+ <g transform="translate(.6774 .44215)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
+  <rect x="1.6707" y="1.4052" width="15.145" height="3.7993" rx=".25"/>
+  <rect x="7.5135" y="8.3664" width="10.461" height="3.5911" rx=".25"/>
+  <rect x="7.5135" y="15.119" width="10.461" height="3.5911" rx=".25"/>
+  <path d="m3.2788 5.2045 0.041282 11.71 4.1934 4.65e-4"/>
+  <path d="m7.5135 10.162h-4.2127"/>
+ </g>
 </svg>

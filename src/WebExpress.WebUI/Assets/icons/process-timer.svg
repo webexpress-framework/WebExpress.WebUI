@@ -1,3 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx='12' cy='12' r='10'/><path d='M12 6v6l3 3'/><path d='M10 2h4'/>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+ <g transform="translate(0 .63199)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
+  <circle cx="10.5" cy="10.5" r="8.5"/>
+  <path d="m10.5 5.4v5.1l2.55 2.55"/>
+  <path d="m8.8 0.73602h3.4"/>
+ </g>
 </svg>

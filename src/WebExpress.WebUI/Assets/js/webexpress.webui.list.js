@@ -654,7 +654,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             sortBtn.className = "wx-list-sort-btn btn btn-link btn-sm p-0";
             sortBtn.title = this._i18n("webexpress.webui:list.sort.title", "Sort");
             sortBtn.setAttribute("aria-label", this._i18n("webexpress.webui:list.sort.title", "Sort"));
-            sortBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M6 12h12M10 18h4"/></svg>`;
+            sortBtn.innerHTML = `<i class="wx-icon-light wx-icon-light-sort"></i>`;
 
             sortBtn.addEventListener("click", () => this._cycleSortDir());
             header.appendChild(sortBtn);
