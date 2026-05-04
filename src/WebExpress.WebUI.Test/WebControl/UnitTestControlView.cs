@@ -44,9 +44,9 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlView(null)
+            var control = new ControlView()
             {
-                Layout = layout
+                Layout = _ => layout
             };
 
             // act

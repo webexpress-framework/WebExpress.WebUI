@@ -9,37 +9,34 @@ using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
-    /// <summary>
-    /// Represents a tab view within a form item group.
-    /// </summary>
     public class ControlFormItemGroupTabView : IControlFormItemGroupTabView
     {
-        private readonly ControlFormItemGroupVertical _group = new();
+        private readonly ControlFormItemGroup _group;
 
         /// <summary>
-        /// Gets or sets the unique identifier for the view.
+        /// Gets or sets the id of the tab.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
         /// Gets or sets the title text.
         /// </summary>
-        public string Title { get; set; }
+        public Func<IRenderControlFormContext, string> Title { get; set; }
 
         /// <summary>
         /// Gets or sets the icon associated with this view.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlFormContext, IIcon> Icon { get; set; }
 
         /// <summary>
         /// Gets or sets the image uri.
         /// </summary>
-        public IUri Image { get; set; }
+        public Func<IRenderControlFormContext, IUri> Image { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the group.
         /// </summary>
-        public string Name
+        public Func<IRenderControlFormContext, string> Name
         {
             get => _group.Name;
             set => _group.Name = value;
@@ -206,6 +203,16 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemGroupTabView(string id = null)
         {
             Id = id;
+            _group = new ControlFormItemGroupVertical();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the class.
+        /// </summary>
+        /// <param name="group">The control form item group.</param>
+        public ControlFormItemGroupTabView(ControlFormItemGroup group)
+        {
+            _group = group;
         }
 
         /// <summary>
@@ -215,7 +222,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public virtual IControlFormItemGroupTabView Add(params IControlFormItem[] items)
         {
-            _group.Add(items);
+            _group?.Add(items);
 
             return this;
         }
@@ -253,7 +260,7 @@ namespace WebExpress.WebUI.WebControl
         /// </param>
         public void Initialize(IRenderControlFormContext renderContext)
         {
-            _group.Initialize(renderContext);
+            _group?.Initialize(renderContext);
         }
 
         /// <summary>
@@ -277,15 +284,19 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            var title = Title?.Invoke(renderContext);
+            var icon = Icon?.Invoke(renderContext);
+            var image = Image?.Invoke(renderContext);
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-tab-view"
             }
-                .AddUserAttribute("data-label", I18N.Translate(renderContext, Title))
-                .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString())
-                .Add(_group.Render(renderContext, visualTree));
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, title))
+                .AddUserAttribute("data-icon", (icon as Icon)?.Class)
+                .AddUserAttribute("data-image", image?.ToString() ?? (icon as ImageIcon)?.Uri?.ToString())
+                .Add(_group?.Render(renderContext, visualTree));
 
             return html;
         }

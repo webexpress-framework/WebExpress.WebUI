@@ -51,6 +51,8 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var value = renderContext.GetValue<ControlFormInputValueBool>(this)?.Checked;
+            var name = Name?.Invoke(renderContext);
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
 
             var html = new HtmlElementTextContentDiv()
             {
@@ -60,9 +62,9 @@ namespace WebExpress.WebUI.WebControl
                 .Add(new HtmlElementFieldInput()
                 {
                     Id = Id,
-                    Name = Name,
+                    Name = name,
                     Type = "checkbox",
-                    Disabled = Disabled,
+                    Disabled = disabled,
                     Class = Css.Concatenate("form-check-input"),
                     Checked = value ?? false,
                 })

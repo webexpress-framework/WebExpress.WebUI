@@ -28,17 +28,17 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the name of the form.
         /// </summary>
-        string Name { get; }
+        Func<IRenderControlFormContext, string> Name { get; }
 
         /// <summary>
         /// Gets or sets the target URI.
         /// </summary>
-        IUri Uri { get; }
+        Func<IRenderControlFormContext, IUri> Uri { get; }
 
         /// <summary>
         /// Gets or sets the redirect URI.
         /// </summary>
-        IUri RedirectUri { get; }
+        Func<IRenderControlFormContext, IUri> RedirectUri { get; }
 
         /// <summary>
         /// Gets or sets the form items.
@@ -48,28 +48,23 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the request method.
         /// </summary>
-        RequestMethod Method { get; }
+        Func<IRenderControlFormContext, RequestMethod> Method { get; }
 
         /// <summary>
         /// Gets or sets the confirmation control that is displayed 
         /// instead of the form after the form has been successfully submitted.
         /// </summary>
-        IControl Conformation { get; }
+        Func<IRenderControlFormContext, IControl> Conformation { get; }
 
         /// <summary>
         /// Gets or sets the form layout.
         /// </summary>
-        TypeLayoutForm FormLayout { get; }
+        Func<IRenderControlFormContext, TypeLayoutForm> FormLayout { get; }
 
         /// <summary>
         /// Gets or sets the item layout.
         /// </summary>
-        TypeLayoutFormItem ItemLayout { get; }
-
-        /// <summary>
-        /// Return the current state of the form.
-        /// </summary>
-        TypeFormState State { get; }
+        Func<IRenderControlFormContext, TypeLayoutFormItem> ItemLayout { get; }
 
         /// <summary>
         /// Initialize the form with data using the specified action.

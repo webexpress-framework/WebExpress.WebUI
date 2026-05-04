@@ -71,7 +71,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputPassword(null)
             {
-                Name = name
+                Name = _ => name
             };
 
             // act
@@ -169,7 +169,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputPassword(null)
             {
-                Disabled = disabled
+                Disabled = _ => disabled
             };
 
             // act
@@ -217,13 +217,18 @@ namespace WebExpress.WebUI.Test.WebControl
             // arrange
             var processed = false;
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CreateRenderContextMock();
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputPassword("pw-box")
                 .Initialize(x => x.Value.Text = value)
                 .Process(x => processed = true);
-            var form = new ControlForm()
+            var form = new ControlForm() { Name = _ => "form" }
                 .Add(control);
+            var context = UnitTestControlFixture.CreateRenderContextMock
+            (
+                null,
+                null,
+                new Parameter("form", "", ParameterScope.Parameter)
+            );
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
 
             context.Request.AddParameter(new Parameter(form.Id, context.Request?.Session.Id.ToString(), ParameterScope.Parameter));
             context.Request.AddParameter(new Parameter("pw-box", value, ParameterScope.Parameter));

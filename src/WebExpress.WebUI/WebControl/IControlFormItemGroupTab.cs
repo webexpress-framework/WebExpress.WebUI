@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -8,9 +10,9 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFormItemGroupTab : IControlFormItemGroup
     {
         /// <summary>
-        /// Gets or sets the layout.
+        /// Gets the layout.
         /// </summary>
-        TypeLayoutTab Layout { get; set; }
+        Func<IRenderControlContext, TypeLayoutTab> Layout { get; }
 
         /// <summary>
         /// Adds the specified view to the tab.

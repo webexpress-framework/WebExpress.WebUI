@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using WebExpress.WebCore.WebHtml;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -19,15 +22,15 @@ namespace WebExpress.WebUI.WebControl
         IEnumerable<IControlViewItem> Views { get; }
 
         /// <summary>
-        /// Gets the collection of footers associated with the
-        /// control view.
+        /// Gets the collection of footers that define the structure 
+        /// and metadata of the control view.
         /// </summary>
         IEnumerable<IControlViewFooter> Footers { get; }
 
         /// <summary>
-        /// Gets the layout used to render the view control.
+        /// Return or specifies the layout.
         /// </summary>
-        TypeLayoutView Layout { get; }
+        System.Func<IRenderControlContext, TypeLayoutView> Layout { get; set; }
 
         /// <summary>
         /// Adds one or more headers to the view control.

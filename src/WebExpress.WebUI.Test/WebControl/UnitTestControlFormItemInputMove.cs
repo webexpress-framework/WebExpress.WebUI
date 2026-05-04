@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputMove(null)
             {
-                Name = name
+                Name = _ => name
             };
 
             // act

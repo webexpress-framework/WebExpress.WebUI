@@ -73,7 +73,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputTile(null)
             {
-                Name = name
+                Name = _ => name
             };
 
             // act
@@ -202,13 +202,11 @@ namespace WebExpress.WebUI.Test.WebControl
             // arrange
             var validated = false;
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CreateRenderContextMock();
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputTile("tile").Initialize(args =>
             {
                 args.Value.Add(value);
             });
-            var form = new ControlForm()
+            var form = new ControlForm() { Name = _ => "form" }
                 .Add(control)
                 .Validate
                 (
@@ -221,6 +219,13 @@ namespace WebExpress.WebUI.Test.WebControl
                         validated = true;
                     }
                 );
+            var context = UnitTestControlFixture.CreateRenderContextMock
+            (
+                null,
+                null,
+                new Parameter("form", "", ParameterScope.Parameter)
+            );
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
 
             context.Request.AddParameter(new Parameter
             (
@@ -254,8 +259,6 @@ namespace WebExpress.WebUI.Test.WebControl
             // arrange
             var validated = false;
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CreateRenderContextMock();
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputTile("tile")
                 .Validate
                 (
@@ -268,8 +271,15 @@ namespace WebExpress.WebUI.Test.WebControl
                         validated = true;
                     }
                 );
-            var form = new ControlForm()
+            var form = new ControlForm() { Name = _ => "form" }
                 .Add(control);
+            var context = UnitTestControlFixture.CreateRenderContextMock
+            (
+                null,
+                null,
+                new Parameter("form", "", ParameterScope.Parameter)
+            );
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
 
             context.Request.AddParameter(new Parameter(form.Id, context.Request?.Session.Id.ToString(), ParameterScope.Parameter));
             context.Request.AddParameter(new Parameter("tile", value, ParameterScope.Parameter));
@@ -293,14 +303,12 @@ namespace WebExpress.WebUI.Test.WebControl
             // arrange
             var processed = false;
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CreateRenderContextMock();
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputTile("tile")
                 .Initialize(args =>
                 {
                     args.Value.Add(value);
                 });
-            var form = new ControlForm()
+            var form = new ControlForm() { Name = _ => "form" }
                 .Add(control)
                 .Process
                 (
@@ -309,6 +317,13 @@ namespace WebExpress.WebUI.Test.WebControl
                         processed = true;
                     }
                 );
+            var context = UnitTestControlFixture.CreateRenderContextMock
+            (
+                null,
+                null,
+                new Parameter("form", "", ParameterScope.Parameter)
+            );
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
 
             context.Request.AddParameter(new Parameter(form.Id, context.Request?.Session.Id.ToString(), ParameterScope.Parameter));
             context.Request.AddParameter(new Parameter("tile", value, ParameterScope.Parameter));
@@ -332,8 +347,6 @@ namespace WebExpress.WebUI.Test.WebControl
             // arrange
             var processed = false;
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CreateRenderContextMock();
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputTile("tile")
                 .Initialize(arg =>
                 {
@@ -346,8 +359,15 @@ namespace WebExpress.WebUI.Test.WebControl
                         processed = true;
                     }
                 );
-            var form = new ControlForm()
+            var form = new ControlForm() { Name = _ => "form" }
                 .Add(control);
+            var context = UnitTestControlFixture.CreateRenderContextMock
+            (
+                null,
+                null,
+                new Parameter("form", "", ParameterScope.Parameter)
+            );
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
 
             context.Request.AddParameter(new Parameter(form.Id, context.Request?.Session.Id.ToString(), ParameterScope.Parameter));
             context.Request.AddParameter(new Parameter("tile", value, ParameterScope.Parameter));

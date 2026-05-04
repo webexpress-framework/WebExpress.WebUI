@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemLabel()
             {
-                Name = name
+                Name = _ => name
             };
 
             // act

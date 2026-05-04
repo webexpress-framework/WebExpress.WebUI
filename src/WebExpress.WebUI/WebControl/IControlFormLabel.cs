@@ -1,4 +1,7 @@
-﻿namespace WebExpress.WebUI.WebControl
+﻿using System;
+using WebExpress.WebUI.WebPage;
+
+namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// Interface for form label controls.
@@ -8,6 +11,6 @@
         /// <summary>
         /// Gets or sets the label.
         /// </summary>
-        string Label { get; }
+        Func<IRenderControlContext, string> Label { get; }
     }
 }

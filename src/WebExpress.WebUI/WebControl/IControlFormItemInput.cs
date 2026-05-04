@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -13,22 +14,22 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the icon associated with the input control.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; }
 
         /// <summary>
         /// Gets an optional help text for the input control.
         /// </summary>
-        string Help { get; }
+        Func<IRenderControlContext, string> Help { get; }
 
         /// <summary>
         /// Gets a value indicating whether the input element is disabled.
         /// </summary>
-        bool Disabled { get; }
+        Func<IRenderControlContext, bool> Disabled { get; }
 
         /// <summary>
         /// Gets or sets whether inputs are enforced.
         /// </summary>
-        bool Required { get; }
+        Func<IRenderControlContext, bool> Required { get; }
 
         /// <summary>
         /// Gets the elements that are displayed in front of the control.
@@ -43,14 +44,14 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets an object that is linked to the control.
         /// </summary>
-        object Tag { get; }
+        Func<IRenderControlContext, object> Tag { get; }
 
         /// <summary>
         /// Gets the binding that is applied to the enclosing form group element.
         /// Use this to attach binds such as <see cref="BindDisable"/>
         /// so the entire fieldset (label, input, help text) reacts as a unit.
         /// </summary>
-        IBinding Bind { get; }
+        Func<IRenderControlContext, IBinding> Bind { get; }
     }
 
     /// <summary>

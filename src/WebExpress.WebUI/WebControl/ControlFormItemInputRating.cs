@@ -45,9 +45,11 @@ namespace WebExpress.WebUI.WebControl
                 null,
                 renderContext?.Request?.Culture
             );
+            var name = Name?.Invoke(renderContext);
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
             var classes = Classes.ToList();
 
-            if (Disabled)
+            if (disabled)
             {
                 classes.Add("disabled");
             }
@@ -58,7 +60,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("wx-webui-input-rating", classes),
                 Style = GetStyles()
             }
-                .AddUserAttribute("name", Name)
+                .AddUserAttribute("name", name)
                 .AddUserAttribute("data-stars", MaxRating != uint.MaxValue ? MaxRating.ToString() : null);
 
             if (!string.IsNullOrWhiteSpace(value))

@@ -32,8 +32,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlSplitButtonLink(string id = null, params IControlSplitButtonItem[] items)
             : base(id, items)
         {
-            Size = TypeSizeButton.Default;
-            Role = "button";
+            Size = _ => TypeSizeButton.Default;
         }
 
         /// <summary>
@@ -44,7 +43,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return Render(renderContext, visualTree, Text, Uri, PrimaryAction, SecondaryAction, Icon, [.. Items]);
+            return Render(renderContext, visualTree, Text?.Invoke(renderContext), Uri, PrimaryAction?.Invoke(renderContext), SecondaryAction?.Invoke(renderContext), Icon?.Invoke(renderContext), [.. Items]);
         }
 
         /// <summary>
@@ -99,10 +98,10 @@ namespace WebExpress.WebUI.WebControl
             var button = new HtmlElementTextSemanticsA()
             {
                 Id = string.IsNullOrWhiteSpace(Id) ? "" : Id + "_btn",
-                Class = Css.Concatenate("btn", Css.Remove(GetClasses(), margin.ToClass())),
+                Class = Css.Concatenate("btn", Css.Remove(GetClasses(), margin?.ToClass())),
                 Style = GetStyles(),
                 Target = Target,
-                Href = Uri?.ToString(),
+                Href = uri?.ToString(),
                 OnClick = OnClick?.ToString()
             };
 
@@ -111,7 +110,7 @@ namespace WebExpress.WebUI.WebControl
                 button.Add(new ControlIcon()
                 {
                     Icon = icon,
-                    Margin = _ => !string.IsNullOrWhiteSpace(Text) ? new PropertySpacingMargin
+                    Margin = _ => !string.IsNullOrWhiteSpace(text) ? new PropertySpacingMargin
                     (
                         PropertySpacing.Space.None,
                         PropertySpacing.Space.Two,
@@ -122,18 +121,18 @@ namespace WebExpress.WebUI.WebControl
                 }.Render(renderContext, visualTree));
             }
 
-            if (!string.IsNullOrWhiteSpace(Text))
+            if (!string.IsNullOrWhiteSpace(text))
             {
                 button.Add(new HtmlText(I18N.Translate(renderContext.Request?.Culture, text)));
             }
 
-            PrimaryAction?.ApplyUserAttributes(button, TypeAction.Primary);
-            SecondaryAction?.ApplyUserAttributes(button, TypeAction.Secondary);
+            primaryAction?.ApplyUserAttributes(button, TypeAction.Primary);
+            secondaryAction?.ApplyUserAttributes(button, TypeAction.Secondary);
 
             var dropdownButton = new HtmlElementTextSemanticsSpan(new HtmlElementTextSemanticsSpan() { Class = "caret" })
             {
                 Id = string.IsNullOrWhiteSpace(Id) ? "" : Id + "_btn",
-                Class = Css.Concatenate("btn dropdown-toggle dropdown-toggle-split", Css.Remove(GetClasses(), "btn-block", margin.ToClass())),
+                Class = Css.Concatenate("btn dropdown-toggle dropdown-toggle-split", Css.Remove(GetClasses(), "btn-block", margin?.ToClass())),
                 Style = GetStyles()
             };
             dropdownButton.AddUserAttribute("data-bs-toggle", "dropdown");
@@ -166,8 +165,8 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate
                 (
                     "btn-group",
-                    margin.ToClass(),
-                    (Block == TypeBlockButton.Block ? "btn-block" : "")
+                    margin?.ToClass(),
+                    (Block?.Invoke(renderContext) == TypeBlockButton.Block ? "btn-block" : "")
                 ),
                 Role = Role
             };

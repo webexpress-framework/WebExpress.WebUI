@@ -77,12 +77,13 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
+            var name = Name?.Invoke(renderContext);
 
             var html = new HtmlElementFieldInput()
             {
                 Id = Id,
                 Value = value,
-                Name = Name,
+                Name = name,
                 Type = "file",
                 Class = Css.Concatenate("form-control-file", GetClasses()),
                 Style = GetStyles(),
@@ -106,13 +107,15 @@ namespace WebExpress.WebUI.WebControl
         {
             var validationResults = new List<ValidationResult>();
             var value = renderContext.GetValue<ControlFormInputValueFile>(this)?.Name;
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
+            var required = Required?.Invoke(renderContext) ?? false;
 
-            if (Disabled)
+            if (disabled)
             {
                 return [];
             }
 
-            if (Required && string.IsNullOrWhiteSpace(value))
+            if (required && string.IsNullOrWhiteSpace(value))
             {
                 validationResults.Add(new ValidationResult
                 (
@@ -138,7 +141,8 @@ namespace WebExpress.WebUI.WebControl
         /// </returns>
         protected override ControlFormInputValueFile CreateValue(string value, IRenderControlFormContext renderContext)
         {
-            var file = renderContext?.Request?.GetParameter(Name) as ParameterFile;
+            var name = Name?.Invoke(renderContext);
+            var file = renderContext?.Request?.GetParameter(name) as ParameterFile;
 
             return new ControlFormInputValueFile(value)
             {

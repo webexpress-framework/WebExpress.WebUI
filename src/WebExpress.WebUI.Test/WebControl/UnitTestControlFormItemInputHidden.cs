@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputHidden()
             {
-                Name = name
+                Name = _ => name
             };
 
             // act

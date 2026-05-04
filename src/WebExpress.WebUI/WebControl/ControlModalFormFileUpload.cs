@@ -36,9 +36,9 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         private ControlFormItemInputFile File { get; } = new ControlFormItemInputFile()
         {
-            Name = "file",
-            Help = "fileupload.file.description",
-            Icon = new IconImage(),
+            Name = _ => "file",
+            Help = _ => "fileupload.file.description",
+            Icon = _ => new IconImage(),
             //AcceptFile = new string[] { "image/*, video/*, audio/*, .pdf, .doc, .docx, .txt" },
             Margin = _ => new PropertySpacingMargin
             (
@@ -157,7 +157,9 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="eventArgs">The event argument.</param>
         private void OnValidation(ControlFormEventItemValidate<ControlFormInputValueFile> eventArgs)
         {
-            if (eventArgs.Context.Request.GetParameter(File.Name) is not ParameterFile)
+            var name = File.Name?.Invoke(eventArgs.Context);
+
+            if (eventArgs.Context.Request.GetParameter(name) is not ParameterFile)
             {
                 //eventArgs.AddResults(new ValidationResult
                 //(
@@ -174,7 +176,8 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="e">The event argument.</param>
         private void OnProcessForm(ControlFormEventFormProcess eventArgs)
         {
-            if (eventArgs.Context.Request.GetParameter(File.Name) is ParameterFile file)
+            var name = File.Name?.Invoke(eventArgs.Context);
+            if (eventArgs.Context.Request.GetParameter(name) is ParameterFile file)
             {
                 OnUpload(new ControlFormEventFormUpload()
                 {

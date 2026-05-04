@@ -106,8 +106,10 @@ namespace WebExpress.WebUI.WebControl
                 null,
                 renderContext?.Request?.Culture
             );
+            var name = Name?.Invoke(renderContext);
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
 
-            if (Disabled)
+            if (disabled)
             {
                 classes.Add("disabled");
             }
@@ -119,7 +121,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
                 Role = Role
             }
-                .AddUserAttribute("name", Name)
+                .AddUserAttribute("name", name)
                 .AddUserAttribute("data-value", value)
                 .AddUserAttribute("data-multiselect", MultiSelect ? "true" : null)
                 .AddUserAttribute("data-large-icon", LargeIcon ? "true" : null)
@@ -145,9 +147,9 @@ namespace WebExpress.WebUI.WebControl
         public override IEnumerable<ValidationResult> Validate(IRenderControlFormContext renderContext)
         {
             var validationResults = new List<ValidationResult>(base.Validate(renderContext));
-            //var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
 
-            if (Disabled)
+            if (disabled)
             {
                 return [];
             }

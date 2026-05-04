@@ -33,7 +33,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the layout used to render the view control.
         /// </summary>
-        public TypeLayoutView Layout { get; set; } = TypeLayoutView.Default;
+        public System.Func<IRenderControlContext, TypeLayoutView> Layout { get; set; } = _ => TypeLayoutView.Default;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -161,6 +161,7 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var classes = Classes.ToList();
+            var layout = Layout?.Invoke(renderContext) ?? TypeLayoutView.Default;
 
             var html = new HtmlElementTextContentDiv()
             {
@@ -169,7 +170,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(),
                 Role = Role
             }
-                .AddUserAttribute("data-layout", Layout == TypeLayoutView.Default ? null : Layout.ToValue())
+                .AddUserAttribute("data-layout", layout == TypeLayoutView.Default ? null : layout.ToValue())
                 .Add(_headers.Select(x => x.Render(renderContext, visualTree)))
                 .Add(_views.Select(x => x.Render(renderContext, visualTree)))
                 .Add(_footers.Select(x => x.Render(renderContext, visualTree)));

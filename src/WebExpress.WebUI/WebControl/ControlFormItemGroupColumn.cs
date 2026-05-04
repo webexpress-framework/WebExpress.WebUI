@@ -75,13 +75,16 @@ namespace WebExpress.WebUI.WebControl
 
                 if (item is IControlFormItemInput input)
                 {
-                    var icon = new ControlIcon() { Icon = input?.Icon };
+                    var icon = new ControlIcon() { Icon = input?.Icon?.Invoke(renderContext) };
                     var label = default(IHtmlNode);
                     var help = new ControlFormItemHelpText(!string.IsNullOrEmpty(item.Id) ? item.Id + "_help" : string.Empty);
+                    var inputLabel = input.Label?.Invoke(renderContext);
+                    var inputRequired = input.Required?.Invoke(renderContext) ?? false;
+                    var inputHelp = input.Help?.Invoke(renderContext);
 
-                    if (!string.IsNullOrWhiteSpace(input.Label) && !input.Required)
+                    if (!string.IsNullOrWhiteSpace(inputLabel) && !inputRequired)
                     {
-                        var text = I18N.Translate(renderGroupContext, input.Label);
+                        var text = I18N.Translate(renderGroupContext, inputLabel);
 
                         var l = new ControlFormItemLabel(!string.IsNullOrEmpty(item.Id) ? item.Id + "_label" : string.Empty)
                         {
@@ -94,9 +97,9 @@ namespace WebExpress.WebUI.WebControl
 
                         label = l.Render(renderGroupContext, visualTree);
                     }
-                    else if (!string.IsNullOrWhiteSpace(input.Label))
+                    else if (!string.IsNullOrWhiteSpace(inputLabel))
                     {
-                        var text = I18N.Translate(renderGroupContext, input.Label)?.Trim(':');
+                        var text = I18N.Translate(renderGroupContext, inputLabel)?.Trim(':');
                         var l = new ControlFormItemLabel(!string.IsNullOrEmpty(item.Id) ? item.Id + "_label" : string.Empty)
                         {
                             Text = text
@@ -121,7 +124,7 @@ namespace WebExpress.WebUI.WebControl
                     }
 
                     help.Initialize(renderContext);
-                    help.Text = I18N.Translate(renderGroupContext.Request?.Culture, input?.Help);
+                    help.Text = I18N.Translate(renderGroupContext.Request?.Culture, inputHelp);
                     help.Classes = ["ms-2"];
 
                     if (icon.Icon is not null)

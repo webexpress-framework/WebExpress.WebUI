@@ -27,8 +27,8 @@ namespace WebExpress.WebUI.Test.WebControl
 
             var input = new ControlFormItemInputText("email")
             {
-                Label = "E-Mail",
-                Bind = new Binding().Add(new BindHide { Source = "type", Condition = "internal" })
+                Label = _ => "E-Mail",
+                Bind = _ => new Binding().Add(new BindHide { Source = "type", Condition = "internal" })
             };
 
             var group = new ControlFormItemGroupVertical();
@@ -60,8 +60,8 @@ namespace WebExpress.WebUI.Test.WebControl
 
             var input = new ControlFormItemInputText("email")
             {
-                Label = "E-Mail",
-                Bind = new Binding().Add(new BindDisable { Source = "notify", Condition = "no" })
+                Label = _ => "E-Mail",
+                Bind = _ => new Binding().Add(new BindDisable { Source = "notify", Condition = "no" })
             };
 
             var group = new ControlFormItemGroupVertical();
@@ -92,10 +92,10 @@ namespace WebExpress.WebUI.Test.WebControl
 
             var input = new ControlFormItemInputText("email")
             {
-                Label = "E-Mail",
-                Bind = new Binding()
-                    .Add(new BindHide    { Source = "showEmail", Condition = "false" })
-                    .Add(new BindDisable { Source = "notify",    Condition = "no" })
+                Label = _ => "E-Mail",
+                Bind = _ => new Binding()
+                    .Add(new BindHide { Source = "showEmail", Condition = "false" })
+                    .Add(new BindDisable { Source = "notify", Condition = "no" })
             };
 
             var group = new ControlFormItemGroupVertical();
@@ -105,9 +105,9 @@ namespace WebExpress.WebUI.Test.WebControl
             var html = group.Render(context, visualTree).ToString();
 
             // assert — both bind names must appear
-            Assert.Contains("hide",    html);
+            Assert.Contains("hide", html);
             Assert.Contains("disable", html);
-            Assert.Contains(@"data-wx-source-hide=""#showEmail""",    html);
+            Assert.Contains(@"data-wx-source-hide=""#showEmail""", html);
             Assert.Contains(@"data-wx-source-disable=""#notify""", html);
         }
 
@@ -125,8 +125,8 @@ namespace WebExpress.WebUI.Test.WebControl
 
             var input = new ControlFormItemInputText("url")
             {
-                Label = "URL",
-                Bind = new Binding().Add(new BindDisable { Source = "count", Condition = ">=5" })
+                Label = _ => "URL",
+                Bind = _ => new Binding().Add(new BindDisable { Source = "count", Condition = ">=5" })
             };
 
             var group = new ControlFormItemGroupVertical();
@@ -153,8 +153,8 @@ namespace WebExpress.WebUI.Test.WebControl
 
             var input = new ControlFormItemInputText("url")
             {
-                Label = "URL",
-                Bind = new Binding().Add(new BindHide { Source = "mode", Condition = "/^internal/i" })
+                Label = _ => "URL",
+                Bind = _ => new Binding().Add(new BindHide { Source = "mode", Condition = "/^internal/i" })
             };
 
             var group = new ControlFormItemGroupVertical();
@@ -181,7 +181,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             var input = new ControlFormItemInputText("email")
             {
-                Label = "E-Mail"
+                Label = _ => "E-Mail"
                 // Bind intentionally not set
             };
 
@@ -209,8 +209,8 @@ namespace WebExpress.WebUI.Test.WebControl
 
             var input = new ControlFormItemInputText("url")
             {
-                Label = "URL",
-                Bind = new Binding().Add(new BindHide { Source = "type", Condition = "internal" })
+                Label = _ => "URL",
+                Bind = _ => new Binding().Add(new BindHide { Source = "type", Condition = "internal" })
             };
 
             var group = new ControlFormItemGroupColumnVertical();

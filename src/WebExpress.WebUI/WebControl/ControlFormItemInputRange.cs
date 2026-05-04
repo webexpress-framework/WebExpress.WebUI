@@ -63,11 +63,13 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var value = renderContext?.GetValue<ControlFormInputValueFloat>(this)?.Number;
+            var name = Name?.Invoke(renderContext);
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
 
             var html = new HtmlElementFieldInput()
             {
                 Id = Id,
-                Name = Name,
+                Name = name,
                 Class = Css.Concatenate("form-range", GetClasses()),
                 Style = GetStyles(),
                 Type = "range",
@@ -75,7 +77,7 @@ namespace WebExpress.WebUI.WebControl
                 Max = Max.ToString(CultureInfo.InvariantCulture),
                 Step = Step.ToString(CultureInfo.InvariantCulture),
                 Value = value?.ToString(CultureInfo.InvariantCulture),
-                Disabled = Disabled
+                Disabled = disabled
             };
 
             return html;

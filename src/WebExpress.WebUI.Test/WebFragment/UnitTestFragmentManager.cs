@@ -407,7 +407,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlForm()
         {
             // arrange
-            var expected = @"<form id=""webexpress-webui-test-testfragmentcontrolform-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>";
+            var expected = @"<form id=""webexpress-webui-test-testfragmentcontrolform-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""form_webexpress-webui-test-testfragmentcontrolform"">*</form>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);

@@ -34,17 +34,17 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the name of the form.
         /// </summary>
-        public string Name { get => _form.Name; set => _form.Name = value; }
+        public Func<IRenderControlFormContext, string> Name { get => _form.Name; set => _form.Name = value; }
 
         /// <summary>
         /// Gets or sets the target uri.
         /// </summary>
-        public IUri Uri { get => _form.Uri; set => _form.Uri = value; }
+        public Func<IRenderControlFormContext, IUri> Uri { get => _form.Uri; set => _form.Uri = value; }
 
         /// <summary>
         /// Gets or sets the redirect uri.
         /// </summary>
-        public IUri RedirectUri { get => _form.RedirectUri; set => _form.RedirectUri = value; }
+        public Func<IRenderControlFormContext, IUri> RedirectUri { get => _form.RedirectUri; set => _form.RedirectUri = value; }
 
         /// <summary>
         /// Returns the form items.
@@ -54,28 +54,23 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the request method.
         /// </summary>
-        public RequestMethod Method { get => _form.Method; set => _form.Method = value; }
+        public Func<IRenderControlFormContext, RequestMethod> Method { get => _form.Method; set => _form.Method = value; }
 
         /// <summary>
         /// Gets or sets the confirmation control that is displayed 
         /// instead of the form after the form has been successfully submitted.
         /// </summary>
-        public IControl Conformation { get => _form.Conformation; set => _form.Conformation = value; }
+        public Func<IRenderControlFormContext, IControl> Conformation { get => _form.Conformation; set => _form.Conformation = value; }
 
         /// <summary>
         /// Gets or sets the form layout.
         /// </summary>
-        public TypeLayoutForm FormLayout { get => _form.FormLayout; set => _form.FormLayout = value; }
+        public Func<IRenderControlFormContext, TypeLayoutForm> FormLayout { get => _form.FormLayout; set => _form.FormLayout = value; }
 
         /// <summary>
         /// Gets or sets the item layout.
         /// </summary>
-        public TypeLayoutFormItem ItemLayout { get => _form.ItemLayout; set => _form.ItemLayout = value; }
-
-        /// <summary>
-        /// Return the current state of the form.
-        /// </summary>
-        public TypeFormState State => _form.State;
+        public Func<IRenderControlFormContext, TypeLayoutFormItem> ItemLayout { get => _form.ItemLayout; set => _form.ItemLayout = value; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -309,8 +304,15 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlFormItem> items)
         {
+            var formRenderContext = new RenderControlFormContext(renderContext, _form);
+            var state = TypeFormState.Default;
+            var formLayout = FormLayout?.Invoke(formRenderContext);
+            var method = Method?.Invoke(formRenderContext);
+            var name = Name?.Invoke(formRenderContext);
+            var conformation = Conformation?.Invoke(formRenderContext);
+
             var classes = Classes.ToList();
-            var formElement = _form.Render(renderContext, visualTree, items);
+            var formElement = _form.Render(formRenderContext, visualTree, items);
             var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Header)))
             {
                 Class = "wx-modal-header"
@@ -330,15 +332,15 @@ namespace WebExpress.WebUI.WebControl
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
                 Role = "dialog"
             }
-            .AddUserAttribute("data-size", Size.ToClass())
-            .AddUserAttribute("data-close-label", I18N.Translate(renderContext, CloseLabel));
+                .AddUserAttribute("data-size", Size.ToClass())
+                .AddUserAttribute("data-close-label", I18N.Translate(renderContext, CloseLabel));
 
-            if (formElement is HtmlElementFormForm form && _form.State != TypeFormState.Success)
+            if (formElement is HtmlElementFormForm form && state != TypeFormState.Success)
             {
                 var elements = form.Elements.Where(x => x is not HtmlElementSectionFooter && x is not HtmlElementTextContentDiv);
                 var buttons = form.Elements.Find(x => x is HtmlElementFieldButton).Select(x => x as HtmlElementFieldButton)
                     .Where(x => x.Type == TypeButton.Submit.ToTypeString() || x.Type == TypeButton.Reset.ToTypeString());
-                var autoShow = State switch
+                var autoShow = state switch
                 {
                     TypeFormState.Default => null,
                     TypeFormState.Error => "true",
@@ -349,31 +351,31 @@ namespace WebExpress.WebUI.WebControl
                 content.Add(elements);
                 footer.Add(buttons);
 
-                modal.AddUserAttribute("data-auto-show", State != TypeFormState.Default
+                modal.AddUserAttribute("data-auto-show", state != TypeFormState.Default
                     ? "true"
                     : null);
 
                 var html = new HtmlElementFormForm()
                 {
                     Id = !string.IsNullOrWhiteSpace(Id) ? $"{Id}-form" : null,
-                    Class = _form.FormLayout == TypeLayoutForm.Inline
+                    Class = formLayout == TypeLayoutForm.Inline
                         ? Css.Concatenate("wx-form-inline", GetClasses())
                         : GetClasses(),
                     Role = _form.Role,
                     Action = Uri?.ToString() ?? renderContext.Request.Uri?.ToString(),
-                    Method = (Method == RequestMethod.NONE
+                    Method = (method == RequestMethod.NONE
                         ? RequestMethod.POST
-                        : Method).ToString(),
+                        : method).ToString(),
                     Enctype = TypeEnctype.Multipart,
-                    Name = Name
+                    Name = name
                 }
                     .Add(modal);
 
                 return html;
             }
 
-            content.Add(_form.Conformation?.Render(renderContext, visualTree));
-            modal.AddUserAttribute("data-auto-show", _form.Conformation is not null ? "true" : null);
+            content.Add(conformation?.Render(formRenderContext, visualTree));
+            modal.AddUserAttribute("data-auto-show", conformation is not null ? "true" : null);
 
             return modal;
         }

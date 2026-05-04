@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCombo(null)
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -96,7 +96,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCombo(null)
             {
-                Label = label
+                Label = _ => label
             };
 
             // act
@@ -120,7 +120,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCombo(null)
             {
-                Help = help
+                Help = _ => help
             };
 
             // act
@@ -144,7 +144,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCombo(null)
             {
-                Disabled = disabled
+                Disabled = _ => disabled
             };
 
             // act
@@ -210,7 +210,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCombo(null)
             {
-                Tag = tag
+                Tag = _ => tag
             };
 
             // act

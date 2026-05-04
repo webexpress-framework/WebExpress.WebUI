@@ -16,8 +16,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the split button link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""btn-group"" role=""button""><a class=""btn""></a><span class=""btn dropdown-toggle dropdown-toggle-split"" data-bs-toggle=""dropdown"" aria-expanded=""false""><span class=""caret""></span></span><ul class=""dropdown-menu""></ul></div>")]
-        [InlineData("id", @"<div id=""id"" class=""btn-group"" role=""button""><a id=""id_btn"" class=""btn""></a><span id=""id_btn"" class=""btn dropdown-toggle dropdown-toggle-split"" data-bs-toggle=""dropdown"" aria-expanded=""false""><span class=""caret""></span></span><ul class=""dropdown-menu""></ul></div>")]
+        [InlineData(null, @"<div class=""btn-group""><a class=""btn""></a><span class=""btn dropdown-toggle dropdown-toggle-split"" data-bs-toggle=""dropdown"" aria-expanded=""false""><span class=""caret""></span></span><ul class=""dropdown-menu""></ul></div>")]
+        [InlineData("id", @"<div id=""id"" class=""btn-group""><a id=""id_btn"" class=""btn""></a><span id=""id_btn"" class=""btn dropdown-toggle dropdown-toggle-split"" data-bs-toggle=""dropdown"" aria-expanded=""false""><span class=""caret""></span></span><ul class=""dropdown-menu""></ul></div>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -38,8 +38,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the text property of the split button link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""btn-group"" role=""button""><a class=""btn""></a>*</div>")]
-        [InlineData("abc", @"<div class=""btn-group"" role=""button""><a class=""btn"">abc</a>*</div>")]
+        [InlineData(null, @"<div class=""btn-group""><a class=""btn""></a>*</div>")]
+        [InlineData("abc", @"<div class=""btn-group""><a class=""btn"">abc</a>*</div>")]
         public void Text(string text, string expected)
         {
             // arrange
@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSplitButtonLink()
             {
-                Text = text
+                Text = _ => text
             };
 
             // act
@@ -58,12 +58,12 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the size property of the split button link control.
+        /// Tests the size property of the split button control.
         /// </summary>
         [Theory]
-        [InlineData(TypeSizeButton.Default, @"<div class=""btn-group"" role=""button""><a class=""btn""></a>*</div>")]
-        [InlineData(TypeSizeButton.Small, @"<div class=""btn-group"" role=""button""><a class=""btn btn-sm""></a>*</div>")]
-        [InlineData(TypeSizeButton.Large, @"<div class=""btn-group"" role=""button""><a class=""btn btn-lg""></a>*</div>")]
+        [InlineData(TypeSizeButton.Default, @"<div class=""btn-group""><a class=""btn""></a>*</div>")]
+        [InlineData(TypeSizeButton.Small, @"<div class=""btn-group""><a class=""btn btn-sm""></a><span class=""btn * btn-sm"" *</div>")]
+        [InlineData(TypeSizeButton.Large, @"<div class=""btn-group""><a class=""btn btn-lg""></a><span class=""btn * btn-lg"" *</div>")]
         public void Size(TypeSizeButton size, string expected)
         {
             // arrange
@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSplitButtonLink()
             {
-                Size = size
+                Size = _ => size
             };
 
             // act
@@ -82,16 +82,16 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the backgroundcolor property of the split button link control.
+        /// Tests the backgroundcolor property of the split button control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorButton.Default, @"<div class=""btn-group"" role=""button""><a class=""btn""></a>*</div>")]
-        [InlineData(TypeColorButton.Primary, @"<div class=""btn-group"" role=""button""><a class=""btn btn-primary""></a><span class=""btn dropdown-toggle dropdown-toggle-split btn-primary"" *</div>")]
-        [InlineData(TypeColorButton.Secondary, @"<div class=""btn-group"" role=""button""><a class=""btn btn-secondary""></a><span class=""btn dropdown-toggle dropdown-toggle-split btn-secondary"" *</div>")]
-        [InlineData(TypeColorButton.Warning, @"<div class=""btn-group"" role=""button""><a class=""btn btn-warning""></a><span class=""btn dropdown-toggle dropdown-toggle-split btn-warning"" *</div>")]
-        [InlineData(TypeColorButton.Danger, @"<div class=""btn-group"" role=""button""><a class=""btn btn-danger""></a><span class=""btn dropdown-toggle dropdown-toggle-split btn-danger"" *</div>")]
-        [InlineData(TypeColorButton.Dark, @"<div class=""btn-group"" role=""button""><a class=""btn btn-dark""></a><span class=""btn dropdown-toggle dropdown-toggle-split btn-dark"" *</div>")]
-        [InlineData(TypeColorButton.Highlight, @"<div class=""btn-group"" role=""button""><a class=""btn btn-highlight""></a><span class=""btn dropdown-toggle dropdown-toggle-split btn-highlight"" *</div>")]
+        [InlineData(TypeColorButton.Default, @"<div class=""btn-group""><a class=""btn""></a>*</div>")]
+        [InlineData(TypeColorButton.Primary, @"<div class=""btn-group""><a class=""btn btn-primary""></a><span class=""btn * btn-primary"" *")]
+        [InlineData(TypeColorButton.Secondary, @"<div class=""btn-group""><a class=""btn btn-secondary""></a><span class=""btn * btn-secondary"" *")]
+        [InlineData(TypeColorButton.Warning, @"<div class=""btn-group""><a class=""btn btn-warning""></a><span class=""btn * btn-warning"" *")]
+        [InlineData(TypeColorButton.Danger, @"<div class=""btn-group""><a class=""btn btn-danger""></a><span class=""btn * btn-danger"" *")]
+        [InlineData(TypeColorButton.Dark, @"<div class=""btn-group""><a class=""btn btn-dark""></a><span class=""btn * btn-dark"" *")]
+        [InlineData(TypeColorButton.Highlight, @"<div class=""btn-group""><a class=""btn btn-highlight""></a><span class=""btn * btn-highlight"" *")]
         public void BackgroundColor(TypeColorButton color, string expected)
         {
             // arrange
@@ -100,7 +100,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSplitButtonLink()
             {
-                BackgroundColor = new PropertyColorButton(color)
+                BackgroundColor = _ => new PropertyColorButton(color)
             };
 
             // act
@@ -110,16 +110,16 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the outline property of the split button link control.
+        /// Tests the outline property of the split button control.
         /// </summary>
         [Theory]
-        [InlineData(false, TypeColorButton.Default, @"<div class=""btn-group"" role=""button""><a class=""btn""></a>*</div>")]
-        [InlineData(true, TypeColorButton.Default, @"<div class=""btn-group"" role=""button""><a class=""btn""></a>*</div>")]
-        [InlineData(true, TypeColorButton.Primary, @"<div class=""btn-group"" role=""button""><a class=""btn btn-outline-primary""></a><span class=""btn dropdown-toggle dropdown-toggle-split btn-outline-primary"" *</div>")]
-        [InlineData(true, TypeColorButton.Secondary, @"<div class=""btn-group"" role=""button""><a class=""btn btn-outline-secondary""></a><span class=""btn dropdown-toggle dropdown-toggle-split btn-outline-secondary"" *</div>")]
-        [InlineData(true, TypeColorButton.Warning, @"<div class=""btn-group"" role=""button""><a class=""btn btn-outline-warning""></a><span class=""btn dropdown-toggle dropdown-toggle-split btn-outline-warning"" *</div>")]
-        [InlineData(true, TypeColorButton.Danger, @"<div class=""btn-group"" role=""button""><a class=""btn btn-outline-danger""></a><span class=""btn dropdown-toggle dropdown-toggle-split btn-outline-danger"" *</div>")]
-        [InlineData(true, TypeColorButton.Dark, @"<div class=""btn-group"" role=""button""><a class=""btn btn-outline-dark""></a><span class=""btn dropdown-toggle dropdown-toggle-split btn-outline-dark"" *</div>")]
+        [InlineData(false, TypeColorButton.Default, @"<div class=""btn-group""><a class=""btn""></a>*</div>")]
+        [InlineData(true, TypeColorButton.Default, @"<div class=""btn-group""><a class=""btn""></a>*</div>")]
+        [InlineData(true, TypeColorButton.Primary, @"<div class=""btn-group""><a class=""btn btn-outline-primary""></a><span class=""btn * btn-outline-primary"" *")]
+        [InlineData(true, TypeColorButton.Secondary, @"<div class=""btn-group""><a class=""btn btn-outline-secondary""></a><span class=""btn * btn-outline-secondary"" *")]
+        [InlineData(true, TypeColorButton.Warning, @"<div class=""btn-group""><a class=""btn btn-outline-warning""></a><span class=""btn * btn-outline-warning"" *")]
+        [InlineData(true, TypeColorButton.Danger, @"<div class=""btn-group""><a class=""btn btn-outline-danger""></a><span class=""btn * btn-outline-danger"" *")]
+        [InlineData(true, TypeColorButton.Dark, @"<div class=""btn-group""><a class=""btn btn-outline-dark""></a><span class=""btn * btn-outline-dark"" *")]
         public void Outline(bool outline, TypeColorButton color, string expected)
         {
             // arrange
@@ -128,8 +128,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSplitButtonLink()
             {
-                Outline = outline,
-                BackgroundColor = new PropertyColorButton(color)
+                Outline = _ => outline,
+                BackgroundColor = _ => new PropertyColorButton(color)
             };
 
             // act
@@ -139,11 +139,11 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the block property of the split button link control.
+        /// Tests the block property of the split button control.
         /// </summary>
         [Theory]
-        [InlineData(TypeBlockButton.None, @"<div class=""btn-group"" role=""button""><a class=""btn""></a>*</div>")]
-        [InlineData(TypeBlockButton.Block, @"<div class=""btn-group btn-block"" role=""button""><a class=""btn btn-block""></a>*</div>")]
+        [InlineData(TypeBlockButton.None, @"<div class=""btn-group""><a class=""btn""></a>*</div>")]
+        [InlineData(TypeBlockButton.Block, @"<div class=""btn-group btn-block""><a class=""btn btn-block""></a>*</div>")]
         public void Block(TypeBlockButton block, string expected)
         {
             // arrange
@@ -152,7 +152,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSplitButtonLink()
             {
-                Block = block
+                Block = _ => block
             };
 
             // act
@@ -162,11 +162,11 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests the icon property of the split button link control.
+        /// Tests the icon property of the split button control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""btn-group"" role=""button""><a class=""btn""></a>*</div>")]
-        [InlineData(typeof(IconStar), @"<div class=""btn-group"" role=""button""><a class=""btn""><i class=""fas fa-star""></i>*</div>")]
+        [InlineData(null, @"<div class=""btn-group""><a class=""btn""></a>*</div>")]
+        [InlineData(typeof(IconStar), @"<div class=""btn-group""><a class=""btn""><i class=""fas fa-star""></i></a>*</div>")]
         public void Icon(Type icon, string expected)
         {
             // arrange
@@ -175,7 +175,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSplitButtonLink()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -213,7 +213,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var html5 = control5.Render(context, visualTree);
             var html6 = control6.Render(context, visualTree);
 
-            var expected = @"<div class=""btn-group"" role=""button"">*<a class=""wx-link"">abc</a>*</div>";
+            var expected = @"<div class=""btn-group"">*<a class=""wx-link"">abc</a>*</div>";
             AssertExtensions.EqualWithPlaceholders(expected, html1);
             AssertExtensions.EqualWithPlaceholders(expected, html2);
             AssertExtensions.EqualWithPlaceholders(expected, html3);

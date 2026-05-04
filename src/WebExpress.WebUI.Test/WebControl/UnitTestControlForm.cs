@@ -17,7 +17,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<form class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData("id", @"<form id=""id"" class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData("id", @"<form id=""id"" class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""id"">*</form>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -39,22 +39,22 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the backgroundcolor property of the form control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorBackground.Default, @"<form id=""*"" class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Primary, @"<form id=""*"" class=""wx-form bg-primary"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Secondary, @"<form id=""*"" class=""wx-form bg-secondary"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Warning, @"<form id=""*"" class=""wx-form bg-warning"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Danger, @"<form id=""*"" class=""wx-form bg-danger"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Dark, @"<form id=""*"" class=""wx-form bg-dark"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Light, @"<form id=""*"" class=""wx-form bg-light"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Highlight, @"<form id=""*"" class=""wx-form bg-highlight"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeColorBackground.Transparent, @"<form id=""*"" class=""wx-form bg-transparent"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Default, @"<form class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Primary, @"<form class=""wx-form bg-primary"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Secondary, @"<form class=""wx-form bg-secondary"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Warning, @"<form class=""wx-form bg-warning"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Danger, @"<form class=""wx-form bg-danger"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Dark, @"<form class=""wx-form bg-dark"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Light, @"<form class=""wx-form bg-light"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Highlight, @"<form class=""wx-form bg-highlight"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeColorBackground.Transparent, @"<form class=""wx-form bg-transparent"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void BackgroundColor(TypeColorBackground color, string expected)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlForm()
+            var control = new ControlForm(null)
             {
                 BackgroundColor = _ => new PropertyColorBackground(color)
             };
@@ -80,7 +80,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlForm()
             {
-                Name = name
+                Name = _ => name
             };
 
             // act
@@ -94,18 +94,18 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the uri property of the form control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<form id=""*"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData("", @"<form id=""*"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData("http://localhost:8080/webui", @"<form id=""*"" action=""http://localhost:8080/webui"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(null, @"<form class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData("", @"<form class=""wx-form"" action=""/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData("http://localhost:8080/webui", @"<form class=""wx-form"" action=""http://localhost:8080/webui"" method=""POST"" enctype=""multipart/form-data""><input type=""hidden"">*</form>")]
         public void Uri(string uri, string expected)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlForm()
+            var control = new ControlForm(null)
             {
-                Uri = uri is not null ? new UriEndpoint(uri) : null
+                Uri = _ => uri is not null ? new UriEndpoint(uri) : null
             };
 
             // act
@@ -119,21 +119,21 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the method property of the form control.
         /// </summary>
         [Theory]
-        [InlineData(RequestMethod.NONE, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(RequestMethod.POST, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(RequestMethod.PUT, @"<form id=""*"" action=""http://localhost:8080/"" method=""PUT"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(RequestMethod.GET, @"<form id=""*"" action=""http://localhost:8080/"" method=""GET"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(RequestMethod.PATCH, @"<form id=""*"" action=""http://localhost:8080/"" method=""PATCH"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(RequestMethod.DELETE, @"<form id=""*"" action=""http://localhost:8080/"" method=""DELETE"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(RequestMethod.NONE, @"<form class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(RequestMethod.POST, @"<form class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(RequestMethod.PUT, @"<form class=""wx-form"" action=""http://localhost:8080/"" method=""PUT"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(RequestMethod.GET, @"<form class=""wx-form"" action=""http://localhost:8080/"" method=""GET"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(RequestMethod.PATCH, @"<form class=""wx-form"" action=""http://localhost:8080/"" method=""PATCH"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(RequestMethod.DELETE, @"<form class=""wx-form"" action=""http://localhost:8080/"" method=""DELETE"" enctype=""multipart/form-data"">*</form>")]
         public void Method(RequestMethod method, string expected)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlForm()
+            var control = new ControlForm(null)
             {
-                Method = method
+                Method = _ => method
             };
 
             // act
@@ -147,17 +147,17 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the form layout property of the form control.
         /// </summary>
         [Theory]
-        [InlineData(TypeLayoutForm.Default, @"<form id=""*"" class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeLayoutForm.Inline, @"<form id=""*"" class=""wx-form wx-form-inline"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeLayoutForm.Default, @"<form class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeLayoutForm.Inline, @"<form class=""wx-form wx-form-inline"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void FormLayout(TypeLayoutForm formLayout, string expected)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlForm()
+            var control = new ControlForm(null)
             {
-                FormLayout = formLayout
+                FormLayout = _ => formLayout
             };
 
             // act
@@ -171,18 +171,18 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the item layout property of the form control.
         /// </summary>
         [Theory]
-        [InlineData(TypeLayoutFormItem.Horizontal, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeLayoutFormItem.Vertical, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeLayoutFormItem.Mix, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeLayoutFormItem.Horizontal, @"<form class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeLayoutFormItem.Vertical, @"<form class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeLayoutFormItem.Mix, @"<form class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void ItemLayout(TypeLayoutFormItem itemLayout, string expected)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlForm()
+            var control = new ControlForm(null)
             {
-                ItemLayout = itemLayout
+                ItemLayout = _ => itemLayout
             };
 
             // act
@@ -196,20 +196,20 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the justify property of the form control.
         /// </summary>
         [Theory]
-        [InlineData(TypeJustifiedFlex.None, @"<form id=""*"" class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeJustifiedFlex.Start, @"<form id=""*"" class=""wx-form justify-content-start"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeJustifiedFlex.Around, @"<form id=""*"" class=""wx-form justify-content-around"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeJustifiedFlex.Between, @"<form id=""*"" class=""wx-form justify-content-between"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData(TypeJustifiedFlex.End, @"<form id=""*"" class=""wx-form justify-content-end"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeJustifiedFlex.None, @"<form class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeJustifiedFlex.Start, @"<form class=""wx-form justify-content-start"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeJustifiedFlex.Around, @"<form class=""wx-form justify-content-around"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeJustifiedFlex.Between, @"<form class=""wx-form justify-content-between"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData(TypeJustifiedFlex.End, @"<form class=""wx-form justify-content-end"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
         public void Justify(TypeJustifiedFlex justify, string expected)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlForm()
+            var control = new ControlForm(null)
             {
-                Justify = justify,
+                Justify = _ => justify,
             };
 
             // act

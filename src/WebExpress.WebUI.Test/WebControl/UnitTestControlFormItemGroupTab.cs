@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the form item group mix control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-tab"" data-layout=""default""></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-webui-tab"" data-layout=""default""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-tab""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-tab""></div>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -38,8 +38,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the name property of the form item group mix control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-tab"" data-layout=""default""></div>")]
-        [InlineData("abc", @"<div class=""wx-webui-tab"" data-layout=""default""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-tab""></div>")]
+        [InlineData("abc", @"<div class=""wx-webui-tab""></div>")]
         public void Name(string name, string expected)
         {
             // arrange
@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemGroupTab()
             {
-                Name = name
+                Name = _ => name
             };
 
             // act
@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemGroupTab()
             {
-                Layout = layout
+                Layout = _ => layout
             };
 
             // act

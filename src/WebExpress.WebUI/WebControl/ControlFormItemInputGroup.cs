@@ -55,7 +55,9 @@ namespace WebExpress.WebUI.WebControl
         /// </returns>
         public override IEnumerable<ValidationResult> Validate(IRenderControlFormContext renderContext)
         {
-            if (Disabled)
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
+
+            if (disabled)
             {
                 return [];
             }

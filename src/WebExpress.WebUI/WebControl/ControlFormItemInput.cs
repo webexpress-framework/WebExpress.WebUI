@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -35,27 +36,27 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the icon.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
         /// Gets or sets the label.
         /// </summary>
-        public string Label { get; set; }
+        public Func<IRenderControlContext, string> Label { get; set; }
 
         /// <summary>
         /// Gets or sets an optional help text.
         /// </summary>
-        public string Help { get; set; }
+        public Func<IRenderControlContext, string> Help { get; set; }
 
         /// <summary>
         /// Gets or sets whether the input element is disabled.
         /// </summary>
-        public bool Disabled { get; set; }
+        public Func<IRenderControlContext, bool> Disabled { get; set; }
 
         /// <summary>
         /// Gets or sets whether inputs are enforced.
         /// </summary>
-        public bool Required { get; set; }
+        public Func<IRenderControlContext, bool> Required { get; set; }
 
         /// <summary>
         /// Returns the elements that are displayed in front of the control.
@@ -71,14 +72,14 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets an object that is linked to the control.
         /// </summary>
-        public object Tag { get; set; }
+        public Func<IRenderControlContext, object> Tag { get; set; }
 
         /// <summary>
         /// Gets or sets the binding that is applied to the enclosing form group element.
         /// Use this to attach binds such as <see cref="BindHide"/> or <see cref="BindDisable"/>
         /// so the entire fieldset (label, input, help text) reacts as a unit.
         /// </summary>
-        public IBinding Bind { get; set; }
+        public Func<IRenderControlContext, IBinding> Bind { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -87,7 +88,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemInput(string id)
             : base(id)
         {
-            Name = id;
+            Name = _ => id;
         }
 
         /// <summary>
@@ -96,7 +97,8 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="renderContext">The context in which the control is rendered.</param>
         public override void Initialize(IRenderControlFormContext renderContext)
         {
-            var value = renderContext.Request.GetParameter(Name)?.Value;
+            var name = Name?.Invoke(renderContext);
+            var value = renderContext.Request.GetParameter(name)?.Value;
 
             if (value is null)
             {
@@ -137,7 +139,9 @@ namespace WebExpress.WebUI.WebControl
         public virtual IEnumerable<ValidationResult> Validate(IRenderControlFormContext renderContext)
         {
             var validationResults = new List<ValidationResult>();
-            if (!Disabled)
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
+
+            if (!disabled)
             {
                 var eventArgument = new ControlFormEventItemValidate<TValue>
                 (

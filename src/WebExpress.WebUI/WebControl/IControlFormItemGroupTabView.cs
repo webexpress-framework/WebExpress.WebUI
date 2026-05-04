@@ -1,3 +1,4 @@
+using System;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebCore.WebUri;
@@ -13,16 +14,16 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the title text.
         /// </summary>
-        string Title { get; }
+        Func<IRenderControlFormContext, string> Title { get; }
 
         /// <summary>
         /// Gets the icon associated with this view.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlFormContext, IIcon> Icon { get; }
 
         /// <summary>
         /// Gets or sets the image uri.
         /// </summary>
-        IUri Image { get; set; }
+        Func<IRenderControlFormContext, IUri> Image { get; set; }
     }
 }

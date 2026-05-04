@@ -92,7 +92,7 @@ namespace WebExpress.WebUI.WebControl
         {
             var content = Content ?? new ControlFormItemStaticText()
             {
-                Text = I18N.Translate(renderContext.Request, "webexpress.webui:confirm.description")
+                Text = _ => I18N.Translate(renderContext.Request, "webexpress.webui:confirm.description")
             };
 
             return Render(renderContext, visualTree, [content]);
@@ -117,7 +117,7 @@ namespace WebExpress.WebUI.WebControl
                 SubmitButtonLabel = I18N.Translate(renderContext.Request, "webexpress.webui:confirm.label");
             }
 
-            RedirectUri ??= renderContext.Request.Uri;
+            RedirectUri ??= _ => renderContext.Request.Uri;
             SubmitButton.Text = SubmitButtonLabel;
 
             return base.Render(renderContext, visualTree, items);

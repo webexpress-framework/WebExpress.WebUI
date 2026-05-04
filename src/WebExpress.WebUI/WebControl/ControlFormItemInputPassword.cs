@@ -66,6 +66,8 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var value = renderContext.GetValue<ControlFormInputValueString>(this);
+            var name = Name?.Invoke(renderContext);
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
 
             var html = new HtmlElementTextContentDiv()
             {
@@ -74,10 +76,10 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(),
                 Role = Role,
             }
-                .AddUserAttribute("name", Name)
+                .AddUserAttribute("name", name)
                 .AddUserAttribute("data-value", value?.Text)
                 .AddUserAttribute("data-placeholder", I18N.Translate(renderContext.Request?.Culture, Placeholder))
-                .AddUserAttribute("data-disabled", Disabled ? "true" : null)
+                .AddUserAttribute("data-disabled", disabled ? "true" : null)
                 .AddUserAttribute("data-minlength", MinLength?.ToString())
                 .AddUserAttribute("data-maxlength", MaxLength?.ToString());
 
@@ -95,13 +97,15 @@ namespace WebExpress.WebUI.WebControl
         {
             var validationResults = new List<ValidationResult>(base.Validate(renderContext));
             var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
+            var required = Required?.Invoke(renderContext) ?? false;
 
-            if (Disabled)
+            if (disabled)
             {
                 return [];
             }
 
-            if (Required && string.IsNullOrWhiteSpace(value))
+            if (required && string.IsNullOrWhiteSpace(value))
             {
                 validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, "webexpress.webui:form.inputpassword.validation.required"));
 

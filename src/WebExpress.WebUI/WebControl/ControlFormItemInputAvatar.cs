@@ -89,13 +89,14 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var value = renderContext.GetValue<ControlFormInputValueFile>(this)?.Name;
+            var name = Name?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-webui-input-avatar"
             }
-                .AddUserAttribute("name", Name)
+                .AddUserAttribute("name", name)
                 .AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder))
                 .AddUserAttribute("uri", Uri?.ToString())
                 .AddUserAttribute("shape", Shape.ToShape())

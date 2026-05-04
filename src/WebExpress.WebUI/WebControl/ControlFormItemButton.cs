@@ -87,7 +87,7 @@ namespace WebExpress.WebUI.WebControl
         {
             _content.AddRange(content);
 
-            Name = Id;
+            Name = _ => Id;
             Disabled = false;
             Size = TypeSizeButton.Default;
         }
@@ -181,7 +181,7 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementFieldButton()
             {
                 Id = Id,
-                Name = Name,
+                Name = Name?.Invoke(renderContext),
                 Type = Type.ToTypeString(),
                 Class = Css.Concatenate("btn", GetClasses()),
                 Style = GetStyles(),

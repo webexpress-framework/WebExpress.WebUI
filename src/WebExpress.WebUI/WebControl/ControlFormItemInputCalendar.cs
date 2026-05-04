@@ -61,13 +61,14 @@ namespace WebExpress.WebUI.WebControl
                     Format ?? renderContext.Request.Culture.DateTimeFormat.ShortDatePattern,
                     renderContext?.Request?.Culture
                 );
+            var name = Name?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv
             {
                 Id = Id,
                 Class = "wx-webui-input-calendar"
             }
-            .AddUserAttribute("name", Name)
+            .AddUserAttribute("name", name)
             .AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder))
             .AddUserAttribute("data-value", value)
             .AddUserAttribute("data-format", !string.IsNullOrWhiteSpace(Format)

@@ -84,12 +84,15 @@ namespace WebExpress.WebUI.WebControl
         {
             var id = Id;
             var value = renderContext.GetValue<ControlFormInputValueString>(this);
+            var name = Name?.Invoke(renderContext);
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
+            var required = Required?.Invoke(renderContext) ?? false;
             var classes = new List<string>(Classes)
             {
                 "form-control"
             };
 
-            if (Disabled)
+            if (disabled)
             {
                 classes.Add("disabled");
             }
@@ -100,7 +103,7 @@ namespace WebExpress.WebUI.WebControl
                 {
                     Id = Id,
                     Value = value?.Text,
-                    Name = Name,
+                    Name = name,
                     Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
                     Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
                     Role = Role,
@@ -113,18 +116,18 @@ namespace WebExpress.WebUI.WebControl
                     Class = Css.Concatenate("wx-webui-editor", classes),
                     Style = GetStyles(),
                     Role = Role,
-                }.AddUserAttribute("name", Name),
+                }.AddUserAttribute("name", name),
                 _ => new HtmlElementFieldInput()
                 {
                     Id = Id,
                     Value = value?.Text,
-                    Name = Name,
+                    Name = name,
                     MinLength = MinLength?.ToString(),
                     MaxLength = MaxLength?.ToString(),
-                    Required = Required,
+                    Required = required,
                     Pattern = Pattern,
                     Type = "text",
-                    Disabled = Disabled,
+                    Disabled = disabled,
                     Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
                     Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
                     Role = Role,
@@ -144,13 +147,15 @@ namespace WebExpress.WebUI.WebControl
         {
             var validationResults = new List<ValidationResult>(base.Validate(renderContext));
             var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
+            var required = Required?.Invoke(renderContext) ?? false;
 
-            if (Disabled)
+            if (disabled)
             {
                 return [];
             }
 
-            if (Required && string.IsNullOrWhiteSpace(value))
+            if (required && string.IsNullOrWhiteSpace(value))
             {
                 validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, "webexpress.webui:form.inputtextbox.validation.required"));
 

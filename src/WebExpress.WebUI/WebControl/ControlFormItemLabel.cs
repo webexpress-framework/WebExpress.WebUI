@@ -44,6 +44,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            var name = FormItem?.Name?.Invoke(renderContext);
             return new HtmlElementFieldLabel()
             {
                 Id = Id,
@@ -53,8 +54,8 @@ namespace WebExpress.WebUI.WebControl
                 Role = Role,
                 For = FormItem is not null ?
                     string.IsNullOrWhiteSpace(FormItem.Id) ?
-                    FormItem.Name :
-                    FormItem.Id :
+                        name :
+                        FormItem.Id :
                     null
             };
         }

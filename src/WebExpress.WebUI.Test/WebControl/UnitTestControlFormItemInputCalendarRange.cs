@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCalendarRange(null)
             {
-                Name = name
+                Name = _ => name
             };
 
             // act
@@ -148,7 +148,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCalendarRange(null)
             {
-                Required = required
+                Required = _ => required
             };
 
             // act

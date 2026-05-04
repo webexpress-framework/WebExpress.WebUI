@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -14,6 +15,8 @@ namespace WebExpress.WebUI.WebControl
     /// </remarks>
     public class ControlFormItemInputSelection : ControlFormItemInput<ControlFormInputValueString>, IControlFormItemInputSelection
     {
+        public new Func<IRenderControlContext, string> Name { get; set; }
+
         private readonly List<IControlFormItemInputSelectionItem> _options = [];
 
         /// <summary>
@@ -59,6 +62,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemInputSelection(string id, params IControlFormItemInputSelectionItem[] items)
             : base(id)
         {
+            Name = _ => id;
             _options.AddRange(items);
         }
 
@@ -107,10 +111,12 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
+            var name = Name?.Invoke(renderContext);
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
             var classes = new List<string>();
             classes.AddRange(Classes);
 
-            if (Disabled)
+            if (disabled)
             {
                 classes.Add("disabled");
             }
@@ -121,7 +127,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("wx-webui-input-selection", classes),
                 Style = GetStyles()
             }
-                .AddUserAttribute("name", Name)
+                .AddUserAttribute("name", name)
                 .AddUserAttribute("placeholder", I18N.Translate(Placeholder))
                 .AddUserAttribute("data-multiselection", MultiSelect ? "true" : null)
                 .AddUserAttribute("data-sticky-selection", StickySelection ? "true" : null)

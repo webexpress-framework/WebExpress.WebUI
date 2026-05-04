@@ -27,32 +27,32 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the placeholder text displayed in the file upload area.
         /// </summary>
-        public string Placeholder { get; set; }
+        public Func<IRenderControlFormContext, string> Placeholder { get; set; }
 
         /// <summary>
         /// Gets or sets the URI associated with the form.
         /// </summary>
-        public IUri Uri { get => _form.Uri; set => _form.Uri = value; }
+        public Func<IRenderControlFormContext, IUri> Uri { get => _form.Uri; set => _form.Uri = value; }
 
         /// <summary>
         /// Gets or sets a value indicating whether multiple selections are allowed.
         /// </summary>
-        public bool Multiple { get; set; } = true;
+        public Func<IRenderControlFormContext, bool> Multiple { get; set; } = _ => true;
 
         /// <summary>
         /// Gets or sets the accept file types for the upload control.
         /// </summary> 
-        public string Accept { get; set; }
+        public Func<IRenderControlFormContext, string> Accept { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether automatic uploads are enabled.
         /// </summary>
-        public bool AutoUpload { get; set; }
+        public Func<IRenderControlFormContext, bool> AutoUpload { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the dropzone is displayed in full-screen mode.
         /// </summary>
-        public bool FullScreenDropzone { get; set; }
+        public Func<IRenderControlFormContext, bool> FullScreenDropzone { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -110,8 +110,14 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var formRenderContext = new RenderControlFormContext(renderContext, _form);
-            var name = _form.Name ?? _form.Id;
-            var uri = _form.Uri?.ToString() ?? formRenderContext.Uri?.ToString();
+            var name = _form.Name?.Invoke(formRenderContext) ?? _form.Id;
+            var uri = _form.Uri?.Invoke(formRenderContext)?.ToString() ?? formRenderContext.Uri?.ToString();
+            var multiple = Multiple?.Invoke(formRenderContext) ?? true;
+            var placeholder = Placeholder?.Invoke(formRenderContext) ?? string.Empty;
+            var accept = Accept?.Invoke(formRenderContext) ?? string.Empty;
+            var autoUpload = AutoUpload?.Invoke(formRenderContext) ?? false;
+            var fullScreenDropzone = FullScreenDropzone?.Invoke(formRenderContext) ?? false;
+
             _form.Render(formRenderContext, visualTree, _form.Items);
 
             var html = new HtmlElementTextContentDiv()
@@ -121,11 +127,11 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles()
             }
                 .AddUserAttribute("data-uri", uri)
-                .AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder))
-                .AddUserAttribute("data-multiple", !Multiple ? "false" : null)
-                .AddUserAttribute("data-accept", Accept)
-                .AddUserAttribute("data-autoupload", AutoUpload ? "true" : null)
-                .AddUserAttribute("data-fullscreen-dropzone", FullScreenDropzone ? "true" : null)
+                .AddUserAttribute("placeholder", I18N.Translate(formRenderContext, placeholder))
+                .AddUserAttribute("data-multiple", !multiple ? "false" : null)
+                .AddUserAttribute("data-accept", accept)
+                .AddUserAttribute("data-autoupload", autoUpload ? "true" : null)
+                .AddUserAttribute("data-fullscreen-dropzone", fullScreenDropzone ? "true" : null)
                 .AddUserAttribute("name", name);
 
             return html;

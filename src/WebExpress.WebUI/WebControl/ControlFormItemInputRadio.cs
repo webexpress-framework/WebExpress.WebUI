@@ -59,6 +59,8 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var value = renderContext?.GetValue<ControlFormInputValueString>(this)?.Text;
+            var name = Name?.Invoke(renderContext);
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
 
             if (!string.IsNullOrWhiteSpace(value))
             {
@@ -73,10 +75,10 @@ namespace WebExpress.WebUI.WebControl
             }
                 .Add(new HtmlElementFieldInput()
                 {
-                    Name = Name,
+                    Name = name,
                     Type = "radio",
                     Value = Option,
-                    Disabled = Disabled,
+                    Disabled = disabled,
                     Class = Css.Concatenate("form-check-input"),
                     Checked = Checked
                 })

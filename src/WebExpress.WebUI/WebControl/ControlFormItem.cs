@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+﻿using System;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -16,7 +17,7 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the name of the input field.
         /// This name is used to identify the form item in the context of form submissions.
         /// </summary>
-        public string Name { get; set; }
+        public Func<IRenderControlFormContext, string> Name { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.

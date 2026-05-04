@@ -83,14 +83,17 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
+            var name = Name?.Invoke(renderContext);
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
+
             var html = new HtmlElementFieldSelect()
             {
                 Id = Id,
-                Name = Name,
+                Name = name,
                 Class = Css.Concatenate("form-select", GetClasses()),
                 Style = GetStyles(),
                 Role = Role,
-                Disabled = Disabled,
+                Disabled = disabled,
                 OnChange = OnChange?.ToString()
             };
 

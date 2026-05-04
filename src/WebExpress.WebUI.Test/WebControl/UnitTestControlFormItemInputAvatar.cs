@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                Name = name
+                Name = _ => name
             };
 
             // act
@@ -293,8 +293,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form move control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data""><input name=""*"" type=""hidden""><main><div><fieldset class=""wx-form-group""><div class=""wx-webui-input-avatar""></div></fieldset></div></main><div></div></form>")]
-        [InlineData("abc", @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data""><input name=""*"" type=""hidden""><main><div><fieldset class=""wx-form-group""><div class=""wx-webui-input-avatar""></div></fieldset></div></main><div></div></form>")]
+        [InlineData(null, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""*""><input name=""*"" type=""hidden""><main><div><fieldset class=""wx-form-group""><div class=""wx-webui-input-avatar""></div></fieldset></div></main><div></div></form>")]
+        [InlineData("abc", @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""*""><input name=""*"" type=""hidden""><main><div><fieldset class=""wx-form-group""><div class=""wx-webui-input-avatar""></div></fieldset></div></main><div></div></form>")]
         public void Value(string value, string expected)
         {
             // arrange
@@ -329,7 +329,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                Label = label,
+                Label = _ => label,
             };
 
             // act

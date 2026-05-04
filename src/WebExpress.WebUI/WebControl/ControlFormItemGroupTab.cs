@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -15,10 +16,10 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the layout.
         /// </summary>
-        public TypeLayoutTab Layout
+        public virtual Func<IRenderControlContext, TypeLayoutTab> Layout
         {
-            get => (TypeLayoutTab)GetProperty(TypeLayoutTab.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeLayoutTab>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
@@ -99,6 +100,7 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var renderGroupContext = new RenderControlFormGroupContext(renderContext, this);
+            var layout = Layout?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
@@ -107,7 +109,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(),
                 Role = Role
             }
-                .AddUserAttribute("data-layout", Layout.ToString().ToLower())
+                .AddUserAttribute("data-layout", layout.ToString().ToLower())
                 .Add(_views.Select(x => x.Render(renderContext, visualTree)));
 
             return html;

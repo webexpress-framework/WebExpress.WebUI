@@ -326,7 +326,7 @@ namespace WebExpress.WebUI.WebControl
         {
             var list = _propertys.Values
                 .Where(x => x.Item2 is not null)
-                .Select(x => x.Item2())
+                .Select(x => x.Item2?.Invoke())
                 .Where(x => !string.IsNullOrEmpty(x))
                 .Distinct();
 

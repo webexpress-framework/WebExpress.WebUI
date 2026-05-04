@@ -51,13 +51,14 @@ namespace WebExpress.WebUI.WebControl
         {
             var range = renderContext.GetValue<ControlFormInputValueDateRange>(this)?
                 .ToString(Format, renderContext?.Request?.Culture);
+            var name = Name?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-webui-input-date"
             }
-                .AddUserAttribute("name", Name)
+                .AddUserAttribute("name", name)
                 .AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder))
                 .AddUserAttribute("data-value", range)
                 .AddUserAttribute("data-range", "true")
