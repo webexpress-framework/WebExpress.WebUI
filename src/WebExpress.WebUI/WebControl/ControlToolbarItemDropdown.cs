@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -35,68 +36,68 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the color. 
         /// </summary>
-        public PropertyColorText Color { get; set; }
+        public Func<IRenderControlContext, PropertyColorText> Color { get; set; }
 
         /// <summary>
         /// Gets or sets the size.
         /// </summary>
-        public TypeSizeButton Size { get; set; }
+        public Func<IRenderControlContext, TypeSizeButton> Size { get; set; } = _ => TypeSizeButton.Default;
 
         /// <summary>
         /// Gets or sets the outline property.
         /// </summary>
-        public bool Outline { get; set; }
+        public Func<IRenderControlContext, bool> Outline { get; set; } = _ => false;
 
         /// <summary>
         /// Gets or sets whether the button should take up the full width.
         /// </summary>
-        public TypeBlockButton Block { get; set; }
+        public Func<IRenderControlContext, TypeBlockButton> Block { get; set; } = _ => TypeBlockButton.None;
 
         /// <summary>
         /// Gets or sets an indicator that indicates that a menu is present.
         /// </summary>
-        public TypeToggleDropdown Toggle { get; set; }
+        public Func<IRenderControlContext, TypeToggleDropdown> Toggle { get; set; } = _ => TypeToggleDropdown.None;
 
         /// <summary>
         /// Gets or sets the label.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
         /// Gets or sets the tooltip.
         /// </summary>
-        public string Tooltip { get; set; }
+        public Func<IRenderControlContext, string> Tooltip { get; set; }
 
         /// <summary>
         /// Gets or sets the icon.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
         /// Gets or sets the image uri.
         /// </summary>
-        public IUri Image { get; set; }
+        public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
         /// Gets or sets the activation status of the button.
         /// </summary>
-        public TypeActive Active { get; set; }
+        public Func<IRenderControlContext, TypeActive> Active { get; set; } = _ => TypeActive.None;
 
         /// <summary>
         /// Gets or sets the orientation of the menu.
         /// </summary>
-        public TypeAlignmentDropdownMenu AlignmentMenu { get; set; }
+        public Func<IRenderControlContext, TypeAlignmentDropdownMenu> AlignmentMenu { get; set; } = _ => TypeAlignmentDropdownMenu.Default;
 
 
         /// <summary>
         /// Gets or sets the alignment of the toolbar item.
         /// </summary>
-        public TypeToolbarItemAlignment Alignment { get; set; } = TypeToolbarItemAlignment.Default;
+        public Func<IRenderControlContext, TypeToolbarItemAlignment> Alignment { get; set; } = _ => TypeToolbarItemAlignment.Default;
 
         /// <summary>
         /// Gets the overflow behavior of the toolbar item.
         /// </summary>
-        public TypeToolbarItemOverflow Overflow { get; set; } = TypeToolbarItemOverflow.Default;
+        public Func<IRenderControlContext, TypeToolbarItemOverflow> Overflow { get; set; } = _ => TypeToolbarItemOverflow.Default;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -189,7 +190,9 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return Render(renderContext, visualTree, _items, Icon);
+            var icon = Icon?.Invoke(renderContext);
+
+            return Render(renderContext, visualTree, _items, icon);
         }
 
         /// <summary>
@@ -201,7 +204,9 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlDropdownItem> items)
         {
-            return Render(renderContext, visualTree, items, Icon);
+            var icon = Icon?.Invoke(renderContext);
+
+            return Render(renderContext, visualTree, items, icon);
         }
 
         /// <summary>
@@ -214,21 +219,33 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlDropdownItem> items, IIcon icon)
         {
+            var color = Color?.Invoke(renderContext);
+            var size = Size?.Invoke(renderContext) ?? TypeSizeButton.Default;
+            var block = Block?.Invoke(renderContext) ?? TypeBlockButton.None;
+            var alignmentMenu = AlignmentMenu?.Invoke(renderContext) ?? TypeAlignmentDropdownMenu.Default;
+            var text = Text?.Invoke(renderContext);
+            var tooltip = Tooltip?.Invoke(renderContext);
+            var image = Image?.Invoke(renderContext);
+            var toggle = Toggle?.Invoke(renderContext) ?? TypeToggleDropdown.None;
+            var active = Active?.Invoke(renderContext) ?? TypeActive.None;
+            var alignment = Alignment?.Invoke(renderContext) ?? TypeToolbarItemAlignment.Default;
+            var overflow = Overflow?.Invoke(renderContext) ?? TypeToolbarItemOverflow.Default;
+
             var buttonCss = "";
 
-            if (Size != TypeSizeButton.Default)
+            if (size != TypeSizeButton.Default)
             {
-                buttonCss = Css.Concatenate(Size.ToClass(), buttonCss);
+                buttonCss = Css.Concatenate(size.ToClass(), buttonCss);
             }
 
-            if (Block != TypeBlockButton.None)
+            if (block != TypeBlockButton.None)
             {
-                buttonCss = Css.Concatenate(Block.ToClass(), buttonCss);
+                buttonCss = Css.Concatenate(block.ToClass(), buttonCss);
             }
 
-            if (AlignmentMenu != TypeAlignmentDropdownMenu.Default)
+            if (alignmentMenu != TypeAlignmentDropdownMenu.Default)
             {
-                buttonCss = Css.Concatenate(AlignmentMenu.ToClass(), buttonCss);
+                buttonCss = Css.Concatenate(alignmentMenu.ToClass(), buttonCss);
             }
 
             var html = new HtmlElementTextContentDiv()
@@ -236,17 +253,17 @@ namespace WebExpress.WebUI.WebControl
                 Id = _id,
                 Class = Css.Concatenate("wx-toolbar-dropdown", buttonCss)
             }
-                .AddUserAttribute("data-label", I18N.Translate(renderContext, Text))
-                .AddUserAttribute("data-title", I18N.Translate(renderContext, Tooltip))
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, text))
+                .AddUserAttribute("data-title", I18N.Translate(renderContext, tooltip))
                 .AddUserAttribute("data-icon", (icon as Icon)?.Class)
-                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-color-css", Color?.ToClass())
-                .AddUserAttribute("data-color-style", Color?.ToStyle())
-                .AddUserAttribute("data-toggle", Toggle == TypeToggleDropdown.Toggle ? "true" : null)
-                .AddUserAttribute(Active == TypeActive.Active ? "active" : null)
-                .AddUserAttribute(Active == TypeActive.Disabled ? "disabled" : null)
-                .AddUserAttribute("data-align", Alignment.ToValue())
-                .AddUserAttribute("data-overflow", Overflow.ToValue())
+                .AddUserAttribute("data-image", image?.ToString() ?? (icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-color-css", color?.ToClass())
+                .AddUserAttribute("data-color-style", color?.ToStyle())
+                .AddUserAttribute("data-toggle", toggle == TypeToggleDropdown.Toggle ? "true" : null)
+                .AddUserAttribute(active == TypeActive.Active ? "active" : null)
+                .AddUserAttribute(active == TypeActive.Disabled ? "disabled" : null)
+                .AddUserAttribute("data-align", alignment.ToValue())
+                .AddUserAttribute("data-overflow", overflow.ToValue())
                 .Add(items.Select(x => x.Render(renderContext, visualTree)));
 
             return html;

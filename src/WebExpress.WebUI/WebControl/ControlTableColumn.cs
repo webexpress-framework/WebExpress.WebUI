@@ -1,3 +1,4 @@
+using System;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
@@ -20,22 +21,22 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the header text.
         /// </summary>
-        public string Title { get; set; }
+        public Func<IRenderControlContext, string> Title { get; set; }
 
         /// <summary>
         /// Gets or sets the icon.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
         /// Gets or sets the image uri.
         /// </summary>
-        public IUri Image { get; set; }
+        public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
         /// Gets or sets the color scheme used for the column.
         /// </summary>
-        public TypeColorTable Color { get; set; } = TypeColorTable.Default;
+        public Func<IRenderControlContext, TypeColorTable> Color { get; set; } = _ => TypeColorTable.Default;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -58,10 +59,10 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id
             }
-                .AddUserAttribute("data-label", I18N.Translate(renderContext, Title))
-                .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-color", Color.ToClass());
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, Title?.Invoke(renderContext)))
+                .AddUserAttribute("data-icon", (Icon?.Invoke(renderContext) as Icon)?.Class)
+                .AddUserAttribute("data-image", Image?.Invoke(renderContext)?.ToString() ?? (Icon?.Invoke(renderContext) as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-color", (Color?.Invoke(renderContext) ?? TypeColorTable.Default).ToClass());
 
             return html;
         }

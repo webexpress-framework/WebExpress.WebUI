@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
@@ -12,12 +13,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the header text.
         /// </summary>
-        string Header { get; }
+        Func<IRenderControlContext, string> Header { get; }
 
         /// <summary>
         /// Gets the color scheme used for the tile card.
         /// </summary>
-        PropertyColorTile Color { get; }
+        Func<IRenderControlContext, PropertyColorTile> Color { get; }
 
         /// <summary>
         /// Gets the content of the tile card.
@@ -28,13 +29,13 @@ namespace WebExpress.WebUI.WebControl
         /// Gets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
-        IAction PrimaryAction { get; }
+        Func<IRenderControlContext, IAction> PrimaryAction { get; }
 
         /// <summary>
         /// Gets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
-        IAction SecondaryAction { get; }
+        Func<IRenderControlContext, IAction> SecondaryAction { get; }
 
         /// <summary>
         /// Adds one or more items to the tile card.

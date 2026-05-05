@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.Internationalization;
+﻿using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -17,7 +18,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets a value indicating whether the current template is editable or read-only.
         /// </summary>
-        public bool Editable { get; set; }
+        public Func<IRenderControlContext, bool> Editable { get; set; } = _ => false;
 
         /// <summary>
         /// Gets or sets the color associated with this property text.
@@ -46,6 +47,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var editable = Editable?.Invoke(renderContext) ?? false;
+
             var html = new HtmlElement("template")
             {
                 Id = Id
@@ -54,7 +57,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-color-css", Color?.ToClass())
                 .AddUserAttribute("data-color-style", Color?.ToStyle())
                 .AddUserAttribute("data-placeholder", I18N.Translate(renderContext, Placeholder))
-                .AddUserAttribute("data-editable", Editable ? "true" : null);
+                .AddUserAttribute("data-editable", editable ? "true" : null);
 
             return html;
         }

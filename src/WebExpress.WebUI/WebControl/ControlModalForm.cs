@@ -313,7 +313,7 @@ namespace WebExpress.WebUI.WebControl
 
             var classes = Classes.ToList();
             var formElement = _form.Render(formRenderContext, visualTree, items);
-            var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Header)))
+            var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Header?.Invoke(renderContext))))
             {
                 Class = "wx-modal-header"
             };

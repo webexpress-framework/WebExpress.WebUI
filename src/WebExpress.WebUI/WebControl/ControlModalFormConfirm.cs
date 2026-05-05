@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the submit button icon.
         /// </summary>
-        public IIcon SubmitButtonIcon
+        public Func<IRenderControlContext, IIcon> SubmitButtonIcon
         {
             get { return SubmitButton?.Icon; }
             set { SubmitButton.Icon = value; }
@@ -29,7 +29,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the submit button color.
         /// </summary>
-        public PropertyColorButton SubmitButtonColor
+        public Func<IRenderControlContext, PropertyColorButton> SubmitButtonColor
         {
             get { return SubmitButton?.Color; }
             set { SubmitButton.Color = value; }
@@ -38,7 +38,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the submit button label.
         /// </summary>
-        public string SubmitButtonLabel { get; set; }
+        public Func<IRenderControlContext, string> SubmitButtonLabel { get; set; }
 
         /// <summary>
         /// Gets or sets the content.
@@ -107,18 +107,21 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlFormItem> items)
         {
-            if (string.IsNullOrWhiteSpace(Header))
+            var header = Header?.Invoke(renderContext);
+            var submitButtonLabel = SubmitButtonLabel?.Invoke(renderContext);
+
+            if (string.IsNullOrWhiteSpace(header))
             {
-                Header = I18N.Translate(renderContext.Request, "webexpress.webui:confirm.header");
+                Header = _ => I18N.Translate(renderContext.Request, "webexpress.webui:confirm.header");
             }
 
-            if (string.IsNullOrWhiteSpace(SubmitButtonLabel))
+            if (string.IsNullOrWhiteSpace(submitButtonLabel))
             {
-                SubmitButtonLabel = I18N.Translate(renderContext.Request, "webexpress.webui:confirm.label");
+                SubmitButtonLabel = _ => I18N.Translate(renderContext.Request, "webexpress.webui:confirm.label");
             }
 
             RedirectUri ??= _ => renderContext.Request.Uri;
-            SubmitButton.Text = SubmitButtonLabel;
+            SubmitButton.Text = _ => submitButtonLabel;
 
             return base.Render(renderContext, visualTree, items);
         }

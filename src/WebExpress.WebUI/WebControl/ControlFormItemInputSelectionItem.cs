@@ -1,3 +1,4 @@
+using System;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
@@ -20,37 +21,37 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the text of the selection item.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
         /// Gets or sets the icon associated with the selection item.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
         /// Gets or sets the image uri.
         /// </summary>
-        public IUri Image { get; set; }
+        public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
         /// Gets or sets the color of the label.
         /// </summary>
-        public TypeColorSelection Color { get; set; }
+        public Func<IRenderControlContext, TypeColorSelection> Color { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the selection item is selected.
         /// </summary>
-        public bool Selected { get; set; }
+        public Func<IRenderControlContext, bool> Selected { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the selection item is disabled.
         /// </summary>
-        public bool Disabled { get; set; }
+        public Func<IRenderControlContext, bool> Disabled { get; set; }
 
         /// <summary>
         /// Gets or sets the content of the selection item.
         /// </summary>
-        public IControl Content { get; set; }
+        public Func<IRenderControlContext, IControl> Content { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
@@ -82,20 +83,20 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-selection-item"),
             }
-                .AddUserAttribute("data-label", I18N.Translate(Text))
-                .AddUserAttribute("data-icon", Icon is Icon ? (Icon as Icon).Class : null)
-                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon is ImageIcon imageIcon ? imageIcon.Uri?.ToString() : null))
-                .AddUserAttribute("data-color", Color != TypeColorSelection.Default
-                    ? Color.ToClass()
+                .AddUserAttribute("data-label", I18N.Translate(Text?.Invoke(renderContext)))
+                .AddUserAttribute("data-icon", Icon?.Invoke(renderContext) is Icon ? (Icon?.Invoke(renderContext) as Icon).Class : null)
+                .AddUserAttribute("data-image", Image?.Invoke(renderContext)?.ToString() ?? (Icon?.Invoke(renderContext) is ImageIcon imageIcon ? imageIcon.Uri?.ToString() : null))
+                .AddUserAttribute("data-color", (Color?.Invoke(renderContext) ?? TypeColorSelection.Default) != TypeColorSelection.Default
+                    ? (Color?.Invoke(renderContext) ?? TypeColorSelection.Default).ToClass()
                     : null)
-                .Add(Content?.Render(renderContext, visualTree));
+                .Add(Content?.Invoke(renderContext)?.Render(renderContext, visualTree));
 
-            if (Selected)
+            if (Selected?.Invoke(renderContext) == true)
             {
                 html.AddUserAttribute("selected");
             }
 
-            if (Disabled)
+            if (Disabled?.Invoke(renderContext) == true)
             {
                 html.AddUserAttribute("disabled");
             }

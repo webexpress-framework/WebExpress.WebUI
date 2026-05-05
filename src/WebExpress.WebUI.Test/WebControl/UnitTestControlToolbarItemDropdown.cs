@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemDropdown()
             {
-                Text = text,
+                Text = _ => text,
             };
 
             // act
@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemDropdown()
             {
-                Tooltip = tooltip,
+                Tooltip = _ => tooltip,
             };
 
             // act
@@ -99,7 +99,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemDropdown()
             {
-                Toggle = toogle
+                Toggle = _ => toogle
             };
 
             // act
@@ -122,7 +122,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemDropdown()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -147,7 +147,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemDropdown()
             {
-                Active = active
+                Active = _ => active
             };
 
             // act
@@ -177,7 +177,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemDropdown()
             {
-                Color = new PropertyColorText(color)
+                Color = _ => new PropertyColorText(color)
             };
 
             // act
@@ -202,7 +202,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemDropdown()
             {
-                Alignment = alignment,
+                Alignment = _ => alignment,
             };
 
             // act

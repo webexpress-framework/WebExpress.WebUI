@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -12,7 +14,7 @@ namespace WebExpress.WebUI.WebControl
         /// enabled the active row is highlighted with a primary-color left
         /// accent and the first row is auto-selected on initialization.
         /// </summary>
-        bool Selectable { get; set; }
+        Func<IRenderControlContext, bool> Selectable { get; set; }
 
         /// <summary>
         /// Adds a collection of list entries to the existing items.

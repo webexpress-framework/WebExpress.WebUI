@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -26,42 +27,42 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets whether the splitter is horziontal or vertically oriented.
         /// </summary>
-        public TypeOrientationSplit Orientation { get; set; }
+        public Func<IRenderControlContext, TypeOrientationSplit> Orientation { get; set; } = _ => TypeOrientationSplit.Horizontal;
 
         /// <summary>
         /// Gets or sets the color of the splitter.
         /// </summary>
-        public PropertyColorBackground SplitterColor { get; set; } = new PropertyColorBackground(TypeColorBackground.Default);
+        public Func<IRenderControlContext, PropertyColorBackground> SplitterColor { get; set; } = _ => new PropertyColorBackground(TypeColorBackground.Default);
 
         /// <summary>
         /// Gets or sets the width of the splitter.
         /// </summary>
-        public int SplitterSize { get; set; } = -1;
+        public Func<IRenderControlContext, int> SplitterSize { get; set; } = _ => -1;
 
         /// <summary>
         /// Gets or sets the minimum size of the left or top area in the ControlPanelSplit.
         /// </summary>
-        public int SidePanelMinSize { get; set; } = -1;
+        public Func<IRenderControlContext, int> SidePanelMinSize { get; set; } = _ => -1;
 
         /// <summary>
         /// Gets or sets the initial size of the left or top area in the ControlPanelSplit in %.
         /// </summary>
-        public int SidePanelInitialSize { get; set; } = -1;
+        public Func<IRenderControlContext, int> SidePanelInitialSize { get; set; } = _ => -1;
 
         /// <summary>
         /// Gets or sets the maximum size of the left or top area in the ControlPanelSplit.
         /// </summary>
-        public int SidePanelMaxSize { get; set; } = -1;
+        public Func<IRenderControlContext, int> SidePanelMaxSize { get; set; } = _ => -1;
 
         /// <summary>
         /// Return or sets the order in which the main and side components are arranged.
         /// </summary>
-        public TypeSplitOrder Order { get; set; } = TypeSplitOrder.Default;
+        public Func<IRenderControlContext, TypeSplitOrder> Order { get; set; } = _ => TypeSplitOrder.Default;
 
         /// <summary>
         /// Gets or sets the unit of measurement for the type size.
         /// </summary>
-        public TypeSizeUnit Unit { get; set; } = TypeSizeUnit.Default;
+        public Func<IRenderControlContext, TypeSizeUnit> Unit { get; set; } = _ => TypeSizeUnit.Default;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -141,6 +142,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var orientation = Orientation?.Invoke(renderContext) ?? TypeOrientationSplit.Horizontal;
+
             var p1 = SidePanel
                 .Select(x => x.Render(renderContext, visualTree))
                 .Where(x => x is not null)
@@ -185,16 +188,16 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute
                 (
                     "data-orientation",
-                    Orientation == TypeOrientationSplit.Horizontal ? "horizontal" : "vertical"
+                    orientation == TypeOrientationSplit.Horizontal ? "horizontal" : "vertical"
                 )
-                .AddUserAttribute("data-min-side", SidePanelMinSize >= 0 ? SidePanelMinSize.ToString() : null)
-                .AddUserAttribute("data-size", SidePanelInitialSize >= 0 ? SidePanelInitialSize.ToString() : null)
-                .AddUserAttribute("data-max-side", SidePanelMaxSize >= 0 ? SidePanelMaxSize.ToString() : null)
-                .AddUserAttribute("data-splitter-size", SplitterSize >= 0 ? SplitterSize.ToString() : null)
-                .AddUserAttribute("data-splitter-class", SplitterColor.ToClass())
-                .AddUserAttribute("data-splitter-style", SplitterColor.ToStyle())
-                .AddUserAttribute("data-order", Order.ToValue())
-                .AddUserAttribute("data-unit", Unit.ToValue());
+                .AddUserAttribute("data-min-side", (SidePanelMinSize?.Invoke(renderContext) ?? -1) >= 0 ? (SidePanelMinSize?.Invoke(renderContext) ?? -1).ToString() : null)
+                .AddUserAttribute("data-size", (SidePanelInitialSize?.Invoke(renderContext) ?? -1) >= 0 ? (SidePanelInitialSize?.Invoke(renderContext) ?? -1).ToString() : null)
+                .AddUserAttribute("data-max-side", (SidePanelMaxSize?.Invoke(renderContext) ?? -1) >= 0 ? (SidePanelMaxSize?.Invoke(renderContext) ?? -1).ToString() : null)
+                .AddUserAttribute("data-splitter-size", (SplitterSize?.Invoke(renderContext) ?? -1) >= 0 ? (SplitterSize?.Invoke(renderContext) ?? -1).ToString() : null)
+                .AddUserAttribute("data-splitter-class", (SplitterColor?.Invoke(renderContext) ?? new PropertyColorBackground(TypeColorBackground.Default)).ToClass())
+                .AddUserAttribute("data-splitter-style", (SplitterColor?.Invoke(renderContext) ?? new PropertyColorBackground(TypeColorBackground.Default)).ToStyle())
+                .AddUserAttribute("data-order", (Order?.Invoke(renderContext) ?? TypeSplitOrder.Default).ToValue())
+                .AddUserAttribute("data-unit", (Unit?.Invoke(renderContext) ?? TypeSizeUnit.Default).ToValue());
 
             return html;
         }

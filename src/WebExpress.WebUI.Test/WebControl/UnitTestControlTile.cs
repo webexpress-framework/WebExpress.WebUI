@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTile(null)
             {
-                Movable = movable
+                Movable = _ => movable
             };
 
             // act
@@ -71,7 +71,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTile(null)
             {
-                AllowRemove = allowRemove
+                AllowRemove = _ => allowRemove
             };
 
             // act
@@ -96,7 +96,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTile(null)
             {
-                LargeIcon = largeIcon
+                LargeIcon = _ => largeIcon
             };
 
             // act

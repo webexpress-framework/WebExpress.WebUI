@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -15,7 +17,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets a value indicating whether multiple items can be selected simultaneously.
         /// </summary>
-        bool MultiSelect { get; }
+        Func<IRenderControlContext, bool> MultiSelect { get; }
 
         /// <summary>
         /// Adds one or more items to the tile control.

@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSelection()
             {
-                Value = text
+                Value = _ => text
             };
 
             // act

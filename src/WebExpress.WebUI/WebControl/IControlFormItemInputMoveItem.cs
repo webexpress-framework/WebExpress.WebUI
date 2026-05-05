@@ -1,6 +1,7 @@
+using System;
 using WebExpress.WebCore.WebIcon;
-using WebExpress.WebCore.WebUri;
 using WebExpress.WebCore.WebPage;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -13,16 +14,16 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the text of the selection item.
         /// </summary>
-        string Text { get; set; }
+        Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
         /// Gets the icon associated with the selection item.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; }
 
         /// <summary>
         /// Gets or sets the image uri.
         /// </summary>
-        IUri Image { get; set; }
+        Func<IRenderControlContext, IUri> Image { get; set; }
     }
 }

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -11,24 +13,24 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the entries.
         /// </summary>
-        public IEnumerable<IControlFormItemInputSelectionItem> Options { get; }
+        IEnumerable<IControlFormItemInputSelectionItem> Options { get; }
 
         /// <summary>
         /// Gets or sets the label of the selected options.
         /// </summary>
-        public string Placeholder { get; }
+        Func<IRenderControlContext, string> Placeholder { get; }
 
         /// <summary>
         /// Allows you to select multiple items.
         /// </summary>
-        public bool MultiSelect { get; }
+        Func<IRenderControlContext, bool> MultiSelect { get; }
 
         /// <summary>
         /// Gets a value indicating whether sticky selection mode is enabled.
         /// When enabled and a value has been selected, the selection cannot be
         /// cleared through the user interface.
         /// </summary>
-        public bool StickySelection { get; }
+        Func<IRenderControlContext, bool> StickySelection { get; }
 
         /// <summary>
         /// Adds one or more items to the selection options.

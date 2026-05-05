@@ -51,7 +51,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDashboardWidget()
             {
-                Title = title
+                Title = _ => title
             };
 
             // act
@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDashboardWidget()
             {
-                Color = color
+                Color = _ => color
             };
 
             // act
@@ -100,7 +100,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDashboardWidget()
             {
-                Column = column
+                Column = _ => column
             };
 
             // act
@@ -124,7 +124,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDashboardWidget()
             {
-                Movable = movable
+                Movable = _ => movable
             };
 
             // act
@@ -148,7 +148,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDashboardWidget()
             {
-                Closeable = closeable
+                Closeable = _ => closeable
             };
 
             // act
@@ -173,7 +173,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDashboardWidget()
             {
-                Widget = widget
+                Widget = _ => widget
             };
 
             // act
@@ -199,7 +199,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var icon = iconType is not null ? Activator.CreateInstance(iconType) as IIcon : null;
             var control = new ControlDashboardWidget(null)
             {
-                Icon = icon
+                Icon = _ => icon
             };
 
             // act

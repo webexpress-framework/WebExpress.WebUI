@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebPage;
+﻿using System;
+using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -12,16 +13,16 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the class or category associated with the current object.
         /// </summary>
-        string Class { get; }
+        Func<IRenderControlContext, string> Class { get; }
 
         /// <summary>
         /// Gets the style applied to the element.
         /// </summary>
-        string Style { get; }
+        Func<IRenderControlContext, string> Style { get; }
 
         /// <summary>
         /// Gets the color scheme used for the cell.
         /// </summary>
-        TypeColorTable Color { get; }
+        Func<IRenderControlContext, TypeColorTable> Color { get; }
     }
 }

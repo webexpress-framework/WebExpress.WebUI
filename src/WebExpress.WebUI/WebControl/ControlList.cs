@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -42,7 +43,7 @@ namespace WebExpress.WebUI.WebControl
         /// enabled the active row is highlighted with a primary-color left
         /// accent and the first row is auto-selected on initialization.
         /// </summary>
-        public bool Selectable { get; set; }
+        public Func<IRenderControlContext, bool> Selectable { get; set; } = _ => false;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -155,6 +156,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<ControlListItem> items)
         {
+            var selectable = Selectable?.Invoke(renderContext) ?? false;
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
@@ -164,7 +167,7 @@ namespace WebExpress.WebUI.WebControl
             }
                 .AddUserAttribute("data-title", I18N.Translate(renderContext, Title))
                 .AddUserAttribute("data-sortable", Sortable ? "true" : null)
-                .AddUserAttribute("data-selectable", Selectable ? "true" : null)
+                .AddUserAttribute("data-selectable", selectable ? "true" : null)
                 .AddUserAttribute("data-layout", Layout.ToClass())
                 .Add(_items.Select(x => x.Render(renderContext, visualTree)));
 

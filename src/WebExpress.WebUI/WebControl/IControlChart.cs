@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -10,81 +12,81 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the chart type. The setter returns the instance for fluent chaining.
         /// </summary>
-        TypeChart Type { get; }
+        Func<IRenderControlContext, TypeChart> Type { get; }
 
         /// <summary>
         /// Gets the chart title. The setter returns the instance for fluent chaining.
         /// </summary>
-        string Title { get; }
+        Func<IRenderControlContext, string> Title { get; }
 
         /// <summary>
         /// Gets the x-axis title. The setter returns the instance for fluent chaining.
         /// </summary>
-        string TitleX { get; }
+        Func<IRenderControlContext, string> TitleX { get; }
 
         /// <summary>
         /// Gets the y-axis title. The setter returns the instance for fluent chaining.
         /// </summary>
-        string TitleY { get; }
+        Func<IRenderControlContext, string> TitleY { get; }
 
         /// <summary>
         /// Gets the chart width. The setter returns the instance for fluent chaining.
         /// </summary>
-        new int Width { get; }
+        new Func<IRenderControlContext, int> Width { get; }
 
         /// <summary>
         /// Gets the chart height. The setter returns the instance for fluent chaining.
         /// </summary>
-        new int Height { get; }
+        new Func<IRenderControlContext, int> Height { get; }
 
         /// <summary>
         /// Gets the minimum y-value. The setter returns the instance for fluent chaining.
         /// </summary>
-        float Minimum { get; }
+        Func<IRenderControlContext, float> Minimum { get; }
 
         /// <summary>
         /// Gets the maximum y-value. The setter returns the instance for fluent chaining.
         /// </summary>
-        float Maximum { get; }
+        Func<IRenderControlContext, float> Maximum { get; }
 
         /// <summary>
         /// Gets whether the chart is responsive. The setter returns the instance for fluent chaining.
         /// </summary>
-        bool Responsive { get; }
+        Func<IRenderControlContext, bool> Responsive { get; }
 
         /// <summary>
         /// Gets whether the chart maintains aspect ratio. The setter returns the instance for fluent chaining.
         /// </summary>
-        bool MaintainAspectRatio { get; }
+        Func<IRenderControlContext, bool> MaintainAspectRatio { get; }
 
         /// <summary>
         /// Gets whether the legend is displayed. The setter returns the instance for fluent chaining.
         /// </summary>
-        bool LegendDisplay { get; }
+        Func<IRenderControlContext, bool> LegendDisplay { get; }
 
         /// Gets whether the title is displayed. The setter returns the instance for fluent chaining.
         /// </summary>
-        bool TitleDisplay { get; }
+        Func<IRenderControlContext, bool> TitleDisplay { get; }
 
         /// <summary>
         /// Gets whether the y-axis begins at zero. The setter returns the instance for fluent chaining.
         /// </summary>
-        bool YBeginAtZero { get; }
+        Func<IRenderControlContext, bool> YBeginAtZero { get; }
 
         /// <summary>
         /// Gets whether the x-axis begins at zero. The setter returns the instance for fluent chaining.
         /// </summary>
-        bool XBeginAtZero { get; }
+        Func<IRenderControlContext, bool> XBeginAtZero { get; }
 
         /// <summary>
         /// Gets the datasets.
         /// </summary>
-        IEnumerable<ControlChartDataset> Data { get; }
+        Func<IRenderControlContext, IEnumerable<ControlChartDataset>> Data { get; }
 
         /// <summary>
         /// Gets the labels. The setter returns the instance for fluent chaining.
         /// </summary>
-        IEnumerable<string> Labels { get; }
+        Func<IRenderControlContext, IEnumerable<string>> Labels { get; }
 
         /// <summary>
         /// Adds one or more datasets to the control chart.

@@ -182,9 +182,9 @@ namespace WebExpress.WebUI.WebMarkdown
                 else if (element is MarkdownBlockElementTable table)
                 {
                     var tab = new ControlTable()
-                        .AddColumns(table.Columns.Select(x => new ControlTableColumn() { Title = x.PlainText }))
+                        .AddColumns(table.Columns.Select(x => new ControlTableColumn() { Title = _ => x.PlainText }))
                         .AddRows(table.Rows.Select(row => new ControlTableRow()
-                            .Add(row.Select(cell => new ControlTableCell() { Text = cell.PlainText }))));
+                            .Add(row.Select(cell => new ControlTableCell() { Text = _ => cell.PlainText }))));
 
                     list.Add(tab.Render(renderContext, null));
                 }

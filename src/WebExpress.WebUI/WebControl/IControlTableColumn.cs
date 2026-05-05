@@ -1,3 +1,4 @@
+using System;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebCore.WebUri;
@@ -13,21 +14,21 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the header text.
         /// </summary>
-        string Title { get; }
+        Func<IRenderControlContext, string> Title { get; }
 
         /// <summary>
         /// Gets the icon.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; }
 
         /// <summary>
         /// Gets or sets the image uri.
         /// </summary>
-        IUri Image { get; set; }
+        Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
         /// Gets the color scheme used for the column.
         /// </summary>
-        TypeColorTable Color { get; }
+        Func<IRenderControlContext, TypeColorTable> Color { get; }
     }
 }

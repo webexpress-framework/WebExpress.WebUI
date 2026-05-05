@@ -1,3 +1,4 @@
+using System;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
@@ -25,64 +26,64 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets whether the link is active or not.
         /// </summary>
-        public TypeActive Active { get; set; }
+        public Func<IRenderControlContext, TypeActive> Active { get; set; }
 
         /// <summary>
         /// Gets or sets the label.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
         /// Gets or sets the target uri.
         /// </summary>
-        public IUri Uri { get; set; }
+        public Func<IRenderControlContext, IUri> Uri { get; set; }
 
         /// <summary>
         /// Gets or sets the target.
         /// </summary>
-        public TypeTarget Target { get; set; }
+        public Func<IRenderControlContext, TypeTarget> Target { get; set; }
 
         /// <summary>
         /// Gets or sets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
-        public IAction PrimaryAction { get; set; }
+        public Func<IRenderControlContext, IAction> PrimaryAction { get; set; }
 
         /// <summary>
         /// Gets or sets the secondary action, typically triggered by a 
         /// double-click to open a modal or similar target.
         /// </summary>
-        public IAction SecondaryAction { get; set; }
+        public Func<IRenderControlContext, IAction> SecondaryAction { get; set; }
 
         /// <summary>
         /// Gets or sets the icon.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
         /// Gets or sets the image uri.
         /// </summary>
-        public IUri Image { get; set; }
+        public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
         /// Gets or sets a tooltip text.
         /// </summary>
-        public string Tooltip { get; set; }
+        public Func<IRenderControlContext, string> Tooltip { get; set; }
 
         /// <summary>
         /// Gets or sets the link color.
         /// </summary>
-        public PropertyColorText Color { get; set; }
+        public Func<IRenderControlContext, PropertyColorText> Color { get; set; }
 
         /// <summary>
         /// Gets or sets the alignment of the toolbar item.
         /// </summary>
-        public TypeToolbarItemAlignment Alignment { get; set; } = TypeToolbarItemAlignment.Default;
+        public Func<IRenderControlContext, TypeToolbarItemAlignment> Alignment { get; set; } = _ => TypeToolbarItemAlignment.Default;
 
         /// <summary>
         /// Gets the overflow behavior of the toolbar item.
         /// </summary>
-        public TypeToolbarItemOverflow Overflow { get; set; } = TypeToolbarItemOverflow.Default;
+        public Func<IRenderControlContext, TypeToolbarItemOverflow> Overflow { get; set; } = _ => TypeToolbarItemOverflow.Default;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -101,26 +102,39 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var text = Text?.Invoke(renderContext);
+            var icon = Icon?.Invoke(renderContext);
+            var image = Image?.Invoke(renderContext);
+            var uri = Uri?.Invoke(renderContext);
+            var target = Target?.Invoke(renderContext);
+            var tooltip = Tooltip?.Invoke(renderContext);
+            var color = Color?.Invoke(renderContext);
+            var active = Active?.Invoke(renderContext);
+            var alignment = Alignment?.Invoke(renderContext) ?? TypeToolbarItemAlignment.Default;
+            var overflow = Overflow?.Invoke(renderContext) ?? TypeToolbarItemOverflow.Default;
+            var primaryAction = PrimaryAction?.Invoke(renderContext);
+            var secondaryAction = SecondaryAction?.Invoke(renderContext);
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-toolbar-button"
             }
-                .AddUserAttribute("data-label", I18N.Translate(renderContext, Text))
-                .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-uri", Uri?.ToString())
-                .AddUserAttribute("data-target", Target.ToValue())
-                .AddUserAttribute("data-title", I18N.Translate(renderContext, Tooltip))
-                .AddUserAttribute("data-color-css", Color?.ToClass())
-                .AddUserAttribute("data-color-style", Color?.ToStyle())
-                .AddUserAttribute(Active == TypeActive.Active ? "active" : null)
-                .AddUserAttribute(Active == TypeActive.Disabled ? "disabled" : null)
-                .AddUserAttribute("data-align", Alignment.ToValue())
-                .AddUserAttribute("data-overflow", Overflow.ToValue());
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, text))
+                .AddUserAttribute("data-icon", (icon as Icon)?.Class)
+                .AddUserAttribute("data-image", image?.ToString() ?? (icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-uri", uri?.ToString())
+                .AddUserAttribute("data-target", target?.ToValue())
+                .AddUserAttribute("data-title", I18N.Translate(renderContext, tooltip))
+                .AddUserAttribute("data-color-css", color?.ToClass())
+                .AddUserAttribute("data-color-style", color?.ToStyle())
+                .AddUserAttribute(active == TypeActive.Active ? "active" : null)
+                .AddUserAttribute(active == TypeActive.Disabled ? "disabled" : null)
+                .AddUserAttribute("data-align", alignment.ToValue())
+                .AddUserAttribute("data-overflow", overflow.ToValue());
 
-            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
-            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
+            primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            secondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

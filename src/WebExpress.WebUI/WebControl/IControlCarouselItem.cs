@@ -1,4 +1,7 @@
-﻿namespace WebExpress.WebUI.WebControl
+﻿using System;
+using WebExpress.WebUI.WebPage;
+
+namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// Represents an slideshow element in a carousel control.
@@ -8,16 +11,16 @@
         /// <summary>
         /// Gets the headline.
         /// </summary>
-        public string Headline { get; }
+        public Func<IRenderControlContext, string> Headline { get; }
 
         /// <summary>
         /// Gets the text.
         /// </summary>
-        public string Text { get; }
+        public Func<IRenderControlContext, string> Text { get; }
 
         /// <summary>
         /// Gets the slideshow element, such as an image.
         /// </summary>
-        public IControl Control { get; }
+        public Func<IRenderControlContext, IControl> Control { get; }
     }
 }

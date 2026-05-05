@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
@@ -24,12 +25,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the color scheme used for the row.
         /// </summary>
-        public PropertyColorText Color { get; set; }
+        public Func<IRenderControlContext, PropertyColorText> Color { get; set; }
 
         /// <summary>
         /// Gets or sets the color scheme used for the row.
         /// </summary>
-        public PropertyColorBackgroundList BackgroundColor { get; set; }
+        public Func<IRenderControlContext, PropertyColorBackgroundList> BackgroundColor { get; set; }
 
         /// <summary>
         /// Gets the options.
@@ -39,38 +40,38 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the icon associated with this instance.
         /// </summary>
-        public virtual IIcon Icon { get; set; }
+        public virtual Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
         /// Gets or sets the image uri.
         /// </summary>
-        public virtual IUri Image { get; set; }
+        public virtual Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
         /// Gets or sets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
-        public IAction PrimaryAction { get; set; }
+        public Func<IRenderControlContext, IAction> PrimaryAction { get; set; }
 
         /// <summary>
         /// Gets or sets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
-        public IAction SecondaryAction { get; set; }
+        public Func<IRenderControlContext, IAction> SecondaryAction { get; set; }
 
         /// <summary>
         /// Gets or sets the ativity state of the list item.
         /// </summary>
-        public TypeActive Active { get; set; }
+        public Func<IRenderControlContext, TypeActive> Active { get; set; }
 
         /// <summary>
         /// Gets or sets the content associated with this cell.
         /// </summary>
-        public virtual string Text
+        public virtual Func<IRenderControlContext, string> Text
         {
             get
             {
-                return string.Join
+                return _ => string.Join
                 (
                     " ",
                     _content.Where(x => x is ControlText)
@@ -87,14 +88,14 @@ namespace WebExpress.WebUI.WebControl
                     return;
                 }
 
-                _content.Add(new ControlText { Text = value, Format = TypeFormatText.Raw });
+                _content.Add(new ControlText { Text = value?.Invoke(null), Format = TypeFormatText.Raw });
             }
         }
 
         /// <summary>
         /// Gets or sets the description associated with this cell.
         /// </summary>
-        public virtual string Description { get; set; }
+        public virtual Func<IRenderControlContext, string> Description { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -154,17 +155,17 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-list-item")
             }
-                .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-color-css", Color?.ToClass())
-                .AddUserAttribute("data-color-style", Color?.UserColor)
-                .AddUserAttribute("data-bgcolor-css", BackgroundColor?.ToClass())
-                .AddUserAttribute("data-bgcolor-style", BackgroundColor?.UserColor)
-                .AddUserAttribute("data-active", Active.ToClass())
+                .AddUserAttribute("data-icon", (Icon?.Invoke(renderContext) as Icon)?.Class)
+                .AddUserAttribute("data-image", Image?.Invoke(renderContext)?.ToString() ?? (Icon?.Invoke(renderContext) as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-color-css", Color?.Invoke(renderContext)?.ToClass())
+                .AddUserAttribute("data-color-style", Color?.Invoke(renderContext)?.UserColor)
+                .AddUserAttribute("data-bgcolor-css", BackgroundColor?.Invoke(renderContext)?.ToClass())
+                .AddUserAttribute("data-bgcolor-style", BackgroundColor?.Invoke(renderContext)?.UserColor)
+                .AddUserAttribute("data-active", (Active?.Invoke(renderContext) ?? TypeActive.None).ToClass())
                 .Add(_content.Select(x => x.Render(renderContext, visualTree)));
 
-            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
-            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
+            PrimaryAction?.Invoke(renderContext)?.ApplyUserAttributes(html, TypeAction.Primary);
+            SecondaryAction?.Invoke(renderContext)?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

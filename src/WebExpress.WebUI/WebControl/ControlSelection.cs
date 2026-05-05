@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -15,7 +16,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the text.
         /// </summary>
-        public string Value { get; set; }
+        public Func<IRenderControlContext, string> Value { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -70,12 +71,14 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var value = Value?.Invoke(renderContext);
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-webui-selection"
             }
-                .AddUserAttribute("data-value", Value)
+                .AddUserAttribute("data-value", value)
                 .Add(_options.Select(x => x.Render(renderContext, visualTree)));
 
             return html;

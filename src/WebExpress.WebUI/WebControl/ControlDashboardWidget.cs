@@ -1,3 +1,4 @@
+using System;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
@@ -20,42 +21,42 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the title associated with the widget.
         /// </summary>
-        public string Title { get; set; }
+        public Func<IRenderControlContext, string> Title { get; set; }
 
         /// <summary>
         /// Gets or sets the color associated with the widget.
         /// </summary>
-        public string Color { get; set; }
+        public Func<IRenderControlContext, string> Color { get; set; }
 
         /// <summary>
         /// Gets or sets the icon associated with this widget.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
         /// Gets or sets the image uri.
         /// </summary>
-        public IUri Image { get; set; }
+        public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
         /// Gets or sets the column index associated with this widget.
         /// </summary>
-        public uint Column { get; set; } = uint.MaxValue;
+        public Func<IRenderControlContext, uint> Column { get; set; } = _ => uint.MaxValue;
 
         /// <summary>
         /// Gets or sets a value indicating whether the widget can be moved.
         /// </summary>
-        public bool Movable { get; set; } = true;
+        public Func<IRenderControlContext, bool> Movable { get; set; } = _ => true;
 
         /// <summary>
         /// Gets or sets a value indicating whether the widget can be closed.
         /// </summary>
-        public bool Closeable { get; set; } = true;
+        public Func<IRenderControlContext, bool> Closeable { get; set; } = _ => true;
 
         /// <summary>
         /// Gets or sets the widget name or identifier associated with this instance.
         /// </summary>
-        public string Widget { get; set; }
+        public Func<IRenderControlContext, string> Widget { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -74,19 +75,21 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var widget = Widget?.Invoke(renderContext);
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-dashboard-widget"
             }
-                .AddUserAttribute("data-title", I18N.Translate(renderContext, Title))
-                .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-color", Color)
-                .AddUserAttribute("data-column", Column < uint.MaxValue ? Column.ToString() : null)
-                .AddUserAttribute("data-movable", !Movable ? "false" : null)
-                .AddUserAttribute("data-closeable", !Closeable ? "false" : null)
-                .AddUserAttribute("data-widget", Widget);
+                .AddUserAttribute("data-title", I18N.Translate(renderContext, Title?.Invoke(renderContext)))
+                .AddUserAttribute("data-icon", (Icon?.Invoke(renderContext) as Icon)?.Class)
+                .AddUserAttribute("data-image", Image?.Invoke(renderContext)?.ToString() ?? (Icon?.Invoke(renderContext) as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-color", Color?.Invoke(renderContext))
+                .AddUserAttribute("data-column", (Column?.Invoke(renderContext) ?? uint.MaxValue) < uint.MaxValue ? (Column?.Invoke(renderContext) ?? uint.MaxValue).ToString() : null)
+                .AddUserAttribute("data-movable", !(Movable?.Invoke(renderContext) ?? true) ? "false" : null)
+                .AddUserAttribute("data-closeable", !(Closeable?.Invoke(renderContext) ?? true) ? "false" : null)
+                .AddUserAttribute("data-widget", widget);
 
             return html;
         }

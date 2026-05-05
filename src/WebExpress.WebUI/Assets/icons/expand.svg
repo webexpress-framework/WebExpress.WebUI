@@ -1,7 +1,9 @@
-﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg width="21" height="21" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
-  <path
-     id="expand"
-     d="M 3,3 V 8 H 4.5 V 5.5 H 8 V 4 H 4 A 1,1 0 0 0 3,5 Z M 13,3 V 4.5 H 16.5 V 8 H 18 V 4 A 1,1 0 0 0 17,3 Z M 3,13 V 17 A 1,1 0 0 0 4,18 H 8 V 16.5 H 4.5 V 13 Z M 16.5,13 V 16.5 H 13 V 18 H 17 A 1,1 0 0 0 18,17 V 13 Z"
-     style="fill:#000000;fill-rule:evenodd" />
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+ <g transform="matrix(1.1993 0 0 1.1993 -2.098 -2.7395)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.0422">
+  <path d="m3.625 8v-3.2968h3.5635"/>
+  <path d="m13.953 4.7032h3.2968v3.5636"/>
+  <path d="m17.383 13.945v3.2968h-3.5636"/>
+  <path d="m6.9218 17.375h-3.2968v-3.5636"/>
+ </g>
 </svg>

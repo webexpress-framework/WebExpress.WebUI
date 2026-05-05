@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using WebExpress.WebCore.WebIcon;
-using WebExpress.WebCore.WebUri;
 using WebExpress.WebCore.WebPage;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -15,28 +16,28 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the label of the selection item.
         /// </summary>
-        string Text { get; }
+        Func<IRenderControlContext, string> Text { get; }
 
         /// <summary>
         /// Gets or sets the icon associated with the selection item.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; }
 
         /// <summary>
         /// Gets or sets the image uri.
         /// </summary>
-        IUri Image { get; set; }
+        Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
         /// Gets or sets the color of the label.
         /// </summary>
-        TypeColorSelection LabelColor { get; }
+        Func<IRenderControlContext, TypeColorSelection> LabelColor { get; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the selection item is disabled.
         /// </summary>
         [JsonPropertyName("disabled")]
-        bool Disabled { get; }
+        Func<IRenderControlContext, bool> Disabled { get; }
 
         /// <summary>
         /// Gets or sets the content of the selection item.

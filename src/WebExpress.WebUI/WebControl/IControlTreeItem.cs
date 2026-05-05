@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
@@ -12,7 +13,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the label of the tree item.
         /// </summary>
-        string Text { get; }
+        Func<IRenderControlContext, string> Text { get; }
 
         /// <summary>
         /// Gets the child tree items.

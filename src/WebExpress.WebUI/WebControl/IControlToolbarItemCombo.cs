@@ -1,6 +1,7 @@
+using System;
 using System.Collections.Generic;
 using WebExpress.WebCore.WebIcon;
-using WebExpress.WebCore.WebUri;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -12,52 +13,52 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the items in the dropdown.
         /// </summary>
-        public IEnumerable<ControlFormItemInputComboItem> Items { get; }
+        IEnumerable<ControlFormItemInputComboItem> Items { get; }
 
         /// <summary>
         /// Gets the color. 
         /// </summary>
-        public PropertyColorText Color { get; }
+        Func<IRenderControlContext, PropertyColorText> Color { get; }
 
         /// <summary>
         /// Gets the size.
         /// </summary>
-        public TypeSizeButton Size { get; }
+        Func<IRenderControlContext, TypeSizeButton> Size { get; }
 
         /// <summary>
         /// Gets the outline property.
         /// </summary>
-        public bool Outline { get; }
+        Func<IRenderControlContext, bool> Outline { get; }
 
         /// <summary>
         /// Gets whether the button should take up the full width.
         /// </summary>
-        public TypeBlockButton Block { get; }
+        Func<IRenderControlContext, TypeBlockButton> Block { get; }
 
         /// <summary>
         /// Gets an indicator that indicates that a menu is present.
         /// </summary>
-        public TypeToggleDropdown Toggle { get; }
+        Func<IRenderControlContext, TypeToggleDropdown> Toggle { get; }
 
         /// <summary>
         /// Gets the label.
         /// </summary>
-        public string Text { get; }
+        Func<IRenderControlContext, string> Text { get; }
 
         /// <summary>
         /// Gets the tooltip.
         /// </summary>
-        public string Tooltip { get; }
+        Func<IRenderControlContext, string> Tooltip { get; }
 
         /// <summary>
         /// Gets the icon.
         /// </summary>
-        public IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; }
 
         /// <summary>
         /// Gets the activation status of the button.
         /// </summary>
-        public TypeActive Active { get; }
+        Func<IRenderControlContext, TypeActive> Active { get; }
 
         /// <summary>
         /// Adds one or more items to the combo.

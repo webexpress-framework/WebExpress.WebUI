@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
@@ -12,12 +13,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the title text.
         /// </summary>
-        string Title { get; }
+        Func<IRenderControlContext, string> Title { get; }
 
         /// <summary>
         /// Gets the description of the view.
         /// </summary>
-        string Description { get; }
+        Func<IRenderControlContext, string> Description { get; }
 
         /// <summary>
         /// Gets the content of the view control.

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -24,7 +25,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets a placeholder text.
         /// </summary>
-        public string Placeholder { get; set; }
+        public Func<IRenderControlContext, string> Placeholder { get; set; }
 
         /// <summary>
         /// Gets or sets the OnChange attribute.
@@ -85,6 +86,7 @@ namespace WebExpress.WebUI.WebControl
             var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
             var name = Name?.Invoke(renderContext);
             var disabled = Disabled?.Invoke(renderContext) ?? false;
+            var placeholder = Placeholder?.Invoke(renderContext);
 
             var html = new HtmlElementFieldSelect()
             {
@@ -97,11 +99,11 @@ namespace WebExpress.WebUI.WebControl
                 OnChange = OnChange?.ToString()
             };
 
-            if (!string.IsNullOrWhiteSpace(Placeholder))
+            if (!string.IsNullOrWhiteSpace(placeholder))
             {
                 html.Add(new HtmlElementFormOption()
                 {
-                    Text = I18N.Translate(renderContext.Request, Placeholder),
+                    Text = I18N.Translate(renderContext.Request, placeholder),
                     Disabled = true,
                     Selected = string.IsNullOrWhiteSpace(value)
                 });
@@ -109,26 +111,32 @@ namespace WebExpress.WebUI.WebControl
 
             foreach (var v in Items)
             {
+                var itemText = v.Text?.Invoke(renderContext);
+
                 if (v.SubItems.Any())
                 {
-                    html.Add(new HtmlElementFormOptgroup() { Label = v.Text });
+                    html.Add(new HtmlElementFormOptgroup() { Label = itemText });
                     foreach (var s in v.SubItems)
                     {
+                        var subValue = s.Value?.Invoke(renderContext);
+
                         html.Add(new HtmlElementFormOption()
                         {
-                            Value = s.Value,
-                            Text = I18N.Translate(renderContext.Request?.Culture, s.Text),
-                            Selected = (s.Value == value)
+                            Value = subValue,
+                            Text = I18N.Translate(renderContext.Request?.Culture, s.Text?.Invoke(renderContext)),
+                            Selected = (subValue == value)
                         });
                     }
                 }
                 else
                 {
+                    var itemValue = v.Value?.Invoke(renderContext);
+
                     html.Add(new HtmlElementFormOption()
                     {
-                        Value = v.Value,
-                        Text = I18N.Translate(renderContext.Request?.Culture, v.Text),
-                        Selected = (v.Value == value)
+                        Value = itemValue,
+                        Text = I18N.Translate(renderContext.Request?.Culture, itemText),
+                        Selected = (itemValue == value)
                     });
                 }
             }

@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.Internationalization;
+﻿using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -17,12 +18,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the title associated with the swimlane.
         /// </summary>
-        public string Title { get; }
+        public Func<IRenderControlContext, string> Title { get; }
 
         /// <summary>
         /// Gets a value indicating whether the content is currently expanded.
         /// </summary>
-        public bool Expanded { get; }
+        public Func<IRenderControlContext, bool> Expanded { get; }
 
         /// <summary>
         /// Initializes a new instance of class.
@@ -35,8 +36,8 @@ namespace WebExpress.WebUI.WebControl
         public ControlKanbanSwimlane(string id, string title, bool expanded = true)
         {
             Id = id;
-            Title = title;
-            Expanded = expanded;
+            Title = _ => title;
+            Expanded = _ => expanded;
         }
 
         /// <summary>
@@ -52,8 +53,8 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = "wx-swimlane"
             }
-                .AddUserAttribute("data-label", I18N.Translate(renderContext, Title))
-                .AddUserAttribute("data-expanded", !Expanded ? "false" : null);
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, Title?.Invoke(renderContext)))
+                .AddUserAttribute("data-expanded", !(Expanded?.Invoke(renderContext) ?? true) ? "false" : null);
 
             return html;
         }

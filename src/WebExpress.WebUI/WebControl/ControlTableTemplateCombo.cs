@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -26,12 +27,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets a value indicating whether the current template is editable or read-only.
         /// </summary>
-        public bool Editable { get; set; }
+        public Func<IRenderControlContext, bool> Editable { get; set; }
 
         /// <summary>
         /// Allows you to select multiple items.
         /// </summary>
-        public bool MultiSelect { get; set; }
+        public Func<IRenderControlContext, bool> MultiSelect { get; set; }
 
         /// <summary>
         /// Adds one or more items to the combo options.
@@ -74,25 +75,27 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var multiSelect = MultiSelect?.Invoke(renderContext) == true;
+
             var html = new HtmlElement("template")
             {
                 Id = Id
             }
                 .AddUserAttribute("data-type", "combo")
-                .AddUserAttribute("data-multiselection", MultiSelect ? "true" : null)
-                .AddUserAttribute("data-editable", Editable ? "true" : null);
+                .AddUserAttribute("data-multiselection", multiSelect ? "true" : null)
+                .AddUserAttribute("data-editable", Editable?.Invoke(renderContext) == true ? "true" : null);
 
             foreach (var v in _options)
             {
                 if (v.SubItems.Any())
                 {
-                    html.Add(new HtmlElementFormOptgroup() { Label = v.Text });
+                    html.Add(new HtmlElementFormOptgroup() { Label = v.Text?.Invoke(null) });
                     foreach (var s in v.SubItems)
                     {
                         html.Add(new HtmlElementFormOption()
                         {
-                            Value = s.Value,
-                            Text = I18N.Translate(renderContext.Request?.Culture, s.Text)
+                            Value = s.Value?.Invoke(null),
+                            Text = I18N.Translate(renderContext.Request?.Culture, s.Text?.Invoke(null))
                         });
                     }
                 }
@@ -100,8 +103,8 @@ namespace WebExpress.WebUI.WebControl
                 {
                     html.Add(new HtmlElementFormOption()
                     {
-                        Value = v.Value,
-                        Text = I18N.Translate(renderContext.Request?.Culture, v.Text)
+                        Value = v.Value?.Invoke(null),
+                        Text = I18N.Translate(renderContext.Request?.Culture, v.Text?.Invoke(null))
                     });
                 }
             }

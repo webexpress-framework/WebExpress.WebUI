@@ -129,7 +129,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlSidebar(null)
                 .Add(new ControlToolbarItemButton()
                 {
-                    Text = "abc"
+                    Text = _ => "abc"
                 });
 
             // act

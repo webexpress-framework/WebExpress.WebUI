@@ -55,7 +55,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableTemplateCalendar()
             {
-                Color = new PropertyColorDate(color)
+                Color = _ => new PropertyColorDate(color)
             };
 
             // act
@@ -81,7 +81,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableTemplateCalendar()
             {
-                Color = new PropertyColorDate(color)
+                Color = _ => new PropertyColorDate(color)
             };
 
             // act
@@ -106,7 +106,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableTemplateCalendar(null)
             {
-                Placeholder = placeholder
+                Placeholder = _ => placeholder
             };
 
             // act
@@ -130,7 +130,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableTemplateCalendar(null)
             {
-                Format = format
+                Format = _ => format
             };
 
             // act

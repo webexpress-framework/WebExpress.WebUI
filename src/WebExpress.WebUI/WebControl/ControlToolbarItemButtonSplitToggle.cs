@@ -1,3 +1,4 @@
+using System;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
@@ -26,37 +27,37 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the icon.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
         /// Gets or sets the image uri.
         /// </summary>
-        public IUri Image { get; set; }
+        public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
         /// Gets or sets a tooltip text.
         /// </summary>
-        public string Tooltip { get; set; }
+        public Func<IRenderControlContext, string> Tooltip { get; set; }
 
         /// <summary>
         /// Gets or sets the identifier for the splitter.
         /// </summary>
-        public string SpltterId { get; set; }
+        public Func<IRenderControlContext, string> SpltterId { get; set; }
 
         /// <summary>
         /// Gets or sets the link color.
         /// </summary>
-        public PropertyColorText Color { get; set; }
+        public Func<IRenderControlContext, PropertyColorText> Color { get; set; }
 
         /// <summary>
         /// Gets or sets the alignment of the toolbar item.
         /// </summary>
-        public TypeToolbarItemAlignment Alignment { get; set; } = TypeToolbarItemAlignment.Default;
+        public Func<IRenderControlContext, TypeToolbarItemAlignment> Alignment { get; set; } = _ => TypeToolbarItemAlignment.Default;
 
         /// <summary>
         /// Gets the overflow behavior of the toolbar item.
         /// </summary>
-        public TypeToolbarItemOverflow Overflow { get; set; } = TypeToolbarItemOverflow.Default;
+        public Func<IRenderControlContext, TypeToolbarItemOverflow> Overflow { get; set; } = _ => TypeToolbarItemOverflow.Default;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -75,24 +76,30 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var icon = Icon?.Invoke(renderContext);
+            var image = Image?.Invoke(renderContext);
+            var tooltip = Tooltip?.Invoke(renderContext);
+            var splitterId = SpltterId?.Invoke(renderContext);
+            var color = Color?.Invoke(renderContext);
+
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-toolbar-button wx-webui-button-split-toggle"
             }
-                .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-title", I18N.Translate(renderContext, Tooltip))
-                .AddUserAttribute("data-color-css", Color?.ToClass())
-                .AddUserAttribute("data-color-style", Color?.ToStyle())
-                .AddUserAttribute("data-align", Alignment.ToValue())
-                .AddUserAttribute("data-overflow", Overflow.ToValue())
+                .AddUserAttribute("data-icon", (icon as Icon)?.Class)
+                .AddUserAttribute("data-image", image?.ToString() ?? (icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-title", I18N.Translate(renderContext, tooltip))
+                .AddUserAttribute("data-color-css", color?.ToClass())
+                .AddUserAttribute("data-color-style", color?.ToStyle())
+                .AddUserAttribute("data-align", (Alignment?.Invoke(renderContext) ?? TypeToolbarItemAlignment.Default).ToValue())
+                .AddUserAttribute("data-overflow", (Overflow?.Invoke(renderContext) ?? TypeToolbarItemOverflow.Default).ToValue())
                 .AddUserAttribute("data-wx-primary-action", "split")
                 .AddUserAttribute
                 (
                     "data-wx-primary-target",
-                    !string.IsNullOrWhiteSpace(SpltterId)
-                        ? $"#{SpltterId}"
+                    !string.IsNullOrWhiteSpace(splitterId)
+                        ? $"#{splitterId}"
                         : null
                 );
         }

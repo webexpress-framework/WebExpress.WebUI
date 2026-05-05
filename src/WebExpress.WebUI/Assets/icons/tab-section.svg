@@ -5,12 +5,10 @@
 		.st3 {fill:#000000;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.24}
 		.st4 {fill:none;fill-rule:evenodd;font-size:12px;overflow:visible;stroke-linecap:square;stroke-miterlimit:3}</style>
  <g fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
-  <g transform="matrix(.13099 0 0 .13099 -8.065 -8.0628)" stroke-width="9.5425">
-   <path d="m90.233 126.67h98.259"/>
-   <path d="m90.531 144.29h87.534"/>
-   <path d="m89.802 161.9h88.791"/>
-   <path d="m90.444 179.52h97.242"/>
-   <path d="m76.635 201.54-0.04462-119.46 37.365-0.19866 0.0729 23.527 92.826-0.19865 0.0115 96.332z"/>
+  <g stroke-width="1.25">
+   <path d="m3.7937 10.838h11.466"/>
+   <path d="m3.7823 15.453h12.738"/>
+   <path d="m1.9734 18.337-0.00584-15.648 4.8944-0.026022 0.00955 3.0818 12.159-0.026021 0.0015 12.619z"/>
   </g>
   <path d="m7.0987 3.3653 5.0301-0.00857 4.61e-4 2.3766" stroke-width="1.25"/>
   <path d="m12.129 3.3568 5.0301-0.00857 4.61e-4 2.3766" stroke-width="1.25"/>

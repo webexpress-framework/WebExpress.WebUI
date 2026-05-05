@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
@@ -27,32 +28,32 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets a value indicating whether the table is striped.
         /// </summary>
-        public TypeStripedTable Striped { get; set; } = TypeStripedTable.Default;
+        public Func<IRenderControlContext, TypeStripedTable> Striped { get; set; } = _ => TypeStripedTable.Default;
 
         /// <summary>
         /// Gets or sets the color scheme used for the table.
         /// </summary>
-        public TypeColorTable Color { get; set; } = TypeColorTable.Default;
+        public Func<IRenderControlContext, TypeColorTable> Color { get; set; } = _ => TypeColorTable.Default;
 
         /// <summary>
         /// Gets or sets the header color scheme used for the table.
         /// </summary>
-        public TypeColorTable HeaderColor { get; set; } = TypeColorTable.Default;
+        public Func<IRenderControlContext, TypeColorTable> HeaderColor { get; set; } = _ => TypeColorTable.Default;
 
         /// <summary>
         /// Gets or sets a value indicating whether the table has a visible border.
         /// </summary>
-        public TypeBorderTable TableBorder { get; set; } = TypeBorderTable.Default;
+        public Func<IRenderControlContext, TypeBorderTable> TableBorder { get; set; } = _ => TypeBorderTable.Default;
 
         /// <summary>
         /// Gets or sets a value indicating whether the item can be selected.
         /// </summary>
-        public bool Selectable { get; set; }
+        public Func<IRenderControlContext, bool> Selectable { get; set; } = _ => false;
 
         /// <summary>
         /// Gets or sets a value indicating whether columns should be hidden.
         /// </summary>
-        public bool SuppressHeaders { get; set; }
+        public Func<IRenderControlContext, bool> SuppressHeaders { get; set; } = _ => false;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -77,8 +78,8 @@ namespace WebExpress.WebUI.WebControl
         {
             _columns.Add(new ControlTableColumn(null)
             {
-                Title = name,
-                Icon = icon,
+                Title = _ => name,
+                Icon = _ => icon,
             });
 
             return this;
@@ -154,6 +155,13 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var color = Color?.Invoke(renderContext) ?? TypeColorTable.Default;
+            var striped = Striped?.Invoke(renderContext) ?? TypeStripedTable.Default;
+            var tableBorder = TableBorder?.Invoke(renderContext) ?? TypeBorderTable.Default;
+            var selectable = Selectable?.Invoke(renderContext) ?? false;
+            var headerColor = HeaderColor?.Invoke(renderContext) ?? TypeColorTable.Default;
+            var suppressHeaders = SuppressHeaders?.Invoke(renderContext) ?? false;
+
             var classes = Classes.ToList();
 
             var html = new HtmlElementTextContentDiv()
@@ -163,18 +171,18 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(),
                 Role = Role
             }
-                .AddUserAttribute("data-color", Color.ToClass())
-                .AddUserAttribute("data-striped", Striped.ToClass())
-                .AddUserAttribute("data-border", TableBorder.ToClass())
-                .AddUserAttribute("data-selectable", Selectable ? "true" : null)
+                .AddUserAttribute("data-color", color.ToClass())
+                .AddUserAttribute("data-striped", striped.ToClass())
+                .AddUserAttribute("data-border", tableBorder.ToClass())
+                .AddUserAttribute("data-selectable", selectable ? "true" : null)
                 .Add
                 (
                     new HtmlElementTextContentDiv()
                     {
-                        Class = Css.Concatenate("wx-table-columns", HeaderColor.ToClass())
+                        Class = Css.Concatenate("wx-table-columns", headerColor.ToClass())
                     }
-                        .AddUserAttribute("data-color", HeaderColor.ToClass())
-                        .AddUserAttribute("data-suppress-headers", SuppressHeaders ? "true" : null)
+                        .AddUserAttribute("data-color", headerColor.ToClass())
+                        .AddUserAttribute("data-suppress-headers", suppressHeaders ? "true" : null)
                         .Add
                         (
                             _columns.Select

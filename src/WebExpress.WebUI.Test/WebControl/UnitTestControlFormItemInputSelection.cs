@@ -100,7 +100,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputSelection(null)
             {
-                Placeholder = placeholder
+                Placeholder = _ => placeholder
             };
 
             // act
@@ -125,7 +125,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputSelection(null)
             {
-                MultiSelect = multiSelect
+                MultiSelect = _ => multiSelect
             };
 
             // act
@@ -150,7 +150,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputSelection(null)
             {
-                StickySelection = stickySelection
+                StickySelection = _ => stickySelection
             };
 
             // act
@@ -174,7 +174,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var icon = iconType is not null ? Activator.CreateInstance(iconType) as IIcon : null;
-            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Icon = icon })
+            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Icon = _ => icon })
             {
             };
 
@@ -199,7 +199,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Text = label })
+            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Text = _ => label })
             {
             };
 
@@ -223,7 +223,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Selected = selected })
+            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Selected = _ => selected })
             {
             };
 
@@ -247,7 +247,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Disabled = disabled })
+            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Disabled = _ => disabled })
             {
             };
 
@@ -271,7 +271,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var content = controlType is not null ? Activator.CreateInstance(controlType, [""]) as IControl : null;
-            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Content = content })
+            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Content = _ => content })
             {
             };
 
@@ -305,7 +305,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null)
             {
-                Color = color
+                Color = _ => color
             });
 
             // act
@@ -331,7 +331,7 @@ namespace WebExpress.WebUI.Test.WebControl
             };
 
             // act
-            control.Add(new ControlFormItemInputSelectionItem(null) { Text = "label" });
+            control.Add(new ControlFormItemInputSelectionItem(null) { Text = _ => "label" });
             var html = control.Render(context, visualTree);
 
             // validation

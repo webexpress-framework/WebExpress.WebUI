@@ -1,6 +1,7 @@
+using System;
 using WebExpress.WebCore.WebIcon;
-using WebExpress.WebCore.WebUri;
 using WebExpress.WebCore.WebPage;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -13,36 +14,36 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the text of the selection item.
         /// </summary>
-        string Text { get; }
+        Func<IRenderControlContext, string> Text { get; }
 
         /// <summary>
         /// Gets the icon associated with the selection item.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; }
 
         /// <summary>
         /// Gets or sets the image uri.
         /// </summary>
-        IUri Image { get; set; }
+        Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
         /// Gets the color of the label.
         /// </summary>
-        TypeColorSelection Color { get; }
+        Func<IRenderControlContext, TypeColorSelection> Color { get; }
 
         /// <summary>
         /// Gets a value indicating whether the selection item is selected.
         /// </summary>
-        bool Selected { get; }
+        Func<IRenderControlContext, bool> Selected { get; }
 
         /// <summary>
         /// Gets a value indicating whether the selection item is disabled.
         /// </summary>
-        bool Disabled { get; }
+        Func<IRenderControlContext, bool> Disabled { get; }
 
         /// <summary>
         /// Gets the content of the selection item.
         /// </summary>
-        IControl Content { get; }
+        Func<IRenderControlContext, IControl> Content { get; }
     }
 }

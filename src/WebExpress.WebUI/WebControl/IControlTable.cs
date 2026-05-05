@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -21,32 +23,32 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets a value indicating whether the table is striped.
         /// </summary>
-        TypeStripedTable Striped { get; }
+        Func<IRenderControlContext, TypeStripedTable> Striped { get; }
 
         /// <summary>
         /// Gets or sets the color scheme used for the table.
         /// </summary>
-        TypeColorTable Color { get; }
+        Func<IRenderControlContext, TypeColorTable> Color { get; }
 
         /// <summary>
         /// Gets the header color scheme used for the table.
         /// </summary>
-        TypeColorTable HeaderColor { get; }
+        Func<IRenderControlContext, TypeColorTable> HeaderColor { get; }
 
         /// <summary>
         /// Gets a value indicating whether the table has a visible border.
         /// </summary>
-        TypeBorderTable TableBorder { get; }
+        Func<IRenderControlContext, TypeBorderTable> TableBorder { get; }
 
         /// <summary>
         /// Gets a value indicating whether the item can be selected.
         /// </summary>
-        bool Selectable { get; }
+        Func<IRenderControlContext, bool> Selectable { get; }
 
         /// <summary>
         /// Gets or sets a value indicating whether columns should be hidden.
         /// </summary>
-        bool SuppressHeaders { get; }
+        Func<IRenderControlContext, bool> SuppressHeaders { get; }
 
         /// <summary>
         /// Adds a column to the table.

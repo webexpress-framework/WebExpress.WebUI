@@ -52,7 +52,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                Text = text,
+                Text = _ => text,
             };
 
             // act
@@ -83,7 +83,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                BackgroundColor = new PropertyColorBackgroundList(backgroundColor)
+                BackgroundColor = _ => new PropertyColorBackgroundList(backgroundColor)
             };
 
             // act
@@ -107,7 +107,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                Uri = uri is not null ? new UriEndpoint(uri) : null,
+                Uri = _ => uri is not null ? new UriEndpoint(uri) : null,
             };
 
             // act
@@ -132,7 +132,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                Title = title,
+                Title = _ => title,
             };
 
             // act
@@ -159,7 +159,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                Target = target,
+                Target = _ => target,
             };
 
             // act
@@ -185,7 +185,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                Tooltip = tooltip
+                Tooltip = _ => tooltip
             };
 
             // act
@@ -209,7 +209,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -233,7 +233,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink(null)
             {
-                Active = active
+                Active = _ => active
             };
 
             // act
@@ -257,7 +257,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                PrimaryAction = new ActionModal(modal)
+                PrimaryAction = _ => new ActionModal(modal)
             };
 
             // act
@@ -281,7 +281,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                SecondaryAction = new ActionModal(modal)
+                SecondaryAction = _ => new ActionModal(modal)
             };
 
             // act

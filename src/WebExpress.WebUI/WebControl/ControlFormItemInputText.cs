@@ -15,37 +15,37 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Determines whether it is a multi-line text box.
         /// </summary>
-        public TypeEditTextFormat Format { get; set; }
+        public Func<IRenderControlContext, TypeEditTextFormat> Format { get; set; }
 
         /// <summary>
         /// Gets or sets the description.
         /// </summary>
-        public string Description { get; set; }
+        public Func<IRenderControlContext, string> Description { get; set; }
 
         /// <summary>
         /// Gets or sets a placeholder text.
         /// </summary>
-        public string Placeholder { get; set; }
+        public Func<IRenderControlContext, string> Placeholder { get; set; }
 
         /// <summary>
         /// Gets or sets the minimum length.
         /// </summary>
-        public uint? MinLength { get; set; }
+        public Func<IRenderControlContext, uint?> MinLength { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum length.
         /// </summary>
-        public uint? MaxLength { get; set; }
+        public Func<IRenderControlContext, uint?> MaxLength { get; set; }
 
         /// <summary>
         /// Gets or sets a search pattern that checks the content.
         /// </summary>
-        public string Pattern { get; set; }
+        public Func<IRenderControlContext, string> Pattern { get; set; }
 
         /// <summary>
         /// Gets or sets the height of the text field (for Multiline and WYSIWYG).
         /// </summary>
-        public uint? Rows { get; set; } = 8;
+        public Func<IRenderControlContext, uint?> Rows { get; set; } = _ => 8;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -87,6 +87,13 @@ namespace WebExpress.WebUI.WebControl
             var name = Name?.Invoke(renderContext);
             var disabled = Disabled?.Invoke(renderContext) ?? false;
             var required = Required?.Invoke(renderContext) ?? false;
+            var format = Format?.Invoke(renderContext) ?? TypeEditTextFormat.Default;
+            var placeholder = Placeholder?.Invoke(renderContext);
+            var pattern = Pattern?.Invoke(renderContext);
+            var rows = Rows?.Invoke(renderContext);
+            var minLength = MinLength?.Invoke(renderContext);
+            var maxLength = MaxLength?.Invoke(renderContext);
+
             var classes = new List<string>(Classes)
             {
                 "form-control"
@@ -97,7 +104,7 @@ namespace WebExpress.WebUI.WebControl
                 classes.Add("disabled");
             }
 
-            return Format switch
+            return format switch
             {
                 TypeEditTextFormat.Multiline => new HtmlElementFormTextarea()
                 {
@@ -107,8 +114,8 @@ namespace WebExpress.WebUI.WebControl
                     Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
                     Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
                     Role = Role,
-                    Placeholder = I18N.Translate(renderContext.Request?.Culture, Placeholder),
-                    Rows = Rows.ToString()
+                    Placeholder = I18N.Translate(renderContext, placeholder),
+                    Rows = rows?.ToString()
                 },
                 TypeEditTextFormat.Wysiwyg => new HtmlElementTextContentDiv(new HtmlText(value?.Text))
                 {
@@ -122,16 +129,16 @@ namespace WebExpress.WebUI.WebControl
                     Id = Id,
                     Value = value?.Text,
                     Name = name,
-                    MinLength = MinLength?.ToString(),
-                    MaxLength = MaxLength?.ToString(),
+                    MinLength = minLength?.ToString(),
+                    MaxLength = maxLength?.ToString(),
                     Required = required,
-                    Pattern = Pattern,
+                    Pattern = pattern,
                     Type = "text",
                     Disabled = disabled,
                     Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
                     Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
                     Role = Role,
-                    Placeholder = I18N.Translate(renderContext.Request?.Culture, Placeholder)
+                    Placeholder = I18N.Translate(renderContext.Request?.Culture, placeholder)
                 },
             };
         }

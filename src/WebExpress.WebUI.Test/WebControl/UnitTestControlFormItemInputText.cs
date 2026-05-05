@@ -96,7 +96,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputText(null)
             {
-                Format = format
+                Format = _ => format
             };
 
             // act
@@ -120,7 +120,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputText(null)
             {
-                Description = description
+                Description = _ => description
             };
 
             // act
@@ -145,7 +145,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputText(null)
             {
-                Placeholder = placeholder
+                Placeholder = _ => placeholder
             };
 
             // act
@@ -170,7 +170,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputText(null)
             {
-                MinLength = minLength
+                MinLength = _ => minLength
             };
 
             // act
@@ -195,7 +195,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputText(null)
             {
-                MaxLength = maxLength
+                MaxLength = _ => maxLength
             };
 
             // act
@@ -243,7 +243,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputText(null)
             {
-                Pattern = pattern
+                Pattern = _ => pattern
             };
 
             // act
@@ -268,8 +268,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputText(null)
             {
-                Rows = rows,
-                Format = TypeEditTextFormat.Multiline
+                Rows = _ => rows,
+                Format = _ => TypeEditTextFormat.Multiline
             };
 
             // act

@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemLabel()
             {
-                Text = text,
+                Text = _ => text,
             };
 
             // act
@@ -71,7 +71,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemLabel()
             {
-                Tooltip = tooltip,
+                Tooltip = _ => tooltip,
             };
 
             // act
@@ -101,7 +101,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemLabel()
             {
-                Color = new PropertyColorText(color)
+                Color = _ => new PropertyColorText(color)
             };
 
             // act
@@ -124,7 +124,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemLabel()
             {
-                Disabled = disabled,
+                Disabled = _ => disabled,
             };
 
             // act
@@ -148,7 +148,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemLabel()
             {
-                Alignment = alignment,
+                Alignment = _ => alignment,
             };
 
             // act

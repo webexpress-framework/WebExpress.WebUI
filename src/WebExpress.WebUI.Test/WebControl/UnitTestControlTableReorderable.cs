@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableReorderable
             {
-                TableBorder = border
+                TableBorder = _ => border
             };
 
             // act
@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableReorderable
             {
-                Striped = striped
+                Striped = _ => striped
             };
 
             // act
@@ -103,7 +103,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableReorderable
             {
-                Color = color
+                Color = _ => color
             };
 
             // act
@@ -126,7 +126,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableReorderable
             {
-                SuppressHeaders = suppressHeaders
+                SuppressHeaders = _ => suppressHeaders
             };
 
             // act
@@ -149,7 +149,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableReorderable
             {
-                AllowColumnRemove = allowColumnRemove
+                AllowColumnRemove = _ => allowColumnRemove
             };
 
             // act
@@ -172,7 +172,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableReorderable
             {
-                MovableRow = movablerow
+                MovableRow = _ => movablerow
             };
 
             // act
@@ -196,7 +196,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableReorderable
             {
-                PersistKey = persistKey
+                PersistKey = _ => persistKey
             };
 
             // act

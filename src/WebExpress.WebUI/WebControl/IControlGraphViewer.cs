@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -21,12 +23,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the style used to render nodes the type graph.
         /// </summary>
-        TypeStyleGraphNode NodeStyle { get; }
+        Func<IRenderControlContext, TypeStyleGraphNode> NodeStyle { get; }
 
         /// <summary>
         /// Gets the style used to render edges in the type graph.
         /// </summary>
-        TypeStyleGraphEdge EdgeStyle { get; }
+        Func<IRenderControlContext, TypeStyleGraphEdge> EdgeStyle { get; }
 
         /// <summary>
         /// Adds one or more control graph nodes to the viewer.

@@ -100,7 +100,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCascading(null)
             {
-                Placeholder = placeholder
+                Placeholder = _ => placeholder
             };
 
             // act
@@ -124,7 +124,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var icon = iconType is not null ? Activator.CreateInstance(iconType) as IIcon : null;
-            var control = new ControlFormItemInputCascading(null, new ControlFormItemInputCascadingItem(null) { Icon = icon })
+            var control = new ControlFormItemInputCascading(null, new ControlFormItemInputCascadingItem(null) { Icon = _ => icon })
             {
             };
 
@@ -149,7 +149,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputCascading(null, new ControlFormItemInputCascadingItem(null) { Text = label })
+            var control = new ControlFormItemInputCascading(null, new ControlFormItemInputCascadingItem(null) { Text = _ => label })
             {
             };
 
@@ -173,7 +173,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputCascading(null, new ControlFormItemInputCascadingItem(null) { Disabled = disabled })
+            var control = new ControlFormItemInputCascading(null, new ControlFormItemInputCascadingItem(null) { Disabled = _ => disabled })
             {
             };
 
@@ -230,7 +230,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputCascading(null, new ControlFormItemInputCascadingItem(null) { LabelColor = color })
+            var control = new ControlFormItemInputCascading(null, new ControlFormItemInputCascadingItem(null) { LabelColor = _ => color })
             {
             };
 
@@ -257,7 +257,7 @@ namespace WebExpress.WebUI.Test.WebControl
             };
 
             // act
-            control.Add(new ControlFormItemInputCascadingItem(null) { Text = "label" });
+            control.Add(new ControlFormItemInputCascadingItem(null) { Text = _ => "label" });
             var html = control.Render(context, visualTree);
 
             // validation

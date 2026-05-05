@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+﻿using System;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -16,7 +17,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets a value indicating whether the current template is editable or read-only.
         /// </summary>
-        public bool Editable { get; set; }
+        public Func<IRenderControlContext, bool> Editable { get; set; } = _ => false;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -35,12 +36,14 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var editable = Editable?.Invoke(renderContext) ?? false;
+
             var html = new HtmlElement("template")
             {
                 Id = Id
             }
                 .AddUserAttribute("data-type", "editor")
-                .AddUserAttribute("data-editable", Editable ? "true" : null);
+                .AddUserAttribute("data-editable", editable ? "true" : null);
 
             return html;
         }

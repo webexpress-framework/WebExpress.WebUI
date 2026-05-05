@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebPage;
+﻿using System;
+using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -11,11 +12,11 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the title associated with the column.
         /// </summary>
-        string Title { get; }
+        Func<IRenderControlContext, string> Title { get; }
 
         /// <summary>
         /// Gets the size descriptor associated with the column.
         /// </summary>
-        string Size { get; }
+        Func<IRenderControlContext, string> Size { get; }
     }
 }

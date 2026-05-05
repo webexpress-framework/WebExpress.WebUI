@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -16,27 +17,27 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the target uri.
         /// </summary>
-        public IUri Uri { get; set; }
+        public Func<IRenderControlContext, IUri> Uri { get; set; }
 
         /// <summary>
         /// Gets or sets the target.
         /// </summary>
-        public TypeTarget Target { get; set; }
+        public Func<IRenderControlContext, TypeTarget> Target { get; set; }
 
         /// <summary>
         /// Gets or sets the tooltip.
         /// </summary>
-        public string Title { get; set; }
+        public Func<IRenderControlContext, string> Title { get; set; }
 
         /// <summary>
         /// Gets or sets a tooltip text.
         /// </summary>
-        public string Tooltip { get; set; }
+        public Func<IRenderControlContext, string> Tooltip { get; set; }
 
         /// <summary>
         /// Gets or sets the parameters that apply to the link.
         /// </summary>
-        public List<Parameter> Params { get; set; }
+        public Func<IRenderControlContext, List<Parameter>> Params { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -51,14 +52,14 @@ namespace WebExpress.WebUI.WebControl
         /// Returns all local and temporary parameters.
         /// </summary>
         /// <returns>The parameters.</returns>
-        public string GetParams()
+        public string GetParams(IRenderControlContext renderContext)
         {
             var dict = new Dictionary<string, Parameter>();
 
             // copying the parameters of the link
             if (Params is not null)
             {
-                foreach (var v in Params)
+                foreach (var v in Params.Invoke(renderContext) ?? [])
                 {
                     if (v.Scope == ParameterScope.Parameter)
                     {
@@ -85,17 +86,24 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var title = Title?.Invoke(renderContext);
+            var tooltip = Tooltip?.Invoke(renderContext);
+            var uri = Uri?.Invoke(renderContext);
+            var target = Target?.Invoke(renderContext) ?? TypeTarget.None;
+            var primaryAction = PrimaryAction?.Invoke(renderContext);
+            var secondaryAction = SecondaryAction?.Invoke(renderContext);
+
             var html = base.Render(renderContext, visualTree);
             html.AddClass("wx-list-item-link");
             html.RemoveClass("wx-list-item");
 
-            html.AddUserAttribute("data-title", I18N.Translate(renderContext, Title));
-            html.AddUserAttribute("data-tooltip", I18N.Translate(renderContext, Tooltip));
-            html.AddUserAttribute("data-uri", Uri?.ToString());
-            html.AddUserAttribute("data-target", Target.ToValue());
+            html.AddUserAttribute("data-title", I18N.Translate(renderContext, title));
+            html.AddUserAttribute("data-tooltip", I18N.Translate(renderContext, tooltip));
+            html.AddUserAttribute("data-uri", uri?.ToString());
+            html.AddUserAttribute("data-target", target.ToValue());
 
-            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
-            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
+            primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            secondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

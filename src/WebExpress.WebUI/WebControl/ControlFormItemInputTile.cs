@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -20,13 +21,13 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets a value indicating whether multiple items can be selected simultaneously.
         /// </summary>
-        public bool MultiSelect { get; set; }
+        public Func<IRenderControlContext, bool> MultiSelect { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether a large icon is displayed 
         /// for the item.
         /// </summary>
-        public bool LargeIcon { get; set; }
+        public Func<IRenderControlContext, bool> LargeIcon { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -108,6 +109,7 @@ namespace WebExpress.WebUI.WebControl
             );
             var name = Name?.Invoke(renderContext);
             var disabled = Disabled?.Invoke(renderContext) ?? false;
+            var largeIcon = LargeIcon?.Invoke(renderContext) ?? false;
 
             if (disabled)
             {
@@ -123,8 +125,8 @@ namespace WebExpress.WebUI.WebControl
             }
                 .AddUserAttribute("name", name)
                 .AddUserAttribute("data-value", value)
-                .AddUserAttribute("data-multiselect", MultiSelect ? "true" : null)
-                .AddUserAttribute("data-large-icon", LargeIcon ? "true" : null)
+                .AddUserAttribute("data-multiselect", MultiSelect?.Invoke(renderContext) == true ? "true" : null)
+                .AddUserAttribute("data-large-icon", largeIcon ? "true" : null)
                 .Add
                 (
                     _items.Select

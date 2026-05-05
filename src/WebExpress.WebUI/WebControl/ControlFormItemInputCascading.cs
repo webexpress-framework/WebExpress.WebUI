@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the label of the selected options.
         /// </summary>
-        public string Placeholder { get; set; }
+        public Func<IRenderControlContext, string> Placeholder { get; set; }
 
         /// <summary>
         /// Gets or sets the OnChange attribute.
@@ -104,7 +104,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles()
             }
                 .AddUserAttribute("name", name)
-                .AddUserAttribute("placeholder", I18N.Translate(Placeholder))
+                .AddUserAttribute("placeholder", I18N.Translate(Placeholder?.Invoke(renderContext)))
                 .AddUserAttribute("data-value", string.Join(";", value ?? []))
                 .Add(_options.Select(x => x.Render(renderContext, visualTree)));
 

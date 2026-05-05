@@ -23,37 +23,37 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the icon associated with this file.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
         /// Gets or sets the image uri.
         /// </summary>
-        public IUri Image { get; set; }
+        public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the file, including its extension.
         /// </summary>
-        public string Name { get; set; }
+        public Func<IRenderControlContext, string> Name { get; set; }
 
         /// <summary>
         /// Gets or sets the uri of the file.
         /// </summary>
-        public IUri Uri { get; set; }
+        public Func<IRenderControlContext, IUri> Uri { get; set; }
 
         /// <summary>
         /// Gets or sets the size of the file in bytes.
         /// </summary>
-        public long Size { get; set; } = long.MinValue;
+        public Func<IRenderControlContext, long> Size { get; set; } = _ => long.MinValue;
 
         /// <summary>
         /// Gets or sets the date of the file.
         /// </summary>
-        public DateTime Date { get; set; } = DateTime.MinValue;
+        public Func<IRenderControlContext, DateTime> Date { get; set; } = _ => DateTime.MinValue;
 
         /// <summary>
         /// Gets or sets the description associated with the file.
         /// </summary>
-        public string Description { get; set; }
+        public Func<IRenderControlContext, string> Description { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -75,18 +75,18 @@ namespace WebExpress.WebUI.WebControl
             var size = string.Format(new FileSizeFormatProvider()
             {
                 Culture = renderContext?.Request?.Culture
-            }, "{0:fs}", Size >= 0 ? Size : 0);
+            }, "{0:fs}", (Size?.Invoke(renderContext) ?? long.MinValue) >= 0 ? (Size?.Invoke(renderContext) ?? long.MinValue) : 0);
 
-            return new HtmlElementTextContentDiv(new HtmlText(Name))
+            return new HtmlElementTextContentDiv(new HtmlText(Name?.Invoke(renderContext)))
             {
                 Class = "wx-webui-file",
             }
-                .AddUserAttribute("data-file-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-file-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-file-uri", Uri?.ToString())
-                .AddUserAttribute("data-file-size", Size >= 0 ? size : null)
-                .AddUserAttribute("data-file-date", Date != DateTime.MinValue ? Date.ToShortDateString() : null)
-                .AddUserAttribute("data-description", !string.IsNullOrWhiteSpace(Description) ? Description : null);
+                .AddUserAttribute("data-file-icon", (Icon?.Invoke(renderContext) as Icon)?.Class)
+                .AddUserAttribute("data-file-image", Image?.Invoke(renderContext)?.ToString() ?? (Icon?.Invoke(renderContext) as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-file-uri", Uri?.Invoke(renderContext)?.ToString())
+                .AddUserAttribute("data-file-size", (Size?.Invoke(renderContext) ?? long.MinValue) >= 0 ? size : null)
+                .AddUserAttribute("data-file-date", (Date?.Invoke(renderContext) ?? DateTime.MinValue) != DateTime.MinValue ? (Date?.Invoke(renderContext) ?? DateTime.MinValue).ToShortDateString() : null)
+                .AddUserAttribute("data-description", !string.IsNullOrWhiteSpace(Description?.Invoke(renderContext)) ? Description?.Invoke(renderContext) : null);
         }
     }
 }

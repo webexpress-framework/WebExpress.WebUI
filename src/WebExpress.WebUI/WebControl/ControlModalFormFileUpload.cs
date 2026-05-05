@@ -52,7 +52,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the submit button icon.
         /// </summary>
-        public IIcon SubmitButtonIcon
+        public Func<IRenderControlContext, IIcon> SubmitButtonIcon
         {
             get { return SubmitButton?.Icon; }
             set { SubmitButton.Icon = value; }
@@ -61,7 +61,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the submit button color.
         /// </summary>
-        public PropertyColorButton SubmitButtonColor
+        public Func<IRenderControlContext, PropertyColorButton> SubmitButtonColor
         {
             get { return SubmitButton?.Color; }
             set { SubmitButton.Color = value; }
@@ -70,7 +70,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the submit button label.
         /// </summary>
-        public string SubmitButtonLabel
+        public Func<IRenderControlContext, string> SubmitButtonLabel
         {
             get { return SubmitButton?.Text; }
             set { SubmitButton.Text = value; }
@@ -116,16 +116,29 @@ namespace WebExpress.WebUI.WebControl
 
             Initialize(x =>
             {
-                Header = I18N.Translate(x.Context, "webexpress.webui:fileupload.header");
-                SubmitButtonLabel = I18N.Translate(x.Context, "webexpress.webui:fileupload.label");
+                Header = _ => I18N.Translate(x.Context, "webexpress.webui:fileupload.header");
+                SubmitButtonLabel = _ => I18N.Translate(x.Context, "webexpress.webui:fileupload.label");
             });
 
 
-            SubmitButtonIcon = new IconUpload();
-            SubmitButtonColor = new PropertyColorButton(TypeColorButton.Primary);
+            SubmitButtonIcon = _ => new IconUpload();
+            SubmitButtonColor = _ => new PropertyColorButton(TypeColorButton.Primary);
 
             //File.ValidateItem += OnValidation;
             ProcessForm += OnProcessForm;
+        }
+
+        event Action<ControlFormEventFormUpload> IControlModalFormFileUpload.UploadForm
+        {
+            add
+            {
+                throw new NotImplementedException();
+            }
+
+            remove
+            {
+                throw new NotImplementedException();
+            }
         }
 
         /// <summary>

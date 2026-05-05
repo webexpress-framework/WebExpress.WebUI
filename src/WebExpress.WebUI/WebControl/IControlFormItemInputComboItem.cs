@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -15,16 +17,16 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the text.
         /// </summary>
-        string Text { get; }
+        Func<IRenderControlContext, string> Text { get; }
 
         /// <summary>
         /// Gets a value.
         /// </summary>
-        string Value { get; }
+        Func<IRenderControlContext, string> Value { get; }
 
         /// <summary>
         /// Gets a tag value.
         /// </summary>
-        object Tag { get; }
+        Func<IRenderControlContext, object> Tag { get; }
     }
 }

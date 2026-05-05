@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
@@ -29,15 +30,15 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the highlight color for the active tab (used in Underline layout).
         /// </summary>
-        public PropertyColorText HighlightColor { get; set; } = new PropertyColorText();
+        public Func<IRenderControlContext, PropertyColorText> HighlightColor { get; set; } = _ => new PropertyColorText();
 
         /// <summary>
         /// Gets or sets the layout.
         /// </summary>
-        public TypeLayoutTab Layout
+        public Func<IRenderControlContext, TypeLayoutTab> Layout
         {
-            get => (TypeLayoutTab)GetProperty(TypeLayoutTab.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeLayoutTab>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
@@ -178,22 +179,22 @@ namespace WebExpress.WebUI.WebControl
             html.Add(viewPrimary.Select(x => x.Render(renderContext, visualTree)));
             html.Add(viewSecondary.Select(x => x.Render(renderContext, visualTree)));
 
-            html.AddUserAttribute("data-layout", Layout.ToString().ToLower());
+            html.AddUserAttribute("data-layout", (Layout?.Invoke(renderContext) ?? TypeLayoutTab.Default).ToString().ToLower());
 
-            if (Layout == TypeLayoutTab.Underline && HighlightColor != null)
+            if ((Layout?.Invoke(renderContext) ?? TypeLayoutTab.Default) == TypeLayoutTab.Underline && HighlightColor?.Invoke(renderContext) != null)
             {
-                if ((TypeColor)HighlightColor.SystemColor == TypeColor.User && !string.IsNullOrWhiteSpace(HighlightColor.UserColor))
+                if ((TypeColor)HighlightColor?.Invoke(renderContext).SystemColor == TypeColor.User && !string.IsNullOrWhiteSpace(HighlightColor?.Invoke(renderContext).UserColor))
                 {
-                    html.AddStyle($"--bs-nav-underline-border-color: {HighlightColor.UserColor};", $"--bs-nav-underline-link-active-color: {HighlightColor.UserColor};");
+                    html.AddStyle($"--bs-nav-underline-border-color: {HighlightColor?.Invoke(renderContext).UserColor};", $"--bs-nav-underline-link-active-color: {HighlightColor?.Invoke(renderContext).UserColor};");
                 }
-                else if ((TypeColor)HighlightColor.SystemColor == TypeColor.Highlight)
+                else if ((TypeColor)HighlightColor?.Invoke(renderContext).SystemColor == TypeColor.Highlight)
                 {
                     var colorVar = "var(--wx-highlight)";
                     html.AddStyle($"--bs-nav-underline-border-color: {colorVar};", $"--bs-nav-underline-link-active-color: {colorVar};");
                 }
-                else if ((TypeColor)HighlightColor.SystemColor != TypeColor.Default)
+                else if ((TypeColor)HighlightColor?.Invoke(renderContext).SystemColor != TypeColor.Default)
                 {
-                    var colorVar = $"var(--bs-{((TypeColor)HighlightColor.SystemColor).ToClass()})";
+                    var colorVar = $"var(--bs-{((TypeColor)HighlightColor?.Invoke(renderContext).SystemColor).ToClass()})";
                     html.AddStyle($"--bs-nav-underline-border-color: {colorVar};", $"--bs-nav-underline-link-active-color: {colorVar};");
                 }
             }

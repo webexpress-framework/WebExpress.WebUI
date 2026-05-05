@@ -54,7 +54,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableRow()
             {
-                Color = color
+                Color = _ => color
             };
 
             // act
@@ -78,7 +78,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableRow(null)
             {
-                ExpandState = state
+                ExpandState = _ => state
             };
 
             // act
@@ -101,7 +101,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableRow(null)
             {
-                PrimaryAction = new ActionModal(modal)
+                PrimaryAction = _ => new ActionModal(modal)
             };
 
             // act
@@ -125,7 +125,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableRow(null)
             {
-                SecondaryAction = new ActionModal(modal)
+                SecondaryAction = _ => new ActionModal(modal)
             };
 
             // act
@@ -148,7 +148,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlTableRow();
 
             // act
-            control.Add(new ControlTableCell() { Text = "abc" });
+            control.Add(new ControlTableCell() { Text = _ => "abc" });
 
             var html = control.Render(context, visualTree);
 

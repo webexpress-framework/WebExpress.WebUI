@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -21,7 +22,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the header.
         /// </summary>
-        public string Header { get; set; }
+        public Func<IRenderControlContext, string> Header { get; set; }
 
         /// <summary>  
         /// Gets or sets the size of the modal dialog.  
@@ -136,7 +137,10 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(Header)))
+            var title = Header?.Invoke(renderContext);
+            var size = Size;
+
+            var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(title)))
             {
                 Class = "wx-modal-header"
             };
@@ -156,8 +160,8 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-modal", GetClasses())
             }
-            .AddUserAttribute("data-size", Size.ToClass())
-            .AddUserAttribute("data-close-label", I18N.Translate(CloseLabel));
+                .AddUserAttribute("data-size", size.ToClass())
+                .AddUserAttribute("data-close-label", I18N.Translate(CloseLabel));
 
             return html;
         }

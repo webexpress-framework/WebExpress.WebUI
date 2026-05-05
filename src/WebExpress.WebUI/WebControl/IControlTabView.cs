@@ -1,7 +1,8 @@
+using System;
 using System.Collections.Generic;
 using WebExpress.WebCore.WebIcon;
-using WebExpress.WebCore.WebUri;
 using WebExpress.WebCore.WebPage;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -14,17 +15,17 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the title text.
         /// </summary>
-        string Title { get; }
+        Func<IRenderControlContext, string> Title { get; }
 
         /// <summary>
         /// Gets the icon associated with this view.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; }
 
         /// <summary>
         /// Gets or sets the image uri.
         /// </summary>
-        IUri Image { get; set; }
+        Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
         /// Adds one or more items to the view.

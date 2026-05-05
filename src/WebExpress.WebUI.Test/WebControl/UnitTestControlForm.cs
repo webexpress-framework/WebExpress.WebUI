@@ -249,7 +249,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlForm();
-            control.AddPrimaryButton(new ControlFormItemButtonSubmit("") { Text = "sendbutton" });
+            control.AddPrimaryButton(new ControlFormItemButtonSubmit("") { Text = _ => "sendbutton" });
 
             // act
             var html = control.Render(context, visualTree);

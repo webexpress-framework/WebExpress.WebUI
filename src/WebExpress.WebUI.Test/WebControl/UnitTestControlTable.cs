@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTable
             {
-                TableBorder = border
+                TableBorder = _ => border
             };
 
             // act
@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTable
             {
-                Striped = striped
+                Striped = _ => striped
             };
 
             // act
@@ -106,7 +106,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTable
             {
-                Color = color
+                Color = _ => color
             };
 
             // act
@@ -130,7 +130,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTable
             {
-                Selectable = selectable
+                Selectable = _ => selectable
             };
 
             // act
@@ -154,7 +154,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTable
             {
-                SuppressHeaders = suppressHeaders
+                SuppressHeaders = _ => suppressHeaders
             };
 
             // act

@@ -1278,6 +1278,11 @@
     mask-image: url("../icons/tweaks.svg");
 }
 
+.wx-icon-light-ufo {
+    -webkit-mask-image: url("../icons/ufo.svg");
+    mask-image: url("../icons/ufo.svg");
+}
+
 .wx-icon-light-tile {
     -webkit-mask-image: url("../icons/tile.svg");
     mask-image: url("../icons/tile.svg");

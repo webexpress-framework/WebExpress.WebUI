@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
@@ -24,37 +25,37 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the title associated with the widget.
         /// </summary>
-        public string Title { get; set; }
+        public Func<IRenderControlContext, string> Title { get; set; }
 
         /// <summary>
         /// Gets or sets the color associated with the widget.
         /// </summary>
-        public string Color { get; set; }
+        public Func<IRenderControlContext, string> Color { get; set; }
 
         /// <summary>
         /// Gets or sets the icon associated with this widget.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
         /// Gets or sets the image uri.
         /// </summary>
-        public IUri Image { get; set; }
+        public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
         /// Gets or sets the column index associated with this widget.
         /// </summary>
-        public uint Column { get; set; } = uint.MaxValue;
+        public Func<IRenderControlContext, uint> Column { get; set; } = _ => uint.MaxValue;
 
         /// <summary>
         /// Gets or sets a value indicating whether the widget can be moved.
         /// </summary>
-        public bool Movable { get; set; }
+        public Func<IRenderControlContext, bool> Movable { get; set; } = _ => false;
 
         /// <summary>
         /// Gets or sets a value indicating whether the widget can be closed.
         /// </summary>
-        public bool Closeable { get; set; }
+        public Func<IRenderControlContext, bool> Closeable { get; set; } = _ => false;
 
         /// <summary>
         /// Gets or sets the collection of controls that make up the content of the container.
@@ -114,18 +115,26 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var title = Title?.Invoke(renderContext);
+            var color = Color?.Invoke(renderContext);
+            var icon = Icon?.Invoke(renderContext);
+            var image = Image?.Invoke(renderContext);
+            var column = Column?.Invoke(renderContext) ?? uint.MaxValue;
+            var movable = Movable?.Invoke(renderContext) ?? false;
+            var closeable = Closeable?.Invoke(renderContext) ?? false;
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-dashboard-widget"
             }
-                .AddUserAttribute("data-title", I18N.Translate(renderContext, Title))
-                .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-color", Color)
-                .AddUserAttribute("data-column", Column < uint.MaxValue ? Column.ToString() : null)
-                .AddUserAttribute("data-movable", Movable ? "true" : null)
-                .AddUserAttribute("data-closeable", Closeable ? "true" : null)
+                .AddUserAttribute("data-title", I18N.Translate(renderContext, title))
+                .AddUserAttribute("data-icon", (icon as Icon)?.Class)
+                .AddUserAttribute("data-image", image?.ToString() ?? (icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-color", color)
+                .AddUserAttribute("data-column", column < uint.MaxValue ? column.ToString() : null)
+                .AddUserAttribute("data-movable", movable ? "true" : null)
+                .AddUserAttribute("data-closeable", closeable ? "true" : null)
                 .Add(_content.Select(x => x.Render(renderContext, visualTree)));
 
             return html;

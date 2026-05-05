@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
@@ -12,7 +13,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the color scheme used for the row.
         /// </summary>
-        TypeColorTable Color { get; }
+        Func<IRenderControlContext, TypeColorTable> Color { get; }
 
         /// <summary>
         /// Gets the cells.
@@ -33,13 +34,13 @@ namespace WebExpress.WebUI.WebControl
         /// Gets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
-        IAction PrimaryAction { get; }
+        Func<IRenderControlContext, IAction> PrimaryAction { get; }
 
         /// <summary>
         /// Gets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
-        IAction SecondaryAction { get; }
+        Func<IRenderControlContext, IAction> SecondaryAction { get; }
 
         /// <summary>
         /// Adds the specified cells to the row.

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -27,30 +28,30 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the label of the selection item.
         /// </summary>
         [JsonPropertyName("label")]
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
         /// Gets or sets the icon associated with the selection item.
         /// </summary>
         [JsonPropertyName("icon")]
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
         /// Gets or sets the image uri.
         /// </summary>
-        public IUri Image { get; set; }
+        public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
         /// Gets or sets the color of the label.
         /// </summary>
         [JsonPropertyName("labelcolor")]
-        public TypeColorSelection LabelColor { get; set; }
+        public Func<IRenderControlContext, TypeColorSelection> LabelColor { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the selection item is disabled.
         /// </summary>
         [JsonPropertyName("disabled")]
-        public bool Disabled { get; set; }
+        public Func<IRenderControlContext, bool> Disabled { get; set; }
 
         /// <summary>
         /// Gets or sets the content of the selection item.
@@ -117,21 +118,27 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var text = Text?.Invoke(renderContext);
+            var icon = Icon?.Invoke(renderContext);
+            var image = Image?.Invoke(renderContext);
+            var labelColor = LabelColor?.Invoke(renderContext) ?? TypeColorSelection.Default;
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-cascading-item"),
             }
-                .AddUserAttribute("data-label", I18N.Translate(Text))
-                .AddUserAttribute("data-icon", Icon is Icon ? (Icon as Icon).Class : null)
-                .AddUserAttribute("data-image", Image?.ToString() ?? (Icon is ImageIcon imageIcon ? imageIcon.Uri?.ToString() : null))
-                .AddUserAttribute("data-label-color", LabelColor != TypeColorSelection.Default
-                    ? LabelColor.ToClass()
+                .AddUserAttribute("data-label", I18N.Translate(text))
+                .AddUserAttribute("data-icon", icon is Icon ? (icon as Icon).Class : null)
+                .AddUserAttribute("data-image", image?.ToString() ?? (icon is ImageIcon imageIcon ? imageIcon.Uri?.ToString() : null))
+                .AddUserAttribute("data-label-color", labelColor != TypeColorSelection.Default
+                    ? labelColor.ToClass()
                     : null)
                 .Add(Children.Select(x => x.Render(renderContext, visualTree)))
                 .Add(Content?.Render(renderContext, visualTree));
 
-            if (Disabled)
+            if (disabled)
             {
                 html.AddUserAttribute("disabled");
             }

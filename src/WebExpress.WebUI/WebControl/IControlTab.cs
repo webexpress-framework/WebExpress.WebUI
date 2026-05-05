@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -15,12 +17,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the highlight color for the active tab (used in Underline layout).
         /// </summary>
-        PropertyColorText HighlightColor { get; set; }
+        Func<IRenderControlContext, PropertyColorText> HighlightColor { get; set; }
 
         /// <summary>
         /// Gets or sets the layout.
         /// </summary>
-        TypeLayoutTab Layout { get; set; }
+        Func<IRenderControlContext, TypeLayoutTab> Layout { get; set; }
 
         /// <summary>
         /// Adds one or more pages to the tab.

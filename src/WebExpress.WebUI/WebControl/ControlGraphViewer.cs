@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -27,12 +28,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the style used to render nodes the type graph.
         /// </summary>
-        public TypeStyleGraphNode NodeStyle { get; set; } = TypeStyleGraphNode.Default;
+        public Func<IRenderControlContext, TypeStyleGraphNode> NodeStyle { get; set; } = _ => TypeStyleGraphNode.Default;
 
         /// <summary>
         /// Gets or sets the style used to render edges in the type graph.
         /// </summary>
-        public TypeStyleGraphEdge EdgeStyle { get; set; } = TypeStyleGraphEdge.Default;
+        public Func<IRenderControlContext, TypeStyleGraphEdge> EdgeStyle { get; set; } = _ => TypeStyleGraphEdge.Default;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -92,8 +93,8 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(),
                 Role = "region"
             }
-                .AddUserAttribute("data-node-style", NodeStyle != TypeStyleGraphNode.Default ? NodeStyle.ToValue() : null)
-                .AddUserAttribute("data-edge-style", EdgeStyle != TypeStyleGraphEdge.Default ? EdgeStyle.ToValue() : null)
+                .AddUserAttribute("data-node-style", (NodeStyle?.Invoke(renderContext) ?? TypeStyleGraphNode.Default) != TypeStyleGraphNode.Default ? (NodeStyle?.Invoke(renderContext) ?? TypeStyleGraphNode.Default).ToValue() : null)
+                .AddUserAttribute("data-edge-style", (EdgeStyle?.Invoke(renderContext) ?? TypeStyleGraphEdge.Default) != TypeStyleGraphEdge.Default ? (EdgeStyle?.Invoke(renderContext) ?? TypeStyleGraphEdge.Default).ToValue() : null)
                 .Add(_nodes.Select(x => x.Render(renderContext, visualTree)))
                 .Add(_edges.Select(x => x.Render(renderContext, visualTree)));
         }

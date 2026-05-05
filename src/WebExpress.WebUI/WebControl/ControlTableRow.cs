@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -22,12 +23,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the color scheme used for the row.
         /// </summary>
-        public TypeColorTable Color { get; set; } = TypeColorTable.Default;
+        public Func<IRenderControlContext, TypeColorTable> Color { get; set; } = _ => TypeColorTable.Default;
 
         /// <summary>
         /// Gets or sets the expand state of the type, indicating whether it is expanded or collapsed.
         /// </summary>
-        public TypeExpandState ExpandState { get; set; } = TypeExpandState.None;
+        public Func<IRenderControlContext, TypeExpandState> ExpandState { get; set; } = _ => TypeExpandState.None;
 
         /// <summary>
         /// Returns the cells.
@@ -48,13 +49,13 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
-        public IAction PrimaryAction { get; set; }
+        public Func<IRenderControlContext, IAction> PrimaryAction { get; set; }
 
         /// <summary>
         /// Gets or sets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
-        public IAction SecondaryAction { get; set; }
+        public Func<IRenderControlContext, IAction> SecondaryAction { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -206,13 +207,15 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var expandState = ExpandState?.Invoke(renderContext) ?? TypeExpandState.None;
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-table-row"
             }
-                .AddUserAttribute("data-color", Color.ToClass())
-                .AddUserAttribute("data-collapsed", ExpandState == TypeExpandState.Collapsed ? "true" : null)
+                .AddUserAttribute("data-color", (Color?.Invoke(renderContext) ?? TypeColorTable.Default).ToClass())
+                .AddUserAttribute("data-collapsed", expandState == TypeExpandState.Collapsed ? "true" : null)
                 .Add
                 (
                     Cells.Select
@@ -243,8 +246,8 @@ namespace WebExpress.WebUI.WebControl
                     )
                 );
 
-            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
-            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
+            PrimaryAction?.Invoke(renderContext)?.ApplyUserAttributes(html, TypeAction.Primary);
+            SecondaryAction?.Invoke(renderContext)?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

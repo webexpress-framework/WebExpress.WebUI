@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebUri;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -17,57 +19,57 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the color. 
         /// </summary>
-        PropertyColorText Color { get; }
+        Func<IRenderControlContext, PropertyColorText> Color { get; }
 
         /// <summary>
         /// Returnsthe size.
         /// </summary>
-        TypeSizeButton Size { get; }
+        Func<IRenderControlContext, TypeSizeButton> Size { get; }
 
         /// <summary>
         /// Gets the outline property.
         /// </summary>
-        bool Outline { get; }
+        Func<IRenderControlContext, bool> Outline { get; }
 
         /// <summary>
         /// Gets whether the button should take up the full width.
         /// </summary>
-        TypeBlockButton Block { get; }
+        Func<IRenderControlContext, TypeBlockButton> Block { get; }
 
         /// <summary>
         /// Gets an indicator that indicates that a menu is present.
         /// </summary>
-        TypeToggleDropdown Toggle { get; }
+        Func<IRenderControlContext, TypeToggleDropdown> Toggle { get; }
 
         /// <summary>
         /// Gets the label.
         /// </summary>
-        string Text { get; }
+        Func<IRenderControlContext, string> Text { get; }
 
         /// <summary>
         /// Gets the tooltip.
         /// </summary>
-        string Tooltip { get; }
+        Func<IRenderControlContext, string> Tooltip { get; }
 
         /// <summary>
         /// Gets the icon.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; }
 
         /// <summary>
         /// Gets or sets the image uri.
         /// </summary>
-        IUri Image { get; set; }
+        Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
         /// Gets the activation status of the button.
         /// </summary>
-        TypeActive Active { get; }
+        Func<IRenderControlContext, TypeActive> Active { get; }
 
         /// <summary>
         /// Gets the orientation of the menu.
         /// </summary>
-        TypeAlignmentDropdownMenu AlignmentMenu { get; }
+        Func<IRenderControlContext, TypeAlignmentDropdownMenu> AlignmentMenu { get; }
 
         /// <summary>
         /// Adds one or more items to the dropdown.

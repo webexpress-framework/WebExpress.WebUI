@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.Internationalization;
+﻿using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -18,12 +19,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the title associated with the column.
         /// </summary>
-        public string Title { get; }
+        public Func<IRenderControlContext, string> Title { get; }
 
         /// <summary>
         /// Gets the size descriptor associated with the column.
         /// </summary>
-        public string Size { get; }
+        public Func<IRenderControlContext, string> Size { get; }
 
         /// <summary>
         /// Initializes a new instance of class.
@@ -34,8 +35,8 @@ namespace WebExpress.WebUI.WebControl
         public ControlKanbanColumn(string id, string title, string size)
         {
             Id = id;
-            Title = title;
-            Size = size;
+            Title = _ => title;
+            Size = _ => size;
         }
 
         /// <summary>
@@ -51,8 +52,8 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = "wx-column"
             }
-                .AddUserAttribute("data-label", I18N.Translate(renderContext, Title))
-                .AddUserAttribute("data-size", Size);
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, Title?.Invoke(renderContext)))
+                .AddUserAttribute("data-size", Size?.Invoke(renderContext));
 
             return html;
         }

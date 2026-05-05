@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -20,18 +21,18 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets a value indicating whether cards in the tile can be moved.
         /// </summary>
-        public bool Movable { get; set; }
+        public Func<IRenderControlContext, bool> Movable { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether items can be removed.
         /// </summary>
-        public bool AllowRemove { get; set; }
+        public Func<IRenderControlContext, bool> AllowRemove { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether a large icon is displayed 
         /// for the item.
         /// </summary>
-        public bool LargeIcon { get; set; }
+        public Func<IRenderControlContext, bool> LargeIcon { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -89,6 +90,9 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var classes = Classes.ToList();
+            var movable = Movable?.Invoke(renderContext) ?? false;
+            var allowRemove = AllowRemove?.Invoke(renderContext) ?? false;
+            var largeIcon = LargeIcon?.Invoke(renderContext) ?? false;
 
             var html = new HtmlElementTextContentDiv()
             {
@@ -97,9 +101,9 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(),
                 Role = Role
             }
-                .AddUserAttribute("data-movable", Movable ? "true" : null)
-                .AddUserAttribute("data-allow-remove", AllowRemove ? "true" : null)
-                .AddUserAttribute("data-large-icon", LargeIcon ? "true" : null)
+                .AddUserAttribute("data-movable", movable ? "true" : null)
+                .AddUserAttribute("data-allow-remove", allowRemove ? "true" : null)
+                .AddUserAttribute("data-large-icon", largeIcon ? "true" : null)
                 .Add
                 (
                     _items.Select

@@ -77,7 +77,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlToolbar(null, new ControlToolbarItemButton() { Text = "abc" });
+            var control = new ControlToolbar(null, new ControlToolbarItemButton() { Text = _ => "abc" });
 
             // act
             var html = control.Render(context, visualTree);

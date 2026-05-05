@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -30,7 +29,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Return or specifies the layout.
         /// </summary>
-        System.Func<IRenderControlContext, TypeLayoutView> Layout { get; set; }
+        Func<IRenderControlContext, TypeLayoutView> Layout { get; set; }
 
         /// <summary>
         /// Adds one or more headers to the view control.

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -23,69 +24,73 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the label of the tree item.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
         /// Gets or sets the icon associated with the tree item.
         /// </summary>
-        public IIcon Icon { get { return IconOpen; } set { IconOpen = IconClose = value; } }
+        public Func<IRenderControlContext, IIcon> Icon
+        {
+            get { return IconOpen; }
+            set { IconOpen = IconClose = value; }
+        }
 
         /// <summary>
         /// Gets or sets the image uri.
         /// </summary>
-        public IUri Image { get; set; }
+        public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
         /// Gets or sets the icon associated with the tree item.
         /// </summary>
-        public IIcon IconOpen { get; set; }
+        public Func<IRenderControlContext, IIcon> IconOpen { get; set; }
 
         /// <summary>
         /// Gets or sets the icon associated with the tree item.
         /// </summary>
-        public IIcon IconClose { get; set; }
+        public Func<IRenderControlContext, IIcon> IconClose { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the tree item is expanded.
         /// </summary>
-        public bool Expand { get; set; }
+        public Func<IRenderControlContext, bool> Expand { get; set; }
 
         /// <summary>
         /// Gets or sets a tooltip text.
         /// </summary>
-        public string Tooltip { get; set; }
+        public Func<IRenderControlContext, string> Tooltip { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the tree item is active.
         /// </summary>
-        public bool Active { get; set; }
+        public Func<IRenderControlContext, bool> Active { get; set; }
 
         /// <summary>
         /// Gets or sets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
-        public IAction PrimaryAction { get; set; }
+        public Func<IRenderControlContext, IAction> PrimaryAction { get; set; }
 
         /// <summary>
         /// Gets or sets the secondary action, typically triggered by a 
         /// double-click to open a modal or similar target.
         /// </summary>
-        public IAction SecondaryAction { get; set; }
+        public Func<IRenderControlContext, IAction> SecondaryAction { get; set; }
 
         /// <summary>
         /// Gets or sets the link color.
         /// </summary>
-        public TypeColorText Color { get; set; }
+        public Func<IRenderControlContext, TypeColorText> Color { get; set; }
 
         /// <summary>
         /// Gets or sets the target uri.
         /// </summary>
-        public IUri Uri { get; set; }
+        public Func<IRenderControlContext, IUri> Uri { get; set; }
 
         /// <summary>
         /// Gets or sets the target.
         /// </summary>
-        public TypeTarget Target { get; set; }
+        public Func<IRenderControlContext, TypeTarget> Target { get; set; }
 
         /// <summary>
         /// Returns the child tree items.
@@ -147,51 +152,65 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var text = Text?.Invoke(renderContext);
+            var icon = Icon?.Invoke(renderContext);
+            var iconOpen = IconOpen?.Invoke(renderContext);
+            var iconClose = IconClose?.Invoke(renderContext);
+            var image = Image?.Invoke(renderContext);
+            var expand = Expand?.Invoke(renderContext) ?? false;
+            var active = Active?.Invoke(renderContext) ?? false;
+            var tooltip = Tooltip?.Invoke(renderContext);
+            var color = Color?.Invoke(renderContext) ?? TypeColorText.Default;
+            var uri = Uri?.Invoke(renderContext);
+            var target = Target?.Invoke(renderContext) ?? TypeTarget.None;
+            var primaryAction = PrimaryAction?.Invoke(renderContext);
+            var secondaryAction = SecondaryAction?.Invoke(renderContext);
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-tree-node"),
             }
-                .AddUserAttribute("data-label", I18N.Translate(Text))
-                .AddUserAttribute("data-expand", Expand ? "true" : null)
-                .AddUserAttribute("data-active", Active ? "true" : null)
-                .AddUserAttribute("data-color", Color.ToClass())
-                .AddUserAttribute("data-tooltip", Tooltip)
-                .AddUserAttribute("data-uri", Uri?.ToString())
-                .AddUserAttribute("data-target", Target.ToValue());
+                .AddUserAttribute("data-label", I18N.Translate(text))
+                .AddUserAttribute("data-expand", expand ? "true" : null)
+                .AddUserAttribute("data-active", active ? "true" : null)
+                .AddUserAttribute("data-color", color.ToClass())
+                .AddUserAttribute("data-tooltip", tooltip)
+                .AddUserAttribute("data-uri", uri?.ToString())
+                .AddUserAttribute("data-target", target.ToValue());
 
-            if (IconOpen == IconClose && Icon is Icon icon)
+            if (IconOpen == IconClose && icon is Icon i)
             {
-                html.AddUserAttribute("data-icon", icon.Class);
+                html.AddUserAttribute("data-icon", i.Class);
             }
 
-            if (IconOpen != IconClose && IconOpen is Icon iconOpen)
+            if (IconOpen != IconClose && iconOpen is Icon io)
             {
-                html.AddUserAttribute("data-icon-opened", iconOpen.Class);
+                html.AddUserAttribute("data-icon-opened", io.Class);
             }
 
-            if (IconOpen != IconClose && IconClose is Icon iconClose)
+            if (IconOpen != IconClose && iconClose is Icon ic)
             {
-                html.AddUserAttribute("data-icon-closed", iconClose.Class);
+                html.AddUserAttribute("data-icon-closed", ic.Class);
             }
 
-            if (IconOpen == IconClose && (Image != null || Icon is ImageIcon))
+            if (IconOpen == IconClose && (image != null || icon is ImageIcon))
             {
-                html.AddUserAttribute("data-image", Image?.ToString() ?? (Icon as ImageIcon)?.Uri?.ToString());
+                html.AddUserAttribute("data-image", image?.ToString() ?? (icon as ImageIcon)?.Uri?.ToString());
             }
 
-            if (IconOpen != IconClose && IconOpen is ImageIcon imageOpen)
+            if (IconOpen != IconClose && iconOpen is ImageIcon imageOpen)
             {
                 html.AddUserAttribute("data-image-opened", imageOpen.Uri?.ToString());
             }
 
-            if (IconOpen != IconClose && IconClose is ImageIcon imageClose)
+            if (IconOpen != IconClose && iconClose is ImageIcon imageClose)
             {
                 html.AddUserAttribute("data-image-closed", imageClose.Uri?.ToString());
             }
 
-            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
-            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
+            primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            secondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

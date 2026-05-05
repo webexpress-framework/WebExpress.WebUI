@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -21,12 +22,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the label displayed for the selected options list.
         /// </summary>
-        public string SelectedHeader { get; set; } = "webexpress.webui:form.move.selected";
+        public Func<IRenderControlContext, string> SelectedHeader { get; set; } = _ => "webexpress.webui:form.move.selected";
 
         /// <summary>
         /// Gets or sets the label displayed for the available options list.
         /// </summary>
-        public string AvailableHeader { get; set; } = "webexpress.webui:form.move.available";
+        public Func<IRenderControlContext, string> AvailableHeader { get; set; } = _ => "webexpress.webui:form.move.available";
 
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
@@ -114,14 +115,14 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("name", name)
                 .Add(_options.Select(x => x.Render(renderContext, visualTree)));
 
-            if (!string.IsNullOrEmpty(SelectedHeader))
+            if (!string.IsNullOrEmpty(SelectedHeader?.Invoke(renderContext)))
             {
-                html.AddUserAttribute("data-header-selected", I18N.Translate(SelectedHeader));
+                html.AddUserAttribute("data-header-selected", I18N.Translate(SelectedHeader?.Invoke(renderContext)));
             }
 
-            if (!string.IsNullOrEmpty(AvailableHeader))
+            if (!string.IsNullOrEmpty(AvailableHeader?.Invoke(renderContext)))
             {
-                html.AddUserAttribute("data-header-available", I18N.Translate(AvailableHeader));
+                html.AddUserAttribute("data-header-available", I18N.Translate(AvailableHeader?.Invoke(renderContext)));
             }
 
             if (!string.IsNullOrWhiteSpace(value))

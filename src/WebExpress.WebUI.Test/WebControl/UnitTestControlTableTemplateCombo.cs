@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableTemplateCombo(null)
             {
-                MultiSelect = multiSelect
+                MultiSelect = _ => multiSelect
             };
 
             // act

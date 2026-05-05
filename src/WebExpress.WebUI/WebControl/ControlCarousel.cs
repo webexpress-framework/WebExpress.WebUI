@@ -94,17 +94,21 @@ namespace WebExpress.WebUI.WebControl
             var inner = new HtmlElementTextContentDiv() { Class = "carousel-inner" };
             foreach (var v in Items)
             {
-                var i = new HtmlElementTextContentDiv(v?.Control.Render(renderContext, visualTree))
+                var control = v?.Control?.Invoke(renderContext);
+                var headline = v?.Headline?.Invoke(renderContext);
+                var text = v?.Text?.Invoke(renderContext);
+
+                var i = new HtmlElementTextContentDiv(control?.Render(renderContext, visualTree))
                 {
                     Class = index == 0 ? "carousel-item active" : "carousel-item"
                 };
 
-                if (!string.IsNullOrWhiteSpace(v.Headline) || !string.IsNullOrWhiteSpace(v.Text))
+                if (!string.IsNullOrWhiteSpace(headline) || !string.IsNullOrWhiteSpace(text))
                 {
                     var caption = new HtmlElementTextContentDiv
                     (
-                        new HtmlElementSectionH3() { Text = v.Headline },
-                        new HtmlElementTextContentP() { Text = v.Text }
+                        new HtmlElementSectionH3() { Text = headline },
+                        new HtmlElementTextContentP() { Text = text }
                     )
                     {
                         Class = "carousel-caption"

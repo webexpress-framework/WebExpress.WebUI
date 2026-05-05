@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -15,7 +17,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the header.
         /// </summary>
-        string Header { get; }
+        Func<IRenderControlContext, string> Header { get; }
 
         /// <summary>  
         /// Gets or sets the size of the modal dialog.  

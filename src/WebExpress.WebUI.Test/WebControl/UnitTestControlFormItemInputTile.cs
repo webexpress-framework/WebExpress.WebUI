@@ -98,7 +98,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputTile(null)
             {
-                MultiSelect = multiselect
+                MultiSelect = _ => multiselect
             };
 
             // act
@@ -123,7 +123,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputTile(null)
             {
-                LargeIcon = largeIcon
+                LargeIcon = _ => largeIcon
             };
 
             // act

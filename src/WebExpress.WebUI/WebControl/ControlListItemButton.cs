@@ -33,8 +33,8 @@ namespace WebExpress.WebUI.WebControl
             html.AddClass("wx-list-item-button");
             html.RemoveClass("wx-list-item");
 
-            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
-            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
+            PrimaryAction?.Invoke(renderContext)?.ApplyUserAttributes(html, TypeAction.Primary);
+            SecondaryAction?.Invoke(renderContext)?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

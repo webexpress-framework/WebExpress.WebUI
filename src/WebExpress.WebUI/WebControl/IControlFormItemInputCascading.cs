@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -16,7 +18,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the label of the cascading options.
         /// </summary>
-        public string Placeholder { get; }
+        public Func<IRenderControlContext, string> Placeholder { get; }
 
         /// <summary>
         /// Adds one or more items to the selection options.

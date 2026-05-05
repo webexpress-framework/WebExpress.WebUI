@@ -116,7 +116,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlChart()
             {
-                Type = type
+                Type = _ => type
             };
 
             // act
@@ -141,7 +141,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlChart()
             {
-                Title = title
+                Title = _ => title
             };
 
             // act
@@ -166,7 +166,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlChart()
             {
-                TitleX = titleX
+                TitleX = _ => titleX
             };
 
             // act
@@ -191,7 +191,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlChart()
             {
-                TitleY = titleY
+                TitleY = _ => titleY
             };
 
             // act
@@ -215,7 +215,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlChart()
             {
-                Width = width
+                Width = _ => width
             };
 
             // act
@@ -239,7 +239,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlChart()
             {
-                Height = height
+                Height = _ => height
             };
 
             // act
@@ -263,7 +263,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlChart()
             {
-                Minimum = minimum
+                Minimum = _ => minimum
             };
 
             // act
@@ -287,7 +287,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlChart()
             {
-                Maximum = maximum
+                Maximum = _ => maximum
             };
 
             // act
@@ -336,7 +336,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlChart()
             {
-                Responsive = value
+                Responsive = _ => value
             };
 
             // act
@@ -360,7 +360,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlChart()
             {
-                MaintainAspectRatio = value
+                MaintainAspectRatio = _ => value
             };
 
             // act
@@ -384,7 +384,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlChart()
             {
-                LegendDisplay = value
+                LegendDisplay = _ => value
             };
 
             // act
@@ -408,7 +408,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlChart()
             {
-                TitleDisplay = value
+                TitleDisplay = _ => value
             };
 
             // act
@@ -432,7 +432,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlChart()
             {
-                YBeginAtZero = value
+                YBeginAtZero = _ => value
             };
 
             // act
@@ -456,7 +456,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlChart()
             {
-                XBeginAtZero = value
+                XBeginAtZero = _ => value
             };
 
             // act

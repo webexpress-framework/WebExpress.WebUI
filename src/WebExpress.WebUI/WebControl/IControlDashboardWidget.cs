@@ -1,6 +1,7 @@
+using System;
 using WebExpress.WebCore.WebIcon;
-using WebExpress.WebCore.WebUri;
 using WebExpress.WebCore.WebPage;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -13,36 +14,36 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the title associated with the widget.
         /// </summary>
-        string Title { get; }
+        Func<IRenderControlContext, string> Title { get; }
 
         /// <summary>
         /// Gets the color associated with the widget.
         /// </summary>
-        string Color { get; }
+        Func<IRenderControlContext, string> Color { get; }
 
         /// <summary>
         /// Gets the icon associated with this widget.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; }
 
         /// <summary>
         /// Gets or sets the image uri.
         /// </summary>
-        IUri Image { get; set; }
+        Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
         /// Gets the column index associated with this widget.
         /// </summary>
-        uint Column { get; }
+        Func<IRenderControlContext, uint> Column { get; }
 
         /// <summary>
         /// Gets a value indicating whether the widget can be moved.
         /// </summary>
-        bool Movable { get; }
+        Func<IRenderControlContext, bool> Movable { get; }
 
         /// <summary>
         /// Gets a value indicating whether the widget can be closed.
         /// </summary>
-        bool Closeable { get; }
+        Func<IRenderControlContext, bool> Closeable { get; }
     }
 }

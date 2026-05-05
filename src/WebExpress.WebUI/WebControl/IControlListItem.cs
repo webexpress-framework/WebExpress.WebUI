@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebCore.WebUri;
@@ -14,12 +15,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the color scheme used for the row.
         /// </summary>
-        PropertyColorText Color { get; }
+        Func<IRenderControlContext, PropertyColorText> Color { get; }
 
         /// <summary>
         /// Gets or sets the color scheme used for the row.
         /// </summary>
-        PropertyColorBackgroundList BackgroundColor { get; }
+        Func<IRenderControlContext, PropertyColorBackgroundList> BackgroundColor { get; }
 
         /// <summary>
         /// Gets the options.
@@ -29,39 +30,39 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the icon associated with this instance.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; }
 
         /// <summary>
         /// Gets the image uri.
         /// </summary>
-        IUri Image { get; }
+        Func<IRenderControlContext, IUri> Image { get; }
 
         /// <summary>
         /// Gets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
-        IAction PrimaryAction { get; }
+        Func<IRenderControlContext, IAction> PrimaryAction { get; }
 
         /// <summary>
         /// Gets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
-        IAction SecondaryAction { get; }
+        Func<IRenderControlContext, IAction> SecondaryAction { get; }
 
         /// <summary>
         /// Gets the ativity state of the list item.
         /// </summary>
-        TypeActive Active { get; }
+        Func<IRenderControlContext, TypeActive> Active { get; }
 
         /// <summary>
         /// Gets the content associated with this cell.
         /// </summary>
-        string Text { get; }
+        Func<IRenderControlContext, string> Text { get; }
 
         /// <summary>
         /// Gets the description associated with this cell.
         /// </summary>
-        string Description { get; }
+        Func<IRenderControlContext, string> Description { get; }
 
         /// <summary> 
         /// Adds one or more controls to the content of the list item.

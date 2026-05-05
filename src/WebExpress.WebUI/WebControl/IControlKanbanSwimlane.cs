@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebPage;
+﻿using System;
+using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -11,11 +12,11 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the title associated with the swimlane.
         /// </summary>
-        string Title { get; }
+        Func<IRenderControlContext, string> Title { get; }
 
         /// <summary>
         /// Gets a value indicating whether the content is currently expanded.
         /// </summary>
-        bool Expanded { get; }
+        Func<IRenderControlContext, bool> Expanded { get; }
     }
 }

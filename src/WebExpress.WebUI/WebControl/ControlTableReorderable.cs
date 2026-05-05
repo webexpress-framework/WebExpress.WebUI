@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -14,18 +15,18 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets a value indicating whether columns can be removed.
         /// </summary>
-        public bool AllowColumnRemove { get; set; }
+        public Func<IRenderControlContext, bool> AllowColumnRemove { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether rows in the table can be moved.
         /// </summary>
-        public bool MovableRow { get; set; }
+        public Func<IRenderControlContext, bool> MovableRow { get; set; }
 
         /// <summary>
         /// Gets or sets the key used to persist data (column order, visibility, 
         /// widths, active sort) across sessions.
         /// </summary>
-        public string PersistKey { get; set; }
+        public Func<IRenderControlContext, string> PersistKey { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -55,20 +56,20 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(),
                 Role = Role
             }
-                .AddUserAttribute("data-color", Color.ToClass())
-                .AddUserAttribute("data-striped", Striped.ToClass())
-                .AddUserAttribute("data-border", TableBorder.ToClass())
-                .AddUserAttribute("data-movable-row", MovableRow ? "true" : null)
-                .AddUserAttribute("data-allow-column-remove", AllowColumnRemove ? "true" : null)
-                .AddUserAttribute("data-persist-key", PersistKey)
+                .AddUserAttribute("data-color", (Color?.Invoke(renderContext) ?? TypeColorTable.Default).ToClass())
+                .AddUserAttribute("data-striped", (Striped?.Invoke(renderContext) ?? TypeStripedTable.Default).ToClass())
+                .AddUserAttribute("data-border", (TableBorder?.Invoke(renderContext) ?? TypeBorderTable.Default).ToClass())
+                .AddUserAttribute("data-movable-row", MovableRow?.Invoke(renderContext) == true ? "true" : null)
+                .AddUserAttribute("data-allow-column-remove", AllowColumnRemove?.Invoke(renderContext) == true ? "true" : null)
+                .AddUserAttribute("data-persist-key", PersistKey?.Invoke(renderContext))
                 .Add
                 (
                     new HtmlElementTextContentDiv()
                     {
-                        Class = Css.Concatenate("wx-table-columns", HeaderColor.ToClass())
+                        Class = Css.Concatenate("wx-table-columns", (HeaderColor?.Invoke(renderContext) ?? TypeColorTable.Default).ToClass())
                     }
-                        .AddUserAttribute("data-color", HeaderColor.ToClass())
-                        .AddUserAttribute("data-suppress-headers", SuppressHeaders ? "true" : null)
+                        .AddUserAttribute("data-color", (HeaderColor?.Invoke(renderContext) ?? TypeColorTable.Default).ToClass())
+                        .AddUserAttribute("data-suppress-headers", SuppressHeaders?.Invoke(renderContext) == true ? "true" : null)
                         .Add
                         (
                             Columns.Select

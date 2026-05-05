@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButton()
             {
-                Text = text
+                Text = _ => text
             };
 
             // act
@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButton()
             {
-                Size = size
+                Size = _ => size
             };
 
             // act
@@ -137,7 +137,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButton()
             {
-                Color = new PropertyColorButton(color)
+                Color = _ => new PropertyColorButton(color)
             };
 
             // act
@@ -167,8 +167,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButton()
             {
-                Outline = outline,
-                Color = new PropertyColorButton(color)
+                Outline = _ => outline,
+                Color = _ => new PropertyColorButton(color)
             };
 
             // act
@@ -192,7 +192,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButton()
             {
-                Block = block
+                Block = _ => block
             };
 
             // act
@@ -216,7 +216,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButton()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act

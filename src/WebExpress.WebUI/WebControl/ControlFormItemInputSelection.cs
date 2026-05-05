@@ -27,19 +27,19 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the label of the selected options.
         /// </summary>
-        public string Placeholder { get; set; }
+        public Func<IRenderControlContext, string> Placeholder { get; set; }
 
         /// <summary>
         /// Allows you to select multiple items.
         /// </summary>
-        public bool MultiSelect { get; set; }
+        public Func<IRenderControlContext, bool> MultiSelect { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether sticky selection mode is enabled.
         /// When enabled and a value has been selected, the selection cannot be
         /// cleared through the user interface.
         /// </summary>
-        public bool StickySelection { get; set; }
+        public Func<IRenderControlContext, bool> StickySelection { get; set; }
 
         /// <summary>
         /// Gets or sets the OnChange attribute.
@@ -128,9 +128,9 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles()
             }
                 .AddUserAttribute("name", name)
-                .AddUserAttribute("placeholder", I18N.Translate(Placeholder))
-                .AddUserAttribute("data-multiselection", MultiSelect ? "true" : null)
-                .AddUserAttribute("data-sticky-selection", StickySelection ? "true" : null)
+                .AddUserAttribute("placeholder", I18N.Translate(Placeholder?.Invoke(renderContext)))
+                .AddUserAttribute("data-multiselection", MultiSelect?.Invoke(renderContext) == true ? "true" : null)
+                .AddUserAttribute("data-sticky-selection", StickySelection?.Invoke(renderContext) == true ? "true" : null)
                 .AddUserAttribute("data-value", value)
                 .Add(_options.Select(x => x.Render(renderContext, visualTree)));
 

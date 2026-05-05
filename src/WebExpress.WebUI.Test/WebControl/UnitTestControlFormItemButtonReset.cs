@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButtonReset()
             {
-                Text = text
+                Text = _ => text
             };
 
             // act
@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButtonReset()
             {
-                Size = size
+                Size = _ => size
             };
 
             // act
@@ -137,7 +137,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButtonReset()
             {
-                Color = new PropertyColorButton(color)
+                Color = _ => new PropertyColorButton(color)
             };
 
             // act
@@ -167,8 +167,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButtonReset()
             {
-                Outline = outline,
-                Color = new PropertyColorButton(color)
+                Outline = _ => outline,
+                Color = _ => new PropertyColorButton(color)
             };
 
             // act
@@ -182,7 +182,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeBlockButton.None, @"<button type=""reset"" class=""btn me-2 btn-secondary"">*</button>")]
-        [InlineData(TypeBlockButton.Block, @"<button type=""reset"" class=""btn me-2 btn-secondary btn-block"">*</button>")]
+        [InlineData(TypeBlockButton.Block, @"<button type=""reset"" class=""btn me-2 btn-block btn-secondary"">*</button>")]
         public void Block(TypeBlockButton block, string expected)
         {
             // arrange
@@ -192,7 +192,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButtonReset()
             {
-                Block = block
+                Block = _ => block
             };
 
             // act
@@ -216,7 +216,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButtonReset()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
