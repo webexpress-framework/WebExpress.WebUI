@@ -65,6 +65,7 @@ namespace WebExpress.WebUI.WebControl
             );
             var name = Name?.Invoke(renderContext);
             var disabled = Disabled?.Invoke(renderContext) ?? false;
+            var role = Role?.Invoke(renderContext);
 
             if (disabled)
             {
@@ -76,7 +77,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-input-tag", classes),
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
-                Role = Role
+                Role = role
             }
                 .AddUserAttribute("name", name)
                 .AddUserAttribute("placeholder", I18N.Translate(renderContext.Request?.Culture, Placeholder))

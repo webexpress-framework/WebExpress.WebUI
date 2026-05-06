@@ -196,6 +196,7 @@ namespace WebExpress.WebUI.WebControl
             var buttonCss = "";
             var buttonStyle = "";
             var menuCss = "";
+            var role = Role?.Invoke(renderContext);
 
             if (Color is not null)
             {
@@ -227,7 +228,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-dropdown", GetClasses()),
-                Role = Role ?? "button"
+                Role = role ?? "button"
             }
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, Text))
                 .AddUserAttribute("data-icon", (Icon as Icon)?.Class)

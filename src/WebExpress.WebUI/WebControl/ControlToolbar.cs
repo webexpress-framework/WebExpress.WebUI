@@ -222,7 +222,10 @@ namespace WebExpress.WebUI.WebControl
             IEnumerable<IControlDropdownItem> more
         )
         {
-            if (!Enable)
+            var role = Role?.Invoke(renderContext);
+            var enable = Enable?.Invoke(renderContext) ?? true;
+
+            if (!enable)
             {
                 return null;
             }
@@ -232,7 +235,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-toolbar", GetClasses()),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             }
                 .Add(items.Select(x => x.Render(renderContext, visualTree)))
                 .Add

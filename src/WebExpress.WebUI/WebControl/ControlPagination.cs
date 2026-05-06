@@ -46,13 +46,14 @@ namespace WebExpress.WebUI.WebControl
         {
             var backgroundColor = BackgroundColor?.Invoke(renderContext);
             var borderColor = BorderColor?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-pagination", Css.Remove(GetClasses(), backgroundColor?.ToClass(), borderColor?.ToClass())),
                 Style = Style.Remove(GetStyles(), backgroundColor.ToStyle()),
-                Role = Role
+                Role = role
             }
                 .AddUserAttribute("data-page", Page > 0 ? Page.ToString() : null)
                 .AddUserAttribute("data-total", Total > 0 ? Total.ToString() : null);

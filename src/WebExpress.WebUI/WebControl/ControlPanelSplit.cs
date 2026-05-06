@@ -142,6 +142,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var role = Role?.Invoke(renderContext);
             var orientation = Orientation?.Invoke(renderContext) ?? TypeOrientationSplit.Horizontal;
 
             var p1 = SidePanel
@@ -183,7 +184,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-split", GetClasses()),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             }
                 .AddUserAttribute
                 (

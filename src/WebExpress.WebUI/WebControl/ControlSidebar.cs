@@ -140,7 +140,10 @@ namespace WebExpress.WebUI.WebControl
             IEnumerable<IControlSidebarItem> items
         )
         {
-            if (!Enable)
+            var enable = Enable?.Invoke(renderContext) ?? true;
+            var role = Role?.Invoke(renderContext);
+
+            if (!enable)
             {
                 return null;
             }
@@ -150,7 +153,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-sidebar", GetClasses()),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             }
                 .Add(items.Select(x => x.Render(renderContext, visualTree)))
                 .Add

@@ -94,6 +94,7 @@ namespace WebExpress.WebUI.WebControl
         {
             var margin = Margin?.Invoke(renderContext);
             var horizontalAlignment = HorizontalAlignment?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
 
             var button = new HtmlElementTextSemanticsA()
             {
@@ -101,8 +102,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("btn", Css.Remove(GetClasses(), margin?.ToClass())),
                 Style = GetStyles(),
                 Target = Target,
-                Href = uri?.ToString(),
-                OnClick = OnClick?.ToString()
+                Href = uri?.ToString()
             };
 
             if (icon is not null)
@@ -168,7 +168,7 @@ namespace WebExpress.WebUI.WebControl
                     margin?.ToClass(),
                     (Block?.Invoke(renderContext) == TypeBlockButton.Block ? "btn-block" : "")
                 ),
-                Role = Role
+                Role = role
             };
 
             return html;

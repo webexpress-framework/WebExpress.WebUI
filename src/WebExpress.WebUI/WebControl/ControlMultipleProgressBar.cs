@@ -42,6 +42,7 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var barClass = new List<string>();
+            var role = Role?.Invoke(renderContext);
 
             switch (Format)
             {
@@ -66,7 +67,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = string.Join(" ", Classes.Where(x => !string.IsNullOrWhiteSpace(x))),
                         Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
-                        Role = Role,
+                        Role = role,
                         Min = "0",
                         Max = "100",
                         Value = _items.Select(x => (int)x.Value).Sum().ToString()
@@ -78,7 +79,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("progress", GetClasses()),
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
-                Role = Role
+                Role = role
             };
 
             foreach (var v in _items)
@@ -99,7 +100,7 @@ namespace WebExpress.WebUI.WebControl
                     Id = Id,
                     Class = string.Join(" ", c.Where(x => !string.IsNullOrWhiteSpace(x))),
                     Style = string.Join(" ", styles.Where(x => !string.IsNullOrWhiteSpace(x))),
-                    Role = Role
+                    Role = role
                 };
 
                 html.Add(bar);

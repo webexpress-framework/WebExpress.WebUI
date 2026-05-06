@@ -64,19 +64,11 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return Render(renderContext, visualTree, Text);
-        }
+            var role = Role?.Invoke(renderContext);
+            var text = Text; //?.Invoke(renderContext);
 
-        /// <summary>
-        /// Converts the control to an HTML representation.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        /// <param name="visualTree">The visual tree representing the control's structure.</param>
-        /// <param name="text">The text to render.</param>
-        /// <returns>An HTML node representing the rendered control.</returns>
-        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, string text)
-        {
             text = I18N.Translate(renderContext?.Request.Culture, text);
+
             var html = default(HtmlElement);
 
             switch (Format)
@@ -87,7 +79,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.Italic:
@@ -96,7 +88,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.Bold:
@@ -105,7 +97,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.Underline:
@@ -114,7 +106,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.StruckOut:
@@ -123,7 +115,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.Cite:
@@ -132,7 +124,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.H1:
@@ -141,7 +133,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.H2:
@@ -150,7 +142,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.H3:
@@ -159,7 +151,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.H4:
@@ -168,7 +160,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.H5:
@@ -177,7 +169,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.H6:
@@ -186,7 +178,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.Span:
@@ -195,7 +187,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.Small:
@@ -204,7 +196,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.Strong:
@@ -213,7 +205,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.Center:
@@ -222,7 +214,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = Css.Concatenate("text-center", GetClasses()),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.Code:
@@ -232,14 +224,14 @@ namespace WebExpress.WebUI.WebControl
                             Id = Id,
                             Class = GetClasses(),
                             Style = GetStyles(),
-                            Role = Role
+                            Role = role
                         }
                         : new HtmlElementTextSemanticsCode(new HtmlText(text))
                         {
                             Id = Id,
                             Class = GetClasses(),
                             Style = GetStyles(),
-                            Role = Role
+                            Role = role
                         };
                     break;
                 case TypeFormatText.Output:
@@ -248,7 +240,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.Time:
@@ -257,7 +249,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.Mark:
@@ -266,7 +258,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.Highlight:
@@ -275,7 +267,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.Definition:
@@ -284,7 +276,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.Abbreviation:
@@ -293,7 +285,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.Input:
@@ -302,7 +294,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.Blockquote:
@@ -311,7 +303,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.Figcaption:
@@ -320,7 +312,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.Preformatted:
@@ -329,7 +321,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
                 case TypeFormatText.Markdown:
@@ -342,7 +334,7 @@ namespace WebExpress.WebUI.WebControl
                         Id = Id,
                         Class = GetClasses(),
                         Style = GetStyles(),
-                        Role = Role
+                        Role = role
                     };
                     break;
             }

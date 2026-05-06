@@ -124,6 +124,7 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var icon = Icon?.Render(renderContext, visualTree);
+            var role = Role?.Invoke(renderContext);
 
             var name = new HtmlElementTextSemanticsSpan(new HtmlText(I18N.Translate(Name)))
             {
@@ -140,7 +141,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = GetClasses(),
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
-                Role = Role
+                Role = role
             };
 
             html.Add(Links?.Select(x => x.Render(renderContext, visualTree)));

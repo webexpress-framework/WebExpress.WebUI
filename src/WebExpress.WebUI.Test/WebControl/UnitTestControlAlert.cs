@@ -25,7 +25,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAlert(id)
             {
-                Dismissibility = TypeDismissibilityAlert.None
+                Dismissibility = _ => TypeDismissibilityAlert.None
             };
 
             // act
@@ -50,8 +50,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAlert()
             {
-                Dismissibility = TypeDismissibilityAlert.None,
-                Text = text
+                Dismissibility = _ => TypeDismissibilityAlert.None,
+                Text = _ => text
             };
 
             // act
@@ -83,8 +83,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAlert()
             {
-                Dismissibility = TypeDismissibilityAlert.None,
-                BackgroundColor = new PropertyColorBackgroundAlert(color)
+                Dismissibility = _ => TypeDismissibilityAlert.None,
+                BackgroundColor = _ => new PropertyColorBackgroundAlert(color)
             };
 
             // act
@@ -108,7 +108,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAlert()
             {
-                Dismissibility = dismissibility
+                Dismissibility = _ => dismissibility
             };
 
             // act

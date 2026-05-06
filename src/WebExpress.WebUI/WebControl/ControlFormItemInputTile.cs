@@ -110,6 +110,7 @@ namespace WebExpress.WebUI.WebControl
             var name = Name?.Invoke(renderContext);
             var disabled = Disabled?.Invoke(renderContext) ?? false;
             var largeIcon = LargeIcon?.Invoke(renderContext) ?? false;
+            var role = Role?.Invoke(renderContext);
 
             if (disabled)
             {
@@ -121,7 +122,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-input-tile", classes),
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
-                Role = Role
+                Role = role
             }
                 .AddUserAttribute("name", name)
                 .AddUserAttribute("data-value", value)

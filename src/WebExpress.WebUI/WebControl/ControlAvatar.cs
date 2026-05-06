@@ -84,6 +84,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, string username, IUri image, IUri uri, IAction primaryAction, IAction secondaryAction)
         {
+            var role = Role?.Invoke(renderContext);
             var img = default(HtmlElement);
 
             if (image is not null)
@@ -107,7 +108,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-profile", GetClasses()),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             }
                 .Add(img)
                 .Add

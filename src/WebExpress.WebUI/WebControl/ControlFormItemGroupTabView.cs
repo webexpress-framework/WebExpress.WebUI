@@ -172,25 +172,16 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the role associated with the group.
         /// </summary>
-        public string Role
+        public Func<IRenderControlContext, string> Role
         {
             get => _group.Role;
             set => _group.Role = value;
         }
 
         /// <summary>
-        /// Gets or sets the action to perform when the associated element is clicked.
-        /// </summary>
-        public PropertyOnClick OnClick
-        {
-            get => _group.OnClick;
-            set => _group.OnClick = value;
-        }
-
-        /// <summary>
         /// Gets or sets a value indicating whether the group is enabled.
         /// </summary>
-        public bool Enable
+        public Func<IRenderControlContext, bool> Enable
         {
             get => _group.Enable;
             set => _group.Enable = value;

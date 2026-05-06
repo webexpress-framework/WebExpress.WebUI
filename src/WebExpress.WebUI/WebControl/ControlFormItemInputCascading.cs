@@ -30,11 +30,6 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, string> Placeholder { get; set; }
 
         /// <summary>
-        /// Gets or sets the OnChange attribute.
-        /// </summary>
-        public PropertyOnChange OnChange { get; set; }
-
-        /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
         /// </summary>
         public ControlFormItemInputCascading()

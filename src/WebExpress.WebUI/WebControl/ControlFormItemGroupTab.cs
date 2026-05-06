@@ -101,13 +101,14 @@ namespace WebExpress.WebUI.WebControl
         {
             var renderGroupContext = new RenderControlFormGroupContext(renderContext, this);
             var layout = Layout?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-tab", Classes),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             }
                 .AddUserAttribute("data-layout", layout.ToString().ToLower())
                 .Add(_views.Select(x => x.Render(renderContext, visualTree)));

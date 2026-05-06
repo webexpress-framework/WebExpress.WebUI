@@ -111,12 +111,14 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var role = Role?.Invoke(renderContext);
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-responsive", GetClasses()),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             }
                 .Add(Panels.Select(x =>
                 {

@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using WebExpress.WebCore;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebUI.WebFragment;
 using WebExpress.WebUI.WebPage;
 using WebExpress.WebUI.WebSection;
-using WebExpress.WebUI.WebFragment;
-using WebExpress.WebCore;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -145,13 +145,14 @@ namespace WebExpress.WebUI.WebControl
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlTabView> pages)
         {
             var classes = Classes.ToList();
+            var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-tab", classes),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             };
 
             // Get tab view fragments
@@ -173,7 +174,7 @@ namespace WebExpress.WebUI.WebControl
 
             // Add standard views
             html.Add(pages.Select(x => x.Render(renderContext, visualTree)));
-            
+
             // Add view fragments
             html.Add(viewPreferences.Select(x => x.Render(renderContext, visualTree)));
             html.Add(viewPrimary.Select(x => x.Render(renderContext, visualTree)));

@@ -72,6 +72,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var role = Role?.Invoke(renderContext);
+
             if (Uri is not null)
             {
                 return new HtmlElementTextSemanticsA(new HtmlText(Value))
@@ -80,7 +82,7 @@ namespace WebExpress.WebUI.WebControl
                     Class = Css.Concatenate("badge link", GetClasses()),
                     Style = GetStyles(),
                     Href = Uri.ToString(),
-                    Role = Role
+                    Role = role
                 };
             }
 
@@ -89,7 +91,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("badge", GetClasses()),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             };
         }
     }

@@ -3,7 +3,6 @@ using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
-using WebExpress.WebCore.WebMessage;
 using WebExpress.WebCore.WebParameter;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
@@ -224,17 +223,17 @@ namespace WebExpress.WebUI.WebControl
             var title = Title?.Invoke(renderContext);
             var tooltip = Tooltip?.Invoke(renderContext);
             var text = Text?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementTextSemanticsA([.. _controls.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-link", icon is ImageIcon ? "d-inline-flex align-items-baseline" : null, GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
+                Role = role,
                 Href = Uri?.Invoke(renderContext)?.ToString() + (param.Length > 0 ? "?" + param : string.Empty),
                 Target = Target?.Invoke(renderContext) ?? TypeTarget.None,
-                Title = string.IsNullOrEmpty(title) ? I18N.Translate(renderContext.Request, tooltip) : I18N.Translate(renderContext.Request, title),
-                OnClick = OnClick?.ToString()
+                Title = string.IsNullOrEmpty(title) ? I18N.Translate(renderContext.Request, tooltip) : I18N.Translate(renderContext.Request, title)
             };
 
             if (icon is not null)

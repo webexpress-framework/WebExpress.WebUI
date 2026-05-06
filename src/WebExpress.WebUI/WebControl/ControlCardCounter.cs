@@ -47,12 +47,14 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var role = Role?.Invoke(renderContext);
+
             var html = new HtmlElementTextSemanticsSpan()
             {
                 Id = Id,
                 Class = Css.Concatenate("card-counter", GetClasses()),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             };
 
             if (Icon is not null)

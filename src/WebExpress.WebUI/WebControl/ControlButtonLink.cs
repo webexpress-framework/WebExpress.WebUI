@@ -41,6 +41,8 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var text = Text?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
+
             text = I18N.Translate(text);
 
             var html = new HtmlElementTextSemanticsA()
@@ -48,10 +50,9 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("btn", GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
+                Role = role,
                 Href = Uri?.Invoke(renderContext)?.BindParameters(renderContext.Request.Parameters).ToString(),
-                Title = I18N.Translate(renderContext, Tooltip?.Invoke(renderContext)),
-                OnClick = OnClick?.ToString()
+                Title = I18N.Translate(renderContext, Tooltip?.Invoke(renderContext))
             };
 
             var icon = Icon?.Invoke(renderContext);

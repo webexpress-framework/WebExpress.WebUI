@@ -153,11 +153,13 @@ namespace WebExpress.WebUI.WebControl
                 menuCss = AlignmentMenu.ToClass();
             }
 
+            var role = Role?.Invoke(renderContext);
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-avatar-dropdown", GetClasses()),
-                Role = Role ?? "button"
+                Role = role ?? "button"
             }
                 .AddUserAttribute("data-name", I18N.Translate(renderContext, username))
                 .AddUserAttribute("data-src", Image?.ToString())

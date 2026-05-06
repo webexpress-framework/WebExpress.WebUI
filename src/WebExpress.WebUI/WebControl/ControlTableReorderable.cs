@@ -48,13 +48,14 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var classes = Classes.ToList();
+            var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-table-reorderable", classes),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             }
                 .AddUserAttribute("data-color", (Color?.Invoke(renderContext) ?? TypeColorTable.Default).ToClass())
                 .AddUserAttribute("data-striped", (Striped?.Invoke(renderContext) ?? TypeStripedTable.Default).ToClass())

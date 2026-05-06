@@ -48,13 +48,14 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var horizontalAlignment = HorizontalAlignment?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementMultimediaImg()
             {
                 Id = Id,
                 Class = Css.Concatenate(horizontalAlignment?.ToClass(), GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
+                Role = role,
                 Alt = Tooltip,
                 Src = Uri?.ToString(),
             };

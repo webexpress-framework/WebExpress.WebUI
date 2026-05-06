@@ -71,6 +71,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var role = Role?.Invoke(renderContext);
+
             if (Format == TypeFormatProgress.Default)
             {
                 return new HtmlElementFormProgress(Value + "%")
@@ -78,7 +80,7 @@ namespace WebExpress.WebUI.WebControl
                     Id = Id,
                     Class = GetClasses(),
                     Style = GetStyles(),
-                    Role = Role,
+                    Role = role,
                     Min = Min.ToString(),
                     Max = Max.ToString(),
                     Value = Value.ToString()
@@ -109,7 +111,7 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv(bar)
             {
                 Id = Id,
-                Role = Role,
+                Role = role,
                 Class = Css.Concatenate
                 (
                     "progress",

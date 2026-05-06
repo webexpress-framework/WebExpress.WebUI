@@ -28,11 +28,6 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, string> Placeholder { get; set; }
 
         /// <summary>
-        /// Gets or sets the OnChange attribute.
-        /// </summary>
-        public PropertyOnChange OnChange { get; set; }
-
-        /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
         /// </summary>
         public ControlFormItemInputCombo()
@@ -87,6 +82,7 @@ namespace WebExpress.WebUI.WebControl
             var name = Name?.Invoke(renderContext);
             var disabled = Disabled?.Invoke(renderContext) ?? false;
             var placeholder = Placeholder?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementFieldSelect()
             {
@@ -94,9 +90,8 @@ namespace WebExpress.WebUI.WebControl
                 Name = name,
                 Class = Css.Concatenate("form-select", GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
-                Disabled = disabled,
-                OnChange = OnChange?.ToString()
+                Role = role,
+                Disabled = disabled
             };
 
             if (!string.IsNullOrWhiteSpace(placeholder))

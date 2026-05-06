@@ -206,13 +206,14 @@ namespace WebExpress.WebUI.WebControl
             var width = Width?.Invoke(renderContext) ?? 0;
             var height = Height?.Invoke(renderContext) ?? 0;
             var datasets = Data?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-chart", GetClasses()),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             }
                 // set chart type
                 .AddUserAttribute("data-type", type.ToType())

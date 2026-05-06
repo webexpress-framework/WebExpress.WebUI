@@ -171,6 +171,7 @@ namespace WebExpress.WebUI.WebControl
             var horizontalAlignment = HorizontalAlignment?.Invoke(renderContext);
             var icon = Icon?.Invoke(renderContext);
             var text = Text?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
 
             var button = new HtmlElementFieldButton()
             {
@@ -215,7 +216,7 @@ namespace WebExpress.WebUI.WebControl
 
             var dropdownElements = new HtmlElementTextContentUl
                 (
-                    Items.Select
+                    [.. Items.Select
                     (
                         x =>
                         x is null || x is ControlDropdownItemDivider || x is ControlLine ?
@@ -223,7 +224,7 @@ namespace WebExpress.WebUI.WebControl
                         x is ControlDropdownItemHeader ?
                         x.Render(renderContext, visualTree) :
                         new HtmlElementTextContentLi(x.Render(renderContext, visualTree)) { Class = "dropdown-item" }
-                    ).ToArray()
+                    )]
                 )
             {
                 Class = horizontalAlignment == TypeHorizontalAlignment.Right ? "dropdown-menu dropdown-menu-right" : "dropdown-menu"
@@ -243,7 +244,7 @@ namespace WebExpress.WebUI.WebControl
                     margin?.ToClass(),
                     (Block?.Invoke(renderContext) == TypeBlockButton.Block ? "btn-block" : "")
                 ),
-                Role = Role
+                Role = role
             };
 
             return html;

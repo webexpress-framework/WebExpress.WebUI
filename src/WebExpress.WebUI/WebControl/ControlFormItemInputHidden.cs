@@ -27,6 +27,7 @@ namespace WebExpress.WebUI.WebControl
         {
             var value = renderContext?.GetValue<ControlFormInputValueString>(this)?.Text;
             var name = Name?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
 
             return new HtmlElementFieldInput()
             {
@@ -34,7 +35,7 @@ namespace WebExpress.WebUI.WebControl
                 Value = value,
                 Name = name,
                 Type = "hidden",
-                Role = Role
+                Role = role
             };
         }
 

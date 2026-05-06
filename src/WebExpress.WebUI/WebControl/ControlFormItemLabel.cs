@@ -45,13 +45,15 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var name = FormItem?.Name?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
+
             return new HtmlElementFieldLabel()
             {
                 Id = Id,
                 Text = I18N.Translate(renderContext.Request?.Culture, Text),
                 Class = Css.Concatenate("wx-form-label", GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
+                Role = role,
                 For = FormItem is not null ?
                     string.IsNullOrWhiteSpace(FormItem.Id) ?
                         name :

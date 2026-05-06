@@ -144,17 +144,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the role.
         /// </summary>
-        public string Role { get; set; }
-
-        /// <summary>
-        /// Gets or sets the OnClick attribute, which executes a java script on the client.
-        /// </summary>
-        public PropertyOnClick OnClick { get; set; }
+        public Func<IRenderControlContext, string> Role { get; set; }
 
         /// <summary>
         /// Determines whether the control is active and rendering.
         /// </summary>
-        public bool Enable { get; set; } = true;
+        public Func<IRenderControlContext, bool> Enable { get; set; } = _ => true;
 
         /// <summary>
         /// Initializes a new instance of the class.

@@ -310,6 +310,7 @@ namespace WebExpress.WebUI.WebControl
             var method = Method?.Invoke(formRenderContext);
             var name = Name?.Invoke(formRenderContext);
             var conformation = Conformation?.Invoke(formRenderContext);
+            var role = Role?.Invoke(renderContext);
 
             var classes = Classes.ToList();
             var formElement = _form.Render(formRenderContext, visualTree, items);
@@ -361,7 +362,7 @@ namespace WebExpress.WebUI.WebControl
                     Class = formLayout == TypeLayoutForm.Inline
                         ? Css.Concatenate("wx-form-inline", GetClasses())
                         : GetClasses(),
-                    Role = _form.Role,
+                    Role = _form.Role?.Invoke(formRenderContext),
                     Action = Uri?.ToString() ?? renderContext.Request.Uri?.ToString(),
                     Method = (method == RequestMethod.NONE
                         ? RequestMethod.POST

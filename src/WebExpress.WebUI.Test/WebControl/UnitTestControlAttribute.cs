@@ -51,7 +51,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAttribute()
             {
-                Key = title,
+                Key = _ => title,
             };
 
             // act
@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAttribute()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -108,7 +108,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAttribute()
             {
-                Color = new PropertyColorText(color)
+                Color = _ => new PropertyColorText(color)
             };
 
             // act
@@ -141,7 +141,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAttribute()
             {
-                KeyColor = new PropertyColorText(color)
+                KeyColor = _ => new PropertyColorText(color)
             };
 
             // act
@@ -198,7 +198,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAttribute()
             {
-                Value = value
+                Value = _ => value
             };
 
             // act
@@ -222,7 +222,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAttribute()
             {
-                Separator = value
+                Separator = _ => value
             };
 
             // act
@@ -246,7 +246,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAttribute()
             {
-                Uri = uri is not null ? new UriEndpoint(uri) : null
+                Uri = _ => uri is not null ? new UriEndpoint(uri) : null
             };
 
             // act

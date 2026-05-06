@@ -78,6 +78,7 @@ namespace WebExpress.WebUI.WebControl
         {
             var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
             var name = Name?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementFieldInput()
             {
@@ -87,7 +88,7 @@ namespace WebExpress.WebUI.WebControl
                 Type = "file",
                 Class = Css.Concatenate("form-control-file", GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
+                Role = role,
                 Placeholder = Placeholder
             };
 

@@ -58,6 +58,7 @@ namespace WebExpress.WebUI.WebControl
             var css = Icon is ImageIcon
                 ? Css.Concatenate("wx-icon", GetClasses())
                 : GetClasses();
+            var role = Role?.Invoke(renderContext);
 
             var html = Icon?.Render
             (
@@ -67,7 +68,7 @@ namespace WebExpress.WebUI.WebControl
                 Title,
                 css,
                 GetStyles(),
-                Role
+                role
             );
 
             return html;

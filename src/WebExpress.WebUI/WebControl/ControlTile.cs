@@ -93,13 +93,14 @@ namespace WebExpress.WebUI.WebControl
             var movable = Movable?.Invoke(renderContext) ?? false;
             var allowRemove = AllowRemove?.Invoke(renderContext) ?? false;
             var largeIcon = LargeIcon?.Invoke(renderContext) ?? false;
+            var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-tile", classes),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             }
                 .AddUserAttribute("data-movable", movable ? "true" : null)
                 .AddUserAttribute("data-allow-remove", allowRemove ? "true" : null)

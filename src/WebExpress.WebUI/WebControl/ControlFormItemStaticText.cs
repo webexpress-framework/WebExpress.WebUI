@@ -46,6 +46,7 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var text = Text?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentP()
             {
@@ -53,7 +54,7 @@ namespace WebExpress.WebUI.WebControl
                 Text = I18N.Translate(renderContext.Request?.Culture, text),
                 Class = Css.Concatenate(GetClasses()),
                 Style = Style.Concatenate(GetStyles()),
-                Role = Role
+                Role = role
             };
 
             return html;

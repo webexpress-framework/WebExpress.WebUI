@@ -93,6 +93,7 @@ namespace WebExpress.WebUI.WebControl
             var rows = Rows?.Invoke(renderContext);
             var minLength = MinLength?.Invoke(renderContext);
             var maxLength = MaxLength?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
 
             var classes = new List<string>(Classes)
             {
@@ -113,7 +114,7 @@ namespace WebExpress.WebUI.WebControl
                     Name = name,
                     Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
                     Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
-                    Role = Role,
+                    Role = role,
                     Placeholder = I18N.Translate(renderContext, placeholder),
                     Rows = rows?.ToString()
                 },
@@ -122,7 +123,7 @@ namespace WebExpress.WebUI.WebControl
                     Id = id,
                     Class = Css.Concatenate("wx-webui-editor", classes),
                     Style = GetStyles(),
-                    Role = Role,
+                    Role = role,
                 }.AddUserAttribute("name", name),
                 _ => new HtmlElementFieldInput()
                 {
@@ -137,7 +138,7 @@ namespace WebExpress.WebUI.WebControl
                     Disabled = disabled,
                     Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
                     Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
-                    Role = Role,
+                    Role = role,
                     Placeholder = I18N.Translate(renderContext.Request?.Culture, placeholder)
                 },
             };

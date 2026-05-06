@@ -171,6 +171,8 @@ namespace WebExpress.WebUI.WebControl
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlNavigationItem> items)
         {
             var htmlItems = new List<HtmlElement>();
+            var role = Role?.Invoke(renderContext);
+
             foreach (var item in items)
             {
                 var i = item.Render(renderContext, visualTree) as HtmlElement;
@@ -240,7 +242,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("nav", GetClasses()),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             };
 
             return html;

@@ -157,6 +157,7 @@ namespace WebExpress.WebUI.WebControl
             var outline = Outline?.Invoke(renderContext) ?? false;
             var primaryAction = PrimaryAction?.Invoke(renderContext);
             var secondaryAction = SecondaryAction?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementFieldButton()
             {
@@ -165,7 +166,7 @@ namespace WebExpress.WebUI.WebControl
                 Type = "button",
                 Class = Css.Concatenate("wx-button btn", GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
+                Role = role,
                 Disabled = Active?.Invoke(renderContext) == TypeActive.Disabled
             };
 
@@ -180,11 +181,6 @@ namespace WebExpress.WebUI.WebControl
             if (!string.IsNullOrWhiteSpace(text))
             {
                 html.Add(new HtmlText(I18N.Translate(renderContext.Request.Culture, text)));
-            }
-
-            if (!string.IsNullOrWhiteSpace(OnClick?.ToString()))
-            {
-                html.AddUserAttribute("onclick", OnClick?.ToString());
             }
 
             if (_content.Count != 0)

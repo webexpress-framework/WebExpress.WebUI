@@ -72,12 +72,14 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var role = Role?.Invoke(renderContext);
+
             return new HtmlElementTextContentDiv([.. Content.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
                 Class = Css.Concatenate("", GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
+                Role = role,
                 DataTheme = Theme.ToValue()
             };
         }

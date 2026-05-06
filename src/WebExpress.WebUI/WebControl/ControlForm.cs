@@ -245,6 +245,7 @@ namespace WebExpress.WebUI.WebControl
             var stateParameterName = $"controlform_{(string.IsNullOrWhiteSpace(name) ? Id ?? "" : name).Replace('.', '-')}_state";
             var state = TypeFormState.Default;
             var stateValue = renderContext.Request.GetParameter(stateParameterName)?.Value;
+            var role = Role?.Invoke(renderContext);
 
             if (Enum.TryParse<TypeFormState>(stateValue, true, out var stateFromRequest))
             {
@@ -342,7 +343,7 @@ namespace WebExpress.WebUI.WebControl
                     ? Css.Concatenate("wx-form wx-form-inline", GetClasses())
                     : Css.Concatenate("wx-form", GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
+                Role = role,
                 Action = uri?.ToString(),
                 Method = (method == RequestMethod.NONE
                     ? RequestMethod.POST
@@ -397,10 +398,10 @@ namespace WebExpress.WebUI.WebControl
                 header.Add(new ControlAlert()
                 {
                     Classes = ["wx-validation-alert"],
-                    BackgroundColor = bgColor,
-                    Text = I18N.Translate(renderContext.Request?.Culture, v.Text),
-                    Dismissibility = TypeDismissibilityAlert.Dismissible,
-                    Fade = TypeFade.FadeShow
+                    BackgroundColor = _ => bgColor,
+                    Text = _ => I18N.Translate(renderContext.Request?.Culture, v.Text),
+                    Dismissibility = _ => TypeDismissibilityAlert.Dismissible,
+                    Fade = _ => TypeFade.FadeShow
                 }.Render(renderContext, visualTree));
             }
 

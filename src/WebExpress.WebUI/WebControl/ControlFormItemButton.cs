@@ -186,6 +186,7 @@ namespace WebExpress.WebUI.WebControl
             var type = Type?.Invoke(renderContext) ?? TypeButton.Default;
             var text = Text?.Invoke(renderContext);
             var icon = Icon?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
 
             var classes = Css.Replace(GetClasses(), color?.ToClass(), color?.ToClass(outline));
             var styles = Style.Replace(GetStyles(), color?.ToStyle(), color?.ToStyle(outline));
@@ -197,9 +198,8 @@ namespace WebExpress.WebUI.WebControl
                 Type = type.ToTypeString(),
                 Class = Css.Concatenate("btn", classes),
                 Style = styles,
-                Role = Role,
-                Disabled = disabled,
-                OnClick = OnClick?.ToString()
+                Role = role,
+                Disabled = disabled
             };
 
             if (icon is not null)

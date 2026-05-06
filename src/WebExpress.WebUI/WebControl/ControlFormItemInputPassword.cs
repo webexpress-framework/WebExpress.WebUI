@@ -68,13 +68,14 @@ namespace WebExpress.WebUI.WebControl
             var value = renderContext.GetValue<ControlFormInputValueString>(this);
             var name = Name?.Invoke(renderContext);
             var disabled = Disabled?.Invoke(renderContext) ?? false;
+            var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-input-password", GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
+                Role = role,
             }
                 .AddUserAttribute("name", name)
                 .AddUserAttribute("data-value", value?.Text)

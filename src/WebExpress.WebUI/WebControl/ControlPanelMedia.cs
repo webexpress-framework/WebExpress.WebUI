@@ -48,6 +48,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var role = Role?.Invoke(renderContext);
             var img = new HtmlElementMultimediaImg()
             {
                 Src = Image?.ToString(),
@@ -80,7 +81,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("media", GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
+                Role = role,
                 DataTheme = Theme.ToValue()
             };
 

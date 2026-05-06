@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
@@ -15,44 +16,44 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the text color of the key.
         /// </summary>
-        public PropertyColorText Color
+        public Func<IRenderControlContext, PropertyColorText> Color
         {
-            get => (PropertyColorText)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+            get => (Func<IRenderControlContext, PropertyColorText>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>
         /// Gets or sets the text color of the key.
         /// </summary>
-        public PropertyColorText KeyColor { get; set; }
+        public Func<IRenderControlContext, PropertyColorText> KeyColor { get; set; }
 
         /// <summary>
         /// Gets or sets the icon associated with the attribute, typically 
         /// used to visually represent the attribute's meaning or category.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
         /// Gets or sets the key of the attribute, representing the name or 
         /// identifier in the key-value pair.
         /// </summary>
-        public string Key { get; set; }
+        public Func<IRenderControlContext, string> Key { get; set; }
 
         /// <summary>
         /// Gets or sets the value.
         /// </summary>
-        public string Value { get; set; }
+        public Func<IRenderControlContext, string> Value { get; set; }
 
         /// <summary>
         /// Gets or sets a link.
         /// </summary>
-        public IUri Uri { get; set; }
+        public Func<IRenderControlContext, IUri> Uri { get; set; }
 
         /// <summary>
         /// Gets or sets the character used to separate the key and value in the displayed attribute.
         /// Common separators include ':' or '='.
         /// </summary>
-        public char Separator { get; set; } = ':';
+        public Func<IRenderControlContext, char> Separator { get; set; } = _ => ':';
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -71,35 +72,28 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return Render(renderContext, visualTree, Key, Value, Uri, Icon);
-        }
+            var enable = Enable?.Invoke(renderContext) ?? true;
+            var uri = Uri?.Invoke(renderContext);
+            var key = Key?.Invoke(renderContext);
+            var icon = Icon?.Invoke(renderContext);
+            var value = Value?.Invoke(renderContext);
+            var keyColor = KeyColor?.Invoke(renderContext);
+            var separator = Separator?.Invoke(renderContext) ?? ':';
+            var role = Role?.Invoke(renderContext);
 
-        /// <summary>
-        /// Converts the control to an HTML representation.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        /// <param name="visualTree">The visual tree representing the control's structure.</param>
-        /// <param name="key">The key of the attribute to be rendered.</param>
-        /// <param name="value">The value of the attribute to be rendered.</param>
-        /// <param name="uri">The URI to be associated with the value, making it a clickable link if provided.</param>
-        /// <param name="icon">The icon to be displayed alongside the key-value pair, providing a visual representation of the attribute.</param>
-        /// <returns>An HTML node representing the rendered control.</returns>
-        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, string key, string value, IUri uri, IIcon icon)
-        {
-            if (!Enable)
+            if (!enable)
             {
                 return null;
             }
 
             var resultUri = uri?.BindParameters(renderContext.Request);
             key = I18N.Translate(renderContext.Request?.Culture, key);
-            var separator = string.IsNullOrWhiteSpace(key) ? '\0' : Separator;
             var iconHtml = icon?.Render(renderContext, visualTree);
 
-            var keyElement = new HtmlElementTextSemanticsSpan(new HtmlText(key + Separator))
+            var keyElement = new HtmlElementTextSemanticsSpan(new HtmlText(key + separator))
             {
                 Id = string.IsNullOrWhiteSpace(Id) ? string.Empty : $"{Id}_name",
-                Class = KeyColor?.ToClass()
+                Class = keyColor?.ToClass()
             };
 
             var valueElement = new HtmlElementTextSemanticsSpan(new HtmlText(I18N.Translate(renderContext.Request?.Culture, value)))
@@ -123,7 +117,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = GetClasses(),
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
-                Role = Role
+                Role = role
             };
 
             return html;

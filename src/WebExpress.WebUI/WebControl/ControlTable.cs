@@ -161,6 +161,7 @@ namespace WebExpress.WebUI.WebControl
             var selectable = Selectable?.Invoke(renderContext) ?? false;
             var headerColor = HeaderColor?.Invoke(renderContext) ?? TypeColorTable.Default;
             var suppressHeaders = SuppressHeaders?.Invoke(renderContext) ?? false;
+            var role = Role?.Invoke(renderContext);
 
             var classes = Classes.ToList();
 
@@ -169,7 +170,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-table", classes),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             }
                 .AddUserAttribute("data-color", color.ToClass())
                 .AddUserAttribute("data-striped", striped.ToClass())

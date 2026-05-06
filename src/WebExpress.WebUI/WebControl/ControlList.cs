@@ -157,13 +157,14 @@ namespace WebExpress.WebUI.WebControl
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<ControlListItem> items)
         {
             var selectable = Selectable?.Invoke(renderContext) ?? false;
+            var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-list", GetClasses()),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             }
                 .AddUserAttribute("data-title", I18N.Translate(renderContext, Title))
                 .AddUserAttribute("data-sortable", Sortable ? "true" : null)

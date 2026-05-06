@@ -162,13 +162,14 @@ namespace WebExpress.WebUI.WebControl
         {
             var classes = Classes.ToList();
             var layout = Layout?.Invoke(renderContext) ?? TypeLayoutView.Default;
+            var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-view", classes),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             }
                 .AddUserAttribute("data-layout", layout == TypeLayoutView.Default ? null : layout.ToValue())
                 .Add(_headers.Select(x => x.Render(renderContext, visualTree)))

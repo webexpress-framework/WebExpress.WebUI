@@ -32,15 +32,16 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var role = Role?.Invoke(renderContext);
             var dropDown = Tools.Render(renderContext, visualTree);
-            var content = new HtmlElementTextContentDiv(Content.Select(x => x.Render(renderContext, visualTree)).ToArray());
+            var content = new HtmlElementTextContentDiv([.. Content.Select(x => x.Render(renderContext, visualTree))]);
 
             var html = new HtmlElementTextContentDiv(dropDown, content)
             {
                 Id = Id,
                 Class = Css.Concatenate("toolpanel", GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
+                Role = role,
                 DataTheme = Theme.ToValue()
             };
 
