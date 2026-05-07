@@ -115,6 +115,17 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            return Render(renderContext, visualTree, _content);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControl> content)
+        {
             var title = Title?.Invoke(renderContext);
             var color = Color?.Invoke(renderContext);
             var icon = Icon?.Invoke(renderContext);
@@ -135,7 +146,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-column", column < uint.MaxValue ? column.ToString() : null)
                 .AddUserAttribute("data-movable", movable ? "true" : null)
                 .AddUserAttribute("data-closeable", closeable ? "true" : null)
-                .Add(_content.Select(x => x.Render(renderContext, visualTree)));
+                .Add(content.Select(x => x.Render(renderContext, visualTree)));
 
             return html;
         }

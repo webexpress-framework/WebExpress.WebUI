@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlBreadcrumb
             {
-                Uri = new UriEndpoint(uri)
+                Uri = _ => new UriEndpoint(uri)
             };
 
             // act
@@ -75,8 +75,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlBreadcrumb
             {
-                Size = size,
-                Uri = new UriEndpoint("http://example.com/a/b/c")
+                Size = _ => size,
+                Uri = _ => new UriEndpoint("http://example.com/a/b/c")
             };
 
             // act
@@ -98,7 +98,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlBreadcrumb { Prefix = prefix, Uri = new UriEndpoint("http://example.com") };
+            var control = new ControlBreadcrumb { Prefix = _ => prefix, Uri = _ => new UriEndpoint("http://example.com") };
 
             // act
             var html = control.Render(context, visualTree);
@@ -119,7 +119,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlBreadcrumb { TakeLast = takeLast, Uri = new UriEndpoint("http://example.com") };
+            var control = new ControlBreadcrumb { TakeLast = _ => takeLast, Uri = _ => new UriEndpoint("http://example.com") };
 
             // act
             var html = control.Render(context, visualTree);
@@ -144,7 +144,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var uriResource = new UriEndpoint(uri);
             var control = new ControlBreadcrumb()
             {
-                Uri = !string.IsNullOrWhiteSpace(uri) ? uriResource : null
+                Uri = _ => !string.IsNullOrWhiteSpace(uri) ? uriResource : null
             };
 
             var uriProperty = renderContext.Request.GetType().GetProperty("Uri");

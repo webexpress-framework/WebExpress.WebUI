@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.Internationalization;
+﻿using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -17,7 +18,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the text.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -36,7 +37,9 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Text)))
+            var text = Text?.Invoke(renderContext);
+
+            return new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, text)))
             {
                 Id = Id,
                 Class = "wx-dropdown-header",

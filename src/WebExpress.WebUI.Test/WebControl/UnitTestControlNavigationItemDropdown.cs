@@ -56,7 +56,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemDropdown()
             {
-                Color = new PropertyColorButton(color)
+                Color = _ => new PropertyColorButton(color)
             };
 
             // act
@@ -81,7 +81,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemDropdown()
             {
-                Size = size
+                Size = _ => size
             };
 
             // act
@@ -105,8 +105,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemDropdown()
             {
-                Outline = outline,
-                Color = new PropertyColorButton(TypeColorButton.Primary)
+                Outline = _ => outline,
+                Color = _ => new PropertyColorButton(TypeColorButton.Primary)
             };
 
             // act
@@ -130,7 +130,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemDropdown()
             {
-                Block = block
+                Block = _ => block
             };
 
             // act
@@ -154,7 +154,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemDropdown()
             {
-                Toggle = toogle
+                Toggle = _ => toogle
             };
 
             // act
@@ -179,7 +179,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemDropdown()
             {
-                Text = text,
+                Text = _ => text,
             };
 
             // act
@@ -204,7 +204,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemDropdown()
             {
-                Tooltip = tooltip,
+                Tooltip = _ => tooltip,
             };
 
             // act
@@ -228,7 +228,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemDropdown()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -253,7 +253,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemDropdown()
             {
-                Active = active
+                Active = _ => active
             };
 
             // act
@@ -277,7 +277,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemDropdown()
             {
-                AlignmentMenu = alignmentMenu
+                AlignmentMenu = _ => alignmentMenu
             };
 
             // act
@@ -300,7 +300,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlNavigationItemDropdown();
 
             // act
-            control.Add(new ControlDropdownItemLink() { Text = "abc" });
+            control.Add(new ControlDropdownItemLink() { Text = _ => "abc" });
 
             var html = control.Render(context, visualTree);
 

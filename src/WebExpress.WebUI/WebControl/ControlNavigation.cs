@@ -205,6 +205,8 @@ namespace WebExpress.WebUI.WebControl
                 }
                 else if (item is ControlNavigationItemDropdown dropdown)
                 {
+                    var active = dropdown.Active?.Invoke(renderContext);
+
                     i.RemoveClass(dropdown.TextColor?.Invoke(renderContext)?.ToClass());
                     i.RemoveStyle(dropdown.TextColor?.Invoke(renderContext)?.ToStyle());
 
@@ -213,16 +215,16 @@ namespace WebExpress.WebUI.WebControl
                         Css.Concatenate
                         (
                             "nav-link",
-                            dropdown.Active == TypeActive.Active ? ActiveColor?.ToClass() : "",
-                            dropdown.Active == TypeActive.Active ? ActiveTextColor?.ToClass() : ""
+                            active == TypeActive.Active ? ActiveColor?.ToClass() : "",
+                            active == TypeActive.Active ? ActiveTextColor?.ToClass() : ""
                         )
                     );
                     i.AddStyle
                     (
                         Style.Concatenate
                         (
-                            dropdown.Active == TypeActive.Active ? ActiveColor?.ToStyle() : "",
-                            dropdown.Active == TypeActive.Active ? ActiveTextColor?.ToStyle() : ""
+                            active == TypeActive.Active ? ActiveColor?.ToStyle() : "",
+                            active == TypeActive.Active ? ActiveTextColor?.ToStyle() : ""
                         )
                     );
                 }

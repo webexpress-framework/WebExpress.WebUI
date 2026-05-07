@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.Internationalization;
+﻿using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -12,12 +13,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the color.
         /// </summary>
-        public string Color { get; set; }
+        public Func<IRenderControlContext, string> Color { get; set; }
 
         /// <summary>
         /// Gets or sets the tooltip text.
         /// </summary>
-        public string Tooltip { get; set; }
+        public Func<IRenderControlContext, string> Tooltip { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -36,14 +37,17 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var color = Color?.Invoke(renderContext);
+            var tooltip = Tooltip?.Invoke(renderContext);
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-color", GetClasses()),
                 Style = GetStyles()
             }
-                .AddUserAttribute("data-value", Color)
-                .AddUserAttribute("data-tooltip", I18N.Translate(renderContext, Tooltip));
+                .AddUserAttribute("data-value", color)
+                .AddUserAttribute("data-tooltip", I18N.Translate(renderContext, tooltip));
 
             return html;
         }

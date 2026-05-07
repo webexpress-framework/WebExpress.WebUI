@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatar()
             {
-                Username = user
+                Username = _ => user
             };
 
             // act
@@ -70,7 +70,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatar()
             {
-                Image = uri is not null ? new UriEndpoint(uri) : null
+                Image = _ => uri is not null ? new UriEndpoint(uri) : null
             };
 
             // act
@@ -155,7 +155,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatar()
             {
-                Uri = uri is not null ? new UriEndpoint(uri) : null
+                Uri = _ => uri is not null ? new UriEndpoint(uri) : null
             };
 
             // act
@@ -179,7 +179,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatar()
             {
-                Size = size
+                Size = _ => size
             };
 
             // act

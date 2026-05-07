@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlCardCounter()
             {
-                Text = text,
+                Text = _ => text,
             };
 
             // act
@@ -76,7 +76,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlCardCounter()
             {
-                Value = value,
+                Value = _ => value,
             };
 
             // act
@@ -101,7 +101,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlCardCounter()
             {
-                Progress = value
+                Progress = _ => value
             };
 
             // act
@@ -125,7 +125,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlCardCounter()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act

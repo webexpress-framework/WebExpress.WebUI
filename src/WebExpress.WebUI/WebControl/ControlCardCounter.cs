@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+﻿using System;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.WebPage;
 
@@ -12,22 +13,22 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the icon.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
         /// Gets or sets the counter value.
         /// </summary>
-        public int? Value { get; set; }
+        public Func<IRenderControlContext, int?> Value { get; set; }
 
         /// <summary>
         /// Gets or sets the value of the progrss.
         /// </summary>
-        public uint? Progress { get; set; }
+        public Func<IRenderControlContext, uint?> Progress { get; set; }
 
         /// <summary>
         /// Gets or sets the text.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -48,6 +49,10 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var role = Role?.Invoke(renderContext);
+            var icon = Icon?.Invoke(renderContext);
+            var value = Value?.Invoke(renderContext);
+            var text = Text?.Invoke(renderContext);
+            var progress = Progress?.Invoke(renderContext);
 
             var html = new HtmlElementTextSemanticsSpan()
             {
@@ -61,32 +66,32 @@ namespace WebExpress.WebUI.WebControl
             {
                 html.Add(new ControlIcon()
                 {
-                    Icon = Icon,
+                    Icon = icon,
                     TextColor = TextColor,
                     HorizontalAlignment = _ => TypeHorizontalAlignment.Right
                 }.Render(renderContext, visualTree));
             }
 
-            var text = new ControlText(string.IsNullOrWhiteSpace(Id) ? null : Id + "_header")
+            var textCtrl = new ControlText(string.IsNullOrWhiteSpace(Id) ? null : Id + "_header")
             {
-                Text = Value.HasValue ? Value.Value.ToString() : null,
+                Text = value.HasValue ? value.Value.ToString() : null,
                 Format = TypeFormatText.H4
             };
 
             var info = new ControlText()
             {
-                Text = Text,
+                Text = text,
                 Format = TypeFormatText.Span,
                 TextColor = new PropertyColorText(TypeColorText.Muted)
             };
 
-            html.Add(new ControlPanel(null, text, info) { }.Render(renderContext, visualTree));
+            html.Add(new ControlPanel(null, textCtrl, info) { }.Render(renderContext, visualTree));
 
-            if (Progress.HasValue)
+            if (progress.HasValue)
             {
                 html.Add(new ControlProgress()
                 {
-                    Value = Progress.Value,
+                    Value = progress.Value,
                     Format = TypeFormatProgress.Striped,
                     BackgroundColor = BackgroundColor,
                     //Color = Color,

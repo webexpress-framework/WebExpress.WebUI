@@ -2,7 +2,6 @@
 using System.Linq;
 using WebExpress.WebCore;
 using WebExpress.WebCore.Internationalization;
-using WebExpress.WebCore.WebEndpoint;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebCore.WebUri;
@@ -19,26 +18,26 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Return or sets the uri.
         /// </summary>
-        public IUri Uri { get; set; }
+        public Func<IRenderControlContext, IUri> Uri { get; set; }
 
         /// <summary>
         /// Gets or sets the size.
         /// </summary>
-        public TypeSizeText Size
+        public Func<IRenderControlContext, TypeSizeText> Size
         {
-            get => (TypeSizeText)GetProperty(TypeSizeText.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeSizeText>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
         /// Return or sets a prefix, which is statically displayed in front of the links.
         /// </summary>
-        public string Prefix { get; set; }
+        public Func<IRenderControlContext, string> Prefix { get; set; }
 
         /// <summary>
         /// Return or sets how many links to display. It will be truncated at the beginning of the link chain.
         /// </summary>
-        public ushort TakeLast { get; set; } = ushort.MaxValue;
+        public Func<IRenderControlContext, ushort> TakeLast { get; set; } = _ => ushort.MaxValue;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -47,7 +46,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlBreadcrumb(string id = null)
             : base(id)
         {
-            Size = TypeSizeText.Small;
+            Size = _ => TypeSizeText.Small;
         }
 
         /// <summary>
@@ -58,18 +57,9 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return Render(renderContext, visualTree, Uri);
-        }
-
-        /// <summary>
-        /// Converts the control to an HTML representation.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        /// <param name="visualTree">The visual tree representing the control's structure.</param>
-        /// <param name="uri">The URI used to generate the breadcrumb links.</param>
-        /// <returns>An HTML node representing the rendered control.</returns>
-        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IUri uri)
-        {
+            var prefix = Prefix?.Invoke(renderContext);
+            var uri = Uri?.Invoke(renderContext);
+            var takeLast = TakeLast?.Invoke(renderContext) ?? ushort.MaxValue;
             var siteManager = WebEx.ComponentHub.SitemapManager;
             var lastEndpointContext = default(WebCore.WebEndpoint.IEndpointContext);
 
@@ -80,7 +70,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(),
             };
 
-            if (!string.IsNullOrWhiteSpace(Prefix))
+            if (!string.IsNullOrWhiteSpace(prefix))
             {
                 html.Add
                 (
@@ -88,7 +78,7 @@ namespace WebExpress.WebUI.WebControl
                     (
                         new HtmlElementTextContentDiv
                         (
-                            new HtmlText(I18N.Translate(renderContext.Request?.Culture, Prefix))
+                            new HtmlText(I18N.Translate(renderContext.Request?.Culture, prefix))
                         )
                     )
                     {
@@ -102,7 +92,7 @@ namespace WebExpress.WebUI.WebControl
                 return html;
             }
 
-            var takeLast = Math.Min(TakeLast, uri.PathSegments.Count());
+            takeLast = (ushort)Math.Min(takeLast, uri?.PathSegments.Count() ?? 0);
             var from = uri.PathSegments.Count() - takeLast;
 
             for (int i = from + 1; i < uri.PathSegments.Count() + 1; i++)

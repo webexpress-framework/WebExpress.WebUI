@@ -58,11 +58,6 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, bool> Disabled { get; set; } = _ => false;
 
         /// <summary>
-        /// Event is triggered when the button is clicked.
-        /// </summary>
-        public EventHandler<ControlFormEvent> Click;
-
-        /// <summary>
         /// Gets or sets the text.
         /// </summary>
         public Func<IRenderControlContext, string> Text { get; set; }
@@ -229,15 +224,6 @@ namespace WebExpress.WebUI.WebControl
             }
 
             return html;
-        }
-
-        /// <summary>
-        /// Triggers the click event.
-        /// </summary>
-        /// <param name="e">The event argument.</param>
-        protected virtual void OnClickEvent(ControlFormEvent e)
-        {
-            Click?.Invoke(this, e);
         }
     }
 }

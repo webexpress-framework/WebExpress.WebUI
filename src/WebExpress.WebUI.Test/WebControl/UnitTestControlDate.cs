@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDate(null)
             {
-                Format = format
+                Format = _ => format
             };
 
             // act
@@ -71,7 +71,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDate(null)
             {
-                Date = string.IsNullOrWhiteSpace(date) ? default : DateTime.Parse(date)
+                Date = _ => string.IsNullOrWhiteSpace(date) ? default : DateTime.Parse(date)
             };
 
             // act
@@ -103,7 +103,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDate()
             {
-                Color = new PropertyColorDate(color)
+                Color = _ => new PropertyColorDate(color)
             };
 
             // act
@@ -129,7 +129,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDate()
             {
-                Color = new PropertyColorDate(color)
+                Color = _ => new PropertyColorDate(color)
             };
 
             // act

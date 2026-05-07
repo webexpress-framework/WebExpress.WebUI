@@ -240,6 +240,18 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The control as html.</returns>
         public virtual IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            return Render(renderContext, visualTree, _items);
+        }
+
+        /// <summary>
+        /// Convert to html.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="items">The form items.</param>
+        /// <returns>The control as html.</returns>
+        public virtual IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlFormItem> items)
+        {
             var validationResults = new List<ValidationResult>();
             var name = Name?.Invoke(renderContext);
             var stateParameterName = $"controlform_{(string.IsNullOrWhiteSpace(name) ? Id ?? "" : name).Replace('.', '-')}_state";
@@ -266,7 +278,7 @@ namespace WebExpress.WebUI.WebControl
 
                 // uninizialized form
                 // fill the form with data
-                foreach (var item in Items.Where(x => x is not null))
+                foreach (var item in items.Where(x => x is not null))
                 {
                     item.Initialize(renderContext);
                 }
@@ -282,7 +294,7 @@ namespace WebExpress.WebUI.WebControl
                 state = TypeFormState.Error;
 
                 // fill the form with data
-                foreach (var item in Items
+                foreach (var item in items
                     .Where(x => x is IControlFormInitialize)
                     .Select(x => x as IControlFormInitialize))
                 {
@@ -295,7 +307,7 @@ namespace WebExpress.WebUI.WebControl
                     Context = renderContext
                 };
 
-                foreach (var item in Items
+                foreach (var item in items
                     .Where(x => x is IControlFormValidation)
                     .Select(x => x as IControlFormValidation))
                 {
@@ -309,7 +321,7 @@ namespace WebExpress.WebUI.WebControl
                 {
                     state = TypeFormState.Success;
 
-                    foreach (var item in Items
+                    foreach (var item in items
                         .Where(x => x is IControlFormProcess)
                         .Select(x => x as IControlFormProcess))
                     {
@@ -405,7 +417,7 @@ namespace WebExpress.WebUI.WebControl
                 }.Render(renderContext, visualTree));
             }
 
-            foreach (var item in Items.Where(x => x is ControlFormItemInputHidden))
+            foreach (var item in items.Where(x => x is ControlFormItemInputHidden))
             {
                 form.Add(item.Render(renderContext, visualTree));
             }

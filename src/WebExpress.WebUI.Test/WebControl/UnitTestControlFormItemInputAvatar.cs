@@ -99,7 +99,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                Placeholder = placeholder
+                Placeholder = _ => placeholder
             };
 
             // act
@@ -122,7 +122,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                Uri = uri is not null ? new UriEndpoint(uri) : null
+                Uri = _ => uri is not null ? new UriEndpoint(uri) : null
             };
 
             var html = control.Render(context, visualTree);
@@ -145,7 +145,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                Shape = shape
+                Shape = _ => shape
             };
 
             var html = control.Render(context, visualTree);
@@ -167,7 +167,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                Viewport = viewport
+                Viewport = _ => viewport
             };
 
             var html = control.Render(context, visualTree);
@@ -189,7 +189,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                OutputSize = size
+                OutputSize = _ => size
             };
 
             var html = control.Render(context, visualTree);
@@ -211,7 +211,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                OutputFormat = format
+                OutputFormat = _ => format
             };
 
             var html = control.Render(context, visualTree);
@@ -233,7 +233,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                OutputQuality = quality
+                OutputQuality = _ => quality
             };
 
             var html = control.Render(context, visualTree);
@@ -256,7 +256,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFormItemInputAvatar(null)
             {
                 Accept = accept is not null
-                    ? [.. accept.Split(',')
+                    ? _ => [.. accept.Split(',')
                         .Select(x => ContentTypeExtensions.ToContentTypeFromMime(x))]
                     : null
             };
@@ -281,7 +281,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                OverlayAlpha = alpha
+                OverlayAlpha = _ => alpha
             };
 
             var html = control.Render(context, visualTree);

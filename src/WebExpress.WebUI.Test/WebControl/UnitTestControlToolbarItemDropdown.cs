@@ -225,7 +225,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlToolbarItemDropdown();
 
             // act
-            control.Add(new ControlDropdownItemLink() { Text = "webexpress.WebUI:plugin.name" });
+            control.Add(new ControlDropdownItemLink() { Text = _ => "webexpress.WebUI:plugin.name" });
 
             // validation
             var html = control.Render(context, visualTree);

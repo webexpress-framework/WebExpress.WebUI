@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlCode()
             {
-                Code = code
+                Code = _ => code
             };
 
             // act
@@ -71,7 +71,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlCode()
             {
-                LineNumbers = lineNumbers
+                LineNumbers = _ => lineNumbers
 
             };
 
@@ -103,7 +103,6 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeLanguage.Python, @"<pre class=""wx-webui-code"" data-language=""python"" data-base64=""true""></pre>")]
         [InlineData(TypeLanguage.VisualBasic, @"<pre class=""wx-webui-code"" data-language=""visualbasic"" data-base64=""true""></pre>")]
         [InlineData(TypeLanguage.Xml, @"<pre class=""wx-webui-code"" data-language=""xml"" data-base64=""true""></pre>")]
-
         public void Language(TypeLanguage language, string expected)
         {
             // arrange
@@ -112,7 +111,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlCode()
             {
-                Language = language
+                Language = _ => language
             };
 
             // act

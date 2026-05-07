@@ -158,7 +158,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public IControlTableRow AddHeader(string text)
         {
-            _options.Add(new ControlDropdownItemHeader() { Text = text });
+            _options.Add(new ControlDropdownItemHeader() { Text = _ => text });
 
             return this;
         }

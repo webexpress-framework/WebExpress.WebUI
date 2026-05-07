@@ -23,6 +23,7 @@ namespace WebExpress.WebUI.WebControl
         };
         private readonly List<ControlChartDataset> _datasets = [];
         private readonly List<string> _labels = [];
+
         /// <summary>
         /// Gets or sets the chart type. The setter returns the instance for fluent chaining.
         /// </summary>

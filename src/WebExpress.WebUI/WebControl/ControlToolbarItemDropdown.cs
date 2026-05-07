@@ -165,7 +165,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public IControlToolbarItemDropdown AddHeader(string text)
         {
-            _items.Add(new ControlDropdownItemHeader() { Text = text });
+            _items.Add(new ControlDropdownItemHeader() { Text = _ => text });
 
             return this;
         }

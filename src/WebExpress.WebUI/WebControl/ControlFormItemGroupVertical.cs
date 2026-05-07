@@ -104,7 +104,7 @@ namespace WebExpress.WebUI.WebControl
                     }
 
                     help.Initialize(renderGroupContext);
-                    help.Text = I18N.Translate(renderGroupContext, inputHelp);
+                    help.Text = _ => I18N.Translate(renderGroupContext, inputHelp);
 
                     if (icon.Icon is not null && label is null)
                     {

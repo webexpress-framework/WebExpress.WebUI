@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlBadge()
             {
-                Value = value?.ToString()
+                Value = _ => value?.ToString()
             };
 
             // act
@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlBadge()
             {
-                Uri = uri is not null ? new UriEndpoint(uri) : null
+                Uri = _ => uri is not null ? new UriEndpoint(uri) : null
             };
 
             // act
@@ -133,7 +133,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlBadge()
             {
-                BackgroundColor = new PropertyColorBackgroundBadge(backgroundColor)
+                BackgroundColor = _ => new PropertyColorBackgroundBadge(backgroundColor)
             };
 
             // act
@@ -156,7 +156,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlBadge()
             {
-                Pill = pill
+                Pill = _ => pill
             };
 
             // act

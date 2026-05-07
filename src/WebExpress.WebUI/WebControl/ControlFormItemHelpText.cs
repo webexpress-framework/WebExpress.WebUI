@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.Internationalization;
+﻿using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -12,16 +13,16 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the size of the text.
         /// </summary>
-        public PropertySizeText Size
+        public Func<IRenderControlContext, PropertySizeText> Size
         {
-            get => (PropertySizeText)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+            get => (Func<IRenderControlContext, PropertySizeText>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>
         /// Gets or sets the help text.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -50,11 +51,12 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var role = Role?.Invoke(renderContext);
+            var text = Text?.Invoke(renderContext);
 
             return new HtmlElementTextSemanticsSmall()
             {
                 Id = Id,
-                Text = I18N.Translate(renderContext.Request?.Culture, Text),
+                Text = I18N.Translate(renderContext.Request?.Culture, text),
                 Class = Css.Concatenate("", GetClasses()),
                 Style = GetStyles(),
                 Role = role

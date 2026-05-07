@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -23,37 +24,37 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the display name for the avatar.
         /// </summary>
-        public string User { get; set; }
+        public Func<IRenderControlContext, string> User { get; set; }
 
         /// <summary>
         /// Gets or sets the image source for the avatar.
         /// </summary>
-        public IUri Image { get; set; }
+        public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
         /// Gets or sets the initials fallback for the avatar.
         /// </summary>
-        public string Initials { get; set; }
+        public Func<IRenderControlContext, string> Initials { get; set; }
 
         /// <summary>
         /// Gets or sets the shape of the avatar thumbnail (circle or rect).
         /// </summary>
-        public TypeShapeAvatar Shape { get; set; }
+        public Func<IRenderControlContext, TypeShapeAvatar> Shape { get; set; }
 
         /// <summary>
         /// Gets or sets the size of the avatar thumbnail in pixels.
         /// </summary>
-        public int Size { get; set; } = -1;
+        public Func<IRenderControlContext, int> Size { get; set; } = _ => -1;
 
         /// <summary>
         /// Gets or sets the color.
         /// </summary>
-        public PropertyColorButton Color { get; set; }
+        public Func<IRenderControlContext, PropertyColorButton> Color { get; set; }
 
         /// <summary>
         /// Gets or sets the orientation of the menu.
         /// </summary>
-        public TypeAlignmentDropdownMenu AlignmentMenu { get; set; }
+        public Func<IRenderControlContext, TypeAlignmentDropdownMenu> AlignmentMenu { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class with the specified id and items.
@@ -108,7 +109,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public IControlDropdown AddHeader(string text)
         {
-            _items.Add(new ControlDropdownItemHeader() { Text = text });
+            _items.Add(new ControlDropdownItemHeader() { Text = _ => text });
 
             return this;
         }
@@ -133,27 +134,21 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return Render(renderContext, visualTree, User, Image);
-        }
-
-        /// <summary>
-        /// Converts the control to an HTML representation.
-        /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        /// <param name="visualTree">The visual tree representing the control's structure.</param>
-        /// <param name="username">The display name for the avatar.</param>
-        /// <param name="image">The image source for the avatar.</param>
-        /// <returns>An HTML node representing the rendered control.</returns>
-        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, string username, IUri image)
-        {
             var menuCss = "";
+            var alignmentMenu = AlignmentMenu?.Invoke(renderContext) ?? TypeAlignmentDropdownMenu.Default;
 
-            if (AlignmentMenu != TypeAlignmentDropdownMenu.Default)
+            if (alignmentMenu != TypeAlignmentDropdownMenu.Default)
             {
-                menuCss = AlignmentMenu.ToClass();
+                menuCss = alignmentMenu.ToClass();
             }
 
             var role = Role?.Invoke(renderContext);
+            var username = User?.Invoke(renderContext);
+            var shape = Shape?.Invoke(renderContext) ?? TypeShapeAvatar.Circle;
+            var initials = Initials?.Invoke(renderContext);
+            var color = Color?.Invoke(renderContext);
+            var size = Size?.Invoke(renderContext) ?? -1;
+            var image = Image?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
@@ -162,11 +157,11 @@ namespace WebExpress.WebUI.WebControl
                 Role = role ?? "button"
             }
                 .AddUserAttribute("data-name", I18N.Translate(renderContext, username))
-                .AddUserAttribute("data-src", Image?.ToString())
-                .AddUserAttribute("data-initials", Initials)
-                .AddUserAttribute("data-shape", Shape != TypeShapeAvatar.Circle ? Shape.ToValue() : null)
-                .AddUserAttribute("data-size", Size > 0 ? Size.ToString() : null)
-                .AddUserAttribute("data-color", Color?.ToClass(false))
+                .AddUserAttribute("data-src", image?.ToString())
+                .AddUserAttribute("data-initials", initials)
+                .AddUserAttribute("data-shape", shape != TypeShapeAvatar.Circle ? shape.ToValue() : null)
+                .AddUserAttribute("data-size", size > 0 ? size.ToString() : null)
+                .AddUserAttribute("data-color", color?.ToClass(false))
                 .AddUserAttribute("data-menuCss", menuCss)
                 .Add(_items.Select(x => x?.Render(renderContext, visualTree)));
 

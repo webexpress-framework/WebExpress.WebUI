@@ -95,7 +95,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var childInstance = new ControlDropdownItemLink() { Text = text };
+            var childInstance = new ControlDropdownItemLink() { Text = _ => text };
             var control = new ControlPanelTool()
             {
             };

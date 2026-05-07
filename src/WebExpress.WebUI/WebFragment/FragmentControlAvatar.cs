@@ -45,16 +45,7 @@ namespace WebExpress.WebUI.WebFragment
                 return null;
             }
 
-            return base.Render
-            (
-                renderContext,
-                visualTree,
-                GetUsername(renderContext),
-                GetImage(renderContext),
-                Uri,
-                PrimaryAction,
-                SecondaryAction
-            );
+            return base.Render(renderContext, visualTree);
         }
 
         /// <summary>
@@ -68,7 +59,7 @@ namespace WebExpress.WebUI.WebFragment
         /// </returns>
         public virtual string GetUsername(IRenderControlContext renderContext)
         {
-            return Username;
+            return Username?.Invoke(renderContext);
         }
 
         /// <summary>
@@ -86,7 +77,7 @@ namespace WebExpress.WebUI.WebFragment
         {
             var applicationContet = renderContext.PageContext.ApplicationContext;
 
-            return Image ?? applicationContet?.Route.Concat("/webexpress.webapp/assets/img/avatar.svg")?.ToUri();
+            return Image?.Invoke(renderContext) ?? applicationContet?.Route.Concat("/webexpress.webapp/assets/img/avatar.svg")?.ToUri();
         }
     }
 }

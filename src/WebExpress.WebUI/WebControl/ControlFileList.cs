@@ -80,9 +80,9 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <param name="visualTree">The visual tree representing the control's structure.</param>
-        /// <param name="nodes">The collection of tree nodes to process.</param>
+        /// <param name="files">The collection of tree nodes to process.</param>
         /// <returns>An HTML node representing the rendered control.</returns>
-        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlFileListItem> nodes)
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlFileListItem> files)
         {
             var html = new HtmlElementTextContentDiv()
             {
@@ -90,7 +90,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("wx-webui-file-list", GetClasses()),
                 Style = GetStyles()
             }
-                .Add(Files.Select(x => x.Render(renderContext, visualTree)));
+                .Add(files.Select(x => x.Render(renderContext, visualTree)));
 
             return html;
         }

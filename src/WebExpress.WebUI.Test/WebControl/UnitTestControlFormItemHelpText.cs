@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemHelpText()
             {
-                Text = text
+                Text = _ => text
             };
 
             // act
@@ -76,7 +76,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemHelpText()
             {
-                Size = new PropertySizeText(size)
+                Size = _ => new PropertySizeText(size)
             };
 
             // act

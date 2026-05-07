@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatarDropdown()
             {
-                User = name
+                User = _ => name
             };
 
             // act
@@ -70,7 +70,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatarDropdown()
             {
-                Image = uri is not null ? new UriEndpoint(uri) : null
+                Image = _ => uri is not null ? new UriEndpoint(uri) : null
             };
 
             // act
@@ -93,7 +93,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatarDropdown()
             {
-                Initials = initials
+                Initials = _ => initials
             };
 
             // act
@@ -116,7 +116,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatarDropdown()
             {
-                Shape = shape
+                Shape = _ => shape
             };
 
             // act
@@ -139,7 +139,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatarDropdown()
             {
-                Size = size
+                Size = _ => size
             };
 
             // act
@@ -163,7 +163,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatarDropdown()
             {
-                Color = new PropertyColorButton(color)
+                Color = _ => new PropertyColorButton(color)
             };
 
             // act
@@ -186,7 +186,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatarDropdown()
             {
-                AlignmentMenu = alignmentMenu
+                AlignmentMenu = _ => alignmentMenu
             };
 
             // act
@@ -208,7 +208,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlAvatarDropdown();
 
             // act
-            control.Add(new ControlDropdownItemLink() { Text = "abc" });
+            control.Add(new ControlDropdownItemLink() { Text = _ => "abc" });
 
             var html = control.Render(context, visualTree);
 
@@ -267,8 +267,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatarDropdown()
             {
-                User = "Max Mustermann",
-                Image = new UriEndpoint("http://example.com/avatar.png")
+                User = _ => "Max Mustermann",
+                Image = _ => new UriEndpoint("http://example.com/avatar.png")
             };
 
             // act
@@ -289,14 +289,14 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatarDropdown()
             {
-                User = "Max Mustermann",
-                Initials = "MM",
-                Shape = TypeShapeAvatar.Rect,
-                Size = 48
+                User = _ => "Max Mustermann",
+                Initials = _ => "MM",
+                Shape = _ => TypeShapeAvatar.Rect,
+                Size = _ => 48
             };
 
             // act
-            control.Add(new ControlDropdownItemLink() { Text = "Profile" });
+            control.Add(new ControlDropdownItemLink() { Text = _ => "Profile" });
 
             var html = control.Render(context, visualTree);
 
@@ -314,7 +314,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatarDropdown();
-            var item = new ControlDropdownItemLink() { Text = "abc" };
+            var item = new ControlDropdownItemLink() { Text = _ => "abc" };
 
             // act
             control.Add(item);
