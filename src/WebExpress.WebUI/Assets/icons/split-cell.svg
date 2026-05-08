@@ -1,7 +1,13 @@
-﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg width="21" height="21" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
-  <path
-     id="split-cell"
-     style="fill:#000000;stroke-width:0"
-     d="M 0 0 L 0 5 L 5 5 L 5 0 L 0 0 z M 6 0 L 6 5 L 12 5 L 12 0 L 6 0 z M 13 0 L 13 5 L 18 5 L 18 0 L 13 0 z M 0 6 L 0 12 L 7 12 L 7 6 L 0 6 z M 8 6 L 8 12 L 10 12 L 10 6 L 8 6 z M 11 6 L 11 12 L 18 12 L 18 6 L 11 6 z M 0 13 L 0 18 L 5 18 L 5 13 L 0 13 z M 6 13 L 6 18 L 12 18 L 12 13 L 6 13 z M 13 13 L 13 18 L 18 18 L 18 13 L 13 13 z " />
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+ <g transform="translate(-11.271,23.441)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
+  <path d="m13.196-15.797h17.15"/>
+  <path d="m13.196-10.085h17.15"/>
+  <path d="m24.922-20.759v4.7958"/>
+  <path d="m18.62-9.5192v4.396"/>
+  <path d="m24.922-9.5192v4.396"/>
+  <path d="m18.62-20.619v4.6562"/>
+  <path d="m21.771-15.269v4.6562"/>
+  <rect x="12.625" y="-21.375" width="18.292" height="16.868" rx=".99481"/>
+ </g>
 </svg>

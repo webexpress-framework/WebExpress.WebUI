@@ -4,8 +4,8 @@
 		.st2 {fill:#000000;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.24}
 		.st3 {fill:none;fill-rule:evenodd;font-size:12px;overflow:visible;stroke-linecap:square;stroke-miterlimit:3}</style>
  <g transform="matrix(.13099 0 0 .13099 -8.197 -8.1747)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="9.5425">
-  <path d="m90.531 144.29h87.534"/>
-  <path d="m90.444 179.52h97.242"/>
+  <path d="m107.95 138.31h69.574" stroke-width="8.5074"/>
+  <path d="m107.16 173.54h71.166" stroke-width="8.1634"/>
   <path d="m76.635 201.54-0.04462-119.46 37.365-0.19866 0.0729 23.527 92.826-0.19865 0.0115 96.332z"/>
  </g>
 </svg>
