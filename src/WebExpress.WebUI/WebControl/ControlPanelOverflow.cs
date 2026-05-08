@@ -32,7 +32,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-overflow", GetClasses()),
                 Style = GetStyles(),
-                DataTheme = Theme.ToValue()
+                DataTheme = Theme?.Invoke(renderContext).ToValue()
             }
                 .Add(Content.Select(x => x.Render(renderContext, visualTree)));
         }

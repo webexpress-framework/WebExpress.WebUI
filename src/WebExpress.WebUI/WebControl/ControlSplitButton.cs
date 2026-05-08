@@ -142,7 +142,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public IControlSplitButton AddHeader(string text)
         {
-            _items.Add(new ControlSplitButtonItemHeader() { Text = text });
+            _items.Add(new ControlSplitButtonItemHeader() { Text = _ => text });
 
             return this;
         }
@@ -184,7 +184,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 button.Add(new ControlIcon()
                 {
-                    Icon = icon,
+                    Icon = _ => icon,
                     Margin = _ => !string.IsNullOrWhiteSpace(text) ? new PropertySpacingMargin
                     (
                         PropertySpacing.Space.None,
@@ -192,7 +192,7 @@ namespace WebExpress.WebUI.WebControl
                         PropertySpacing.Space.None,
                         PropertySpacing.Space.None
                     ) : new PropertySpacingMargin(PropertySpacing.Space.None),
-                    VerticalAlignment = TypeVerticalAlignment.Default
+                    VerticalAlignment = _ => TypeVerticalAlignment.Default
                 }.Render(renderContext, visualTree));
             }
 

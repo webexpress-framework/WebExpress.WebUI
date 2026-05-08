@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.Internationalization;
+using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -19,22 +20,22 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the label.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
         /// Gets or sets a tooltip text.
         /// </summary>
-        public string Tooltip { get; set; }
+        public Func<IRenderControlContext, string> Tooltip { get; set; }
 
         /// <summary>
         /// Gets or sets the link color.
         /// </summary>
-        public PropertyColorText Color { get; set; }
+        public Func<IRenderControlContext, PropertyColorText> Color { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the feature is disabled.
         /// </summary>
-        public bool Disabled { get; set; } = false;
+        public Func<IRenderControlContext, bool> Disabled { get; set; } = _ => false;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -53,7 +54,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return Render(renderContext, visualTree, Text);
+            return Render(renderContext, visualTree, Text?.Invoke(renderContext));
         }
 
         /// <summary>
@@ -65,16 +66,20 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, string text)
         {
+            var tooltip = Tooltip?.Invoke(renderContext);
+            var color = Color?.Invoke(renderContext);
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
+
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-sidebar-header"
             }
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, text))
-                .AddUserAttribute("data-title", I18N.Translate(renderContext, Tooltip))
-                .AddUserAttribute("data-color-css", Color?.ToClass())
-                .AddUserAttribute("data-color-style", Color?.ToStyle())
-                .AddUserAttribute(Disabled ? "disabled" : null);
+                .AddUserAttribute("data-title", I18N.Translate(renderContext, tooltip))
+                .AddUserAttribute("data-color-css", color?.ToClass())
+                .AddUserAttribute("data-color-style", color?.ToStyle())
+                .AddUserAttribute(disabled ? "disabled" : null);
         }
     }
 }

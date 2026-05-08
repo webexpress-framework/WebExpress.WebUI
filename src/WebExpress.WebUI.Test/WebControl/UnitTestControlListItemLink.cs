@@ -301,17 +301,17 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control1 = new ControlListItemLink(null).Add(new ControlIcon() { Icon = new IconStar() });
-            var control2 = new ControlListItemLink(null).Add([new ControlIcon() { Icon = new IconStar() }]);
-            var control3 = new ControlListItemLink(null).Add(new List<ControlIcon>([new ControlIcon() { Icon = new IconStar() }]).ToArray());
+            var control1 = new ControlListItemLink(null).Add(new ControlIcon() { Icon = _ => new IconStar() });
+            var control2 = new ControlListItemLink(null).Add([new ControlIcon() { Icon = _ => new IconStar() }]);
+            var control3 = new ControlListItemLink(null).Add(new List<ControlIcon>([new ControlIcon() { Icon = _ => new IconStar() }]).ToArray());
             var control4 = new ControlListItemLink(null);
             var control5 = new ControlListItemLink(null);
             var control6 = new ControlListItemLink(null);
 
             // act
-            control4.Add(new ControlIcon() { Icon = new IconStar() });
-            control5.Add([new ControlIcon() { Icon = new IconStar() }]);
-            control6.Add(new List<ControlIcon>([new ControlIcon() { Icon = new IconStar() }]).ToArray());
+            control4.Add(new ControlIcon() { Icon = _ => new IconStar() });
+            control5.Add([new ControlIcon() { Icon = _ => new IconStar() }]);
+            control6.Add(new List<ControlIcon>([new ControlIcon() { Icon = _ => new IconStar() }]).ToArray());
 
             var html1 = control1.Render(context, visualTree);
             var html2 = control2.Render(context, visualTree);

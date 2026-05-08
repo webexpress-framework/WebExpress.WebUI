@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -13,17 +13,17 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets whether the checkbox should be displayed on a new line.
         /// </summary>
-        public bool Inline { get; set; }
+        public Func<IRenderControlContext, bool> Inline { get; set; }
 
         /// <summary>
         /// Gets or sets the description.
         /// </summary>
-        public string Description { get; set; }
+        public Func<IRenderControlContext, string> Description { get; set; }
 
         /// <summary>
         /// Gets or sets the layout configuration for the type.
         /// </summary>
-        public TypeLayoutCheck Layout { get; set; } = TypeLayoutCheck.Default;
+        public Func<IRenderControlContext, TypeLayoutCheck> Layout { get; set; } = _ => TypeLayoutCheck.Default;
 
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
@@ -53,10 +53,13 @@ namespace WebExpress.WebUI.WebControl
             var value = renderContext.GetValue<ControlFormInputValueBool>(this)?.Checked;
             var name = Name?.Invoke(renderContext);
             var disabled = Disabled?.Invoke(renderContext) ?? false;
+            var inline = Inline?.Invoke(renderContext) ?? false;
+            var layout = Layout?.Invoke(renderContext) ?? TypeLayoutCheck.Default;
+            var description = Description?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
-                Class = Css.Concatenate(Layout.ToClass(), Inline ? "form-check-inline" : null, GetClasses()),
+                Class = Css.Concatenate(layout.ToClass(), inline ? "form-check-inline" : null, GetClasses()),
                 Style = GetStyles(),
             }
                 .Add(new HtmlElementFieldInput()
@@ -73,9 +76,9 @@ namespace WebExpress.WebUI.WebControl
                     Class = Css.Concatenate("form-check-label"),
                     For = Id
                 }
-                    .Add(new HtmlText(string.IsNullOrWhiteSpace(Description) ?
+                    .Add(new HtmlText(string.IsNullOrWhiteSpace(description) ?
                         string.Empty :
-                        I18N.Translate(renderContext.Request?.Culture, Description)
+                        I18N.Translate(renderContext.Request?.Culture, description)
                     )));
 
             return html;
@@ -85,11 +88,14 @@ namespace WebExpress.WebUI.WebControl
         /// Creates an value from the specified string representation.
         /// </summary>
         /// <param name="value">
-        /// The string representation of the value to be converted. Cannot be null.
+        /// The string representation of the value to be parsed and stored.
         /// </param>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="renderContext">
+        /// The context in which the control is rendered.
+        /// </param>
         /// <returns>
-        /// The value created from the specified string representation.
+        /// A instance representing the parsed value, or an instance with a default 
+        /// value if parsing fails.
         /// </returns>
         protected override ControlFormInputValueBool CreateValue(string value, IRenderControlFormContext renderContext)
         {

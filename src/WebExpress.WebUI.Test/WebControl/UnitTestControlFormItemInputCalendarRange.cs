@@ -71,7 +71,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCalendarRange(null)
             {
-                Format = "yyyy-MM-dd"
+                Format = _ => "yyyy-MM-dd"
             };
             var form = new ControlForm().Add(control).Initialize(renderContext =>
             {
@@ -100,7 +100,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCalendarRange(null)
             {
-                Placeholder = placeholder
+                Placeholder = _ => placeholder
             };
 
             // act
@@ -124,7 +124,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCalendarRange(null)
             {
-                Format = format
+                Format = _ => format
             };
 
             // act

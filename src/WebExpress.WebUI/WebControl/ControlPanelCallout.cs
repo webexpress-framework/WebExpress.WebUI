@@ -1,4 +1,5 @@
-﻿using System.Linq;
+using System;
+using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -12,15 +13,15 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the title.
         /// </summary>
-        public string Title { get; set; }
+        public Func<IRenderControlContext, string> Title { get; set; }
 
         /// <summary>
         /// Gets or sets the color.
         /// </summary>
-        public PropertyColorCallout Color
+        public Func<IRenderControlContext, PropertyColorCallout> Color
         {
-            get => (PropertyColorCallout)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+            get => (Func<IRenderControlContext, PropertyColorCallout>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>
@@ -42,6 +43,8 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var role = Role?.Invoke(renderContext);
+            var theme = Theme?.Invoke(renderContext) ?? TypeTheme.None;
+            var title = Title?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
@@ -49,12 +52,12 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("wx-callout", GetClasses()),
                 Style = GetStyles(),
                 Role = role,
-                DataTheme = Theme.ToValue()
+                DataTheme = theme.ToValue()
             };
 
-            if (Title is not null)
+            if (title is not null)
             {
-                html.Add(new HtmlElementTextSemanticsSpan(new HtmlText(Title))
+                html.Add(new HtmlElementTextSemanticsSpan(new HtmlText(title))
                 {
                     Class = "wx-callout-title"
                 });

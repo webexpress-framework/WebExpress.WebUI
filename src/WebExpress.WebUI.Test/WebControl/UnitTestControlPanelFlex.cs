@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelFlex()
             {
-                Direction = direction,
+                Direction = _ => direction,
             };
 
             // act
@@ -73,7 +73,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelFlex()
             {
-                Fluid = fluid,
+                Fluid = _ => fluid,
             };
 
             // act
@@ -97,7 +97,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelFlex()
             {
-                Layout = layout,
+                Layout = _ => layout,
             };
 
             // act
@@ -123,7 +123,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelFlex()
             {
-                Justify = justify,
+                Justify = _ => justify,
             };
 
             // act
@@ -149,7 +149,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelFlex()
             {
-                Align = align,
+                Align = _ => align,
             };
 
             // act
@@ -174,7 +174,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelFlex()
             {
-                Wrap = wrap,
+                Wrap = _ => wrap,
             };
 
             // act
@@ -198,7 +198,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelFlex()
             {
-                Theme = theme
+                Theme = _ => theme
             };
 
             // act

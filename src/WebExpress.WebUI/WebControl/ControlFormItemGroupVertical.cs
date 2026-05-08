@@ -13,7 +13,7 @@ namespace WebExpress.WebUI.WebControl
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        ///<param name="items">The form controls.</param> 
+        /// <param name="items">The form controls.</param> 
         public ControlFormItemGroupVertical(string id = null, params ControlFormItem[] items)
             : base(id, items)
         {
@@ -54,7 +54,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 if (item is IControlFormItemInput input)
                 {
-                    var icon = new ControlIcon() { Icon = input?.Icon?.Invoke(renderContext) };
+                    var icon = new ControlIcon() { Icon = _ => input?.Icon?.Invoke(renderContext) };
                     var label = default(IHtmlNode);
                     var help = new ControlFormItemHelpText(!string.IsNullOrEmpty(item.Id) ? item.Id + "_help" : string.Empty);
                     var fieldset = new HtmlElementFormFieldset() { Class = "wx-form-group" };
@@ -69,7 +69,7 @@ namespace WebExpress.WebUI.WebControl
 
                         var l = new ControlFormItemLabel(!string.IsNullOrEmpty(item.Id) ? item.Id + "_label" : string.Empty)
                         {
-                            Text = text.EndsWith(":") ? text : text + ":"
+                            Text = _ => text.EndsWith(":") ? text : text + ":"
                         };
 
                         l.Initialize(renderGroupContext);
@@ -82,11 +82,11 @@ namespace WebExpress.WebUI.WebControl
                         var text = I18N.Translate(renderGroupContext, inputLabel)?.Trim(':');
                         var l = new ControlFormItemLabel(!string.IsNullOrEmpty(item.Id) ? item.Id + "_label" : string.Empty)
                         {
-                            Text = text
+                            Text = _ => text
                         };
                         var required = new ControlFormItemLabel(null)
                         {
-                            Text = "*",
+                            Text = _ => "*",
                             Classes = ["wx-form-required"],
                             TextColor = _ => new PropertyColorText(TypeColorText.Danger)
                         };

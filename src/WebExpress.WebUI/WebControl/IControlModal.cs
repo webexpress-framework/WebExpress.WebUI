@@ -28,12 +28,12 @@ namespace WebExpress.WebUI.WebControl
         /// <remarks>  
         /// This property allows you to define the size of the modal dialog, such as Default, Small, Large, ExtraLarge, or Fullscreen.  
         /// </remarks>  
-        TypeModalSize Size { get; }
+        Func<IRenderControlContext, TypeModalSize> Size { get; }
 
         /// <summary>
         /// Gets or sets the label for the close button of the modal.
         /// </summary>
-        string CloseLabel { get; }
+        Func<IRenderControlContext, string> CloseLabel { get; }
 
         /// <summary> 
         /// Adds one or more controls to the content of the modal.

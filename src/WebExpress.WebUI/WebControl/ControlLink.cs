@@ -217,6 +217,18 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            return Render(renderContext, visualTree, _controls);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="controls">The controls to render within the link.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControl> controls)
+        {
             var param = GetParams(renderContext);
 
             var icon = Icon?.Invoke(renderContext);
@@ -225,7 +237,7 @@ namespace WebExpress.WebUI.WebControl
             var text = Text?.Invoke(renderContext);
             var role = Role?.Invoke(renderContext);
 
-            var html = new HtmlElementTextSemanticsA([.. _controls.Select(x => x.Render(renderContext, visualTree))])
+            var html = new HtmlElementTextSemanticsA([.. controls.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-link", icon is ImageIcon ? "d-inline-flex align-items-baseline" : null, GetClasses()),
@@ -240,7 +252,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 html.Add(new ControlIcon()
                 {
-                    Icon = icon
+                    Icon = _ => icon
                 }.Render(renderContext, visualTree));
             }
 

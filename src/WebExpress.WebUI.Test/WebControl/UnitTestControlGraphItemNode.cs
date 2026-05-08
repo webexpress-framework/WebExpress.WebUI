@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemNode()
             {
-                Label = label
+                Label = _ => label
             };
 
             // act
@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemNode()
             {
-                Uri = !string.IsNullOrEmpty(uri) ? new UriEndpoint(uri) : null
+                Uri = _ => !string.IsNullOrEmpty(uri) ? new UriEndpoint(uri) : null
             };
 
             // act
@@ -99,7 +99,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemNode()
             {
-                Point = x == int.MinValue && y == int.MinValue
+                Point = _ => x == int.MinValue && y == int.MinValue
                     ? null
                     : new System.Drawing.Point(x, y)
             };
@@ -132,7 +132,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemNode()
             {
-                Color = new PropertyColorGraph(color)
+                Color = _ => new PropertyColorGraph(color)
             };
 
             // act
@@ -157,7 +157,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemNode()
             {
-                Color = new PropertyColorGraph(color)
+                Color = _ => new PropertyColorGraph(color)
             };
 
             // act
@@ -189,7 +189,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemNode()
             {
-                BackgroundColor = new PropertyColorBackgroundGraph(color)
+                BackgroundColor = _ => new PropertyColorBackgroundGraph(color)
             };
 
             // act
@@ -214,7 +214,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemNode()
             {
-                BackgroundColor = new PropertyColorBackgroundGraph(color)
+                BackgroundColor = _ => new PropertyColorBackgroundGraph(color)
             };
 
             // act
@@ -238,7 +238,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemNode()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -263,7 +263,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemNode()
             {
-                Shape = shape
+                Shape = _ => shape
             };
 
             // act

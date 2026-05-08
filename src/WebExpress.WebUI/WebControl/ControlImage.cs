@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+using System;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
@@ -12,22 +13,22 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the image source.
         /// </summary>
-        public IUri Uri { get; set; }
+        public Func<IRenderControlContext, IUri> Uri { get; set; }
 
         /// <summary>
         /// Gets or sets the width.
         /// </summary>
-        public new int Width { get; set; }
+        public new Func<IRenderControlContext, int> Width { get; set; }
 
         /// <summary>
         /// Gets or sets the height.
         /// </summary>
-        public new int Height { get; set; }
+        public new Func<IRenderControlContext, int> Height { get; set; }
 
         /// <summary>
         /// Gets or sets a tooltip text.
         /// </summary>
-        public string Tooltip { get; set; }
+        public Func<IRenderControlContext, string> Tooltip { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -49,6 +50,10 @@ namespace WebExpress.WebUI.WebControl
         {
             var horizontalAlignment = HorizontalAlignment?.Invoke(renderContext);
             var role = Role?.Invoke(renderContext);
+            var uri = Uri?.Invoke(renderContext);
+            var tooltip = Tooltip?.Invoke(renderContext);
+            var width = Width?.Invoke(renderContext) ?? 0;
+            var height = Height?.Invoke(renderContext) ?? 0;
 
             var html = new HtmlElementMultimediaImg()
             {
@@ -56,24 +61,24 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate(horizontalAlignment?.ToClass(), GetClasses()),
                 Style = GetStyles(),
                 Role = role,
-                Alt = Tooltip,
-                Src = Uri?.ToString(),
+                Alt = tooltip,
+                Src = uri?.ToString(),
             };
 
-            if (!string.IsNullOrWhiteSpace(Tooltip))
+            if (!string.IsNullOrWhiteSpace(tooltip))
             {
                 html.AddUserAttribute("data-toggle", "tooltip");
-                html.AddUserAttribute("title", Tooltip);
+                html.AddUserAttribute("title", tooltip);
             }
 
-            if (Width > 0)
+            if (width > 0)
             {
-                html.AddUserAttribute("width", Width.ToString());
+                html.AddUserAttribute("width", width.ToString());
             }
 
-            if (Height > 0)
+            if (height > 0)
             {
-                html.AddUserAttribute("height", Height.ToString());
+                html.AddUserAttribute("height", height.ToString());
             }
 
             return html;

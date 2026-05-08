@@ -203,7 +203,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigationItemLink()
             {
-                NoWrap = noWrap
+                NoWrap = _ => noWrap
             };
 
             // act
@@ -223,9 +223,9 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control1 = new ControlNavigationItemLink(null, new ControlIcon() { Icon = new IconStar() });
-            var control2 = new ControlNavigationItemLink(null, [new ControlIcon() { Icon = new IconStar() }]);
-            var control3 = new ControlNavigationItemLink(null, new List<ControlIcon>([new ControlIcon() { Icon = new IconStar() }]).ToArray());
+            var control1 = new ControlNavigationItemLink(null, new ControlIcon() { Icon = _ => new IconStar() });
+            var control2 = new ControlNavigationItemLink(null, [new ControlIcon() { Icon = _ => new IconStar() }]);
+            var control3 = new ControlNavigationItemLink(null, new List<ControlIcon>([new ControlIcon() { Icon = _ => new IconStar() }]).ToArray());
 
             // act
             var html1 = control1.Render(context, visualTree);

@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test
                 throw new ArgumentNullException(nameof(renderContext), "Parameter cannot be null or empty.");
             }
 
-            visualTree.AddContent(new ControlText() { Text = "Hello World" });
+            visualTree.AddContent(new ControlText() { Text = _ => "Hello World" });
         }
 
         /// <summary>

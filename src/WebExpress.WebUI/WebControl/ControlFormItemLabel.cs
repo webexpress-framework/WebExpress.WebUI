@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.Internationalization;
+using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -12,7 +13,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the text of the label.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
         /// Gets or sets the associated form field.
@@ -46,11 +47,12 @@ namespace WebExpress.WebUI.WebControl
         {
             var name = FormItem?.Name?.Invoke(renderContext);
             var role = Role?.Invoke(renderContext);
+            var text = Text?.Invoke(renderContext);
 
             return new HtmlElementFieldLabel()
             {
                 Id = Id,
-                Text = I18N.Translate(renderContext.Request?.Culture, Text),
+                Text = I18N.Translate(renderContext.Request?.Culture, text),
                 Class = Css.Concatenate("wx-form-label", GetClasses()),
                 Style = GetStyles(),
                 Role = role,

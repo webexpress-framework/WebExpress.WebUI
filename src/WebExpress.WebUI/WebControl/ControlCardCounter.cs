@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.WebPage;
@@ -66,7 +66,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 html.Add(new ControlIcon()
                 {
-                    Icon = icon,
+                    Icon = _ => icon,
                     TextColor = TextColor,
                     HorizontalAlignment = _ => TypeHorizontalAlignment.Right
                 }.Render(renderContext, visualTree));
@@ -74,15 +74,15 @@ namespace WebExpress.WebUI.WebControl
 
             var textCtrl = new ControlText(string.IsNullOrWhiteSpace(Id) ? null : Id + "_header")
             {
-                Text = value.HasValue ? value.Value.ToString() : null,
-                Format = TypeFormatText.H4
+                Text = _ => value.HasValue ? value.Value.ToString() : null,
+                Format = _ => TypeFormatText.H4
             };
 
             var info = new ControlText()
             {
-                Text = text,
-                Format = TypeFormatText.Span,
-                TextColor = new PropertyColorText(TypeColorText.Muted)
+                Text = _ => text,
+                Format = _ => TypeFormatText.Span,
+                TextColor = _ => new PropertyColorText(TypeColorText.Muted)
             };
 
             html.Add(new ControlPanel(null, textCtrl, info) { }.Render(renderContext, visualTree));
@@ -91,11 +91,11 @@ namespace WebExpress.WebUI.WebControl
             {
                 html.Add(new ControlProgress()
                 {
-                    Value = progress.Value,
-                    Format = TypeFormatProgress.Striped,
+                    Value = _ => progress.Value,
+                    Format = _ => TypeFormatProgress.Striped,
                     BackgroundColor = BackgroundColor,
                     //Color = Color,
-                    Size = TypeSizeProgress.Small
+                    Size = _ => TypeSizeProgress.Small
                 }.Render(renderContext, visualTree));
             }
 

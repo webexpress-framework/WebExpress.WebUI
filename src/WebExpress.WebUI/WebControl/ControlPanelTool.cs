@@ -42,7 +42,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("toolpanel", GetClasses()),
                 Style = GetStyles(),
                 Role = role,
-                DataTheme = Theme.ToValue()
+                DataTheme = Theme?.Invoke(renderContext).ToValue()
             };
 
             return html;

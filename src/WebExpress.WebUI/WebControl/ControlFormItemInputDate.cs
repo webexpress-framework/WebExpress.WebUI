@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.Internationalization;
+using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -12,17 +13,17 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the description.
         /// </summary>
-        public string Description { get; set; }
+        public Func<IRenderControlContext, string> Description { get; set; }
 
         /// <summary>
         /// Gets or sets the placeholder text displayed when no date is selected.
         /// </summary>
-        public string Placeholder { get; set; }
+        public Func<IRenderControlContext, string> Placeholder { get; set; }
 
         /// <summary>
         /// Gets or sets the date format string used for formatting date values.
         /// </summary>
-        public string Format { get; set; }
+        public Func<IRenderControlContext, string> Format { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
@@ -49,8 +50,10 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            var format = Format?.Invoke(renderContext);
+            var placeholder = Placeholder?.Invoke(renderContext);
             var value = renderContext.GetValue<ControlFormInputValueDate>(this)?.Date?
-                .ToString(Format ?? renderContext.Request.Culture.DateTimeFormat.ShortDatePattern);
+                .ToString(format ?? renderContext.Request.Culture.DateTimeFormat.ShortDatePattern);
             var name = Name?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
@@ -59,10 +62,10 @@ namespace WebExpress.WebUI.WebControl
                 Class = "wx-webui-input-date"
             }
                 .AddUserAttribute("name", name)
-                .AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder))
+                .AddUserAttribute("placeholder", I18N.Translate(renderContext, placeholder))
                 .AddUserAttribute("data-value", value)
-                .AddUserAttribute("data-format", !string.IsNullOrWhiteSpace(Format)
-                    ? Format
+                .AddUserAttribute("data-format", !string.IsNullOrWhiteSpace(format)
+                    ? format
                     : renderContext.Request.Culture.DateTimeFormat.ShortDatePattern
                 );
 

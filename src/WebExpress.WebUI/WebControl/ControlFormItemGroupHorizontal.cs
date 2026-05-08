@@ -13,7 +13,7 @@ namespace WebExpress.WebUI.WebControl
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        ///<param name="items">The form controls.</param> 
+        /// <param name="items">The form controls.</param> 
         public ControlFormItemGroupHorizontal(string id = null, params ControlFormItem[] items)
             : base(id, items)
         {
@@ -23,7 +23,6 @@ namespace WebExpress.WebUI.WebControl
         /// Initializes the form element.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
-        /// <param name="state">The state of the form control, such as New, Update, Submit, or Reset.</param>
         public override void Initialize(IRenderControlFormContext renderContext)
         {
             var renderGroupContext = new RenderControlFormGroupContext(renderContext, this);
@@ -59,7 +58,7 @@ namespace WebExpress.WebUI.WebControl
 
                 if (item is IControlFormItemInput input)
                 {
-                    var icon = new ControlIcon() { Icon = input?.Icon?.Invoke(renderContext) };
+                    var icon = new ControlIcon() { Icon = _ => input?.Icon?.Invoke(renderContext) };
                     var label = default(IHtmlNode);
                     var help = new ControlFormItemHelpText(!string.IsNullOrEmpty(item.Id) ? item.Id + "_help" : string.Empty);
                     var inputLabel = input.Label?.Invoke(renderContext);
@@ -73,7 +72,7 @@ namespace WebExpress.WebUI.WebControl
                         var l = new ControlFormItemLabel(!string.IsNullOrEmpty(item.Id) ? item.Id + "_label" : string.Empty)
                         {
                             Classes = ["me-2"],
-                            Text = text.EndsWith(":") ? text : text + ":"
+                            Text = _ => text.EndsWith(":") ? text : text + ":"
                         };
 
                         l.Initialize(renderGroupContext);
@@ -86,11 +85,11 @@ namespace WebExpress.WebUI.WebControl
                         var text = I18N.Translate(renderGroupContext, inputLabel)?.Trim(':');
                         var l = new ControlFormItemLabel(!string.IsNullOrEmpty(item.Id) ? item.Id + "_label" : string.Empty)
                         {
-                            Text = text
+                            Text = _ => text
                         };
                         var required = new ControlFormItemLabel(null)
                         {
-                            Text = "*",
+                            Text = _ => "*",
                             Classes = ["wx-form-required"],
                             TextColor = _ => new PropertyColorText(TypeColorText.Danger)
                         };

@@ -51,7 +51,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemPanel()
             {
-                Direction = direction,
+                Direction = _ => direction,
             };
 
             // act
@@ -76,7 +76,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemPanel()
             {
-                Fluid = fluid,
+                Fluid = _ => fluid,
             };
 
             // act

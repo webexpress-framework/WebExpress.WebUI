@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+using System;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -11,16 +12,16 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the color.
         /// </summary>
-        public PropertyColorTag Color
+        public Func<IRenderControlContext, PropertyColorTag> Color
         {
-            get => (PropertyColorTag)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+            get => (Func<IRenderControlContext, PropertyColorTag>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>
         /// Gets or sets the text.
         /// </summary>
-        public string Value { get; set; }
+        public Func<IRenderControlContext, string> Value { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -39,15 +40,18 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var color = Color?.Invoke(renderContext);
+            var value = Value?.Invoke(renderContext);
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-webui-tag",
                 Role = "tag"
             }
-                .AddUserAttribute("data-color-css", Color?.ToClass())
-                .AddUserAttribute("data-color-style", Color?.ToStyle())
-                .AddUserAttribute("data-value", Value);
+                .AddUserAttribute("data-color-css", color?.ToClass())
+                .AddUserAttribute("data-color-style", color?.ToStyle())
+                .AddUserAttribute("data-value", value);
 
             return html;
         }

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+using System;
+using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebUri;
@@ -7,10 +8,10 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// A modal page dynamically retrieves and displays content from another page within 
-    /// a modal dialog. This allows users to interact with external or additional information 
-    /// without navigating away from the current view. Modal pages are ideal for loading details, 
-    /// or dynamic content, providing a seamless and focused user experience while maintaining 
+    /// A modal page dynamically retrieves and displays content from another page within
+    /// a modal dialog. This allows users to interact with external or additional information
+    /// without navigating away from the current view. Modal pages are ideal for loading details,
+    /// or dynamic content, providing a seamless and focused user experience while maintaining
     /// the main application's context.
     /// </summary>
     public class ControlModalRemotePage : ControlModal
@@ -18,12 +19,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the URI of the page to be displayed in the modal.
         /// </summary>
-        public IUri Uri { get; set; }
+        public Func<IRenderControlContext, IUri> Uri { get; set; }
 
         /// <summary>
         /// Gets or sets the selector for the content to be loaded into the modal.
         /// </summary>
-        public string Selector { get; set; }
+        public Func<IRenderControlContext, string> Selector { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -52,6 +53,10 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var title = Header?.Invoke(renderContext);
+            var size = Size?.Invoke(renderContext) ?? TypeModalSize.Default;
+            var closeLabel = CloseLabel?.Invoke(renderContext);
+            var uri = Uri?.Invoke(renderContext);
+            var selector = Selector?.Invoke(renderContext);
 
             var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, title)))
             {
@@ -73,10 +78,10 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-modal-page", GetClasses())
             }
-            .AddUserAttribute("data-size", Size.ToClass())
-            .AddUserAttribute("data-close-label", I18N.Translate(renderContext, CloseLabel))
-            .AddUserAttribute("data-uri", Uri?.ToString())
-            .AddUserAttribute("data-selector", !string.IsNullOrWhiteSpace(Selector) ? $"#{Selector}" : null);
+            .AddUserAttribute("data-size", size.ToClass())
+            .AddUserAttribute("data-close-label", I18N.Translate(renderContext, closeLabel))
+            .AddUserAttribute("data-uri", uri?.ToString())
+            .AddUserAttribute("data-selector", !string.IsNullOrWhiteSpace(selector) ? $"#{selector}" : null);
 
             return html;
         }

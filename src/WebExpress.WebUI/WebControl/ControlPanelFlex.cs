@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -12,46 +13,46 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets whether the items should be displayed inline.
         /// </summary>
-        public virtual TypeLayoutFlex Layout
+        public virtual Func<IRenderControlContext, TypeLayoutFlex> Layout
         {
-            get => (TypeLayoutFlex)GetProperty(TypeLayoutFlex.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeLayoutFlex>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
         /// Gets or sets the horizontal alignment of the items.
         /// </summary>
-        public virtual TypeJustifiedFlex Justify
+        public virtual Func<IRenderControlContext, TypeJustifiedFlex> Justify
         {
-            get => (TypeJustifiedFlex)GetProperty(TypeJustifiedFlex.Start);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeJustifiedFlex>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
         /// Gets or sets the vertical orientation of the items.
         /// </summary>
-        public virtual TypeAlignFlex Align
+        public virtual Func<IRenderControlContext, TypeAlignFlex> Align
         {
-            get => (TypeAlignFlex)GetProperty(TypeAlignFlex.Start);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeAlignFlex>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
         /// Gets or sets the overflow behavior of the items.
         /// </summary>
-        public virtual TypeWrap Wrap
+        public virtual Func<IRenderControlContext, TypeWrap> Wrap
         {
-            get => (TypeWrap)GetProperty(TypeWrap.Nowrap);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeWrap>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
         /// Gets or sets the gap type associated with the current instance.
         /// </summary>
-        public virtual TypeGap Gap
+        public virtual Func<IRenderControlContext, TypeGap> Gap
         {
-            get => (TypeGap)GetProperty(TypeGap.None);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeGap>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
@@ -80,7 +81,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("", GetClasses()),
                 Style = GetStyles(),
                 Role = role,
-                DataTheme = Theme.ToValue()
+                DataTheme = Theme?.Invoke(renderContext).ToValue()
             };
         }
     }

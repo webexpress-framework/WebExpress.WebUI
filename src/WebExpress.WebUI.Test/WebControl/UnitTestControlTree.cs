@@ -51,7 +51,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTree()
             {
-                DisableIndicator = disableIndicator
+                DisableIndicator = _ => disableIndicator
             };
 
             // act
@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTree()
             {
-                Movable = movable
+                Movable = _ => movable
             };
 
             // act
@@ -102,7 +102,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTree()
             {
-                Layout = layout
+                Layout = _ => layout
             };
 
             // act

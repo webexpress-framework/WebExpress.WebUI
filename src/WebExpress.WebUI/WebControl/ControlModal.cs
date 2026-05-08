@@ -33,12 +33,12 @@ namespace WebExpress.WebUI.WebControl
         /// <remarks>  
         /// This property allows you to define the size of the modal dialog, such as Default, Small, Large, ExtraLarge, or Fullscreen.  
         /// </remarks>  
-        public TypeModalSize Size { get; set; }
+        public Func<IRenderControlContext, TypeModalSize> Size { get; set; }
 
         /// <summary>
         /// Gets or sets the label for the close button of the modal.
         /// </summary>
-        public string CloseLabel { get; set; } = "webexpress.webui:modal.close.label";
+        public Func<IRenderControlContext, string> CloseLabel { get; set; } = _ => "webexpress.webui:modal.close.label";
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -138,7 +138,8 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var title = Header?.Invoke(renderContext);
-            var size = Size;
+            var size = Size?.Invoke(renderContext) ?? TypeModalSize.Default;
+            var closeLabel = CloseLabel?.Invoke(renderContext);
 
             var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(title)))
             {
@@ -161,7 +162,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("wx-webui-modal", GetClasses())
             }
                 .AddUserAttribute("data-size", size.ToClass())
-                .AddUserAttribute("data-close-label", I18N.Translate(CloseLabel));
+                .AddUserAttribute("data-close-label", I18N.Translate(closeLabel));
 
             return html;
         }

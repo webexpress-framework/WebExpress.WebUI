@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -21,7 +22,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the format of the progress bar.
         /// </summary>
-        public TypeFormatProgress Format { get; set; }
+        public Func<IRenderControlContext, TypeFormatProgress> Format { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class with the specified id and items.
@@ -32,19 +33,18 @@ namespace WebExpress.WebUI.WebControl
             : base(id)
         {
             _items.AddRange(items);
-        }
+        }
+
         /// <summary>
         /// Converts the control to an HTML representation.
         /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        /// <param name="visualTree">The visual tree representing the control's structure.</param>
-        /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var barClass = new List<string>();
             var role = Role?.Invoke(renderContext);
+            var format = Format?.Invoke(renderContext) ?? TypeFormatProgress.Default;
 
-            switch (Format)
+            switch (format)
             {
                 case TypeFormatProgress.Colored:
                     barClass.Add("progress-bar");
@@ -62,7 +62,7 @@ namespace WebExpress.WebUI.WebControl
                     break;
 
                 default:
-                    return new HtmlElementFormProgress(_items.Select(x => (int)x.Value).Sum() + "%")
+                    return new HtmlElementFormProgress(_items.Select(x => (int)(x.Value?.Invoke(renderContext) ?? 0)).Sum() + "%")
                     {
                         Id = Id,
                         Class = string.Join(" ", Classes.Where(x => !string.IsNullOrWhiteSpace(x))),
@@ -70,7 +70,7 @@ namespace WebExpress.WebUI.WebControl
                         Role = role,
                         Min = "0",
                         Max = "100",
-                        Value = _items.Select(x => (int)x.Value).Sum().ToString()
+                        Value = _items.Select(x => (int)(x.Value?.Invoke(renderContext) ?? 0)).Sum().ToString()
                     };
             }
 
@@ -84,18 +84,23 @@ namespace WebExpress.WebUI.WebControl
 
             foreach (var v in _items)
             {
+                var value = v.Value?.Invoke(renderContext) ?? 0;
+                var text = v.Text?.Invoke(renderContext);
+                var backgroundColor = v.BackgroundColor?.Invoke(renderContext);
+                var color = v.Color?.Invoke(renderContext);
+
                 var styles = new List<string>
                 {
-                    "width: " + v.Value + "%;"
+                    "width: " + value + "%;"
                 };
 
                 var c = new List<string>(barClass)
                 {
-                    v.BackgroundColor.ToClass(),
-                    v.Color.ToClass()
+                    backgroundColor?.ToClass(),
+                    color?.ToClass()
                 };
 
-                var bar = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext.Request?.Culture, v.Text)))
+                var bar = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext.Request?.Culture, text)))
                 {
                     Id = Id,
                     Class = string.Join(" ", c.Where(x => !string.IsNullOrWhiteSpace(x))),

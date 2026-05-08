@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlProgress()
             {
-                Format = format
+                Format = _ => format
             };
 
             // act
@@ -74,8 +74,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlProgress()
             {
-                Size = size,
-                Format = TypeFormatProgress.Colored
+                Size = _ => size,
+                Format = _ => TypeFormatProgress.Colored
             };
 
             // act
@@ -99,8 +99,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlProgress()
             {
-                Text = text,
-                Format = TypeFormatProgress.Colored
+                Text = _ => text,
+                Format = _ => TypeFormatProgress.Colored
             };
 
             // act
@@ -130,8 +130,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlProgress()
             {
-                Color = new PropertyColorProgress(color),
-                Format = TypeFormatProgress.Colored
+                Color = _ => new PropertyColorProgress(color),
+                Format = _ => TypeFormatProgress.Colored
             };
 
             // act
@@ -162,8 +162,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlProgress()
             {
-                TextColor = new PropertyColorText(textColor),
-                Format = TypeFormatProgress.Colored
+                TextColor = _ => new PropertyColorText(textColor),
+                Format = _ => TypeFormatProgress.Colored
             };
 
             // act
@@ -187,7 +187,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlProgress()
             {
-                Min = min
+                Min = _ => min
             };
 
             // act
@@ -211,7 +211,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlProgress()
             {
-                Max = max
+                Max = _ => max
             };
 
             // act
@@ -235,7 +235,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlProgress()
             {
-                Value = value
+                Value = _ => value
             };
 
             // act

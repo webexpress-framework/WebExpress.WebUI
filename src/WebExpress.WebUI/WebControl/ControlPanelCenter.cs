@@ -35,7 +35,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = GetClasses(),
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
                 Role = role,
-                DataTheme = Theme.ToValue()
+                DataTheme = Theme?.Invoke(renderContext).ToValue()
             };
         }
     }

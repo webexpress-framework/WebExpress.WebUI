@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSidebarItemDynamic()
             {
-                Tooltip = tooltip,
+                Tooltip = _ => tooltip,
             };
 
             // act
@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSidebarItemDynamic()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -105,7 +105,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSidebarItemDynamic()
             {
-                Color = new PropertyColorText(color)
+                Color = _ => new PropertyColorText(color)
             };
 
             // act
@@ -130,7 +130,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSidebarItemDynamic()
             {
-                Mode = mode
+                Mode = _ => mode
             };
 
             // act

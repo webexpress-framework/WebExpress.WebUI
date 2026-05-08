@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemEdge()
             {
-                Label = label
+                Label = _ => label
             };
 
             // act
@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemEdge()
             {
-                Source = source
+                Source = _ => source
             };
 
             // act
@@ -96,7 +96,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemEdge()
             {
-                Target = target
+                Target = _ => target
             };
 
             // act
@@ -127,7 +127,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemEdge()
             {
-                Color = new PropertyColorGraph(color)
+                Color = _ => new PropertyColorGraph(color)
             };
 
             // act
@@ -152,7 +152,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemEdge()
             {
-                Color = new PropertyColorGraph(color)
+                Color = _ => new PropertyColorGraph(color)
             };
 
             // act

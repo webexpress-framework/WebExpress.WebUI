@@ -35,7 +35,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("navbar", GetClasses()),
                 Style = GetStyles(),
                 Role = role,
-                DataTheme = Theme.ToValue()
+                DataTheme = Theme?.Invoke(renderContext).ToValue()
             };
         }
     }

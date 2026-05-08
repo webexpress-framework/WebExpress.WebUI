@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSearchContent()
             {
-                Placeholder = text
+                Placeholder = _ => text
             };
 
             // act
@@ -95,7 +95,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSearchContent()
             {
-                HighlightColor = color ?? "yellow"
+                HighlightColor = _ => color ?? "yellow"
             };
 
             var html = control.Render(context, visualTree);
@@ -117,7 +117,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSearchContent()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act

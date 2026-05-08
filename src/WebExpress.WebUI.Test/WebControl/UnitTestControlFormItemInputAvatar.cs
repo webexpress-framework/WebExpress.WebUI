@@ -293,8 +293,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form move control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""*""><input name=""*"" type=""hidden""><main><div><fieldset class=""wx-form-group""><div class=""wx-webui-input-avatar""></div></fieldset></div></main><div></div></form>")]
-        [InlineData("abc", @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""*""><input name=""*"" type=""hidden""><main><div><fieldset class=""wx-form-group""><div class=""wx-webui-input-avatar""></div></fieldset></div></main><div></div></form>")]
+        [InlineData(null, @"<form id=""id_*"" class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""id_*""><input name=""id_*"" type=""hidden""><input name=""controlform_id_*_state"" value=""Default"" type=""hidden""><main><div><fieldset class=""wx-form-group""><span></span><div class=""wx-webui-input-avatar""></div></fieldset></div></main><div></div></form>")]
+        [InlineData("abc", @"<form id=""id_*"" class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""id_*""><input name=""id_*"" type=""hidden""><input name=""controlform_id_*_state"" value=""Default"" type=""hidden""><main><div><fieldset class=""wx-form-group""><span></span><div class=""wx-webui-input-avatar""></div></fieldset></div></main><div></div></form>")]
         public void Value(string value, string expected)
         {
             // arrange
@@ -378,7 +378,7 @@ namespace WebExpress.WebUI.Test.WebControl
             };
 
             // act
-            //control.Add(new ControlFormItemInputMoveItem() { Label = "label" });
+            //control.Add(new ControlFormItemInputMoveItem() { Label = _ => "label" });
             //var html = control.Render(context, visualTree);
 
             // validation

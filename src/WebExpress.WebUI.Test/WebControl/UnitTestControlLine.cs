@@ -53,7 +53,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlLine()
             {
-                Color = new PropertyColorLine(color)
+                Color = _ => new PropertyColorLine(color)
             };
 
             // act

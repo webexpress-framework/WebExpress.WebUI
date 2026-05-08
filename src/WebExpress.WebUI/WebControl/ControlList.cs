@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
@@ -22,13 +22,13 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the layout.
         /// </summary>
-        public TypeLayoutList Layout { get; set; }
+        public Func<IRenderControlContext, TypeLayoutList> Layout { get; set; }
 
         /// <summary>
         /// Gets or sets the title displayed in the list header.
         /// Set to <c>null</c> (default) to hide the header entirely.
         /// </summary>
-        public string Title { get; set; }
+        public Func<IRenderControlContext, string> Title { get; set; }
 
         /// <summary>
         /// Gets or sets whether the header shows a sort-toggle button that lets the
@@ -36,7 +36,7 @@ namespace WebExpress.WebUI.WebControl
         /// Requires <see cref="Title"/> to be set <em>or</em> <c>Sortable = true</c>
         /// to make the header visible.
         /// </summary>
-        public bool Sortable { get; set; }
+        public Func<IRenderControlContext, bool> Sortable { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether list rows are selectable. When
@@ -61,10 +61,10 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="items">The list entries to add.</param>
         /// <remarks>
-        /// This method appends the specified collection of <see cref="ControlListItem"/> instances to the 
-        /// current list of items. It ensures that the new items are concatenated with the existing ones, 
+        /// This method appends the specified collection of <see cref="ControlListItem"/> instances to the
+        /// current list of items. It ensures that the new items are concatenated with the existing ones,
         /// maintaining the order of addition.
-        /// 
+        ///
         /// Example usage:
         /// <code>
         /// var list = new ControlList();
@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.WebControl
         /// var item2 = new ControlListItem { Text = "Item 2" };
         /// list.Add(item1, item2);
         /// </code>
-        /// 
+        ///
         /// This method accepts any item that derives from <see cref="ControlListItem"/>.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
@@ -88,10 +88,10 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="items">The list entries to add.</param>
         /// <remarks>
-        /// This method appends the specified collection of <see cref="ControlListItem"/> instances to the 
-        /// current list of items. It ensures that the new items are concatenated with the existing ones, 
+        /// This method appends the specified collection of <see cref="ControlListItem"/> instances to the
+        /// current list of items. It ensures that the new items are concatenated with the existing ones,
         /// maintaining the order of addition.
-        /// 
+        ///
         /// Example usage:
         /// <code>
         /// var list = new ControlList();
@@ -99,7 +99,7 @@ namespace WebExpress.WebUI.WebControl
         /// var item2 = new ControlListItem { Text = "Item 2" };
         /// list.Add(item1).Add(item2);
         /// </code>
-        /// 
+        ///
         /// This method accepts any item that derives from <see cref="ControlListItem"/>.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
@@ -115,9 +115,9 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="item">The list entry to remove.</param>
         /// <remarks>
-        /// This method removes the specified <see cref="ControlListItem"/> instance from the 
+        /// This method removes the specified <see cref="ControlListItem"/> instance from the
         /// current list of items. If the item does not exist in the list, the method does nothing.
-        /// 
+        ///
         /// Example usage:
         /// <code>
         /// var list = new ControlList();
@@ -125,7 +125,7 @@ namespace WebExpress.WebUI.WebControl
         /// list.Add(item1);
         /// list.Remove(item1);
         /// </code>
-        /// 
+        ///
         /// This method accepts any item that derives from <see cref="ControlListItem"/>.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
@@ -158,6 +158,9 @@ namespace WebExpress.WebUI.WebControl
         {
             var selectable = Selectable?.Invoke(renderContext) ?? false;
             var role = Role?.Invoke(renderContext);
+            var title = Title?.Invoke(renderContext);
+            var sortable = Sortable?.Invoke(renderContext) ?? false;
+            var layout = Layout?.Invoke(renderContext) ?? default;
 
             var html = new HtmlElementTextContentDiv()
             {
@@ -166,10 +169,10 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(),
                 Role = role
             }
-                .AddUserAttribute("data-title", I18N.Translate(renderContext, Title))
-                .AddUserAttribute("data-sortable", Sortable ? "true" : null)
+                .AddUserAttribute("data-title", I18N.Translate(renderContext, title))
+                .AddUserAttribute("data-sortable", sortable ? "true" : null)
                 .AddUserAttribute("data-selectable", selectable ? "true" : null)
-                .AddUserAttribute("data-layout", Layout.ToClass())
+                .AddUserAttribute("data-layout", layout.ToClass())
                 .Add(_items.Select(x => x.Render(renderContext, visualTree)));
 
             return html;

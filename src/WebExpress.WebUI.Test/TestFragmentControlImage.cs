@@ -17,7 +17,7 @@ namespace WebExpress.WebUI.Test
         public TestFragmentControlImage(IFragmentContext fragmentContext)
             : base(fragmentContext)
         {
-            Uri = new UriEndpoint("/a/b/c");
+            Uri = _ => new UriEndpoint("/a/b/c");
         }
     }
 }

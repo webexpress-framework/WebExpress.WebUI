@@ -333,8 +333,8 @@ namespace WebExpress.WebUI.WebControl
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
                 Role = "dialog"
             }
-                .AddUserAttribute("data-size", Size.ToClass())
-                .AddUserAttribute("data-close-label", I18N.Translate(renderContext, CloseLabel));
+                .AddUserAttribute("data-size", (Size?.Invoke(renderContext) ?? TypeModalSize.Default).ToClass())
+                .AddUserAttribute("data-close-label", I18N.Translate(renderContext, CloseLabel?.Invoke(renderContext)));
 
             if (formElement is HtmlElementFormForm form && state != TypeFormState.Success)
             {

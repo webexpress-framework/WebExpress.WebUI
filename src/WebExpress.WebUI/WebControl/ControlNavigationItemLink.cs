@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+using System;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -11,7 +12,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Prevents line break.
         /// </summary>
-        public bool NoWrap { get; set; }
+        public Func<IRenderControlContext, bool> NoWrap { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -32,8 +33,9 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var html = base.Render(renderContext, visualTree);
+            var noWrap = NoWrap?.Invoke(renderContext) ?? false;
 
-            if (NoWrap)
+            if (noWrap)
             {
                 html.AddClass("text-nowrap");
             }

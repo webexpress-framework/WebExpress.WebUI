@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -12,39 +13,39 @@ namespace WebExpress.WebUI.WebControl
     {
         private readonly List<IControl> _content = [];
 
-        /// <summary> 
-        /// Returns the content of the panel. 
-        /// </summary> 
-        /// <remarks> 
-        /// The content property holds a collection of controls that represent 
-        /// the visual and interactive elements within this container. 
+        /// <summary>
+        /// Returns the content of the panel.
+        /// </summary>
+        /// <remarks>
+        /// The content property holds a collection of controls that represent
+        /// the visual and interactive elements within this container.
         /// </remarks>
         public IEnumerable<IControl> Content => _content;
 
         /// <summary>
         /// Gets or sets the arrangement of the content.
         /// </summary>
-        public TypeDirection Direction
+        public Func<IRenderControlContext, TypeDirection> Direction
         {
-            get => (TypeDirection)GetProperty(TypeDirection.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeDirection>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
         /// Fixed or full-width adjustment.
         /// </summary>
-        public TypePanelContainer Fluid
+        public Func<IRenderControlContext, TypePanelContainer> Fluid
         {
-            get => (TypePanelContainer)GetProperty(TypePanelContainer.None);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypePanelContainer>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
         /// Gets or sets the theme of the control.
         /// </summary>
-        public virtual TypeTheme Theme
+        public virtual Func<IRenderControlContext, TypeTheme> Theme
         {
-            get => (TypeTheme)GetProperty(TypeTheme.None, "data-bs-theme");
+            get => (Func<IRenderControlContext, TypeTheme>)GetPropertyObjectValue("data-bs-theme");
             set => SetProperty(value, null, null, "data-bs-theme");
         }
 
@@ -59,23 +60,23 @@ namespace WebExpress.WebUI.WebControl
             _content.AddRange(controls.Where(x => x is not null));
         }
 
-        /// <summary> 
+        /// <summary>
         /// Adds one or more controls to the content of the control panel.
-        /// </summary> 
-        /// <param name="controls">The controls to add to the content.</param> 
-        /// <remarks> 
-        /// This method allows adding one or multiple controls to the content collection of 
-        /// the control panel. It is useful for dynamically constructing the user interface by appending 
-        /// various controls to the panel's content. 
-        /// 
-        /// Example usage: 
-        /// <code> 
-        /// var panel = new ControlPanel(); 
+        /// </summary>
+        /// <param name="controls">The controls to add to the content.</param>
+        /// <remarks>
+        /// This method allows adding one or multiple controls to the content collection of
+        /// the control panel. It is useful for dynamically constructing the user interface by appending
+        /// various controls to the panel's content.
+        ///
+        /// Example usage:
+        /// <code>
+        /// var panel = new ControlPanel();
         /// var text1 = new ControlText { Text = "A" };
         /// var text2 = new ControlText { Text = "B" };
         /// panel.Add(text1, text2);
-        /// </code> 
-        /// 
+        /// </code>
+        ///
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
@@ -86,23 +87,23 @@ namespace WebExpress.WebUI.WebControl
             return this;
         }
 
-        /// <summary> 
+        /// <summary>
         /// Adds one or more controls to the content of the control panel.
-        /// </summary> 
-        /// <param name="controls">The controls to add to the content.</param> 
-        /// <remarks> 
-        /// This method allows adding one or multiple controls to the content collection of 
-        /// the control panel. It is useful for dynamically constructing the user interface by appending 
-        /// various controls to the panel's content. 
-        /// 
-        /// Example usage: 
-        /// <code> 
-        /// var panel = new ControlPanel(); 
+        /// </summary>
+        /// <param name="controls">The controls to add to the content.</param>
+        /// <remarks>
+        /// This method allows adding one or multiple controls to the content collection of
+        /// the control panel. It is useful for dynamically constructing the user interface by appending
+        /// various controls to the panel's content.
+        ///
+        /// Example usage:
+        /// <code>
+        /// var panel = new ControlPanel();
         /// var text1 = new ControlText { Text = "A" };
         /// var text2 = new ControlText { Text = "B" };
         /// panel.Add(text1, text2);
-        /// </code> 
-        /// 
+        /// </code>
+        ///
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
@@ -118,7 +119,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="control">The control to remove from the content.</param>
         /// <remarks>
-        /// This method allows removing a specific control from the content collection of 
+        /// This method allows removing a specific control from the content collection of
         /// the control panel.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
@@ -152,15 +153,27 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var role = Role?.Invoke(renderContext);
+            return Render(renderContext, visualTree, _content);
+        }
 
-            return new HtmlElementTextContentDiv([.. _content.Select(x => x?.Render(renderContext, visualTree))])
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="controls">The collection of controls to be rendered within the panel.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControl> content)
+        {
+            var role = Role?.Invoke(renderContext);
+            var theme = Theme?.Invoke(renderContext) ?? TypeTheme.None;
+
+            return new HtmlElementTextContentDiv([.. content.Select(x => x?.Render(renderContext, visualTree))])
             {
                 Id = Id,
                 Class = GetClasses(),
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
                 Role = role,
-                DataTheme = Theme.ToValue()
+                DataTheme = theme.ToValue()
             };
         }
     }

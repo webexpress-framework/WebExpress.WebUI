@@ -84,7 +84,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = breakpoint.HasValue
                 ? new ControlSidebar()
                 {
-                    Breakpoint = breakpoint.Value
+                    Breakpoint = _ => breakpoint.Value
                 }
                 : new ControlSidebar();
 
@@ -107,7 +107,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlSidebar(null)
                 .Add(new ControlSidebarItemLink()
                 {
-                    Text = "abc"
+                    Text = _ => "abc"
                 });
 
             // act

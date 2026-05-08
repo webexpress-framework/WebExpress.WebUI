@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.Internationalization;
+using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -12,17 +13,17 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the description.
         /// </summary>
-        public string Description { get; set; }
+        public Func<IRenderControlContext, string> Description { get; set; }
 
         /// <summary>
         /// Gets or sets the placeholder text displayed when no date is selected.
         /// </summary>
-        public string Placeholder { get; set; }
+        public Func<IRenderControlContext, string> Placeholder { get; set; }
 
         /// <summary>
         /// Gets or sets the date format string used for formatting date values.
         /// </summary>
-        public string Format { get; set; }
+        public Func<IRenderControlContext, string> Format { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
@@ -49,8 +50,10 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            var format = Format?.Invoke(renderContext);
+            var placeholder = Placeholder?.Invoke(renderContext);
             var range = renderContext.GetValue<ControlFormInputValueDateRange>(this)?
-                .ToString(Format, renderContext?.Request?.Culture);
+                .ToString(format, renderContext?.Request?.Culture);
             var name = Name?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
@@ -59,11 +62,11 @@ namespace WebExpress.WebUI.WebControl
                 Class = "wx-webui-input-date"
             }
                 .AddUserAttribute("name", name)
-                .AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder))
+                .AddUserAttribute("placeholder", I18N.Translate(renderContext, placeholder))
                 .AddUserAttribute("data-value", range)
                 .AddUserAttribute("data-range", "true")
-                .AddUserAttribute("data-format", !string.IsNullOrWhiteSpace(Format)
-                    ? Format
+                .AddUserAttribute("data-format", !string.IsNullOrWhiteSpace(format)
+                    ? format
                     : renderContext.Request.Culture.DateTimeFormat.ShortDatePattern
                 );
 
@@ -74,11 +77,14 @@ namespace WebExpress.WebUI.WebControl
         /// Creates an value from the specified string representation.
         /// </summary>
         /// <param name="value">
-        /// The string representation of the value to be converted. Cannot be null.
+        /// The string representation of the value to be parsed and stored.
         /// </param>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="renderContext">
+        /// The context in which the control is rendered.
+        /// </param>
         /// <returns>
-        /// The value created from the specified string representation.
+        /// A instance representing the parsed value, or an instance with a default 
+        /// value if parsing fails.
         /// </returns>
         protected override ControlFormInputValueDateRange CreateValue(string value, IRenderControlFormContext renderContext)
         {

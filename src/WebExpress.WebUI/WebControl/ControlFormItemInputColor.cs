@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+using System;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -11,7 +12,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the color value.
         /// </summary>
-        public string Color { get; set; }
+        public Func<IRenderControlContext, string> Color { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
@@ -39,6 +40,7 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
+            var color = Color?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
@@ -46,7 +48,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("wx-webui-input-color", GetClasses()),
                 Style = GetStyles(),
             }
-              .AddUserAttribute("data-value", value ?? Color);
+              .AddUserAttribute("data-value", value ?? color);
 
             return html;
         }

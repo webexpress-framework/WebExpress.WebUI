@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Drawing;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a visual component capable of displaying a graph consisting of 
+    /// Represents a visual component capable of displaying a graph consisting of
     /// nodes and edges.
     /// </summary>
     public interface IControlGraphItemEdge : IControlGraphItem
@@ -12,22 +14,22 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets the id of the source node.
         /// </summary>
-        string Source { get; }
+        Func<IRenderControlContext, string> Source { get; }
 
         /// <summary>
         /// Gets the id of the target node.
         /// </summary>
-        string Target { get; }
+        Func<IRenderControlContext, string> Target { get; }
 
         /// <summary>
         /// Gets an optional label for the edge.
         /// </summary>
-        string Label { get; }
+        Func<IRenderControlContext, string> Label { get; }
 
         /// <summary>
         /// Gets the color for the node.
         /// </summary>
-        PropertyColorGraph Color { get; }
+        Func<IRenderControlContext, PropertyColorGraph> Color { get; }
 
         /// <summary>
         /// Gets the collection of waypoints that define the path.
@@ -37,23 +39,11 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Adds one or more waypoints to the edge.
         /// </summary>
-        /// <param name="waypoints">
-        /// An array of points representing the waypoints to add.
-        /// </param>
-        /// <returns>
-        /// The current instance with the added waypoints.
-        /// </returns>
         IControlGraphItemEdge Add(params Point[] waypoints);
 
         /// <summary>
         /// Adds one or more waypoints to the edge.
         /// </summary>
-        /// <param name="waypoints">
-        /// An array of points representing the waypoints to add.
-        /// </param>
-        /// <returns>
-        /// The current instance with the added waypoints.
-        /// </returns>
         IControlGraphItemEdge Add(IEnumerable<Point> waypoints);
     }
 }

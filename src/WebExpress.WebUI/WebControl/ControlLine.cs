@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+using System;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -11,15 +12,15 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or set the background color.
         /// </summary>
-        public new PropertyColorBackground BackgroundColor { get; private set; }
+        public new Func<IRenderControlContext, PropertyColorBackground> BackgroundColor { get; private set; }
 
         /// <summary>
         /// Gets or sets the color.
         /// </summary>
-        public PropertyColorLine Color
+        public Func<IRenderControlContext, PropertyColorLine> Color
         {
-            get => (PropertyColorLine)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+            get => (Func<IRenderControlContext, PropertyColorLine>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>

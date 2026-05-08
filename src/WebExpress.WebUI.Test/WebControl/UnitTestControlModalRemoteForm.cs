@@ -73,7 +73,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlModalRemoteForm(null)
             {
-                Size = size
+                Size = _ => size
             };
 
             // act
@@ -96,7 +96,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlModalRemoteForm(null)
             {
-                Uri = !string.IsNullOrWhiteSpace(uri) ? new WebCore.WebUri.UriEndpoint(uri) : null
+                Uri = _ => !string.IsNullOrWhiteSpace(uri) ? new WebCore.WebUri.UriEndpoint(uri) : null
             };
 
             // act
@@ -119,7 +119,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlModalRemoteForm(null)
             {
-                Selector = selector
+                Selector = _ => selector
             };
 
             // act

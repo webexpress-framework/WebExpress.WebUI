@@ -55,7 +55,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelToast()
             {
-                BackgroundColor = new PropertyColorBackgroundAlert(backgroundColor)
+                BackgroundColor = _ => new PropertyColorBackgroundAlert(backgroundColor)
             };
 
             // act
@@ -82,7 +82,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelToast()
             {
-                Direction = direction,
+                Direction = _ => direction,
             };
 
             // act
@@ -107,7 +107,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelToast()
             {
-                Fluid = fluid,
+                Fluid = _ => fluid,
             };
 
             // act
@@ -132,7 +132,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelToast()
             {
-                Theme = theme
+                Theme = _ => theme
             };
 
             // act

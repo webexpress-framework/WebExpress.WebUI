@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlLinkList()
             {
-                Name = name,
+                Name = _ => name,
             };
 
             // act
@@ -81,8 +81,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlLinkList()
             {
-                Name = "abc",
-                NameColor = new PropertyColorText(color)
+                Name = _ => "abc",
+                NameColor = _ => new PropertyColorText(color)
             };
 
             // act
@@ -105,7 +105,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlLinkList()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act

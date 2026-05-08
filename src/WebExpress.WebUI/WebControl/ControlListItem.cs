@@ -88,7 +88,7 @@ namespace WebExpress.WebUI.WebControl
                     return;
                 }
 
-                _content.Add(new ControlText { Text = value?.Invoke(null), Format = TypeFormatText.Raw });
+                _content.Add(new ControlText { Text = value, Format = _ => TypeFormatText.Raw });
             }
         }
 

@@ -82,7 +82,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlList()
             {
-                Layout = layout
+                Layout = _ => layout
             };
 
             // act
@@ -106,7 +106,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlList(null) { Title = title };
+            var control = new ControlList(null) { Title = _ => title };
 
             // act
             var html = control.Render(context, visualTree);
@@ -127,7 +127,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlList(null) { Sortable = sortable };
+            var control = new ControlList(null) { Sortable = _ => sortable };
 
             // act
             var html = control.Render(context, visualTree);
@@ -146,7 +146,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlList(null) { Title = "Characters", Sortable = true };
+            var control = new ControlList(null) { Title = _ => "Characters", Sortable = _ => true };
 
             // act
             var html = control.Render(context, visualTree).ToString();

@@ -99,7 +99,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputTag(null)
             {
-                Placeholder = placeholder
+                Placeholder = _ => placeholder
             };
 
             // act
@@ -132,7 +132,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputTag(null)
             {
-                Color = new PropertyColorTag(color)
+                Color = _ => new PropertyColorTag(color)
             };
 
             // act
@@ -159,7 +159,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputTag(null)
             {
-                Color = new PropertyColorTag(color)
+                Color = _ => new PropertyColorTag(color)
             };
 
             // act

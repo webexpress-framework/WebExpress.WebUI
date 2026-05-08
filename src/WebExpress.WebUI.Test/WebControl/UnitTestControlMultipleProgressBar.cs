@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlMultipleProgressBar()
             {
-                Format = format
+                Format = _ => format
             };
 
             // act
@@ -70,10 +70,10 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var item = new ControlMultipleProgressBarItem() { Text = text };
+            var item = new ControlMultipleProgressBarItem() { Text = _ => text };
             var control = new ControlMultipleProgressBar(null, item)
             {
-                Format = TypeFormatProgress.Colored
+                Format = _ => TypeFormatProgress.Colored
             };
 
             // act
@@ -101,10 +101,10 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var item = new ControlMultipleProgressBarItem() { Color = new PropertyColorText(color) };
+            var item = new ControlMultipleProgressBarItem() { Color = _ => new PropertyColorText(color) };
             var control = new ControlMultipleProgressBar(null, item)
             {
-                Format = TypeFormatProgress.Colored
+                Format = _ => TypeFormatProgress.Colored
             };
 
             // act
@@ -136,7 +136,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlMultipleProgressBar()
             {
                 TextColor = _ => new PropertyColorText(textColor),
-                Format = TypeFormatProgress.Colored
+                Format = _ => TypeFormatProgress.Colored
             };
 
             // act
@@ -158,7 +158,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var item = new ControlMultipleProgressBarItem() { Value = value };
+            var item = new ControlMultipleProgressBarItem() { Value = _ => value };
             var control = new ControlMultipleProgressBar(null, item)
             {
             };

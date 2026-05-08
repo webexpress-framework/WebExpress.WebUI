@@ -126,7 +126,7 @@ namespace WebExpress.WebUI.WebControl
                                 pathIcon is not null
                                     ? new ControlIcon()
                                     {
-                                        Icon = pathIcon
+                                        Icon = _ => pathIcon
                                     }
                                         .Render(renderContext, visualTree)
                                     : null
@@ -150,7 +150,7 @@ namespace WebExpress.WebUI.WebControl
                                 icon is not null
                                     ? new ControlIcon()
                                     {
-                                        Icon = icon
+                                        Icon = _ => icon
                                     }
                                         .Render(renderContext, visualTree)
                                     : null

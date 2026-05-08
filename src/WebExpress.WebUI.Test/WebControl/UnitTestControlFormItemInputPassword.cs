@@ -95,7 +95,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputPassword(null)
             {
-                Placeholder = placeholder
+                Placeholder = _ => placeholder
             };
 
             // act
@@ -120,7 +120,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputPassword(null)
             {
-                MinLength = minLength
+                MinLength = _ => minLength
             };
 
             // act
@@ -145,7 +145,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputPassword(null)
             {
-                MaxLength = maxLength
+                MaxLength = _ => maxLength
             };
 
             // act

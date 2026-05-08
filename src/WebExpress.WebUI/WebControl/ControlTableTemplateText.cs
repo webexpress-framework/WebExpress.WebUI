@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -23,12 +23,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the color associated with this property text.
         /// </summary>
-        public PropertyColorText Color { get; set; }
+        public Func<IRenderControlContext, PropertyColorText> Color { get; set; }
 
         /// <summary>
         /// Gets or sets the placeholder text displayed when the input field is empty.
         /// </summary>
-        public string Placeholder { get; set; }
+        public Func<IRenderControlContext, string> Placeholder { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -48,15 +48,17 @@ namespace WebExpress.WebUI.WebControl
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var editable = Editable?.Invoke(renderContext) ?? false;
+            var color = Color?.Invoke(renderContext);
+            var placeholder = Placeholder?.Invoke(renderContext);
 
             var html = new HtmlElement("template")
             {
                 Id = Id
             }
                 .AddUserAttribute("data-type", "text")
-                .AddUserAttribute("data-color-css", Color?.ToClass())
-                .AddUserAttribute("data-color-style", Color?.ToStyle())
-                .AddUserAttribute("data-placeholder", I18N.Translate(renderContext, Placeholder))
+                .AddUserAttribute("data-color-css", color?.ToClass())
+                .AddUserAttribute("data-color-style", color?.ToStyle())
+                .AddUserAttribute("data-placeholder", I18N.Translate(renderContext, placeholder))
                 .AddUserAttribute("data-editable", editable ? "true" : null);
 
             return html;

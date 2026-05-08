@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -22,17 +23,17 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the color of the name text.
         /// </summary>
-        public PropertyColorText NameColor { get; set; }
+        public Func<IRenderControlContext, PropertyColorText> NameColor { get; set; }
 
         /// <summary>
         /// Gets or sets the icon.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
         /// Gets or sets the name.
         /// </summary>
-        public string Name { get; set; }
+        public Func<IRenderControlContext, string> Name { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -45,23 +46,23 @@ namespace WebExpress.WebUI.WebControl
             _links.AddRange(links);
         }
 
-        /// <summary> 
+        /// <summary>
         /// Adds one or more links to the content of the link list control.
-        /// </summary> 
-        /// <param name="links">The links to add to the content.</param> 
-        /// <remarks> 
-        /// This method allows adding one or multiple links to the collection of 
-        /// the link list control. It is useful for dynamically constructing the user interface by appending 
-        /// various links to the link list content. 
-        /// 
-        /// Example usage: 
-        /// <code> 
-        /// var list = new ControlLinkList(); 
+        /// </summary>
+        /// <param name="links">The links to add to the content.</param>
+        /// <remarks>
+        /// This method allows adding one or multiple links to the collection of
+        /// the link list control. It is useful for dynamically constructing the user interface by appending
+        /// various links to the link list content.
+        ///
+        /// Example usage:
+        /// <code>
+        /// var list = new ControlLinkList();
         /// var link1 = new ControlLink { Text = "A" };
         /// var link2 = new ControlLink { Text = "B" };
         /// list.Add(text1, text2);
-        /// </code> 
-        /// 
+        /// </code>
+        ///
         /// This method accepts any control that implements the <see cref="IControlLink"/> interface.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
@@ -72,23 +73,23 @@ namespace WebExpress.WebUI.WebControl
             return this;
         }
 
-        /// <summary> 
+        /// <summary>
         /// Adds one or more links to the content of the link list control.
-        /// </summary> 
-        /// <param name="links">The links to add to the content.</param> 
-        /// <remarks> 
-        /// This method allows adding one or multiple links to the collection of 
-        /// the link list control. It is useful for dynamically constructing the user interface by appending 
-        /// various links to the link list content. 
-        /// 
-        /// Example usage: 
-        /// <code> 
-        /// var list = new ControlLinkList(); 
+        /// </summary>
+        /// <param name="links">The links to add to the content.</param>
+        /// <remarks>
+        /// This method allows adding one or multiple links to the collection of
+        /// the link list control. It is useful for dynamically constructing the user interface by appending
+        /// various links to the link list content.
+        ///
+        /// Example usage:
+        /// <code>
+        /// var list = new ControlLinkList();
         /// var link1 = new ControlLink { Text = "A" };
         /// var link2 = new ControlLink { Text = "B" };
         /// list.Add(text1, text2);
-        /// </code> 
-        /// 
+        /// </code>
+        ///
         /// This method accepts any control that implements the <see cref="IControlLink"/> interface.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
@@ -104,7 +105,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="link">The link to remove from the content.</param>
         /// <remarks>
-        /// This method allows removing a specific link from the collection of 
+        /// This method allows removing a specific link from the collection of
         /// the link list control.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
@@ -123,19 +124,22 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var icon = Icon?.Render(renderContext, visualTree);
+            var iconValue = Icon?.Invoke(renderContext);
+            var icon = iconValue?.Render(renderContext, visualTree);
             var role = Role?.Invoke(renderContext);
+            var nameValue = Name?.Invoke(renderContext);
+            var nameColor = NameColor?.Invoke(renderContext);
 
-            var name = new HtmlElementTextSemanticsSpan(new HtmlText(I18N.Translate(Name)))
+            var name = new HtmlElementTextSemanticsSpan(new HtmlText(I18N.Translate(nameValue)))
             {
                 Id = string.IsNullOrWhiteSpace(Id) ? string.Empty : $"{Id}_name",
-                Class = NameColor?.ToClass()
+                Class = nameColor?.ToClass()
             };
 
             var html = new HtmlElementTextContentDiv
             (
-                Icon is not null ? icon : null,
-                Name is not null ? name : null
+                iconValue is not null ? icon : null,
+                nameValue is not null ? name : null
             )
             {
                 Id = Id,

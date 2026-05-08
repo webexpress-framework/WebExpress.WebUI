@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSidebarItemIcon()
             {
-                Icon = iconClass is not null ? new IconCog() : null
+                Icon = _ => iconClass is not null ? new IconCog() : null
             };
 
             // act
@@ -73,7 +73,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSidebarItemIcon()
             {
-                Icon = !string.IsNullOrWhiteSpace(iconImage)
+                Icon = _ => !string.IsNullOrWhiteSpace(iconImage)
                     ? ImageIcon.FromString(iconImage)
                     : null
             };
@@ -100,7 +100,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSidebarItemIcon()
             {
-                Text = text
+                Text = _ => text
             };
 
             // act
@@ -124,7 +124,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSidebarItemIcon()
             {
-                IconEdit = iconEdit
+                IconEdit = _ => iconEdit
             };
 
             // act
@@ -149,7 +149,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSidebarItemIcon()
             {
-                Uri = uri is not null ? new UriEndpoint(uri) : null,
+                Uri = _ => uri is not null ? new UriEndpoint(uri) : null,
             };
 
             // act
@@ -174,7 +174,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSidebarItemIcon()
             {
-                PrimaryAction = new ActionModal("modalId", endpoint)
+                PrimaryAction = _ => new ActionModal("modalId", endpoint)
             };
 
             // act
@@ -199,7 +199,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSidebarItemIcon()
             {
-                SecondaryAction = new ActionModal("modalId", endpoint)
+                SecondaryAction = _ => new ActionModal("modalId", endpoint)
             };
 
             // act
@@ -223,7 +223,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSidebarItemIcon()
             {
-                Mode = mode
+                Mode = _ => mode
             };
 
             // act

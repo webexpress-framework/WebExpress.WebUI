@@ -42,7 +42,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the id of the item.
         /// </summary>
-        public string ObjectId { get; set; }
+        public Func<IRenderControlContext, string> ObjectId { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the item.
@@ -165,7 +165,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("wx-webui-smart-edit", GetClasses()),
                 Style = GetStyles()
             }
-                .AddUserAttribute("data-object-id", ObjectId)
+                .AddUserAttribute("data-object-id", ObjectId?.Invoke(renderContext))
                 .AddUserAttribute("data-object-name", name)
                 .AddUserAttribute("data-form-action", uri)
                 .AddUserAttribute("data-form-method", method.ToString())

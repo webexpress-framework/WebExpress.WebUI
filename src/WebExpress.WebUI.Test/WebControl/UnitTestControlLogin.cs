@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlLogin()
             {
-                Username = login
+                Username = _ => login
             };
 
             // act
@@ -73,7 +73,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlLogin()
             {
-                Title = title
+                Title = _ => title
             };
 
             // act

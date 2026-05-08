@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -14,12 +15,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets a placeholder text.
         /// </summary>
-        public string Placeholder { get; set; }
+        public Func<IRenderControlContext, string> Placeholder { get; set; }
 
         /// <summary>
         /// Gets or sets the color of the tags.
         /// </summary>
-        public PropertyColorTag Color { get; set; } = new PropertyColorTag(TypeColorTag.Default);
+        public Func<IRenderControlContext, PropertyColorTag> Color { get; set; } = _ => new PropertyColorTag(TypeColorTag.Default);
 
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
@@ -42,6 +43,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Initializes the form element.
         /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <param name="renderContext">The context in which the control is rendered.</param>
         public override void Initialize(IRenderControlFormContext renderContext)
         {
@@ -66,6 +68,8 @@ namespace WebExpress.WebUI.WebControl
             var name = Name?.Invoke(renderContext);
             var disabled = Disabled?.Invoke(renderContext) ?? false;
             var role = Role?.Invoke(renderContext);
+            var placeholder = Placeholder?.Invoke(renderContext);
+            var color = Color?.Invoke(renderContext);
 
             if (disabled)
             {
@@ -80,10 +84,10 @@ namespace WebExpress.WebUI.WebControl
                 Role = role
             }
                 .AddUserAttribute("name", name)
-                .AddUserAttribute("placeholder", I18N.Translate(renderContext.Request?.Culture, Placeholder))
+                .AddUserAttribute("placeholder", I18N.Translate(renderContext.Request?.Culture, placeholder))
                 .AddUserAttribute("data-value", value)
-                .AddUserAttribute("data-color-css", Color.ToClass())
-                .AddUserAttribute("data-color-style", Color.ToStyle());
+                .AddUserAttribute("data-color-css", color?.ToClass())
+                .AddUserAttribute("data-color-style", color?.ToStyle());
 
             return html;
         }
@@ -91,10 +95,8 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Validates the input elements within a form for correctness of the data.
         /// </summary>
-        /// <param name="renderContext">The context in which the inputs are validated, containing form data and state.</param>
-        /// <returns>A collection of <see cref="ValidationResult"/> objects representing the validation 
-        /// results for each input element. Each result indicates whether the input is valid or contains errors.
-        /// </returns>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <returns>A collection of validation results indicating any issues found.</returns>
         public override IEnumerable<ValidationResult> Validate(IRenderControlFormContext renderContext)
         {
             var validationResults = new List<ValidationResult>(base.Validate(renderContext));
@@ -112,15 +114,17 @@ namespace WebExpress.WebUI.WebControl
         /// Creates an value from the specified string representation.
         /// </summary>
         /// <param name="value">
-        /// The string representation of the value to be converted. Cannot be null.
+        /// The string representation of the value to be parsed and stored.
         /// </param>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="renderContext">
+        /// The context in which the control is rendered.
+        /// </param>
         /// <returns>
-        /// The value created from the specified string representation.
+        /// A instance representing the parsed value, or an instance with a default 
+        /// value if parsing fails.
         /// </returns>
         protected override ControlFormInputValueStringList CreateValue(string value, IRenderControlFormContext renderContext)
         {
-            // create a new instance using the semicolon separated string
             return new ControlFormInputValueStringList(value);
         }
     }

@@ -48,8 +48,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlText()
             {
-                Text = text,
-                Format = format
+                Text = _ => text,
+                Format = _ => format
             };
 
             // act
@@ -81,7 +81,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlText()
             {
-                TextColor = new PropertyColorText(color)
+                TextColor = _ => new PropertyColorText(color)
             };
 
             // act

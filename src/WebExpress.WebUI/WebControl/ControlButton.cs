@@ -187,7 +187,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 html.Add(new ControlIcon()
                 {
-                    Icon = icon
+                    Icon = _ => icon
                 }.Render(renderContext, visualTree));
             }
 

@@ -26,7 +26,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlIcon(id)
             {
-                Icon = new IconStar()
+                Icon = _ => new IconStar()
             };
 
             // act
@@ -49,8 +49,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlIcon()
             {
-                Icon = new IconStar(),
-                Title = title
+                Icon = _ => new IconStar(),
+                Title = _ => title
             };
 
             // act
@@ -73,7 +73,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlIcon()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -99,8 +99,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlIcon()
             {
-                Icon = new IconStar(),
-                Size = new PropertySizeText(size)
+                Icon = _ => new IconStar(),
+                Size = _ => new PropertySizeText(size)
             };
 
             // act
@@ -126,8 +126,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlIcon()
             {
-                Icon = new IconStar(),
-                VerticalAlignment = verticalAlignment
+                Icon = _ => new IconStar(),
+                VerticalAlignment = _ => verticalAlignment
             };
 
             // act
@@ -152,7 +152,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlIcon()
             {
-                Icon = new IconStar(theme)
+                Icon = _ => new IconStar(theme)
             };
 
             // act

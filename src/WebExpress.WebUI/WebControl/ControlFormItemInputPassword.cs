@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -14,22 +14,22 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets a placeholder text.
         /// </summary>
-        public string Placeholder { get; set; }
+        public Func<IRenderControlContext, string> Placeholder { get; set; }
 
         /// <summary>
         /// Gets or sets the minimum length.
         /// </summary>
-        public uint? MinLength { get; set; }
+        public Func<IRenderControlContext, uint?> MinLength { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum length.
         /// </summary>
-        public uint? MaxLength { get; set; }
+        public Func<IRenderControlContext, uint?> MaxLength { get; set; }
 
         /// <summary>
         /// Gets or sets a search pattern that checks the content.
         /// </summary>
-        public string Pattern { get; set; }
+        public Func<IRenderControlContext, string> Pattern { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -69,6 +69,9 @@ namespace WebExpress.WebUI.WebControl
             var name = Name?.Invoke(renderContext);
             var disabled = Disabled?.Invoke(renderContext) ?? false;
             var role = Role?.Invoke(renderContext);
+            var placeholder = Placeholder?.Invoke(renderContext);
+            var minLength = MinLength?.Invoke(renderContext);
+            var maxLength = MaxLength?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
@@ -79,10 +82,10 @@ namespace WebExpress.WebUI.WebControl
             }
                 .AddUserAttribute("name", name)
                 .AddUserAttribute("data-value", value?.Text)
-                .AddUserAttribute("data-placeholder", I18N.Translate(renderContext.Request?.Culture, Placeholder))
+                .AddUserAttribute("data-placeholder", I18N.Translate(renderContext.Request?.Culture, placeholder))
                 .AddUserAttribute("data-disabled", disabled ? "true" : null)
-                .AddUserAttribute("data-minlength", MinLength?.ToString())
-                .AddUserAttribute("data-maxlength", MaxLength?.ToString());
+                .AddUserAttribute("data-minlength", minLength?.ToString())
+                .AddUserAttribute("data-maxlength", maxLength?.ToString());
 
             return html;
         }
@@ -90,16 +93,16 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Validates the input elements within a form for correctness of the data.
         /// </summary>
-        /// <param name="renderContext">The context in which the inputs are validated, containing form data and state.</param>
-        /// <returns>A collection of <see cref="ValidationResult"/> objects representing the validation 
-        /// results for each input element. Each result indicates whether the input is valid or contains errors.
-        /// </returns>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <returns>A collection of validation results indicating any issues found.</returns>
         public override IEnumerable<ValidationResult> Validate(IRenderControlFormContext renderContext)
         {
             var validationResults = new List<ValidationResult>(base.Validate(renderContext));
             var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
             var disabled = Disabled?.Invoke(renderContext) ?? false;
             var required = Required?.Invoke(renderContext) ?? false;
+            var minLength = MinLength?.Invoke(renderContext);
+            var maxLength = MaxLength?.Invoke(renderContext);
 
             if (disabled)
             {
@@ -113,14 +116,14 @@ namespace WebExpress.WebUI.WebControl
                 return validationResults;
             }
 
-            if (!string.IsNullOrWhiteSpace(MinLength?.ToString()) && Convert.ToInt32(MinLength) > value?.Length)
+            if (!string.IsNullOrWhiteSpace(minLength?.ToString()) && Convert.ToInt32(minLength) > value?.Length)
             {
-                validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputpassword.validation.min"), MinLength)));
+                validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputpassword.validation.min"), minLength)));
             }
 
-            if (!string.IsNullOrWhiteSpace(MaxLength?.ToString()) && Convert.ToInt32(MaxLength) < value?.Length)
+            if (!string.IsNullOrWhiteSpace(maxLength?.ToString()) && Convert.ToInt32(maxLength) < value?.Length)
             {
-                validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputpassword.validation.max"), MaxLength)));
+                validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputpassword.validation.max"), maxLength)));
             }
 
             return validationResults;
@@ -130,11 +133,14 @@ namespace WebExpress.WebUI.WebControl
         /// Creates an value from the specified string representation.
         /// </summary>
         /// <param name="value">
-        /// The string representation of the value to be converted. Cannot be null.
+        /// The string representation of the value to be parsed and stored.
         /// </param>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="renderContext">
+        /// The context in which the control is rendered.
+        /// </param>
         /// <returns>
-        /// The value created from the specified string representation.
+        /// A instance representing the parsed value, or an instance with a default 
+        /// value if parsing fails.
         /// </returns>
         protected override ControlFormInputValueString CreateValue(string value, IRenderControlFormContext renderContext)
         {

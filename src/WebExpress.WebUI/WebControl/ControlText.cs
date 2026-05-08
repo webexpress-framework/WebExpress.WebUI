@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.Internationalization;
+using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebMarkdown;
 using WebExpress.WebUI.WebPage;
@@ -13,10 +14,10 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the text color.
         /// </summary>
-        public new virtual PropertyColorText TextColor
+        public new virtual Func<IRenderControlContext, PropertyColorText> TextColor
         {
-            get => (PropertyColorText)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+            get => (Func<IRenderControlContext, PropertyColorText>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>
@@ -26,26 +27,26 @@ namespace WebExpress.WebUI.WebControl
         /// <remarks>
         /// This property allows you to specify the format of the text, such as paragraph, italic, bold, underline, etc.
         /// </remarks>
-        public TypeFormatText Format { get; set; }
+        public Func<IRenderControlContext, TypeFormatText> Format { get; set; }
 
         /// <summary>
         /// Gets or sets the size of the text.
         /// </summary>
-        public PropertySizeText Size
+        public Func<IRenderControlContext, PropertySizeText> Size
         {
-            get => (PropertySizeText)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+            get => (Func<IRenderControlContext, PropertySizeText>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>
         /// Gets or sets the text.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
         /// Gets or sets a tooltip text.
         /// </summary>
-        public string Title { get; set; }
+        public Func<IRenderControlContext, string> Title { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -65,13 +66,15 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var role = Role?.Invoke(renderContext);
-            var text = Text; //?.Invoke(renderContext);
+            var text = Text?.Invoke(renderContext);
+            var title = Title?.Invoke(renderContext);
+            var format = Format?.Invoke(renderContext) ?? default;
 
             text = I18N.Translate(renderContext?.Request.Culture, text);
 
             var html = default(HtmlElement);
 
-            switch (Format)
+            switch (format)
             {
                 case TypeFormatText.Paragraph:
                     html = new HtmlElementTextContentP(text)
@@ -339,10 +342,10 @@ namespace WebExpress.WebUI.WebControl
                     break;
             }
 
-            if (!string.IsNullOrWhiteSpace(Title))
+            if (!string.IsNullOrWhiteSpace(title))
             {
                 html.AddUserAttribute("data-toggle", "tooltip");
-                html.AddUserAttribute("title", Title);
+                html.AddUserAttribute("title", title);
             }
 
             return html;

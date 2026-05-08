@@ -78,7 +78,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelOverflow()
             {
-                Theme = theme
+                Theme = _ => theme
             };
 
             // act

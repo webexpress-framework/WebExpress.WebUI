@@ -73,7 +73,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlModal(null)
             {
-                Size = size
+                Size = _ => size
             };
 
             // act

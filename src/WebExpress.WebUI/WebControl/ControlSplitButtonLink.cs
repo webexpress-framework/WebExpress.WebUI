@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -9,7 +10,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a split button link control that can contain multiple items 
+    /// Represents a split button link control that can contain multiple items
     /// and navigate to a specified URI.
     /// </summary>
     public class ControlSplitButtonLink : ControlSplitButton
@@ -17,12 +18,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the target.
         /// </summary>
-        public TypeTarget Target { get; set; }
+        public Func<IRenderControlContext, TypeTarget> Target { get; set; }
 
         /// <summary>
         /// Gets or sets the uri.
         /// </summary>
-        public IUri Uri { get; set; }
+        public Func<IRenderControlContext, IUri> Uri { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -43,30 +44,30 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return Render(renderContext, visualTree, Text?.Invoke(renderContext), Uri, PrimaryAction?.Invoke(renderContext), SecondaryAction?.Invoke(renderContext), Icon?.Invoke(renderContext), [.. Items]);
+            return Render(renderContext, visualTree, Text?.Invoke(renderContext), Uri?.Invoke(renderContext), PrimaryAction?.Invoke(renderContext), SecondaryAction?.Invoke(renderContext), Icon?.Invoke(renderContext), [.. Items]);
         }
 
         /// <summary>
-        /// Renders a button element as an HTML node with optional icon, text, tooltip, modal behavior, 
+        /// Renders a button element as an HTML node with optional icon, text, tooltip, modal behavior,
         /// and additional content.
         /// </summary>
         /// <param name="renderContext">
-        /// The rendering context that provides information and services required during control 
+        /// The rendering context that provides information and services required during control
         /// rendering.
         /// </param>
         /// <param name="visualTree">
-        /// The visual tree context used to resolve control hierarchies and relationships during 
+        /// The visual tree context used to resolve control hierarchies and relationships during
         /// rendering.
         /// </param>
         /// <param name="text">
-        /// The text label to display within the button. This value is localized before 
+        /// The text label to display within the button. This value is localized before
         /// rendering. Can be null or empty.
         /// </param>
         /// <param name="uri">
         /// The URI to navigate to when the button is clicked. Ignored if a modal is specified.
         /// </param>
         /// <param name="primaryAction">
-        /// The primary action to associate with the button. If specified, this action is 
+        /// The primary action to associate with the button. If specified, this action is
         /// invoked when the button is  activated. Can be null.
         /// </param>
         /// <param name="secondaryAction">
@@ -75,9 +76,9 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="icon">
         /// The icon to display within the button. Can be null if no icon is required.
         /// </param>
-        /// <param name="items"></param>
+        /// <param name="items">The dropdown items associated with the split button.</param>
         /// <returns>
-        /// An <see cref="IHtmlNode"/> representing the rendered button element, including any 
+        /// An <see cref="IHtmlNode"/> representing the rendered button element, including any
         /// specified icon, text, tooltip, modal attributes, and child content.
         /// </returns>
         public virtual IHtmlNode Render
@@ -95,13 +96,14 @@ namespace WebExpress.WebUI.WebControl
             var margin = Margin?.Invoke(renderContext);
             var horizontalAlignment = HorizontalAlignment?.Invoke(renderContext);
             var role = Role?.Invoke(renderContext);
+            var target = Target?.Invoke(renderContext) ?? TypeTarget.None;
 
             var button = new HtmlElementTextSemanticsA()
             {
                 Id = string.IsNullOrWhiteSpace(Id) ? "" : Id + "_btn",
                 Class = Css.Concatenate("btn", Css.Remove(GetClasses(), margin?.ToClass())),
                 Style = GetStyles(),
-                Target = Target,
+                Target = target,
                 Href = uri?.ToString()
             };
 
@@ -109,7 +111,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 button.Add(new ControlIcon()
                 {
-                    Icon = icon,
+                    Icon = _ => icon,
                     Margin = _ => !string.IsNullOrWhiteSpace(text) ? new PropertySpacingMargin
                     (
                         PropertySpacing.Space.None,
@@ -117,7 +119,7 @@ namespace WebExpress.WebUI.WebControl
                         PropertySpacing.Space.None,
                         PropertySpacing.Space.None
                     ) : new PropertySpacingMargin(PropertySpacing.Space.None),
-                    VerticalAlignment = TypeVerticalAlignment.Default
+                    VerticalAlignment = _ => TypeVerticalAlignment.Default
                 }.Render(renderContext, visualTree));
             }
 

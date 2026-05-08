@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -20,17 +21,17 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the layout.
         /// </summary>
-        public TypeLayoutTree Layout { get; set; } = TypeLayoutTree.Default;
+        public Func<IRenderControlContext, TypeLayoutTree> Layout { get; set; } = _ => TypeLayoutTree.Default;
 
         /// <summary>
         /// Gets or sets a value indicating whether to show an indicator for expandable nodes.
         /// </summary>
-        public bool DisableIndicator { get; set; }
+        public Func<IRenderControlContext, bool> DisableIndicator { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the tree nodes are movable.
         /// </summary>
-        public bool Movable { get; set; }
+        public Func<IRenderControlContext, bool> Movable { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ControlTree"/> class.
@@ -101,6 +102,9 @@ namespace WebExpress.WebUI.WebControl
         {
             var classes = new List<string>(["wx-webui-tree"]);
             classes.AddRange(Classes);
+            var layout = Layout?.Invoke(renderContext) ?? TypeLayoutTree.Default;
+            var disableIndicator = DisableIndicator?.Invoke(renderContext) ?? false;
+            var movable = Movable?.Invoke(renderContext) ?? false;
 
             var html = new HtmlElementTextContentDiv([.. RenderChildren(renderContext, visualTree, nodes)])
             {
@@ -109,17 +113,17 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles()
             };
 
-            if (Layout != TypeLayoutTree.Default)
+            if (layout != TypeLayoutTree.Default)
             {
-                html.AddUserAttribute("data-layout", Layout.ToClass());
+                html.AddUserAttribute("data-layout", layout.ToClass());
             }
 
-            if (DisableIndicator)
+            if (disableIndicator)
             {
                 html.AddUserAttribute("data-indicator", "false");
             }
 
-            if (Movable)
+            if (movable)
             {
                 html.AddUserAttribute("data-movable", "true");
             }

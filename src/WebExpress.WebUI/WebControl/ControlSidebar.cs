@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -30,7 +31,7 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the breakpoint value that determines when the layout switches between 
         /// reduced and extended behavior.
         /// </summary>
-        public virtual int Breakpoint { get; set; } = -1;
+        public virtual Func<IRenderControlContext, int> Breakpoint { get; set; } = _ => -1;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -142,6 +143,7 @@ namespace WebExpress.WebUI.WebControl
         {
             var enable = Enable?.Invoke(renderContext) ?? true;
             var role = Role?.Invoke(renderContext);
+            var brakpoint = Breakpoint?.Invoke(renderContext) ?? -1;
 
             if (!enable)
             {
@@ -166,7 +168,9 @@ namespace WebExpress.WebUI.WebControl
                         .Add(_toolbarItems.Select(x => x.Render(renderContext, visualTree)))
                     : null
                 )
-                .AddUserAttribute("data-breakpoint", Breakpoint >= 0 ? Breakpoint.ToString() : null);
+                .AddUserAttribute("data-breakpoint", brakpoint >= 0
+                    ? brakpoint.ToString()
+                    : null);
 
             return html;
         }

@@ -79,7 +79,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelMedia()
             {
-                Direction = direction,
+                Direction = _ => direction,
             };
 
             // act
@@ -103,7 +103,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelMedia()
             {
-                Fluid = fluid,
+                Fluid = _ => fluid,
             };
 
             // act
@@ -127,7 +127,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelMedia()
             {
-                Title = title
+                Title = _ => title
             };
 
             // act
@@ -150,7 +150,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelMedia()
             {
-                Image = image
+                Image = _ => image
             };
 
             // act
@@ -173,7 +173,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelMedia()
             {
-                ImageWidth = imageWidth
+                ImageWidth = _ => imageWidth
             };
 
             // act
@@ -196,7 +196,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelMedia()
             {
-                ImageHeight = imageHeight
+                ImageHeight = _ => imageHeight
             };
 
             // act
@@ -220,7 +220,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelMedia()
             {
-                Theme = theme
+                Theme = _ => theme
             };
 
             // act

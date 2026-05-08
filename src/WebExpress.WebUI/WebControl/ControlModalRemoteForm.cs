@@ -41,6 +41,10 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var title = Header?.Invoke(renderContext);
+            var size = Size?.Invoke(renderContext) ?? TypeModalSize.Default;
+            var closeLabel = CloseLabel?.Invoke(renderContext);
+            var uri = Uri?.Invoke(renderContext);
+            var selector = Selector?.Invoke(renderContext);
 
             var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, title)))
             {
@@ -62,10 +66,10 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-modal-form", GetClasses())
             }
-            .AddUserAttribute("data-size", Size.ToClass())
-            .AddUserAttribute("data-close-label", I18N.Translate(renderContext, CloseLabel))
-            .AddUserAttribute("data-uri", Uri?.ToString())
-            .AddUserAttribute("data-selector", !string.IsNullOrWhiteSpace(Selector) ? $"#{Selector}" : null);
+            .AddUserAttribute("data-size", size.ToClass())
+            .AddUserAttribute("data-close-label", I18N.Translate(renderContext, closeLabel))
+            .AddUserAttribute("data-uri", uri?.ToString())
+            .AddUserAttribute("data-selector", !string.IsNullOrWhiteSpace(selector) ? $"#{selector}" : null);
 
             return html;
         }

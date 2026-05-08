@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCheck(null)
             {
-                Inline = inline
+                Inline = _ => inline
             };
 
             // act
@@ -98,7 +98,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCheck(null)
             {
-                Description = description
+                Description = _ => description
             };
 
             // act
@@ -123,7 +123,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCheck(null)
             {
-                Layout = layout
+                Layout = _ => layout
             };
 
             // act
