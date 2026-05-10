@@ -30,7 +30,9 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         masterPane: null,
         bodyWrapper: null,
         header: null,
-        footer: null
+        footer: null,
+        headerNodes: [],
+        footerNodes: []
     };
 
     _ctrls = {
@@ -49,7 +51,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Construct controller.
-     * @param {HTMLElement} element host element
+     * @param {HTMLElement} element - The Host element.
      */
     constructor(element) {
         super(element);
@@ -114,17 +116,23 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Parse child view configurations and import header/footer nodes if present.
-     * @param {HTMLElement} host host element
+     * @param {HTMLElement} host - The Host element.
      */
     _parseViews(host) {
-        const headerNode = host.querySelector(":scope > .wx-view-header");
-        if (headerNode) {
-            this._views.header = headerNode;
+        const directChildren = Array.from(host.children);
+
+        this._views.headerNodes = directChildren
+            .filter(node => node.matches && node.matches(".wx-view-header"));
+
+        this._views.footerNodes = directChildren
+            .filter(node => node.matches && node.matches(".wx-view-footer"));
+
+        if (this._views.headerNodes.length > 0) {
+            this._views.header = this._views.headerNodes[0];
         }
 
-        const footerNode = host.querySelector(":scope > .wx-view-statusbar, :scope > .wx-view-footer, :scope > footer");
-        if (footerNode) {
-            this._views.footer = footerNode;
+        if (this._views.footerNodes.length > 0) {
+            this._views.footer = this._views.footerNodes[0];
         }
 
         const viewNodes = Array.from(host.querySelectorAll(":scope > .wx-view"));
@@ -168,7 +176,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Build layout scaffolding.
-     * @param {HTMLElement} host host element
+     * @param {HTMLElement} host - The Host element.
      */
     _buildLayout(host) {
         host.classList.add("wx-view");
@@ -179,12 +187,13 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
             this._buildToolbar(host);
         }
 
-        if (this._views.header) {
-            host.appendChild(this._views.header);
+        if (this._views.headerNodes.length > 0) {
+            this._views.headerNodes.forEach(node => host.appendChild(node));
         } else {
             const headerRow = document.createElement("div");
             headerRow.className = "wx-view-header p-2";
             this._views.header = headerRow;
+            this._views.headerNodes = [headerRow];
             host.appendChild(headerRow);
         }
 
@@ -202,7 +211,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Build the default toolbar with title/description and a dropdown.
-     * @param {HTMLElement} host host element
+     * @param {HTMLElement} host - The Host element.
      */
     _buildToolbar(host) {
         const tb = document.createElement("div");
@@ -240,7 +249,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Build the toggle bar used by the togglegroup layout.
-     * @param {HTMLElement} host host element
+     * @param {HTMLElement} host - The Host element.
      */
     _buildToggleBar(host) {
         const tb = document.createElement("div");
@@ -259,11 +268,12 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Build status bar (footer).
-     * @param {HTMLElement} host host element
+     * @param {HTMLElement} host - The Host element.
      */
     _buildStatusbar(host) {
-        if (this._views.footer) {
-            host.appendChild(this._views.footer);
+        if (this._views.footerNodes.length > 0) {
+            this._views.footerNodes.forEach(node => host.appendChild(node));
+            this._views.footer = this._views.footerNodes[0];
             return;
         }
 
@@ -276,6 +286,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
         host.appendChild(sb);
         this._views.footer = sb;
+        this._views.footerNodes = [sb];
     }
 
     /**
@@ -404,14 +415,22 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
         const config = { childList: true, subtree: true, characterData: true };
 
-        if (this._views.header) {
+        const headers = this._views.headerNodes && this._views.headerNodes.length > 0
+            ? this._views.headerNodes
+            : (this._views.header ? [this._views.header] : []);
+
+        const footers = this._views.footerNodes && this._views.footerNodes.length > 0
+            ? this._views.footerNodes
+            : (this._views.footer ? [this._views.footer] : []);
+
+        if (headers.length > 0) {
             this._headerObserver = new MutationObserver(observerCallback);
-            this._headerObserver.observe(this._views.header, config);
+            headers.forEach(node => this._headerObserver.observe(node, config));
         }
 
-        if (this._views.footer) {
+        if (footers.length > 0) {
             this._footerObserver = new MutationObserver(observerCallback);
-            this._footerObserver.observe(this._views.footer, config);
+            footers.forEach(node => this._footerObserver.observe(node, config));
         }
     }
 
@@ -419,18 +438,42 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
      * Update header/footer border classes.
      */
     _updateHeaderFooterBorders() {
-        const updateBorder = (el, className) => {
+        const resetBorder = (el, className) => {
             if (el) {
-                if (this._hasVisibleContent(el)) {
-                    el.classList.add(className);
-                } else {
-                    el.classList.remove(className);
-                }
+                el.classList.remove(className);
             }
         };
 
-        updateBorder(this._views.header, "border-bottom");
-        updateBorder(this._views.footer, "border-top");
+        const applyBorder = (el, className) => {
+            if (!el) {
+                return;
+            }
+
+            if (this._hasVisibleContent(el)) {
+                el.classList.add(className);
+            }
+        };
+
+        const headers = this._views.headerNodes && this._views.headerNodes.length > 0
+            ? this._views.headerNodes
+            : (this._views.header ? [this._views.header] : []);
+
+        const footers = this._views.footerNodes && this._views.footerNodes.length > 0
+            ? this._views.footerNodes
+            : (this._views.footer ? [this._views.footer] : []);
+
+        headers.forEach(node => resetBorder(node, "border-bottom"));
+        footers.forEach(node => resetBorder(node, "border-top"));
+
+        const lastVisibleHeader = headers
+            .filter(node => this._hasVisibleContent(node))
+            .at(-1) || null;
+
+        const firstVisibleFooter = footers
+            .filter(node => this._hasVisibleContent(node))[0] || null;
+
+        applyBorder(lastVisibleHeader, "border-bottom");
+        applyBorder(firstVisibleFooter, "border-top");
     }
 
     /**
@@ -450,7 +493,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Switch active view and save state.
-     * @param {number} index target view index
+     * @param {number} index - Target view index
      */
     switchView(index) {
         if (index < 0 || index >= this._viewsConfig.length) {
@@ -502,7 +545,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Update title, description and icon shown in the default toolbar.
-     * @param {Object} cfg active view configuration
+     * @param {Object} cfg - Active view configuration.
      */
     _updateToolbarMetadata(cfg) {
         if (this._elements.title) {

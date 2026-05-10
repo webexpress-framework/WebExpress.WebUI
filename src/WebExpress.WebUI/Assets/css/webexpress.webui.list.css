@@ -1,6 +1,4 @@
-/* base: rely on bootstrap color and spacing variables */
 .wx-list {
-    /* use bootstrap's body colors to integrate with the theme */
     color: var(--bs-body-color);
     background-color: var(--bs-body-bg);
     display: block;
@@ -8,6 +6,7 @@
     padding: 0;
     border: 1px solid var(--bs-border-color);
     border-radius: var(--bs-border-radius, 10px);
+    height: 100%;
 }
 
 .wx-list-header {

@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.WebFragment
         /// </summary>
         /// <param name="fragmentContext">The context of the fragment.</param>
         protected FragmentControlTile(IFragmentContext fragmentContext)
-            : base(fragmentContext?.FragmentId?.ToString())
+            : base(fragmentContext?.FragmentId?.ToString()?.Replace(".", "-"))
         {
             FragmentContext = fragmentContext;
         }

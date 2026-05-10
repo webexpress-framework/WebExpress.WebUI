@@ -1,14 +1,18 @@
 using System.Collections.Generic;
 using System.Linq;
+using WebExpress.WebCore;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebScope;
+using WebExpress.WebUI.WebFragment;
 using WebExpress.WebUI.WebPage;
+using WebExpress.WebUI.WebSection;
 
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// Represents a view control.
     /// </summary>
-    public class ControlView : Control, IControlView
+    public class ControlView : Control, IControlView, IScope
     {
         private readonly List<IControlViewHeader> _headers = [];
         private readonly List<IControlViewItem> _views = [];
@@ -163,6 +167,59 @@ namespace WebExpress.WebUI.WebControl
             var classes = Classes.ToList();
             var layout = Layout?.Invoke(renderContext) ?? TypeLayoutView.Default;
             var role = Role?.Invoke(renderContext);
+            var fragmentManager = WebEx.ComponentHub.FragmentManager;
+            var applicationContext = renderContext?.PageContext?.ApplicationContext;
+
+            // headers
+            var headerPreferences = fragmentManager.GetFragments<IFragmentControlViewHeader, SectionViewHeaderPreferences>
+            (
+                applicationContext,
+                [GetType()]
+            );
+            var headerPrimary = fragmentManager.GetFragments<IFragmentControlViewHeader, SectionViewHeaderPrimary>
+            (
+                applicationContext,
+                [GetType()]
+            );
+            var headerSecondary = fragmentManager.GetFragments<IFragmentControlViewHeader, SectionViewHeaderSecondary>
+            (
+                applicationContext,
+                [GetType()]
+            );
+
+            // views
+            var viewPreferences = fragmentManager.GetFragments<IFragmentControlViewItem, SectionViewItemPreferences>
+            (
+                applicationContext,
+                [GetType()]
+            );
+            var viewPrimary = fragmentManager.GetFragments<IFragmentControlViewItem, SectionViewItemPrimary>
+            (
+                applicationContext,
+                [GetType()]
+            );
+            var viewSecondary = fragmentManager.GetFragments<IFragmentControlViewItem, SectionViewItemSecondary>
+            (
+                applicationContext,
+                [GetType()]
+            );
+
+            // footers
+            var footerPreferences = fragmentManager.GetFragments<IFragmentControlViewFooter, SectionViewFooterPreferences>
+            (
+                applicationContext,
+                [GetType()]
+            );
+            var footerPrimary = fragmentManager.GetFragments<IFragmentControlViewFooter, SectionViewFooterPrimary>
+            (
+                applicationContext,
+                [GetType()]
+            );
+            var footerSecondary = fragmentManager.GetFragments<IFragmentControlViewFooter, SectionViewFooterSecondary>
+            (
+                applicationContext,
+                [GetType()]
+            );
 
             var html = new HtmlElementTextContentDiv()
             {
@@ -172,8 +229,17 @@ namespace WebExpress.WebUI.WebControl
                 Role = role
             }
                 .AddUserAttribute("data-layout", layout == TypeLayoutView.Default ? null : layout.ToValue())
+                .Add(headerPreferences.Select(x => x.Render(renderContext, visualTree)))
+                .Add(headerPrimary.Select(x => x.Render(renderContext, visualTree)))
+                .Add(headerSecondary.Select(x => x.Render(renderContext, visualTree)))
                 .Add(_headers.Select(x => x.Render(renderContext, visualTree)))
+                .Add(viewPreferences.Select(x => x.Render(renderContext, visualTree)))
+                .Add(viewPrimary.Select(x => x.Render(renderContext, visualTree)))
+                .Add(viewSecondary.Select(x => x.Render(renderContext, visualTree)))
                 .Add(_views.Select(x => x.Render(renderContext, visualTree)))
+                .Add(footerPreferences.Select(x => x.Render(renderContext, visualTree)))
+                .Add(footerPrimary.Select(x => x.Render(renderContext, visualTree)))
+                .Add(footerSecondary.Select(x => x.Render(renderContext, visualTree)))
                 .Add(_footers.Select(x => x.Render(renderContext, visualTree)));
 
             return html;

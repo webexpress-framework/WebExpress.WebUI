@@ -6,20 +6,20 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebFragment
 {
     /// <summary>
-    /// Represents a control panel tool that is part of a fragment and implements the IFragmentControl interface.
+    /// Represents a control view for a fragment, implementing the IFragmentControlViewFooter interface.
     /// </summary>
-    public abstract class FragmentControlPanelTool : ControlPanelTool, IFragmentControl<ControlPanelTool>
+    public abstract class FragmentControlViewFooter : ControlViewFooter, IFragmentControlViewFooter
     {
         /// <summary>
         /// Gets the context of the fragment.
         /// </summary>
-        public IFragmentContext FragmentContext { get; private set; }
+        public IFragmentContext FragmentContext { get; }
 
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="fragmentContext">The context of the fragment.</param>
-        public FragmentControlPanelTool(IFragmentContext fragmentContext)
+        protected FragmentControlViewFooter(IFragmentContext fragmentContext)
             : base(fragmentContext?.FragmentId?.ToString()?.Replace(".", "-"))
         {
             FragmentContext = fragmentContext;

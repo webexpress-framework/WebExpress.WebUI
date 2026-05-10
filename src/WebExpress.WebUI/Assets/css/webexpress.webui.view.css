@@ -9,7 +9,6 @@
     overflow: hidden;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     color: var(--bs-body-color);
-    background: var(--bs-body-bg);
     box-sizing: border-box;
     position: relative;
 }
@@ -76,7 +75,6 @@
 /* flexible header area for external controls */
 .wx-view-header {
     padding: 0.5rem 0.75rem;
-    background-color: var(--bs-body-bg);
     flex: 0 0 auto;
     width: 100%;
     box-sizing: border-box;
@@ -148,7 +146,6 @@
 
 .wx-view-footer {
     padding: 0.5rem 0.75rem;
-    background-color: var(--bs-body-bg);
     flex: 0 0 auto;
     width: 100%;
     box-sizing: border-box;

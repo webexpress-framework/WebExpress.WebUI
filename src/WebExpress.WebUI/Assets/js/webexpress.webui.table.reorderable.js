@@ -675,7 +675,9 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
 
             if (effectiveOptions && effectiveOptions.length > 0) {
                 const div = document.createElement("div");
-                div.dataset.icon = "fas fa-cog";
+                div.dataset.icon = this._iconTheme == "light"
+                    ? "wx-icon-light wx-icon-light-more"
+                    : "fas fa-more";
                 div.dataset.size = "btn-sm";
                 div.dataset.border = "false";
                 tdOpt.appendChild(div);
