@@ -215,7 +215,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return Render(renderContext, visualTree, Items);
+            return Render(renderContext, visualTree, _items);
         }
 
         /// <summary>
@@ -432,7 +432,7 @@ namespace WebExpress.WebUI.WebControl
                 _ => new ControlFormItemGroupVertical(),
             };
 
-            foreach (var item in Items.Where(x => x is not ControlFormItemInputHidden))
+            foreach (var item in items.Where(x => x is not ControlFormItemInputHidden))
             {
                 group.Items.Add(item);
             }
