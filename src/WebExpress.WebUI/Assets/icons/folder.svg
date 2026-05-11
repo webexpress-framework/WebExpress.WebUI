@@ -1,7 +1,7 @@
-﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg width="21" height="21" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
-  <path
-     id="folder"
-     d="M 2.5,4 A 1,1 0 0 0 1.5,5 V 17 A 1,1 0 0 0 2.5,18 H 18.5 A 1,1 0 0 0 19.5,17 V 7 A 1,1 0 0 0 18.5,6 H 10 L 8,4 Z"
-     style="fill:#000000;fill-rule:evenodd" />
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+ <g transform="matrix(.97235 0 0 .97235 .29277 -.19096)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2855">
+  <path d="m10 6-2-2h-6.4714v13.99h17.966v-12.017z"/>
+  <path d="m10 6v2.2777h-8.5"/>
+ </g>
 </svg>
