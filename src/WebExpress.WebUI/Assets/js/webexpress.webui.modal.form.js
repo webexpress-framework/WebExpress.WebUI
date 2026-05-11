@@ -28,8 +28,9 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
     _update(response) {
         const parser = new DOMParser();
         const doc = parser.parseFromString(response, "text/html");
-
         const form = doc.querySelector(this._selector);
+
+        this._titleH1.textContent = doc.title?.trim();
 
         if (form) {
             // remove previous submit handler to avoid duplicate bindings
@@ -107,8 +108,6 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
 
         // fallback: try to find a wx-content-main
         const contentMain = doc.querySelector("#wx-content-main");
-
-        this._titleH1.textContent = doc.title?.trim();
 
         if (contentMain) {
             this._bodyDiv.innerHTML = "";
