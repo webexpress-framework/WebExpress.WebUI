@@ -139,7 +139,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
         viewNodes.forEach((node, index) => {
             const wrapper = document.createElement("div");
-            wrapper.className = "wx-view-content d-flex flex-column flex-fill";
+            wrapper.className = "wx-view-content";
 
             const fragment = document.createDocumentFragment();
             while (node.firstChild) {
@@ -191,18 +191,18 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
             this._views.headerNodes.forEach(node => host.appendChild(node));
         } else {
             const headerRow = document.createElement("div");
-            headerRow.className = "wx-view-header p-2";
+            headerRow.className = "wx-view-header";
             this._views.header = headerRow;
             this._views.headerNodes = [headerRow];
             host.appendChild(headerRow);
         }
 
         this._views.bodyWrapper = document.createElement("div");
-        this._views.bodyWrapper.className = "wx-view-body flex-fill position-relative overflow-hidden d-flex";
+        this._views.bodyWrapper.className = "wx-view-body";
         host.appendChild(this._views.bodyWrapper);
 
         this._views.masterPane = document.createElement("div");
-        this._views.masterPane.className = "wx-main-pane flex-fill w-100 h-100 d-flex flex-column";
+        this._views.masterPane.className = "wx-main-pane";
         this._views.bodyWrapper.appendChild(this._views.masterPane);
 
         this._buildStatusbar(host);
@@ -215,7 +215,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
      */
     _buildToolbar(host) {
         const tb = document.createElement("div");
-        tb.className = "wx-view-toolbar d-flex align-items-center p-2 gap-2";
+        tb.className = "wx-view-toolbar";
 
         const titleGroup = document.createElement("div");
         titleGroup.className = "d-flex align-items-center me-auto overflow-hidden";
@@ -295,7 +295,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     _initSubViews() {
         this._viewsConfig.forEach(cfg => {
             const container = document.createElement("div");
-            container.className = "wx-view-container h-100 w-100 d-none";
+            container.className = "wx-view-container d-none";
 
             if (cfg.contentNode) {
                 container.appendChild(cfg.contentNode);

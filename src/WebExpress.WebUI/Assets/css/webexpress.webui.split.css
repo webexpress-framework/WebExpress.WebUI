@@ -25,6 +25,10 @@
     box-sizing: border-box;
 }
 
+.wx-main-pane {
+    flex: 1;
+}
+
 /* Splitter styles */
 .wx-split .wx-splitter {
     z-index: 10;

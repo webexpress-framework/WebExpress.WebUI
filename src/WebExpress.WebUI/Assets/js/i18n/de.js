@@ -111,6 +111,9 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "editor.heading1": "Überschrift 1",
     "editor.heading2": "Überschrift 2",
     "editor.heading3": "Überschrift 3",
+    "editor.heading4": "Überschrift 4",
+    "editor.heading5": "Überschrift 5",
+    "editor.heading6": "Überschrift 6",
     "editor.quote": "Zitat",
     "editor.codeblock": "Codeblock",
     "editor.bold": "Fett (Strg+B)",
@@ -185,6 +188,51 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "editor.addon.title": "AddOns",
     "editor.addon.error.select": "Bitte wählen Sie ein AddOn aus der Liste.",
     "editor.addon.error.internal": "Interner Fehler: Editor-Instanz nicht gefunden.",
+
+    // placeholder
+    "editor.placeholder": "Tippe „/“ für Befehle",
+
+    // slash menu chrome
+    "editor.slash.search": "Befehl suchen…",
+    "editor.slash.empty": "Keine Treffer",
+    "editor.slash.title": "Einfügen",
+
+    // slash menu categories
+    "editor.slash.cat.general": "Allgemein",
+    "editor.slash.cat.text": "Text",
+    "editor.slash.cat.list": "Liste",
+    "editor.slash.cat.insert": "Einfügen",
+    "editor.slash.cat.format": "Formatierung",
+
+    // slash command labels
+    "editor.slash.date": "Datum",
+    "editor.slash.datetime": "Datum & Uhrzeit",
+
+    // slash command descriptions
+    "editor.slash.desc.paragraph": "Normaler Textabsatz",
+    "editor.slash.desc.h1": "Große Überschrift",
+    "editor.slash.desc.h2": "Mittlere Überschrift",
+    "editor.slash.desc.h3": "Kleine Überschrift",
+    "editor.slash.desc.quote": "Blockzitat",
+    "editor.slash.desc.code": "Codeblock in Monospace",
+    "editor.slash.desc.bullet": "Aufzählung mit Punkten",
+    "editor.slash.desc.number": "Nummerierte Aufzählung",
+    "editor.slash.date.desc": "Aktuelles Datum einfügen",
+    "editor.slash.datetime.desc": "Aktuelles Datum mit Uhrzeit einfügen",
+    "editor.slash.hr.desc": "Horizontale Trennlinie",
+    "editor.slash.link.desc": "Hyperlink hinzufügen",
+    "editor.slash.image.desc": "Bild per URL einbetten",
+    "editor.slash.addon.desc": "AddOn-Bibliothek öffnen",
+    "editor.slash.clear.desc": "Formatierung der Auswahl entfernen",
+
+    // mention picker
+    "editor.mention.search": "Personen suchen…",
+    "editor.mention.empty": "Keine Treffer",
+    "editor.mention.title": "Erwähnen",
+
+    // undo / redo (already in core, fallback only)
+    "editor.undo": "Rückgängig (Strg+Z)",
+    "editor.redo": "Wiederherstellen (Strg+Y)",
 
     "graph.undo": "Rückgängig",
     "graph.redo": "Wiederherstellen",

@@ -111,6 +111,9 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "editor.heading1": "Heading 1",
     "editor.heading2": "Heading 2",
     "editor.heading3": "Heading 3",
+    "editor.heading4": "Heading 4",
+    "editor.heading5": "Heading 5",
+    "editor.heading6": "Heading 6",
     "editor.quote": "Quote",
     "editor.codeblock": "Code Block",
     "editor.bold": "Bold (Ctrl+B)",
@@ -185,6 +188,51 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "editor.addon.title": "AddOns",
     "editor.addon.error.select": "Please select an AddOn from the list.",
     "editor.addon.error.internal": "Internal error: Editor instance not found.",
+
+    // placeholder
+    "editor.placeholder": "Type / for commands",
+
+    // slash menu chrome
+    "editor.slash.search": "Search commands…",
+    "editor.slash.empty": "No matches",
+    "editor.slash.title": "Insert",
+
+    // slash menu categories
+    "editor.slash.cat.general": "General",
+    "editor.slash.cat.text": "Text",
+    "editor.slash.cat.list": "List",
+    "editor.slash.cat.insert": "Insert",
+    "editor.slash.cat.format": "Format",
+
+    // slash command labels
+    "editor.slash.date": "Date",
+    "editor.slash.datetime": "Date & time",
+
+    // slash command descriptions
+    "editor.slash.desc.paragraph": "Plain text paragraph",
+    "editor.slash.desc.h1": "Large section heading",
+    "editor.slash.desc.h2": "Medium section heading",
+    "editor.slash.desc.h3": "Small section heading",
+    "editor.slash.desc.quote": "Block quote",
+    "editor.slash.desc.code": "Monospaced code block",
+    "editor.slash.desc.bullet": "Unordered list",
+    "editor.slash.desc.number": "Ordered list",
+    "editor.slash.date.desc": "Insert today's date",
+    "editor.slash.datetime.desc": "Insert current date and time",
+    "editor.slash.hr.desc": "Horizontal divider line",
+    "editor.slash.link.desc": "Add a hyperlink",
+    "editor.slash.image.desc": "Embed an image by URL",
+    "editor.slash.addon.desc": "Open the AddOn library",
+    "editor.slash.clear.desc": "Remove all formatting from selection",
+
+    // mention picker
+    "editor.mention.search": "Search people…",
+    "editor.mention.empty": "No matches",
+    "editor.mention.title": "Mention",
+
+    // undo / redo (already in core, fallback only)
+    "editor.undo": "Undo (Ctrl+Z)",
+    "editor.redo": "Redo (Ctrl+Y)",
 
     "graph.undo": "Undo",
     "graph.redo": "Redo",
