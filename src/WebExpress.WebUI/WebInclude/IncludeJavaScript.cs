@@ -20,6 +20,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/webexpress.webui.button.split.toggle.js")]
     [Asset("/assets/js/webexpress.webui.chart.js")]
     [Asset("/assets/js/webexpress.webui.code.js")]
+    [Asset("/assets/js/webexpress.webui.collaborative.js")]
     [Asset("/assets/js/webexpress.webui.color.js")]
     [Asset("/assets/js/webexpress.webui.dashboard.js")]
     [Asset("/assets/js/webexpress.webui.date.js")]
