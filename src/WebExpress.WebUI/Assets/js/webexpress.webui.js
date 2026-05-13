@@ -2070,12 +2070,4 @@ webexpress.webui.Event = class {
     static SELECTED_TAB_EVENT = "webexpress.webui.tab.selected";
     // Event triggered when dark mode is toggled.
     static CHANGE_DARKMODE_EVENT = "webexpress.webui.change.darkmode";
-    // Event triggered when a remote user joins a CollaborativeCtrl container.
-    static COLLABORATIVE_USER_JOIN = "webexpress.webui.collaborative.user.join";
-    // Event triggered when a remote user leaves a CollaborativeCtrl container.
-    static COLLABORATIVE_USER_LEAVE = "webexpress.webui.collaborative.user.leave";
-    // Event triggered when a remote cursor position update is received.
-    static COLLABORATIVE_CURSOR = "webexpress.webui.collaborative.cursor";
-    // Event triggered when a remote input value update is received.
-    static COLLABORATIVE_INPUT = "webexpress.webui.collaborative.input";
 }
