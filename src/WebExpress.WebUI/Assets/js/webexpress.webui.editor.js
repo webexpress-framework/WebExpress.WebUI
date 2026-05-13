@@ -70,6 +70,10 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
         // ensure typing space is available after initialization and upgrades
         this._ensureTypingSpace();
+
+        // notify plugins again so anything that depends on the final block
+        // structure (placeholder hint, etc.) sees the post-typing-space DOM
+        this._notifyPluginsContentChanged();
     }
 
     /**
@@ -823,7 +827,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             "a", "b", "strong", "i", "em", "u", "p", "br", "ul", "ol", "li",
             "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "pre", "code",
             "img", "span", "div", "table", "thead", "tbody", "tr", "th", "td",
-            "colgroup", "col", "hr", "small", "sub", "sup"
+            "colgroup", "col", "hr", "small", "sub", "sup", "input"
         ]);
 
         // allowed attributes per tag
@@ -834,6 +838,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             "td": ["colspan", "rowspan", "contenteditable"],
             "table": ["border", "cellpadding", "cellspacing"],
             "div": ["draggable"],
+            "input": ["type", "value", "min", "max", "placeholder", "name"],
             // globally allow attributes relevant to the editor
             "*": ["class", "id", "title", "role", "tabindex", "style", "contenteditable", "data-addon-id", "data-type"]
         };
@@ -950,6 +955,9 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         this._notifyPluginsContentChanged();
         // then ensure typing space un-nests the newly upgraded frames
         this._ensureTypingSpace();
+        // notify again so plugins that depend on the post-typing-space block
+        // structure (placeholder hint, etc.) see the final DOM
+        this._notifyPluginsContentChanged();
 
         // update hidden input and dispatch change
         this._syncValue();
@@ -966,23 +974,41 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Restores the previously saved selection range.
-     * If no range is saved, sets cursor to the end of the content.
+     * If a live selection already lives inside the editor, that selection is
+     * preferred over the stored range — this prevents a stale `_savedRange`
+     * from overwriting the user's actual selection (e.g., when the bubble
+     * menu or another control acts on the current selection).
+     * If no range is available at all, the cursor is moved to the end of
+     * the content as a sane fallback.
      */
     restoreSavedRange() {
+        const sel = window.getSelection();
+
+        // prefer a live selection that already sits inside the editor — that
+        // is the user's actual selection and must not be replaced
+        if (sel && sel.rangeCount > 0) {
+            const live = sel.getRangeAt(0);
+            if (this._editorElement.contains(live.startContainer) && this._editorElement.contains(live.endContainer)) {
+                this._savedRange = live.cloneRange();
+                this._editorElement.focus();
+                return;
+            }
+        }
+
         this._editorElement.focus();
 
         if (this._savedRange) {
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(this._savedRange);
+            const s = window.getSelection();
+            s.removeAllRanges();
+            s.addRange(this._savedRange);
         } else {
             // fallback: move cursor to end if no selection exists
-            const sel = window.getSelection();
+            const s = window.getSelection();
             const range = document.createRange();
             range.selectNodeContents(this._editorElement);
             range.collapse(false);
-            sel.removeAllRanges();
-            sel.addRange(range);
+            s.removeAllRanges();
+            s.addRange(range);
 
             // save this position so subsequent calls use it
             this._savedRange = range.cloneRange();

@@ -4,7 +4,7 @@
 
 The `EditorCtrl` component provides a "What You See Is What You Get" (WYSIWYG) editor that enables the creation and editing of rich text content directly in the browser. The component is declaratively integrated into the HTML markup and initializes its content from the existing markup of the host element. For seamless integration into forms, a `name` attribute is used to automatically synchronize the editor's content with a hidden input field.
 
-Beyond plain formatting, the editor ships with a slash-command palette, inline triggers for mentions, links, and AddOns, markdown-style auto-formatting, a floating selection toolbar, and a contextual placeholder. All of these are optional and extensible through dedicated registries.
+Beyond plain formatting, the editor ships with inline triggers for mentions, links, and AddOns, markdown-style auto-formatting, a floating selection toolbar, and an instruction text tool. All of these are optional and extensible through dedicated registries.
 
 ## Declarative Configuration
 
@@ -15,45 +15,21 @@ The editor is initialized directly in the HTML. The initial content is taken fro
 | `name`                  | Defines the name for a hidden input field that submits the editor's content with a form submission.  | `name="content"`
 | `data-image-upload-uri` | The URI endpoint for image uploads.                                                                  | `data-image-upload-uri="/api/upload"`
 | `data-image-base-uri`   | The base URI for resolving image paths.                                                              | `data-image-base-uri="/images/"`
-| `data-placeholder`      | Hint shown in empty blocks. Defaults to *"Type / for commands"* (translated through I18N).           | `data-placeholder="Write something…"`
 | `data-mention-uri`      | REST endpoint for the `@`-mention search. The presence of this attribute enables the mention picker. | `data-mention-uri="/api/users/search"`
 | Text Content            | The initial HTML content of the editor.                                                              | `<div class="wx-webui-editor">Initial <b>text</b>.</div>`
 
-## Slash Command Palette
-
-Typing `/` at the start of an empty block (or any empty line) opens a searchable command palette anchored to the caret. The palette lists every entry registered with `webexpress.webui.EditorShortcuts`, grouped by category, with descriptions and icons.
-
-The palette is navigated with arrow keys; `Enter` runs the highlighted command, `Esc` dismisses it. Typing into the palette's search field filters by label, id, description, or keywords (case-insensitive).
-
-Ships with the following defaults:
-
-| Category | Command            | Effect
-|----------|--------------------|----------------------------------------------
-| Text     | Paragraph          | Convert current block to `<p>`
-| Text     | Heading 1 / 2 / 3  | Convert to `<h1>` / `<h2>` / `<h3>`
-| Text     | Quote              | Convert to `<blockquote>`
-| Text     | Code Block         | Convert to `<pre>`
-| List     | Bullet             | Toggle unordered list
-| List     | Numbered list      | Toggle ordered list
-| Insert   | Date               | Insert today's date in the active locale
-| Insert   | Date & time        | Insert current date + time
-| Insert   | Horizontal Rule    | Insert `<hr>` and a fresh paragraph
-| Insert   | Insert Link        | Open the link dialog
-| Insert   | Insert Image       | Open the image dialog
-| Insert   | Insert AddOn       | Open the AddOn library
-| Format   | Clear Format       | Strip formatting from the selection
-
 ## Inline Triggers
 
-Beyond the slash menu, the editor recognises three direct triggers that map to specific pickers:
+The editor recognises direct triggers that map to specific actions or pickers:
 
 | Trigger | Action
 |---------|---------------------------------------------------------------
 | `@`     | Opens the mention picker (only when `data-mention-uri` is set)
 | `[[`    | Opens the link dialog
 | `{{`    | Opens the AddOn library
+| `//`    | Inserts a date control at the cursor
 
-The double-character triggers (`[[`, `{{`) consume both characters; the surface document never contains the literal trigger.
+The double-character triggers (`[[`, `{{`, `//`) consume both characters; the surface document never contains the literal trigger.
 
 ## Markdown Shortcuts
 
@@ -83,15 +59,13 @@ The editor auto-formats common markdown patterns inline. Block patterns fire on 
 
 ## Bubble Menu
 
-When text is selected, a floating mini-toolbar appears above the selection with the most common formatting actions: **Bold**, *Italic*, <u>Underline</u>, ~~Strike~~, Link, Clear Format.
+When text is selected, a floating mini-toolbar appears **below** the selection with the most common formatting actions: **Bold**, *Italic*, <u>Underline</u>, ~~Strike~~, Link, Clear Format.
 
-The toolbar repositions itself on scroll and on window resize, and disappears when the selection collapses, the editor loses focus, or the user clicks outside.
+The toolbar is always anchored below the selection. It repositions itself on scroll and on window resize, clamps against the viewport edges, and disappears when the selection collapses, the editor loses focus, or the user clicks outside.
 
-## Placeholder
+## Instruction Text
 
-Empty blocks render a low-contrast placeholder hint inside the editor. By default the hint is shown on the very first block always (so an empty document is never visually blank) and on whichever block currently holds the caret. Non-editable embeds (AddOn frames, tables) are excluded.
-
-The text comes from `data-placeholder` on the host element, falling back to the I18N key `webexpress.webui:editor.placeholder`.
+The editor provides a tool to insert instruction texts (Anweisungstexte) for authors via a toolbar button. Clicking the button opens a prompt asking for the text. The entered text is inserted into the editor as a highly visible, distinct block. This block is read-only (`contenteditable="false"`) to prevent accidental editing of the structure. Outside the editor context, the instruction text is hidden via CSS, making it completely invisible on the published page.
 
 ## Mentions API
 
@@ -218,65 +192,16 @@ The editor supports the following keyboard shortcuts:
 | `Ctrl+Z` / `⌘+Z`             | Undo
 | `Ctrl+Y` / `⌘+Y`             | Redo
 | `Ctrl+Shift+Z` / `⌘+Shift+Z` | Redo
-| `/`                          | Open slash command palette (at start of an empty block)
 | `@`                          | Open mention picker (when `data-mention-uri` is set)
 | `[[`                         | Open link dialog
 | `{{`                         | Open AddOn library
-| `↑` / `↓` (popup)            | Navigate menu items
-| `Enter` (popup)              | Activate highlighted item
-| `Esc` (popup)                | Close popup
+| `//`                         | Insert date control
 | `Tab` (in list)              | Indent list item
 | `Shift+Tab` (in list)        | Outdent list item
 
 ## Extending the Editor
 
-The editor exposes three registry-style extension points. Each registry is a singleton on the `webexpress.webui` namespace and follows the same shape used elsewhere in the framework.
-
-### Slash Commands
-
-Register custom commands via `webexpress.webui.EditorShortcuts`:
-
-```javascript
-webexpress.webui.EditorShortcuts.register({
-    id: "insert.signature",
-    label: "Signature",
-    description: "Insert my email signature",
-    icon: "fas fa-signature",
-    category: "Insert",
-    keywords: ["sig", "signatur"],
-    execute: (editor) => {
-        editor.insertHtmlAtCursor("<p>— Best regards,<br>Anna</p>");
-    }
-});
-```
-
-A shortcut definition has the following fields:
-
-| Field         | Type     | Description
-|---------------|----------|---------------------------------------------------------
-| `id`          | string   | **Required.** Unique identifier. Re-registering with the same id replaces the entry.
-| `label`       | string   | **Required.** Shown in the menu.
-| `description` | string   | Optional secondary line.
-| `icon`        | string   | FontAwesome class. Defaults to `fas fa-bolt`.
-| `category`    | string   | Group header in the menu. Defaults to *General*.
-| `keywords`    | string[] | Additional search terms.
-| `execute`     | function | Handler called with `(editor)`.
-| `tag`         | string   | Alternative: applies `formatBlock(<tag>)`.
-| `cmd`         | string   | Alternative: runs `execCommand(cmd)`.
-| `html`        | string   | Alternative: calls `insertHtmlAtCursor(html)`.
-
-Exactly one of `execute`, `tag`, `cmd`, or `html` should be provided. Definitions can also be registered in bulk by passing an array.
-
-The full registry API:
-
-| Method                     | Description
-|----------------------------|-----------------------------------------------
-| `register(def)`            | Registers one definition or an array of them.
-| `unregister(id)`           | Removes a shortcut by id.
-| `get(id)`                  | Returns a single definition.
-| `getAll()`                 | Returns every registered definition.
-| `search(query)`            | Returns definitions matching the query.
-| `clear()`                  | Removes everything (useful for tests).
+The editor exposes registry-style extension points. Each registry is a singleton on the `webexpress.webui` namespace and follows the same shape used elsewhere in the framework.
 
 ### Plugins
 
@@ -291,7 +216,7 @@ webexpress.webui.EditorPlugins.register("my-plugin", 80, {
 });
 ```
 
-The numeric position (default `10`) controls the order of toolbar groups. The shortcut palette, bubble menu, and placeholder are themselves plugins registered at positions 50–70.
+The numeric position (default `10`) controls the order of toolbar groups. The bubble menu, placeholder, and other core features are themselves plugins registered at positions 50–70.
 
 ### AddOns
 
@@ -315,17 +240,16 @@ webexpress.webui.EditorAddOns.register("alert-box", {
 });
 ```
 
-AddOns appear in the AddOn picker (opened via `{{`, the toolbar button, or the *Insert AddOn* slash command). When the AddOn has `properties`, a property dialog opens before insertion.
+AddOns appear in the AddOn picker (opened via `{{`, or the toolbar button). When the AddOn has `properties`, a property dialog opens before insertion.
 
 ## Use Case Examples
 
-### Form with mentions and custom placeholder
+### Form with mentions
 
 ```html
 <form action="/submit-comment" method="post">
     <div class="wx-webui-editor"
          name="comment"
-         data-placeholder="Write a comment…"
          data-mention-uri="/api/users/search">
     </div>
     <button type="submit">Post</button>
@@ -346,44 +270,6 @@ AddOns appear in the AddOn picker (opened via `{{`, the toolbar button, or the *
     </div>
     <button type="submit">Submit</button>
 </form>
-```
-
-### Custom slash command — deadline (+7 days)
-
-```javascript
-webexpress.webui.EditorShortcuts.register({
-    id: "insert.deadline",
-    label: "Deadline (+7 days)",
-    description: "Insert a due-date one week from today",
-    icon: "fas fa-flag",
-    category: "Insert",
-    keywords: ["due", "deadline", "termin"],
-    execute: (editor) => {
-        const d = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-        const formatted = d.toLocaleDateString();
-        editor.insertHtmlAtCursor(`<strong>Due: ${formatted}</strong>&nbsp;`);
-    }
-});
-```
-
-### Replacing default shortcuts
-
-Removing or substituting a default works through the same registry:
-
-```javascript
-// remove the built-in date command
-webexpress.webui.EditorShortcuts.unregister("insert.date");
-
-// register a replacement with ISO format
-webexpress.webui.EditorShortcuts.register({
-    id: "insert.date",
-    label: "Date (ISO)",
-    icon: "fas fa-calendar-day",
-    category: "Insert",
-    execute: (editor) => {
-        editor.insertHtmlAtCursor(new Date().toISOString().slice(0, 10) + "&nbsp;");
-    }
-});
 ```
 
 ### Reacting to content changes

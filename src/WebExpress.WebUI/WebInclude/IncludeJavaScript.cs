@@ -1,4 +1,4 @@
-﻿using WebExpress.WebCore.WebAttribute;
+using WebExpress.WebCore.WebAttribute;
 using WebExpress.WebCore.WebInclude;
 
 namespace WebExpress.WebUI.WebInclude
@@ -82,9 +82,11 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/editor/formatting.js")]
     [Asset("/assets/js/editor/media.js")]
     [Asset("/assets/js/editor/placeholder.js")]
+    [Asset("/assets/js/editor/shortcut.js")]
     [Asset("/assets/js/editor/table.js")]
     [Asset("/assets/js/editor/addons/default.js")]
     [Asset("/assets/js/editor/addons/gameoflife.js")]
+    [Asset("/assets/js/editor/shortcuts/default.js")]
     [Asset("/assets/js/i18n/en.js")]
     [Asset("/assets/js/i18n/de.js")]
     [Asset("/assets/js/templates/default.js")]
@@ -107,6 +109,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/panels/webexpress.webui.panel.editor.addon.js")]
     [Asset("/assets/js/panels/webexpress.webui.panel.editor.image.js")]
     [Asset("/assets/js/panels/webexpress.webui.panel.editor.link.js")]
+    [Asset("/assets/js/panels/webexpress.webui.panel.editor.placeholder.js")]
     [Asset("/assets/js/panels/webexpress.webui.panel.table.columns.js")]
     [Asset("/assets/js/widgets/default.js")]
     public sealed class IncludeJavaScript : IInclude

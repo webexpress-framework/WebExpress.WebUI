@@ -6,23 +6,22 @@ The file `webexpress.webui.js` is the core of the WebExpress.WebUI JavaScript fr
 
 ## Overview
 
-| Class / Singleton                     | Type      | Description
-|---------------------------------------|-----------|----------------------------------------------------------
-| `webexpress.webui.Controller`         | Singleton | Central controller that monitors the DOM, manages control instances, and delegates actions.
-| `webexpress.webui.FilterRegistry`     | Singleton | Manages client-side quick-filter state with group constraints and cookie persistence.
-| `webexpress.webui.I18N`               | Singleton | Internationalization helper for translations with automatic language detection.
-| `webexpress.webui.Syntax`             | Singleton | Registry for language-specific syntax-highlighting configurations.
-| `webexpress.webui.Actions`            | Singleton | Dynamic registry for action plugins that can be extended from external files.
-| `webexpress.webui.EditorPlugins`      | Singleton | Registry for WYSIWYG editor plugins with priority-based ordering.
-| `webexpress.webui.EditorAddOns`       | Singleton | Registry for editor add-ons that can be inserted via the editor plugin.
-| `webexpress.webui.DialogPanels`       | Singleton | Registry for modal dialog panel definitions.
-| `webexpress.webui.DashboardWidgets`   | Singleton | Registry for dashboard widget definitions.
-| `webexpress.webui.TableTemplates`     | Singleton | Registry for table cell renderer templates.
-| `webexpress.webui.Ctrl`              | Class     | Abstract base class for all UI controls.
-| `webexpress.webui.PopperCtrl`        | Class     | Base class for controls that use Popper.js for dropdown positioning.
-| `webexpress.webui.Event`             | Class     | Utility class that defines all event name constants.
-
----
+|Class / Singleton                   |Type      |Description
+|------------------------------------|----------|----------------------------------------------------------
+|`webexpress.webui.Controller`       |Singleton |Central controller that monitors the DOM, manages control instances, and delegates actions.
+|`webexpress.webui.FilterRegistry`   |Singleton |Manages client-side quick-filter state with group constraints and cookie persistence.
+|`webexpress.webui.I18N`             |Singleton |Internationalization helper for translations with automatic language detection.
+|`webexpress.webui.Syntax`           |Singleton |Registry for language-specific syntax-highlighting configurations.
+|`webexpress.webui.Actions`          |Singleton |Dynamic registry for action plugins that can be extended from external files.
+|`webexpress.webui.EditorPlugins`    |Singleton |Registry for WYSIWYG editor plugins with priority-based ordering.
+|`webexpress.webui.EditorAddOns`     |Singleton |Registry for editor add-ons that can be inserted via the editor plugin.
+|`webexpress.webui.EditorShortcuts`  |Singleton |Registry for editor slash commands and inline triggers.
+|`webexpress.webui.DialogPanels`     |Singleton |Registry for modal dialog panel definitions.
+|`webexpress.webui.DashboardWidgets` |Singleton |Registry for dashboard widget definitions.
+|`webexpress.webui.TableTemplates`   |Singleton |Registry for table cell renderer templates.
+|`webexpress.webui.Ctrl`             |Class     |Abstract base class for all UI controls.
+|`webexpress.webui.PopperCtrl`       |Class     |Base class for controls that use Popper.js for dropdown positioning.
+|`webexpress.webui.Event`            |Class     |Utility class that defines all event name constants.
 
 ## Controller
 
@@ -30,17 +29,17 @@ The `Controller` is a singleton that monitors changes in the DOM via a `Mutation
 
 ### Methods
 
-| Method                                                  | Description
-|---------------------------------------------------------|------------------------------------------------------------------
-| `registerClass(selector, ClassConstructor)`              | Registers a class constructor for a CSS selector. When the DOM contains an element with this selector as a class, an instance of the class is created automatically.
-| `createInstances(element)`                               | Creates instances for new DOM elements (depth-first). Called automatically by the MutationObserver.
-| `createInstanceByClassType(classType, element)`          | Creates an instance from a registered class type and binds it to the given element. Returns the instance or `null`.
-| `removeInstances(element)`                               | Removes instances for removed DOM elements and their descendants.
-| `getInstance(selector, ClassConstructor?)`               | Retrieves an instance by CSS selector. Optionally restricts to a specific class constructor.
-| `getInstanceByElement(element, ClassConstructor?)`       | Retrieves an instance by DOM element reference.
-| `getClosestInstance(element, ClassConstructor?)`          | Traverses up the DOM tree from the given element and returns the closest control instance.
-| `toggleFullscreen(el)`                                   | Toggles CSS-based fullscreen state for the provided element.
-| `toggleNativeFullscreen(el)`                             | Toggles native browser fullscreen for the provided element.
+|Method                                             |Description
+|---------------------------------------------------|------------------------------------------------------------------
+|`registerClass(selector, ClassConstructor)`        |Registers a class constructor for a CSS selector. When the DOM contains an element with this selector as a class, an instance of the class is created automatically.
+|`createInstances(element)`                         |Creates instances for new DOM elements (depth-first). Called automatically by the MutationObserver.
+|`createInstanceByClassType(classType, element)`    |Creates an instance from a registered class type and binds it to the given element. Returns the instance or `null`.
+|`removeInstances(element)`                         |Removes instances for removed DOM elements and their descendants.
+|`getInstance(selector, ClassConstructor?)`         |Retrieves an instance by CSS selector. Optionally restricts to a specific class constructor.
+|`getInstanceByElement(element, ClassConstructor?)` |Retrieves an instance by DOM element reference.
+|`getClosestInstance(element, ClassConstructor?)`   |Traverses up the DOM tree from the given element and returns the closest control instance.
+|`toggleFullscreen(el)`                             |Toggles CSS-based fullscreen state for the provided element.
+|`toggleNativeFullscreen(el)`                       |Toggles native browser fullscreen for the provided element.
 
 ### Declarative Action Binding
 
@@ -67,10 +66,10 @@ HTML elements can trigger registered actions via `data-wx-primary-action` (click
 
 Dismiss actions are handled directly by the Controller, independently of the Actions registry:
 
-| Attribute                              | Description
-|----------------------------------------|----------------------------------------------------------
-| `data-wx-dismiss="fullscreen"`         | Exits CSS-based fullscreen on click.
-| `data-wx-dismiss="native-fullscreen"`  | Exits native browser fullscreen on click.
+|Attribute                             |Description
+|--------------------------------------|---------------------------------------------------------
+|`data-wx-dismiss="fullscreen"`        |Exits CSS-based fullscreen on click.
+|`data-wx-dismiss="native-fullscreen"` |Exits native browser fullscreen on click.
 
 ### Data Binding
 
@@ -93,8 +92,6 @@ as plugins in `webexpress.webui.Binds` (see [Binds](#binds)) and can be freely e
      data-wx-source-search="#searchBox">
 </div>
 ```
-
----
 
 ## Actions
 
@@ -142,14 +139,14 @@ webexpress.webui.Actions.register("my-action", {
 
 The following actions are registered in `action/default.js`:
 
-| Action Name          | Description                                                         | Supported Attributes
-|----------------------|---------------------------------------------------------------------|-------------------------------------
-| `modal`              | Shows a modal dialog instance.                                      | `target`, `uri`, `size`
-| `frame`              | Sets the URI on a frame control instance.                           | `target`, `uri`
-| `split`              | Toggles the side pane of a split control.                           | `target`
-| `fullscreen`         | Toggles CSS-based fullscreen for the target element.                | `target`
-| `native-fullscreen`  | Toggles native browser fullscreen for the target element.           | `target`
-| `filter`             | Toggles a quick-filter in the `FilterRegistry`.                     | _(uses element ID)_
+|Action Name         |Description                                               |Supported Attributes
+|--------------------|----------------------------------------------------------|-------------------------------------
+|`modal`             |Shows a modal dialog instance.                            |`target`, `uri`, `size`
+|`frame`             |Sets the URI on a frame control instance.                 |`target`, `uri`
+|`split`             |Toggles the side pane of a split control.                 |`target`
+|`fullscreen`        |Toggles CSS-based fullscreen for the target element.      |`target`
+|`native-fullscreen` |Toggles native browser fullscreen for the target element. |`target`
+|`filter`            |Toggles a quick-filter in the `FilterRegistry`.           |_(uses element ID)_
 
 ### Example: Registering a Custom Action
 
@@ -173,8 +170,6 @@ webexpress.webui.Actions.register("redirect", {
 </a>
 ```
 
----
-
 ## Binds
 
 The `Binds` singleton provides a dynamic registry for bind plugins. Binds are loaded from external
@@ -183,14 +178,14 @@ Each bind is established once per element when the `data-wx-bind` attribute is p
 
 ### Methods
 
-| Method                          | Description
-|---------------------------------|--------------------------------------------------------------
-| `register(name, definition)`    | Registers a bind under the given name. The definition must contain a `bind` function.
-| `get(name)`                     | Returns the bind definition for the given name, or `null`.
-| `has(name)`                     | Returns `true` if a bind is registered under the given name.
-| `getAll()`                      | Returns an array of all registered bind names.
-| `unregister(name)`              | Removes the bind registered under the given name.
-| `clear()`                       | Removes all registered binds.
+|Method                       |Description
+|-----------------------------|--------------------------------------------------------------
+|`register(name, definition)` |Registers a bind under the given name. The definition must contain a `bind` function.
+|`get(name)`                  |Returns the bind definition for the given name, or `null`.
+|`has(name)`                  |Returns `true` if a bind is registered under the given name.
+|`getAll()`                   |Returns an array of all registered bind names.
+|`unregister(name)`           |Removes the bind registered under the given name.
+|`clear()`                    |Removes all registered binds.
 
 ### Bind Definition Contract
 
@@ -211,14 +206,14 @@ webexpress.webui.Binds.register("my-bind", {
 
 The following binds are registered in `bind/default.js`:
 
-| Bind Name   | Source Attribute          | Extra Attributes                   | Description
-|-------------|---------------------------|------------------------------------|--------------------------------------------
-| `search`    | `data-wx-source-search`   | –                                  | Forwards `CHANGE_FILTER_EVENT` → `instance.search(query, searchType)`.
-| `paging`    | `data-wx-source-paging`   | –                                  | Forwards `CHANGE_PAGE_EVENT` → `instance.paging(page)`.
-| `filter`    | –                         | –                                  | Reacts to global `CHANGE_FILTER_EVENT` → `instance.filter(activeFilters)`.
-| `darkmode`  | –                         | `data-wx-bind-icon-light`, `data-wx-bind-icon-dark`, `data-wx-bind-text-light`, `data-wx-bind-text-dark` | Syncs icon and text to the current dark-mode state.
-| `hide`      | `data-wx-source-hide`     | `data-wx-bind-value-hide`          | Hides the element (or `fieldset.wx-form-group`) when the source value equals the trigger value.
-| `disable`   | `data-wx-source-disable`  | `data-wx-bind-value-disable`       | Disables the element (or `fieldset.wx-form-group`) when the source value equals the trigger value.
+|Bind Name   |Source Attribute         |Extra Attributes                   | Description
+|------------|-------------------------|-----------------------------------|--------------------------------------------
+|`search`    |`data-wx-source-search`  |–                                  | Forwards `CHANGE_FILTER_EVENT` → `instance.search(query, searchType)`.
+|`paging`    |`data-wx-source-paging`  |–                                  | Forwards `CHANGE_PAGE_EVENT` → `instance.paging(page)`.
+|`filter`    |–                        |–                                  | Reacts to global `CHANGE_FILTER_EVENT` → `instance.filter(activeFilters)`.
+|`darkmode`  |–                        |`data-wx-bind-icon-light`, `data-wx-bind-icon-dark`, `data-wx-bind-text-light`, `data-wx-bind-text-dark` | Syncs icon and text to the current dark-mode state.
+|`hide`      |`data-wx-source-hide`    |`data-wx-bind-value-hide`          | Hides the element (or `fieldset.wx-form-group`) when the source value equals the trigger value.
+|`disable`   |`data-wx-source-disable` |`data-wx-bind-value-disable`       | Disables the element (or `fieldset.wx-form-group`) when the source value equals the trigger value.
 
 #### `hide` bind — conditional visibility
 
@@ -322,21 +317,18 @@ webexpress.webui.Binds.register("highlight", {
 </div>
 ```
 
----
-
-
 The `Actions` singleton provides a dynamic registry for action plugins. Actions are loaded from external files (e.g., `action/default.js`) and can be freely extended without modifying the framework core.
 
 ### Methods
 
-| Method                          | Description
-|---------------------------------|--------------------------------------------------------------
-| `register(name, definition)`    | Registers an action under the given name. The definition must contain an `execute` function.
-| `get(name)`                     | Returns the action definition for the given name, or `null`.
-| `has(name)`                     | Returns `true` if an action is registered under the given name.
-| `getAll()`                      | Returns an array of all registered action names.
-| `unregister(name)`              | Removes the action registered under the given name.
-| `clear()`                       | Removes all registered actions.
+|Method                       |Description
+|-----------------------------|--------------------------------------------------------------
+|`register(name, definition)` |Registers an action under the given name. The definition must contain an `execute` function.
+|`get(name)`                  |Returns the action definition for the given name, or `null`.
+|`has(name)`                  |Returns `true` if an action is registered under the given name.
+|`getAll()`                   |Returns an array of all registered action names.
+|`unregister(name)`           |Removes the action registered under the given name.
+|`clear()`                    |Removes all registered actions.
 
 ### Action Definition Contract
 
@@ -369,14 +361,14 @@ webexpress.webui.Actions.register("my-action", {
 
 The following actions are registered in `action/default.js`:
 
-| Action Name          | Description                                                         | Supported Attributes
-|----------------------|---------------------------------------------------------------------|-------------------------------------
-| `modal`              | Shows a modal dialog instance.                                      | `target`, `uri`, `size`
-| `frame`              | Sets the URI on a frame control instance.                           | `target`, `uri`
-| `split`              | Toggles the side pane of a split control.                           | `target`
-| `fullscreen`         | Toggles CSS-based fullscreen for the target element.                | `target`
-| `native-fullscreen`  | Toggles native browser fullscreen for the target element.           | `target`
-| `filter`             | Toggles a quick-filter in the `FilterRegistry`.                     | _(uses element ID)_
+|Action Name         |Description                                               |Supported Attributes
+|--------------------|----------------------------------------------------------|-------------------------------------
+|`modal`             |Shows a modal dialog instance.                            |`target`, `uri`, `size`
+|`frame`             |Sets the URI on a frame control instance.                 |`target`, `uri`
+|`split`             |Toggles the side pane of a split control.                 |`target`
+|`fullscreen`        |Toggles CSS-based fullscreen for the target element.      |`target`
+|`native-fullscreen` |Toggles native browser fullscreen for the target element. |`target`
+|`filter`            |Toggles a quick-filter in the `FilterRegistry`.           |_(uses element ID)_
 
 ### Example: Registering a Custom Action
 
@@ -400,40 +392,36 @@ webexpress.webui.Actions.register("redirect", {
 </a>
 ```
 
----
-
 ## FilterRegistry
 
 The `FilterRegistry` singleton manages client-side quick-filter state. It supports group constraints, exclusive filters, reset filters, and persists state to cookies.
 
 ### Methods
 
-| Method                          | Description
-|---------------------------------|--------------------------------------------------------------
-| `registerFilters(filters)`      | Registers an array of filter definitions.
-| `init()`                        | Initializes state from the cookie and broadcasts the initial state.
-| `activate(id)`                  | Activates a filter by ID, enforcing group exclusivity constraints.
-| `deactivate(id)`                | Deactivates a filter by ID.
-| `toggle(id)`                    | Toggles the state of a filter.
-| `clearGroup(group)`             | Clears all active filters within a specific group.
-| `clearAll()`                    | Clears all currently active filters.
-| `getActiveFilters()`            | Returns an array of all currently active filter IDs.
-| `getFilterConfig(id)`           | Returns the configuration for a specific filter ID.
-| `getAllKnownFilters()`          | Returns all registered filter configurations.
+|Method                     |Description
+|---------------------------|--------------------------------------------------------------
+|`registerFilters(filters)` |Registers an array of filter definitions.
+|`init()`                   |Initializes state from the cookie and broadcasts the initial state.
+|`activate(id)`             |Activates a filter by ID, enforcing group exclusivity constraints.
+|`deactivate(id)`           |Deactivates a filter by ID.
+|`toggle(id)`               |Toggles the state of a filter.
+|`clearGroup(group)`        |Clears all active filters within a specific group.
+|`clearAll()`               |Clears all currently active filters.
+|`getActiveFilters()`       |Returns an array of all currently active filter IDs.
+|`getFilterConfig(id)`      |Returns the configuration for a specific filter ID.
+|`getAllKnownFilters()`     |Returns all registered filter configurations.
 
 ### Filter Definition
 
 Each filter object supports the following properties:
 
-| Property     | Type      | Description
-|--------------|-----------|-----------------------------------------------
-| `id`         | `string`  | Unique identifier for the filter.
-| `name`       | `string`  | Display name for the filter.
-| `group`      | `string`  | Optional group name for mutual exclusion.
-| `exclusive`  | `boolean` | When `true`, activating this filter deactivates other filters in the same group.
-| `reset`      | `boolean` | When `true`, activating this filter clears all other filters in its group.
-
----
+|Property    |Type      |Description
+|------------|----------|-----------------------------------------------
+|`id`        |`string`  |Unique identifier for the filter.
+|`name`      |`string`  |Display name for the filter.
+|`group`     |`string`  |Optional group name for mutual exclusion.
+|`exclusive` |`boolean` |When `true`, activating this filter deactivates other filters in the same group.
+|`reset`     |`boolean` |When `true`, activating this filter clears all other filters in its group.
 
 ## I18N
 
@@ -441,11 +429,11 @@ The `I18N` singleton provides internationalization support with automatic browse
 
 ### Methods
 
-| Method                              | Description
-|-------------------------------------|--------------------------------------------------------------
-| `register(lang, module, values)`    | Registers a key-value map of translations for a language and module.
-| `setLanguage(language)`             | Sets the current language code.
-| `translate(key)`                    | Returns the translated text for a key. Supports `module:key` syntax with English fallback.
+|Method                           |Description
+|---------------------------------|--------------------------------------------------------------
+|`register(lang, module, values)` |Registers a key-value map of translations for a language and module.
+|`setLanguage(language)`          |Sets the current language code.
+|`translate(key)`                 |Returns the translated text for a key. Supports `module:key` syntax with English fallback.
 
 ### Usage
 
@@ -471,18 +459,16 @@ Within controls that extend `Ctrl`, use the built-in `_i18n` helper:
 const label = this._i18n("webexpress.webui:calendar.may", "May");
 ```
 
----
-
 ## Syntax
 
 The `Syntax` singleton manages registration and retrieval of syntax-highlighting configurations for different programming languages.
 
 ### Methods
 
-| Method                                | Description
-|---------------------------------------|--------------------------------------------------------------
-| `register(language, alias, syntax)`   | Registers a syntax configuration for a language and optional alias.
-| `get(language)`                       | Returns the syntax configuration for a language, or `null`.
+|Method                              |Description
+|------------------------------------|--------------------------------------------------------------
+|`register(language, alias, syntax)` |Registers a syntax configuration for a language and optional alias.
+|`get(language)`                     |Returns the syntax configuration for a language, or `null`.
 
 ### Usage
 
@@ -496,19 +482,17 @@ webexpress.webui.Syntax.register("javascript", "js", {
 const config = webexpress.webui.Syntax.get("js"); // same as get("javascript")
 ```
 
----
-
 ## EditorPlugins
 
 The `EditorPlugins` singleton is a priority-based registry for WYSIWYG editor plugins. Each plugin can provide lifecycle hooks for toolbar creation, content change handling, and context menus.
 
 ### Methods
 
-| Method                                    | Description
-|-------------------------------------------|--------------------------------------------------------------
-| `register(name, definition)`              | Registers a plugin with default position (10).
-| `register(name, position, definition)`    | Registers a plugin with an explicit position for ordering.
-| `getAll()`                                | Returns all plugin definitions sorted by position.
+|Method                                 |Description
+|---------------------------------------|--------------------------------------------------------------
+|`register(name, definition)`           |Registers a plugin with default position (10).
+|`register(name, position, definition)` |Registers a plugin with an explicit position for ordering.
+|`getAll()`                             |Returns all plugin definitions sorted by position.
 
 ### Plugin Definition
 
@@ -521,23 +505,19 @@ webexpress.webui.EditorPlugins.register("my-plugin", 500, {
 });
 ```
 
----
-
 ## EditorAddOns
 
 The `EditorAddOns` singleton manages editor add-ons that can be inserted into content via the editor add-ons plugin.
 
 ### Methods
 
-| Method                          | Description
-|---------------------------------|--------------------------------------------------------------
-| `register(id, definition)`     | Registers an add-on with properties like `label`, `icon`, `category`, and `renderer`.
-| `get(id)`                      | Returns the add-on definition, or `undefined`.
-| `getAll()`                     | Returns all registered add-on definitions.
-| `unregister(id)`               | Removes an add-on. Returns `true` if removed.
-| `clear()`                      | Clears all registered add-ons.
-
----
+|Method                     |Description
+|---------------------------|--------------------------------------------------------------
+|`register(id, definition)` |Registers an add-on with properties like `label`, `icon`, `category`, and `renderer`.
+|`get(id)`                  |Returns the add-on definition, or `undefined`.
+|`getAll()`                 |Returns all registered add-on definitions.
+|`unregister(id)`           |Removes an add-on. Returns `true` if removed.
+|`clear()`                  |Clears all registered add-ons.
 
 ## DialogPanels
 
@@ -545,14 +525,12 @@ The `DialogPanels` singleton stores panel definitions by a modal key. Multiple p
 
 ### Methods
 
-| Method                          | Description
-|---------------------------------|--------------------------------------------------------------
-| `register(modalKey, panel)`     | Registers a panel definition under a modal key.
-| `get(modalKey)`                 | Returns all panel definitions for a key (shallow copies).
-| `unregister(modalKey)`          | Removes all panels registered under a key.
-| `clear()`                      | Clears the entire registry.
-
----
+|Method                      |Description
+|----------------------------|--------------------------------------------------------------
+|`register(modalKey, panel)` |Registers a panel definition under a modal key.
+|`get(modalKey)`             |Returns all panel definitions for a key (shallow copies).
+|`unregister(modalKey)`      |Removes all panels registered under a key.
+|`clear()`                   |Clears the entire registry.
 
 ## DashboardWidgets
 
@@ -560,13 +538,11 @@ The `DashboardWidgets` singleton manages dashboard widget definitions.
 
 ### Methods
 
-| Method                          | Description
-|---------------------------------|--------------------------------------------------------------
-| `register(id, definition)`     | Registers a widget with a unique ID and definition.
-| `get(id)`                      | Returns the widget definition, or `null`.
-| `getAll()`                     | Returns all registered widget definitions.
-
----
+|Method                     |Description
+|---------------------------|--------------------------------------------------------------
+|`register(id, definition)` |Registers a widget with a unique ID and definition.
+|`get(id)`                  |Returns the widget definition, or `null`.
+|`getAll()`                 |Returns all registered widget definitions.
 
 ## TableTemplates
 
@@ -574,13 +550,13 @@ The `TableTemplates` singleton provides a central registry for table cell render
 
 ### Methods
 
-| Method                                          | Description
-|-------------------------------------------------|--------------------------------------------------------------
-| `register(type, rendererFn, defaultOptions?)`   | Registers a renderer function for a cell type (e.g., `"date"`, `"currency"`).
-| `get(type)`                                     | Returns `{ fn, options }` for the given type, or `null`.
-| `has(type)`                                     | Returns `true` if a renderer is registered for the type.
-| `unregister(type)`                              | Removes a renderer by type.
-| `clear()`                                       | Clears the entire registry.
+|Method                                        |Description
+|----------------------------------------------|--------------------------------------------------------------
+|`register(type, rendererFn, defaultOptions?)` |Registers a renderer function for a cell type (e.g., `"date"`, `"currency"`).
+|`get(type)`                                   |Returns `{ fn, options }` for the given type, or `null`.
+|`has(type)`                                   |Returns `true` if a renderer is registered for the type.
+|`unregister(type)`                            |Removes a renderer by type.
+|`clear()`                                     |Clears the entire registry.
 
 ### Usage
 
@@ -592,23 +568,21 @@ webexpress.webui.TableTemplates.register("currency", function (val, table, row, 
 }, { decimals: 2, symbol: "€" });
 ```
 
----
-
 ## Ctrl
 
 The `Ctrl` class is the abstract base class for all WebExpress.WebUI controls. It provides common lifecycle methods and utility functions. It cannot be instantiated directly.
 
 ### Methods
 
-| Method                              | Description
-|-------------------------------------|--------------------------------------------------------------
-| `render()`                          | Renders the control. Must be implemented in the derived class.
-| `update()`                          | Updates the control. By default calls `render()`.
-| `destroy()`                         | Destroys the control and performs cleanup.
-| `_detachElement(element)`           | Detaches an element from the DOM while preserving event listeners.
-| `_dispatch(type, detail)`           | Dispatches a custom event from the control's element.
-| `_i18n(key, fallback)`             | Returns the translated text for an i18n key, or the fallback.
-| `_isVisible()`                      | Returns `true` if the control's element is currently visible.
+|Method                    |Description
+|--------------------------|--------------------------------------------------------------
+|`render()`                |Renders the control. Must be implemented in the derived class.
+|`update()`                |Updates the control. By default calls `render()`.
+|`destroy()`               |Destroys the control and performs cleanup.
+|`_detachElement(element)` |Detaches an element from the DOM while preserving event listeners.
+|`_dispatch(type, detail)` |Dispatches a custom event from the control's element.
+|`_i18n(key, fallback)`    |Returns the translated text for an i18n key, or the fallback.
+|`_isVisible()`            |Returns `true` if the control's element is currently visible.
 
 ### Usage
 
@@ -628,21 +602,17 @@ webexpress.webui.MyCtrl = class extends webexpress.webui.Ctrl {
 webexpress.webui.Controller.registerClass("wx-webui-myctrl", webexpress.webui.MyCtrl);
 ```
 
----
-
 ## PopperCtrl
 
 The `PopperCtrl` class extends `Ctrl` and provides base functionality for controls that use [Popper.js](https://popper.js.org/) for positioning dropdown menus.
 
 ### Methods
 
-| Method                                              | Description
-|-----------------------------------------------------|--------------------------------------------------------------
-| `_initializePopper(container, dropdownmenu)`        | Initializes Popper.js for a dropdown menu. Sets up click-outside and ESC-key handlers.
+|Method                                       |Description
+|---------------------------------------------|--------------------------------------------------------------
+|`_initializePopper(container, dropdownmenu)` |Initializes Popper.js for a dropdown menu. Sets up click-outside and ESC-key handlers.
 
 The initialized dropdown menu receives `show()` and `hide()` methods for programmatic control. Events `DROPDOWN_SHOW_EVENT` and `DROPDOWN_HIDDEN_EVENT` are dispatched accordingly.
-
----
 
 ## Event
 
@@ -650,54 +620,54 @@ The `Event` class defines all event name constants used across the framework. Us
 
 ### Constants
 
-| Constant                    | Value                                        | Description
-|-----------------------------|----------------------------------------------|----------------------------------------------
-| `CHANGE_VISIBILITY_EVENT`   | `webexpress.webui.change.visibility`         | Visibility of an element changed.
-| `CLICK_EVENT`               | `webexpress.webui.click`                     | An element was clicked.
-| `DOUBLE_CLICK_EVENT`        | `webexpress.webui.dbclick`                   | An element was double-clicked.
-| `CHANGE_FILTER_EVENT`       | `webexpress.webui.change.filter`             | A filter state changed.
-| `DROPDOWN_SHOW_EVENT`       | `webexpress.webui.dropdown.show`             | A dropdown menu was shown.
-| `DROPDOWN_HIDDEN_EVENT`     | `webexpress.webui.dropdown.hidden`           | A dropdown menu was hidden.
-| `CHANGE_FAVORITE_EVENT`     | `webexpress.webui.change.favorite`           | A favorite state changed.
-| `COLUMN_REORDER_EVENT`      | `webexpress.webui.table.column.reorder`      | Table columns were reordered.
-| `COLUMN_SEARCH_EVENT`       | `webexpress.webui.table.column.search`       | A search/filter was applied to a column.
-| `ROW_REORDER_EVENT`         | `webexpress.webui.table.row.reorder`         | Table rows were reordered.
-| `SELECT_ROW_EVENT`          | `webexpress.webui.table.select.row`          | A table row was selected.
-| `TABLE_SORT_EVENT`          | `webexpress.webui.table.sorted`              | A table was sorted.
-| `CHANGE_VALUE_EVENT`        | `webexpress.webui.change.value`              | The value of an input or control changed.
-| `MOVE_EVENT`                | `webexpress.webui.move`                      | An item was moved.
-| `CHANGE_PAGE_EVENT`         | `webexpress.webui.change.page`               | The page in a pagination control changed.
-| `MODAL_SHOW_EVENT`          | `webexpress.webui.modal.show`                | A modal was shown.
-| `MODAL_HIDE_EVENT`          | `webexpress.webui.modal.hide`                | A modal was hidden.
-| `DATA_REQUESTED_EVENT`      | `webexpress.webui.data.requested`            | Data was requested.
-| `DATA_ARRIVED_EVENT`        | `webexpress.webui.data.arrived`              | Requested data has arrived.
-| `TASK_START_EVENT`           | `webexpress.webui.task.start`                | A task started.
-| `TASK_UPDATE_EVENT`          | `webexpress.webui.task.update`               | A task was updated.
-| `TASK_FINISH_EVENT`          | `webexpress.webui.task.finish`               | A task finished.
-| `SIZE_CHANGE_EVENT`         | `webexpress.webui.size.change`               | The size of an element changed.
-| `HIDE_EVENT`                | `webexpress.webui.hide`                      | An element was hidden.
-| `SHOW_EVENT`                | `webexpress.webui.show`                      | An element was shown.
-| `UPDATED_EVENT`             | `webexpress.webui.updated`                   | An element was updated.
-| `ADD_EVENT`                 | `webexpress.webui.add`                       | An item was added.
-| `REMOVE_EVENT`              | `webexpress.webui.remove`                    | An item was removed.
-| `START_INLINE_EDIT_EVENT`   | `webexpress.webui.inlineedit.start`          | Inline editing started.
-| `SAVE_INLINE_EDIT_EVENT`    | `webexpress.webui.inlineedit.save`           | Inline editing was saved.
-| `END_INLINE_EDIT_EVENT`     | `webexpress.webui.inlineedit.end`            | Inline editing ended.
-| `FILE_SELECTED_EVENT`       | `webexpress.webui.file.selected`             | A file was selected.
-| `UPLOAD_SUCCESS_EVENT`      | `webexpress.webui.upload.success`            | A file upload completed successfully.
-| `UPLOAD_ERROR_EVENT`        | `webexpress.webui.upload.error`              | A file upload failed.
-| `UPLOAD_PROGRESS_EVENT`     | `webexpress.webui.upload.progress`           | Upload progress was updated.
-| `TILE_SEARCH_EVENT`         | `webexpress.webui.tile.search`               | A tile search was performed.
-| `TILE_SORT_EVENT`           | `webexpress.webui.tile.sort`                 | Tiles were sorted.
-| `BREAKPOINT_CHANGE_EVENT`   | `webexpress.webui.breakpoint.change`         | A responsive breakpoint changed.
-| `WS_OPEN_EVENT`             | `webexpress.webui.websocket.open`            | A WebSocket connection was opened.
-| `WS_MESSAGE_EVENT`          | `webexpress.webui.websocket.message`         | A WebSocket message was received.
-| `WS_CLOSE_EVENT`            | `webexpress.webui.websocket.close`           | A WebSocket connection was closed.
-| `WS_ERROR_EVENT`            | `webexpress.webui.websocket.error`           | A WebSocket error occurred.
-| `SELECT_ITEM_EVENT`         | `webexpress.webui.select.item`               | An item was selected.
-| `UPDATE_PAGINATION_EVENT`   | `webexpress.webui.update.pagination`         | Pagination was updated.
-| `SELECTED_TAB_EVENT`        | `webexpress.webui.tab.selected`              | A tab was selected.
-| `CHANGE_DARKMODE_EVENT`     | `webexpress.webui.change.darkmode`           | The dark mode was toggled.
+|Constant                  |Value                                   |Description
+|--------------------------|----------------------------------------|---------------------------------------------
+|`CHANGE_VISIBILITY_EVENT` |`webexpress.webui.change.visibility`    |Visibility of an element changed.
+|`CLICK_EVENT`             |`webexpress.webui.click`                |An element was clicked.
+|`DOUBLE_CLICK_EVENT`      |`webexpress.webui.dbclick`              |An element was double-clicked.
+|`CHANGE_FILTER_EVENT`     |`webexpress.webui.change.filter`        |A filter state changed.
+|`DROPDOWN_SHOW_EVENT`     |`webexpress.webui.dropdown.show`        |A dropdown menu was shown.
+|`DROPDOWN_HIDDEN_EVENT`   |`webexpress.webui.dropdown.hidden`      |A dropdown menu was hidden.
+|`CHANGE_FAVORITE_EVENT`   |`webexpress.webui.change.favorite`      |A favorite state changed.
+|`COLUMN_REORDER_EVENT`    |`webexpress.webui.table.column.reorder` |Table columns were reordered.
+|`COLUMN_SEARCH_EVENT`     |`webexpress.webui.table.column.search`  |A search/filter was applied to a column.
+|`ROW_REORDER_EVENT`       |`webexpress.webui.table.row.reorder`    |Table rows were reordered.
+|`SELECT_ROW_EVENT`        |`webexpress.webui.table.select.row`     |A table row was selected.
+|`TABLE_SORT_EVENT`        |`webexpress.webui.table.sorted`         |A table was sorted.
+|`CHANGE_VALUE_EVENT`      |`webexpress.webui.change.value`         |The value of an input or control changed.
+|`MOVE_EVENT`              |`webexpress.webui.move`                 |An item was moved.
+|`CHANGE_PAGE_EVENT`       |`webexpress.webui.change.page`          |The page in a pagination control changed.
+|`MODAL_SHOW_EVENT`        |`webexpress.webui.modal.show`           |A modal was shown.
+|`MODAL_HIDE_EVENT`        |`webexpress.webui.modal.hide`           |A modal was hidden.
+|`DATA_REQUESTED_EVENT`    |`webexpress.webui.data.requested`       |Data was requested.
+|`DATA_ARRIVED_EVENT`      |`webexpress.webui.data.arrived`         |Requested data has arrived.
+|`TASK_START_EVENT`        |`webexpress.webui.task.start`           |A task started.
+|`TASK_UPDATE_EVENT`       |`webexpress.webui.task.update`          |A task was updated.
+|`TASK_FINISH_EVENT`       |`webexpress.webui.task.finish`          |A task finished.
+|`SIZE_CHANGE_EVENT`       |`webexpress.webui.size.change`          |The size of an element changed.
+|`HIDE_EVENT`              |`webexpress.webui.hide`                 |An element was hidden.
+|`SHOW_EVENT`              |`webexpress.webui.show`                 |An element was shown.
+|`UPDATED_EVENT`           |`webexpress.webui.updated`              |An element was updated.
+|`ADD_EVENT`               |`webexpress.webui.add`                  |An item was added.
+|`REMOVE_EVENT`            |`webexpress.webui.remove`               |An item was removed.
+|`START_INLINE_EDIT_EVENT` |`webexpress.webui.inlineedit.start`     |Inline editing started.
+|`SAVE_INLINE_EDIT_EVENT`  |`webexpress.webui.inlineedit.save`      |Inline editing was saved.
+|`END_INLINE_EDIT_EVENT`   |`webexpress.webui.inlineedit.end`       |Inline editing ended.
+|`FILE_SELECTED_EVENT`     |`webexpress.webui.file.selected`        |A file was selected.
+|`UPLOAD_SUCCESS_EVENT`    |`webexpress.webui.upload.success`       |A file upload completed successfully.
+|`UPLOAD_ERROR_EVENT`      |`webexpress.webui.upload.error`         |A file upload failed.
+|`UPLOAD_PROGRESS_EVENT`   |`webexpress.webui.upload.progress`      |Upload progress was updated.
+|`TILE_SEARCH_EVENT`       |`webexpress.webui.tile.search`          |A tile search was performed.
+|`TILE_SORT_EVENT`         |`webexpress.webui.tile.sort`            |Tiles were sorted.
+|`BREAKPOINT_CHANGE_EVENT` |`webexpress.webui.breakpoint.change`    |A responsive breakpoint changed.
+|`WS_OPEN_EVENT`           |`webexpress.webui.websocket.open`       |A WebSocket connection was opened.
+|`WS_MESSAGE_EVENT`        |`webexpress.webui.websocket.message`    |A WebSocket message was received.
+|`WS_CLOSE_EVENT`          |`webexpress.webui.websocket.close`      |A WebSocket connection was closed.
+|`WS_ERROR_EVENT`          |`webexpress.webui.websocket.error`      |A WebSocket error occurred.
+|`SELECT_ITEM_EVENT`       |`webexpress.webui.select.item`          |An item was selected.
+|`UPDATE_PAGINATION_EVENT` |`webexpress.webui.update.pagination`    |Pagination was updated.
+|`SELECTED_TAB_EVENT`      |`webexpress.webui.tab.selected`         |A tab was selected.
+|`CHANGE_DARKMODE_EVENT`   |`webexpress.webui.change.darkmode`      |The dark mode was toggled.
 
 ### Usage
 

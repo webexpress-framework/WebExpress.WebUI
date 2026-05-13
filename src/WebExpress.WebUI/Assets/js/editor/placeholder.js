@@ -1,100 +1,116 @@
 /**
- * Placeholder plugin.
- *
- * Displays a low-contrast hint inside every empty block of the editor (the
- * first block always, others when focused on them). Mirrors the slash-command
- * affordance: "Type / for commands" by default.
- *
- * Reads the hint from data-placeholder on the editor host element when given,
- * falling back to an i18n key.
- *
- * Implemented entirely via CSS via the data-empty="true" attribute that this
- * plugin writes onto empty blocks on every input/selectionchange.
+ * Plugin that provides a toolbar button to insert an "Instruction Text" (Anweisungstext)
+ * into the editor via a modal dialog. This text is meant to be a visual hint or instruction for authors.
+ * It is displayed prominently within the editor but hidden by default outside of it.
  */
-webexpress.webui.EditorPlugins.register("placeholder", 70, (function () {
+webexpress.webui.EditorPlugins.register("placeholder", 5000, {
+    placeholderModal: null,
+
+    init: function(editor) {
+        // No automatic initialization needed
+    },
 
     /**
-     * Translation helper.
-     * @param {string} key
-     * @param {string} fallback
-     * @returns {string}
+     * Creates toolbar controls for the plugin.
+     * @param {object} editor - the editor instance
+     * @returns {HTMLElement} toolbar group element
      */
-    function t(key, fallback) {
-        return webexpress?.webui?.I18N?.translate?.(key) ?? fallback;
-    }
+    createToolbar: function(editor) {
+        const group = document.createElement("div");
+        group.className = "wx-editor-btn-group";
 
-    /**
-     * Returns whether a block is visually "empty" — no text and no embedded
-     * content (images, addons, br-only). Treats `<br>` as empty.
-     * @param {HTMLElement} block
-     * @returns {boolean}
-     */
-    function isBlockEmpty(block) {
-        if (!block) return false;
-        const text = (block.textContent || "").trim();
-        if (text.length) return false;
-        // any non-br element with content counts as not-empty
-        for (const child of block.children) {
-            if (child.tagName !== "BR" && child.tagName !== "SPAN") return false;
-            if (child.tagName === "SPAN" && child.textContent.trim().length) return false;
-        }
-        return true;
-    }
+        const btn = document.createElement("button");
+        btn.className = "wx-editor-btn";
+        btn.type = "button";
+        btn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.placeholder.title");
+        btn.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.placeholder.title"));
+        btn.innerHTML = '<i class="fas fa-info-circle"></i>';
 
-    return {
-        /**
-         * Plugin init hook. Attaches an attribute-syncing routine that paints
-         * the data-empty marker onto every empty block.
-         * @param {Object} editor
-         */
-        init: function (editor) {
-            const editorElem = editor.getEditorElement();
-            const host = editor._uiContainer || editorElem;
+        btn.addEventListener("mousedown", (e) => {
+            e.preventDefault(); // prevent losing focus
+            if (typeof editor._saveCurrentSelection === "function") {
+                editor._saveCurrentSelection();
+            }
+        });
 
-            // resolve placeholder text once
-            const hint = host?.dataset?.placeholder
-                || t("webexpress.webui:editor.placeholder", "Type / for commands");
-            editorElem.setAttribute("data-placeholder", hint);
+        btn.addEventListener("click", () => {
+            let prefillText = "";
+            let activeRange = null;
 
-            /**
-             * Walks every block child of the editor and toggles `data-empty`.
-             */
-            function refresh() {
-                const blocks = editorElem.children;
-                let activeBlock = null;
-                const sel = window.getSelection();
-                if (sel && sel.rangeCount && editorElem.contains(sel.anchorNode)) {
-                    let node = sel.getRangeAt(0).startContainer;
-                    if (node.nodeType === Node.TEXT_NODE) node = node.parentElement;
-                    const b = node?.closest?.("p, h1, h2, h3, h4, h5, h6, blockquote, pre, li, div");
-                    if (b && editorElem.contains(b) && b !== editorElem) activeBlock = b;
-                }
-                for (const b of blocks) {
-                    // skip non-editable embeds (addon frames, tables)
-                    if (b.getAttribute("contenteditable") === "false") {
-                        b.removeAttribute("data-empty");
-                        continue;
-                    }
-                    if (isBlockEmpty(b)) {
-                        // show placeholder on first block always, or on currently-active block
-                        const show = (b === blocks[0]) || (b === activeBlock);
-                        b.toggleAttribute("data-empty", !!show);
-                    } else {
-                        b.removeAttribute("data-empty");
-                    }
-                }
+            if (editor._savedRange) {
+                activeRange = editor._savedRange.cloneRange();
+                prefillText = activeRange.toString().trim();
             }
 
-            // initial paint, then on every relevant event
-            refresh();
-            editorElem.addEventListener("input", refresh);
-            editorElem.addEventListener("focus", refresh);
-            editorElem.addEventListener("blur", refresh);
-            document.addEventListener("selectionchange", () => {
-                // only react if our editor has focus / selection lives inside
-                const sel = window.getSelection();
-                if (sel && sel.rangeCount && editorElem.contains(sel.anchorNode)) refresh();
-            });
+            this._openModal(editor, "placeholderModal", "editor-placeholder", "webexpress.webui:editor.placeholder.title", { text: prefillText }, activeRange);
+        });
+
+        group.appendChild(btn);
+        return group;
+    },
+
+    /**
+     * Opens a modal and provides the editor context to the modal controller.
+     * Creates the modal on first use to prevent redundant logic.
+     * @param {object} editor - The editor instance.
+     * @param {string} modalProperty - The property name where the modal wrapper is stored.
+     * @param {string} key - Registry key or identifier for the modal.
+     * @param {string} title - The title to display in the modal header.
+     * @param {object|null} prefill - Optional data to prefill the modal form.
+     * @param {Range|null} activeRange - The actively saved text range before focus loss.
+     * @returns {void}
+     */
+    _openModal: function(editor, modalProperty, key, title, prefill, activeRange) {
+        if (!this[modalProperty]) {
+            this[modalProperty] = this._createModal(key, title);
         }
-    };
-})());
+
+        if (this[modalProperty] && this[modalProperty].ctrl) {
+            const ctrl = this[modalProperty].ctrl;
+
+            // provide editor reference to the modal controller
+            ctrl._editor = editor;
+
+            // securely store the explicit cursor position
+            ctrl._backupRange = activeRange || null;
+
+            // set or clear prefill data to force reset on reuse
+            ctrl._placeholderPrefill = prefill || null;
+
+            // show modal via controller api if available
+            if (typeof ctrl.show === "function") {
+                ctrl.show();
+            }
+        }
+    },
+
+    /**
+     * Creates a minimal ModalSidebarPanel instance and returns a wrapper object.
+     * @param {string} key - Registry key or identifier used by dialog panels.
+     * @param {string} title - Modal header title.
+     * @returns {{ element: HTMLElement, ctrl: object }} Wrapper containing element and controller.
+     */
+    _createModal: function(key, title) {
+        const id = "wx-msp-" + key + "-" + Date.now();
+        const el = document.createElement("div");
+        el.id = id;
+        el.setAttribute("data-size", "modal-md");
+        el.setAttribute("data-key", key);
+        el.setAttribute("aria-hidden", "true");
+
+        // build minimal modal shell securely with static html
+        el.innerHTML = `
+            <div class="wx-modal-header">
+                <h5 class="modal-title">${webexpress.webui.I18N.translate(title)}</h5>
+            </div>
+            <div class="wx-modal-content"></div>
+            <div class="wx-modal-footer">
+                <button class="btn btn-primary submit-btn" disabled>${webexpress.webui.I18N.translate("webexpress.webui:insert")}</button>
+            </div>`;
+
+        document.body.appendChild(el);
+        const ctrl = new webexpress.webui.ModalSidebarPanel(el);
+
+        return { element: el, ctrl: ctrl };
+    }
+});

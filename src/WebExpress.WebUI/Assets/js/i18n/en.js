@@ -191,6 +191,11 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
 
     // placeholder
     "editor.placeholder": "Type / for commands",
+    "editor.placeholder.title": "Instruction Text",
+    "editor.placeholder.text.label": "Text",
+    "editor.placeholder.text.placeholder": "Enter instruction text...",
+    "editor.placeholder.error.text": "Please provide an instruction text.",
+    "editor.placeholder.error.internal": "Internal error: editor or field not available.",
 
     // slash menu chrome
     "editor.slash.search": "Search commands…",

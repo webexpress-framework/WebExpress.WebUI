@@ -26,8 +26,15 @@
  * </div>
  */
 webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
+    
     /**
-     * Constructor
+     * Wire-format message type for presence updates.
+     * @type {string}
+     */
+    static PRESENCE_TYPE = "webexpress.webui.collaborative.presence";
+
+    /**
+     * Initializes the collaborative control and sets up the required environment.
      * @param {HTMLElement} element - The DOM element associated with this instance.
      */
     constructor(element) {
@@ -50,16 +57,16 @@ webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
         }
         this._containerId = element.id;
 
-        // remote state
-        this._remoteUsers = new Map();   // userId -> { name, color, lastSeen }
-        this._remoteCursors = new Map(); // userId -> { x, y, color, name }
-        this._suppressInput = new Set(); // fieldIds currently being remote-updated (echo guard)
+        // remote state setup
+        this._remoteUsers = new Map();
+        this._remoteCursors = new Map();
+        this._suppressInput = new Set();
 
-        // throttling state
+        // throttling state setup
         this._pendingCursor = null;
         this._cursorRafId = 0;
 
-        // base CSS and required positioning
+        // base css and required positioning
         element.classList.add("wx-collaborative");
         const computedPosition = getComputedStyle(element).position;
         if (!computedPosition || computedPosition === "static") {
@@ -68,86 +75,92 @@ webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
 
         this._initOverlayDOM();
 
-        // transport: webexpress.webapp.MessageQueue singleton
+        // transport setup using the message queue singleton
         this._queue = (typeof webexpress !== "undefined" && webexpress.webapp)
             ? webexpress.webapp.MessageQueue
             : null;
         this._messageHandler = (payload) => this._onMessage(payload);
+        
         if (this._queue) {
             this._queue.register(this._messageHandler);
         }
 
         this._bindLocalEvents();
 
-        // announce presence and keep peers informed
+        // announce presence and keep peers informed periodically
         this._sendPresence("join");
         this._heartbeat = setInterval(() => {
             this._sendPresence("ping");
             this._reapStaleUsers();
         }, 5000);
 
-        // leave on tab close
-        this._beforeUnload = () => this._sendPresence("leave");
+        // gracefully leave on tab close
+        this._beforeUnload = () => {
+            this._sendPresence("leave");
+        };
         window.addEventListener("beforeunload", this._beforeUnload);
 
         this.render();
     }
 
-    // -----------------------------------------------------------------------
-    // Lifecycle
-    // -----------------------------------------------------------------------
-
     /**
-     * Re-renders presence chips and remote cursors. The host element's user
-     * content is never touched - only the overlay sub-containers are updated.
+     * Re-renders presence chips and remote cursors. 
+     * The host element's user content is never touched, only the overlay sub-containers are updated.
      */
     render() {
         this._renderPresence();
         this._renderCursors();
     }
 
+    /**
+     * Updates the UI components to reflect the latest state.
+     */
     update() {
         this.render();
     }
 
     /**
-     * Cleanup: announces leave, removes listeners, stops timers.
+     * Cleans up the instance by announcing departure, removing listeners, and stopping timers.
      */
     destroy() {
         this._sendPresence("leave");
+        
         if (this._queue) {
             this._queue.unregister(this._messageHandler);
         }
+        
         this._unbindLocalEvents();
         window.removeEventListener("beforeunload", this._beforeUnload);
         clearInterval(this._heartbeat);
+        
         if (this._cursorRafId) {
             cancelAnimationFrame(this._cursorRafId);
         }
+        
         if (this._presenceBar && this._presenceBar.parentNode) {
             this._presenceBar.parentNode.removeChild(this._presenceBar);
         }
+        
         if (this._cursorLayer && this._cursorLayer.parentNode) {
             this._cursorLayer.parentNode.removeChild(this._cursorLayer);
         }
+        
         this._element.classList.remove("wx-collaborative");
     }
 
-    // -----------------------------------------------------------------------
-    // Public API
-    // -----------------------------------------------------------------------
-
     /**
-     * Returns the currently active remote users.
-     * @returns {Array<{id:string,name:string,color:string,lastSeen:number}>}
+     * Retrieves the currently active remote users.
+     * @returns {Array<{id: string, name: string, color: string, lastSeen: number}>} An array of active user objects.
      */
     get users() {
-        return Array.from(this._remoteUsers.entries()).map(([id, u]) => ({ id, ...u }));
+        return Array.from(this._remoteUsers.entries()).map(([id, u]) => {
+            return { id, ...u };
+        });
     }
 
     /**
      * Enables or disables the presence chip display.
-     * @param {boolean} value
+     * @param {boolean} value - Indicates whether presence should be shown.
      */
     enablePresence(value) {
         this._presenceEnabled = !!value;
@@ -156,7 +169,7 @@ webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Enables or disables remote cursor visualization.
-     * @param {boolean} value
+     * @param {boolean} value - Indicates whether remote cursors should be rendered.
      */
     enableCursor(value) {
         this._cursorEnabled = !!value;
@@ -168,19 +181,14 @@ webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Enables or disables text input synchronization.
-     * @param {boolean} value
+     * @param {boolean} value - Indicates whether input synchronization should be active.
      */
     enableInput(value) {
         this._inputEnabled = !!value;
     }
 
-    // -----------------------------------------------------------------------
-    // DOM scaffolding
-    // -----------------------------------------------------------------------
-
     /**
-     * Builds the presence bar and cursor overlay sub-containers and appends
-     * them to the host element without disturbing existing content.
+     * Builds the presence bar and cursor overlay sub-containers and appends them to the host element.
      */
     _initOverlayDOM() {
         this._presenceBar = document.createElement("div");
@@ -193,20 +201,28 @@ webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
         this._element.appendChild(this._cursorLayer);
     }
 
-    // -----------------------------------------------------------------------
-    // Local event wiring
-    // -----------------------------------------------------------------------
-
+    /**
+     * Binds local dom events for interaction tracking.
+     */
     _bindLocalEvents() {
-        this._onMouseMove = (e) => this._scheduleCursorSend(e);
-        this._onMouseLeave = () => this._sendCursor(-1, -1);
-        this._onInputEvent = (e) => this._handleLocalInput(e);
+        this._onMouseMove = (e) => {
+            this._scheduleCursorSend(e);
+        };
+        this._onMouseLeave = () => {
+            this._sendCursor(-1, -1);
+        };
+        this._onInputEvent = (e) => {
+            this._handleLocalInput(e);
+        };
 
         this._element.addEventListener("mousemove", this._onMouseMove);
         this._element.addEventListener("mouseleave", this._onMouseLeave);
         this._element.addEventListener("input", this._onInputEvent, true);
     }
 
+    /**
+     * Unbinds local dom events.
+     */
     _unbindLocalEvents() {
         this._element.removeEventListener("mousemove", this._onMouseMove);
         this._element.removeEventListener("mouseleave", this._onMouseLeave);
@@ -214,17 +230,27 @@ webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Throttles cursor send events to one per animation frame.
-     * @param {MouseEvent} e
+     * Throttles cursor send events to one per animation frame to optimize performance.
+     * @param {MouseEvent} e - The native mouse event.
      */
     _scheduleCursorSend(e) {
-        if (!this._cursorEnabled) return;
+        if (!this._cursorEnabled) {
+            return;
+        }
+        
         const rect = this._element.getBoundingClientRect();
-        if (rect.width === 0 || rect.height === 0) return;
+        if (rect.width === 0 || rect.height === 0) {
+            return;
+        }
+        
         const x = (e.clientX - rect.left) / rect.width;
         const y = (e.clientY - rect.top) / rect.height;
         this._pendingCursor = { x, y };
-        if (this._cursorRafId) return;
+        
+        if (this._cursorRafId) {
+            return;
+        }
+        
         this._cursorRafId = requestAnimationFrame(() => {
             this._cursorRafId = 0;
             if (this._pendingCursor) {
@@ -236,16 +262,26 @@ webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Handles local input events on contained fields and broadcasts the value.
-     * @param {Event} e
+     * @param {Event} e - The native input event.
      */
     _handleLocalInput(e) {
-        if (!this._inputEnabled) return;
+        if (!this._inputEnabled) {
+            return;
+        }
+        
         const target = e.target;
-        if (!target) return;
+        if (!target) {
+            return;
+        }
 
         const fieldId = this._fieldIdentifier(target);
-        if (!fieldId) return;
-        if (this._suppressInput.has(fieldId)) return;
+        if (!fieldId) {
+            return;
+        }
+        
+        if (this._suppressInput.has(fieldId)) {
+            return;
+        }
 
         const value = "value" in target ? target.value : target.textContent || "";
         const selectionStart = typeof target.selectionStart === "number" ? target.selectionStart : null;
@@ -255,27 +291,38 @@ webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Returns a stable identifier for a field: its id when present, otherwise null.
-     * Fields without an id are not synchronized.
-     * @param {HTMLElement} el
-     * @returns {string|null}
+     * Returns a stable identifier for a field, primarily utilizing its ID.
+     * @param {HTMLElement} el - The element to identify.
+     * @returns {string|null} The identifier string or null if not identifiable.
      */
     _fieldIdentifier(el) {
-        if (el.id) return el.id;
+        if (el.id) {
+            return el.id;
+        }
         return null;
     }
 
-    // -----------------------------------------------------------------------
-    // Outbound messages
-    // -----------------------------------------------------------------------
-
+    /**
+     * Checks whether outgoing messages can currently be transmitted.
+     * @returns {boolean} True if the transport queue is ready.
+     */
     _canSend() {
         return this._queue && this._queue.status === "online";
     }
 
+    /**
+     * Broadcasts the user's presence state.
+     * @param {string} status - The status to broadcast (e.g., 'join', 'ping', 'leave').
+     */
     _sendPresence(status) {
-        if (!this._presenceEnabled && status !== "leave") return;
-        if (!this._canSend()) return;
+        if (!this._presenceEnabled && status !== "leave") {
+            return;
+        }
+        
+        if (!this._canSend()) {
+            return;
+        }
+        
         this._queue.send({
             type: webexpress.webui.CollaborativeCtrl.PRESENCE_TYPE,
             containerId: this._containerId,
@@ -287,9 +334,20 @@ webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
         });
     }
 
+    /**
+     * Broadcasts the user's current local cursor position.
+     * @param {number} x - The normalized horizontal coordinate.
+     * @param {number} y - The normalized vertical coordinate.
+     */
     _sendCursor(x, y) {
-        if (!this._cursorEnabled) return;
-        if (!this._canSend()) return;
+        if (!this._cursorEnabled) {
+            return;
+        }
+        
+        if (!this._canSend()) {
+            return;
+        }
+        
         this._queue.send({
             type: webexpress.webui.Event.COLLABORATIVE_CURSOR,
             containerId: this._containerId,
@@ -302,8 +360,18 @@ webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
         });
     }
 
+    /**
+     * Broadcasts the latest input state of a synchronized field.
+     * @param {string} fieldId - The identifier of the input field.
+     * @param {string} value - The current value of the field.
+     * @param {number|null} selectionStart - The start of the text selection.
+     * @param {number|null} selectionEnd - The end of the text selection.
+     */
     _sendInput(fieldId, value, selectionStart, selectionEnd) {
-        if (!this._canSend()) return;
+        if (!this._canSend()) {
+            return;
+        }
+        
         this._queue.send({
             type: webexpress.webui.Event.COLLABORATIVE_INPUT,
             containerId: this._containerId,
@@ -318,18 +386,22 @@ webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
         });
     }
 
-    // -----------------------------------------------------------------------
-    // Inbound messages
-    // -----------------------------------------------------------------------
-
     /**
-     * Filters and dispatches an incoming MessageQueue payload.
-     * @param {any} payload - Already JSON-parsed object (or string if unparsable)
+     * Filters and dispatches an incoming message payload based on its type.
+     * @param {any} payload - The message payload received from the queue.
      */
     _onMessage(payload) {
-        if (!payload || typeof payload !== "object") return;
-        if (payload.containerId !== this._containerId) return;
-        if (payload.userId === this._userId) return;
+        if (!payload || typeof payload !== "object") {
+            return;
+        }
+        
+        if (payload.containerId !== this._containerId) {
+            return;
+        }
+        
+        if (payload.userId === this._userId) {
+            return;
+        }
 
         switch (payload.type) {
             case webexpress.webui.CollaborativeCtrl.PRESENCE_TYPE:
@@ -344,16 +416,22 @@ webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
         }
     }
 
+    /**
+     * Handles incoming presence messages and updates the remote user state.
+     * @param {Object} msg - The decoded presence message.
+     */
     _onPresence(msg) {
         if (msg.status === "leave") {
             if (this._remoteUsers.has(msg.userId)) {
                 this._remoteUsers.delete(msg.userId);
                 this._remoteCursors.delete(msg.userId);
+                
                 this._dispatch(webexpress.webui.Event.COLLABORATIVE_USER_LEAVE, {
                     userId: msg.userId,
                     userName: msg.userName,
                     userColor: msg.userColor
                 });
+                
                 this._renderPresence();
                 this._renderCursors();
             }
@@ -368,8 +446,7 @@ webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
         });
 
         if (isNew) {
-            // when a new peer is announced, respond with our own presence so the
-            // peer learns about us without waiting for the next heartbeat
+            // ping back so the new peer learns about the local user immediately
             this._sendPresence("ping");
             this._dispatch(webexpress.webui.Event.COLLABORATIVE_USER_JOIN, {
                 userId: msg.userId,
@@ -380,10 +457,16 @@ webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
         }
     }
 
+    /**
+     * Handles incoming cursor messages and updates remote cursor positions.
+     * @param {Object} msg - The decoded cursor message.
+     */
     _onCursor(msg) {
-        if (!this._cursorEnabled) return;
+        if (!this._cursorEnabled) {
+            return;
+        }
 
-        // mark the sender alive (cursor implies presence)
+        // mark the sender as alive since a cursor update implies presence
         if (!this._remoteUsers.has(msg.userId)) {
             this._remoteUsers.set(msg.userId, {
                 name: msg.userName || msg.userId,
@@ -413,27 +496,42 @@ webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
             x: msg.x,
             y: msg.y
         });
+        
         this._renderCursors();
     }
 
+    /**
+     * Handles incoming input messages and updates the corresponding local fields.
+     * @param {Object} msg - The decoded input message.
+     */
     _onInput(msg) {
-        if (!this._inputEnabled) return;
-        if (!msg.fieldId) return;
+        if (!this._inputEnabled) {
+            return;
+        }
+        
+        if (!msg.fieldId) {
+            return;
+        }
 
         const field = this._element.querySelector("#" + CSS.escape(msg.fieldId));
-        if (!field || !this._element.contains(field)) return;
+        if (!field || !this._element.contains(field)) {
+            return;
+        }
 
-        // do not overwrite a field the local user is actively editing
-        if (document.activeElement === field) return;
+        // do not overwrite a field that the local user is actively editing
+        if (document.activeElement === field) {
+            return;
+        }
 
         this._suppressInput.add(msg.fieldId);
+        
         try {
             if ("value" in field) {
                 field.value = msg.value != null ? msg.value : "";
             } else {
                 field.textContent = msg.value != null ? msg.value : "";
             }
-            // emit a native event so frameworks/bindings observing the field react
+            // emit native event to ensure frameworks or bindings can react
             field.dispatchEvent(new Event("input", { bubbles: true }));
         } finally {
             this._suppressInput.delete(msg.fieldId);
@@ -448,18 +546,21 @@ webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
         });
     }
 
-    // -----------------------------------------------------------------------
-    // Rendering
-    // -----------------------------------------------------------------------
-
+    /**
+     * Renders the presence chips indicating active remote users.
+     */
     _renderPresence() {
-        if (!this._presenceBar) return;
+        if (!this._presenceBar) {
+            return;
+        }
+        
         this._presenceBar.innerHTML = "";
 
         if (!this._presenceEnabled) {
             this._presenceBar.style.display = "none";
             return;
         }
+        
         this._presenceBar.style.display = "";
 
         for (const [id, user] of this._remoteUsers) {
@@ -473,14 +574,21 @@ webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
         }
     }
 
+    /**
+     * Renders the remote user cursors based on their last known coordinates.
+     */
     _renderCursors() {
-        if (!this._cursorLayer) return;
+        if (!this._cursorLayer) {
+            return;
+        }
+        
         this._cursorLayer.innerHTML = "";
 
         if (!this._cursorEnabled) {
             this._cursorLayer.style.display = "none";
             return;
         }
+        
         this._cursorLayer.style.display = "";
 
         for (const [id, c] of this._remoteCursors) {
@@ -491,7 +599,7 @@ webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
             cur.style.color = c.color;
             cur.dataset.userId = id;
 
-            cur.innerHTML =
+            cur.innerHTML = 
                 "<svg viewBox=\"0 0 16 16\" width=\"16\" height=\"16\" aria-hidden=\"true\">" +
                 "<path d=\"M2 1 L14 8 L8 9 L11 14 L9 15 L6 10 L2 13 Z\" fill=\"currentColor\" stroke=\"white\" stroke-width=\"1\"></path>" +
                 "</svg>";
@@ -506,31 +614,38 @@ webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
         }
     }
 
-    // -----------------------------------------------------------------------
-    // Helpers
-    // -----------------------------------------------------------------------
-
+    /**
+     * Identifies and removes users that haven't sent a heartbeat recently.
+     */
     _reapStaleUsers() {
         const cutoff = Date.now() - 12000;
         let changed = false;
+        
         for (const [id, user] of this._remoteUsers) {
             if (user.lastSeen < cutoff) {
                 this._remoteUsers.delete(id);
                 this._remoteCursors.delete(id);
+                
                 this._dispatch(webexpress.webui.Event.COLLABORATIVE_USER_LEAVE, {
                     userId: id,
                     userName: user.name,
                     userColor: user.color
                 });
+                
                 changed = true;
             }
         }
+        
         if (changed) {
             this._renderPresence();
             this._renderCursors();
         }
     }
 
+    /**
+     * Generates a unique identifier string for the local user.
+     * @returns {string} The generated user id.
+     */
     _generateUserId() {
         if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
             return "u-" + crypto.randomUUID();
@@ -540,29 +655,40 @@ webexpress.webui.CollaborativeCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Deterministically picks an HSL color from a seed string.
-     * Used when colorMode is "auto" and no explicit color is provided.
-     * @param {string} seed
-     * @returns {string}
+     * Used when color mode is auto and no explicit color is provided.
+     * @param {string} seed - The input string to hash.
+     * @returns {string} A valid HSL color string.
      */
     _pickAutoColor(seed) {
         let hash = 0;
+        
         for (let i = 0; i < seed.length; i++) {
             hash = (hash * 31 + seed.charCodeAt(i)) | 0;
         }
+        
         const hue = Math.abs(hash) % 360;
         return "hsl(" + hue + ", 70%, 50%)";
     }
 
+    /**
+     * Derives initials from a given name string.
+     * @param {string} name - The full name of the user.
+     * @returns {string} Up to two uppercase characters representing the initials.
+     */
     _initials(name) {
-        if (!name) return "?";
+        if (!name) {
+            return "?";
+        }
+        
         const parts = name.trim().split(/\s+/);
-        if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+        
+        if (parts.length === 1) {
+            return parts[0].charAt(0).toUpperCase();
+        }
+        
         return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
     }
 };
-
-// wire-format message type for presence updates (join / ping / leave share one channel)
-webexpress.webui.CollaborativeCtrl.PRESENCE_TYPE = "webexpress.webui.collaborative.presence";
 
 // register the control with the controller for auto-instantiation
 webexpress.webui.Controller.registerClass("wx-webui-collaborative", webexpress.webui.CollaborativeCtrl);

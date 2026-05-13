@@ -1434,6 +1434,103 @@ webexpress.webui.EditorAddOns = new class {
 };
 
 /**
+ * Registry for editor slash commands and inline triggers.
+ */
+webexpress.webui.EditorShortcuts = new class {
+    /**
+     * Creates a new instance of the registry.
+     */
+    constructor() {
+        this._shortcuts = {};
+    }
+
+    /**
+     * Registers a new shortcut. Re-registering the same id replaces the entry.
+     * @param {string} id - Unique identifier for the shortcut (e.g. "insert.date").
+     * @param {object} definition - The shortcut definition object.
+     * @param {string} definition.label - Display name shown in the slash menu.
+     * @param {string} [definition.description] - Optional secondary line.
+     * @param {string} [definition.icon] - FontAwesome icon class. Defaults to 'fas fa-bolt'.
+     * @param {string} [definition.category] - Group header in the menu. Defaults to 'General'.
+     * @param {Array<string>} [definition.keywords] - Extra search terms.
+     * @param {Function} [definition.execute] - Handler called with (editor).
+     * @param {string} [definition.tag] - Alternative: applies formatBlock(<tag>).
+     * @param {string} [definition.cmd] - Alternative: runs execCommand(cmd).
+     * @param {string} [definition.cmdArg] - Optional argument to execCommand.
+     * @param {string} [definition.html] - Alternative: insertHtmlAtCursor(html).
+     * @returns {this} The registry instance for chaining.
+     */
+    register(id, definition) {
+        if (!id || !definition) {
+            return this;
+        }
+
+        // ensure the id is included in the definition object for downstream usage
+        definition.id = id;
+
+        this._shortcuts[id] = definition;
+        return this;
+    }
+
+    /**
+     * Retrieves a specific shortcut definition by id.
+     * @param {string} id - The shortcut id.
+     * @returns {object|null} The shortcut definition or null if not found.
+     */
+    get(id) {
+        if (typeof id !== "string" || id.trim() === "") {
+            return null;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(this._shortcuts, id)) {
+            return this._shortcuts[id];
+        }
+
+        return null;
+    }
+
+    /**
+     * Checks whether a shortcut is registered.
+     * @param {string} id - The shortcut id.
+     * @returns {boolean} True if registered.
+     */
+    has(id) {
+        return Object.prototype.hasOwnProperty.call(this._shortcuts, id);
+    }
+
+    /**
+     * Returns all registered shortcut definitions.
+     * @returns {Array<object>} List of all shortcut definitions in registration order.
+     */
+    getAll() {
+        return Object.values(this._shortcuts);
+    }
+
+    /**
+     * Unregisters a shortcut by id.
+     * @param {string} id - The shortcut id to remove.
+     * @returns {void}
+     */
+    unregister(id) {
+        if (typeof id !== "string" || id.trim() === "") {
+            return;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(this._shortcuts, id)) {
+            delete this._shortcuts[id];
+        }
+    }
+
+    /**
+     * Clears the entire registry. Useful for tests.
+     * @returns {void}
+     */
+    clear() {
+        this._shortcuts = {};
+    }
+};
+
+/**
  * Stores panel definitions by key, optionally scoped via a modalId property on the panel object.
  * A "panel definition" is a plain object that may contain metadata and render/onShow/onSubmit hooks.
  */

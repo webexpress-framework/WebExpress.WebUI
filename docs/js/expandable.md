@@ -21,7 +21,7 @@ The component consists of a perpetually visible header that acts as an interacti
 The component's configuration is managed via `data-` attributes directly on the host element. This enables an intuitive and maintainable integration without the need for initialization scripts.
 
 | Attribute                                 | Description
-|-------------------------------------------|--------------------------------------------------------------------------------------------------------------------
+|-------------------------------------------|-----------------------------------------------------------------------------------------------------
 | `data-header`                             | Defines the text for the header.
 | `data-expanded`                           | Controls the initial state. If set to `"true"`, the content is initially displayed; otherwise, it is collapsed.
 | `data-icon-opened` / `data-icon-closed`   | Allows assigning different CSS classes for icons to visually distinguish between the expanded and collapsed states.
