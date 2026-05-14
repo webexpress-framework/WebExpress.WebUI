@@ -199,7 +199,9 @@ The editor supports the following keyboard shortcuts:
 | `Tab` (in list)              | Indent list item
 | `Shift+Tab` (in list)        | Outdent list item
 
-Backspace/Delete now remove typed whitespace first and only remove adjacent non-editable blocks when the caret is truly at the block boundary (word-processor-like behavior).
+### Deletion Behavior
+
+Backspace/Delete remove typed whitespace first and only remove adjacent non-editable blocks when the caret is truly at the block boundary (word-processor-like behavior).
 
 ## Extending the Editor
 
