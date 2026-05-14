@@ -250,7 +250,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                                 preCaretRange.setEnd(range.startContainer, range.startOffset);
 
                                 const frag = preCaretRange.cloneContents();
-                                const hasContent = frag.textContent.trim().length > 0 ||
+                                const hasContent = frag.textContent.length > 0 ||
                                     Array.from(frag.querySelectorAll("*")).filter(el => el.tagName !== "BR").length > 0;
 
                                 if (!hasContent) {
@@ -269,7 +269,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                                 postCaretRange.setStart(range.endContainer, range.endOffset);
 
                                 const frag = postCaretRange.cloneContents();
-                                const hasContent = frag.textContent.trim().length > 0 ||
+                                const hasContent = frag.textContent.length > 0 ||
                                     Array.from(frag.querySelectorAll("*")).filter(el => el.tagName !== "BR").length > 0;
 
                                 if (!hasContent) {
