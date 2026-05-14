@@ -37,6 +37,33 @@ webexpress.webui.EditorShortcuts.register("block.heading3", {
     tag: "H3"
 });
 
+webexpress.webui.EditorShortcuts.register("block.heading4", {
+    label: "Heading 4",
+    description: "Sub-heading",
+    icon: "fas fa-heading",
+    category: "Text",
+    keywords: ["h4"],
+    tag: "H4"
+});
+
+webexpress.webui.EditorShortcuts.register("block.heading5", {
+    label: "Heading 5",
+    description: "Minor heading",
+    icon: "fas fa-heading",
+    category: "Text",
+    keywords: ["h5"],
+    tag: "H5"
+});
+
+webexpress.webui.EditorShortcuts.register("block.heading6", {
+    label: "Heading 6",
+    description: "Smallest heading",
+    icon: "fas fa-heading",
+    category: "Text",
+    keywords: ["h6"],
+    tag: "H6"
+});
+
 webexpress.webui.EditorShortcuts.register("block.quote", {
     label: "Quote",
     description: "Block quote",
