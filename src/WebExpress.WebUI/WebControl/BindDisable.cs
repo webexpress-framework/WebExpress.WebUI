@@ -28,11 +28,11 @@ namespace WebExpress.WebUI.WebControl
         /// When the condition is satisfied the target element is disabled; otherwise it is enabled.
         /// <para>Supported formats:</para>
         /// <list type="bullet">
-        ///   <item><description><c>value</c> — equality (boolean-normalised; "true", "1", "yes", "on" are equivalent)</description></item>
-        ///   <item><description><c>=value</c> — explicit equality prefix</description></item>
-        ///   <item><description><c>!=value</c> — not-equal</description></item>
-        ///   <item><description><c>&gt;number</c>, <c>&gt;=number</c>, <c>&lt;number</c>, <c>&lt;=number</c> — numeric comparison</description></item>
-        ///   <item><description><c>/pattern/flags</c> — regular-expression match, e.g. <c>/^foo/i</c></description></item>
+        ///   <item><description><c>value</c> - equality (boolean-normalised; "true", "1", "yes", "on" are equivalent)</description></item>
+        ///   <item><description><c>=value</c> - explicit equality prefix</description></item>
+        ///   <item><description><c>!=value</c> - not-equal</description></item>
+        ///   <item><description><c>&gt;number</c>, <c>&gt;=number</c>, <c>&lt;number</c>, <c>&lt;=number</c> - numeric comparison</description></item>
+        ///   <item><description><c>/pattern/flags</c> - regular-expression match, e.g. <c>/^foo/i</c></description></item>
         /// </list>
         /// </summary>
         public string Condition { get; set; }

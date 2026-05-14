@@ -836,7 +836,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                 this._enableDragAndDropItem(handle, it);
             }
 
-            // build content wrapper — for link/button types wrap inside the action element
+            // build content wrapper - for link/button types wrap inside the action element
             let actionEl = null;
             if (it.itemType === "link") {
                 actionEl = document.createElement("a");

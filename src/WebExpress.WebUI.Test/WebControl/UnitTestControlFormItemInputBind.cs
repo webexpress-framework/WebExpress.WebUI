@@ -37,7 +37,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = group.Render(context, visualTree).ToString();
 
-            // assert — attributes must be on the fieldset, not only on the inner input
+            // assert - attributes must be on the fieldset, not only on the inner input
             Assert.Contains(@"data-wx-bind=""hide""", html);
             Assert.Contains(@"data-wx-source-hide=""#type""", html);
             Assert.Contains(@"data-wx-bind-condition-hide=""internal""", html);
@@ -104,7 +104,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = group.Render(context, visualTree).ToString();
 
-            // assert — both bind names must appear
+            // assert - both bind names must appear
             Assert.Contains("hide", html);
             Assert.Contains("disable", html);
             Assert.Contains(@"data-wx-source-hide=""#showEmail""", html);

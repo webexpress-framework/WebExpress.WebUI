@@ -975,7 +975,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Restores the previously saved selection range.
      * If a live selection already lives inside the editor, that selection is
-     * preferred over the stored range — this prevents a stale `_savedRange`
+     * preferred over the stored range - this prevents a stale `_savedRange`
      * from overwriting the user's actual selection (e.g., when the bubble
      * menu or another control acts on the current selection).
      * If no range is available at all, the cursor is moved to the end of
@@ -984,7 +984,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     restoreSavedRange() {
         const sel = window.getSelection();
 
-        // prefer a live selection that already sits inside the editor — that
+        // prefer a live selection that already sits inside the editor - that
         // is the user's actual selection and must not be replaced
         if (sel && sel.rangeCount > 0) {
             const live = sel.getRangeAt(0);

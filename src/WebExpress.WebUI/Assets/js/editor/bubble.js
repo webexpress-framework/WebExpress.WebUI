@@ -5,7 +5,7 @@
  *
  * Positioning rule: the bubble is always placed BELOW the selection. If the
  * page is so close to the bottom edge that the bubble would be clipped, it is
- * clamped against the viewport bottom — but never flipped above.
+ * clamped against the viewport bottom - but never flipped above.
  */
 webexpress.webui.EditorPlugins.register("bubble", 5000, {
     _bubbleEl: null,
@@ -224,7 +224,7 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
     },
 
     /**
-     * Positions the bubble below the current selection. Always below — never flipped.
+     * Positions the bubble below the current selection. Always below - never flipped.
      * Clamps against the viewport bottom when there is not enough room.
      */
     _reposition: function() {

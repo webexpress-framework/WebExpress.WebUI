@@ -100,7 +100,7 @@
     background-color: var(--bs-tertiary-bg);
 }
 
-/* active / selected item — highlight with a left accent border */
+/* active / selected item - highlight with a left accent border */
 .wx-list-item-active,
 .wx-list-item.active {
     background-color: var(--bs-primary-bg-subtle, rgba(var(--bs-primary-rgb), 0.08));

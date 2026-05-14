@@ -491,7 +491,7 @@
 /*
    The placeholder is a real <span class="wx-editor-placeholder"> element
    injected into empty editor blocks by the placeholder plugin. The default
-   rule below hides it everywhere — so when the editor's stored HTML is
+   rule below hides it everywhere - so when the editor's stored HTML is
    rendered outside an editor context (in a preview pane, a blog post, an
    e-mail, …) the hint never appears.
 */

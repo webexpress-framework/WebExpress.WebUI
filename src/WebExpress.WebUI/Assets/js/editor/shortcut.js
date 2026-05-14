@@ -106,7 +106,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
         // markdown block patterns react on Space at the very start of a line
         if (e.key === " " || e.code === "Space") {
             // run AFTER the space is inserted so the pattern is observable
-            // but we don't need preventDefault here — patterns rewrite the line
+            // but we don't need preventDefault here - patterns rewrite the line
         }
     },
 
@@ -125,7 +125,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
 
         const inputType = e.inputType || "";
 
-        // detect a freshly typed character — most reliable across browsers
+        // detect a freshly typed character - most reliable across browsers
         if (inputType === "insertText" || inputType === "insertCompositionText" || inputType === "" || !inputType) {
             const data = e.data;
 
@@ -144,7 +144,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
                 }
             }
 
-            // detect [[ and {{ — both characters are eaten and the dialog opens
+            // detect [[ and {{ - both characters are eaten and the dialog opens
             if (data === "[" || data === "{") {
                 if (this._consumeDoubleTrigger(editor, data)) {
                     return;
@@ -204,7 +204,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
         // remember where the slash was typed so we can replace it on commit.
         // we also capture the parent block, because the easiest way to clean
         // up reliably (regardless of where focus lands) is to wipe the block
-        // — the menu only opens at the start of an otherwise empty block.
+        // - the menu only opens at the start of an otherwise empty block.
         const sel = window.getSelection();
         if (sel && sel.rangeCount) {
             const r = sel.getRangeAt(0);
@@ -475,7 +475,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
     /**
      * Removes the `/` character that triggered the menu. Because the menu
      * only opens in an otherwise empty block, we wipe the block entirely and
-     * leave a `<br>` filler — this side-steps any tricky cross-element range
+     * leave a `<br>` filler - this side-steps any tricky cross-element range
      * arithmetic that comes up when focus has moved to the popup's search
      * field. Selection is then re-anchored at the start of the block so the
      * following execCommand operates in the expected location.
@@ -505,7 +505,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
             // tell the editor about the new selection so execCommand picks it up
             editor._saveCurrentSelection?.();
         } catch (_) {
-            // ignore — caret will land somewhere sensible after execution
+            // ignore - caret will land somewhere sensible after execution
         }
     },
 
