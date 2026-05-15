@@ -189,13 +189,10 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "editor.addon.error.select": "Bitte wählen Sie ein AddOn aus der Liste.",
     "editor.addon.error.internal": "Interner Fehler: Editor-Instanz nicht gefunden.",
 
-    // placeholder
-    "editor.placeholder": "Tippe „/“ für Befehle",
-    "editor.placeholder.title": "Anweisungstext",
-    "editor.placeholder.text.label": "Text",
-    "editor.placeholder.text.placeholder": "Anweisungstext eingeben...",
-    "editor.placeholder.error.text": "Bitte geben Sie einen Anweisungstext ein.",
-    "editor.placeholder.error.internal": "Interner Fehler: Editor oder Feld nicht verfügbar.",
+    // instruction
+    "editor.instruction.title": "Anweisungstext",
+    "editor.instruction.text.label": "Geben Sie hier einen Anweisungstext ein.",
+    "editor.instruction.text.placeholder": "Anweisungstext eingeben …", 
 
     // slash menu chrome
     "editor.slash.search": "Befehl suchen…",

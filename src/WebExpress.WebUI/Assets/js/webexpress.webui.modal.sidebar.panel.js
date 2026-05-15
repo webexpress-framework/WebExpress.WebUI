@@ -3,11 +3,11 @@
  * - extends ModalCtrl to reuse modal shell, header, body, and footer
  * - uses SplitCtrl for a resizable sidebar/main area
  * - uses TreeCtrl for page navigation
- * - pages can be added via API
+ * - pages can be added via api
  * - auto-loads panels from DialogPanels by a modal "key" (data-key or data-panels-key)
  *   - loads all panels registered under that key
  *   - if a registration carries a modalId, it is only loaded when it matches this modal's id
- * Data attributes:
+ * data attributes:
  * - data-key or data-panels-key: registry key used to autoload panels from DialogPanels
  * - data-side-width: initial sidebar width in px (default 280)
  * - data-min-side-width: min sidebar width in px (default 180)
@@ -16,8 +16,8 @@
  */
 webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
     /**
-     * Constructor
-     * @param {HTMLElement} element - host element with optional .wx-modal-header/.wx-modal-content/.wx-modal-footer children (handled by ModalCtrl)
+     * Constructor.
+     * @param {HTMLElement} element - Host element with optional modal shell children.
      */
     constructor(element) {
         super(element);
@@ -45,12 +45,13 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
         this._activePageId = null;
         this._pagePanes = new Map();
         this._hasValidationErrors = false;
+        this._singlePaneMode = false;
 
         // dom refs
         this._splitEl = null;
         this._treeHost = null;
         this._pageHost = null;
-        this._validationEl = null; // bootstrap alert element in body (above split)
+        this._validationEl = null;
         this._submitBtn = null;
 
         // controller refs
@@ -59,7 +60,7 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
 
         // event handler refs
         this._treeClickHandler = null;
-        this._treeClickBound = false; // prevents duplicate bindings
+        this._treeClickBound = false;
         this._submitClickHandler = null;
 
         // build body content
@@ -68,13 +69,16 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
         // autoload panels by key
         this._autoloadFromRegistry();
 
+        // apply initial layout mode based on page count
+        this._applyLayoutMode();
+
         // bind modal lifecycle events
         this._bindModalLifecycle();
     }
 
     /**
      * Adds a page to the panel.
-     * @param {SidebarPage & { parentId?: string|null }} page - page definition
+     * @param {SidebarPage & { parentId?: string|null }} page - Page definition.
      * @returns {this}
      */
     addPage(page) {
@@ -93,11 +97,13 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
 
         this._pages.push(safe);
 
-        // create tree node and page pane if controls exist
         if (this._pageHost) {
-            this._createTreeNode(safe);
+            if (!this._singlePaneMode) {
+                this._createTreeNode(safe);
+            }
             this._createPagePane(safe, this._pages.length === 1);
             this._renderTree();
+            this._applyLayoutMode();
         }
 
         return this;
@@ -124,7 +130,7 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
 
     /**
      * Programmatically selects a page by id.
-     * @param {string} id - page id
+     * @param {string} id - Page id.
      * @returns {void}
      */
     selectPage(id) {
@@ -155,10 +161,8 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
      * @private
      */
     _buildBodyContent() {
-        // clear base content
         this._bodyDiv.innerHTML = "";
 
-        // create split host
         const split = document.createElement("div");
         split.className = "wx-webui-split";
         split.id = this._element.id ? (this._element.id + "-split") : ("wx-split-" + Math.random().toString(36).slice(2));
@@ -167,34 +171,28 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
         split.setAttribute("data-min-side", String(this._minSideWidth));
         split.setAttribute("data-size", String(this._sideWidth));
 
-        // create panes
         const sidePane = document.createElement("div");
         sidePane.className = "wx-side-pane";
         const mainPane = document.createElement("div");
         mainPane.className = "wx-main-pane";
 
-        // tree host
         const tree = document.createElement("div");
         tree.id = split.id + "-tree";
         tree.dataset.movable = "false";
         tree.dataset.indicatorLeaf = "false";
         sidePane.appendChild(tree);
 
-        // pages host
         this._pageHost = document.createElement("div");
         this._pageHost.className = "wx-pages m-2";
         mainPane.appendChild(this._pageHost);
 
-        // assemble
         split.appendChild(sidePane);
         split.appendChild(mainPane);
         this._bodyDiv.appendChild(split);
 
-        // store refs
         this._splitEl = split;
         this._treeHost = tree;
 
-        // init controls
         try {
             this._splitCtrl = new window.webexpress.webui.SplitCtrl(split);
         } catch (err) {
@@ -206,11 +204,68 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
             // ignore tree init errors
         }
 
-        // initial render
         this._renderTree();
-
-        // ensure tree click subscription once
         this._ensureTreeClickSubscription();
+    }
+
+    /**
+     * Applies layout mode:
+     * - one page: hide tree/split and show content only
+     * - multiple pages: show split/tree + content
+     * @returns {void}
+     * @private
+     */
+    _applyLayoutMode() {
+        const shouldSingle = this._pages.length <= 1;
+
+        if (shouldSingle === this._singlePaneMode) {
+            return;
+        }
+
+        this._singlePaneMode = shouldSingle;
+
+        if (this._singlePaneMode) {
+            if (this._splitEl) {
+                this._splitEl.style.display = "none";
+            }
+
+            if (this._pageHost && this._pageHost.parentElement !== this._bodyDiv) {
+                this._bodyDiv.appendChild(this._pageHost);
+            }
+
+            this._removeTreeClickSubscription();
+        } else {
+            if (this._splitEl) {
+                this._splitEl.style.display = "";
+                const mainPane = this._splitEl.querySelector(".wx-main-pane");
+                if (mainPane && this._pageHost && this._pageHost.parentElement !== mainPane) {
+                    mainPane.appendChild(this._pageHost);
+                }
+            }
+
+            this._rebuildTreeModel();
+            this._renderTree();
+            this._ensureTreeClickSubscription();
+
+            if (this._splitCtrl && typeof this._splitCtrl.fitSidePaneToContent === "function") {
+                this._splitCtrl.fitSidePaneToContent();
+            }
+        }
+    }
+
+    /**
+     * Rebuilds tree model/index from current pages.
+     * @returns {void}
+     * @private
+     */
+    _rebuildTreeModel() {
+        this._treeModel = [];
+        this._treeIndex = new Map();
+        this._pendingChildren = new Map();
+
+        for (let i = 0; i < this._pages.length; i++) {
+            this._createTreeNode(this._pages[i]);
+        }
     }
 
     /**
@@ -223,14 +278,11 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
             return;
         }
 
-        // subscribe tree click to switch pages
         this._treeClickHandler = (ev) => {
-            // guard against unrelated events
             if (!ev || !ev.detail) {
                 return;
             }
 
-            // accept clicks that originate from this tree; be tolerant about sender shape
             const nodeId = ev.detail.node;
             const sender = ev.detail.sender || ev.detail.source || ev.target || null;
 
@@ -242,7 +294,6 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
             } else if (sender && sender.id && this._treeHost && sender.id === this._treeHost.id) {
                 isOwnSender = true;
             } else if (this._treeHost && ev.detail.treeId && ev.detail.treeId === this._treeHost.id) {
-                // some emitters carry an explicit tree id
                 isOwnSender = true;
             }
 
@@ -250,7 +301,6 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
                 return;
             }
 
-            // switch page if pane exists
             this._selectPageById(nodeId);
         };
 
@@ -286,8 +336,9 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
      * @private
      */
     _bindModalLifecycle() {
-        // on shown, ensure a page is active and call onshow
         this._element.addEventListener("shown.bs.modal", () => {
+            this._applyLayoutMode();
+
             this._renderTree();
             if (!this._activePageId && this._pages.length > 0) {
                 this._selectPageById(this._pages[0].id);
@@ -298,23 +349,19 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
                 }
             }
 
-            // ensure submit button is wired (footer is managed by base class)
             this._wireSubmitButton();
 
-            // ensure tree clicks are subscribed (important after reopen)
-            this._ensureTreeClickSubscription();
-
-            // fit after layout
-            requestAnimationFrame(() => {
-                this.fitSidePaneToContent();
-            });
+            if (!this._singlePaneMode) {
+                this._ensureTreeClickSubscription();
+                requestAnimationFrame(() => {
+                    this.fitSidePaneToContent();
+                });
+            }
         });
 
-        // on hidden, cleanup listeners and validation
         this._element.addEventListener("hidden.bs.modal", () => {
             this._hideValidation();
 
-            // keep tree subscription strategy flexible: remove to prevent leaks, will be re-added on next shown
             this._removeTreeClickSubscription();
 
             if (this._submitBtn && this._submitClickHandler) {
@@ -331,12 +378,10 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
 
     /**
      * Auto-loads all panels from DialogPanels that match this modal's panels key.
-     * Respects per-panel modalId filters: a panel with modalId is only loaded when it matches this modal's id.
      * @returns {void}
      * @private
      */
     _autoloadFromRegistry() {
-        // nothing to do if no key
         if (!this._panelsKey) {
             return;
         }
@@ -349,7 +394,6 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
         const modalId = this._element?.id || null;
         let counter = 0;
 
-        // resolve panels from new or legacy api
         let panelList = null;
         if (typeof registry.get === "function") {
             panelList = registry.get(this._panelsKey) || [];
@@ -369,7 +413,6 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
                 continue;
             }
 
-            // apply modalid filter if present
             const hasPanelModalId = Object.prototype.hasOwnProperty.call(panel, "modalId") && panel.modalId != null && String(panel.modalId) !== "";
             if (hasPanelModalId) {
                 if (!modalId || String(panel.modalId) !== String(modalId)) {
@@ -377,7 +420,6 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
                 }
             }
 
-            // ensure unique id or generate
             const idTaken = (panel.id && this._pages.some((p) => { return p.id === panel.id; })) === true;
             if (!panel.id || String(panel.id).trim() === "" || idTaken) {
                 panel.id = this._generatePageId(panel, ++counter);
@@ -389,8 +431,8 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
 
     /**
      * Generates a unique page id based on title or the panels key.
-     * @param {SidebarPage} page - page definition
-     * @param {number} [n] - optional running number
+     * @param {SidebarPage} page - Page definition.
+     * @param {number} [n] - Optional running number.
      * @returns {string} Generated id.
      * @private
      */
@@ -406,8 +448,7 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
 
     /**
      * Creates a single tree node from a page and inserts it into the model.
-     * Supports hierarchical insertion via page.parentId and expands all ancestors automatically.
-     * @param {SidebarPage & { parentId?: string|null }} page - page definition
+     * @param {SidebarPage & { parentId?: string|null }} page - Page definition.
      * @returns {void}
      * @private
      */
@@ -425,22 +466,17 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
             children: []
         };
 
-        // index node for lookup
         this._treeIndex.set(node.id, node);
 
-        // insert into model by parentid
         const pid = page.parentId ? String(page.parentId) : null;
         if (pid && this._treeIndex.has(pid)) {
-            const parent = /** @type {any} */ (this._treeIndex.get(pid));
+            const parent = this._treeIndex.get(pid);
             node.parent = parent;
             parent.children.push(node);
-
-            // expand all ancestors so the newly added child becomes visible
             this._expandChain(parent);
         } else {
             this._treeModel.push(node);
 
-            // remember as pending child until parent arrives
             if (pid) {
                 const list = this._pendingChildren.get(pid) || [];
                 list.push(node);
@@ -448,7 +484,6 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
             }
         }
 
-        // adopt pending children waiting for this node and expand this node to show them
         const waiting = this._pendingChildren.get(node.id);
         if (Array.isArray(waiting) && waiting.length > 0) {
             for (let i = 0; i < waiting.length; i++) {
@@ -464,7 +499,7 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
 
     /**
      * Removes a node reference from the root list if present.
-     * @param {any} node - the node to remove from roots
+     * @param {any} node - Node to remove from roots.
      * @returns {void}
      * @private
      */
@@ -477,7 +512,7 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
 
     /**
      * Expands all ancestors of the given node id.
-     * @param {string} id - node id to reveal
+     * @param {string} id - Node id to reveal.
      * @returns {void}
      * @private
      */
@@ -492,14 +527,13 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
 
     /**
      * Expands an entire parent chain starting from the given node up to the root.
-     * @param {any} startNode - parent node to start expanding from
+     * @param {any} startNode - Parent node to start expanding from.
      * @returns {void}
      * @private
      */
     _expandChain(startNode) {
         let p = startNode;
         while (p) {
-            // mark parent expanded
             p.expand = true;
             p = p.parent;
         }
@@ -511,17 +545,19 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
      * @private
      */
     _renderTree() {
+        if (this._singlePaneMode) {
+            return;
+        }
         if (!this._treeCtrl) {
             return;
         }
-        // pass roots as hierarchical model; treectrl handles children itself
         this._treeCtrl.nodes = this._treeModel.slice();
     }
 
     /**
      * Creates a page pane container and calls render hook.
-     * @param {SidebarPage} page - page definition
-     * @param {boolean} active - whether pane should be initially visible
+     * @param {SidebarPage} page - Page definition.
+     * @param {boolean} active - Whether pane should be initially visible.
      * @returns {void}
      * @private
      */
@@ -533,7 +569,6 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
         this._pageHost.appendChild(pane);
         this._pagePanes.set(page.id, pane);
 
-        // let page render its content
         if (typeof page.render === "function") {
             page.render(pane, this);
         }
@@ -545,8 +580,8 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
 
     /**
      * Recursively marks the active node in the tree model.
-     * @param {Array<any>} nodes - node list to visit
-     * @param {string} id - active id
+     * @param {Array<any>} nodes - Node list to visit.
+     * @param {string} id - Active id.
      * @returns {void}
      * @private
      */
@@ -562,8 +597,7 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
 
     /**
      * Switches visible page by id and calls onShow.
-     * Expands all parents of the selected node to ensure visibility.
-     * @param {string} id - page id
+     * @param {string} id - Page id.
      * @returns {void}
      * @private
      */
@@ -575,7 +609,6 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
             return;
         }
 
-        // hide previous pane
         if (this._activePageId && this._pagePanes.has(this._activePageId)) {
             const oldPane = this._pagePanes.get(this._activePageId);
             if (oldPane) {
@@ -583,31 +616,26 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
             }
         }
 
-        // show new pane
         const pane = this._pagePanes.get(id);
         if (pane) {
             pane.style.display = "";
         }
         this._activePageId = id;
 
-        // expand all parents so selected node is visible
-        this._expandAncestors(id);
+        if (!this._singlePaneMode) {
+            this._expandAncestors(id);
+            this._markActiveRecursive(this._treeModel, id);
+            this._renderTree();
+        }
 
-        // update active flags in tree model and re-render
-        this._markActiveRecursive(this._treeModel, id);
-        this._renderTree();
-
-        // call page onshow if provided
         const page = this.getActivePage();
         if (page && typeof page.onShow === "function") {
             page.onShow(this);
         }
-
-        // do not auto-hide validation here; keep alert visible as long as errors exist
     }
 
     /**
-     * Wires the submit button provided by the base class using the id in data-submit-id.
+     * Wires the submit button provided by the base class.
      * @returns {void}
      * @private
      */
@@ -616,7 +644,6 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
             return;
         }
 
-        // find by global id and ensure it belongs to this modal
         const btn = document.getElementById(this._submitButtonId);
         if (!btn) {
             return;
@@ -627,7 +654,6 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
 
         this._submitBtn = btn;
 
-        // avoid double binding
         if (this._submitClickHandler) {
             try {
                 this._submitBtn.removeEventListener("click", this._submitClickHandler);
@@ -643,21 +669,18 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
     }
 
     /**
-     * Handles submit: runs validation (active-only or all pages), shows a bootstrap alert on error, calls onSubmit, and closes the modal on success.
+     * Handles submit: runs validation, shows error alert, calls onSubmit, closes modal on success.
      * @returns {void}
      * @private
      */
     _handleSubmit() {
-        // compute validation scope
         const active = this.getActivePage();
         const pagesToValidate = this._validateActiveOnly ? (active ? [active] : []) : this._pages.slice();
 
-        // perform validation
         let valid = true;
         let message = "";
 
         if (pagesToValidate.length === 0) {
-            // nothing to validate or submit
             this._hasValidationErrors = false;
             this._hideValidation();
             this._closeModal();
@@ -672,7 +695,6 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
                     if (typeof res === "boolean") {
                         if (!res) {
                             valid = false;
-                            // keep message empty to allow next branches to set it if available
                         }
                     } else if (res && typeof res === "object") {
                         if (res.valid === false) {
@@ -695,7 +717,6 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
                 }
             }
 
-            // stop on first error if validating only active, otherwise continue to collect first message
             if (!valid && this._validateActiveOnly) {
                 break;
             }
@@ -707,14 +728,12 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
             return;
         }
 
-        // success: optional per-page submit hook (active page preferred when active-only)
         try {
             if (this._validateActiveOnly) {
                 if (active && typeof active.onSubmit === "function") {
                     active.onSubmit(this);
                 }
             } else {
-                // call onsubmit on active page first if available, then others
                 if (active && typeof active.onSubmit === "function") {
                     active.onSubmit(this);
                 }
@@ -732,19 +751,17 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
             return;
         }
 
-        // close modal after successful submit
         this._hasValidationErrors = false;
         this._hideValidation();
         this._closeModal();
     }
 
     /**
-     * Closes the modal using base class or Bootstrap as a fallback.
+     * Closes the modal using base class or Bootstrap fallback.
      * @returns {void}
      * @private
      */
     _closeModal() {
-        // prefer a base-class method if available
         try {
             if (typeof this.hide === "function") {
                 this.hide();
@@ -758,7 +775,6 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
             // ignore and try bootstrap fallback
         }
 
-        // bootstrap 5 fallback (if available)
         try {
             const Modal = window.bootstrap && window.bootstrap.Modal ? window.bootstrap.Modal : null;
             if (Modal) {
@@ -772,7 +788,6 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
             // ignore
         }
 
-        // final fallback: dispatch a click on a dismiss button if present
         const dismiss = this._element.querySelector("[data-bs-dismiss='modal'], .btn-close");
         if (dismiss && typeof dismiss.click === "function") {
             dismiss.click();
@@ -781,19 +796,17 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
 
     /**
      * Shows a validation message as a Bootstrap alert above the split control.
-     * @param {string} message - text to display
+     * @param {string} message - Text to display.
      * @returns {void}
      * @private
      */
     _showValidation(message) {
-        // ensure alert element exists above the split
         this._ensureValidationEl();
 
         if (!this._validationEl) {
             return;
         }
 
-        // set message text and show alert
         const textEl = this._validationEl.querySelector(".wx-alert-text");
         if (textEl) {
             textEl.textContent = String(message || "");
@@ -812,7 +825,6 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
             return;
         }
         this._validationEl.classList.add("d-none");
-        // clear text but keep element for reuse
         const textEl = this._validationEl.querySelector(".wx-alert-text");
         if (textEl) {
             textEl.textContent = "";
@@ -838,11 +850,12 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
         span.className = "wx-alert-text";
         alert.appendChild(span);
 
-        // insert alert above split control in the body
-        if (this._splitEl && this._splitEl.parentNode) {
+        // insert alert above visible content container
+        if (this._singlePaneMode) {
+            this._bodyDiv.insertBefore(alert, this._bodyDiv.firstChild);
+        } else if (this._splitEl && this._splitEl.parentNode) {
             this._splitEl.parentNode.insertBefore(alert, this._splitEl);
         } else {
-            // fallback: append to body div if split not ready
             this._bodyDiv.insertBefore(alert, this._bodyDiv.firstChild);
         }
 
@@ -851,8 +864,8 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
 
     /**
      * Parses integer attribute with fallback.
-     * @param {string|null} value - attribute value
-     * @param {number} fallback - default value
+     * @param {string|null} value - Attribute value.
+     * @param {number} fallback - Default value.
      * @returns {number} Parsed integer value.
      * @private
      */
@@ -866,9 +879,9 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
 
     /**
      * Parses boolean attribute with fallback.
-     * accepts: "true", "1", "yes", "on" as true; "false", "0", "no", "off" as false; empty => fallback
-     * @param {string|null} value - attribute value
-     * @param {boolean} fallback - default value
+     * Accepts: "true", "1", "yes", "on" as true; "false", "0", "no", "off" as false.
+     * @param {string|null} value - Attribute value.
+     * @param {boolean} fallback - Default value.
      * @returns {boolean} Parsed boolean value.
      * @private
      */

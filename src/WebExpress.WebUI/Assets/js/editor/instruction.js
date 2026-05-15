@@ -3,8 +3,8 @@
  * into the editor via a modal dialog. This text is meant to be a visual hint or instruction for authors.
  * It is displayed prominently within the editor but hidden by default outside of it.
  */
-webexpress.webui.EditorPlugins.register("placeholder", 5000, {
-    placeholderModal: null,
+webexpress.webui.EditorPlugins.register("instruction", 5000, {
+    instructionModal: null,
 
     init: function(editor) {
         // No automatic initialization needed
@@ -22,8 +22,8 @@ webexpress.webui.EditorPlugins.register("placeholder", 5000, {
         const btn = document.createElement("button");
         btn.className = "wx-editor-btn";
         btn.type = "button";
-        btn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.placeholder.title");
-        btn.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.placeholder.title"));
+        btn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.instruction.title");
+        btn.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.instruction.title"));
         btn.innerHTML = '<i class="fas fa-info-circle"></i>';
 
         btn.addEventListener("mousedown", (e) => {
@@ -42,7 +42,7 @@ webexpress.webui.EditorPlugins.register("placeholder", 5000, {
                 prefillText = activeRange.toString().trim();
             }
 
-            this._openModal(editor, "placeholderModal", "editor-placeholder", "webexpress.webui:editor.placeholder.title", { text: prefillText }, activeRange);
+            this._openModal(editor, "instructionModal", "editor-instruction", "webexpress.webui:editor.instruction.title", { text: prefillText }, activeRange);
         });
 
         group.appendChild(btn);
@@ -67,17 +67,10 @@ webexpress.webui.EditorPlugins.register("placeholder", 5000, {
 
         if (this[modalProperty] && this[modalProperty].ctrl) {
             const ctrl = this[modalProperty].ctrl;
-
-            // provide editor reference to the modal controller
             ctrl._editor = editor;
+            ctrl._backupRange = activeRange ? activeRange.cloneRange() : null;
+            ctrl._instructionPrefill = prefill || null;
 
-            // securely store the explicit cursor position
-            ctrl._backupRange = activeRange || null;
-
-            // set or clear prefill data to force reset on reuse
-            ctrl._placeholderPrefill = prefill || null;
-
-            // show modal via controller api if available
             if (typeof ctrl.show === "function") {
                 ctrl.show();
             }

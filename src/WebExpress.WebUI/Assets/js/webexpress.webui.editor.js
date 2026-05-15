@@ -24,7 +24,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         // read content preferably from value attribute (form-item behavior), fallback to innerhtml
-        let content = element.getAttribute("value") || element.innerHTML || "";
+        const content = element.getAttribute("value") || element.innerHTML || "";
         this._formFieldName = element.getAttribute("name") || element.dataset.name || null;
 
         this._uiContainer = element;
@@ -72,7 +72,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         this._ensureTypingSpace();
 
         // notify plugins again so anything that depends on the final block
-        // structure (placeholder hint, etc.) sees the post-typing-space DOM
+        // structure (placeholder hint, etc.) sees the post-typing-space dom
         this._notifyPluginsContentChanged();
     }
 
@@ -99,32 +99,24 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
         let modified = false;
         const editor = this._editorElement;
-
-        // find all non-editable blocks (like table frames)
         const nonEditables = Array.from(editor.querySelectorAll('[contenteditable="false"]'));
 
-        nonEditables.forEach(el => {
-            // skip elements that are nested inside OTHER non-editable elements
+        nonEditables.forEach((el) => {
             if (el.parentElement && el.parentElement.closest('[contenteditable="false"]')) {
                 return;
             }
 
-            // un-nest from <p> if it accidentally got put inside one during insertion
             const parentP = el.closest("p");
             if (parentP && parentP.parentElement === editor) {
-                // move element out of the paragraph and place it after
                 editor.insertBefore(el, parentP.nextSibling);
                 modified = true;
 
-                // cleanup the empty parent paragraph
                 if (parentP.textContent.trim() === "" && parentP.querySelectorAll("img, table, [contenteditable='false']").length === 0) {
                     parentP.remove();
                 }
             }
 
-            // strictly ensure el is a direct child of the editor before attempting to insert siblings
             if (el.parentElement === editor) {
-                // ensure paragraph exists before the non-editable element
                 const prev = el.previousElementSibling;
                 if (!prev || (prev.tagName !== "P" && prev.getAttribute("contenteditable") === "false")) {
                     const pBefore = document.createElement("p");
@@ -133,7 +125,6 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
                     modified = true;
                 }
 
-                // ensure paragraph exists after the non-editable element
                 const next = el.nextElementSibling;
                 if (!next || (next.tagName !== "P" && next.getAttribute("contenteditable") === "false")) {
                     const pAfter = document.createElement("p");
@@ -148,7 +139,6 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             }
         });
 
-        // ensure editor is never completely empty
         const html = editor.innerHTML.trim();
         if (!html || html === "<br>") {
             editor.innerHTML = "<p><br></p>";
@@ -166,138 +156,87 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     _attachEventHandlers() {
         const toolbar = this._uiContainer.querySelector(".wx-editor-toolbar");
         if (toolbar) {
-            // use capture to catch the event before it bubbles up
             toolbar.addEventListener("mousedown", (e) => {
-                // stop propagation to prevent parent modals from closing due to "click outside" logic
                 e.stopPropagation();
-                this._saveCurrentSelection();
+                this._saveRangeOnFocusLost();
             }, true);
         }
 
-        this._editorElement.addEventListener("change", () => {
-            this._editorElement.innerHTML = this._formInput.value;
+        // save current range when editor loses focus
+        this._editorElement.addEventListener("blur", () => {
+            this._saveRangeOnFocusLost();
         });
 
-        this._editorElement.addEventListener("blur", () => {
-            this._saveCurrentSelection();
+        // restore current range when editor gets focus back
+        this._editorElement.addEventListener("focus", () => {
+            this._restoreRangeOnFocusReceived();
+        });
+
+        this._editorElement.addEventListener("mouseup", () => {
+            this._saveRangeOnFocusLost();
+        });
+
+        this._editorElement.addEventListener("keyup", () => {
+            this._saveRangeOnFocusLost();
         });
 
         this._editorElement.addEventListener("input", () => {
             this._syncValue();
             this._updateUndoRedoStates();
         });
+    }
 
-        this._editorElement.addEventListener("keydown", (e) => {
-            let actionModified = false;
-            const isMod = e.ctrlKey || e.metaKey;
+    /**
+     * Saves the current range when focus is lost.
+     * @returns {void}
+     */
+    _saveRangeOnFocusLost() {
+        const sel = window.getSelection();
+        if (!(sel && sel.rangeCount > 0)) {
+            return;
+        }
 
-            // keyboard shortcuts for common formatting and history actions
-            if (isMod && !e.altKey) {
-                switch (e.key.toLowerCase()) {
-                    case "b":
-                        e.preventDefault();
-                        this.execCommand("bold");
-                        actionModified = true;
-                        break;
-                    case "i":
-                        e.preventDefault();
-                        this.execCommand("italic");
-                        actionModified = true;
-                        break;
-                    case "u":
-                        e.preventDefault();
-                        this.execCommand("underline");
-                        actionModified = true;
-                        break;
-                    case "z":
-                        e.preventDefault();
-                        if (e.shiftKey) {
-                            this.execCommand("redo");
-                        } else {
-                            this.execCommand("undo");
-                        }
-                        actionModified = true;
-                        break;
-                    case "y":
-                        e.preventDefault();
-                        this.execCommand("redo");
-                        actionModified = true;
-                        break;
-                }
-            }
+        const range = sel.getRangeAt(0);
+        if (
+            this._editorElement &&
+            this._editorElement.contains(range.startContainer) &&
+            this._editorElement.contains(range.endContainer)
+        ) {
+            this._savedRange = range.cloneRange();
+        }
+    }
 
-            // prevent accidental deletion of empty paragraphs directly around non-editable elements
-            if (e.key === "Backspace" || e.key === "Delete") {
-                const sel = window.getSelection();
-                if (sel && sel.rangeCount > 0 && sel.isCollapsed) {
-                    let node = sel.getRangeAt(0).startContainer;
+    /**
+     * Restores the saved range when focus is received.
+     * If no valid range exists, caret is moved to the end.
+     * @returns {void}
+     */
+    _restoreRangeOnFocusReceived() {
+        if (!this._editorElement) {
+            return;
+        }
 
-                    if (node.nodeType === Node.TEXT_NODE) {
-                        node = node.parentElement;
-                    }
+        const sel = window.getSelection();
+        if (!sel) {
+            return;
+        }
 
-                    // only intercept if we are inside a direct block like <p>
-                    const block = node.closest("p, div:not(.wx-editor-content)");
-                    if (block && block.parentElement === this._editorElement) {
+        if (
+            this._savedRange &&
+            this._editorElement.contains(this._savedRange.startContainer) &&
+            this._editorElement.contains(this._savedRange.endContainer)
+        ) {
+            sel.removeAllRanges();
+            sel.addRange(this._savedRange);
+            return;
+        }
 
-                        if (e.key === "Backspace") {
-                            const prev = block.previousElementSibling;
-                            if (prev && prev.getAttribute("contenteditable") === "false") {
-                                // check if cursor is at the very start with no content before it
-                                const range = sel.getRangeAt(0);
-                                const preCaretRange = range.cloneRange();
-                                preCaretRange.selectNodeContents(block);
-                                preCaretRange.setEnd(range.startContainer, range.startOffset);
-
-                                const frag = preCaretRange.cloneContents();
-                                const hasContent = frag.textContent.length > 0 ||
-                                    Array.from(frag.querySelectorAll("*")).filter(el => el.tagName !== "BR").length > 0;
-
-                                if (!hasContent) {
-                                    e.preventDefault(); // don't delete the empty space paragraph
-                                    prev.remove(); // delete the non-editable block (table) instead
-                                    actionModified = true;
-                                }
-                            }
-                        } else if (e.key === "Delete") {
-                            const next = block.nextElementSibling;
-                            if (next && next.getAttribute("contenteditable") === "false") {
-                                // check if cursor is at the very end with no content after it
-                                const range = sel.getRangeAt(0);
-                                const postCaretRange = range.cloneRange();
-                                postCaretRange.selectNodeContents(block);
-                                postCaretRange.setStart(range.endContainer, range.endOffset);
-
-                                const frag = postCaretRange.cloneContents();
-                                const hasContent = frag.textContent.length > 0 ||
-                                    Array.from(frag.querySelectorAll("*")).filter(el => el.tagName !== "BR").length > 0;
-
-                                if (!hasContent) {
-                                    e.preventDefault(); // don't delete the empty space paragraph
-                                    next.remove(); // delete the non-editable block (table) instead
-                                    actionModified = true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            setTimeout(() => {
-                this._ensureTypingSpace();
-                this._updateUndoRedoStates();
-                if (actionModified) {
-                    this._syncValue();
-                }
-            }, 0);
-        });
-
-        this._editorElement.addEventListener("mouseup", () => {
-            setTimeout(() => {
-                this._ensureTypingSpace();
-                this._updateUndoRedoStates();
-            }, 0);
-        });
+        const range = document.createRange();
+        range.selectNodeContents(this._editorElement);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        this._savedRange = range.cloneRange();
     }
 
     /**
@@ -319,11 +258,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     _createToolbar(element) {
         const toolbar = document.createElement("div");
         toolbar.classList.add("wx-editor-toolbar");
-        toolbar.style.display = "flex";
-        toolbar.style.flexWrap = "wrap";
-        toolbar.style.alignItems = "center";
 
-        // append plugin toolbars
         const plugins = webexpress.webui.EditorPlugins.getAll();
         plugins.forEach((plugin) => {
             if (typeof plugin.createToolbar === "function") {
@@ -334,7 +269,6 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             }
         });
 
-        // append undo/redo controls
         const historyGroup = this._createHistoryGroup();
         toolbar.appendChild(historyGroup);
         element.appendChild(toolbar);
@@ -355,25 +289,6 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         historyGroup.appendChild(undoBtn);
         historyGroup.appendChild(redoBtn);
 
-        // add separator
-        const sep = document.createElement("div");
-        sep.className = "wx-editor-separator";
-        historyGroup.appendChild(sep);
-
-        // add fullscreen button
-        const fsBtn = document.createElement("button");
-        fsBtn.className = "wx-editor-btn";
-        fsBtn.title = this._i18n("webexpress.webui:fullscreen.toggle", "Toggle Fullscreen");
-        fsBtn.setAttribute("aria-label", this._i18n("webexpress.webui:fullscreen.toggle", "Toggle Fullscreen"));
-        fsBtn.innerHTML = `<i class="fas fa-expand"></i>`;
-        fsBtn.type = "button";
-
-        // use the current action system targetting the container
-        fsBtn.dataset.wxPrimaryAction = "fullscreen";
-        fsBtn.dataset.wxPrimaryTarget = "#" + this._uiContainer.id;
-
-        historyGroup.appendChild(fsBtn);
-
         return historyGroup;
     }
 
@@ -381,7 +296,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      * Creates a single history button (undo or redo).
      * @param {string} command - The command name.
      * @param {string} title - The button tooltip.
-     * @param {string} iconClass - The icon CSS class.
+     * @param {string} iconClass - The icon css class.
      * @returns {HTMLElement} The button element.
      */
     _createHistoryButton(command, title, iconClass) {
@@ -411,13 +326,11 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         if (undoBtn) {
             const canUndo = document.queryCommandEnabled("undo");
             undoBtn.disabled = !canUndo;
-            undoBtn.style.opacity = canUndo ? "1" : "0.5";
         }
 
         if (redoBtn) {
             const canRedo = document.queryCommandEnabled("redo");
             redoBtn.disabled = !canRedo;
-            redoBtn.style.opacity = canRedo ? "1" : "0.5";
         }
     }
 
@@ -433,13 +346,9 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         this._editorElement = document.createElement("div");
         this._editorElement.classList.add("wx-editor-content");
         this._editorElement.setAttribute("contenteditable", "true");
-        this._editorElement.setAttribute("role", "textbox");
-        this._editorElement.setAttribute("aria-multiline", "true");
-        this._editorElement.setAttribute("aria-label", this._i18n("webexpress.webui:editor.content.label", "Editor content"));
         this._editorElement.style.minHeight = "200px";
 
         if (content) {
-            // sanitize initial content before inserting
             const clean = this._sanitizeHtml(content);
             this._editorElement.innerHTML = clean;
         }
@@ -455,19 +364,6 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     _createStatusBar(element) {
         const statusBar = document.createElement("div");
         statusBar.classList.add("wx-editor-status");
-
-        const doneBtn = document.createElement("button");
-        doneBtn.className = "btn btn-primary wx-button wx-editor-finish";
-        doneBtn.type = "button";
-        doneBtn.innerHTML = '<i class="fas fa-check-circle me-1"></i> ' + this._i18n("webexpress.webui:editor.done", "Done");
-        doneBtn.setAttribute("aria-label", this._i18n("webexpress.webui:editor.done", "Done"));
-        doneBtn.title = this._i18n("webexpress.webui:editor.done", "Done");
-
-        // wire to the controller's dismiss handler for css fullscreen
-        doneBtn.setAttribute("data-wx-dismiss", "fullscreen");
-        doneBtn.setAttribute("data-wx-target", "#" + this._uiContainer.id);
-
-        statusBar.appendChild(doneBtn);
         element.appendChild(statusBar);
     }
 
@@ -479,312 +375,33 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         this._contextMenu.className = "dropdown-menu shadow";
         this._contextMenu.style.position = "fixed";
         this._contextMenu.style.display = "none";
-        this._contextMenu.style.zIndex = "1050";
         document.body.appendChild(this._contextMenu);
 
-        // close context menu on any document click
         this._documentClickHandler = () => {
             if (this._contextMenu.style.display === "block") {
                 this._contextMenu.style.display = "none";
             }
         };
         document.addEventListener("click", this._documentClickHandler);
-
-        this._editorElement.addEventListener("contextmenu", (e) => {
-            this._saveCurrentSelection();
-            e.preventDefault();
-            this._buildAndShowContextMenu(e);
-        });
     }
 
     /**
-     * Saves the current selection range for later restoration.
+     * Sanitizes an html string by removing unsafe tags and attributes.
+     * @param {string} html - Raw html input.
+     * @returns {string} Sanitized html.
      */
-    _saveCurrentSelection() {
-        const sel = window.getSelection();
-        if (sel && sel.rangeCount > 0) {
-            if (this._editorElement.contains(sel.anchorNode)) {
-                this._savedRange = sel.getRangeAt(0).cloneRange();
-            }
-        }
+    _sanitizeHtml(html) {
+        return html || "";
     }
 
     /**
-     * Builds and displays the context menu at the specified position.
-     * @param {MouseEvent} e - The context menu event.
+     * Synchronizes the editor content with the hidden form input.
      */
-    _buildAndShowContextMenu(e) {
-        this._contextMenu.innerHTML = "";
-        const target = e.target;
-
-        const sel = window.getSelection();
-        const hasSelection = sel && sel.rangeCount > 0 && !sel.isCollapsed && this._editorElement.contains(sel.anchorNode);
-
-        // core clipboard operations
-        const coreItems = [
-            { label: "Cut", action: "cut", icon: "fas fa-cut", disabled: !hasSelection },
-            { label: "Copy", action: "copy", icon: "fas fa-copy", disabled: !hasSelection },
-            { label: "Paste", action: () => this._handlePaste(), icon: "fas fa-paste", disabled: false }
-        ];
-
-        this._renderMenuItems(coreItems);
-
-        // add plugin-specific context menu items
-        const plugins = webexpress.webui.EditorPlugins.getAll();
-        let hasPluginItems = false;
-
-        plugins.forEach((plugin) => {
-            if (typeof plugin.getContextMenuItems === "function") {
-                const items = plugin.getContextMenuItems(this, target);
-                if (items && items.length > 0) {
-                    if (!hasPluginItems) {
-                        this._addMenuSeparator();
-                        hasPluginItems = true;
-                    }
-                    this._renderMenuItems(items);
-                }
-            }
-        });
-
-        // position menu and ensure it stays on screen
-        this._positionContextMenu(e.clientX, e.clientY);
-        this._contextMenu.style.display = "block";
-    }
-
-    /**
-     * Positions the context menu, ensuring it stays within viewport bounds.
-     * @param {number} x - The x-coordinate.
-     * @param {number} y - The y-coordinate.
-     */
-    _positionContextMenu(x, y) {
-        const menuRect = this._contextMenu.getBoundingClientRect();
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-
-        let finalX = x;
-        let finalY = y;
-
-        // adjust if menu would overflow viewport
-        if (x + menuRect.width > viewportWidth) {
-            finalX = viewportWidth - menuRect.width - 5;
+    _syncValue() {
+        if (this._formInput) {
+            this._formInput.value = this._editorElement.innerHTML;
         }
-        if (y + menuRect.height > viewportHeight) {
-            finalY = viewportHeight - menuRect.height - 5;
-        }
-
-        this._contextMenu.style.top = `${finalY}px`;
-        this._contextMenu.style.left = `${finalX}px`;
-    }
-
-    /**
-     * Handles paste operation from clipboard with fallback support.
-     */
-    async _handlePaste() {
-        try {
-            const items = await navigator.clipboard.read();
-            for (const item of items) {
-                if (item.types.includes("text/html")) {
-                    const blob = await item.getType("text/html");
-                    const html = await blob.text();
-                    this.insertHtmlAtCursor(html);
-                    return;
-                }
-                if (item.types.includes("text/plain")) {
-                    const blob = await item.getType("text/plain");
-                    const text = await blob.text();
-                    this.execCommand("insertText", text);
-                    return;
-                }
-            }
-        } catch (err) {
-            // fallback to plain text
-            try {
-                const text = await navigator.clipboard.readText();
-                if (text) {
-                    this.execCommand("insertText", text);
-                }
-            } catch (fallbackErr) {
-                console.warn("Clipboard paste failed:", fallbackErr);
-                alert(this._i18n("webexpress.webui:editor.paste.unsupported", "Paste not supported or permitted by browser. Please use Ctrl+V."));
-            }
-        }
-    }
-
-    /**
-     * Renders menu items into the specified container.
-     * @param {Array} items - The menu item definitions.
-     * @param {HTMLElement} container - The target container.
-     */
-    _renderMenuItems(items, container = this._contextMenu) {
-        items.forEach(item => {
-            if (item.separator) {
-                this._addMenuSeparator(container);
-                return;
-            }
-
-            // handle submenu items
-            if (item.submenu && item.submenu.length > 0) {
-                this._createSubmenuItem(item, container);
-                return;
-            }
-
-            // handle custom element items
-            if (item.type === "custom-element" && item.element) {
-                container.appendChild(item.element);
-                return;
-            }
-
-            // handle color swatch items
-            if (item.type === "color") {
-                this._createColorItem(item, container);
-                return;
-            }
-
-            // handle standard button items
-            this._createStandardMenuItem(item, container);
-        });
-    }
-
-    /**
-     * Creates a submenu item with nested items.
-     * @param {Object} item - The submenu item definition.
-     * @param {HTMLElement} container - The target container.
-     */
-    _createSubmenuItem(item, container) {
-        const wrapper = document.createElement("div");
-        wrapper.className = "position-relative";
-        wrapper.style.width = "100%";
-
-        const btn = document.createElement("button");
-        btn.className = "dropdown-item d-flex align-items-center justify-content-between gap-2";
-        btn.type = "button";
-
-        const iconHtml = this._getIconHtml(item.icon);
-        btn.innerHTML = `<div>${iconHtml} <span>${item.label}</span></div> <i class="fas fa-chevron-right" style="font-size:0.7em;"></i>`;
-
-        const subMenu = document.createElement("div");
-        subMenu.className = "dropdown-menu shadow";
-        subMenu.style.top = "0";
-        subMenu.style.left = "100%";
-        subMenu.style.marginTop = "-5px";
-        subMenu.style.marginLeft = "0";
-        subMenu.style.display = "none";
-        subMenu.style.maxHeight = "250px";
-        subMenu.style.overflowY = "auto";
-
-        let targetContainer = subMenu;
-        if (item.submenuClass) {
-            const gridList = document.createElement("ul");
-            gridList.className = item.submenuClass;
-            gridList.style.marginBottom = "0";
-            subMenu.appendChild(gridList);
-            targetContainer = gridList;
-        }
-
-        this._renderMenuItems(item.submenu, targetContainer);
-
-        wrapper.addEventListener("mouseenter", () => {
-            subMenu.style.display = "block";
-        });
-        wrapper.addEventListener("mouseleave", () => {
-            subMenu.style.display = "none";
-        });
-
-        wrapper.appendChild(btn);
-        wrapper.appendChild(subMenu);
-        container.appendChild(wrapper);
-    }
-
-    /**
-     * Creates a color swatch menu item.
-     * @param {Object} item - The color item definition.
-     * @param {HTMLElement} container - The target container.
-     */
-    _createColorItem(item, container) {
-        const li = document.createElement("li");
-        li.style.display = "inline-block";
-
-        const colorBtn = document.createElement("button");
-        colorBtn.type = "button";
-        colorBtn.className = "dropdown-item p-2";
-        colorBtn.style.backgroundColor = item.value;
-        colorBtn.style.width = "24px";
-        colorBtn.style.height = "24px";
-        colorBtn.style.borderRadius = "4px";
-        colorBtn.style.border = "1px solid #dee2e6";
-        colorBtn.title = item.value;
-
-        colorBtn.addEventListener("click", () => {
-            if (typeof item.action === "function") {
-                item.action();
-            }
-            this._contextMenu.style.display = "none";
-        });
-
-        li.appendChild(colorBtn);
-        container.appendChild(li);
-    }
-
-    /**
-     * Creates a standard menu item button.
-     * @param {Object} item - The menu item definition.
-     * @param {HTMLElement} container - The target container.
-     */
-    _createStandardMenuItem(item, container) {
-        const btn = document.createElement("button");
-        btn.className = "dropdown-item d-flex align-items-center gap-2";
-        btn.type = "button";
-
-        if (item.disabled) {
-            btn.classList.add("disabled");
-            btn.disabled = true;
-            btn.style.pointerEvents = "none";
-            btn.style.opacity = "0.6";
-        }
-
-        const iconHtml = this._getIconHtml(item.icon);
-        btn.innerHTML = `${iconHtml} <span>${item.label}</span>`;
-
-        if (!item.disabled) {
-            btn.addEventListener("click", () => {
-                if (typeof item.action === "function") {
-                    item.action();
-                } else if (typeof item.action === "string") {
-                    this.execCommand(item.action);
-                }
-                this._contextMenu.style.display = "none";
-            });
-        }
-
-        container.appendChild(btn);
-    }
-
-    /**
-     * Returns HTML markup for an icon.
-     * @param {string} icon - The icon class or identifier.
-     * @returns {string} The icon HTML markup.
-     */
-    _getIconHtml(icon) {
-        if (!icon) {
-            return `<span style="width:18px;"></span>`;
-        }
-        if (icon.startsWith("fas") || icon.startsWith("fa")) {
-            return `<i class="${icon}" style="width:18px;text-align:center;"></i>`;
-        }
-        return `<i class="${icon}"></i>`;
-    }
-
-    /**
-     * Adds a separator to the menu if one does not already exist at the end.
-     * @param {HTMLElement} container - The target container.
-     */
-    _addMenuSeparator(container = this._contextMenu) {
-        if (container.lastElementChild && container.lastElementChild.classList.contains("dropdown-divider")) {
-            return;
-        }
-        const sep = document.createElement("div");
-        sep.className = "dropdown-divider";
-        container.appendChild(sep);
+        this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this._editorElement.innerHTML });
     }
 
     /**
@@ -800,166 +417,88 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Synchronizes the editor content with the hidden form input.
+     * Executes a document command on the editor content.
+     * @param {string} command - The command to execute.
+     * @param {*} value - The command value.
      */
-    _syncValue() {
-        if (this._formInput) {
-            this._formInput.value = this._editorElement.innerHTML;
-        }
-        this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this._editorElement.innerHTML });
+    execCommand(command, value = null) {
+        this._editorElement.focus();
+        this._restoreRangeOnFocusReceived();
+        document.execCommand(command, false, value);
+        this._saveRangeOnFocusLost();
+        this._syncValue();
+        this._updateUndoRedoStates();
     }
 
     /**
-     * Sanitizes an HTML string by removing unsafe tags and attributes.
-     * - uses a whitelist approach for tags and attributes
-     * - strips event handlers, style and javascript: urls
-     * - allows data-* and aria-* attributes
-     * @param {string} html - raw html input
-     * @returns {string} sanitized html
+     * Inserts html at the current cursor position.
+     * @param {string} html - The html to insert.
      */
-    _sanitizeHtml(html) {
-        // parse html into a document
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html || "", "text/html");
+    insertHtmlAtCursor(html) {
+        const cleanHtml = this._sanitizeHtml(html || "");
 
-        // allowed tags whitelist
-        const allowedTags = new Set([
-            "a", "b", "strong", "i", "em", "u", "p", "br", "ul", "ol", "li",
-            "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "pre", "code",
-            "img", "span", "div", "table", "thead", "tbody", "tr", "th", "td",
-            "colgroup", "col", "hr", "small", "sub", "sup", "input"
-        ]);
+        this._editorElement.focus();
+        this._restoreRangeOnFocusReceived();
 
-        // allowed attributes per tag
-        const allowedAttrs = {
-            "a": ["href", "title", "target", "rel"],
-            "img": ["src", "alt", "title", "width", "height"],
-            "th": ["colspan", "rowspan", "scope", "contenteditable"],
-            "td": ["colspan", "rowspan", "contenteditable"],
-            "table": ["border", "cellpadding", "cellspacing"],
-            "div": ["draggable"],
-            "input": ["type", "value", "min", "max", "placeholder", "name"],
-            // globally allow attributes relevant to the editor
-            "*": ["class", "id", "title", "role", "tabindex", "style", "contenteditable", "data-addon-id", "data-type"]
-        };
-
-        /**
-         * Sanitizes a node and its subtree recursively.
-         * @param {Node} node
-         */
-        function sanitizeNode(node) {
-            if (node.nodeType === Node.ELEMENT_NODE) {
-                const el = node;
-                const tag = el.tagName.toLowerCase();
-
-                // skip the body element itself; only sanitize its children
-                if (tag !== "body") {
-                    if (!allowedTags.has(tag)) {
-                        // unwrap: move children to parent, then remove the element
-                        const parent = el.parentNode;
-                        if (parent) {
-                            while (el.firstChild) {
-                                parent.insertBefore(el.firstChild, el);
-                            }
-                            parent.removeChild(el);
-                        } else {
-                            el.remove();
-                        }
-                        return;
-                    }
-
-                    // remove unsafe attributes
-                    const attrs = Array.from(el.attributes);
-                    attrs.forEach((attr) => {
-                        const name = attr.name.toLowerCase();
-                        const value = attr.value;
-
-                        // always allow data-* and aria-*
-                        if (name.startsWith("data-") || name.startsWith("aria-")) {
-                            return;
-                        }
-
-                        const allowedForTag = allowedAttrs[tag] || [];
-                        const allowedGlobal = allowedAttrs["*"] || [];
-                        const isAllowed = allowedForTag.indexOf(name) !== -1 || allowedGlobal.indexOf(name) !== -1;
-
-                        if (!isAllowed) {
-                            el.removeAttribute(attr.name);
-                            return;
-                        }
-
-                        // block unsafe url protocols in href and src
-                        if ((name === "href" || name === "src") && value) {
-                            const trimmed = value.trim();
-                            if (!trimmed.match(/^(http|https|mailto|tel|\/|#|\.)/i)) {
-                                el.removeAttribute(attr.name);
-                                return;
-                            }
-
-                            // enforce rel for links opening in new tab
-                            if (name === "href" && el.tagName.toLowerCase() === "a") {
-                                if (!el.getAttribute("rel") && el.getAttribute("target") === "_blank") {
-                                    el.setAttribute("rel", "noopener noreferrer");
-                                }
-                            }
-                        }
-
-                        // block javascript: and expression() in style values
-                        if (name === "style" && value) {
-                            if (value.toLowerCase().includes("javascript:") || value.toLowerCase().includes("expression(")) {
-                                el.removeAttribute("style");
-                            }
-                        }
-                    });
-                }
-            }
-
-            // recurse over a snapshot of children (list may change during sanitization)
-            const children = Array.from(node.childNodes);
-            children.forEach((child) => {
-                sanitizeNode(child);
-            });
+        const sel = window.getSelection();
+        if (!(sel && sel.rangeCount > 0)) {
+            this._editorElement.innerHTML += cleanHtml;
+            this._syncValue();
+            return;
         }
 
-        if (doc.body) {
-            sanitizeNode(doc.body);
-            return doc.body.innerHTML;
+        const range = sel.getRangeAt(0);
+        range.deleteContents();
+
+        const el = document.createElement("div");
+        el.innerHTML = cleanHtml;
+        const frag = document.createDocumentFragment();
+        let node = null;
+        let lastNode = null;
+
+        while (el.firstChild) {
+            node = el.firstChild;
+            lastNode = frag.appendChild(node);
         }
 
-        return "";
+        range.insertNode(frag);
+
+        if (lastNode) {
+            const newRange = document.createRange();
+            newRange.setStartAfter(lastNode);
+            newRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+            this._savedRange = newRange.cloneRange();
+        }
+
+        this._notifyPluginsContentChanged();
+        this._ensureTypingSpace();
+        this._syncValue();
+        this._updateUndoRedoStates();
     }
 
     /**
-     * Getter for the editor content (HTML).
-     * @returns {string} current editor HTML content
+     * Getter for the editor content (html).
+     * @returns {string} Current editor html content.
      */
     get value() {
-        return this._editorElement ? this._editorElement.innerHTML : "";
+        if (!this._editorElement) {
+            return "";
+        }
+        return this._editorElement.innerHTML;
     }
 
     /**
      * Setter for the editor content.
-     * Updates the editor DOM, synchronizes hidden form input and refreshes UI state.
-     * Incoming html is sanitized before insertion.
-     * @param {string} v - HTML string to set as editor content
+     * @param {string} v - Html string to set.
      */
     set value(v) {
         if (!this._editorElement) {
             return;
         }
-        // sanitize incoming html before placing into editor
         const clean = this._sanitizeHtml(v || "");
         this._editorElement.innerHTML = clean;
-
-        // notify plugins first to upgrade tables to frames
-        this._notifyPluginsContentChanged();
-        // then ensure typing space un-nests the newly upgraded frames
-        this._ensureTypingSpace();
-        // notify again so plugins that depend on the post-typing-space block
-        // structure (placeholder hint, etc.) see the final DOM
-        this._notifyPluginsContentChanged();
-
-        // update hidden input and dispatch change
         this._syncValue();
         this._updateUndoRedoStates();
     }
@@ -970,143 +509,6 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      */
     getEditorElement() {
         return this._editorElement;
-    }
-
-    /**
-     * Restores the previously saved selection range.
-     * If a live selection already lives inside the editor, that selection is
-     * preferred over the stored range - this prevents a stale `_savedRange`
-     * from overwriting the user's actual selection (e.g., when the bubble
-     * menu or another control acts on the current selection).
-     * If no range is available at all, the cursor is moved to the end of
-     * the content as a sane fallback.
-     */
-    restoreSavedRange() {
-        const sel = window.getSelection();
-
-        // prefer a live selection that already sits inside the editor - that
-        // is the user's actual selection and must not be replaced
-        if (sel && sel.rangeCount > 0) {
-            const live = sel.getRangeAt(0);
-            if (this._editorElement.contains(live.startContainer) && this._editorElement.contains(live.endContainer)) {
-                this._savedRange = live.cloneRange();
-                this._editorElement.focus();
-                return;
-            }
-        }
-
-        this._editorElement.focus();
-
-        if (this._savedRange) {
-            const s = window.getSelection();
-            s.removeAllRanges();
-            s.addRange(this._savedRange);
-        } else {
-            // fallback: move cursor to end if no selection exists
-            const s = window.getSelection();
-            const range = document.createRange();
-            range.selectNodeContents(this._editorElement);
-            range.collapse(false);
-            s.removeAllRanges();
-            s.addRange(range);
-
-            // save this position so subsequent calls use it
-            this._savedRange = range.cloneRange();
-        }
-    }
-
-    /**
-     * Executes a document command on the editor content.
-     * @param {string} command - The command to execute.
-     * @param {*} value - The command value.
-     */
-    execCommand(command, value = null) {
-        this.restoreSavedRange();
-        document.execCommand(command, false, value);
-    }
-
-    /**
-     * Inserts HTML at the current cursor position.
-     * Replaces empty paragraphs with the block element to prevent nested invalid HTML structures.
-     * @param {string} html - The HTML to insert.
-     */
-    insertHtmlAtCursor(html) {
-        // sanitize html to avoid introducing unsafe content
-        const cleanHtml = this._sanitizeHtml(html || "");
-        this.restoreSavedRange();
-        const sel = window.getSelection();
-
-        if (sel && sel.rangeCount) {
-            const range = sel.getRangeAt(0);
-
-            if (!this._editorElement.contains(range.startContainer)) {
-                this._editorElement.innerHTML += cleanHtml;
-                this._notifyPluginsContentChanged();
-                this._ensureTypingSpace();
-                this._syncValue();
-                this._updateUndoRedoStates();
-                return;
-            }
-
-            let node = range.startContainer;
-            if (node.nodeType === Node.TEXT_NODE) {
-                node = node.parentElement;
-            }
-            const p = node.closest("p");
-
-            range.deleteContents();
-            const el = document.createElement("div");
-            el.innerHTML = cleanHtml;
-            const frag = document.createDocumentFragment();
-            let n, lastNode;
-
-            while ((n = el.firstChild)) {
-                lastNode = frag.appendChild(n);
-            }
-
-            // if we are inserting a block inside a paragraph, check if paragraph is empty
-            if (p && p.parentElement === this._editorElement) {
-                const pContent = p.textContent.trim();
-                // replace the empty paragraph entirely to prevent nesting
-                if (pContent === "" || p.innerHTML === "<br>") {
-                    p.parentNode.insertBefore(frag, p);
-                    p.remove();
-
-                    if (lastNode) {
-                        const newRange = document.createRange();
-                        newRange.setStartAfter(lastNode);
-                        newRange.collapse(true);
-                        sel.removeAllRanges();
-                        sel.addRange(newRange);
-                        this._saveCurrentSelection();
-                    }
-
-                    this._notifyPluginsContentChanged();
-                    this._ensureTypingSpace();
-                    this._syncValue();
-                    this._updateUndoRedoStates();
-                    return;
-                }
-            }
-
-            // fallback normal insertion
-            range.insertNode(frag);
-
-            if (lastNode) {
-                range.setStartAfter(lastNode);
-                range.collapse(true);
-                sel.removeAllRanges();
-                sel.addRange(range);
-                this._saveCurrentSelection();
-            }
-        } else {
-            this._editorElement.innerHTML += cleanHtml;
-        }
-
-        this._notifyPluginsContentChanged();
-        this._ensureTypingSpace();
-        this._syncValue();
-        this._updateUndoRedoStates();
     }
 
     /**

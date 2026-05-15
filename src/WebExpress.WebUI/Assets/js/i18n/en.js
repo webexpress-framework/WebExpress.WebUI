@@ -189,13 +189,10 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "editor.addon.error.select": "Please select an AddOn from the list.",
     "editor.addon.error.internal": "Internal error: Editor instance not found.",
 
-    // placeholder
-    "editor.placeholder": "Type / for commands",
-    "editor.placeholder.title": "Instruction Text",
-    "editor.placeholder.text.label": "Text",
-    "editor.placeholder.text.placeholder": "Enter instruction text...",
-    "editor.placeholder.error.text": "Please provide an instruction text.",
-    "editor.placeholder.error.internal": "Internal error: editor or field not available.",
+    // instruction
+    "editor.instruction.title": "Instruction Text",
+    "editor.instruction.text.label": "Enter an instruction text here.",
+    "editor.instruction.text.placeholder": "Enter instruction text …",
 
     // slash menu chrome
     "editor.slash.search": "Search commands…",
