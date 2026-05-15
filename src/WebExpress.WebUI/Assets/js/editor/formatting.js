@@ -26,7 +26,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
      * Initializes the plugin.
      * Sets up listeners to update button states based on cursor selection
      * and the document's structural state. Keyboard, mouse and focus
-     * events keep the toolbar in sync the same way Word does — every
+     * events keep the toolbar in sync the same way Word does - every
      * cursor movement immediately updates the highlighted buttons.
      * @param {object} editor - The editor instance.
      */
@@ -149,7 +149,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         });
 
         // reflect the current paragraph format in the dropdown label so
-        // the user always sees what kind of block the caret sits in —
+        // the user always sees what kind of block the caret sits in -
         // identical to Word's "Styles" indicator.
         if (toolbar) {
             this._updateFormatDropdown(toolbar, blockFormat);
@@ -232,7 +232,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
     /**
      * Detects the current block-level format (paragraph, heading,
      * quote, code) of the caret position. Used to keep the format
-     * dropdown label in sync — the closest match in
+     * dropdown label in sync - the closest match in
      * <c>_formatOptions</c> is taken.
      * @param {object} editor - The editor instance.
      * @returns {string|null} The lowercase tag name (<c>p</c>,
