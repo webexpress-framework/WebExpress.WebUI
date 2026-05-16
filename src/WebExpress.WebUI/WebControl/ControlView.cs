@@ -231,16 +231,17 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-layout", layout == TypeLayoutView.Default ? null : layout.ToValue())
                 .Add(headerPreferences.Select(x => x.Render(renderContext, visualTree)))
                 .Add(headerPrimary.Select(x => x.Render(renderContext, visualTree)))
-                .Add(headerSecondary.Select(x => x.Render(renderContext, visualTree)))
                 .Add(_headers.Select(x => x.Render(renderContext, visualTree)))
+                .Add(headerSecondary.Select(x => x.Render(renderContext, visualTree)))
                 .Add(viewPreferences.Select(x => x.Render(renderContext, visualTree)))
                 .Add(viewPrimary.Select(x => x.Render(renderContext, visualTree)))
-                .Add(viewSecondary.Select(x => x.Render(renderContext, visualTree)))
                 .Add(_views.Select(x => x.Render(renderContext, visualTree)))
+                .Add(viewSecondary.Select(x => x.Render(renderContext, visualTree)))
                 .Add(footerPreferences.Select(x => x.Render(renderContext, visualTree)))
                 .Add(footerPrimary.Select(x => x.Render(renderContext, visualTree)))
+                .Add(_footers.Select(x => x.Render(renderContext, visualTree)))
                 .Add(footerSecondary.Select(x => x.Render(renderContext, visualTree)))
-                .Add(_footers.Select(x => x.Render(renderContext, visualTree)));
+                ;
 
             return html;
         }

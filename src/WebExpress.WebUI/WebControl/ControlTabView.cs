@@ -1,7 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
@@ -37,6 +37,11 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the image uri.
         /// </summary>
         public Func<IRenderControlContext, IUri> Image { get; set; }
+
+        /// <summary>
+        /// Gets the items of the view control.
+        /// </summary>
+        public IEnumerable<IControl> Items => _items;
 
         /// <summary>
         /// Initializes a new instance of the class.

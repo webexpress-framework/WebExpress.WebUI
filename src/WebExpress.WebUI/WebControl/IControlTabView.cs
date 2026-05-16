@@ -23,9 +23,14 @@ namespace WebExpress.WebUI.WebControl
         Func<IRenderControlContext, IIcon> Icon { get; }
 
         /// <summary>
-        /// Gets or sets the image uri.
+        /// Gets the image uri.
         /// </summary>
-        Func<IRenderControlContext, IUri> Image { get; set; }
+        Func<IRenderControlContext, IUri> Image { get; }
+
+        /// <summary>
+        /// Gets the items of the view control.
+        /// </summary>
+        public IEnumerable<IControl> Items { get; }
 
         /// <summary>
         /// Adds one or more items to the view.
