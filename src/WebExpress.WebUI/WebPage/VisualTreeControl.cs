@@ -112,7 +112,7 @@ namespace WebExpress.WebUI.WebPage
             Title = pageContext?.PageTitle;
             _favicons.Add(new Favicon(RouteEndpoint.Combine(contextPath, WebEx.Favicon)));
 
-            foreach (var include in _componentHub.IncludeManager
+            foreach (var include in _componentHub?.IncludeManager
                 .GetIncludes(pageContext.ApplicationContext))
             {
                 if (!include.Scopes.Any() || pageContext.Scopes.Intersect(include.Scopes).Any())
@@ -125,7 +125,7 @@ namespace WebExpress.WebUI.WebPage
                 }
             }
 
-            foreach (var include in _componentHub.IncludeManager
+            foreach (var include in _componentHub?.IncludeManager
                 .GetIncludes(pageContext.ApplicationContext))
             {
                 if (!include.Scopes.Any() || pageContext.Scopes.Intersect(include.Scopes).Any())
