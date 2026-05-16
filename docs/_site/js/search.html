@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>SearchCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="SearchCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/search.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="searchctrl">SearchCtrl</h1>
+<p>The <code>SearchCtrl</code> is a sophisticated search field component that extends beyond the functionality of a standard input field. It provides an integrated dropdown list with predefined search suggestions, a favorites feature, a search icon, and a button to quickly clear the field. The control is designed to offer users an intuitive and guided search experience by displaying relevant suggestions and prioritizing frequently used search queries for quick access.</p>
+<p>The positioning of the dropdown menu is managed by the <code>PopperCtrl</code> base class to ensure correct alignment below the search field.</p>
+<pre><code>   ┌──────────────────────────────────────────┐
+   │                                          │
+   │ [Icon] [Search Input Placeholder...] [x] │
+   │                                          │
+   └──────────────────────────────────────────┘
+   ┌──────────────────────────────────────────┐
+   │ [*] Favorited Suggestion 1               │
+   │ [*] Favorited Suggestion 2               │
+   │ ──────────────────────────────────────── │
+   │     Filtered Suggestion 3                │
+   │     Filtered Suggestion 4                │
+   │ ──────────────────────────────────────── │
+   │ [Footer Content]                         │
+   └──────────────────────────────────────────┘
+</code></pre>
+<h2 id="configuration">Configuration</h2>
+<p>The entire configuration of the search field is done declaratively via HTML attributes and child elements of the host element.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>The name for the <code>&lt;input&gt;</code> element, relevant for form submissions.</td>
+</tr>
+<tr>
+<td><code>placeholder</code></td>
+<td>The placeholder text displayed in the empty search field.</td>
+</tr>
+<tr>
+<td><code>data-icon</code></td>
+<td>The CSS class for the icon displayed at the beginning of the search field (e.g., <code>fas fa-search</code>).</td>
+</tr>
+<tr>
+<td><code>data-favorited</code></td>
+<td>If set to <code>&quot;true&quot;</code>, the favorites feature (star icon) is enabled for the suggestions.</td>
+</tr>
+<tr>
+<td><code>data-value</code></td>
+<td>The initial value of the search field.</td>
+</tr>
+</tbody>
+</table>
+<p>Search suggestions and an optional footer are defined as child elements:</p>
+<ul>
+<li><strong>Suggestions</strong>: Each <code>&lt;div&gt;</code> with the class <code>.wx-search-suggestion</code> is interpreted as a suggestion. Attributes like <code>id</code>, <code>data-icon</code>, <code>data-image</code>, <code>data-color</code>, and <code>data-favorited</code> can be used to customize each suggestion individually.</li>
+<li><strong>Footer</strong>: An element with the class <code>.wx-search-footer</code> can contain HTML content that is displayed at the bottom of the dropdown list.</li>
+</ul>
+<h2 id="functionality">Functionality</h2>
+<p>The <code>SearchCtrl</code> is designed as a self-contained component that dynamically generates its user interface and manages its state internally.</p>
+<ul>
+<li><strong>Dynamic DOM Construction</strong>: During initialization, the component reads the configuration from the host element and its children. Subsequently, the original content of the host element is removed and replaced by a programmatically created structure that includes the search field, icon, clear button, and dropdown menu.</li>
+<li><strong>Suggestion Management</strong>: The declared suggestions are extracted and stored internally. The component distinguishes between favorited and non-favorited suggestions.</li>
+<li><strong>Interactive Dropdown Menu</strong>: The dropdown menu becomes visible as soon as the input field gains focus. The <code>_refreshSuggestions</code> method is called on every input (<code>input</code> event) to filter the list of non-favorited suggestions, so that only those containing the entered text are displayed.</li>
+<li><strong>Favorites System</strong>: If the favorites feature is enabled, favorited suggestions are always displayed at the top of the list, separated by a divider. Each suggestion item gets a star icon that allows the user to toggle its favorite status. Such a change triggers the <code>CHANGE_FAVORITE_EVENT</code> to inform the application of the change and re-renders the list.</li>
+<li><strong>State Management and Event Communication</strong>: The current search text is stored in the <code>_value</code> property. Any change to this property (either by user input or programmatic assignment) triggers the <code>CHANGE_FILTER_EVENT</code>. This is the primary event that informs other components that a new search should be performed.</li>
+</ul>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>After initialization, the value of the search field can be read and set programmatically.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const element = document.getElementById('my-search');
+
+// retrieve the controller instance associated with the element
+const searchCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (searchCtrl) {
+    // get the current search query
+    const currentQuery = searchCtrl.value;
+
+    // set a new search query programmatically
+    // this will update the input field and trigger the CHANGE_FILTER_EVENT
+    searchCtrl.value = &quot;status:open&quot;;
+}
+</code></pre>
+<h3 id="manual-instantiation">Manual Instantiation</h3>
+<pre><code class="lang-javascript">// find the container element for the dynamic search control
+const container = document.getElementById('dynamic-search-container');
+
+// create a new instance of SearchCtrl manually
+const dynamicSearchCtrl = new webexpress.webui.SearchCtrl(container);
+
+// set the properties programmatically
+dynamicSearchCtrl.name = 'q-dynamic';
+dynamicSearchCtrl.placeholder = 'Search dynamically...';
+dynamicSearchCtrl.suggestions = [
+    { id: 'dyn1', label: 'Dynamic Suggestion 1' },
+    { id: 'dyn2', label: 'Dynamic Suggestion 2', favorited: true }
+];
+</code></pre>
+<h2 id="events">Events</h2>
+<p>The component communicates state changes via four specific events.</p>
+<ul>
+<li><strong><code>webexpress.webui.Event.CHANGE_FILTER_EVENT</code></strong>: Fired when the value of the search field changes. This is the signal to perform a filter or search operation.</li>
+<li><strong><code>webexpress.webui.Event.CHANGE_FAVORITE_EVENT</code></strong>: Fired when a user changes the favorite status of a suggestion.</li>
+<li><strong><code>webexpress.webui.Event.DROPDOWN_SHOW_EVENT</code></strong>: Fired when the dropdown menu with suggestions becomes visible.</li>
+<li><strong><code>webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT</code></strong>: Fired when the dropdown menu is hidden.</li>
+</ul>
+<h2 id="use-case-example">Use Case Example</h2>
+<pre><code class="lang-html">&lt;!--
+    Host element for the search control.
+    Favoriting is enabled, and an initial value is set.
+--&gt;
+&lt;div id=&quot;issue-search&quot;
+     class=&quot;wx-webui-search&quot;
+     name=&quot;q&quot;
+     placeholder=&quot;Search issues...&quot;
+     data-favorited=&quot;true&quot;
+     data-value=&quot;is:open&quot;&gt;
+
+    &lt;!-- Pre-defined suggestions --&gt;
+    &lt;div id=&quot;s1&quot; class=&quot;wx-search-suggestion&quot; data-favorited=&quot;true&quot;&gt;is:open&lt;/div&gt;
+    &lt;div id=&quot;s2&quot; class=&quot;wx-search-suggestion&quot; data-favorited=&quot;true&quot;&gt;is:closed&lt;/div&gt;
+    &lt;div id=&quot;s3&quot; class=&quot;wx-search-suggestion&quot;&gt;label:bug&lt;/div&gt;
+    &lt;div id=&quot;s4&quot; class=&quot;wx-search-suggestion&quot;&gt;label:enhancement&lt;/div&gt;
+
+    &lt;!-- Optional footer for the dropdown --&gt;
+    &lt;div class=&quot;wx-search-footer&quot;&gt;
+        &lt;a href=&quot;/search/advanced&quot;&gt;Advanced Search&lt;/a&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/search.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

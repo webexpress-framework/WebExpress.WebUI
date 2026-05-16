@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>ResponsiveCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="ResponsiveCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/responsive.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="responsivectrl">ResponsiveCtrl</h1>
+<p>The <code>ResponsiveCtrl</code> component provides a flexible way to dynamically show or hide panels in a container depending on its width. This enables adaptive layouts that respond to breakpoints, ensuring optimal content display across various device sizes.</p>
+<pre><code>   ┌─────────────────────────────┐
+   │ [Panel ≥ 900px]             │
+   └─────────────────────────────┘
+   ┌─────────────────────────────┐
+   │ [Panel ≥ 600px]             │
+   └─────────────────────────────┘
+   ┌─────────────────────────────┐
+   │ [Panel ≥ 300px]             │
+   └─────────────────────────────┘
+   ┌─────────────────────────────┐
+   │ [Fallback Panel &lt; 300px]    │
+   └─────────────────────────────┘
+</code></pre>
+<h2 id="configuration">Configuration</h2>
+<p>Initialization is declarative via child elements and <code>data-breakpoint</code> attributes on each panel. The component recognizes the following child element types:</p>
+<table>
+<thead>
+<tr>
+<th>Element Class</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.wx-responsive-panel</code></td>
+<td>A panel that is shown when its breakpoint is matched or exceeded</td>
+</tr>
+<tr>
+<td><code>.wx-responsive-panel-fallback</code></td>
+<td>A fallback panel shown if no breakpoint matches</td>
+</tr>
+</tbody>
+</table>
+<p>Each responsive panel must set the <code>data-breakpoint</code> attribute to define the minimum container width (in pixels) at which it becomes visible.</p>
+<h2 id="functionality">Functionality</h2>
+<p>The component automatically manages which panel is visible, based on the container's current width:</p>
+<ul>
+<li><strong>Breakpoint Matching:</strong> For each resize, the component checks all defined breakpoints. The panel with the largest matching breakpoint (less than or equal to the container width) is shown.</li>
+<li><strong>Fallback Panel:</strong> If no breakpoint matches (the container is smaller than all defined breakpoints), the fallback panel is displayed if present.</li>
+<li><strong>Dynamic Observation:</strong> The component observes container size changes using the ResizeObserver API and updates panel visibility in real-time.</li>
+<li><strong>Event Handling:</strong> When the displayed panel changes due to a breakpoint switch, the <code>webexpress.webui.Event.BREAKPOINT_CHANGE_EVENT</code> is triggered. The event includes the active breakpoint value (or <code>null</code> if fallback is shown).</li>
+</ul>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>The control exposes simple programmatic methods for integration:</p>
+<ul>
+<li><code>refresh()</code>: Forces a re-evaluation of the container size and updates panel visibility.</li>
+<li><code>destroy()</code>: Disconnects the ResizeObserver and cleans up resources.</li>
+</ul>
+<p>Example for programmatic usage:</p>
+<pre><code class="lang-javascript">const responsiveElement = document.getElementById('my-responsive-container');
+const responsiveCtrl = webexpress.webui.Controller.getInstanceByElement(responsiveElement);
+
+if (responsiveCtrl) {
+    // manually refresh panel visibility
+    responsiveCtrl.refresh();
+
+    // cleanup when no longer needed
+    responsiveCtrl.destroy();
+}
+</code></pre>
+<h2 id="use-case-example">Use Case Example</h2>
+<p>The following example shows a responsive container with three panels for different breakpoints and a fallback panel:</p>
+<pre><code class="lang-html">&lt;div id=&quot;my-responsive-container&quot; class=&quot;wx-webui-responsive&quot;&gt;
+    &lt;div class=&quot;wx-responsive-panel&quot; data-breakpoint=&quot;900&quot;&gt;
+        Content for large screens (≥ 900px)
+    &lt;/div&gt;
+    &lt;div class=&quot;wx-responsive-panel&quot; data-breakpoint=&quot;600&quot;&gt;
+        Content for medium screens (≥ 600px)
+    &lt;/div&gt;
+    &lt;div class=&quot;wx-responsive-panel&quot; data-breakpoint=&quot;300&quot;&gt;
+        Content for small screens (≥ 300px)
+    &lt;/div&gt;
+    &lt;div class=&quot;wx-responsive-panel-fallback&quot;&gt;
+        Fallback content for very small screens
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h2 id="events">Events</h2>
+<p>The ResponsiveCtrl component triggers the following event:</p>
+<ul>
+<li><strong>BREAKPOINT_CHANGE_EVENT:</strong> Fired whenever the visible panel changes due to a breakpoint switch. The event payload contains the current breakpoint value or <code>null</code> when the fallback panel is shown.</li>
+</ul>
+<h2 id="summary">Summary</h2>
+<p>ResponsiveCtrl enables adaptive layouts by conditionally showing panels based on container width breakpoints. It supports fallback panels, real-time observation of size changes, and programmatic control, making it ideal for responsive interfaces in modern web applications.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/responsive.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

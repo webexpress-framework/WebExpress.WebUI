@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>InlinePageCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="InlinePageCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/page.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="inlinepagectrl">InlinePageCtrl</h1>
+<p>The InlinePageCtrl is a lightweight component for embedding external HTML content into a regular container element, serving as a minimal alternative to iframes. It loads a target document via URI, extracts the content of a specified selector (default: <code>body</code>), and injects the markup into the host element. During the loading process, events are emitted before and after the request to signal status changes and enable UI reactions. A skeleton placeholder visualizes the loading state, while errors are displayed using a collapsible alert.</p>
+<h2 id="configuration">Configuration</h2>
+<p>Initialization and behavior are controlled exclusively via <code>data-</code> attributes on the host element. The attributes are removed after reading to avoid leaking configuration into the DOM.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-uri</code></td>
+<td>Absolute or relative URL of the resource to be loaded. If empty or missing, the container is cleared.</td>
+</tr>
+<tr>
+<td><code>data-selector</code></td>
+<td>CSS selector to extract from the loaded document. Default is <code>&quot;body&quot;</code>.</td>
+</tr>
+<tr>
+<td><code>data-autoload</code></td>
+<td>Controls automatic loading when the instance is created. Any value except <code>&quot;false&quot;</code> will trigger autoload. Default is <code>&quot;true&quot;</code> (not case-sensitive).</td>
+</tr>
+</tbody>
+</table>
+<p>Additional behavior:</p>
+<ul>
+<li>Requests use <code>fetch()</code> with <code>credentials: &quot;same-origin&quot;</code>.</li>
+<li>While loading, a skeleton placeholder is inserted (<code>placeholder</code>, <code>placeholder-glow</code>, and other utility classes).</li>
+<li>In case of errors, a collapsible error box is shown via <code>ExpandableCtrl</code> with internationalized texts.</li>
+</ul>
+<h2 id="functionality">Functionality</h2>
+<p>During construction, <code>data-uri</code>, <code>data-selector</code>, and <code>data-autoload</code> are read and then removed from the host element. If autoload is enabled, <code>load()</code> is executed immediately.</p>
+<p>The <code>load()</code> method first inserts a placeholder and emits <code>webexpress.webui.Event.DATA_REQUESTED_EVENT</code>. The resource is loaded using <code>fetch(this._uri, { credentials: &quot;same-origin&quot; })</code>. Upon a successful response, the HTML text is parsed, the desired area is determined via <code>this._selector</code> (fallback: <code>document.body</code>), and its <code>innerHTML</code> is transferred to the host element. Afterwards, <code>webexpress.webui.Event.DATA_ARRIVED_EVENT</code> is emitted.</p>
+<p>If an error occurs (network error or <code>!response.ok</code>), the container is cleared and a collapsible error alert with headline, details, and stacktrace is shown. The alert uses i18n keys:</p>
+<ul>
+<li><code>webexpress.webui:page.contentNotLoaded.label</code> (default: &quot;Content could not be loaded.&quot;)</li>
+<li><code>webexpress.webui:page.contentNotLoaded.details</code> (default: empty)</li>
+</ul>
+<p>The class is registered under the key <code>&quot;wx-webui-inline-page&quot;</code> and can be automatically instantiated via <code>data-controller</code>.</p>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>After initialization, the instance can be controlled using the API.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<pre><code class="lang-html">&lt;div id=&quot;my-inline&quot; data-controller=&quot;wx-webui-inline-page&quot;
+     data-uri=&quot;/docs/partials/intro.html&quot;
+     data-selector=&quot;#content&quot;
+     data-autoload=&quot;true&quot;&gt;&lt;/div&gt;
+</code></pre>
+<pre><code class="lang-javascript">// find host element
+const element = document.getElementById(&quot;my-inline&quot;);
+
+// retrieve controller instance bound to the element
+const inlineCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (inlineCtrl) {
+    // update the uri and trigger an immediate reload
+    inlineCtrl.setUri(&quot;/docs/partials/advanced.html&quot;, true);
+
+    // reload current uri explicitly
+    inlineCtrl.refresh();
+
+    // listen to lifecycle events (scoped handling recommended)
+    document.addEventListener(webexpress.webui.Event.DATA_REQUESTED_EVENT, function (e) {
+        if (e &amp;&amp; e.detail &amp;&amp; e.detail.uri === &quot;/docs/partials/advanced.html&quot;) {
+            // handle start of fetch
+        }
+    });
+    document.addEventListener(webexpress.webui.Event.DATA_ARRIVED_EVENT, function (e) {
+        if (e &amp;&amp; e.detail &amp;&amp; typeof e.detail.response === &quot;string&quot;) {
+            // handle successful content arrival
+        }
+    });
+}
+</code></pre>
+<h3 id="manual-instantiation">Manual Instantiation</h3>
+<pre><code class="lang-javascript">// create or select the host container
+const container = document.createElement(&quot;div&quot;);
+container.id = &quot;dynamic-inline&quot;;
+document.body.appendChild(container);
+
+// create controller instance manually
+const ctrl = new webexpress.webui.InlinePageCtrl(container);
+
+// configure source and load content
+ctrl.setUri(&quot;/pages/snippets/help.html&quot;, false);
+ctrl.load();
+
+// later: refresh or point to a different uri
+if (ctrl) {
+    ctrl.refresh();
+    ctrl.setUri(&quot;/pages/snippets/faq.html&quot;, true);
+}
+</code></pre>
+<h2 id="events">Events</h2>
+<p>InlinePageCtrl emits two core events to inform application state.</p>
+<ul>
+<li><code>webexpress.webui.Event.DATA_REQUESTED_EVENT</code>: Emitted immediately before the network request starts.
+<ul>
+<li>Payload: <code>{ uri: string }</code></li>
+</ul>
+</li>
+<li><code>webexpress.webui.Event.DATA_ARRIVED_EVENT</code>: Emitted after the host element is updated successfully.
+<ul>
+<li>Payload: <code>{ uri: string, response: string }</code> (raw HTML string from the response)</li>
+</ul>
+</li>
+</ul>
+<p>Note on event handling: For component-local reactions, it is recommended to check the target or payload to assign listeners to the correct host element.</p>
+<h2 id="example-usage">Example Usage</h2>
+<pre><code class="lang-html">&lt;!--
+    An inline container loading a section from an external page.
+    The #article-content area of the loaded document will be displayed.
+--&gt;
+&lt;div id=&quot;article-view&quot;
+     data-controller=&quot;wx-webui-inline-page&quot;
+     data-uri=&quot;/articles/intro.html&quot;
+     data-selector=&quot;#article-content&quot;
+     data-autoload=&quot;true&quot;&gt;
+&lt;/div&gt;
+</code></pre>
+<pre><code class="lang-javascript">// optionally: dynamic update of the target
+const el = document.getElementById(&quot;article-view&quot;);
+const instance = webexpress.webui.Controller.getInstanceByElement(el);
+
+if (instance) {
+    // swap to a different article on demand
+    instance.setUri(&quot;/articles/deep-dive.html&quot;, true);
+}
+</code></pre>
+<pre><code class="lang-html">&lt;!--
+    Error demo: invalid URL. InlinePageCtrl shows a collapsible error alert,
+    including localized headline, icon, red alert styling, and stacktrace.
+--&gt;
+&lt;div id=&quot;broken-view&quot;
+     data-controller=&quot;wx-webui-inline-page&quot;
+     data-uri=&quot;/not/found.html&quot;
+     data-autoload=&quot;true&quot;&gt;
+&lt;/div&gt;
+</code></pre>
+<pre><code class="lang-javascript">// optionally: react to loading start and finish
+document.addEventListener(webexpress.webui.Event.DATA_REQUESTED_EVENT, function (e) {
+    // show a global loader if required
+});
+document.addEventListener(webexpress.webui.Event.DATA_ARRIVED_EVENT, function (e) {
+    // hide global loader, update breadcrumbs, etc.
+});
+</code></pre>
+<pre><code class="lang-javascript">// security note: only embed trusted html or ensure server-side sanitization.
+// scripts injected via innerHTML do not execute automatically.
+</code></pre>
+<pre><code class="lang-javascript">// styling note: the loading skeleton relies on utility classes like 'placeholder' and 'placeholder-glow'.
+// if not present in your css stack, the markup renders unstyled but remains functional.
+</code></pre>
+<pre><code class="lang-javascript">// registration: the controller is available via the registry key &quot;wx-webui-inline-page&quot;.
+webexpress.webui.Controller.registerClass(&quot;wx-webui-inline-page&quot;, webexpress.webui.InlinePageCtrl);
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/page.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

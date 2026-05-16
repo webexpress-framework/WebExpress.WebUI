@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>ToolbarCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="ToolbarCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/toolbar.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="toolbarctrl">ToolbarCtrl</h1>
+<p>The <code>ToolbarCtrl</code> control provides dynamic creation and management of a responsive toolbar. The content and layout of the toolbar are defined by its child elements, which enables flexible and declarative configuration directly in HTML. The toolbar supports various element types, such as buttons (with icon, text, or both), separators, interactive elements like dropdown menus and comboboxes, as well as static text items. Configuration is performed via <code>data-</code> attributes for detailed customization of appearance and behavior.</p>
+<pre><code>                           separator                         text            overflow-
+               ...button....   :   dropdown    overflow       :    combobox    more    more
+               :     :     :   :       :          :           :       :         :       :
+   ┌───────────:─────:─────:───:───────:──────────V───────────:───────:─────────:───────:───┐
+   │┌──────────:─────:─────:───:───────:──────────────────────:───────:─────────:───┐┌──:──┐│
+   ││┌─────────V─────V─────V───V───────V───────────────┐┌─────:───────V──────┐┌─:──┐││  :  ││
+   │││┌──────────┐┌────┐┌─────┐│┌────────────┐         ││     V  │┌────────┐ ││ V  │││  V  ││
+   ││││icon label││icon││label│││icon label ▼│         ││   label││option ▼│ ││[▼] │││ […] ││
+   │││└──────────┘└────┘└─────┘│└──┬─────────┘         ││        │└─┬──────┘ ││    │││     ││
+   ││└───────────────────────────┌─┴──────────┐────────┘└─────────┌─┴──────┐─┘└────┘││     ││
+   │└────────────────────────────│ header     │───────────────────│ option │────────┘└─────┘│
+   └─────────────────────────────│ icon label │───────────────────│ option │────────────────┘
+                                 │ icon label │                   │ option │
+                                 ├────────────┤                   └────────┘
+                                 │ icon label │
+                                 └────────────┘
+</code></pre>
+<h2 id="item-types">Item Types</h2>
+<p>The toolbar structure is determined by the CSS classes of its child elements. Each type is recognized and transformed into the corresponding component. The following types are supported:</p>
+<ul>
+<li><strong>Buttons (<code>.wx-toolbar-button</code>)</strong>: Main interactive elements that trigger actions. They can be displayed with icon, text, or both.</li>
+<li><strong>Separators (<code>.wx-toolbar-separator</code>)</strong>: Provide visual grouping of related buttons.</li>
+<li><strong>Dropdown Buttons (<code>.wx-toolbar-dropdown</code>)</strong>: Open submenus with further actions or links. Internally, the <code>DropdownCtrl</code> control is used.</li>
+<li><strong>Comboboxes (<code>.wx-toolbar-combo</code>)</strong>: Create a dropdown menu for selection between several options.</li>
+<li><strong>Text Items (<code>.wx-toolbar-label</code>)</strong>: Display static, non-interactive text in the toolbar, such as labels or status displays.</li>
+<li><strong>&quot;More&quot; Menu (<code>.wx-toolbar-more</code>)</strong>: A special dropdown menu automatically placed at the right edge, marked by the &quot;…&quot; symbol. Used for less frequently required actions.</li>
+</ul>
+<h2 id="settings">Settings</h2>
+<p>Individual elements are configured via <code>data-</code> attributes in the HTML. These attributes provide fine-grained control over appearance and functionality.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-label</code></td>
+<td>Sets the visible text for buttons, comboboxes, or text items.</td>
+<td><code>data-label=&quot;Save&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-icon</code></td>
+<td>Assigns a CSS icon class to a button.</td>
+<td><code>data-icon=&quot;fas fa-save&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-title</code></td>
+<td>Adds a tooltip to a button, displayed on mouseover.</td>
+<td><code>data-title=&quot;Save changes&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-color-css</code></td>
+<td>Applies a predefined color class to an element.</td>
+<td><code>data-color-css=&quot;btn-primary&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-color-style</code></td>
+<td>Applies a direct CSS style to an element.</td>
+<td><code>data-color-style=&quot;background-color: #ff0000;&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-align</code></td>
+<td>Sets the alignment of an element within the toolbar (<code>left</code> or <code>right</code>). Default: <code>left</code></td>
+<td><code>data-align=&quot;right&quot;</code></td>
+</tr>
+<tr>
+<td><code>active</code></td>
+<td>Marks a button as active or selected visually. No value required.</td>
+<td><code>&lt;div class=&quot;wx-toolbar-button&quot; active&gt;&lt;/div&gt;</code></td>
+</tr>
+<tr>
+<td><code>disabled</code></td>
+<td>Disables an element and prevents interaction. No value required.</td>
+<td><code>&lt;div class=&quot;wx-toolbar-button&quot; disabled&gt;&lt;/div&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>After initialization, the toolbar instance can be accessed programmatically to change its properties or child elements dynamically.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<p>For toolbars declared in HTML, the associated controller instance can be retrieved using <code>getInstanceByElement(element)</code> from <code>webexpress.webui.Controller</code>.</p>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const toolbarElement = document.getElementById('myToolbar');
+
+// retrieve the controller instance for the element
+const toolbarCtrl = webexpress.webui.Controller.getInstanceByElement(toolbarElement);
+
+// programmatically interact with the toolbar, e.g., find a specific button
+if (toolbarCtrl) {
+    const saveButton = toolbarElement.querySelector('[data-label=&quot;Save&quot;]');
+    // ...further manipulation of the button
+}
+</code></pre>
+<h3 id="manual-instantiation">Manual Instantiation</h3>
+<p>A toolbar can also be created completely programmatically and assigned to a host element, which is useful for dynamic UI scenarios.</p>
+<pre><code class="lang-javascript">// find the container element for the dynamic toolbar
+const container = document.getElementById('toolbar-container');
+
+// create a new ToolbarCtrl instance manually
+const dynamicToolbarCtrl = new webexpress.webui.ToolbarCtrl(container);
+
+// add items to the toolbar programmatically
+// ...
+</code></pre>
+<h2 id="events">Events</h2>
+<p>The control triggers global events in response to user interactions. These events can be processed by other application modules.</p>
+<ul>
+<li><p><strong><code>webexpress.webui.Event.CLICK_EVENT</code></strong>
+Triggered when a button (<code>.wx-toolbar-button</code>) is clicked. The event <code>detail</code> object contains information about the sender and the clicked item.</p>
+</li>
+<li><p><strong><code>webexpress.webui.Event.CHANGE_VALUE_EVENT</code></strong>
+Triggered when the user selects a new option in a combobox (<code>.wx-toolbar-combo</code>).</p>
+</li>
+</ul>
+<h2 id="example-use-cases">Example Use Cases</h2>
+<p>The following HTML example demonstrates declarative configuration of a toolbar with different item types and attributes.</p>
+<pre><code class="lang-html">&lt;!-- Main container for the toolbar control --&gt;
+&lt;div id=&quot;example-toolbar&quot; class=&quot;wx-webui-toolbar&quot;&gt;
+  
+  &lt;!-- A button with icon and label --&gt;
+  &lt;div class=&quot;wx-toolbar-button&quot; data-label=&quot;Home&quot; data-icon=&quot;fas fa-home&quot;&gt;&lt;/div&gt;
+  
+  &lt;!-- A button with only icon and tooltip --&gt;
+  &lt;div class=&quot;wx-toolbar-button&quot; data-icon=&quot;fas fa-cog&quot; data-title=&quot;Settings&quot;&gt;&lt;/div&gt;
+  
+  &lt;!-- A separator for grouping --&gt;
+  &lt;div class=&quot;wx-toolbar-separator&quot;&gt;&lt;/div&gt;
+  
+  &lt;!-- A dropdown button with nested menu --&gt;
+  &lt;div class=&quot;wx-toolbar-dropdown&quot; data-label=&quot;Options&quot;&gt;
+    &lt;ul class=&quot;dropdown-menu&quot;&gt;
+      &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Option 1&lt;/a&gt;&lt;/li&gt;
+      &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Option 2&lt;/a&gt;&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/div&gt;
+  
+  &lt;!-- A combobox with label and selectable options --&gt;
+  &lt;div class=&quot;wx-toolbar-combo&quot; data-label=&quot;Select&quot;&gt;
+      &lt;option value=&quot;a&quot;&gt;Option A&lt;/option&gt;
+      &lt;option value=&quot;b&quot;&gt;Option B&lt;/option&gt;
+      &lt;option value=&quot;c&quot;&gt;Option C&lt;/option&gt;
+  &lt;/div&gt;
+  
+  &lt;!-- A static text item, aligned to the right --&gt;
+  &lt;div class=&quot;wx-toolbar-label&quot; data-label=&quot;Static Text&quot; data-align=&quot;right&quot;&gt;&lt;/div&gt;
+
+  &lt;!-- A &quot;more&quot; dropdown for additional, less frequently used items --&gt;
+  &lt;div class=&quot;wx-toolbar-more&quot;&gt;
+    &lt;a href=&quot;#&quot;&gt;Another Item 1&lt;/a&gt;
+    &lt;a href=&quot;#&quot;&gt;Another Item 2&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/toolbar.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

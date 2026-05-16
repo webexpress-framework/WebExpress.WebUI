@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>ListCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="ListCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/list.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="listctrl">ListCtrl</h1>
+<p>The <code>ListCtrl</code> is a flexible flat-list component that renders a collection of items inside a <code>&lt;ul&gt;</code> element. It supports item selection, drag-and-drop reordering, inline editing, per-item context menus (options), deletable rows, change-flash highlighting, and cookie-based order persistence.</p>
+<pre><code>   ┌───────────────────────────────────────┐
+   │ Title                               ▾ │
+   ├───────────────────────────────────────┤
+   │ ⠿  Item A                             │
+   ┃ ⠿  Item B  ◄── selected (active)      │
+   │ ⠿  Item C                             │
+   │ ⠿  Item D                            x│
+   └───────────────────────────────────────┘
+</code></pre>
+<h2 id="configuration">Configuration</h2>
+<p>The initialization and behaviour of the <code>ListCtrl</code> are controlled via <code>data-</code> attributes on the host element (<code>wx-webui-list</code>) and on each item element (<code>wx-list-item</code>).</p>
+<h3 id="host-element-attributes">Host element attributes</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-selectable</code></td>
+<td>Set to <code>&quot;true&quot;</code> to allow the user to select a row by clicking it. Fires <code>SELECT_ITEM_EVENT</code> on selection change.</td>
+</tr>
+<tr>
+<td><code>data-movable-item</code></td>
+<td>Set to <code>&quot;true&quot;</code> to show a drag handle on each row and allow the user to reorder rows via drag-and-drop or keyboard.</td>
+</tr>
+<tr>
+<td><code>data-deletable</code></td>
+<td>Set to <code>&quot;true&quot;</code> to show a delete button on each row. Fires <code>MOVE_EVENT</code> with <code>action: &quot;delete&quot;</code> after removal.</td>
+</tr>
+<tr>
+<td><code>data-delete-confirm</code></td>
+<td>Set to <code>&quot;true&quot;</code> to show a browser <code>confirm()</code> dialog before deleting a row.</td>
+</tr>
+<tr>
+<td><code>data-delete-label</code></td>
+<td>Label text for the delete button. Default: <code>&quot;Delete&quot;</code>.</td>
+</tr>
+<tr>
+<td><code>data-delete-title</code></td>
+<td>Tooltip text for the delete button. Default: <code>&quot;Delete item&quot;</code>.</td>
+</tr>
+<tr>
+<td><code>data-persist-key</code></td>
+<td>Cookie key used to persist item order across page loads. Falls back to the element's <code>id</code> if omitted. Only effective when all items have an <code>id</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="item-element-attributes-wx-list-item">Item element attributes (<code>wx-list-item</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Unique identifier for the item. Required for persistence and programmatic selection.</td>
+</tr>
+<tr>
+<td><code>data-color</code></td>
+<td>A Bootstrap or custom CSS class added to the <code>&lt;li&gt;</code> element (e.g. <code>&quot;text-danger&quot;</code>).</td>
+</tr>
+<tr>
+<td><code>data-editable</code></td>
+<td>Set to <code>&quot;true&quot;</code> to make the item content inline-editable via <code>SmartEditCtrl</code>.</td>
+</tr>
+<tr>
+<td><code>data-image</code></td>
+<td>URL of an image to show in the item content area.</td>
+</tr>
+<tr>
+<td><code>data-icon</code></td>
+<td>CSS class of a Font Awesome icon to prepend (e.g. <code>&quot;fa-solid fa-star&quot;</code>).</td>
+</tr>
+<tr>
+<td><code>data-uri</code></td>
+<td>Link target URI rendered inside the item content.</td>
+</tr>
+<tr>
+<td><code>data-target</code></td>
+<td>Link target (<code>_blank</code>, <code>_self</code>, …).</td>
+</tr>
+<tr>
+<td><code>data-modal</code></td>
+<td>Modal selector to open on click.</td>
+</tr>
+<tr>
+<td><code>data-object-id</code></td>
+<td>Object identifier forwarded to the <code>SmartEditCtrl</code> for inline edit operations.</td>
+</tr>
+<tr>
+<td><code>data-type</code></td>
+<td>Renderer type used to render the item body (e.g. a custom template type).</td>
+</tr>
+<tr>
+<td><code>data-wx-primary-action</code></td>
+<td>Primary action type (<code>&quot;frame&quot;</code>, <code>&quot;modal&quot;</code>, …).</td>
+</tr>
+<tr>
+<td><code>data-wx-primary-target</code></td>
+<td>CSS selector of the target element for the primary action.</td>
+</tr>
+<tr>
+<td><code>data-wx-primary-uri</code></td>
+<td>URI passed to the primary action target.</td>
+</tr>
+<tr>
+<td><code>data-wx-secondary-action</code></td>
+<td>Secondary action type (triggered on double-click).</td>
+</tr>
+<tr>
+<td><code>data-wx-secondary-target</code></td>
+<td>CSS selector of the target element for the secondary action.</td>
+</tr>
+<tr>
+<td><code>data-wx-secondary-uri</code></td>
+<td>URI passed to the secondary action target.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="options-sub-element-wx-list-options">Options sub-element (<code>wx-list-options</code>)</h3>
+<p>Place a child <code>&lt;div class=&quot;wx-list-options&quot;&gt;</code> inside the host element to define a per-item context menu shown in a dropdown. Each child <code>&lt;div&gt;</code> inside it becomes one menu entry and supports the same attributes as option items in <code>ControlDropdown</code>.</p>
+<h2 id="functionality">Functionality</h2>
+<p><code>ListCtrl</code> parses all <code>.wx-list-item</code> children during construction and removes the original <code>&lt;div&gt;</code> elements from the DOM, replacing them with a managed <code>&lt;ul&gt;</code>. Each item is converted into an internal data object and rendered as a <code>&lt;li class=&quot;wx-list-li&quot;&gt;</code>.</p>
+<p><strong>Selection</strong> — when <code>data-selectable=&quot;true&quot;</code> the user can click any row. The active row receives the CSS class <code>active</code> and <code>aria-selected=&quot;true&quot;</code>. Only one row may be active at a time; clicking the same row again keeps it selected.</p>
+<p><strong>Drag-and-drop reorder</strong> — when <code>data-movable-item=&quot;true&quot;</code> a drag handle (☰) is prepended to each <code>&lt;li&gt;</code>. Items can be moved by dragging with the mouse or using <code>Space</code> to pick up an item, <code>↑</code>/<code>↓</code> to move the placeholder, and <code>Enter</code> / <code>Escape</code> to confirm or cancel. An auto-scroll mechanism activates when the pointer approaches the list boundary.</p>
+<p><strong>Delete</strong> — when <code>data-deletable=&quot;true&quot;</code> a delete button (✕) is appended to each <code>&lt;li&gt;</code>. An optional confirmation dialog is shown if <code>data-delete-confirm=&quot;true&quot;</code> is set. After removal the item array is updated and <code>render()</code> is called.</p>
+<p><strong>Change-flash highlight</strong> — after a <code>render()</code> call, items whose text content has changed since the previous render receive a brief CSS flash animation (<code>wx-row-flash</code>). This can be suppressed for a single cycle with <code>suppressNextChangeFlash()</code> or toggled globally with <code>setChangeFlash(bool)</code>.</p>
+<p><strong>Persistence</strong> — when <code>data-persist-key</code> is set (or when the host element has an <code>id</code>), the current item order is serialised as JSON and stored in a cookie (30 days, <code>SameSite=Lax</code>) after every reorder. On the next page load the order is restored automatically. Persistence only works when every item carries an <code>id</code> attribute.</p>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>After initialization, the component can be controlled via its JavaScript instance.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an automatically created instance</h3>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const element = document.getElementById(&quot;my-list&quot;);
+
+// retrieve the controller instance associated with the element
+const listCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (listCtrl) {
+    // select an item by its id
+    listCtrl.selectItem(&quot;item-2&quot;);
+
+    // insert a new item at the end
+    listCtrl.insertItem({ id: &quot;item-new&quot;, content: { content: &quot;New entry&quot; } });
+
+    // delete an item by id
+    listCtrl.deleteItem(&quot;item-1&quot;);
+
+    // replace all items at once
+    listCtrl.setItems([
+        { id: &quot;a&quot;, content: { content: &quot;Alpha&quot; } },
+        { id: &quot;b&quot;, content: { content: &quot;Beta&quot;  } }
+    ]);
+
+    // clear the whole list
+    listCtrl.clear();
+}
+</code></pre>
+<h3 id="manual-instantiation">Manual instantiation</h3>
+<pre><code class="lang-javascript">const container = document.getElementById(&quot;dynamic-list&quot;);
+
+// mark items before instantiation
+container.innerHTML = `
+    &lt;div class=&quot;wx-list-item&quot; id=&quot;x1&quot;&gt;First&lt;/div&gt;
+    &lt;div class=&quot;wx-list-item&quot; id=&quot;x2&quot;&gt;Second&lt;/div&gt;
+`;
+
+const listCtrl = new webexpress.webui.ListCtrl(container);
+</code></pre>
+<h3 id="api-reference">API reference</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>render()</code></td>
+<td>Re-renders all items and applies change-flash highlighting to modified rows.</td>
+</tr>
+<tr>
+<td><code>clear()</code></td>
+<td>Removes all items and resets selection state.</td>
+</tr>
+<tr>
+<td><code>setItems(items)</code></td>
+<td>Replaces the entire item list with a new array of item objects or strings.</td>
+</tr>
+<tr>
+<td><code>insertItem(itemData, index?)</code></td>
+<td>Inserts a new item at the given index (appends if omitted). Returns the new item object.</td>
+</tr>
+<tr>
+<td><code>deleteItem(itemId)</code></td>
+<td>Removes the item with the given <code>id</code>. Returns <code>true</code> if found and removed.</td>
+</tr>
+<tr>
+<td><code>deleteItemAt(index)</code></td>
+<td>Removes the item at the given zero-based index. Returns <code>true</code> if removed.</td>
+</tr>
+<tr>
+<td><code>selectItem(itemId, dispatch?)</code></td>
+<td>Programmatically selects an item by <code>id</code>. Pass <code>dispatch = false</code> to suppress the event.</td>
+</tr>
+<tr>
+<td><code>enableChangeFlash()</code></td>
+<td>Enables the change-flash highlight feature (default: enabled).</td>
+</tr>
+<tr>
+<td><code>disableChangeFlash()</code></td>
+<td>Disables the change-flash highlight feature.</td>
+</tr>
+<tr>
+<td><code>setChangeFlash(enabled)</code></td>
+<td>Enables or disables the change-flash highlight feature.</td>
+</tr>
+<tr>
+<td><code>suppressNextChangeFlash()</code></td>
+<td>Suppresses the change-flash for the next <code>render()</code> cycle only.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="events">Events</h2>
+<p>The component dispatches the following events on its host element.</p>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>When</th>
+<th>Detail properties</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>webexpress.webui.Event.SELECT_ITEM_EVENT</code></td>
+<td>A row is selected (or deselected) by click or <code>selectItem()</code>.</td>
+<td><code>{ item, itemId, originalEvent }</code></td>
+</tr>
+<tr>
+<td><code>webexpress.webui.Event.ROW_REORDER_EVENT</code></td>
+<td>The user finishes a drag-and-drop reorder.</td>
+<td><code>{ newOrder, previousOrder }</code></td>
+</tr>
+<tr>
+<td><code>webexpress.webui.Event.MOVE_EVENT</code></td>
+<td>An item is moved (<code>action: &quot;move&quot;</code>) or deleted (<code>action: &quot;delete&quot;</code>).</td>
+<td><code>{ kind, action, itemId, index }</code></td>
+</tr>
+<tr>
+<td><code>webexpress.webui.Event.START_INLINE_EDIT_EVENT</code></td>
+<td>Integration only — forwarded from <code>SmartEditCtrl</code>.</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT</code></td>
+<td>Integration only — forwarded from <code>SmartEditCtrl</code>.</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>webexpress.webui.Event.END_INLINE_EDIT_EVENT</code></td>
+<td>Integration only — forwarded from <code>SmartEditCtrl</code>.</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-javascript">const el = document.getElementById(&quot;my-list&quot;);
+
+// react to item selection
+el.addEventListener(webexpress.webui.Event.SELECT_ITEM_EVENT, (e) =&gt; {
+    console.log(&quot;Selected item id:&quot;, e.detail.itemId);
+});
+
+// react to reorder
+el.addEventListener(webexpress.webui.Event.ROW_REORDER_EVENT, (e) =&gt; {
+    const ids = e.detail.newOrder.map(it =&gt; it.id);
+    console.log(&quot;New order:&quot;, ids);
+});
+</code></pre>
+<h2 id="use-case-example-html--declarative">Use-Case Example (HTML / declarative)</h2>
+<pre><code class="lang-html">&lt;!--
+    A selectable, movable list with options menu and order persistence.
+    The cookie key is derived from the element id (&quot;character-list&quot;).
+--&gt;
+&lt;ul id=&quot;character-list&quot;
+    class=&quot;wx-webui-list&quot;
+    data-selectable=&quot;true&quot;
+    data-movable-item=&quot;true&quot;
+    data-deletable=&quot;true&quot;
+    data-delete-confirm=&quot;true&quot;
+    data-delete-label=&quot;Remove&quot;
+    data-delete-title=&quot;Remove this character&quot;&gt;
+
+    &lt;!-- global options menu entries (shared by all items) --&gt;
+    &lt;div class=&quot;wx-list-options&quot;&gt;
+        &lt;div data-icon=&quot;fa-solid fa-pen&quot; data-uri=&quot;/edit&quot;&gt;Edit&lt;/div&gt;
+        &lt;div data-icon=&quot;fa-solid fa-trash&quot; data-uri=&quot;/delete&quot;&gt;Delete&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;!-- list items --&gt;
+    &lt;div class=&quot;wx-list-item&quot; id=&quot;char-1&quot;
+         data-icon=&quot;fa-solid fa-user&quot;
+         data-wx-primary-action=&quot;frame&quot;
+         data-wx-primary-target=&quot;#detail-frame&quot;
+         data-wx-primary-uri=&quot;/characters/1&quot;&gt;
+        Aragorn
+    &lt;/div&gt;
+
+    &lt;div class=&quot;wx-list-item&quot; id=&quot;char-2&quot;
+         data-icon=&quot;fa-solid fa-user&quot;
+         data-wx-primary-action=&quot;frame&quot;
+         data-wx-primary-target=&quot;#detail-frame&quot;
+         data-wx-primary-uri=&quot;/characters/2&quot;&gt;
+        Legolas
+    &lt;/div&gt;
+
+    &lt;div class=&quot;wx-list-item&quot; id=&quot;char-3&quot;
+         data-icon=&quot;fa-solid fa-user&quot;
+         data-wx-primary-action=&quot;frame&quot;
+         data-wx-primary-target=&quot;#detail-frame&quot;
+         data-wx-primary-uri=&quot;/characters/3&quot;&gt;
+        Gimli
+    &lt;/div&gt;
+&lt;/ul&gt;
+
+&lt;!-- detail frame that receives primary action content --&gt;
+&lt;div id=&quot;detail-frame&quot; class=&quot;wx-webui-frame&quot;&gt;&lt;/div&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/list.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

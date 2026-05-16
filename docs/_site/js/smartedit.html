@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>SmartEditCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="SmartEditCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/smartedit.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="smarteditctrl">SmartEditCtrl</h1>
+<p>The <code>SmartEditCtrl</code> is a versatile control for in-line editing of values directly within HTML elements. It extends the functionality of conventional display elements with the ability to edit these values comfortably and without changing the editing context. When hovering over a target element with the mouse, a pencil icon appears to the right of the content, which serves as an edit button. A click on the pencil opens an editor form at that exact position, allowing the values to be edited. The input can either be accepted and saved or canceled. The choice of editor is flexible and can be customized, allowing for the use of simple text fields or specialized components like a code editor.</p>
+<pre><code>   ┌──────────────────────────────────────────┐
+   │ [Value]                           [Edit] │
+   └──────────────────────────────────────────┘
+</code></pre>
+<p>Configuration is done declaratively via <code>data-*</code> attributes on the HTML element.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-object-id</code></td>
+<td>The ID of the data object being edited.</td>
+</tr>
+<tr>
+<td><code>data-object-name</code></td>
+<td>The name of the data object being edited.</td>
+</tr>
+<tr>
+<td><code>data-form-action</code></td>
+<td>The URL to which the form data is sent upon saving.</td>
+</tr>
+<tr>
+<td><code>data-form-method</code></td>
+<td>The HTTP method for the request (e.g., <code>PUT</code>, <code>POST</code>). Defaults to <code>PUT</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="functionality">Functionality</h3>
+<p>The control operates autonomously and manages the entire editing workflow:</p>
+<ul>
+<li><strong>Dynamic DOM Manipulation</strong>: Upon initialization, the target element is equipped with mouse events, so the pencil icon is shown on mouseover and removed on mouseout. A double-click also initiates editing.</li>
+<li><strong>Editor Integration</strong>: After clicking the pencil, the original display content is temporarily replaced by a form containing the editor and control buttons (Save, Cancel). The editor component is the first child element of the <code>wx-webui-smart-edit</code> container, allowing for flexible integration of different editor types.</li>
+<li><strong>State Management and Events</strong>: During editing, the element is protected by the internal reference <code>_activeEdit</code>, ensuring that only one edit can be active at a time. After editing is complete—whether by saving or canceling—the original display is restored, and corresponding events are dispatched.</li>
+<li><strong>Application Integration</strong>: Changes are communicated to the application via a <code>fetch</code> request to the configured endpoint. The control dispatches the following global custom events on the <code>document</code>:
+<ul>
+<li><code>webexpress.webui.Event.START_INLINE_EDIT_EVENT</code>: Fired when editing begins.</li>
+<li><code>webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT</code>: Fired when a value is successfully saved.</li>
+<li><code>webexpress.webui.Event.END_INLINE_EDIT_EVENT</code>: Fired when editing finishes (regardless of save or cancel).</li>
+</ul>
+</li>
+</ul>
+<h3 id="programmatic-control">Programmatic Control</h3>
+<p>The component supports full control via JavaScript after initialization.</p>
+<h4 id="accessing-an-automatically-generated-instance">Accessing an Automatically Generated Instance</h4>
+<p>For controls defined declaratively in HTML, a central <code>webexpress.webui.Controller</code> instance is created automatically. Use <code>getInstanceByElement(element)</code> for access.</p>
+<pre><code class="lang-javascript">const element = document.getElementById('my-editable-text');
+const smartEditCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (smartEditCtrl) {
+    // Programmatically interact with the instance, e.g., read the value
+    console.log('Current value:', smartEditCtrl.getValue(element));
+}
+</code></pre>
+<h4 id="manual-instantiation">Manual Instantiation</h4>
+<p>A <code>SmartEditCtrl</code> can also be created programmatically, for example, when content is loaded at runtime.</p>
+<pre><code class="lang-javascript">const container = document.getElementById('dynamic-edit-container');
+// Ensure the container has the required structure (e.g., an editor element as a child).
+const dynamicEditCtrl = new webexpress.webui.SmartEditCtrl(container);
+</code></pre>
+<h3 id="event-handling">Event Handling</h3>
+<p>The <code>SmartEditCtrl</code> component emits global events for user interactions and state changes.</p>
+<ul>
+<li><strong><code>webexpress.webui.Event.START_INLINE_EDIT_EVENT</code></strong>: Fired when editing begins. <code>event.detail</code> contains the sender and the current value.</li>
+<li><strong><code>webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT</code></strong>: Fired after a value has been successfully saved via the API.</li>
+<li><strong><code>webexpress.webui.Event.END_INLINE_EDIT_EVENT</code></strong>: Fired when editing is finished.</li>
+</ul>
+<pre><code class="lang-javascript">document.addEventListener(webexpress.webui.Event.START_INLINE_EDIT_EVENT, (e) =&gt; {
+    console.log(`Editing started for element #${e.detail.id} with value:`, e.detail.value);
+});
+
+document.addEventListener(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, (e) =&gt; {
+    console.log(`Element #${e.detail.id} was saved.`);
+    // A notification could be shown to the user here, for example.
+});
+</code></pre>
+<h3 id="html-usage-example">HTML Usage Example</h3>
+<p>To use the control, wrap your editor element within a container and assign it the class <code>wx-webui-smart-edit</code>.</p>
+<pre><code class="lang-html">&lt;!--
+    An element that can be edited with SmartEditCtrl.
+    The inner `div` with a `data-controller-class` will be used as the editor.
+--&gt;
+&lt;div id=&quot;my-editable-text&quot;
+     class=&quot;wx-webui-smart-edit&quot;
+     data-form-action=&quot;/api/update/item&quot;
+     data-form-method=&quot;PUT&quot;
+     data-object-id=&quot;123&quot;&gt;
+    &lt;div data-controller-class=&quot;wx-webui-EditorCtrl&quot;&gt;
+        &lt;!-- Initial value displayed to the user --&gt;
+        This is the editable value.
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<p>This control provides an efficient, user-friendly inline editing experience in web applications.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/smartedit.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

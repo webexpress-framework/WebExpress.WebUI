@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>SmartViewCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="SmartViewCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/smartview.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="smartviewctrl">SmartViewCtrl</h1>
+<p>The <code>SmartViewCtrl</code> is a display-only component that acts as a read-only wrapper around other form controls or simple markup. Its primary purpose is to extract the value from an inner element (like an editor, a select dropdown, or an input field) and render a static, non-interactive representation of that value.</p>
+<p>This control is ideal for &quot;summary&quot; or &quot;review&quot; pages where you want to display the data that a user has entered in a form, using the same rendering logic as the original control but without the editing capabilities.</p>
+<h2 id="functionality">Functionality</h2>
+<ul>
+<li><strong>Value Extraction</strong>: On initialization, <code>SmartViewCtrl</code> inspects its child element to determine the best way to extract its value. It can intelligently pull data from:
+<ul>
+<li>Other WebExpress WebUI controls (e.g., <code>EditorCtrl</code>, <code>SelectionCtrl</code>, <code>TagCtrl</code>).</li>
+<li>Standard HTML form elements (<code>&lt;input&gt;</code>, <code>&lt;textarea&gt;</code>, <code>&lt;select&gt;</code>).</li>
+<li>Elements with a <code>data-value</code> attribute.</li>
+<li>As a last resort, the <code>textContent</code> of the child element.</li>
+</ul>
+</li>
+<li><strong>Read-Only Rendering</strong>: The component replaces its content with a clone of its child element, effectively presenting a static snapshot. It does not provide any inline editing capabilities or dispatch events related to editing.</li>
+<li><strong>Programmatic Updates</strong>: While the view is read-only for the user, the displayed value can be updated programmatically by setting the <code>value</code> property on the <code>SmartViewCtrl</code> instance. When the value is set, the component attempts to update the underlying control (if it's a known WebUI control) before re-rendering its view.</li>
+</ul>
+<h2 id="configuration">Configuration</h2>
+<p>The <code>SmartViewCtrl</code> is configured by wrapping it around the element you wish to display. There are no specific <code>data-</code> attributes for the wrapper itself; its behavior is determined entirely by its child content.</p>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>The value of the <code>SmartViewCtrl</code> can be accessed and modified through its JavaScript instance.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const element = document.getElementById('my-smart-view');
+
+// retrieve the controller instance associated with the element
+const smartViewCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (smartViewCtrl) {
+    // get the extracted value
+    const currentValue = smartViewCtrl.value;
+
+    // set a new value programmatically
+    // this will update the inner control (if possible) and re-render the view
+    smartViewCtrl.value = 'New value to display';
+}
+</code></pre>
+<h2 id="use-case-example">Use Case Example</h2>
+<p>Imagine you have a form with a <code>SelectionCtrl</code> for picking a category. On a confirmation page, you can use <code>SmartViewCtrl</code> to display the selected category without making it editable.</p>
+<p><strong>Form Page (Interactive):</strong></p>
+<pre><code class="lang-html">&lt;div id=&quot;category-selector&quot; class=&quot;wx-webui-input-selection&quot; name=&quot;category&quot;&gt;
+    &lt;div id=&quot;cat-1&quot; class=&quot;wx-selection-item&quot;&gt;Category 1&lt;/div&gt;
+    &lt;div id=&quot;cat-2&quot; class=&quot;wx-selection-item&quot;&gt;Category 2&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<p><strong>Confirmation Page (Read-Only Display):</strong></p>
+<pre><code class="lang-html">&lt;!--
+    The SmartViewCtrl wraps the same control definition.
+    It will automatically extract the value (&quot;cat-1&quot; or &quot;cat-2&quot;)
+    and display the corresponding read-only selection tag.
+--&gt;
+&lt;div id=&quot;category-display&quot; class=&quot;wx-webui-smart-view&quot;&gt;
+    &lt;div class=&quot;wx-webui-selection&quot; data-value=&quot;cat-2&quot;&gt;
+        &lt;div id=&quot;cat-1&quot; class=&quot;wx-selection-item&quot;&gt;Category 1&lt;/div&gt;
+        &lt;div id=&quot;cat-2&quot; class=&quot;wx-selection-item&quot;&gt;Category 2&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/smartview.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

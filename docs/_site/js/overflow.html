@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>OverflowCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="OverflowCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/overflow.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="overflowctrl">OverflowCtrl</h1>
+<p>The <code>OverflowCtrl</code> class manages the dynamic distribution of horizontally arranged elements and automatically moves overflowing content into an overflow menu (&quot;More&quot; menu) at the right edge. This ensures a flexible, width-adaptive layout, so that important controls always remain visible and less relevant elements are hidden when space is limited.</p>
+<pre><code>                                                                                        more
+                                                                                         :
+   ┌─────────────────────────────────────────────────────────────────────────────────────:───┐
+   │  ┌─────────┐┌─────────┐┌─────────┐┌─────────┐┌─────────┐┌─────────┐┌─────────┐      V   │
+   │  │ control ││ control ││ control ││ control ││ control ││ control ││ control │     [▼]  │
+   │  └─────────┘└─────────┘└─────────┘└─────────┘└─────────┘└─────────┘└─────────┘          │
+   └─────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h2 id="functionality">Functionality</h2>
+<p>The overflow controller monitors the width of the container and moves elements to the overflow menu when space runs out. Control is via CSS classes and <code>data-</code> attributes of the child elements. Any control element can be used, e.g. buttons, dropdowns, comboboxes, separators, or static text.</p>
+<p>Supported types of elements:</p>
+<ul>
+<li><strong>Interactive elements (<code>.wx-toolbar-button</code>)</strong>: Any button or control that triggers actions.</li>
+<li><strong>Separators (<code>.wx-toolbar-separator</code>)</strong>: Used for visual grouping.</li>
+<li><strong>Dropdowns (<code>.wx-toolbar-dropdown</code>)</strong>: Open a submenu for further actions or links. Internally, the <code>DropdownCtrl</code> class is used.</li>
+<li><strong>Comboboxes (<code>.wx-toolbar-combo</code>)</strong>: Selection field for choosing a value.</li>
+<li><strong>Text elements (<code>.wx-toolbar-label</code>)</strong>: Static text, e.g. for a status display.</li>
+<li><strong>Overflow menu (&quot;More&quot;, <code>.wx-toolbar-more</code>)</strong>: A special dropdown menu at the right edge, which is automatically populated.</li>
+</ul>
+<h2 id="settings-and-attributes">Settings and Attributes</h2>
+<p>The overflow logic and the behavior of individual elements are controlled by the following attributes:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-overflow</code></td>
+<td>Controls the behavior: <code>&quot;never&quot;</code> (never move), <code>&quot;force&quot;</code> (always in overflow), empty = automatic</td>
+<td><code>data-overflow=&quot;force&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-overflow-cutoff</code></td>
+<td>Activates cutoff mode: As soon as the first element is moved to overflow, all subsequent elements are also moved. Values: <code>&quot;true&quot;</code> or <code>&quot;false&quot;</code></td>
+<td><code>data-overflow-cutoff=&quot;true&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="breakpoint--cutoff">Breakpoint / Cutoff</h2>
+<p>With the <code>data-overflow-cutoff</code> attribute, a breakpoint can be activated. If this is enabled (<code>&quot;true&quot;</code>), the controller moves, starting with the first overflowing element, all subsequent elements into the overflow menu. The visible area thus gets a clear cutoff point, after which all elements on the right are hidden. Without cutoff, elements are moved individually as space allows.</p>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>After initialization, the instance can be obtained via <code>getInstanceByElement(element)</code> from the central <code>webexpress.webui.Controller</code> and controlled directly.</p>
+<pre><code class="lang-javascript">// Find the root element
+const overflowRoot = document.querySelector('.wx-overflow');
+
+// Get the controller instance
+const overflowCtrl = webexpress.webui.Controller.getInstanceByElement(overflowRoot);
+
+// Explicitly trigger the overflow logic, e.g. after a layout change
+overflowCtrl.handleOverflow();
+
+// Restore all elements from the overflow menu
+overflowCtrl.restore();
+
+// Enable or disable automatic distribution
+overflowCtrl.setAutoDistribute(true); // or false
+</code></pre>
+<h2 id="manual-instantiation">Manual Instantiation</h2>
+<p>The class can also be created entirely programmatically and assigned to any container element.</p>
+<pre><code class="lang-javascript">// Find the container element
+const container = document.getElementById('overflow-container');
+
+// Create a new OverflowCtrl instance
+const dynamicOverflowCtrl = new webexpress.webui.OverflowCtrl(container);
+
+// Add elements programmatically
+// ...
+</code></pre>
+<h2 id="events">Events</h2>
+<p>The controller triggers global events, which can be processed by other parts of the application:</p>
+<ul>
+<li><strong>Click events:</strong> When clicking on interactive elements in the overflow menu.</li>
+<li><strong>Keyboard navigation:</strong> Events for menu navigation and submenus.</li>
+</ul>
+<h2 id="example">Example</h2>
+<p>A responsive layout using OverflowCtrl:</p>
+<pre><code class="lang-html">&lt;div class=&quot;wx-overflow&quot; data-overflow-cutoff=&quot;true&quot;&gt;
+    &lt;div class=&quot;wx-toolbar-button&quot; data-label=&quot;Open&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;wx-toolbar-button&quot; data-label=&quot;Save&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;wx-toolbar-dropdown&quot; data-label=&quot;Options&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;wx-toolbar-button&quot; data-label=&quot;Print&quot; data-overflow=&quot;force&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h2 id="best-practices">Best Practices</h2>
+<ul>
+<li>For important actions that should always remain visible: use <code>data-overflow=&quot;never&quot;</code>.</li>
+<li>For rarely used actions: use <code>data-overflow=&quot;force&quot;</code>.</li>
+<li>Use the cutoff attribute to define a clear breakpoint for visibility.</li>
+</ul>
+<h2 id="accessibility">Accessibility</h2>
+<p><code>OverflowCtrl</code> supports keyboard navigation and ARIA roles for improved accessibility. The overflow menu can be operated via keyboard and all entries are focusable.</p>
+<h2 id="summary">Summary</h2>
+<p>The <code>OverflowCtrl</code> class ensures flexible and adaptive distribution of elements in horizontal layouts. Less important elements are moved into an overflow menu when space is limited. With the cutoff attribute, a clear breakpoint can be defined, after which all further elements are hidden. Control is via HTML attributes and can also be programmatically adjusted as needed.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/overflow.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

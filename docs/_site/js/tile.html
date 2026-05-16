@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>TileCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="TileCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/tile.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="tilectrl">TileCtrl</h1>
+<p>The <code>TileCtrl</code> is a component for managing an interactive tile collection. It facilitates parsing tiles from HTML markup, reordering them via drag-and-drop, toggling their visibility, searching, sorting, and persisting their state (order and visibility). Configuration is done declaratively using <code>data-</code> attributes, which promotes simple integration and clean code.</p>
+<pre><code>   ┌─────────────────────────────┐
+   │ ┌───────────┐ ┌───────────┐ │
+   │ │ [Tile 1]  │ │ [Tile 2]  │ │
+   │ └───────────┘ └───────────┘ │
+   │ ┌───────────┐ ┌───────────┐ │
+   │ │ [Tile 3]  │ │ [Tile 4]  │ │
+   │ └───────────┘ └───────────┘ │
+   └─────────────────────────────┘
+</code></pre>
+<h2 id="declarative-configuration">Declarative Configuration</h2>
+<p>The initial state and behavior of the tile container are defined via <code>data-</code> attributes on the host element. The individual tiles are defined as direct child elements with the class <code>.wx-tile-card</code>.</p>
+<h3 id="container-attributes">Container Attributes</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-movable</code></td>
+<td>Allows reordering of tiles via drag-and-drop.</td>
+<td><code>data-movable=&quot;true&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-allow-remove</code></td>
+<td>Allows hiding or removing tiles.</td>
+<td><code>data-allow-remove=&quot;true&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-persist-key</code></td>
+<td>A unique key to save the order and visibility of tiles in a cookie.</td>
+<td><code>data-persist-key=&quot;dashboard-tiles&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="tile-attributes">Tile Attributes</h3>
+<p>Each tile is defined by an element with the class <code>.wx-tile-card</code>.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Attribute</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><code>data-id</code></td>
+<td style="text-align: left;">A unique ID for the tile.</td>
+<td style="text-align: left;"><code>data-id=&quot;tile-profile&quot;</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>data-label</code></td>
+<td style="text-align: left;">The title of the tile.</td>
+<td style="text-align: left;"><code>data-label=&quot;User Profile&quot;</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>data-icon</code></td>
+<td style="text-align: left;">A CSS class for an icon.</td>
+<td style="text-align: left;"><code>data-icon=&quot;fas fa-user&quot;</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>data-image</code></td>
+<td style="text-align: left;">The URL of an image for the tile header.</td>
+<td style="text-align: left;"><code>data-image=&quot;/path/to/icon.png&quot;</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>data-color-css</code></td>
+<td style="text-align: left;">A CSS class for color styling.</td>
+<td style="text-align: left;"><code>data-color-css=&quot;bg-primary&quot;</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>data-visible</code></td>
+<td style="text-align: left;">Determines if the tile is initially visible.</td>
+<td style="text-align: left;"><code>data-visible=&quot;false&quot;</code></td>
+</tr>
+<tr>
+<td style="text-align: left;"><code>innerHTML</code></td>
+<td style="text-align: left;">The HTML content of the tile body.</td>
+<td style="text-align: left;"><code>&lt;div&gt;Additional details...&lt;/div&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>Once initialized, the tile collection can be programmatically controlled via its controller instance. Methods like <code>insertTile</code>, <code>searchTiles</code>, or <code>orderTiles</code> automatically trigger a redraw of the view.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<p>For tile containers defined declaratively in HTML, the associated instance is retrieved via the <code>getInstanceByElement(element)</code> method of the central <code>webexpress.webui.Controller</code>.</p>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const tileContainer = document.getElementById('myTileContainer');
+
+// retrieve the controller instance associated with the element
+const tileCtrl = webexpress.webui.Controller.getInstanceByElement(tileContainer);
+
+// programmatically search for tiles
+if (tileCtrl) {
+    tileCtrl.searchTiles('Profile');
+}
+</code></pre>
+<h3 id="manual-instantiation">Manual Instantiation</h3>
+<p>A tile collection can also be created entirely programmatically and attached to a host element.</p>
+<pre><code class="lang-javascript">// find the container element for the dynamic tiles
+const container = document.getElementById('tile-container');
+
+// create a new instance of TileCtrl manually
+const dynamicTileCtrl = new webexpress.webui.TileCtrl(container);
+
+// add a new tile
+dynamicTileCtrl.insertTile({
+    id: 'new-tile',
+    label: 'Newly Added Tile',
+    html: '&lt;p&gt;This tile was added via code.&lt;/p&gt;',
+    icon: 'fas fa-plus'
+});
+</code></pre>
+<h2 id="events">Events</h2>
+<p>The component dispatches standardized events to inform the application about interactions.</p>
+<ul>
+<li><strong><code>webexpress.webui.Event.MOVE_EVENT</code></strong>: Fired after a tile has been moved.</li>
+<li><strong><code>webexpress.webui.Event.CHANGE_VISIBILITY_EVENT</code></strong>: Fired when a tile is shown or hidden.</li>
+<li><strong><code>webexpress.webui.Event.TILE_SEARCH_EVENT</code></strong>: Fired after a search, containing the search term and the found tiles.</li>
+<li><strong><code>webexpress.webui.Event.TILE_SORT_EVENT</code></strong>: Fired after a sort, containing the sort property and direction.</li>
+</ul>
+<h2 id="use-case-examples">Use Case Examples</h2>
+<p>The following example shows the declarative configuration of a tile container.</p>
+<pre><code class="lang-html">&lt;!-- Container that enables drag-and-drop and persistence --&gt;
+&lt;div id=&quot;dashboard&quot; class=&quot;wx-webui-tile&quot; data-movable=&quot;true&quot; data-persist-key=&quot;dashboard-state&quot; data-allow-remove=&quot;true&quot;&gt;
+
+    &lt;!-- A tile with an icon and title --&gt;
+    &lt;div class=&quot;wx-tile-card&quot; data-id=&quot;profile&quot; data-icon=&quot;fas fa-user&quot; data-label=&quot;Profile&quot;&gt;
+        View your user profile.
+    &lt;/div&gt;
+
+    &lt;!-- A tile that is initially hidden --&gt;
+    &lt;div class=&quot;wx-tile-card&quot; data-id=&quot;settings&quot; data-icon=&quot;fas fa-cog&quot; data-label=&quot;Settings&quot; data-visible=&quot;false&quot;&gt;
+        Adjust application settings.
+    &lt;/div&gt;
+
+    &lt;!-- Another tile --&gt;
+    &lt;div class=&quot;wx-tile-card&quot; data-id=&quot;mail&quot; data-icon=&quot;fas fa-envelope&quot; data-label=&quot;Messages&quot;&gt;
+        Check your inbox.
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/tile.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

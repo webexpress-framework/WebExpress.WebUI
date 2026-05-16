@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>SelectionCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="SelectionCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/selection.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="selectionctrl">SelectionCtrl</h1>
+<p>The <code>SelectionCtrl</code> component is a read-only control used to display a static list of items. It is designed to visually represent a set of options and highlight which ones are &quot;selected&quot; without providing any user interaction for changing that selection.</p>
+<p>All items are rendered in a single, flat <code>&lt;ul&gt;</code> list. This makes it an ideal choice for displaying data, such as the tags assigned to a blog post or the roles of a user, in a clear and non-interactive way.</p>
+<pre><code>   ┌────────────────────────────────────────────────────────┐
+   │ ┌─────────────────┐ ┌─────────────────┐ ┌────────────┐ │
+   │ │ [icon] Option A │ │ [icon] Option B │ │ [icon] ... │ │
+   │ └─────────────────┘ └─────────────────┘ └────────────┘ │
+   └────────────────────────────────────────────────────────┘
+</code></pre>
+<h2 id="configuration">Configuration</h2>
+<p>The component is initialized declaratively. The host element defines the control, and its child elements define the available options.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-value</code></td>
+<td>A semicolon-separated list of option IDs that should be initially marked as selected.</td>
+</tr>
+</tbody>
+</table>
+<p>Each available option is defined by an element with the class <code>.wx-selection-item</code>.</p>
+<ul>
+<li><strong>ID</strong>: The <code>id</code> of the element serves as the unique value of the option.</li>
+<li><strong><code>data-label</code></strong>: The text label for the item. If not provided, the element's text content is used.</li>
+<li><strong><code>data-icon</code> / <code>data-image</code></strong>: An icon class or image URL for the item.</li>
+<li><strong><code>data-label-color</code></strong>: A CSS class to apply to the list item, allowing for custom styling (e.g., colored tags).</li>
+<li><strong><code>disabled</code></strong>: Marks the item with a disabled style.</li>
+</ul>
+<h2 id="functionality">Functionality</h2>
+<ul>
+<li><strong>Static List Display</strong>: Renders all provided options in a simple <code>&lt;ul&gt;</code> list. The list is not filterable or sortable by the user.</li>
+<li><strong>Selection Highlighting</strong>: Items whose IDs are present in the <code>value</code> property are given a <code>.selected</code> CSS class for visual distinction.</li>
+<li><strong>Read-Only by Design</strong>: There are no user interactions for selecting or deselecting items. Changes to the selection can only be made programmatically.</li>
+<li><strong>State Management</strong>: The component reads its initial configuration from the DOM. The <code>options</code> and <code>value</code> properties can be manipulated via JavaScript after initialization, which will trigger a re-render.</li>
+</ul>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>After initialization, the component's state can be accessed and modified through its JavaScript instance.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const element = document.getElementById('my-selection-list');
+
+// retrieve the controller instance associated with the element
+const selectionCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (selectionCtrl) {
+    // get the currently marked items (array of IDs)
+    const currentSelection = selectionCtrl.value;
+
+    // set a new selection to be highlighted
+    // this will re-render the list
+    selectionCtrl.value = ['item-1', 'item-3'];
+}
+</code></pre>
+<h2 id="use-case-example">Use Case Example</h2>
+<p>The following HTML demonstrates how to display a list of user roles, with &quot;Administrator&quot; and &quot;Editor&quot; marked as selected.</p>
+<pre><code class="lang-html">&lt;!--
+    The host element defines the read-only selection list.
+    The 'data-value' attribute specifies which items are highlighted.
+--&gt;
+&lt;div id=&quot;user-roles-display&quot;
+     class=&quot;wx-webui-selection&quot;
+     data-value=&quot;role-admin;role-editor&quot;&gt;
+
+    &lt;!-- Each option is declared as a child element. --&gt;
+    &lt;div id=&quot;role-admin&quot; class=&quot;wx-selection-item&quot; data-icon=&quot;fas fa-user-shield&quot;&gt;Administrator&lt;/div&gt;
+    &lt;div id=&quot;role-editor&quot; class=&quot;wx-selection-item&quot; data-icon=&quot;fas fa-user-edit&quot;&gt;Editor&lt;/div&gt;
+    &lt;div id=&quot;role-viewer&quot; class=&quot;wx-selection-item&quot; data-icon=&quot;fas fa-user&quot;&gt;Viewer&lt;/div&gt;
+    &lt;div id=&quot;role-guest&quot; class=&quot;wx-selection-item&quot; data-icon=&quot;fas fa-question-circle&quot; disabled&gt;Guest (Disabled)&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h1 id="inputselectionctrl">InputSelectionCtrl</h1>
+<p>The <code>InputSelectionCtrl</code> is a versatile dropdown selection component that supports both single and multi-select modes, customizable options with icons and images, filtering, and structural elements like headers and dividers. It is designed to be highly configurable through declarative HTML attributes and provides a rich user experience for selecting items from a list.</p>
+<p>The component's value is managed internally and synchronized with a hidden input field, making it fully compatible with standard HTML form submissions.</p>
+<pre><code>   ┌────────────────────────────────────────────┐
+   │                                            │
+   │ [[Icon] Option A [x]] [[Icon] Option C [x]]│  // Display area with selected items
+   │                                            │
+   └────────────────────────────────────────────┘
+   ┌────────────────────────────────────────────┐
+   │  [Filter Input...]                     [x] │  // Dropdown menu
+   │ ────────────────────────────────────────── │
+   │ [Header Text]                              │
+   │   [Icon] Option B                          │
+   │ ────────────────────────────────────────── │
+   │   [Icon] Option D                          │
+   │ ────────────────────────────────────────── │
+   │ [Footer Content]                           │
+   └────────────────────────────────────────────┘
+</code></pre>
+<h2 id="configuration-1">Configuration</h2>
+<p>The component is initialized on a host element and configured using <code>data-</code> attributes.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>The name for the hidden input field used for form submission.</td>
+<td><code>name=&quot;categories&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-value</code></td>
+<td>A semicolon-separated list of IDs for the initial selection.</td>
+<td><code>data-value=&quot;id2;id3&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-multiselection</code></td>
+<td>Set to <code>&quot;true&quot;</code> to enable multi-select mode.</td>
+<td><code>data-multiselection=&quot;true&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-sticky-selection</code></td>
+<td>Set to <code>&quot;true&quot;</code> to prevent deselection of items in single-select mode.</td>
+<td><code>data-sticky-selection=&quot;true&quot;</code></td>
+</tr>
+<tr>
+<td><code>placeholder</code></td>
+<td>The text displayed when no items are selected.</td>
+<td><code>placeholder=&quot;Select an item...&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="options-and-structural-elements">Options and Structural Elements</h3>
+<p>Options and other list items are defined as child elements of the host container.</p>
+<ul>
+<li><strong>Item (<code>.wx-selection-item</code>)</strong>: Represents a selectable option.
+<ul>
+<li><code>id</code>: The unique value of the item.</li>
+<li><code>data-label</code>: The text label for the item.</li>
+<li><code>data-icon</code> / <code>data-image</code>: An icon class or image URL for the item.</li>
+<li><code>data-label-color</code>: A CSS class to apply to the selected item's tag.</li>
+<li><code>disabled</code>: Marks the item as non-selectable.</li>
+<li><code>data-render</code>: A JavaScript function string for custom rendering of the item in the dropdown list.</li>
+</ul>
+</li>
+<li><strong>Header (<code>.wx-selection-header</code>)</strong>: A non-selectable header to group options.</li>
+<li><strong>Divider (<code>.wx-selection-divider</code>)</strong>: A visual separator line.</li>
+<li><strong>Footer (<code>.wx-selection-footer</code>)</strong>: A static footer section at the bottom of the dropdown.</li>
+</ul>
+<h2 id="functionality-1">Functionality</h2>
+<ul>
+<li><strong>Single and Multi-Select</strong>: Can be configured for both modes. In single-select mode, choosing a new item replaces the current one.</li>
+<li><strong>Filtering</strong>: A built-in search box allows users to filter the list of options in real-time.</li>
+<li><strong>Rich Content</strong>: Options can include icons, images, and custom HTML structures.</li>
+<li><strong>Custom Rendering</strong>: A <code>data-render</code> attribute allows for a completely custom JavaScript-driven rendering for each option in the dropdown.</li>
+<li><strong>Form Integration</strong>: The component automatically manages a hidden <code>&lt;input&gt;</code> field, storing the selected values as a semicolon-separated string.</li>
+<li><strong>Dynamic Updates</strong>: Both the available <code>options</code> and the selected <code>value</code> can be get and set programmatically.</li>
+</ul>
+<h2 id="programmatic-control-1">Programmatic Control</h2>
+<p>The component's instance can be accessed to manipulate its state after initialization.</p>
+<h3 id="accessing-an-automatically-created-instance-1">Accessing an Automatically Created Instance</h3>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const element = document.getElementById('my-selection');
+
+// retrieve the controller instance associated with the element
+const selectionCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (selectionCtrl) {
+    // get the current selection (array of IDs)
+    const currentSelection = selectionCtrl.value;
+
+    // set a new selection programmatically using an array of IDs
+    selectionCtrl.value = ['id1', 'id4'];
+
+    // set a new selection using an array of objects
+    // objects that are not already registered as options are added automatically.
+    // the display label is resolved from 'label', 'name', 'text', or 'title' (in that order).
+    selectionCtrl.value = [
+        { id: 'game-1', name: 'The Secret of Monkey Island', releaseYear: 1990 },
+        { id: 'game-2', name: 'Monkey Island 2: LeChuck\'s Revenge', releaseYear: 1991 }
+    ];
+
+    // update the available options
+    selectionCtrl.options = [
+        { id: 'new1', label: 'New Option 1' },
+        { id: 'new2', label: 'New Option 2', icon: 'fas fa-star' }
+    ];
+}
+</code></pre>
+<h3 id="accepted-value-formats">Accepted Value Formats</h3>
+<p>The <code>value</code> setter accepts the following formats:</p>
+<table>
+<thead>
+<tr>
+<th>Format</th>
+<th>Example</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Array of IDs</td>
+<td><code>['id1', 'id2']</code></td>
+<td>Selects items whose IDs match.</td>
+</tr>
+<tr>
+<td>Array of objects</td>
+<td><code>[{ id: 'id1', name: 'Item 1' }]</code></td>
+<td>Extracts IDs; stores display metadata for rendering selected items. Does not add entries to the dropdown options.</td>
+</tr>
+<tr>
+<td>Semicolon-separated</td>
+<td><code>'id1;id2'</code></td>
+<td>Splits by <code>;</code> and selects matching items.</td>
+</tr>
+<tr>
+<td>Single ID string</td>
+<td><code>'id1'</code></td>
+<td>Selects a single item.</td>
+</tr>
+<tr>
+<td><code>null</code> / <code>undefined</code></td>
+<td><code>null</code></td>
+<td>Clears the selection.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="events">Events</h2>
+<p>The component dispatches several events to allow for external interactions.</p>
+<ul>
+<li><code>webexpress.webui.Event.CHANGE_VALUE_EVENT</code>: Fired when the selection changes.</li>
+<li><code>webexpress.webui.Event.CHANGE_FILTER_EVENT</code>: Fired when the user types in the filter input.</li>
+<li><code>webexpress.webui.Event.DROPDOWN_SHOW_EVENT</code>: Fired when the dropdown menu becomes visible.</li>
+<li><code>webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT</code>: Fired when the dropdown menu is hidden.</li>
+</ul>
+<h2 id="use-case-example-1">Use Case Example</h2>
+<pre><code class="lang-html">&lt;div id=&quot;category-selection&quot;
+     class=&quot;wx-webui-input-selection&quot;
+     name=&quot;categories&quot;
+     data-value=&quot;cat-2&quot;
+     data-multiselection=&quot;true&quot;
+     placeholder=&quot;Select categories...&quot;&gt;
+
+    &lt;div class=&quot;wx-selection-header&quot;&gt;Group 1&lt;/div&gt;
+    &lt;div id=&quot;cat-1&quot; class=&quot;wx-selection-item&quot; data-icon=&quot;fas fa-tag&quot;&gt;Category 1&lt;/div&gt;
+    &lt;div id=&quot;cat-2&quot; class=&quot;wx-selection-item&quot; data-icon=&quot;fas fa-tag&quot; data-label-color=&quot;bg-primary&quot;&gt;Category 2&lt;/div&gt;
+    &lt;div class=&quot;wx-selection-divider&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;wx-selection-header&quot;&gt;Group 2&lt;/div&gt;
+    &lt;div id=&quot;cat-3&quot; class=&quot;wx-selection-item&quot; data-icon=&quot;fas fa-tag&quot; disabled&gt;Category 3 (Disabled)&lt;/div&gt;
+    &lt;div id=&quot;cat-4&quot;
+         class=&quot;wx-selection-item&quot;
+         data-render=&quot;(item) =&gt; `&lt;strong&gt;${item.label}&lt;/strong&gt;&lt;br&gt;&lt;small&gt;Custom Render&lt;/small&gt;`&quot;
+         data-label=&quot;Category 4&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;wx-selection-footer&quot;&gt;
+        &lt;a href=&quot;#&quot;&gt;Add New...&lt;/a&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/selection.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

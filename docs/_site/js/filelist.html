@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>FileListCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="FileListCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/filelist.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="filelistctrl">FileListCtrl</h1>
+<p>The <code>FileListCtrl</code> is a declaratively configurable component for rendering a structured fillist – a visual file list with metadata, icons, and optional preview images. It’s ideal for displaying uploaded files or predefined file entries in web applications.</p>
+<pre><code>   ┌───────────────────────────────────────┐
+   │ [file name] [description] [meta data] │
+   │ [file name] [description] [meta data] │
+   │ [file name] [description] [meta data] │
+   │ ...         ...           ...         │
+   └───────────────────────────────────────┘
+</code></pre>
+<h3 id="declarative-configuration">Declarative Configuration</h3>
+<p>The <code>FileListCtrl</code> component is initialized using data- attributes and child elements inside the host container. Each file entry is defined using a <code>wx-webui-file</code> element, which provides metadata and display options for the visual fillist.</p>
+<p>File Entry Attributes:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-file-uri</code></td>
+<td>The URL or path to the file. Used as the link target.</td>
+</tr>
+<tr>
+<td><code>data-file-icon</code></td>
+<td>Optional Font Awesome icon class (e.g., fas fa-file-pdf). If not set, an icon is inferred from the file extension.</td>
+</tr>
+<tr>
+<td><code>data-file-image</code></td>
+<td>Optional image URL for thumbnail preview.</td>
+</tr>
+<tr>
+<td><code>data-file-size</code></td>
+<td>File size string (e.g., 1.2 MB).</td>
+</tr>
+<tr>
+<td><code>data-file-date</code></td>
+<td>Date string (e.g., 2025-08-01).</td>
+</tr>
+<tr>
+<td><code>data-description</code></td>
+<td>Optional description text shown next to the file.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="architecture-and-functionality">Architecture and Functionality</h3>
+<p>The <code>FileListCtrl</code> is designed as a lightweight, reactive component for displaying and managing file entries in a structured list.</p>
+<ul>
+<li><strong>Declarative Setup:</strong> Files are defined using .wx-webui-file elements with data- attributes for URI, size, date, and description.</li>
+<li><strong>Icon Inference:</strong> Icons are automatically selected based on file extension unless overridden via data-file-icon.</li>
+<li><strong>Thumbnail Preview:</strong> If data-file-image is set, a preview image is shown alongside the file entry.</li>
+<li><strong>Metadata Display:</strong> File size, date, and description are rendered in a clean, responsive layout.</li>
+<li><strong>Accessibility &amp; Responsiveness:</strong> The layout adapts to various screen sizes and supports keyboard navigation.</li>
+</ul>
+<h3 id="programmatic-control">Programmatic Control</h3>
+<p>The component can be fully controlled via its JavaScript instance after initialization. There are two primary ways to obtain or create an instance.</p>
+<h4 id="1-accessing-an-automatically-created-instance">1. Accessing an Automatically Created Instance</h4>
+<pre><code class="lang-javascript">const element = document.getElementById('my-upload');
+const fileListCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+</code></pre>
+<h4 id="2-manual-instantiation">2. Manual Instantiation</h4>
+<pre><code class="lang-javascript">const container = document.getElementById('upload-container');
+const fileListCtrl = new webexpress.webui.FileListCtrl(container);
+</code></pre>
+<h3 id="event-handling">Event Handling</h3>
+<p>The <code>FileListCtrl</code> is a purely visual component and does not dispatch any custom events.</p>
+<h3 id="use-case-example">Use Case Example</h3>
+<pre><code class="lang-html">&lt;!-- Host element for file list --&gt;
+&lt;div id=&quot;my-upload&quot; class=&quot;wx-webui-file-list&quot;&gt;
+    &lt;div class=&quot;wx-webui-file&quot;
+         data-file-uri=&quot;/files/report.pdf&quot;
+         data-file-size=&quot;1.2 MB&quot;
+         data-file-date=&quot;2025-08-01&quot;
+         data-description=&quot;Quarterly Report Q2&quot;&gt;
+        report.pdf
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/filelist.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,568 @@
+{
+  "source_base_path": "C:/Users/Rene/source/repos/WebExpress/WebExpress.WebUI/docs",
+  "xrefmap": "xrefmap.yml",
+  "files": [
+    {
+      "type": "Resource",
+      "output": {
+        "resource": {
+          "relative_path": "index.json"
+        }
+      }
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "api/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "api/toc.html"
+        },
+        ".json": {
+          "relative_path": "api/toc.json"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "assets/webexpress.ico",
+      "output": {
+        "resource": {
+          "relative_path": "assets/webexpress.ico"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Resource",
+      "source_relative_path": "assets/webexpress.svg",
+      "output": {
+        "resource": {
+          "relative_path": "assets/webexpress.svg"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "index.md",
+      "output": {
+        ".html": {
+          "relative_path": "index.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "javascript.md",
+      "output": {
+        ".html": {
+          "relative_path": "javascript.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/avatar-dropdown.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/avatar-dropdown.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/avatar.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/avatar.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/button.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/button.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/cascading.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/cascading.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/chart.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/chart.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/code.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/code.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/color.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/color.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/date.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/date.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/dropdown.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/dropdown.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/editor.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/editor.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/expandable.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/expandable.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/filelist.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/filelist.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/form.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/form.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/frame.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/frame.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/graph.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/graph.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/index.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/index.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/list.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/list.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/modal.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/modal.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/move.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/move.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/overflow.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/overflow.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/page.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/page.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/pagination.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/pagination.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/password.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/password.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/quickfilter.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/quickfilter.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/rating.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/rating.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/responsive.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/responsive.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/scrum.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/scrum.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/search.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/search.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/selection.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/selection.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/sidebar.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/sidebar.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/smartedit.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/smartedit.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/smartview.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/smartview.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/split.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/split.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/tab.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/tab.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/table.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/table.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/tag.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/tag.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/tile.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/tile.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "js/toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "js/toc.html"
+        },
+        ".json": {
+          "relative_path": "js/toc.json"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/toolbar.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/toolbar.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/tree.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/tree.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/upload.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/upload.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/view.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/view.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/webexpress.webui.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/webexpress.webui.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/wizard.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/wizard.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "js/wql.md",
+      "output": {
+        ".html": {
+          "relative_path": "js/wql.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "md-guide.md",
+      "output": {
+        ".html": {
+          "relative_path": "md-guide.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Toc",
+      "source_relative_path": "toc.yml",
+      "output": {
+        ".html": {
+          "relative_path": "toc.html"
+        },
+        ".json": {
+          "relative_path": "toc.json"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "tutorials.md",
+      "output": {
+        ".html": {
+          "relative_path": "tutorials.html"
+        }
+      },
+      "version": ""
+    },
+    {
+      "type": "Conceptual",
+      "source_relative_path": "user-guide.md",
+      "output": {
+        ".html": {
+          "relative_path": "user-guide.html"
+        }
+      },
+      "version": ""
+    }
+  ],
+  "groups": [
+    {
+      "xrefmap": "xrefmap.yml"
+    }
+  ]
+}

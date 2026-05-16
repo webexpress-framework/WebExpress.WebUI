@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>PaginationCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="PaginationCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/pagination.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="paginationctrl">PaginationCtrl</h1>
+<p>The <code>PaginationCtrl</code> is a UI component for displaying page navigation. It allows users to browse through paginated data, such as long lists or tables. The control dynamically generates a series of page numbers, including &quot;Back&quot; and &quot;Next&quot; buttons, and intelligently adapts its display to the total number of pages. For a large number of pages, an abbreviated view with ellipses (...) is used to keep the user interface clean.</p>
+<p>The component is designed to manage its state (current page and total page count) internally and triggers a redraw of the view with every change.</p>
+<pre><code>   ┌─────────────────────────────────────────┐
+   │                                         │
+   │ [&lt;]   1   …   4   [5]   6   …   10  [&gt;] │ Example of the pagination control for page 5 of 10.
+   │                                         │
+   └─────────────────────────────────────────┘   
+</code></pre>
+<h2 id="configuration">Configuration</h2>
+<p>The initialization of the control is done via <code>data-</code> attributes directly on the host element. This allows for simple configuration in the HTML markup.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-page</code></td>
+<td>The initially active page. The count starts at 0. If not specified, 0 is used as the default.</td>
+</tr>
+<tr>
+<td><code>data-total</code></td>
+<td>The total number of available pages. If not specified, 10 is used as the default.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="functionality">Functionality</h2>
+<p>The <code>PaginationCtrl</code> is designed as a self-contained, reactive component that manages its own lifecycle from initialization to interaction.</p>
+<ul>
+<li><strong>Dynamic DOM Construction</strong>: During initialization, the component reads the configuration attributes, completely clears the host element, and programmatically rebuilds the pagination buttons using <code>&lt;li&gt;</code> and <code>&lt;a&gt;</code> elements that correspond to the Bootstrap pagination classes.</li>
+<li><strong>State-Driven Rendering</strong>: The visual representation is directly coupled with the internal properties <code>_page</code> and <code>_count</code>. Any change to these properties, whether through user interaction or programmatic access, automatically triggers a call to the <code>render()</code> method. This method redraws the control completely based on the new state.</li>
+<li><strong>Intelligent Pagination Logic</strong>: The core logic resides in the <code>_addPageItems</code> method. It decides how the page numbers are displayed:
+<ul>
+<li><strong>Few pages (≤ 10)</strong>: All page numbers are displayed directly.</li>
+<li><strong>Many pages</strong>: Depending on the position of the current page (<code>_page</code>), an abbreviated representation is chosen:
+<ul>
+<li><strong>At the beginning</strong>: The first few pages are displayed, followed by an ellipsis and the last page (e.g., <code>&lt; 1 2 3 4 5 ... 20 &gt;</code>).</li>
+<li><strong>At the end</strong>: The first page, an ellipsis, and the last few pages are displayed (e.g., <code>&lt; 1 ... 16 17 18 19 20 &gt;</code>).</li>
+<li><strong>In the middle</strong>: The first page, an ellipsis, a few pages around the current page, another ellipsis, and the last page are displayed (e.g., <code>&lt; 1 ... 8 9 10 11 12 ... 20 &gt;</code>).</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Event-Based Communication</strong>: Instead of interacting directly with other parts of the application, the component communicates by dispatching global custom events. This promotes loose coupling and allows other components to react to page changes.</li>
+</ul>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>After initialization, the control can be fully managed programmatically via its JavaScript instance.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const element = document.getElementById('my-pagination');
+
+// retrieve the controller instance associated with the element
+const paginationCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (paginationCtrl) {
+    // get the current page number
+    const currentPage = paginationCtrl.page;
+
+    // programmatically set the current page to 3
+    // this will trigger a re-render and dispatch the CHANGE_PAGE_EVENT
+    paginationCtrl.page = 3;
+}
+</code></pre>
+<h3 id="manual-instantiation">Manual Instantiation</h3>
+<pre><code class="lang-javascript">// find the container element for the dynamic pagination
+const container = document.getElementById('dynamic-pagination-container');
+
+// create a new instance of PaginationCtrl manually
+const dynamicPaginationCtrl = new webexpress.webui.PaginationCtrl(container);
+
+// set the properties programmatically
+dynamicPaginationCtrl.total = 25;
+dynamicPaginationCtrl.page = 5;
+</code></pre>
+<h2 id="events">Events</h2>
+<p>The component dispatches two main events to inform the application logic about interactions.</p>
+<ul>
+<li><strong><code>webexpress.webui.Event.CLICK_EVENT</code></strong>: Fired on every click of any page button (including &quot;Back&quot; and &quot;Next&quot;). The <code>detail</code> object contains the index of the page that was clicked.</li>
+<li><strong><code>webexpress.webui.Event.CHANGE_PAGE_EVENT</code></strong>: Fired only when the <code>page</code> property actually changes. This is the primary event to listen for in order to reload paginated data.</li>
+</ul>
+<h2 id="use-case-example">Use Case Example</h2>
+<pre><code class="lang-html">&lt;!--
+    The host element for the pagination control.
+    It is initialized to show page 4 of a total of 15 pages.
+--&gt;
+&lt;ul id=&quot;content-pagination&quot;
+    class=&quot;wx-webui-pagination&quot;
+    data-page=&quot;4&quot;
+    data-total=&quot;15&quot;&gt;
+&lt;/ul&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/pagination.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

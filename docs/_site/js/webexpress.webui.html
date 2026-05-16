@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>webexpress.webui.js | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="webexpress.webui.js | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/webexpress.webui.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="webexpresswebuijs">webexpress.webui.js</h1>
+<p>The file <code>webexpress.webui.js</code> is the core of the WebExpress.WebUI JavaScript framework. It defines the central infrastructure for managing UI controls, registering actions, handling events, and providing shared services such as internationalization and syntax highlighting. All classes and singletons live under the <code>webexpress.webui</code> namespace.</p>
+<h2 id="overview">Overview</h2>
+<table>
+<thead>
+<tr>
+<th>Class / Singleton</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>webexpress.webui.Controller</code></td>
+<td>Singleton</td>
+<td>Central controller that monitors the DOM, manages control instances, and delegates actions.</td>
+</tr>
+<tr>
+<td><code>webexpress.webui.FilterRegistry</code></td>
+<td>Singleton</td>
+<td>Manages client-side quick-filter state with group constraints and cookie persistence.</td>
+</tr>
+<tr>
+<td><code>webexpress.webui.I18N</code></td>
+<td>Singleton</td>
+<td>Internationalization helper for translations with automatic language detection.</td>
+</tr>
+<tr>
+<td><code>webexpress.webui.Syntax</code></td>
+<td>Singleton</td>
+<td>Registry for language-specific syntax-highlighting configurations.</td>
+</tr>
+<tr>
+<td><code>webexpress.webui.Actions</code></td>
+<td>Singleton</td>
+<td>Dynamic registry for action plugins that can be extended from external files.</td>
+</tr>
+<tr>
+<td><code>webexpress.webui.EditorPlugins</code></td>
+<td>Singleton</td>
+<td>Registry for WYSIWYG editor plugins with priority-based ordering.</td>
+</tr>
+<tr>
+<td><code>webexpress.webui.EditorAddOns</code></td>
+<td>Singleton</td>
+<td>Registry for editor add-ons that can be inserted via the editor plugin.</td>
+</tr>
+<tr>
+<td><code>webexpress.webui.EditorShortcuts</code></td>
+<td>Singleton</td>
+<td>Registry for editor slash commands and inline triggers.</td>
+</tr>
+<tr>
+<td><code>webexpress.webui.DialogPanels</code></td>
+<td>Singleton</td>
+<td>Registry for modal dialog panel definitions.</td>
+</tr>
+<tr>
+<td><code>webexpress.webui.DashboardWidgets</code></td>
+<td>Singleton</td>
+<td>Registry for dashboard widget definitions.</td>
+</tr>
+<tr>
+<td><code>webexpress.webui.TableTemplates</code></td>
+<td>Singleton</td>
+<td>Registry for table cell renderer templates.</td>
+</tr>
+<tr>
+<td><code>webexpress.webui.Ctrl</code></td>
+<td>Class</td>
+<td>Abstract base class for all UI controls.</td>
+</tr>
+<tr>
+<td><code>webexpress.webui.PopperCtrl</code></td>
+<td>Class</td>
+<td>Base class for controls that use Popper.js for dropdown positioning.</td>
+</tr>
+<tr>
+<td><code>webexpress.webui.Event</code></td>
+<td>Class</td>
+<td>Utility class that defines all event name constants.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="controller">Controller</h2>
+<p>The <code>Controller</code> is a singleton that monitors changes in the DOM via a <code>MutationObserver</code> and automatically creates instances of registered control classes when matching elements appear. It also handles the delegation of primary and secondary actions and manages fullscreen toggling.</p>
+<h3 id="methods">Methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>registerClass(selector, ClassConstructor)</code></td>
+<td>Registers a class constructor for a CSS selector. When the DOM contains an element with this selector as a class, an instance of the class is created automatically.</td>
+</tr>
+<tr>
+<td><code>createInstances(element)</code></td>
+<td>Creates instances for new DOM elements (depth-first). Called automatically by the MutationObserver.</td>
+</tr>
+<tr>
+<td><code>createInstanceByClassType(classType, element)</code></td>
+<td>Creates an instance from a registered class type and binds it to the given element. Returns the instance or <code>null</code>.</td>
+</tr>
+<tr>
+<td><code>removeInstances(element)</code></td>
+<td>Removes instances for removed DOM elements and their descendants.</td>
+</tr>
+<tr>
+<td><code>getInstance(selector, ClassConstructor?)</code></td>
+<td>Retrieves an instance by CSS selector. Optionally restricts to a specific class constructor.</td>
+</tr>
+<tr>
+<td><code>getInstanceByElement(element, ClassConstructor?)</code></td>
+<td>Retrieves an instance by DOM element reference.</td>
+</tr>
+<tr>
+<td><code>getClosestInstance(element, ClassConstructor?)</code></td>
+<td>Traverses up the DOM tree from the given element and returns the closest control instance.</td>
+</tr>
+<tr>
+<td><code>toggleFullscreen(el)</code></td>
+<td>Toggles CSS-based fullscreen state for the provided element.</td>
+</tr>
+<tr>
+<td><code>toggleNativeFullscreen(el)</code></td>
+<td>Toggles native browser fullscreen for the provided element.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="declarative-action-binding">Declarative Action Binding</h3>
+<p>HTML elements can trigger registered actions via <code>data-wx-primary-action</code> (click) and <code>data-wx-secondary-action</code> (dblclick) attributes. The Controller resolves the action name from the <code>webexpress.webui.Actions</code> registry and invokes the corresponding <code>execute</code> callback. Additional parameters are passed through arbitrary <code>data-wx-{prefix}-*</code> attributes.</p>
+<pre><code class="lang-html">&lt;!-- primary action triggers on click --&gt;
+&lt;button data-wx-primary-action=&quot;modal&quot;
+        data-wx-primary-target=&quot;#myModal&quot;
+        data-wx-primary-uri=&quot;/api/data&quot;
+        data-wx-primary-size=&quot;lg&quot;&gt;
+    Open Modal
+&lt;/button&gt;
+
+&lt;!-- secondary action triggers on double-click --&gt;
+&lt;tr data-wx-secondary-action=&quot;frame&quot;
+    data-wx-secondary-target=&quot;#detailFrame&quot;
+    data-wx-secondary-uri=&quot;/details/42&quot;&gt;
+    ...
+&lt;/tr&gt;
+</code></pre>
+<h3 id="dismiss-actions">Dismiss Actions</h3>
+<p>Dismiss actions are handled directly by the Controller, independently of the Actions registry:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-wx-dismiss=&quot;fullscreen&quot;</code></td>
+<td>Exits CSS-based fullscreen on click.</td>
+</tr>
+<tr>
+<td><code>data-wx-dismiss=&quot;native-fullscreen&quot;</code></td>
+<td>Exits native browser fullscreen on click.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="data-binding">Data Binding</h3>
+<p>The <code>data-wx-bind</code> attribute connects a UI element to event-driven data sources. Binds are registered
+as plugins in <code>webexpress.webui.Binds</code> (see <a href="#binds">Binds</a>) and can be freely extended.</p>
+<table>
+<thead>
+<tr>
+<th>Bind Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>search</code></td>
+<td>Listens for <code>CHANGE_FILTER_EVENT</code> on the source element and calls <code>instance.search(query, searchType)</code>.</td>
+</tr>
+<tr>
+<td><code>paging</code></td>
+<td>Listens for <code>CHANGE_PAGE_EVENT</code> on the source element and calls <code>instance.paging(page)</code>.</td>
+</tr>
+<tr>
+<td><code>filter</code></td>
+<td>Listens for global <code>CHANGE_FILTER_EVENT</code> and calls <code>instance.filter(activeFilters)</code>.</td>
+</tr>
+<tr>
+<td><code>darkmode</code></td>
+<td>Syncs icon and text of the element to the current dark-mode state.</td>
+</tr>
+<tr>
+<td><code>hide</code></td>
+<td>Hides the element (or its enclosing <code>fieldset.wx-form-group</code>) when the source value matches.</td>
+</tr>
+<tr>
+<td><code>disable</code></td>
+<td>Disables the element (or its enclosing <code>fieldset.wx-form-group</code>) when the source value matches.</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-html">&lt;div id=&quot;myTable&quot;
+     class=&quot;wx-webui-table&quot;
+     data-wx-bind=&quot;search, filter&quot;
+     data-wx-source-search=&quot;#searchBox&quot;&gt;
+&lt;/div&gt;
+</code></pre>
+<h2 id="actions">Actions</h2>
+<p>The <code>Actions</code> singleton provides a dynamic registry for action plugins. Actions are loaded from external files (e.g., <code>action/default.js</code>) and can be freely extended without modifying the framework core.</p>
+<h3 id="methods-1">Methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>register(name, definition)</code></td>
+<td>Registers an action under the given name. The definition must contain an <code>execute</code> function.</td>
+</tr>
+<tr>
+<td><code>get(name)</code></td>
+<td>Returns the action definition for the given name, or <code>null</code>.</td>
+</tr>
+<tr>
+<td><code>has(name)</code></td>
+<td>Returns <code>true</code> if an action is registered under the given name.</td>
+</tr>
+<tr>
+<td><code>getAll()</code></td>
+<td>Returns an array of all registered action names.</td>
+</tr>
+<tr>
+<td><code>unregister(name)</code></td>
+<td>Removes the action registered under the given name.</td>
+</tr>
+<tr>
+<td><code>clear()</code></td>
+<td>Removes all registered actions.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="action-definition-contract">Action Definition Contract</h3>
+<pre><code class="lang-javascript">webexpress.webui.Actions.register(&quot;my-action&quot;, {
+    /**
+     * Called when the action is triggered (click for primary, dblclick for secondary).
+     * @param {HTMLElement} element - The element that triggered the action.
+     * @param {string} prefix - &quot;primary&quot; or &quot;secondary&quot;.
+     * @param {object} controller - The Controller singleton.
+     * @param {Event} event - The original DOM event.
+     */
+    execute: function (element, prefix, controller, event) {
+        // action logic
+    },
+
+    /**
+     * Optional one-time initialization hook, called once per element binding.
+     * @param {HTMLElement} element - The bound element.
+     * @param {string} prefix - &quot;primary&quot; or &quot;secondary&quot;.
+     * @param {object} controller - The Controller singleton.
+     */
+    init: function (element, prefix, controller) {
+        // setup logic (e.g., aria attributes)
+    }
+});
+</code></pre>
+<h3 id="built-in-actions">Built-in Actions</h3>
+<p>The following actions are registered in <code>action/default.js</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Action Name</th>
+<th>Description</th>
+<th>Supported Attributes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>modal</code></td>
+<td>Shows a modal dialog instance.</td>
+<td><code>target</code>, <code>uri</code>, <code>size</code></td>
+</tr>
+<tr>
+<td><code>frame</code></td>
+<td>Sets the URI on a frame control instance.</td>
+<td><code>target</code>, <code>uri</code></td>
+</tr>
+<tr>
+<td><code>split</code></td>
+<td>Toggles the side pane of a split control.</td>
+<td><code>target</code></td>
+</tr>
+<tr>
+<td><code>fullscreen</code></td>
+<td>Toggles CSS-based fullscreen for the target element.</td>
+<td><code>target</code></td>
+</tr>
+<tr>
+<td><code>native-fullscreen</code></td>
+<td>Toggles native browser fullscreen for the target element.</td>
+<td><code>target</code></td>
+</tr>
+<tr>
+<td><code>filter</code></td>
+<td>Toggles a quick-filter in the <code>FilterRegistry</code>.</td>
+<td><em>(uses element ID)</em></td>
+</tr>
+</tbody>
+</table>
+<h3 id="example-registering-a-custom-action">Example: Registering a Custom Action</h3>
+<pre><code class="lang-javascript">// file: action/custom.js
+webexpress.webui.Actions.register(&quot;redirect&quot;, {
+    execute: function (element, prefix, controller, event) {
+        event.preventDefault();
+        const uri = element.getAttribute(&quot;data-wx-&quot; + prefix + &quot;-uri&quot;);
+        if (uri) {
+            window.location.href = uri;
+        }
+    }
+});
+</code></pre>
+<pre><code class="lang-html">&lt;a data-wx-primary-action=&quot;redirect&quot;
+   data-wx-primary-uri=&quot;/dashboard&quot;&gt;
+    Go to Dashboard
+&lt;/a&gt;
+</code></pre>
+<h2 id="binds">Binds</h2>
+<p>The <code>Binds</code> singleton provides a dynamic registry for bind plugins. Binds are loaded from external
+files (e.g., <code>bind/default.js</code>) and can be freely extended without modifying the framework core.
+Each bind is established once per element when the <code>data-wx-bind</code> attribute is processed.</p>
+<h3 id="methods-2">Methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>register(name, definition)</code></td>
+<td>Registers a bind under the given name. The definition must contain a <code>bind</code> function.</td>
+</tr>
+<tr>
+<td><code>get(name)</code></td>
+<td>Returns the bind definition for the given name, or <code>null</code>.</td>
+</tr>
+<tr>
+<td><code>has(name)</code></td>
+<td>Returns <code>true</code> if a bind is registered under the given name.</td>
+</tr>
+<tr>
+<td><code>getAll()</code></td>
+<td>Returns an array of all registered bind names.</td>
+</tr>
+<tr>
+<td><code>unregister(name)</code></td>
+<td>Removes the bind registered under the given name.</td>
+</tr>
+<tr>
+<td><code>clear()</code></td>
+<td>Removes all registered binds.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="bind-definition-contract">Bind Definition Contract</h3>
+<pre><code class="lang-javascript">webexpress.webui.Binds.register(&quot;my-bind&quot;, {
+    /**
+     * Called once when the binding is established for an element.
+     * @param {HTMLElement} element    - The element carrying all data-wx-bind-* attributes.
+     * @param {object}      controller - The Controller singleton.
+     */
+    bind: function (element, controller) {
+        // setup logic: attach event listeners, read data-wx-bind-* attributes, etc.
+    }
+});
+</code></pre>
+<h3 id="built-in-binds">Built-in Binds</h3>
+<p>The following binds are registered in <code>bind/default.js</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Bind Name</th>
+<th>Source Attribute</th>
+<th>Extra Attributes</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>search</code></td>
+<td><code>data-wx-source-search</code></td>
+<td>–</td>
+<td>Forwards <code>CHANGE_FILTER_EVENT</code> → <code>instance.search(query, searchType)</code>.</td>
+</tr>
+<tr>
+<td><code>paging</code></td>
+<td><code>data-wx-source-paging</code></td>
+<td>–</td>
+<td>Forwards <code>CHANGE_PAGE_EVENT</code> → <code>instance.paging(page)</code>.</td>
+</tr>
+<tr>
+<td><code>filter</code></td>
+<td>–</td>
+<td>–</td>
+<td>Reacts to global <code>CHANGE_FILTER_EVENT</code> → <code>instance.filter(activeFilters)</code>.</td>
+</tr>
+<tr>
+<td><code>darkmode</code></td>
+<td>–</td>
+<td><code>data-wx-bind-icon-light</code>, <code>data-wx-bind-icon-dark</code>, <code>data-wx-bind-text-light</code>, <code>data-wx-bind-text-dark</code></td>
+<td>Syncs icon and text to the current dark-mode state.</td>
+</tr>
+<tr>
+<td><code>hide</code></td>
+<td><code>data-wx-source-hide</code></td>
+<td><code>data-wx-bind-value-hide</code></td>
+<td>Hides the element (or <code>fieldset.wx-form-group</code>) when the source value equals the trigger value.</td>
+</tr>
+<tr>
+<td><code>disable</code></td>
+<td><code>data-wx-source-disable</code></td>
+<td><code>data-wx-bind-value-disable</code></td>
+<td>Disables the element (or <code>fieldset.wx-form-group</code>) when the source value equals the trigger value.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="hide-bind--conditional-visibility"><code>hide</code> bind — conditional visibility</h4>
+<p>When the source element's value equals <code>data-wx-bind-value-hide</code> the target gains the <code>d-none</code> class
+and <code>aria-hidden=&quot;true&quot;</code>. If the bound element is inside a <code>fieldset.wx-form-group</code> the whole
+fieldset is toggled so the label and help text are hidden together with the input.</p>
+<pre><code class="lang-html">&lt;!-- hide the second field when the type selector is set to &quot;internal&quot; --&gt;
+&lt;select id=&quot;type&quot;&gt;
+  &lt;option value=&quot;external&quot;&gt;External&lt;/option&gt;
+  &lt;option value=&quot;internal&quot;&gt;Internal&lt;/option&gt;
+&lt;/select&gt;
+
+&lt;input id=&quot;url&quot;
+       type=&quot;text&quot;
+       data-wx-bind=&quot;hide&quot;
+       data-wx-source-hide=&quot;#type&quot;
+       data-wx-bind-value-hide=&quot;internal&quot;&gt;
+</code></pre>
+<h4 id="disable-bind--conditional-disabling"><code>disable</code> bind — conditional disabling</h4>
+<p>When the source element's value equals <code>data-wx-bind-value-disable</code> the target gains <code>disabled=true</code>
+and <code>aria-disabled=&quot;true&quot;</code>. For a <code>fieldset.wx-form-group</code> the native <code>disabled</code> attribute is set,
+which automatically propagates to all descendant form controls.</p>
+<pre><code class="lang-html">&lt;!-- disable the email field when &quot;no notification&quot; is chosen --&gt;
+&lt;select id=&quot;notify&quot;&gt;
+  &lt;option value=&quot;yes&quot;&gt;Yes&lt;/option&gt;
+  &lt;option value=&quot;no&quot;&gt;No&lt;/option&gt;
+&lt;/select&gt;
+
+&lt;input id=&quot;email&quot;
+       type=&quot;email&quot;
+       data-wx-bind=&quot;disable&quot;
+       data-wx-source-disable=&quot;#notify&quot;
+       data-wx-bind-value-disable=&quot;no&quot;&gt;
+</code></pre>
+<p>Both binds can be combined on the same element:</p>
+<pre><code class="lang-html">&lt;input id=&quot;email&quot;
+       type=&quot;email&quot;
+       data-wx-bind=&quot;hide, disable&quot;
+       data-wx-source-hide=&quot;#showEmail&quot;
+       data-wx-bind-value-hide=&quot;false&quot;
+       data-wx-source-disable=&quot;#notify&quot;
+       data-wx-bind-value-disable=&quot;no&quot;&gt;
+</code></pre>
+<h4 id="c-usage">C# usage</h4>
+<p>The corresponding C# classes <code>BindHide</code> and <code>BindDisable</code> emit the required attributes automatically:</p>
+<pre><code class="lang-csharp">// hide the field when the source value equals &quot;internal&quot;
+Bind = new Binding().Add(new BindHide { Source = &quot;type&quot;, Value = &quot;internal&quot; });
+
+// disable the field when the source value equals &quot;no&quot;
+Bind = new Binding().Add(new BindDisable { Source = &quot;notify&quot;, Value = &quot;no&quot; });
+
+// combine both on one element
+Bind = new Binding()
+    .Add(new BindHide    { Source = &quot;showEmail&quot;, Value = &quot;false&quot; })
+    .Add(new BindDisable { Source = &quot;notify&quot;,    Value = &quot;no&quot; });
+</code></pre>
+<h3 id="example-registering-a-custom-bind">Example: Registering a Custom Bind</h3>
+<pre><code class="lang-javascript">// file: bind/custom.js
+webexpress.webui.Binds.register(&quot;highlight&quot;, {
+    bind: function (element) {
+        const sourceElement = document.querySelector(
+            element.getAttribute(&quot;data-wx-source-highlight&quot;)
+        );
+        if (!sourceElement) return;
+
+        const color = element.getAttribute(&quot;data-wx-bind-highlight-color&quot;) || &quot;yellow&quot;;
+
+        const sync = () =&gt; {
+            element.style.backgroundColor =
+                sourceElement.value.trim() !== &quot;&quot; ? color : &quot;&quot;;
+        };
+
+        sync();
+        sourceElement.addEventListener(&quot;input&quot;, sync);
+    }
+});
+</code></pre>
+<pre><code class="lang-html">&lt;input id=&quot;name&quot; type=&quot;text&quot;&gt;
+&lt;div data-wx-bind=&quot;highlight&quot;
+     data-wx-source-highlight=&quot;#name&quot;
+     data-wx-bind-highlight-color=&quot;lightblue&quot;&gt;
+    I turn blue when the name field is filled.
+&lt;/div&gt;
+</code></pre>
+<p>The <code>Actions</code> singleton provides a dynamic registry for action plugins. Actions are loaded from external files (e.g., <code>action/default.js</code>) and can be freely extended without modifying the framework core.</p>
+<h3 id="methods-3">Methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>register(name, definition)</code></td>
+<td>Registers an action under the given name. The definition must contain an <code>execute</code> function.</td>
+</tr>
+<tr>
+<td><code>get(name)</code></td>
+<td>Returns the action definition for the given name, or <code>null</code>.</td>
+</tr>
+<tr>
+<td><code>has(name)</code></td>
+<td>Returns <code>true</code> if an action is registered under the given name.</td>
+</tr>
+<tr>
+<td><code>getAll()</code></td>
+<td>Returns an array of all registered action names.</td>
+</tr>
+<tr>
+<td><code>unregister(name)</code></td>
+<td>Removes the action registered under the given name.</td>
+</tr>
+<tr>
+<td><code>clear()</code></td>
+<td>Removes all registered actions.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="action-definition-contract-1">Action Definition Contract</h3>
+<pre><code class="lang-javascript">webexpress.webui.Actions.register(&quot;my-action&quot;, {
+    /**
+     * Called when the action is triggered (click for primary, dblclick for secondary).
+     * @param {HTMLElement} element - The element that triggered the action.
+     * @param {string} prefix - &quot;primary&quot; or &quot;secondary&quot;.
+     * @param {object} controller - The Controller singleton.
+     * @param {Event} event - The original DOM event.
+     */
+    execute: function (element, prefix, controller, event) {
+        // action logic
+    },
+
+    /**
+     * Optional one-time initialization hook, called once per element binding.
+     * @param {HTMLElement} element - The bound element.
+     * @param {string} prefix - &quot;primary&quot; or &quot;secondary&quot;.
+     * @param {object} controller - The Controller singleton.
+     */
+    init: function (element, prefix, controller) {
+        // setup logic (e.g., aria attributes)
+    }
+});
+</code></pre>
+<h3 id="built-in-actions-1">Built-in Actions</h3>
+<p>The following actions are registered in <code>action/default.js</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Action Name</th>
+<th>Description</th>
+<th>Supported Attributes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>modal</code></td>
+<td>Shows a modal dialog instance.</td>
+<td><code>target</code>, <code>uri</code>, <code>size</code></td>
+</tr>
+<tr>
+<td><code>frame</code></td>
+<td>Sets the URI on a frame control instance.</td>
+<td><code>target</code>, <code>uri</code></td>
+</tr>
+<tr>
+<td><code>split</code></td>
+<td>Toggles the side pane of a split control.</td>
+<td><code>target</code></td>
+</tr>
+<tr>
+<td><code>fullscreen</code></td>
+<td>Toggles CSS-based fullscreen for the target element.</td>
+<td><code>target</code></td>
+</tr>
+<tr>
+<td><code>native-fullscreen</code></td>
+<td>Toggles native browser fullscreen for the target element.</td>
+<td><code>target</code></td>
+</tr>
+<tr>
+<td><code>filter</code></td>
+<td>Toggles a quick-filter in the <code>FilterRegistry</code>.</td>
+<td><em>(uses element ID)</em></td>
+</tr>
+</tbody>
+</table>
+<h3 id="example-registering-a-custom-action-1">Example: Registering a Custom Action</h3>
+<pre><code class="lang-javascript">// file: action/custom.js
+webexpress.webui.Actions.register(&quot;redirect&quot;, {
+    execute: function (element, prefix, controller, event) {
+        event.preventDefault();
+        const uri = element.getAttribute(&quot;data-wx-&quot; + prefix + &quot;-uri&quot;);
+        if (uri) {
+            window.location.href = uri;
+        }
+    }
+});
+</code></pre>
+<pre><code class="lang-html">&lt;a data-wx-primary-action=&quot;redirect&quot;
+   data-wx-primary-uri=&quot;/dashboard&quot;&gt;
+    Go to Dashboard
+&lt;/a&gt;
+</code></pre>
+<h2 id="filterregistry">FilterRegistry</h2>
+<p>The <code>FilterRegistry</code> singleton manages client-side quick-filter state. It supports group constraints, exclusive filters, reset filters, and persists state to cookies.</p>
+<h3 id="methods-4">Methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>registerFilters(filters)</code></td>
+<td>Registers an array of filter definitions.</td>
+</tr>
+<tr>
+<td><code>init()</code></td>
+<td>Initializes state from the cookie and broadcasts the initial state.</td>
+</tr>
+<tr>
+<td><code>activate(id)</code></td>
+<td>Activates a filter by ID, enforcing group exclusivity constraints.</td>
+</tr>
+<tr>
+<td><code>deactivate(id)</code></td>
+<td>Deactivates a filter by ID.</td>
+</tr>
+<tr>
+<td><code>toggle(id)</code></td>
+<td>Toggles the state of a filter.</td>
+</tr>
+<tr>
+<td><code>clearGroup(group)</code></td>
+<td>Clears all active filters within a specific group.</td>
+</tr>
+<tr>
+<td><code>clearAll()</code></td>
+<td>Clears all currently active filters.</td>
+</tr>
+<tr>
+<td><code>getActiveFilters()</code></td>
+<td>Returns an array of all currently active filter IDs.</td>
+</tr>
+<tr>
+<td><code>getFilterConfig(id)</code></td>
+<td>Returns the configuration for a specific filter ID.</td>
+</tr>
+<tr>
+<td><code>getAllKnownFilters()</code></td>
+<td>Returns all registered filter configurations.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="filter-definition">Filter Definition</h3>
+<p>Each filter object supports the following properties:</p>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><code>string</code></td>
+<td>Unique identifier for the filter.</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td><code>string</code></td>
+<td>Display name for the filter.</td>
+</tr>
+<tr>
+<td><code>group</code></td>
+<td><code>string</code></td>
+<td>Optional group name for mutual exclusion.</td>
+</tr>
+<tr>
+<td><code>exclusive</code></td>
+<td><code>boolean</code></td>
+<td>When <code>true</code>, activating this filter deactivates other filters in the same group.</td>
+</tr>
+<tr>
+<td><code>reset</code></td>
+<td><code>boolean</code></td>
+<td>When <code>true</code>, activating this filter clears all other filters in its group.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="i18n">I18N</h2>
+<p>The <code>I18N</code> singleton provides internationalization support with automatic browser language detection and module-scoped translation keys.</p>
+<h3 id="methods-5">Methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>register(lang, module, values)</code></td>
+<td>Registers a key-value map of translations for a language and module.</td>
+</tr>
+<tr>
+<td><code>setLanguage(language)</code></td>
+<td>Sets the current language code.</td>
+</tr>
+<tr>
+<td><code>translate(key)</code></td>
+<td>Returns the translated text for a key. Supports <code>module:key</code> syntax with English fallback.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="usage">Usage</h3>
+<pre><code class="lang-javascript">// register translations
+webexpress.webui.I18N.register(&quot;en&quot;, &quot;myapp&quot;, {
+    &quot;greeting&quot;: &quot;Hello&quot;,
+    &quot;farewell&quot;: &quot;Goodbye&quot;
+});
+
+webexpress.webui.I18N.register(&quot;de&quot;, &quot;myapp&quot;, {
+    &quot;greeting&quot;: &quot;Hallo&quot;,
+    &quot;farewell&quot;: &quot;Auf Wiedersehen&quot;
+});
+
+// retrieve translation with module prefix
+const text = webexpress.webui.I18N.translate(&quot;myapp:greeting&quot;); // &quot;Hello&quot; or &quot;Hallo&quot;
+</code></pre>
+<p>Within controls that extend <code>Ctrl</code>, use the built-in <code>_i18n</code> helper:</p>
+<pre><code class="lang-javascript">const label = this._i18n(&quot;webexpress.webui:calendar.may&quot;, &quot;May&quot;);
+</code></pre>
+<h2 id="syntax">Syntax</h2>
+<p>The <code>Syntax</code> singleton manages registration and retrieval of syntax-highlighting configurations for different programming languages.</p>
+<h3 id="methods-6">Methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>register(language, alias, syntax)</code></td>
+<td>Registers a syntax configuration for a language and optional alias.</td>
+</tr>
+<tr>
+<td><code>get(language)</code></td>
+<td>Returns the syntax configuration for a language, or <code>null</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="usage-1">Usage</h3>
+<pre><code class="lang-javascript">webexpress.webui.Syntax.register(&quot;javascript&quot;, &quot;js&quot;, {
+    keywords: [&quot;const&quot;, &quot;let&quot;, &quot;var&quot;, &quot;function&quot;, &quot;return&quot;],
+    types: [&quot;string&quot;, &quot;number&quot;, &quot;boolean&quot;],
+    // ...
+});
+
+const config = webexpress.webui.Syntax.get(&quot;js&quot;); // same as get(&quot;javascript&quot;)
+</code></pre>
+<h2 id="editorplugins">EditorPlugins</h2>
+<p>The <code>EditorPlugins</code> singleton is a priority-based registry for WYSIWYG editor plugins. Each plugin can provide lifecycle hooks for toolbar creation, content change handling, and context menus.</p>
+<h3 id="methods-7">Methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>register(name, definition)</code></td>
+<td>Registers a plugin with default position (10).</td>
+</tr>
+<tr>
+<td><code>register(name, position, definition)</code></td>
+<td>Registers a plugin with an explicit position for ordering.</td>
+</tr>
+<tr>
+<td><code>getAll()</code></td>
+<td>Returns all plugin definitions sorted by position.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="plugin-definition">Plugin Definition</h3>
+<pre><code class="lang-javascript">webexpress.webui.EditorPlugins.register(&quot;my-plugin&quot;, 500, {
+    init: function (editor) { },
+    createToolbar: function (editor) { return document.createElement(&quot;div&quot;); },
+    onContentChange: function (editor) { },
+    getContextMenuItems: function (editor, target) { return []; }
+});
+</code></pre>
+<h2 id="editoraddons">EditorAddOns</h2>
+<p>The <code>EditorAddOns</code> singleton manages editor add-ons that can be inserted into content via the editor add-ons plugin.</p>
+<h3 id="methods-8">Methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>register(id, definition)</code></td>
+<td>Registers an add-on with properties like <code>label</code>, <code>icon</code>, <code>category</code>, and <code>renderer</code>.</td>
+</tr>
+<tr>
+<td><code>get(id)</code></td>
+<td>Returns the add-on definition, or <code>undefined</code>.</td>
+</tr>
+<tr>
+<td><code>getAll()</code></td>
+<td>Returns all registered add-on definitions.</td>
+</tr>
+<tr>
+<td><code>unregister(id)</code></td>
+<td>Removes an add-on. Returns <code>true</code> if removed.</td>
+</tr>
+<tr>
+<td><code>clear()</code></td>
+<td>Clears all registered add-ons.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="dialogpanels">DialogPanels</h2>
+<p>The <code>DialogPanels</code> singleton stores panel definitions by a modal key. Multiple panels can be registered under the same key.</p>
+<h3 id="methods-9">Methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>register(modalKey, panel)</code></td>
+<td>Registers a panel definition under a modal key.</td>
+</tr>
+<tr>
+<td><code>get(modalKey)</code></td>
+<td>Returns all panel definitions for a key (shallow copies).</td>
+</tr>
+<tr>
+<td><code>unregister(modalKey)</code></td>
+<td>Removes all panels registered under a key.</td>
+</tr>
+<tr>
+<td><code>clear()</code></td>
+<td>Clears the entire registry.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="dashboardwidgets">DashboardWidgets</h2>
+<p>The <code>DashboardWidgets</code> singleton manages dashboard widget definitions.</p>
+<h3 id="methods-10">Methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>register(id, definition)</code></td>
+<td>Registers a widget with a unique ID and definition.</td>
+</tr>
+<tr>
+<td><code>get(id)</code></td>
+<td>Returns the widget definition, or <code>null</code>.</td>
+</tr>
+<tr>
+<td><code>getAll()</code></td>
+<td>Returns all registered widget definitions.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="tabletemplates">TableTemplates</h2>
+<p>The <code>TableTemplates</code> singleton provides a central registry for table cell renderer templates. Each template is a function that receives cell data and returns a DOM node or string.</p>
+<h3 id="methods-11">Methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>register(type, rendererFn, defaultOptions?)</code></td>
+<td>Registers a renderer function for a cell type (e.g., <code>&quot;date&quot;</code>, <code>&quot;currency&quot;</code>).</td>
+</tr>
+<tr>
+<td><code>get(type)</code></td>
+<td>Returns <code>{ fn, options }</code> for the given type, or <code>null</code>.</td>
+</tr>
+<tr>
+<td><code>has(type)</code></td>
+<td>Returns <code>true</code> if a renderer is registered for the type.</td>
+</tr>
+<tr>
+<td><code>unregister(type)</code></td>
+<td>Removes a renderer by type.</td>
+</tr>
+<tr>
+<td><code>clear()</code></td>
+<td>Clears the entire registry.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="usage-2">Usage</h3>
+<pre><code class="lang-javascript">webexpress.webui.TableTemplates.register(&quot;currency&quot;, function (val, table, row, cell, name, opts) {
+    const span = document.createElement(&quot;span&quot;);
+    span.textContent = parseFloat(val).toFixed(opts.decimals || 2) + &quot; &quot; + (opts.symbol || &quot;€&quot;);
+    return span;
+}, { decimals: 2, symbol: &quot;€&quot; });
+</code></pre>
+<h2 id="ctrl">Ctrl</h2>
+<p>The <code>Ctrl</code> class is the abstract base class for all WebExpress.WebUI controls. It provides common lifecycle methods and utility functions. It cannot be instantiated directly.</p>
+<h3 id="methods-12">Methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>render()</code></td>
+<td>Renders the control. Must be implemented in the derived class.</td>
+</tr>
+<tr>
+<td><code>update()</code></td>
+<td>Updates the control. By default calls <code>render()</code>.</td>
+</tr>
+<tr>
+<td><code>destroy()</code></td>
+<td>Destroys the control and performs cleanup.</td>
+</tr>
+<tr>
+<td><code>_detachElement(element)</code></td>
+<td>Detaches an element from the DOM while preserving event listeners.</td>
+</tr>
+<tr>
+<td><code>_dispatch(type, detail)</code></td>
+<td>Dispatches a custom event from the control's element.</td>
+</tr>
+<tr>
+<td><code>_i18n(key, fallback)</code></td>
+<td>Returns the translated text for an i18n key, or the fallback.</td>
+</tr>
+<tr>
+<td><code>_isVisible()</code></td>
+<td>Returns <code>true</code> if the control's element is currently visible.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="usage-3">Usage</h3>
+<pre><code class="lang-javascript">webexpress.webui.MyCtrl = class extends webexpress.webui.Ctrl {
+    constructor(element) {
+        super(element);
+        this.render();
+    }
+
+    render() {
+        this._element.innerHTML = &quot;&lt;p&gt;&quot; + this._i18n(&quot;myapp:hello&quot;, &quot;Hello&quot;) + &quot;&lt;/p&gt;&quot;;
+    }
+}
+
+// register the control for automatic instantiation
+webexpress.webui.Controller.registerClass(&quot;wx-webui-myctrl&quot;, webexpress.webui.MyCtrl);
+</code></pre>
+<h2 id="popperctrl">PopperCtrl</h2>
+<p>The <code>PopperCtrl</code> class extends <code>Ctrl</code> and provides base functionality for controls that use <a href="https://popper.js.org/">Popper.js</a> for positioning dropdown menus.</p>
+<h3 id="methods-13">Methods</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>_initializePopper(container, dropdownmenu)</code></td>
+<td>Initializes Popper.js for a dropdown menu. Sets up click-outside and ESC-key handlers.</td>
+</tr>
+</tbody>
+</table>
+<p>The initialized dropdown menu receives <code>show()</code> and <code>hide()</code> methods for programmatic control. Events <code>DROPDOWN_SHOW_EVENT</code> and <code>DROPDOWN_HIDDEN_EVENT</code> are dispatched accordingly.</p>
+<h2 id="event">Event</h2>
+<p>The <code>Event</code> class defines all event name constants used across the framework. Use these constants when dispatching or listening for events.</p>
+<h3 id="constants">Constants</h3>
+<table>
+<thead>
+<tr>
+<th>Constant</th>
+<th>Value</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>CHANGE_VISIBILITY_EVENT</code></td>
+<td><code>webexpress.webui.change.visibility</code></td>
+<td>Visibility of an element changed.</td>
+</tr>
+<tr>
+<td><code>CLICK_EVENT</code></td>
+<td><code>webexpress.webui.click</code></td>
+<td>An element was clicked.</td>
+</tr>
+<tr>
+<td><code>DOUBLE_CLICK_EVENT</code></td>
+<td><code>webexpress.webui.dbclick</code></td>
+<td>An element was double-clicked.</td>
+</tr>
+<tr>
+<td><code>CHANGE_FILTER_EVENT</code></td>
+<td><code>webexpress.webui.change.filter</code></td>
+<td>A filter state changed.</td>
+</tr>
+<tr>
+<td><code>DROPDOWN_SHOW_EVENT</code></td>
+<td><code>webexpress.webui.dropdown.show</code></td>
+<td>A dropdown menu was shown.</td>
+</tr>
+<tr>
+<td><code>DROPDOWN_HIDDEN_EVENT</code></td>
+<td><code>webexpress.webui.dropdown.hidden</code></td>
+<td>A dropdown menu was hidden.</td>
+</tr>
+<tr>
+<td><code>CHANGE_FAVORITE_EVENT</code></td>
+<td><code>webexpress.webui.change.favorite</code></td>
+<td>A favorite state changed.</td>
+</tr>
+<tr>
+<td><code>COLUMN_REORDER_EVENT</code></td>
+<td><code>webexpress.webui.table.column.reorder</code></td>
+<td>Table columns were reordered.</td>
+</tr>
+<tr>
+<td><code>COLUMN_SEARCH_EVENT</code></td>
+<td><code>webexpress.webui.table.column.search</code></td>
+<td>A search/filter was applied to a column.</td>
+</tr>
+<tr>
+<td><code>ROW_REORDER_EVENT</code></td>
+<td><code>webexpress.webui.table.row.reorder</code></td>
+<td>Table rows were reordered.</td>
+</tr>
+<tr>
+<td><code>SELECT_ROW_EVENT</code></td>
+<td><code>webexpress.webui.table.select.row</code></td>
+<td>A table row was selected.</td>
+</tr>
+<tr>
+<td><code>TABLE_SORT_EVENT</code></td>
+<td><code>webexpress.webui.table.sorted</code></td>
+<td>A table was sorted.</td>
+</tr>
+<tr>
+<td><code>CHANGE_VALUE_EVENT</code></td>
+<td><code>webexpress.webui.change.value</code></td>
+<td>The value of an input or control changed.</td>
+</tr>
+<tr>
+<td><code>MOVE_EVENT</code></td>
+<td><code>webexpress.webui.move</code></td>
+<td>An item was moved.</td>
+</tr>
+<tr>
+<td><code>CHANGE_PAGE_EVENT</code></td>
+<td><code>webexpress.webui.change.page</code></td>
+<td>The page in a pagination control changed.</td>
+</tr>
+<tr>
+<td><code>MODAL_SHOW_EVENT</code></td>
+<td><code>webexpress.webui.modal.show</code></td>
+<td>A modal was shown.</td>
+</tr>
+<tr>
+<td><code>MODAL_HIDE_EVENT</code></td>
+<td><code>webexpress.webui.modal.hide</code></td>
+<td>A modal was hidden.</td>
+</tr>
+<tr>
+<td><code>DATA_REQUESTED_EVENT</code></td>
+<td><code>webexpress.webui.data.requested</code></td>
+<td>Data was requested.</td>
+</tr>
+<tr>
+<td><code>DATA_ARRIVED_EVENT</code></td>
+<td><code>webexpress.webui.data.arrived</code></td>
+<td>Requested data has arrived.</td>
+</tr>
+<tr>
+<td><code>TASK_START_EVENT</code></td>
+<td><code>webexpress.webui.task.start</code></td>
+<td>A task started.</td>
+</tr>
+<tr>
+<td><code>TASK_UPDATE_EVENT</code></td>
+<td><code>webexpress.webui.task.update</code></td>
+<td>A task was updated.</td>
+</tr>
+<tr>
+<td><code>TASK_FINISH_EVENT</code></td>
+<td><code>webexpress.webui.task.finish</code></td>
+<td>A task finished.</td>
+</tr>
+<tr>
+<td><code>SIZE_CHANGE_EVENT</code></td>
+<td><code>webexpress.webui.size.change</code></td>
+<td>The size of an element changed.</td>
+</tr>
+<tr>
+<td><code>HIDE_EVENT</code></td>
+<td><code>webexpress.webui.hide</code></td>
+<td>An element was hidden.</td>
+</tr>
+<tr>
+<td><code>SHOW_EVENT</code></td>
+<td><code>webexpress.webui.show</code></td>
+<td>An element was shown.</td>
+</tr>
+<tr>
+<td><code>UPDATED_EVENT</code></td>
+<td><code>webexpress.webui.updated</code></td>
+<td>An element was updated.</td>
+</tr>
+<tr>
+<td><code>ADD_EVENT</code></td>
+<td><code>webexpress.webui.add</code></td>
+<td>An item was added.</td>
+</tr>
+<tr>
+<td><code>REMOVE_EVENT</code></td>
+<td><code>webexpress.webui.remove</code></td>
+<td>An item was removed.</td>
+</tr>
+<tr>
+<td><code>START_INLINE_EDIT_EVENT</code></td>
+<td><code>webexpress.webui.inlineedit.start</code></td>
+<td>Inline editing started.</td>
+</tr>
+<tr>
+<td><code>SAVE_INLINE_EDIT_EVENT</code></td>
+<td><code>webexpress.webui.inlineedit.save</code></td>
+<td>Inline editing was saved.</td>
+</tr>
+<tr>
+<td><code>END_INLINE_EDIT_EVENT</code></td>
+<td><code>webexpress.webui.inlineedit.end</code></td>
+<td>Inline editing ended.</td>
+</tr>
+<tr>
+<td><code>FILE_SELECTED_EVENT</code></td>
+<td><code>webexpress.webui.file.selected</code></td>
+<td>A file was selected.</td>
+</tr>
+<tr>
+<td><code>UPLOAD_SUCCESS_EVENT</code></td>
+<td><code>webexpress.webui.upload.success</code></td>
+<td>A file upload completed successfully.</td>
+</tr>
+<tr>
+<td><code>UPLOAD_ERROR_EVENT</code></td>
+<td><code>webexpress.webui.upload.error</code></td>
+<td>A file upload failed.</td>
+</tr>
+<tr>
+<td><code>UPLOAD_PROGRESS_EVENT</code></td>
+<td><code>webexpress.webui.upload.progress</code></td>
+<td>Upload progress was updated.</td>
+</tr>
+<tr>
+<td><code>TILE_SEARCH_EVENT</code></td>
+<td><code>webexpress.webui.tile.search</code></td>
+<td>A tile search was performed.</td>
+</tr>
+<tr>
+<td><code>TILE_SORT_EVENT</code></td>
+<td><code>webexpress.webui.tile.sort</code></td>
+<td>Tiles were sorted.</td>
+</tr>
+<tr>
+<td><code>BREAKPOINT_CHANGE_EVENT</code></td>
+<td><code>webexpress.webui.breakpoint.change</code></td>
+<td>A responsive breakpoint changed.</td>
+</tr>
+<tr>
+<td><code>WS_OPEN_EVENT</code></td>
+<td><code>webexpress.webui.websocket.open</code></td>
+<td>A WebSocket connection was opened.</td>
+</tr>
+<tr>
+<td><code>WS_MESSAGE_EVENT</code></td>
+<td><code>webexpress.webui.websocket.message</code></td>
+<td>A WebSocket message was received.</td>
+</tr>
+<tr>
+<td><code>WS_CLOSE_EVENT</code></td>
+<td><code>webexpress.webui.websocket.close</code></td>
+<td>A WebSocket connection was closed.</td>
+</tr>
+<tr>
+<td><code>WS_ERROR_EVENT</code></td>
+<td><code>webexpress.webui.websocket.error</code></td>
+<td>A WebSocket error occurred.</td>
+</tr>
+<tr>
+<td><code>SELECT_ITEM_EVENT</code></td>
+<td><code>webexpress.webui.select.item</code></td>
+<td>An item was selected.</td>
+</tr>
+<tr>
+<td><code>UPDATE_PAGINATION_EVENT</code></td>
+<td><code>webexpress.webui.update.pagination</code></td>
+<td>Pagination was updated.</td>
+</tr>
+<tr>
+<td><code>SELECTED_TAB_EVENT</code></td>
+<td><code>webexpress.webui.tab.selected</code></td>
+<td>A tab was selected.</td>
+</tr>
+<tr>
+<td><code>CHANGE_DARKMODE_EVENT</code></td>
+<td><code>webexpress.webui.change.darkmode</code></td>
+<td>The dark mode was toggled.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="usage-4">Usage</h3>
+<pre><code class="lang-javascript">// listen for an event
+document.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, (e) =&gt; {
+    console.log(&quot;Value changed:&quot;, e.detail);
+});
+
+// dispatch an event from a control
+this._dispatch(webexpress.webui.Event.CLICK_EVENT, { item: selectedItem });
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/webexpress.webui.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

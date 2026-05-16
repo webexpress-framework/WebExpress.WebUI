@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>TabCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="TabCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/tab.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="tabctrl">TabCtrl</h1>
+<p>The <code>TabCtrl</code> component provides a versatile tabbed interface, enabling navigation between different views or content panes without leaving the current page. It supports declarative initialization with <code>data-</code> attributes to easily map interactive elements to their respective views. It parses the DOM structure, applies necessary CSS classes for styling (such as standard tabs, pills, or underline layouts), and handles the logic for switching between active states.</p>
+<pre><code>   ┌─────────────────────────────────────────────────────────────────┐
+   │ [Tab 1]  [Tab 2]  [Tab 3]                            [Toolbar]  │
+   ├─────────────────────────────────────────────────────────────────┤
+   │                                                                 │
+   │ Content for the active tab                                      │
+   │                                                                 │
+   └─────────────────────────────────────────────────────────────────┘
+</code></pre>
+<h2 id="declarative-configuration">Declarative Configuration</h2>
+<p>The initial structure and configuration of the tabs are defined declaratively in the HTML markup. The root element acts as the container, and its children with the <code>wx-tab-view</code> class define the individual tabs and their content.</p>
+<h3 id="container-element-attributes">Container Element Attributes</h3>
+<p>The container element (typically a <code>&lt;div&gt;</code>) can be configured using <code>data-</code> attributes.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-layout</code></td>
+<td>Defines the visual style of the tabs. Supported values: <code>tab</code>, <code>pill</code>, <code>underline</code>.</td>
+<td><code>data-layout=&quot;underline&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="tab-view-elements-attributes">Tab View Elements Attributes</h3>
+<p>Each child element representing a tab view can also use <code>data-</code> attributes to configure its corresponding navigation header.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Unique identifier for the tab (required for linking nav and pane).</td>
+<td><code>id=&quot;settings-tab&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-label</code></td>
+<td>Text label displayed in the tab navigation.</td>
+<td><code>data-label=&quot;Settings&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-icon</code></td>
+<td>CSS class for an icon displayed next to the label.</td>
+<td><code>data-icon=&quot;fas fa-cog&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-color</code></td>
+<td>CSS class for the icon color.</td>
+<td><code>data-color=&quot;text-primary&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-wx-primary-action</code></td>
+<td>Optional action identifier for the tab.</td>
+<td><code>data-wx-primary-action=&quot;save&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-wx-primary-target</code></td>
+<td>Optional target identifier for the tab action.</td>
+<td><code>data-wx-primary-target=&quot;form1&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="toolbar">Toolbar</h3>
+<p>The <code>TabCtrl</code> supports an optional toolbar that is displayed on the right side of the navigation header. Any direct child element of the main container with the class <code>wx-tab-toolbar</code> will be treated as the toolbar and relocated into the nav bar automatically.</p>
+<p>The toolbar content uses the same item types as the <a href="toolbar.html"><code>ToolbarCtrl</code></a>. The following items are supported:</p>
+<ul>
+<li><strong>Buttons (<code>.wx-toolbar-button</code>)</strong>: Interactive elements that trigger actions.</li>
+<li><strong>Separators (<code>.wx-toolbar-separator</code>)</strong>: Visual grouping of related buttons.</li>
+<li><strong>Dropdown Buttons (<code>.wx-toolbar-dropdown</code>)</strong>: Open submenus with further actions.</li>
+<li><strong>Comboboxes (<code>.wx-toolbar-combo</code>)</strong>: Dropdown menus for selection between options.</li>
+<li><strong>Text Items (<code>.wx-toolbar-label</code>)</strong>: Static, non-interactive text.</li>
+<li><strong>&quot;More&quot; Menu (<code>.wx-toolbar-more</code>)</strong>: Overflow dropdown at the right edge.</li>
+</ul>
+<p>Refer to <a href="toolbar.html">toolbar.md</a> for full documentation on item types and <code>data-</code> attribute configuration.</p>
+<pre><code class="lang-html">&lt;div id=&quot;myTabs&quot; class=&quot;wx-webui-tab&quot;&gt;
+    &lt;!-- Toolbar --&gt;
+    &lt;div class=&quot;wx-tab-toolbar&quot;&gt;
+        &lt;div class=&quot;wx-toolbar-button&quot; data-icon=&quot;fas fa-plus&quot; data-title=&quot;Add&quot;&gt;&lt;/div&gt;
+        &lt;div class=&quot;wx-toolbar-separator&quot;&gt;&lt;/div&gt;
+        &lt;div class=&quot;wx-toolbar-dropdown&quot; data-label=&quot;Options&quot;&gt;
+            &lt;ul class=&quot;dropdown-menu&quot;&gt;
+                &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Option 1&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;&lt;a href=&quot;#&quot;&gt;Option 2&lt;/a&gt;&lt;/li&gt;
+            &lt;/ul&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Tab Views --&gt;
+    &lt;div id=&quot;tab1&quot; class=&quot;wx-tab-view&quot; data-label=&quot;Tab 1&quot;&gt;...&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>Once initialized, the <code>TabCtrl</code> instance can be used to programmatically change the active tab.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<p>For tabs defined declaratively, the instance is retrieved via the <code>getInstanceByElement(element)</code> method.</p>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const tabElement = document.getElementById('myTabs');
+
+// retrieve the controller instance associated with the element
+const tabCtrl = webexpress.webui.Controller.getInstanceByElement(tabElement);
+
+// programmatically select a specific tab by its ID
+if (tabCtrl) {
+    tabCtrl.selectTab('settings-tab');
+}
+</code></pre>
+<h2 id="events">Events</h2>
+<p>The component dispatches events to notify the application of user interactions, specifically when a different tab is selected.</p>
+<ul>
+<li><strong><code>webexpress.webui.Event.SELECTED_TAB_EVENT</code></strong>: This event is fired when the user selects a tab. The event <code>detail</code> object contains the <code>tabId</code> of the newly active tab.</li>
+</ul>
+<h2 id="use-case-examples">Use Case Examples</h2>
+<p>The following example illustrates a complete declarative setup for a tab control, utilizing the underline layout.</p>
+<pre><code class="lang-html">&lt;!-- The main tab container --&gt;
+&lt;div id=&quot;myTabs&quot; class=&quot;wx-webui-tab&quot; data-layout=&quot;underline&quot;&gt;
+
+    &lt;!-- Optional Toolbar (aligned to the right) --&gt;
+    &lt;div class=&quot;wx-tab-toolbar&quot;&gt;
+        &lt;div class=&quot;btn-group&quot;&gt;
+            &lt;button class=&quot;btn btn-outline-secondary btn-sm&quot;&gt;Action&lt;/button&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    
+    &lt;!-- Tab 1 --&gt;
+    &lt;div id=&quot;home-tab&quot; class=&quot;wx-tab-view&quot; data-label=&quot;Home&quot; data-icon=&quot;fas fa-home&quot;&gt;
+        &lt;h3&gt;Home Content&lt;/h3&gt;
+        &lt;p&gt;This is the content for the home tab.&lt;/p&gt;
+    &lt;/div&gt;
+    
+    &lt;!-- Tab 2 --&gt;
+    &lt;div id=&quot;profile-tab&quot; class=&quot;wx-tab-view&quot; data-label=&quot;Profile&quot; data-icon=&quot;fas fa-user&quot;&gt;
+        &lt;h3&gt;Profile Content&lt;/h3&gt;
+        &lt;p&gt;This is the content for the user profile tab.&lt;/p&gt;
+    &lt;/div&gt;
+
+&lt;/div&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/tab.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
