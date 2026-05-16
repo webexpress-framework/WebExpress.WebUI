@@ -22,7 +22,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, IUri> Uri { get; set; }
 
         /// <summary>
-        /// Gets or sets the selector for the content to be loaded into the modal.
+        /// Gets or sets the selector (#id, .class, element) for the content to be loaded into the modal.
         /// </summary>
         public Func<IRenderControlContext, string> Selector { get; set; }
 
@@ -81,7 +81,7 @@ namespace WebExpress.WebUI.WebControl
             .AddUserAttribute("data-size", size.ToClass())
             .AddUserAttribute("data-close-label", I18N.Translate(renderContext, closeLabel))
             .AddUserAttribute("data-uri", uri?.ToString())
-            .AddUserAttribute("data-selector", !string.IsNullOrWhiteSpace(selector) ? $"#{selector}" : null);
+            .AddUserAttribute("data-selector", selector);
 
             return html;
         }

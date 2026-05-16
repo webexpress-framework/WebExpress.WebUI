@@ -69,7 +69,7 @@ namespace WebExpress.WebUI.WebControl
             .AddUserAttribute("data-size", size.ToClass())
             .AddUserAttribute("data-close-label", I18N.Translate(renderContext, closeLabel))
             .AddUserAttribute("data-uri", uri?.ToString())
-            .AddUserAttribute("data-selector", !string.IsNullOrWhiteSpace(selector) ? $"#{selector}" : null);
+            .AddUserAttribute("data-selector", selector);
 
             return html;
         }
