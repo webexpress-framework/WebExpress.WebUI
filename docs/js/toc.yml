@@ -44,6 +44,8 @@
   href: page.md
 - name: Pagination
   href: pagination.md
+- name: Panel Dismissible
+  href: panel.dismissible.md
 - name: Password
   href: password.md
 - name: Quickfilter

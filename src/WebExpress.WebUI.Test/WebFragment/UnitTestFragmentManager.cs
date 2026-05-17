@@ -797,6 +797,30 @@ namespace WebExpress.WebUI.Test.WebFragment
         }
 
         /// <summary>
+        /// Test the render function of the fragment manager for the dismissible
+        /// panel fragment-control. The base class composes both its own content
+        /// and any fragments registered for the body section.
+        /// </summary>
+        [Fact]
+        public void Render_TestSectionFragmentControlPanelDismissible()
+        {
+            // arrange
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolpaneldismissible"" class=""wx-webui-panel-dismissible"" data-title=""FragmentPanel""><div>fragment-content</div></div>";
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+
+            // act
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlPanelDismissibleBody));
+
+            // validation
+            Assert.NotNull(html);
+            Assert.NotEmpty(html);
+            AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
+        }
+
+        /// <summary>
         /// Test the render function of the fragment manager for tab control items.
         /// </summary>
         [Fact]

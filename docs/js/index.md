@@ -31,6 +31,7 @@ This section documents the JavaScript UI controllers and components of `WebExpre
 - [Overflow](overflow.md)
 - [Page](page.md)
 - [Pagination](pagination.md)
+- [Panel Dismissible](panel.dismissible.md)
 - [Password](password.md)
 - [Quickfilter](quickfilter.md)
 - [Rating](rating.md)

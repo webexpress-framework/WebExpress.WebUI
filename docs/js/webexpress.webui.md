@@ -84,6 +84,7 @@ as plugins in `webexpress.webui.Binds` (see [Binds](#binds)) and can be freely e
 | `darkmode` | Syncs icon and text of the element to the current dark-mode state.
 | `hide`     | Hides the element (or its enclosing `fieldset.wx-form-group`) when the source value matches.
 | `disable`  | Disables the element (or its enclosing `fieldset.wx-form-group`) when the source value matches.
+| `show`     | Calls `instance.show()` on the bound control when the source raises `SELECT_ITEM_EVENT` (configurable). Primary use case: re-open a dismissed [`PanelDismissibleCtrl`](panel.dismissible.md) on list / tile / tree selection.
 
 ```html
 <div id="myTable"

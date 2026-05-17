@@ -260,6 +260,45 @@ webexpress.webui.Binds.register("hide", {
     }
 });
 
+// show bind - reveals the bound control whenever the configured event fires on
+// the source element. Default event: SELECT_ITEM_EVENT (lists / tiles / trees).
+// The bound element is expected to expose a show() method (PanelDismissibleCtrl,
+// or any control that follows the same convention). When an optional condition
+// is supplied, the event detail is matched against it before show() is called -
+// useful to e.g. fire only when a non-null itemId is selected.
+webexpress.webui.Binds.register("show", {
+    bind(element, controller) {
+        const sourceElement = resolveSourceElement(element, "show");
+
+        if (!sourceElement) {
+            return;
+        }
+
+        const eventName = element.getAttribute("data-wx-bind-event-show") ||
+            webexpress.webui.Event.SELECT_ITEM_EVENT;
+        const condition = element.getAttribute("data-wx-bind-condition-show") ?? "";
+        const detailKey = element.getAttribute("data-wx-bind-detail-show") || "itemId";
+
+        sourceElement.addEventListener(eventName, (e) => {
+            const raw = e?.detail?.[detailKey];
+            const value = raw == null ? "" : String(raw);
+
+            if (condition && !matchesCondition(value, condition)) {
+                return;
+            }
+
+            const instance = controller.getInstanceByElement(element);
+            if (typeof instance?.show === "function") {
+                instance.show();
+            } else {
+                // fall-back for raw elements: just remove d-none
+                element.classList.remove("d-none");
+                element.setAttribute("aria-hidden", "false");
+            }
+        });
+    }
+});
+
 // disable bind - disables the element (or its enclosing fieldset.wx-form-group) when the source value satisfies the condition
 webexpress.webui.Binds.register("disable", {
     bind(element) {

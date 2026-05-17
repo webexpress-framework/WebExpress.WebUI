@@ -54,6 +54,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/webexpress.webui.move.js")]
     [Asset("/assets/js/webexpress.webui.overflow.js")]
     [Asset("/assets/js/webexpress.webui.pagination.js")]
+    [Asset("/assets/js/webexpress.webui.panel.dismissible.js")]
     [Asset("/assets/js/webexpress.webui.quickfilter.js")]
     [Asset("/assets/js/webexpress.webui.rating.js")]
     [Asset("/assets/js/webexpress.webui.responsive.js")]

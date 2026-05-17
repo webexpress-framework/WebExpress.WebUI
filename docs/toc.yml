@@ -55,6 +55,8 @@
       href: js/page.md
     - name: Pagination
       href: js/pagination.md
+    - name: Panel Dismissible
+      href: js/panel.dismissible.md
     - name: Password
       href: js/password.md
     - name: Quickfilter
