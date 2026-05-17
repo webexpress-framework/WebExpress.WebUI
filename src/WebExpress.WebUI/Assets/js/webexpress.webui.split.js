@@ -8,6 +8,11 @@
  * - Min/Max constraints.
  * - Collapsible side pane (double click or drag beyond threshold).
  * - Automatic resizing via ResizeObserver.
+ * - Content-visibility aware: if every child of the side or main pane becomes
+ *   invisible (display:none, visibility:hidden, the hidden attribute, or an
+ *   empty pane) the splitter and that pane are removed from the DOM and the
+ *   remaining pane takes the full container; both are restored when content
+ *   becomes visible again.
  *
  * The following events are triggered:
  * - webexpress.webui.Event.SIZE_CHANGE_EVENT
@@ -39,6 +44,13 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     _splitter = null;
     _resizeObserver = null;
 
+    // content-visibility tracking
+    _sideContentHidden = false;
+    _mainContentHidden = false;
+    _sideContentObserver = null;
+    _mainContentObserver = null;
+    _contentVisibilityPending = false;
+
     /**
      * Constructor
      * @param {HTMLElement} element - The DOM element for the split control.
@@ -52,6 +64,9 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
 
         // restore state or set initial defaults
         this._restoreState(element);
+
+        // observe content visibility and detach pane + splitter when empty
+        this._initContentVisibility();
     }
 
     /**
@@ -304,6 +319,10 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
 
         if (this._sidePaneCollapsed) return;
 
+        // in single-pane mode the visible pane already fills 100% of the
+        // container, so the normal two-pane sizing must not run.
+        if (this._sideContentHidden || this._mainContentHidden) return;
+
         const splitterSize = this._getSplitterSize();
         let sideSize = this._sideSize;
 
@@ -495,6 +514,180 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         const date = new Date();
         date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000));
         document.cookie = `${this._cookieName}=${encodeURIComponent(JSON.stringify(payload))}; expires=${date.toUTCString()}; path=/; SameSite=Lax`;
+    }
+
+    /**
+     * Installs MutationObservers on both panes that watch the visibility of
+     * their child content. When the children of a pane become invisible the
+     * pane and the splitter are removed from the DOM and the remaining pane
+     * takes the full container; when content becomes visible again the
+     * original three-element layout is restored.
+     */
+    _initContentVisibility() {
+        if (typeof MutationObserver === "undefined") return;
+
+        const config = {
+            attributes: true,
+            attributeFilter: ["style", "class", "hidden"],
+            childList: true,
+            subtree: true
+        };
+        const schedule = () => this._scheduleContentVisibilityCheck();
+
+        if (this._sidePane) {
+            this._sideContentObserver = new MutationObserver(schedule);
+            this._sideContentObserver.observe(this._sidePane, config);
+        }
+        if (this._mainPane) {
+            this._mainContentObserver = new MutationObserver(schedule);
+            this._mainContentObserver.observe(this._mainPane, config);
+        }
+
+        // initial pass once the browser has had a chance to apply styles
+        schedule();
+    }
+
+    /**
+     * Coalesces visibility re-evaluation into a single rAF tick so a burst
+     * of DOM mutations only triggers one layout adjustment.
+     */
+    _scheduleContentVisibilityCheck() {
+        if (this._contentVisibilityPending) return;
+        this._contentVisibilityPending = true;
+        requestAnimationFrame(() => {
+            this._contentVisibilityPending = false;
+            this._applyContentVisibility();
+        });
+    }
+
+    /**
+     * Resolves the current content-visibility state of both panes and detaches
+     * or re-attaches the corresponding DOM nodes to match.
+     */
+    _applyContentVisibility() {
+        const sideHidden = this._sidePane != null && !this._hasVisibleContent(this._sidePane);
+        const mainHidden = this._mainPane != null && !this._hasVisibleContent(this._mainPane);
+
+        if (sideHidden === this._sideContentHidden && mainHidden === this._mainContentHidden) {
+            return;
+        }
+
+        this._sideContentHidden = sideHidden;
+        this._mainContentHidden = mainHidden;
+
+        if (sideHidden && mainHidden) {
+            // nothing to show - clear everything from the container
+            this._detachFromContainer(this._sidePane);
+            this._detachFromContainer(this._splitter);
+            this._detachFromContainer(this._mainPane);
+            return;
+        }
+
+        if (sideHidden) {
+            this._detachFromContainer(this._sidePane);
+            this._detachFromContainer(this._splitter);
+            this._reattachInOrder();
+            this._fillContainer(this._mainPane);
+            return;
+        }
+
+        if (mainHidden) {
+            this._detachFromContainer(this._mainPane);
+            this._detachFromContainer(this._splitter);
+            this._reattachInOrder();
+            this._fillContainer(this._sidePane);
+            return;
+        }
+
+        // both visible again - restore the three-element layout and resize
+        this._reattachInOrder();
+        if (this._sidePaneCollapsed) {
+            // honor the existing user-driven collapse state
+            const prop = this._orientation === "vertical" ? "height" : "width";
+            const splitSize = this._getSplitterSize();
+            const collapseTo = this._minSide || 0;
+            if (this._mainPane) {
+                this._mainPane.style[prop] = `calc(100% - ${splitSize}px - ${collapseTo}px)`;
+            }
+        } else {
+            this._setPaneSizes(this._sideSize);
+        }
+    }
+
+    /**
+     * Returns true if the pane has at least one direct child that is not
+     * hidden via the hidden attribute, an inline display:none, an inline
+     * visibility:hidden, or - when the pane is still attached - a stylesheet
+     * rule producing the same effect.
+     * @param {HTMLElement} pane Pane element to inspect.
+     */
+    _hasVisibleContent(pane) {
+        if (!pane || pane.children.length === 0) return false;
+        const attached = pane.isConnected;
+        for (const child of pane.children) {
+            if (child.hidden) continue;
+            if (attached) {
+                const style = window.getComputedStyle(child);
+                if (style.display !== "none" && style.visibility !== "hidden") return true;
+            } else {
+                const display = child.style.display;
+                const visibility = child.style.visibility;
+                if (display !== "none" && visibility !== "hidden") return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Removes a node from the host container if it is currently attached.
+     * @param {HTMLElement} node Element to detach.
+     */
+    _detachFromContainer(node) {
+        if (node && node.parentNode === this._element) {
+            this._element.removeChild(node);
+        }
+    }
+
+    /**
+     * Re-inserts side, splitter and main in the configured order, skipping
+     * any node that the visibility logic wants to keep detached.
+     */
+    _reattachInOrder() {
+        const sequence = this._paneOrder === "main-side"
+            ? [this._mainPane, this._splitter, this._sidePane]
+            : [this._sidePane, this._splitter, this._mainPane];
+
+        const fragment = document.createDocumentFragment();
+        for (const node of sequence) {
+            if (!node) continue;
+            if (node === this._sidePane && this._sideContentHidden) continue;
+            if (node === this._mainPane && this._mainContentHidden) continue;
+            if (node === this._splitter && (this._sideContentHidden || this._mainContentHidden)) continue;
+            if (node.parentNode === this._element) {
+                this._element.removeChild(node);
+            }
+            fragment.appendChild(node);
+        }
+        this._element.appendChild(fragment);
+    }
+
+    /**
+     * Makes the remaining pane fill the container when its counterpart is
+     * detached. Resets any sizing left over from the two-pane layout.
+     * @param {HTMLElement} pane Pane that should occupy the full container.
+     */
+    _fillContainer(pane) {
+        if (!pane) return;
+        if (this._orientation === "vertical") {
+            pane.style.height = "100%";
+            pane.style.minHeight = "";
+            pane.style.width = "";
+        } else {
+            pane.style.width = "100%";
+            pane.style.minWidth = "";
+            pane.style.height = "";
+        }
+        pane.style.display = "";
     }
 
     /**
