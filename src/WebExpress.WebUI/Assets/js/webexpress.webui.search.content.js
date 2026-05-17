@@ -33,7 +33,7 @@ webexpress.webui.SearchContentCtrl = class extends webexpress.webui.Ctrl {
         // read configuration from attributes
         const name = element.getAttribute("name") || null;
         const placeholder = element.getAttribute("placeholder") || null;
-        const icon = element.dataset.icon || "fas fa-search";
+        const icon = element.dataset.icon || this._iconClass("fas fa-search", "wx-icon-light-search");
         const idsAttr = element.getAttribute("data-target-ids") || element.dataset.targets || "";
         const colorAttr = element.getAttribute("data-highlight-color") || element.dataset.highlightColor || "yellow";
 
@@ -136,7 +136,7 @@ webexpress.webui.SearchContentCtrl = class extends webexpress.webui.Ctrl {
     _createSearchClearButton() {
         const searchClear = document.createElement("span");
         const icon = document.createElement("i");
-        icon.className = "fas fa-times";
+        icon.className = this._iconClass("fas fa-times", "wx-icon-light-xmark");
         searchClear.appendChild(icon);
         searchClear.style.cursor = "pointer";
 

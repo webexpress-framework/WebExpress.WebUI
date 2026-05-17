@@ -193,8 +193,10 @@ webexpress.webui.Binds.register("filter", {
 // darkmode bind - syncs the icon and text of the bound element to the current dark mode state
 webexpress.webui.Binds.register("darkmode", {
     bind(element) {
-        const iconLight = element.getAttribute("data-wx-bind-icon-light") || "fas fa-moon";
-        const iconDark  = element.getAttribute("data-wx-bind-icon-dark")  || "fas fa-sun";
+        const iconLight = element.getAttribute("data-wx-bind-icon-light") ||
+            webexpress.webui.IconTheme.resolve("fas fa-moon", "wx-icon-light-moon");
+        const iconDark  = element.getAttribute("data-wx-bind-icon-dark")  ||
+            webexpress.webui.IconTheme.resolve("fas fa-sun", "wx-icon-light-lightbulb-on");
         const textLight = element.getAttribute("data-wx-bind-text-light");
         const textDark  = element.getAttribute("data-wx-bind-text-dark");
 

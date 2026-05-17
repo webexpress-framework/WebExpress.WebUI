@@ -912,7 +912,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             // options or delete button
             if (it.options && it.options.length) {
                 const opt = document.createElement("div");
-                opt.dataset.icon = "fas fa-cog";
+                opt.dataset.icon = this._iconClass("fas fa-cog", "wx-icon-light-cog");
                 opt.dataset.size = "btn-sm";
                 opt.dataset.border = "false";
                 new webexpress.webui.DropdownCtrl(opt).items = it.options;

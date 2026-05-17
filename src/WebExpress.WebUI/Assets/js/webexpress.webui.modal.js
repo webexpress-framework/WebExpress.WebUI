@@ -66,7 +66,7 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
             // create fullscreen toggle button
             this._fullscreenButton.type = "button";
             this._fullscreenButton.className = "btn wx-button-fullscreen ms-auto";
-            this._fullscreenButton.innerHTML = '<i class="fas fa-expand"></i>';
+            this._fullscreenButton.innerHTML = `<i class="${this._iconClass("fas fa-expand", "wx-icon-light-expand")}"></i>`;
             this._fullscreenButton.setAttribute("aria-label", this._i18n("webexpress.webui:fullscreen.toggle", "Toggle Fullscreen"));
             this._fullscreenButton.addEventListener("click", () => {
                 this.toggleFullscreen();
@@ -79,7 +79,7 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         closeButton.type = "button";
         closeButton.className = "btn wx-button-close";
         closeButton.setAttribute("data-wx-dismiss", "modal");
-        closeButton.innerHTML = '<i class="fas fa-times"></i>';
+        closeButton.innerHTML = `<i class="${this._iconClass("fas fa-times", "wx-icon-light-xmark")}"></i>`;
         closeButton.setAttribute("aria-label", this._closeLabel);
         closeButton.addEventListener("click", () => {
             this.hide();
@@ -90,7 +90,7 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         this._cancelButton.type = "button";
         this._cancelButton.className = "btn btn-secondary";
         this._cancelButton.setAttribute("data-wx-dismiss", "modal");
-        this._cancelButton.innerHTML = `<i class="fas fa-times me-2"></i>${this._closeLabel}`;
+        this._cancelButton.innerHTML = `<i class="${this._iconClass("fas fa-times", "wx-icon-light-xmark")} me-2"></i>${this._closeLabel}`;
         this._cancelButton.addEventListener("click", () => {
             this.hide();
         });

@@ -19,6 +19,7 @@ The file `webexpress.webui.js` is the core of the WebExpress.WebUI JavaScript fr
 |`webexpress.webui.DialogPanels`     |Singleton |Registry for modal dialog panel definitions.
 |`webexpress.webui.DashboardWidgets` |Singleton |Registry for dashboard widget definitions.
 |`webexpress.webui.TableTemplates`   |Singleton |Registry for table cell renderer templates.
+|`webexpress.webui.IconTheme`        |Singleton |Resolves icon classes against the page-wide `<html data-icon-theme>` setting and provides cross-theme fallback.
 |`webexpress.webui.Ctrl`             |Class     |Abstract base class for all UI controls.
 |`webexpress.webui.PopperCtrl`       |Class     |Base class for controls that use Popper.js for dropdown positioning.
 |`webexpress.webui.Event`            |Class     |Utility class that defines all event name constants.
@@ -569,21 +570,67 @@ webexpress.webui.TableTemplates.register("currency", function (val, table, row, 
 }, { decimals: 2, symbol: "€" });
 ```
 
+## IconTheme
+
+The `IconTheme` singleton resolves icon classes against the page-wide
+icon theme that the server emits on the root `<html>` element.
+
+- **Default theme** - the attribute is absent (or set to anything other than
+  `"light"`). Controls render the bundled FontAwesome glyphs (`fas fa-*` etc.).
+- **Light theme** - `<html data-icon-theme="light">`. Controls render the
+  lightweight SVG variants defined in `webexpress.webui.icon.css` (the
+  `wx-icon-light wx-icon-light-*` class pair).
+
+The C# side picks the theme up from
+`IApplicationContext.IconTheme` and emits the attribute via
+`VisualTreeWebApp` (or `VisualTreeWebAppLogin`) - individual controls no
+longer need to mirror the theme through per-control `data-icon-theme`
+attributes.
+
+### Methods
+
+|Method                       |Description
+|-----------------------------|--------------------------------------------------------------
+|`current()`                  |Returns the active theme: `"light"` or `"default"`.
+|`resolve(faClass, lightClass)` |Returns the CSS class string for the current theme. When the preferred variant is missing or empty, falls back to the other one. The light value accepts either the full class (`"wx-icon-light wx-icon-light-pen"`), just the modifier (`"wx-icon-light-pen"`) or the bare icon name (`"pen"`); the `"wx-icon-light "` prefix is added automatically.
+
+### Usage from controls
+
+Controls should not read `document.documentElement.dataset.iconTheme`
+directly - the inherited `_iconClass()` / `_iconTheme()` helpers on
+[`Ctrl`](#ctrl) forward to the singleton:
+
+```javascript
+const xmark = document.createElement("i");
+xmark.className = this._iconClass("fas fa-xmark", "wx-icon-light-xmark");
+// default theme -> "fas fa-xmark"
+// light theme   -> "wx-icon-light wx-icon-light-xmark"
+// light theme with no light variant supplied -> falls back to "fas fa-xmark"
+```
+
+Stand-alone code (binds, utilities) calls the singleton directly:
+
+```javascript
+const moonIcon = webexpress.webui.IconTheme.resolve("fas fa-moon", "wx-icon-light-moon");
+```
+
 ## Ctrl
 
 The `Ctrl` class is the abstract base class for all WebExpress.WebUI controls. It provides common lifecycle methods and utility functions. It cannot be instantiated directly.
 
 ### Methods
 
-|Method                    |Description
-|--------------------------|--------------------------------------------------------------
-|`render()`                |Renders the control. Must be implemented in the derived class.
-|`update()`                |Updates the control. By default calls `render()`.
-|`destroy()`               |Destroys the control and performs cleanup.
-|`_detachElement(element)` |Detaches an element from the DOM while preserving event listeners.
-|`_dispatch(type, detail)` |Dispatches a custom event from the control's element.
-|`_i18n(key, fallback)`    |Returns the translated text for an i18n key, or the fallback.
-|`_isVisible()`            |Returns `true` if the control's element is currently visible.
+|Method                          |Description
+|--------------------------------|--------------------------------------------------------------
+|`render()`                      |Renders the control. Must be implemented in the derived class.
+|`update()`                      |Updates the control. By default calls `render()`.
+|`destroy()`                     |Destroys the control and performs cleanup.
+|`_detachElement(element)`       |Detaches an element from the DOM while preserving event listeners.
+|`_dispatch(type, detail)`       |Dispatches a custom event from the control's element.
+|`_i18n(key, fallback)`          |Returns the translated text for an i18n key, or the fallback.
+|`_isVisible()`                  |Returns `true` if the control's element is currently visible.
+|`_iconTheme()`                  |Returns the active icon theme (`"light"` or `"default"`) as read from `<html data-icon-theme>`.
+|`_iconClass(faClass, lightClass)`|Resolves an icon CSS class for the active theme. Falls back to the other variant when the preferred one is missing - see [IconTheme](#icontheme).
 
 ### Usage
 

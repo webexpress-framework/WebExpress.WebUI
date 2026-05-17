@@ -161,7 +161,6 @@ namespace WebExpress.WebUI.WebControl
             var selectable = Selectable?.Invoke(renderContext) ?? false;
             var headerColor = HeaderColor?.Invoke(renderContext) ?? TypeColorTable.Default;
             var suppressHeaders = SuppressHeaders?.Invoke(renderContext) ?? false;
-            var iconTheme = renderContext?.PageContext?.ApplicationContext?.IconTheme ?? TypeIconTheme.Default;
             var role = Role?.Invoke(renderContext);
 
             var classes = Classes.ToList();
@@ -177,7 +176,6 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-striped", striped.ToClass())
                 .AddUserAttribute("data-border", tableBorder.ToClass())
                 .AddUserAttribute("data-selectable", selectable ? "true" : null)
-                .AddUserAttribute("data-icon-theme", iconTheme == TypeIconTheme.Light ? "light" : null)
                 .Add
                 (
                     new HtmlElementTextContentDiv()

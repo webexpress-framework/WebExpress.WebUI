@@ -1298,6 +1298,77 @@ webexpress.webui.Binds = new class {
 };
 
 /**
+ * Global icon-theme registry.
+ *
+ * The active theme is bound to the document root via
+ * <c>&lt;html data-icon-theme="light"&gt;</c>. When the attribute is missing
+ * or set to anything other than "light", the page is rendered in the
+ * default theme (FontAwesome glyphs). The light theme switches to the
+ * lightweight SVG variants defined in webexpress.webui.icon.css
+ * (the <c>wx-icon-light wx-icon-light-*</c> class pair).
+ *
+ * Controls should not read the document attribute directly; both
+ * <see cref="webexpress.webui.Ctrl#_iconTheme">_iconTheme()</see> and
+ * <see cref="webexpress.webui.Ctrl#_iconClass">_iconClass(fa, light)</see>
+ * are forwarded to this singleton, which also implements the
+ * cross-theme fallback (use FontAwesome when no light variant exists
+ * and vice versa).
+ */
+webexpress.webui.IconTheme = new class {
+    /**
+     * Returns the active icon theme as read from
+     * <c>document.documentElement.dataset.iconTheme</c>.
+     * @returns {"light" | "default"} The current icon theme.
+     */
+    current() {
+        const root = (typeof document !== "undefined") ? document.documentElement : null;
+        const value = (root?.dataset?.iconTheme || "").trim().toLowerCase();
+        return value === "light" ? "light" : "default";
+    }
+
+    /**
+     * Resolves an icon CSS class for the active theme with cross-theme
+     * fallback. When the active theme is "light", the light class is
+     * preferred; the FontAwesome class is used as a fallback when no light
+     * variant has been supplied. The reverse applies for the default theme.
+     *
+     * The light argument accepts either a full class string
+     * ("wx-icon-light wx-icon-light-pen") or the bare icon name
+     * ("pen"); in the latter case the "wx-icon-light wx-icon-light-"
+     * prefix is added automatically.
+     *
+     * @param {string|null|undefined} faClass - FontAwesome class string.
+     * @param {string|null|undefined} lightClass - Light-theme class or name.
+     * @returns {string} The resolved CSS class, or "" when both are empty.
+     */
+    resolve(faClass, lightClass) {
+        const fa = (faClass || "").trim();
+        const lightFull = this._normalizeLight(lightClass);
+
+        if (this.current() === "light") {
+            return lightFull || fa || "";
+        }
+        return fa || lightFull || "";
+    }
+
+    /**
+     * Normalises a light-theme value into a full CSS class string. Accepts
+     * either an already-prefixed class ("wx-icon-light wx-icon-light-foo"),
+     * just the modifier class ("wx-icon-light-foo") or the bare icon name
+     * ("foo").
+     * @param {string|null|undefined} value - Raw light-theme value.
+     * @returns {string} The full class string or "".
+     */
+    _normalizeLight(value) {
+        const v = (value || "").trim();
+        if (!v) return "";
+        if (v.startsWith("wx-icon-light ")) return v;
+        if (v.startsWith("wx-icon-light-")) return `wx-icon-light ${v}`;
+        return `wx-icon-light wx-icon-light-${v}`;
+    }
+};
+
+/**
  * Registry for editor plugins.
  * Allows decoupling of functionality into separate files.
  */
@@ -1866,6 +1937,40 @@ webexpress.webui.Ctrl = class {
      */
     _isVisible() {
         return this._element && this._element.offsetParent !== null;
+    }
+
+    /**
+     * Returns the active icon theme as read from the root <html data-icon-theme>
+     * attribute. Possible values are "light" (lightweight SVG variants from
+     * webexpress.webui.icon.css) or "default" (FontAwesome glyphs, also used
+     * when the attribute is missing).
+     *
+     * Derived controls should use this together with {@link _iconClass} to
+     * stay in sync with whatever theme the page sets, instead of mirroring
+     * the theme on every individual control via a per-control data attribute.
+     *
+     * @returns {"light" | "default"} The current icon theme.
+     */
+    _iconTheme() {
+        return webexpress.webui.IconTheme.current();
+    }
+
+    /**
+     * Resolves an icon CSS class for the active theme. Falls back to the
+     * other variant whenever the preferred one is missing - so passing only
+     * the FontAwesome name still produces a sensible result under the light
+     * theme, and vice versa.
+     *
+     * @param {string|null|undefined} faClass - The FontAwesome class string,
+     *     e.g. "fas fa-pen".
+     * @param {string|null|undefined} lightClass - The light-theme class
+     *     string, e.g. "wx-icon-light wx-icon-light-pen". Pass just the
+     *     icon name (e.g. "pen") and the "wx-icon-light wx-icon-light-"
+     *     prefix is added automatically.
+     * @returns {string} The CSS class string to apply to the icon element.
+     */
+    _iconClass(faClass, lightClass) {
+        return webexpress.webui.IconTheme.resolve(faClass, lightClass);
     }
 }
 

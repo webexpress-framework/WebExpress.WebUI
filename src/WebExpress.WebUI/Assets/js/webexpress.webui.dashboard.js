@@ -264,7 +264,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         if (isWidgetMovable) {
             const dragHandle = document.createElement("span");
             dragHandle.className = "text-muted wx-drag-handle";
-            dragHandle.innerHTML = '<i class="fas fa-grip-horizontal"></i>';
+            dragHandle.innerHTML = `<i class="${this._iconClass("fas fa-grip-horizontal", "wx-icon-light-drag")}"></i>`;
             leftArea.appendChild(dragHandle);
 
             cardEl.setAttribute("draggable", "true");
@@ -313,7 +313,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             removeBtn.type = "button";
             removeBtn.className = "btn wx-button-close";
             removeBtn.setAttribute("aria-label", this._i18n("webexpress.webui:remove", "Remove"));
-            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+            removeBtn.innerHTML = `<i class="${this._iconClass("fas fa-times", "wx-icon-light-xmark")}"></i>`;
             removeBtn.addEventListener("click", () => {
                 this._removeWidget(colIdx, widgetData.instanceId);
             });

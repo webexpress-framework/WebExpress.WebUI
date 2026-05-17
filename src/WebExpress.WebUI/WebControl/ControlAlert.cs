@@ -1,5 +1,7 @@
 ﻿using System;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebIcon;
+using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -66,6 +68,7 @@ namespace WebExpress.WebUI.WebControl
             var h = Head?.Invoke(renderContext);
             var text = Text?.Invoke(renderContext);
             var dismissibility = Dismissibility?.Invoke(renderContext);
+            var iconTheme = renderContext?.PageContext?.ApplicationContext?.IconTheme ?? TypeIconTheme.Default;
 
             var head = new HtmlElementTextSemanticsStrong
             (
@@ -77,7 +80,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 Class = "btn wx-button-close"
             }
-                .Add(new HtmlElementTextSemanticsI() { Class = "fas fa-times" })
+                .Add(new HtmlElementTextSemanticsI() { Class = new IconXmark(iconTheme).Class })
                 .AddUserAttribute("data-bs-dismiss", "alert")
                 .AddUserAttribute("aria-label", "close");
 

@@ -73,10 +73,6 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         if (ds.striped) {
             this._table.classList.add(...ds.striped.split(" "));
         }
-        if (ds.iconTheme) {
-            this._iconTheme = ds.iconTheme === "light" ? "light" : null;
-        }
-
         // explicit check for string "true" to enable selection
         this._selectable = ds.selectable === "true";
         if (this._selectable) {
@@ -967,9 +963,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         const effectiveOptions = (row.options && row.options.length) ? row.options : this._options;
         if (effectiveOptions && effectiveOptions.length > 0) {
             const div = document.createElement("div");
-            div.dataset.icon = this._iconTheme == "light"
-                ? "wx-icon-light wx-icon-light-more"
-                : "fas fa-more";
+            div.dataset.icon = this._iconClass("fas fa-ellipsis-h", "wx-icon-light-more");
             div.dataset.size = "btn-sm";
             div.dataset.border = "false";
             tdOpt.appendChild(div);
