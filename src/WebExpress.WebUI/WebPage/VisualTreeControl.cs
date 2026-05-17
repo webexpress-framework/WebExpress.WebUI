@@ -6,8 +6,10 @@ using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebComponent;
 using WebExpress.WebCore.WebEndpoint;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebMessage;
 using WebExpress.WebCore.WebPage;
+using WebExpress.WebCore.WebTheme;
 using WebExpress.WebUI.WebControl;
 
 namespace WebExpress.WebUI.WebPage
@@ -48,6 +50,20 @@ namespace WebExpress.WebUI.WebPage
         /// Gets the title of the html document.
         /// </summary>
         public string Title { get; set; }
+
+        /// <summary>
+        /// Gets the active theme for the page. Resolved at construction time
+        /// by picking the first theme registered for the application; null
+        /// when the application has no theme.
+        /// </summary>
+        public IThemeContext Theme { get; protected set; }
+
+        /// <summary>
+        /// Gets the icon theme for the page. Mirrors <see cref="Theme"/> /
+        /// <c>Theme.IconTheme</c>; falls back to
+        /// <see cref="TypeIconTheme.Default"/> when no theme is registered.
+        /// </summary>
+        public TypeIconTheme IconTheme => Theme?.IconTheme ?? TypeIconTheme.Default;
 
         /// <summary>
         /// Returns the favicons.
@@ -110,6 +126,15 @@ namespace WebExpress.WebUI.WebPage
             _componentHub = componentHub;
 
             Title = pageContext?.PageTitle;
+
+            // resolve the active theme once at construction. The first theme
+            // registered for the application is treated as the default
+            // (matching the convention documented in the Theme model);
+            // applications without a theme leave Theme/IconTheme at their
+            // fallback values.
+            Theme = componentHub?.ThemeManager?.Themes
+                ?.FirstOrDefault(t => t.ApplicationContext == pageContext?.ApplicationContext);
+
             _favicons.Add(new Favicon(RouteEndpoint.Combine(contextPath, WebEx.Favicon)));
 
             foreach (var include in _componentHub?.IncludeManager

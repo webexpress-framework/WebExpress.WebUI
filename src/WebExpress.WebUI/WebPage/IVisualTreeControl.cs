@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebPage;
+using WebExpress.WebCore.WebTheme;
 using WebExpress.WebUI.WebControl;
 
 namespace WebExpress.WebUI.WebPage
@@ -14,6 +16,21 @@ namespace WebExpress.WebUI.WebPage
         /// Gets the title of the html document.
         /// </summary>
         string Title { get; set; }
+
+        /// <summary>
+        /// Gets the active theme for the current page. Resolved at
+        /// construction time from <c>ThemeManager.Themes</c> using the first
+        /// theme registered for the page's application, or <c>null</c> when
+        /// the application has no theme.
+        /// </summary>
+        IThemeContext Theme { get; }
+
+        /// <summary>
+        /// Gets the icon theme used to render icons on this page. Pulled from
+        /// <see cref="Theme"/>; falls back to
+        /// <see cref="TypeIconTheme.Default"/> when no theme is registered.
+        /// </summary>
+        TypeIconTheme IconTheme { get; }
 
         /// <summary>
         /// Gets or sets the HTTP status code associated with the response.

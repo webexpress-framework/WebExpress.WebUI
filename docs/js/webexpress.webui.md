@@ -581,11 +581,15 @@ icon theme that the server emits on the root `<html>` element.
   lightweight SVG variants defined in `webexpress.webui.icon.css` (the
   `wx-icon-light wx-icon-light-*` class pair).
 
-The C# side picks the theme up from
-`IApplicationContext.IconTheme` and emits the attribute via
-`VisualTreeWebApp` (or `VisualTreeWebAppLogin`) - individual controls no
+The C# side picks the theme up from the active `IThemeContext` (resolved
+by `VisualTreeControl` from the first theme registered for the request's
+application via `ThemeManager.Themes`). Themes declare their icon-theme
+via `[IconTheme(...)]` on the theme class, next to `[ThemeMode]` and
+`[ThemeStyle]`. The `<html data-icon-theme>` attribute is emitted by
+`VisualTreeWebApp` / `VisualTreeWebAppLogin`; individual controls no
 longer need to mirror the theme through per-control `data-icon-theme`
-attributes.
+attributes. Server-side `Icon` Funcs that only have a render context use
+the `IRenderContext.GetIconTheme()` extension to arrive at the same value.
 
 ### Methods
 
