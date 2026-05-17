@@ -27,13 +27,15 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var role = Role?.Invoke(renderContext);
+
             return new HtmlElementSectionNav([.. Content.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
                 Class = Css.Concatenate("navbar", GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
-                DataTheme = Theme.ToValue()
+                Role = role,
+                DataTheme = Theme?.Invoke(renderContext).ToValue()
             };
         }
     }

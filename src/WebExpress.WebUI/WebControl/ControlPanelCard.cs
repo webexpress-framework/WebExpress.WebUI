@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -13,29 +14,29 @@ namespace WebExpress.WebUI.WebControl
     public class ControlPanelCard : ControlPanel
     {
         /// <summary>
-        /// Returns or sets the header text.
+        /// Gets or sets the header text.
         /// </summary>
-        public string Header { get; set; }
+        public Func<IRenderControlContext, string> Header { get; set; }
 
         /// <summary>
-        /// Returns or sets the header image.
+        /// Gets or sets the header image.
         /// </summary>
-        public IUri HeaderImage { get; set; }
+        public Func<IRenderControlContext, IUri> HeaderImage { get; set; }
 
         /// <summary>
-        /// Returns or sets the headline.
+        /// Gets or sets the headline.
         /// </summary>
-        public string Headline { get; set; }
+        public Func<IRenderControlContext, string> Headline { get; set; }
 
         /// <summary>
-        /// Returns or sets the footer.
+        /// Gets or sets the footer.
         /// </summary>
-        public string Footer { get; set; }
+        public Func<IRenderControlContext, string> Footer { get; set; }
 
         /// <summary>
-        /// Returns or sets the footer image.
+        /// Gets or sets the footer image.
         /// </summary>
-        public IUri FooterImage { get; set; }
+        public Func<IRenderControlContext, IUri> FooterImage { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -45,7 +46,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlPanelCard(string id = null, params IControl[] controls)
             : base(id, controls)
         {
-            Border = new PropertyBorder(true);
+            Border = _ => new PropertyBorder(true);
         }
 
         /// <summary>
@@ -56,43 +57,51 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var role = Role?.Invoke(renderContext);
+            var theme = Theme?.Invoke(renderContext) ?? TypeTheme.None;
+            var header = Header?.Invoke(renderContext);
+            var headerImage = HeaderImage?.Invoke(renderContext);
+            var headline = Headline?.Invoke(renderContext);
+            var footer = Footer?.Invoke(renderContext);
+            var footerImage = FooterImage?.Invoke(renderContext);
+
             var content = Content;
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("card", GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
-                DataTheme = Theme.ToValue()
+                Role = role,
+                DataTheme = theme.ToValue()
             };
 
-            if (!string.IsNullOrWhiteSpace(Header))
+            if (!string.IsNullOrWhiteSpace(header))
             {
-                html.Add(new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(Header))) { Class = "card-header" });
+                html.Add(new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(header))) { Class = "card-header" });
             }
 
-            if (HeaderImage is not null)
+            if (headerImage is not null)
             {
                 html.Add(new HtmlElementMultimediaImg()
                 {
-                    Src = HeaderImage?.ToString(),
+                    Src = headerImage?.ToString(),
                     Class = "card-img-top"
                 });
             }
 
-            if (!string.IsNullOrWhiteSpace(Headline))
+            if (!string.IsNullOrWhiteSpace(headline))
             {
                 var headContent = (IEnumerable<IControl>)[new ControlText()
                 {
-                    Text = I18N.Translate(Headline),
+                    Text = _ => I18N.Translate(headline),
                     Classes = new List<string>(["card-title"]),
-                    Format = TypeFormatText.H4
+                    Format = _ => TypeFormatText.H4
                 }];
 
                 content = headContent.Concat(Content);
             }
 
-            html.Add(new HtmlElementTextContentDiv(new HtmlElementTextContentDiv([.. content.Select(x => x.Render(renderContext, visualTree))])
+            html.Add(new HtmlElementTextContentDiv(new HtmlElementTextContentDiv([.. content.Select(x => x?.Render(renderContext, visualTree))])
             {
                 Class = "card-text"
             })
@@ -100,18 +109,18 @@ namespace WebExpress.WebUI.WebControl
                 Class = "card-body"
             });
 
-            if (FooterImage is not null)
+            if (footerImage is not null)
             {
                 html.Add(new HtmlElementMultimediaImg()
                 {
-                    Src = FooterImage?.ToString(),
+                    Src = footerImage?.ToString(),
                     Class = "card-img-top"
                 });
             }
 
-            if (!string.IsNullOrWhiteSpace(Footer))
+            if (!string.IsNullOrWhiteSpace(footer))
             {
-                html.Add(new HtmlElementTextContentDiv(new HtmlText(Footer)) { Class = "card-footer" });
+                html.Add(new HtmlElementTextContentDiv(new HtmlText(footer)) { Class = "card-footer" });
             }
 
             return html;

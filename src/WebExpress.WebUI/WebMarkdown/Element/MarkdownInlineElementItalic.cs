@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebMarkdown.Element
     public class MarkdownInlineElementItalic : MarkdownInlineElement
     {
         /// <summary>
-        /// Returns the collection of inline elements contained within the italic text segment.
+        /// Gets the collection of inline elements contained within the italic text segment.
         /// </summary>
         public IEnumerable<MarkdownInlineElement> Content { get; } = [];
 

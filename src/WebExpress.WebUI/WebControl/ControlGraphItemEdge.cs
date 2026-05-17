@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text.Json;
@@ -9,7 +10,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a visual component capable of displaying a graph consisting of 
+    /// Represents a visual component capable of displaying a graph consisting of
     /// nodes and edges.
     /// </summary>
     public class ControlGraphItemEdge : IControlGraphItemEdge
@@ -17,29 +18,29 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<Point> _waypoints = [];
 
         /// <summary>
-        /// Returns the unique identifier of the edge.
+        /// Gets the unique identifier of the edge.
         /// </summary>
         public string Id { get; private set; }
 
         /// <summary>
-        /// Returns or sets the id of the source node.
+        /// Gets or sets the id of the source node.
         /// </summary>
-        public string Source { get; set; }
+        public Func<IRenderControlContext, string> Source { get; set; }
 
         /// <summary>
-        /// Returns or sets the id of the target node.
+        /// Gets or sets the id of the target node.
         /// </summary>
-        public string Target { get; set; }
+        public Func<IRenderControlContext, string> Target { get; set; }
 
         /// <summary>
-        /// Returns or sets an optional label for the edge.
+        /// Gets or sets an optional label for the edge.
         /// </summary>
-        public string Label { get; set; }
+        public Func<IRenderControlContext, string> Label { get; set; }
 
         /// <summary>
-        /// Returns or sets the color for the edge.
+        /// Gets or sets the color for the edge.
         /// </summary>
-        public PropertyColorGraph Color { get; set; }
+        public Func<IRenderControlContext, PropertyColorGraph> Color { get; set; }
 
         /// <summary>
         /// Returns the collection of waypoints that define the path.
@@ -96,17 +97,21 @@ namespace WebExpress.WebUI.WebControl
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var waypoints = JsonSerializer.Serialize(_waypoints.Select(p => new { x = p.X, y = p.Y }));
+            var label = Label?.Invoke(renderContext);
+            var source = Source?.Invoke(renderContext);
+            var target = Target?.Invoke(renderContext);
+            var color = Color?.Invoke(renderContext);
 
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-graph-edge"
             }
-                .AddUserAttribute("data-label", I18N.Translate(renderContext, Label))
-                .AddUserAttribute("data-from", Source)
-                .AddUserAttribute("data-to", Target)
-                .AddUserAttribute("data-color-css", Color?.ToClass())
-                .AddUserAttribute("data-color", Color?.ToStyle())
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, label))
+                .AddUserAttribute("data-from", source)
+                .AddUserAttribute("data-to", target)
+                .AddUserAttribute("data-color-css", color?.ToClass())
+                .AddUserAttribute("data-color", color?.ToStyle())
                 .AddUserAttribute("data-waypoints", _waypoints.Count > 0 ? waypoints : null);
         }
     }

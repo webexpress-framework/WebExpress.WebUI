@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlQuickfilter : IControl
     {
         /// <summary>
-        /// Returns the items of the quickfilter control.
+        /// Gets the items of the quickfilter control.
         /// </summary>
         IEnumerable<IControlQuickfilterItem> Items { get; }
 

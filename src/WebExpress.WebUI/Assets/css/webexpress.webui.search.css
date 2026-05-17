@@ -23,7 +23,7 @@
     outline: none;
     flex-grow: 1 !important;
     color: var(--bs-body-color); /* Use theme-aware text color */
-    background-color: var(--bs-body-bg); /* Use theme-aware background color */
+    background-color: inherit; /* Use theme-aware background color */
 }
 
 /* Styling for the clear (X) button */

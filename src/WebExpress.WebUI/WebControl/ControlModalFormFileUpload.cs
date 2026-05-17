@@ -22,7 +22,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlModalFormFileUpload : ControlModalForm, IControlModalFormFileUpload
     {
         /// <summary>
-        /// Returns or sets the files that are accepted.
+        /// Gets or sets the files that are accepted.
         /// </summary>
         public IEnumerable<string> AcceptFile { get => File.AcceptFile; }
 
@@ -32,15 +32,15 @@ namespace WebExpress.WebUI.WebControl
         public event Action<ControlFormEventFormUpload> UploadForm;
 
         /// <summary>
-        /// Returns or sets the file.
+        /// Gets or sets the file.
         /// </summary>
         private ControlFormItemInputFile File { get; } = new ControlFormItemInputFile()
         {
-            Name = "file",
-            Help = "fileupload.file.description",
-            Icon = new IconImage(),
+            Name = _ => "file",
+            Help = _ => "fileupload.file.description",
+            Icon = _ => new IconImage(),
             //AcceptFile = new string[] { "image/*, video/*, audio/*, .pdf, .doc, .docx, .txt" },
-            Margin = new PropertySpacingMargin
+            Margin = _ => new PropertySpacingMargin
             (
                 PropertySpacing.Space.None,
                 PropertySpacing.Space.None,
@@ -50,44 +50,44 @@ namespace WebExpress.WebUI.WebControl
         };
 
         /// <summary>
-        /// Returns or sets the submit button icon.
+        /// Gets or sets the submit button icon.
         /// </summary>
-        public IIcon SubmitButtonIcon
+        public Func<IRenderControlContext, IIcon> SubmitButtonIcon
         {
             get { return SubmitButton?.Icon; }
             set { SubmitButton.Icon = value; }
         }
 
         /// <summary>
-        /// Returns or sets the submit button color.
+        /// Gets or sets the submit button color.
         /// </summary>
-        public PropertyColorButton SubmitButtonColor
+        public Func<IRenderControlContext, PropertyColorButton> SubmitButtonColor
         {
             get { return SubmitButton?.Color; }
             set { SubmitButton.Color = value; }
         }
 
         /// <summary>
-        /// Returns or sets the submit button label.
+        /// Gets or sets the submit button label.
         /// </summary>
-        public string SubmitButtonLabel
+        public Func<IRenderControlContext, string> SubmitButtonLabel
         {
             get { return SubmitButton?.Text; }
             set { SubmitButton.Text = value; }
         }
 
         /// <summary>
-        /// Returns or sets the prologue area.
+        /// Gets or sets the prologue area.
         /// </summary>
         public ControlFormItem Prologue { get; set; }
 
         /// <summary>
-        /// Returns or sets the epilogue area.
+        /// Gets or sets the epilogue area.
         /// </summary>
         public ControlFormItem Epilogue { get; set; }
 
         /// <summary>
-        /// Returns or sets the submit button.
+        /// Gets or sets the submit button.
         /// </summary>
         private ControlFormItemButtonSubmit SubmitButton { get; set; }
             = new ControlFormItemButtonSubmit();
@@ -116,16 +116,29 @@ namespace WebExpress.WebUI.WebControl
 
             Initialize(x =>
             {
-                Header = I18N.Translate(x.Context, "webexpress.webui:fileupload.header");
-                SubmitButtonLabel = I18N.Translate(x.Context, "webexpress.webui:fileupload.label");
+                Header = _ => I18N.Translate(x.Context, "webexpress.webui:fileupload.header");
+                SubmitButtonLabel = _ => I18N.Translate(x.Context, "webexpress.webui:fileupload.label");
             });
 
 
-            SubmitButtonIcon = new IconUpload();
-            SubmitButtonColor = new PropertyColorButton(TypeColorButton.Primary);
+            SubmitButtonIcon = _ => new IconUpload();
+            SubmitButtonColor = _ => new PropertyColorButton(TypeColorButton.Primary);
 
             //File.ValidateItem += OnValidation;
             ProcessForm += OnProcessForm;
+        }
+
+        event Action<ControlFormEventFormUpload> IControlModalFormFileUpload.UploadForm
+        {
+            add
+            {
+                throw new NotImplementedException();
+            }
+
+            remove
+            {
+                throw new NotImplementedException();
+            }
         }
 
         /// <summary>
@@ -157,7 +170,9 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="eventArgs">The event argument.</param>
         private void OnValidation(ControlFormEventItemValidate<ControlFormInputValueFile> eventArgs)
         {
-            if (eventArgs.Context.Request.GetParameter(File.Name) is not ParameterFile)
+            var name = File.Name?.Invoke(eventArgs.Context);
+
+            if (eventArgs.Context.Request.GetParameter(name) is not ParameterFile)
             {
                 //eventArgs.AddResults(new ValidationResult
                 //(
@@ -174,7 +189,8 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="e">The event argument.</param>
         private void OnProcessForm(ControlFormEventFormProcess eventArgs)
         {
-            if (eventArgs.Context.Request.GetParameter(File.Name) is ParameterFile file)
+            var name = File.Name?.Invoke(eventArgs.Context);
+            if (eventArgs.Context.Request.GetParameter(name) is ParameterFile file)
             {
                 OnUpload(new ControlFormEventFormUpload()
                 {

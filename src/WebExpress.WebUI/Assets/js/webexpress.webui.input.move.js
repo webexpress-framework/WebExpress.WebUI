@@ -29,13 +29,14 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
         // Initialize the lists and all control buttons
         this._selectedList = this._createList();
         this._availableList = this._createList();
-        this._buttonToSelectedAll = this._createButton('btn-primary', '<<');
-        this._buttonToSelected = this._createButton('btn-primary', '<');
-        this._buttonToAvailable = this._createButton('btn-primary', '>');
-        this._buttonToAvailableAll = this._createButton('btn-primary', '>>');
+        this._buttonToSelectedAll = this._createButton("btn-primary", "<<");
+        this._buttonToSelected = this._createButton("btn-primary", "<");
+        this._buttonToAvailable = this._createButton("btn-primary", ">");
+        this._buttonToAvailableAll = this._createButton("btn-primary", ">>");
         this._hidden = this._createHiddenInput();
 
         // Read all relevant data attributes for labels and state
+        const id = element.getAttribute("id");
         const name = element.getAttribute("name") || element.id;
         const selectedHeaderLabel = element.dataset.headerSelected || this._i18n("webexpress.webui:selected", "");
         const availableHeaderLabel = element.dataset.headerAvailable || this._i18n("webexpress.webui:available", "");
@@ -49,14 +50,15 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
         this._options = this._parseOptions(element.querySelectorAll(".wx-webui-move-option"));
 
         // Create the containers for both list panels and the button panel
-        const selectedContainer = this._createDiv('wx-move-list');
+        const selectedContainer = this._createDiv("wx-move-list");
         const selectedHeader = this._createHeader(selectedHeaderLabel);
-        const availableContainer = this._createDiv('wx-move-list');
+        const availableContainer = this._createDiv("wx-move-list");
         const availableHeader = this._createHeader(availableHeaderLabel);
-        const buttonContainer = this._createDiv('wx-move-button');
+        const buttonContainer = this._createDiv("wx-move-button");
 
         // Clean up the DOM and remove all data attributes
-        element.innerHTML = '';
+        element.innerHTML = "";
+        element.removeAttribute("id");
         element.removeAttribute("name");
         element.removeAttribute("data-value");
         element.removeAttribute("data-header-selected");
@@ -66,7 +68,10 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
         element.removeAttribute("data-button-available");
         element.removeAttribute("data-button-availableall");
 
-        // Set hidden input name if available
+        // Set hidden input id and name if available
+        if (id) {
+            this._hidden.id = id;
+        }
         if (name) {
             this._hidden.name = name;
         }
@@ -92,17 +97,17 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
         this._addDragDropEvents(availableContainer, this._availableList, () => this.moveToAvailable());
 
         // Add click event handlers for all control buttons
-        this._buttonToSelectedAll.addEventListener('click', () => this.moveToSelectedAll());
-        this._buttonToSelected.addEventListener('click', () => this.moveToSelected());
-        this._buttonToAvailableAll.addEventListener('click', () => this.moveToAvailableAll());
-        this._buttonToAvailable.addEventListener('click', () => this.moveToAvailable());
+        this._buttonToSelectedAll.addEventListener("click", () => this.moveToSelectedAll());
+        this._buttonToSelected.addEventListener("click", () => this.moveToSelected());
+        this._buttonToAvailableAll.addEventListener("click", () => this.moveToAvailableAll());
+        this._buttonToAvailable.addEventListener("click", () => this.moveToAvailable());
 
         // Add all panels to the DOM and initialize state
         element.appendChild(selectedContainer);
         element.appendChild(buttonContainer);
         element.appendChild(availableContainer);
         element.classList.add("wx-move");
-        if (name) element.appendChild(this._hidden);
+        if (name || id) element.appendChild(this._hidden);
         if (value) this.value = String(value).split(";");
 
         // Render the UI for the first time
@@ -114,8 +119,8 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
      * @returns {HTMLUListElement}
      */
     _createList() {
-        const ul = document.createElement('ul');
-        ul.className = 'list-group list-group-flush';
+        const ul = document.createElement("ul");
+        ul.className = "list-group list-group-flush";
         return ul;
     }
 
@@ -126,8 +131,8 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
      * @returns {HTMLButtonElement}
      */
     _createButton(btnClass, label) {
-        const btn = document.createElement('button');
-        btn.type = 'button';
+        const btn = document.createElement("button");
+        btn.type = "button";
         btn.className = `btn ${btnClass} btn-block`;
         btn.textContent = label;
         return btn;
@@ -138,8 +143,8 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
      * @returns {HTMLInputElement}
      */
     _createHiddenInput() {
-        const input = document.createElement('input');
-        input.type = 'hidden';
+        const input = document.createElement("input");
+        input.type = "hidden";
         return input;
     }
 
@@ -149,7 +154,7 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
      * @returns {HTMLDivElement}
      */
     _createDiv(classes) {
-        const div = document.createElement('div');
+        const div = document.createElement("div");
         div.className = classes;
         return div;
     }
@@ -160,8 +165,8 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
      * @returns {HTMLSpanElement}
      */
     _createHeader(label) {
-        const span = document.createElement('span');
-        span.className = 'text-muted';
+        const span = document.createElement("span");
+        span.className = "text-muted";
         span.textContent = label;
         return span;
     }
@@ -192,21 +197,21 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
      */
     _addDragDropEvents(container, list, onDropHandler) {
         // Highlight list on drag enter/over
-        container.addEventListener('dragenter', event => {
+        container.addEventListener("dragenter", event => {
             event.preventDefault();
-            list.classList.add('wx-drag-over');
+            list.classList.add("wx-drag-over");
         });
-        container.addEventListener('dragover', event => {
+        container.addEventListener("dragover", event => {
             event.preventDefault();
-            list.classList.add('wx-drag-over');
+            list.classList.add("wx-drag-over");
         });
         // Remove highlight and dragging class on drag end/leave/drop
-        container.addEventListener('dragend', () => {
+        container.addEventListener("dragend", () => {
             if (this._draggingElement) this._draggingElement.classList.remove("wx-dragging", "wx-drag-over");
         });
-        container.addEventListener('dragleave', () => list.classList.remove('wx-drag-over'));
-        container.addEventListener('drop', event => {
-            list.classList.remove('wx-drag-over');
+        container.addEventListener("dragleave", () => list.classList.remove("wx-drag-over"));
+        container.addEventListener("drop", event => {
+            list.classList.remove("wx-drag-over");
             onDropHandler();
             event.preventDefault();
         });
@@ -267,8 +272,8 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
         const intersection = this._options.filter(b => values.includes(b.id));
 
         // Clear the lists and state maps
-        this._selectedList.innerHTML = '';
-        this._availableList.innerHTML = '';
+        this._selectedList.innerHTML = "";
+        this._availableList.innerHTML = "";
         this._selectedoptions.clear();
         this._availableoptions.clear();
 
@@ -307,7 +312,7 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
             this._selectedoptions.set(li, null);
 
             // Click handler for selection (with or without Ctrl)
-            li.addEventListener('click', event => {
+            li.addEventListener("click", event => {
                 if (event.ctrlKey) {
                     if (![...this._selectedoptions.values()].some(elem => elem === currentValue)) {
                         this._selectedoptions.set(li, currentValue);
@@ -325,14 +330,14 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
                 this._dispatch(webexpress.webui.Event.CLICK_EVENT, { item: currentValue });
             });
             // Double click handler: move to available
-            li.addEventListener('dblclick', () => {
+            li.addEventListener("dblclick", () => {
                 this._selectedoptions.forEach((_, key) => this._selectedoptions.set(key, null));
                 this._selectedoptions.set(li, currentValue);
                 this._availableoptions.forEach((_, key) => this._availableoptions.set(key, null));
                 this.moveToAvailable();
             });
             // Space key handler for selection
-            li.addEventListener('keyup', event => {
+            li.addEventListener("keyup", event => {
                 if (event.keyCode === 32) {
                     if (![...this._selectedoptions.keys()].some(el => el === currentValue)) {
                         this._selectedoptions.set(li, currentValue);
@@ -344,7 +349,7 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
                 }
             });
             // Drag start handler
-            li.addEventListener('dragstart', () => {
+            li.addEventListener("dragstart", () => {
                 this._selectedoptions.forEach((_, key) => this._selectedoptions.set(key, null));
                 this._selectedoptions.set(li, currentValue);
                 this._availableoptions.forEach((_, key) => this._availableoptions.set(key, null));
@@ -362,7 +367,7 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
             this._availableoptions.set(li, null);
 
             // Click handler for selection (with or without Ctrl)
-            li.addEventListener('click', event => {
+            li.addEventListener("click", event => {
                 if (event.ctrlKey) {
                     if (![...this._availableoptions.values()].some(elem => elem === currentValue)) {
                         this._availableoptions.set(li, currentValue);
@@ -380,14 +385,14 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
                 this._dispatch(webexpress.webui.Event.CLICK_EVENT, { item: currentValue });
             });
             // Double click handler: move to selected
-            li.addEventListener('dblclick', () => {
+            li.addEventListener("dblclick", () => {
                 this._selectedoptions.forEach((_, key) => this._selectedoptions.set(key, null));
                 this._availableoptions.forEach((_, key) => this._availableoptions.set(key, null));
                 this._availableoptions.set(li, currentValue);
                 this.moveToSelected();
             });
             // Space key handler for selection
-            li.addEventListener('keyup', event => {
+            li.addEventListener("keyup", event => {
                 if (event.keyCode === 32) {
                     if (![...this._availableoptions.keys()].some(el => el === currentValue)) {
                         this._availableoptions.set(li, currentValue);
@@ -399,7 +404,7 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
                 }
             });
             // Drag start handler
-            li.addEventListener('dragstart', () => {
+            li.addEventListener("dragstart", () => {
                 this._selectedoptions.forEach((_, key) => this._selectedoptions.set(key, null));
                 this._availableoptions.forEach((_, key) => this._availableoptions.set(key, null));
                 this._availableoptions.set(li, currentValue);
@@ -427,30 +432,30 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
      * @returns {HTMLLIElement}
      */
     _createListItem(currentValue) {
-        const li = document.createElement('li');
-        li.className = 'list-group-item';
-        li.setAttribute('draggable', 'true');
+        const li = document.createElement("li");
+        li.className = "list-group-item";
+        li.setAttribute("draggable", "true");
         // Add icon if specified
         if (currentValue.icon) {
-            const icon = document.createElement('i');
+            const icon = document.createElement("i");
             icon.className = `text-primary ${currentValue.icon}`;
-            icon.setAttribute('draggable', 'false');
+            icon.setAttribute("draggable", "false");
             li.appendChild(icon);
         }
         // Add image if specified
         if (currentValue.image) {
-            const img = document.createElement('img');
+            const img = document.createElement("img");
             img.className = "wx-icon";
-            img.setAttribute('src', currentValue.image);
-            img.setAttribute('title', '');
-            img.setAttribute('draggable', 'false');
+            img.setAttribute("src", currentValue.image);
+            img.setAttribute("title", "");
+            img.setAttribute("draggable", "false");
             li.appendChild(img);
         }
         // Add label as link
-        const a = document.createElement('a');
-        a.className = 'wx-link';
-        a.setAttribute('href', 'javascript:void(0)');
-        a.setAttribute('draggable', 'false');
+        const a = document.createElement("a");
+        a.className = "wx-link";
+        a.setAttribute("href", "javascript:void(0)");
+        a.setAttribute("draggable", "false");
         a.textContent = currentValue.label;
         li.appendChild(a);
         return li;
@@ -496,11 +501,11 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
             normalized = [];
         } else if (Array.isArray(values)) {
             normalized = values;
-        } else if (typeof values === 'string') {
+        } else if (typeof values === "string") {
             const trimmed = values.trim();
             if (trimmed.length > 0) {
-                normalized = trimmed.includes(';')
-                    ? trimmed.split(';').map(v => v.trim())
+                normalized = trimmed.includes(";")
+                    ? trimmed.split(";").map(v => v.trim())
                     : [trimmed];
             }
         } else {
@@ -509,7 +514,7 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
 
         // trim and filter empty
         normalized = normalized
-            .map(v => (v == null ? '' : String(v).trim()))
+            .map(v => (v == null ? "" : String(v).trim()))
             .filter(v => v.length > 0);
 
         // restrict to available option ids
@@ -525,8 +530,8 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
         });
 
         // serialize for change detection
-        const oldSerialized = (this._values || []).join(';');
-        const newSerialized = normalized.join(';');
+        const oldSerialized = (this._values || []).join(";");
+        const newSerialized = normalized.join(";");
 
         if (oldSerialized !== newSerialized) {
             this._values = normalized;

@@ -44,6 +44,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorTable.Warning, @"<div class=""wx-table-row"" data-color=""table-warning""></div>")]
         [InlineData(TypeColorTable.Danger, @"<div class=""wx-table-row"" data-color=""table-danger""></div>")]
         [InlineData(TypeColorTable.Light, @"<div class=""wx-table-row"" data-color=""table-light""></div>")]
+        [InlineData(TypeColorTable.Highlight, @"<div class=""wx-table-row"" data-color=""table-highlight""></div>")]
         [InlineData(TypeColorTable.Dark, @"<div class=""wx-table-row"" data-color=""table-dark""></div>")]
         public void Color(TypeColorTable color, string expected)
         {
@@ -53,7 +54,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableRow()
             {
-                Color = color
+                Color = _ => color
             };
 
             // act
@@ -77,7 +78,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableRow(null)
             {
-                ExpandState = state
+                ExpandState = _ => state
             };
 
             // act
@@ -100,7 +101,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableRow(null)
             {
-                PrimaryAction = new ActionModal(modal)
+                PrimaryAction = _ => new ActionModal(modal)
             };
 
             // act
@@ -124,7 +125,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableRow(null)
             {
-                SecondaryAction = new ActionModal(modal)
+                SecondaryAction = _ => new ActionModal(modal)
             };
 
             // act
@@ -147,7 +148,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlTableRow();
 
             // act
-            control.Add(new ControlTableCell() { Text = "abc" });
+            control.Add(new ControlTableCell() { Text = _ => "abc" });
 
             var html = control.Render(context, visualTree);
 

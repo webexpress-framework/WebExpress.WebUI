@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+using System;
+using System.Globalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -7,35 +8,32 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a range input form item control.
     /// </summary>
-    /// <remarks>
-    /// This class provides the functionality for a range input within a form.
-    /// </remarks>
     public class ControlFormItemInputRange : ControlFormItemInput<ControlFormInputValueFloat>
     {
         /// <summary>
-        /// Returns or sets the minimum allowable value.
+        /// Gets or sets the minimum allowable value.
         /// </summary>
-        public float Min { get; set; } = 0;
+        public Func<IRenderControlContext, float> Min { get; set; } = _ => 0;
 
         /// <summary>
-        /// Returns or sets the maximum allowable value.
+        /// Gets or sets the maximum allowable value.
         /// </summary>
-        public float Max { get; set; } = 10;
+        public Func<IRenderControlContext, float> Max { get; set; } = _ => 10;
 
         /// <summary>
-        /// Returns or sets the step size used for incrementing or decrementing values.
+        /// Gets or sets the step size used for incrementing or decrementing values.
         /// </summary>
-        public float Step { get; set; } = 1;
+        public Func<IRenderControlContext, float> Step { get; set; } = _ => 1;
 
         /// <summary>
-        /// Returns or sets the description.
+        /// Gets or sets the description.
         /// </summary>
-        public string Description { get; set; }
+        public Func<IRenderControlContext, string> Description { get; set; }
 
         /// <summary>
-        /// Returns or sets whether the radio button is selected
+        /// Gets or sets whether the radio button is selected.
         /// </summary>
-        public bool Checked { get; set; }
+        public Func<IRenderControlContext, bool> Checked { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
@@ -63,19 +61,24 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var value = renderContext?.GetValue<ControlFormInputValueFloat>(this)?.Number;
+            var name = Name?.Invoke(renderContext);
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
+            var min = Min?.Invoke(renderContext) ?? 0;
+            var max = Max?.Invoke(renderContext) ?? 10;
+            var step = Step?.Invoke(renderContext) ?? 1;
 
             var html = new HtmlElementFieldInput()
             {
                 Id = Id,
-                Name = Name,
+                Name = name,
                 Class = Css.Concatenate("form-range", GetClasses()),
                 Style = GetStyles(),
                 Type = "range",
-                Min = Min.ToString(CultureInfo.InvariantCulture),
-                Max = Max.ToString(CultureInfo.InvariantCulture),
-                Step = Step.ToString(CultureInfo.InvariantCulture),
+                Min = min.ToString(CultureInfo.InvariantCulture),
+                Max = max.ToString(CultureInfo.InvariantCulture),
+                Step = step.ToString(CultureInfo.InvariantCulture),
                 Value = value?.ToString(CultureInfo.InvariantCulture),
-                Disabled = Disabled
+                Disabled = disabled
             };
 
             return html;
@@ -85,11 +88,14 @@ namespace WebExpress.WebUI.WebControl
         /// Creates an value from the specified string representation.
         /// </summary>
         /// <param name="value">
-        /// The string representation of the value to be converted. Cannot be null.
+        /// The string representation of the value to be parsed and stored.
         /// </param>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="renderContext">
+        /// The context in which the control is rendered.
+        /// </param>
         /// <returns>
-        /// The value created from the specified string representation.
+        /// A instance representing the parsed value, or an instance with a default 
+        /// value if parsing fails.
         /// </returns>
         protected override ControlFormInputValueFloat CreateValue(string value, IRenderControlFormContext renderContext)
         {

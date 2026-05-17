@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebPage;
+﻿using System;
+using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -10,18 +11,18 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlTableCell : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the class or category associated with the current object.
+        /// Gets the class or category associated with the current object.
         /// </summary>
-        string Class { get; }
+        Func<IRenderControlContext, string> Class { get; }
 
         /// <summary>
-        /// Returns the style applied to the element.
+        /// Gets the style applied to the element.
         /// </summary>
-        string Style { get; }
+        Func<IRenderControlContext, string> Style { get; }
 
         /// <summary>
-        /// Returns the color scheme used for the cell.
+        /// Gets the color scheme used for the cell.
         /// </summary>
-        TypeColorTable Color { get; }
+        Func<IRenderControlContext, TypeColorTable> Color { get; }
     }
 }

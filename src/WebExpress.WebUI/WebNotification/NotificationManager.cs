@@ -28,12 +28,20 @@ namespace WebExpress.WebUI.WebNotification
         public event EventHandler<INotification> CreateNotification;
 
         /// <summary>
+        /// An event that fires when an notification is created and carries
+        /// the routing context (application, session) required to dispatch
+        /// the notification through transport channels such as the
+        /// WebSocket MessageQueue.
+        /// </summary>
+        public event EventHandler<NotificationDispatchEventArgs> DispatchNotification;
+
+        /// <summary>
         /// An event that fires when an notification is destroyed.
         /// </summary>
         public event EventHandler<INotification> DestroyNotification;
 
         /// <summary>
-        /// Returns the reference to the context of the host.
+        /// Gets the reference to the context of the host.
         /// </summary>
         public IHttpServerContext HttpServerContext { get; private set; }
 
@@ -48,7 +56,7 @@ namespace WebExpress.WebUI.WebNotification
             _componentHub = componentHub;
             _httpServerContext = httpServerContext;
 
-            _httpServerContext.Log.Debug
+            _httpServerContext?.Log?.Debug
             (
                 I18N.Translate("webexpress.webui:notificationmanager.initialization")
             );
@@ -79,6 +87,7 @@ namespace WebExpress.WebUI.WebNotification
 
             _globalNotifications.AddNotificationItem(applicationContext, notification);
             OnCreateNotification(notification);
+            OnDispatchNotification(notification, applicationContext, null);
 
             return notification;
         }
@@ -124,6 +133,7 @@ namespace WebExpress.WebUI.WebNotification
             }
 
             OnCreateNotification(notification);
+            OnDispatchNotification(notification, applicationContext, request.Session);
 
             return notification;
         }
@@ -217,6 +227,25 @@ namespace WebExpress.WebUI.WebNotification
         private void OnCreateNotification(INotification notification)
         {
             CreateNotification?.Invoke(this, notification);
+        }
+
+        /// <summary>
+        /// Raises the DispatchNotification event with the routing context
+        /// required by downstream transports (e.g. the WebSocket popup
+        /// bridge).
+        /// </summary>
+        private void OnDispatchNotification
+        (
+            INotification notification,
+            WebCore.WebApplication.IApplicationContext applicationContext,
+            WebCore.WebSession.Model.Session session
+        )
+        {
+            DispatchNotification?.Invoke
+            (
+                this,
+                new NotificationDispatchEventArgs(notification, applicationContext, session)
+            );
         }
 
         /// <summary>

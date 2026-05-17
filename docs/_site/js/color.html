@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>ColorCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="ColorCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/color.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="colorctrl">ColorCtrl</h1>
+<p>The <code>ColorCtrl</code> component provides a read-only color display that renders a color swatch and an optional tooltip. It is intended solely for visualization of color values defined via dataset attributes on the host element. The implementation is intentionally minimal and does not provide selection or editing capabilities, making the control suitable for design previews, read-only form views, and style guides.</p>
+<pre><code>   ┌─────┐
+   │ Red │
+   └─────┘
+</code></pre>
+<h2 id="configuration">Configuration</h2>
+<p>Configuration is performed via dataset attributes on the host element:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-value</code></td>
+<td>Initial color value as a hex string (for example <code>#ff0000</code>). Default is <code>#000000</code>.</td>
+</tr>
+<tr>
+<td><code>data-tooltip</code></td>
+<td>Optional tooltip text that will be used as the <code>title</code> attribute on the swatch.</td>
+</tr>
+</tbody>
+</table>
+<p>The host element automatically receives the CSS class <code>wx-color</code>. Visual appearance and sizing are controlled by external stylesheets targeting <code>.wx-color</code> and its child DIV.</p>
+<h2 id="functionality">Functionality</h2>
+<p>The control renders a single DIV whose background color reflects the current color value. If a tooltip is configured, it is applied as the DIV title. The control is strictly presentational and handles no user-driven color changes. Programmatic updates applied via the API are reflected immediately in the rendered swatch.</p>
+<p>Main behaviors:</p>
+<ul>
+<li>initial read of <code>data-value</code> / <code>data-color</code> and optional <code>data-tooltip</code></li>
+<li>rendering of a single swatch DIV with the configured color</li>
+<li>immediate visual update when <code>value</code> or <code>tooltip</code> is changed programmatically</li>
+</ul>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>The component exposes a small, explicit API for reading and updating the displayed color and tooltip.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<p>When the framework instantiates the controller automatically, the instance can be retrieved via the framework registry and read or updated using vanilla JavaScript:</p>
+<pre><code class="lang-javascript">// find the host element
+var el = document.getElementById('color1');
+
+// retrieve the controller instance created by the framework
+var ctrl = webexpress.webui.Controller.getInstanceByElement(el);
+
+// read current value
+var current = ctrl ? ctrl.value : null;
+
+// set new value and tooltip
+if (ctrl) {
+    ctrl.value = '#ff5722';
+    ctrl.tooltip = 'Warning color';
+}
+</code></pre>
+<h3 id="manual-instantiation">Manual Instantiation</h3>
+<p>Manual instantiation is supported for direct programmatic use:</p>
+<pre><code class="lang-javascript">var el = document.getElementById('color-manual');
+var ctrl = new webexpress.webui.ColorCtrl(el);
+
+// update value programmatically
+ctrl.value = '#1e90ff';
+ctrl.tooltip = 'Primary color';
+</code></pre>
+<h2 id="events">Events</h2>
+<p>The ColorCtrl does not dispatch custom DOM or framework events when its value changes. Consumers can observe changes by directly querying the controller instance (<code>ctrl.value</code>) or by implementing an external observer pattern if event-driven notifications are required.</p>
+<h2 id="use-case-example">Use Case Example</h2>
+<p>Static usage inside HTML:</p>
+<pre><code class="lang-html">&lt;div id=&quot;color1&quot; class=&quot;wx-webui-color&quot; data-value=&quot;#1e90ff&quot; data-tooltip=&quot;Primary color&quot;&gt;&lt;/div&gt;
+</code></pre>
+<p>Programmatic control example:</p>
+<pre><code class="lang-javascript">var el = document.getElementById('color1');
+var ctrl = new webexpress.webui.ColorCtrl(el);
+ctrl.value = '#ff8a65';
+ctrl.tooltip = 'Accent color';
+</code></pre>
+<h1 id="inputcolorctrl">InputColorCtrl</h1>
+<p>The <code>InputColorCtrl</code> component implements a compact color picker presented as a dropdown with a visual preview. In collapsed state only a color preview box is shown. The opened dropdown contains a grid of predefined colors plus an embedded native color input for custom selection. A hidden input element is created for form submission, making the control suitable for form scenarios while keeping the UI compact.</p>
+<pre><code>   ┌───────────────────────────────┐
+   │ Red                          ▼│  // Display area with selected color chips
+   └───────────────────────────────┘
+   ┌───────────────────────────────┐
+   │ [■] Red        [■] Coral      │  // palette
+   │ [■] Green      [■] Yellow     │
+   │ [■] Indigo     [■] DodgerBlue │  // native color picker integrated
+   │ [ color picker ]              │  
+   └───────────────────────────────┘
+</code></pre>
+<h2 id="configuration-1">Configuration</h2>
+<p>The control is configured through attributes and dataset entries on the host element:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>Used for the created hidden input so the selected value is submitted with forms.</td>
+</tr>
+<tr>
+<td><code>data-value</code></td>
+<td>Initial hex color value (e.g. <code>#00ff00</code>). If omitted, the default <code>#000000</code> is used.</td>
+</tr>
+<tr>
+<td><code>disabled</code></td>
+<td>When present, interaction is blocked and relevant UI elements are visually disabled.</td>
+</tr>
+<tr>
+<td><code>data-palette</code></td>
+<td>Optional JSON string representing an array of hex color strings to override the default palette (for example <code>data-palette='[&quot;#ff0000&quot;,&quot;#00ff00&quot;]'</code>). Invalid JSON is ignored and the default palette remains in use.</td>
+</tr>
+</tbody>
+</table>
+<p>Relevant CSS classes set by the control: <code>wx-color-input</code> (host), <code>wx-color-trigger</code> (dropdown trigger), <code>wx-color-preview-box</code> (preview), <code>wx-color-dropdown</code> (dropdown container), <code>wx-color-palette-grid</code> (palette grid), and <code>wx-native-color-picker</code> (native color input).</p>
+<h2 id="functionality-1">Functionality</h2>
+<p>The component presents a preview and dropdown containing selectable color swatches and a native color input. Interaction model and behavior:</p>
+<ul>
+<li>Clicking the preview toggles the dropdown unless the control is disabled.</li>
+<li>The dropdown shows a grid of predefined color swatches. Clicking a swatch sets the value and closes the dropdown.</li>
+<li>The final grid item hosts a native <code>&lt;input type=&quot;color&quot;&gt;</code> picker. <code>input</code> events update the preview live; <code>change</code> closes the dropdown.</li>
+<li>A hidden input element with the configured <code>name</code> holds the current hex value for form submission.</li>
+<li>The palette can be customized with <code>data-palette</code>; invalid JSON is logged and ignored.</li>
+<li>Validation accepts hex formats <code>#RGB</code> and <code>#RRGGBB</code>. Short form <code>#RGB</code> is expanded to <code>#RRGGBB</code> before being applied to the native picker.</li>
+</ul>
+<p>Disabled state:</p>
+<ul>
+<li>When <code>disabled</code> is present on the host element, interactive elements (palette buttons, native picker) are disabled and the dropdown will not open.</li>
+</ul>
+<h2 id="programmatic-control-1">Programmatic Control</h2>
+<p>The control exposes <code>value</code> as a get/set property and a <code>render()</code> method that synchronizes UI with internal state. Value changes trigger a framework change event.</p>
+<h3 id="accessing-an-automatically-created-instance-1">Accessing an Automatically Created Instance</h3>
+<p>When instantiated by the framework, the instance can be accessed and controlled with vanilla JavaScript:</p>
+<pre><code class="lang-javascript">// find the host element
+var el = document.getElementById('color-input-1');
+
+// retrieve the controller instance created by the framework
+var ctrl = webexpress.webui.Controller.getInstanceByElement(el);
+
+// read current color
+var current = ctrl ? ctrl.value : null;
+
+// set new color (must be valid hex)
+if (ctrl) {
+    ctrl.value = '#00bcd4';
+}
+</code></pre>
+<h3 id="manual-instantiation-1">Manual Instantiation</h3>
+<p>Manual creation and configuration example:</p>
+<pre><code class="lang-javascript">var el = document.getElementById('color-input-manual');
+var ctrl = new webexpress.webui.InputColorCtrl(el);
+
+// set color programmatically
+ctrl.value = '#ffeb3b';
+
+// force re-render if required
+ctrl.render();
+</code></pre>
+<h2 id="events-1">Events</h2>
+<p>The control dispatches both native and framework-specific events:</p>
+<ul>
+<li><code>webexpress.webui.Event.CHANGE_VALUE_EVENT</code> — emitted after the value changes; payload conventionally contains <code>{ value: '#rrggbb' }</code>.</li>
+<li><code>webexpress.webui.Event.DROPDOWN_SHOW_EVENT</code> — emitted when the dropdown is shown.</li>
+<li><code>webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT</code> — emitted when the dropdown is hidden.</li>
+</ul>
+<p>Additionally, the dropdown element emits native <code>show</code> and <code>hide</code> events when opening and closing.</p>
+<p>Example listener for value changes:</p>
+<pre><code class="lang-javascript">var el = document.getElementById('color-input-1');
+el.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, function (e) {
+    var newVal = e.detail &amp;&amp; e.detail.value ? e.detail.value : (webexpress.webui.Controller.getInstanceByElement(el) || {}).value;
+    console.log('color changed to', newVal);
+});
+</code></pre>
+<h2 id="use-case-example-1">Use Case Example</h2>
+<p>Form integration with a custom palette:</p>
+<pre><code class="lang-html">&lt;form action=&quot;/save&quot; method=&quot;post&quot;&gt;
+  &lt;div id=&quot;favColor&quot;
+       class=&quot;wx-webui-input-color&quot;
+       name=&quot;favoriteColor&quot;
+       data-value=&quot;#ff8a65&quot;
+       data-palette='[&quot;#ff0000&quot;,&quot;#00ff00&quot;,&quot;#0000ff&quot;,&quot;#ff8a65&quot;,&quot;#1e90ff&quot;]'&gt;&lt;/div&gt;
+
+  &lt;button type=&quot;submit&quot;&gt;Save&lt;/button&gt;
+&lt;/form&gt;
+</code></pre>
+<p>Minimal standalone example:</p>
+<pre><code class="lang-html">&lt;div id=&quot;color-input-1&quot; class=&quot;wx-webui-input-color&quot; data-value=&quot;#00bcd4&quot;&gt;&lt;/div&gt;
+&lt;script&gt;
+  var el = document.getElementById('color-input-1');
+  var ctrl = webexpress.webui.Controller.getInstanceByElement(el);
+  el.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, function (e) {
+      console.log('selected color changed', e.detail ? e.detail.value : ctrl.value);
+  });
+&lt;/script&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/color.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -11,28 +11,28 @@ namespace WebExpress.WebUI.WebControl
     public class ControlCode : Control
     {
         /// <summary>
-        /// Returns or sets the size of the text.
+        /// Gets or sets the size of the text.
         /// </summary>
-        public PropertySizeText Size
+        public Func<IRenderControlContext, PropertySizeText> Size
         {
-            get => (PropertySizeText)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+            get => (Func<IRenderControlContext, PropertySizeText>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>
-        /// Returns or sets the code.
+        /// Gets or sets the code.
         /// </summary>
-        public string Code { get; set; }
+        public Func<IRenderControlContext, string> Code { get; set; }
 
         /// <summary>
-        /// Returns or sets the programming language type.
+        /// Gets or sets the programming language type.
         /// </summary>
-        public TypeLanguage Language { get; set; } = TypeLanguage.Default;
+        public Func<IRenderControlContext, TypeLanguage> Language { get; set; } = _ => TypeLanguage.Default;
 
         /// <summary>
-        /// Returns or sets a value indicating whether line numbers should be displayed.
+        /// Gets or sets a value indicating whether line numbers should be displayed.
         /// </summary>
-        public bool LineNumbers { get; set; }
+        public Func<IRenderControlContext, bool> LineNumbers { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -51,7 +51,10 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var decode = Convert.ToBase64String(Encoding.UTF8.GetBytes(Code ?? ""));
+            var code = Code?.Invoke(renderContext) ?? "";
+            var lineNumbers = LineNumbers?.Invoke(renderContext) ?? false;
+            var language = Language?.Invoke(renderContext) ?? TypeLanguage.Default;
+            var decode = Convert.ToBase64String(Encoding.UTF8.GetBytes(code ?? ""));
 
             var html = new HtmlElementTextContentPre(new HtmlText(decode))
             {
@@ -59,8 +62,8 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("wx-webui-code", GetClasses()),
                 Style = GetStyles()
             }
-                .AddUserAttribute("data-line-numbers", LineNumbers ? "true" : null)
-                .AddUserAttribute("data-language", Language.ToLanguage())
+                .AddUserAttribute("data-line-numbers", lineNumbers ? "true" : null)
+                .AddUserAttribute("data-language", language.ToLanguage())
                 .AddUserAttribute("data-base64", "true");
 
             return html;

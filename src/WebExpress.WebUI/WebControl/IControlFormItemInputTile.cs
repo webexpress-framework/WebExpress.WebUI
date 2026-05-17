@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -8,14 +10,14 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFormItemInputTile : IControlFormItemInput<ControlFormInputValueStringList>
     {
         /// <summary>
-        /// Returns the items of the tile control.
+        /// Gets the items of the tile control.
         /// </summary>
         IEnumerable<IControlTileCard> Items { get; }
 
         /// <summary>
-        /// Returns a value indicating whether multiple items can be selected simultaneously.
+        /// Gets a value indicating whether multiple items can be selected simultaneously.
         /// </summary>
-        bool MultiSelect { get; }
+        Func<IRenderControlContext, bool> MultiSelect { get; }
 
         /// <summary>
         /// Adds one or more items to the tile control.

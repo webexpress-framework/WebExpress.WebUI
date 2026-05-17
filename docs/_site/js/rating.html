@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>RatingCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="RatingCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/rating.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="ratingctrl">RatingCtrl</h1>
+<p>The <code>RatingCtrl</code> component is designed to display a read-only star rating. It visualizes a numeric value by rendering a corresponding number of filled or empty stars. This control is purely for display purposes (e.g., showing product reviews or user scores) and does not allow user interaction to change the value.</p>
+<p>The component automatically handles value normalization (clamping between 0 and the total number of stars) and provides accessibility support via ARIA attributes.</p>
+<pre><code>   ┌─────────────────────────┐
+   │  ★ ★ ★ ☆ ☆           │
+   └─────────────────────────┘
+</code></pre>
+<h2 id="configuration">Configuration</h2>
+<p>Initialization is handled declaratively through <code>data-</code> attributes on the host element.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-stars</code></td>
+<td>(Optional) The total number of stars to display. Defaults to <code>5</code> if not specified or invalid.</td>
+</tr>
+<tr>
+<td><code>data-value</code></td>
+<td>The initial numeric value of the rating.</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>CSS Classes</strong>: The component automatically adds the class <code>.wx-rating-view</code> to the host element.</li>
+<li><strong>Icons</strong>: It utilizes FontAwesome classes (<code>fas fa-star</code> for filled, <code>far fa-star</code> for empty) to render the stars.</li>
+<li><strong>Accessibility</strong>: The component automatically sets <code>aria-readonly=&quot;true&quot;</code>. If no <code>aria-label</code> is provided, it generates one in the format &quot;Rating: [value] / [total]&quot;.</li>
+</ul>
+<h2 id="functionality">Functionality</h2>
+<ul>
+<li><strong>Static Rendering</strong>: The component renders a container with a defined number of star icons.</li>
+<li><strong>Value Normalization</strong>: Input values are parsed as integers. If a value is less than 0, it becomes 0. If it exceeds the total number of stars, it is capped at the total.</li>
+<li><strong>Read-Only Display</strong>: The component is strictly for visualization. There are no click or hover events bound to the stars that would allow the user to modify the rating.</li>
+<li><strong>Reactive Updates</strong>: Changing the <code>value</code> programmatically triggers a re-render of the stars and updates the <code>aria-label</code> immediately.</li>
+</ul>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>The component's value can be updated dynamically via its JavaScript instance.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const element = document.getElementById('product-rating');
+
+// retrieve the controller instance associated with the element
+const ratingCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (ratingCtrl) {
+    // get the current rating value
+    const currentRating = ratingCtrl.value;
+
+    // set a new rating programmatically
+    // this will re-render the stars to show 4 out of 5 (or whatever total is set)
+    ratingCtrl.value = 4;
+}
+</code></pre>
+<h3 id="manual-instantiation">Manual Instantiation</h3>
+<pre><code class="lang-javascript">// find the container element
+const container = document.getElementById('dynamic-rating-container');
+
+// ensure configuration attributes are set before instantiation if needed
+container.dataset.stars = &quot;10&quot;;
+container.dataset.value = &quot;7&quot;;
+
+// create a new instance of RatingCtrl manually
+const dynamicRatingCtrl = new webexpress.webui.RatingCtrl(container);
+
+// update the value later
+dynamicRatingCtrl.value = 9;
+</code></pre>
+<h2 id="use-case-example">Use Case Example</h2>
+<p>The following example shows how to declare a 5-star rating control with an initial value of 3.</p>
+<pre><code class="lang-html">&lt;!--
+    The host element defines the rating control.
+    It will display 5 stars in total, with 3 filled.
+--&gt;
+&lt;div id=&quot;user-score&quot;
+     class=&quot;wx-webui-rating&quot;
+     data-stars=&quot;5&quot;
+     data-value=&quot;3&quot;&gt;
+&lt;/div&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/rating.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

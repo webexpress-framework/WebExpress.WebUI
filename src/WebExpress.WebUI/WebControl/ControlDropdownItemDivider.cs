@@ -12,7 +12,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlDropdownItemDivider : IControlDropdownItem
     {
         /// <summary>
-        /// Returns the unique identifier for the entity.
+        /// Gets the unique identifier for the entity.
         /// </summary>
         public string Id { get; set; }
 

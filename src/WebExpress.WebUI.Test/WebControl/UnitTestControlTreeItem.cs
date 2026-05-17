@@ -52,7 +52,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTreeItem()
             {
-                Expand = expand
+                Expand = _ => expand
             };
 
             // act
@@ -77,7 +77,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTreeItem()
             {
-                Text = label
+                Text = _ => label
             };
 
             // act
@@ -102,7 +102,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var icon = iconType is not null ? Activator.CreateInstance(iconType) as IIcon : null;
             var control = new ControlTreeItem()
             {
-                Icon = icon
+                Icon = _ => icon
             };
 
             // act
@@ -128,8 +128,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var iconClose = iconCloseType is not null ? Activator.CreateInstance(iconOpenType) as IIcon : null;
             var control = new ControlTreeItem()
             {
-                IconOpen = iconOpen,
-                IconClose = iconClose
+                IconOpen = _ => iconOpen,
+                IconClose = _ => iconClose
             };
 
             // act
@@ -153,7 +153,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTreeItem()
             {
-                Uri = uri is not null ? new UriEndpoint(uri) : null
+                Uri = _ => uri is not null ? new UriEndpoint(uri) : null
             };
 
             // act
@@ -177,7 +177,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTreeItem()
             {
-                Tooltip = tooltip
+                Tooltip = _ => tooltip
             };
 
             // act
@@ -204,7 +204,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTreeItem()
             {
-                Target = target
+                Target = _ => target
             };
 
             // act
@@ -228,7 +228,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTreeItem()
             {
-                Active = active
+                Active = _ => active
             };
 
             // act
@@ -252,7 +252,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTreeItem()
             {
-                PrimaryAction = new ActionModal(modal)
+                PrimaryAction = _ => new ActionModal(modal)
             };
 
             // act
@@ -276,7 +276,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTreeItem()
             {
-                SecondaryAction = new ActionModal(modal)
+                SecondaryAction = _ => new ActionModal(modal)
             };
 
             // act

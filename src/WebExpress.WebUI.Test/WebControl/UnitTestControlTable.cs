@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTable
             {
-                TableBorder = border
+                TableBorder = _ => border
             };
 
             // act
@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTable
             {
-                Striped = striped
+                Striped = _ => striped
             };
 
             // act
@@ -96,6 +96,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorTable.Warning, @"<div class=""wx-webui-table"" data-color=""table-warning"">*</div>")]
         [InlineData(TypeColorTable.Danger, @"<div class=""wx-webui-table"" data-color=""table-danger"">*</div>")]
         [InlineData(TypeColorTable.Light, @"<div class=""wx-webui-table"" data-color=""table-light"">*</div>")]
+        [InlineData(TypeColorTable.Highlight, @"<div class=""wx-webui-table"" data-color=""table-highlight"">*</div>")]
         [InlineData(TypeColorTable.Dark, @"<div class=""wx-webui-table"" data-color=""table-dark"">*</div>")]
         public void Color(TypeColorTable color, string expected)
         {
@@ -105,7 +106,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTable
             {
-                Color = color
+                Color = _ => color
             };
 
             // act
@@ -129,7 +130,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTable
             {
-                Selectable = selectable
+                Selectable = _ => selectable
             };
 
             // act
@@ -153,7 +154,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTable
             {
-                SuppressHeaders = suppressHeaders
+                SuppressHeaders = _ => suppressHeaders
             };
 
             // act

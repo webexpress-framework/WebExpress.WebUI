@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual IEnumerable<IControlDropdownItem> More => _more;
 
         /// <summary>
-        /// Returns or sets the orientation of the toolbar.
+        /// Gets or sets the orientation of the toolbar.
         /// </summary>
         public virtual TypeOrientationToolBar Orientation
         {
@@ -36,7 +36,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the fixed position of the toolbar.
+        /// Gets or sets the fixed position of the toolbar.
         /// </summary>
         public virtual TypeFixed Fixed
         {
@@ -45,7 +45,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the sticky position of the toolbar.
+        /// Gets or sets the sticky position of the toolbar.
         /// </summary>
         public virtual TypeSticky Sticky
         {
@@ -62,7 +62,7 @@ namespace WebExpress.WebUI.WebControl
             : base(id)
         {
             Orientation = TypeOrientationToolBar.Default;
-            Padding = new PropertySpacingPadding(PropertySpacing.Space.Two, PropertySpacing.Space.None);
+            Padding = _ => new PropertySpacingPadding(PropertySpacing.Space.Two, PropertySpacing.Space.None);
 
             _items.AddRange(items);
         }
@@ -222,7 +222,10 @@ namespace WebExpress.WebUI.WebControl
             IEnumerable<IControlDropdownItem> more
         )
         {
-            if (!Enable)
+            var role = Role?.Invoke(renderContext);
+            var enable = Enable?.Invoke(renderContext) ?? true;
+
+            if (!enable)
             {
                 return null;
             }
@@ -232,7 +235,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-toolbar", GetClasses()),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             }
                 .Add(items.Select(x => x.Render(renderContext, visualTree)))
                 .Add

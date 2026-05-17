@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                Name = name
+                Name = _ => name
             };
 
             // act
@@ -99,7 +99,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                Placeholder = placeholder
+                Placeholder = _ => placeholder
             };
 
             // act
@@ -122,7 +122,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                Uri = uri is not null ? new UriEndpoint(uri) : null
+                Uri = _ => uri is not null ? new UriEndpoint(uri) : null
             };
 
             var html = control.Render(context, visualTree);
@@ -145,7 +145,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                Shape = shape
+                Shape = _ => shape
             };
 
             var html = control.Render(context, visualTree);
@@ -167,7 +167,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                Viewport = viewport
+                Viewport = _ => viewport
             };
 
             var html = control.Render(context, visualTree);
@@ -189,7 +189,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                OutputSize = size
+                OutputSize = _ => size
             };
 
             var html = control.Render(context, visualTree);
@@ -211,7 +211,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                OutputFormat = format
+                OutputFormat = _ => format
             };
 
             var html = control.Render(context, visualTree);
@@ -233,7 +233,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                OutputQuality = quality
+                OutputQuality = _ => quality
             };
 
             var html = control.Render(context, visualTree);
@@ -256,7 +256,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFormItemInputAvatar(null)
             {
                 Accept = accept is not null
-                    ? [.. accept.Split(',')
+                    ? _ => [.. accept.Split(',')
                         .Select(x => ContentTypeExtensions.ToContentTypeFromMime(x))]
                     : null
             };
@@ -281,7 +281,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                OverlayAlpha = alpha
+                OverlayAlpha = _ => alpha
             };
 
             var html = control.Render(context, visualTree);
@@ -293,8 +293,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form move control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data""><input name=""*"" type=""hidden""><main><div><fieldset class=""wx-form-group""><div class=""wx-webui-input-avatar""></div></fieldset></div></main><div></div></form>")]
-        [InlineData("abc", @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data""><input name=""*"" type=""hidden""><main><div><fieldset class=""wx-form-group""><div class=""wx-webui-input-avatar""></div></fieldset></div></main><div></div></form>")]
+        [InlineData(null, @"<form id=""id_*"" class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""id_*""><input name=""id_*"" type=""hidden""><input name=""controlform_id_*_state"" value=""Default"" type=""hidden""><main><div><fieldset class=""wx-form-group""><span></span><div class=""wx-webui-input-avatar""></div></fieldset></div></main><div></div></form>")]
+        [InlineData("abc", @"<form id=""id_*"" class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""id_*""><input name=""id_*"" type=""hidden""><input name=""controlform_id_*_state"" value=""Default"" type=""hidden""><main><div><fieldset class=""wx-form-group""><span></span><div class=""wx-webui-input-avatar""></div></fieldset></div></main><div></div></form>")]
         public void Value(string value, string expected)
         {
             // arrange
@@ -329,7 +329,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputAvatar(null)
             {
-                Label = label,
+                Label = _ => label,
             };
 
             // act
@@ -378,7 +378,7 @@ namespace WebExpress.WebUI.Test.WebControl
             };
 
             // act
-            //control.Add(new ControlFormItemInputMoveItem() { Label = "label" });
+            //control.Add(new ControlFormItemInputMoveItem() { Label = _ => "label" });
             //var html = control.Render(context, visualTree);
 
             // validation

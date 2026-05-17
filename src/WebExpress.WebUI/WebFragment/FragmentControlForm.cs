@@ -8,10 +8,10 @@ namespace WebExpress.WebUI.WebFragment
     /// <summary>
     /// Represents a form control fragment that can display a form.
     /// </summary>
-    public class FragmentControlForm : ControlForm, IFragmentControl<ControlModalForm>
+    public abstract class FragmentControlForm : ControlForm, IFragmentControl<ControlModalForm>
     {
         /// <summary>
-        /// Returns the context of the fragment.
+        /// Gets the context of the fragment.
         /// </summary>
         public IFragmentContext FragmentContext { get; private set; }
 
@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.WebFragment
         /// </summary>
         /// <param name="fragmentContext">The context of the fragment.</param>
         public FragmentControlForm(IFragmentContext fragmentContext)
-            : base(fragmentContext?.FragmentId?.ToString())
+            : base(fragmentContext?.FragmentId?.ToString()?.Replace(".", "-"))
         {
             FragmentContext = fragmentContext;
         }

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>GraphViewerCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="GraphViewerCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/graph.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="graphviewerctrl">GraphViewerCtrl</h1>
+<p>The <code>GraphViewerCtrl</code> is an interactive visualization component designed to display network graphs consisting of nodes and connecting edges. It renders using SVG and provides built-in support for panning, zooming, and dragging nodes.</p>
+<p>The component includes a lightweight spring-mass physics engine that can automatically arrange nodes if explicit positions are not provided. It supports various node shapes, icons, images, and customizable edge styles.</p>
+<pre><code>          ┌────────────┐
+          │  [Icon]    │ ──────┐
+          │   Node A   │       │
+          └────────────┘       │ (Edge Label)
+                 │             │
+                 ▼             ▼
+          ┌────────────┐  ┌────────────┐
+          │   Node B   │  │   Node C   │
+          └────────────┘  └────────────┘
+</code></pre>
+<h2 id="configuration">Configuration</h2>
+<p>The component is initialized on a host container. Global settings for the graph behavior and visual style are defined via <code>data-</code> attributes on this container.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-node-style</code></td>
+<td>Defines the default layout for nodes. Set to <code>label-below</code> to place text under the icon/shape.</td>
+</tr>
+<tr>
+<td><code>data-edge-style</code></td>
+<td>Defines the drawing style of edges. Options are <code>smooth</code> (curved bezier lines) or <code>straight</code>.</td>
+</tr>
+<tr>
+<td><code>data-physics-enabled</code></td>
+<td>Controls the built-in physics engine. If <code>true</code>, nodes without fixed positions will be auto-arranged. Set to <code>false</code> to disable physics.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="defining-the-graph-structure">Defining the Graph Structure</h2>
+<p>The initial graph model is parsed directly from the DOM children of the host element.</p>
+<h3 id="nodes">Nodes</h3>
+<p>Nodes are defined by elements with the class <code>.wx-graph-node</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td><strong>Required</strong>. Unique identifier for the node.</td>
+</tr>
+<tr>
+<td><code>data-label</code></td>
+<td>The text label displayed on the node. Defaults to the ID if omitted.</td>
+</tr>
+<tr>
+<td><code>data-uri</code></td>
+<td>URL or path associated with the node.</td>
+</tr>
+<tr>
+<td><code>data-x</code> / <code>data-y</code></td>
+<td>Explicit coordinates. If omitted, the node will be positioned by the physics engine.</td>
+</tr>
+<tr>
+<td><code>data-shape</code></td>
+<td>The shape of the node background. Options: <code>rect</code> (default), <code>circle</code>.</td>
+</tr>
+<tr>
+<td><code>data-icon</code></td>
+<td>A CSS class string for a font icon (e.g., <code>fas fa-server</code>).</td>
+</tr>
+<tr>
+<td><code>data-image</code></td>
+<td>URL to an image to display inside the node.</td>
+</tr>
+<tr>
+<td><code>data-background-color</code></td>
+<td>Hex color or standard color name for the node background fill.</td>
+</tr>
+<tr>
+<td><code>data-background-css</code></td>
+<td>CSS class to append to the node shape for styling via stylesheets.</td>
+</tr>
+<tr>
+<td><code>data-foreground-color</code></td>
+<td>Color for the text and icon.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="edges">Edges</h3>
+<p>Edges are defined by elements with the class <code>.wx-graph-edge</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-from</code></td>
+<td><strong>Required</strong>. The ID of the source node.</td>
+</tr>
+<tr>
+<td><code>data-to</code></td>
+<td><strong>Required</strong>. The ID of the target node.</td>
+</tr>
+<tr>
+<td><code>data-label</code></td>
+<td>Optional text label displayed in the middle of the edge.</td>
+</tr>
+<tr>
+<td><code>data-color</code></td>
+<td>Stroke color for the edge line.</td>
+</tr>
+<tr>
+<td><code>data-dasharray</code></td>
+<td>SVG stroke-dasharray pattern (e.g., <code>5,5</code> for dashed lines).</td>
+</tr>
+<tr>
+<td><code>data-waypoints</code></td>
+<td>A JSON string array of coordinates <code>[{&quot;x&quot;:10,&quot;y&quot;:20}, ...]</code> for routing the edge manually.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="functionality">Functionality</h2>
+<ul>
+<li><strong>Pan &amp; Zoom:</strong> Users can pan the canvas by dragging the background and zoom using the mouse wheel.</li>
+<li><strong>Interactive Nodes:</strong> Nodes can be dragged to new positions. If physics is enabled, the graph will react elastically.</li>
+<li><strong>Fit to View:</strong> A built-in button (bottom-right) automatically scales and pans the graph to fit all nodes within the viewport.</li>
+<li><strong>SVG Rendering:</strong> The graph is rendered as scalable vector graphics, ensuring sharpness at any zoom level.</li>
+</ul>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>The graph data can be updated dynamically via JavaScript using the <code>model</code> property.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<pre><code class="lang-javascript">// find the host element
+const element = document.getElementById('network-graph');
+
+// retrieve the controller instance
+const graphCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (graphCtrl) {
+    // update the graph model completely
+    graphCtrl.model = {
+        nodes: [
+            { id: 'n1', label: 'Server', icon: 'fas fa-server', x: 100, y: 100 },
+            { id: 'n2', label: 'Client', icon: 'fas fa-laptop', x: 300, y: 100 }
+        ],
+        edges: [
+            { from: 'n1', to: 'n2', label: 'Connection', color: 'blue' }
+        ]
+    };
+}
+</code></pre>
+<h3 id="manual-instantiation">Manual Instantiation</h3>
+<p>You can instantiate a <code>GraphViewerCtrl</code> manually if you need programmatic control over the graph's initialization:</p>
+<pre><code class="lang-javascript">// find the host container for the graph
+const container = document.getElementById('my-manual-graph');
+
+// create a new GraphViewerCtrl instance manually
+const graphCtrl = new webexpress.webui.GraphViewerCtrl(container);
+
+// set the graph data directly
+graphCtrl.model = {
+    nodes: [
+        { id: 'node-1', label: 'First Node', icon: 'fas fa-circle', x: 120, y: 180, backgroundColor: '#e3f2fd' },
+        { id: 'node-2', label: 'Second Node', icon: 'fas fa-square', x: 270, y: 200 }
+    ],
+    edges: [
+        { from: 'node-1', to: 'node-2', label: 'Link', color: '#607d8b' }
+    ]
+};
+</code></pre>
+<h2 id="events">Events</h2>
+<p>The component triggers events when user interactions occur on nodes.</p>
+<ul>
+<li><code>webexpress.webui.Event.CLICK_EVENT</code>: Fired when a node is clicked.</li>
+<li><code>webexpress.webui.Event.DOUBLE_CLICK_EVENT</code>: Fired when a node is double-clicked.</li>
+</ul>
+<p>The <code>detail</code> property of the event contains:</p>
+<pre><code class="lang-javascript">{
+    id: &quot;node-id&quot;, // The ID of the clicked node
+    data: { ... }  // The full data object associated with the node
+}
+</code></pre>
+<h2 id="use-case-example">Use Case Example</h2>
+<p>The following example creates a simple network diagram with three nodes. &quot;Server&quot; and &quot;Database&quot; have fixed positions, while &quot;Client&quot; will be positioned by the physics engine.</p>
+<pre><code class="lang-html">&lt;div id=&quot;my-graph&quot; 
+     class=&quot;wx-webui-graph-viewer&quot;
+     data-edge-style=&quot;smooth&quot;
+     data-physics-enabled=&quot;true&quot;
+     style=&quot;height: 500px; border: 1px solid #ccc;&quot;&gt;
+
+    &lt;!-- Nodes --&gt;
+    &lt;div id=&quot;srv-01&quot; 
+         class=&quot;wx-graph-node&quot; 
+         data-label=&quot;Main Server&quot; 
+         data-icon=&quot;fas fa-server&quot;
+         data-x=&quot;100&quot; data-y=&quot;150&quot;
+         data-background-color=&quot;#e0f7fa&quot;&gt;&lt;/div&gt;
+
+    &lt;div id=&quot;db-01&quot; 
+         class=&quot;wx-graph-node&quot; 
+         data-label=&quot;Database&quot; 
+         data-shape=&quot;circle&quot;
+         data-icon=&quot;fas fa-database&quot;
+         data-x=&quot;100&quot; data-y=&quot;300&quot;
+         data-background-color=&quot;#fff9c4&quot;&gt;&lt;/div&gt;
+
+    &lt;div id=&quot;client-01&quot; 
+         class=&quot;wx-graph-node&quot; 
+         data-label=&quot;User Client&quot; 
+         data-icon=&quot;fas fa-laptop&quot;&gt;&lt;/div&gt;
+
+    &lt;!-- Edges --&gt;
+    &lt;div class=&quot;wx-graph-edge&quot; 
+         data-from=&quot;client-01&quot; 
+         data-to=&quot;srv-01&quot; 
+         data-label=&quot;HTTPS&quot;
+         data-color=&quot;#666&quot;&gt;&lt;/div&gt;
+
+    &lt;div class=&quot;wx-graph-edge&quot; 
+         data-from=&quot;srv-01&quot; 
+         data-to=&quot;db-01&quot; 
+         data-dasharray=&quot;4,4&quot;&gt;&lt;/div&gt;
+
+&lt;/div&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/graph.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

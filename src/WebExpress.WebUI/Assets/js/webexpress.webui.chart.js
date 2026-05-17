@@ -29,8 +29,8 @@ webexpress.webui.ChartCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Ensures a canvas element is present within the given host element. If no canvas exists, a new 
-     * canvas is created, styled, and appended to the host. The canvas width is always set to 100%. The 
+     * Ensures a canvas element is present within the given host element. If no canvas exists, a new
+     * canvas is created, styled, and appended to the host. The canvas width is always set to 100%. The
      * height is determined by the data-height attribute if present, otherwise a default height of 300px is used.
      * @param {HTMLElement} host - The container element in which the canvas should reside.
      * @returns {HTMLCanvasElement} Returns the canvas element contained within the host.
@@ -134,7 +134,7 @@ webexpress.webui.ChartCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Ensures that the specified nested option path exists within the root object. 
+     * Ensures that the specified nested option path exists within the root object.
      * If any part of the path does not exist or is not an object, an empty object is assigned at that position.
      * Returns the leaf object at the end of the path.
      * @param {Object} root - The root object to traverse or extend.

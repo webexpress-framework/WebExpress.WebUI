@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButtonSubmit()
             {
-                Text = text
+                Text = _ => text
             };
 
             // act
@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButtonSubmit()
             {
-                Size = size
+                Size = _ => size
             };
 
             // act
@@ -95,6 +95,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<button type=""submit"" class=""btn bg-danger *"">*</button>")]
         [InlineData(TypeColorBackground.Dark, @"<button type=""submit"" class=""btn bg-dark *"">*</button>")]
         [InlineData(TypeColorBackground.Light, @"<button type=""submit"" class=""btn bg-light *"">*</button>")]
+        [InlineData(TypeColorBackground.Highlight, @"<button type=""submit"" class=""btn bg-highlight *"">*</button>")]
         [InlineData(TypeColorBackground.White, @"<button type=""submit"" class=""btn bg-white *"">*</button>")]
         [InlineData(TypeColorBackground.Transparent, @"<button type=""submit"" class=""btn bg-transparent *"">*</button>")]
         public void BackgroundColor(TypeColorBackground color, string expected)
@@ -106,7 +107,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButtonSubmit()
             {
-                BackgroundColor = new PropertyColorBackground(color)
+                BackgroundColor = _ => new PropertyColorBackground(color)
             };
 
             // act
@@ -126,6 +127,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorButton.Danger, @"<button type=""submit"" class=""btn me-2 btn-danger"">*</button>")]
         [InlineData(TypeColorButton.Dark, @"<button type=""submit"" class=""btn me-2 btn-dark"">*</button>")]
         [InlineData(TypeColorButton.Light, @"<button type=""submit"" class=""btn me-2 btn-light"">*</button>")]
+        [InlineData(TypeColorButton.Highlight, @"<button type=""submit"" class=""btn me-2 btn-highlight"">*</button>")]
         public void Color(TypeColorButton color, string expected)
         {
             // arrange
@@ -135,7 +137,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButtonSubmit()
             {
-                Color = new PropertyColorButton(color)
+                Color = _ => new PropertyColorButton(color)
             };
 
             // act
@@ -165,8 +167,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButtonSubmit()
             {
-                Outline = outline,
-                Color = new PropertyColorButton(color)
+                Outline = _ => outline,
+                Color = _ => new PropertyColorButton(color)
             };
 
             // act
@@ -180,7 +182,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeBlockButton.None, @"<button type=""submit"" class=""btn me-2 btn-success"">*</button>")]
-        [InlineData(TypeBlockButton.Block, @"<button type=""submit"" class=""btn me-2 btn-success btn-block"">*</button>")]
+        [InlineData(TypeBlockButton.Block, @"<button type=""submit"" class=""btn me-2 btn-block btn-success"">*</button>")]
         public void Block(TypeBlockButton block, string expected)
         {
             // arrange
@@ -190,7 +192,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButtonSubmit()
             {
-                Block = block
+                Block = _ => block
             };
 
             // act
@@ -214,7 +216,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButtonSubmit()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -234,17 +236,17 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control1 = new ControlFormItemButtonSubmit(null, new ControlIcon() { Icon = new IconStar() });
-            var control2 = new ControlFormItemButtonSubmit(null, [new ControlIcon() { Icon = new IconStar() }]);
-            var control3 = new ControlFormItemButtonSubmit(null, new List<ControlIcon>([new ControlIcon() { Icon = new IconStar() }]).ToArray());
+            var control1 = new ControlFormItemButtonSubmit(null, new ControlIcon() { Icon = _ => new IconStar() });
+            var control2 = new ControlFormItemButtonSubmit(null, [new ControlIcon() { Icon = _ => new IconStar() }]);
+            var control3 = new ControlFormItemButtonSubmit(null, new List<ControlIcon>([new ControlIcon() { Icon = _ => new IconStar() }]).ToArray());
             var control4 = new ControlFormItemButtonSubmit(null);
             var control5 = new ControlFormItemButtonSubmit(null);
             var control6 = new ControlFormItemButtonSubmit(null);
 
             // act
-            control4.Add(new ControlIcon() { Icon = new IconStar() });
-            control5.Add([new ControlIcon() { Icon = new IconStar() }]);
-            control6.Add(new List<ControlIcon>([new ControlIcon() { Icon = new IconStar() }]));
+            control4.Add(new ControlIcon() { Icon = _ => new IconStar() });
+            control5.Add([new ControlIcon() { Icon = _ => new IconStar() }]);
+            control6.Add(new List<ControlIcon>([new ControlIcon() { Icon = _ => new IconStar() }]));
 
             var html1 = control1.Render(context, visualTree);
             var html2 = control2.Render(context, visualTree);

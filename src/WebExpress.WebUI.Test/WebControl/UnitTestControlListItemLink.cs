@@ -18,8 +18,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the list item link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<li class=""list-group-item-action""><a class=""wx-link""></a></li>")]
-        [InlineData("id", @"<li id=""id"" class=""list-group-item-action""><a id=""id"" class=""wx-link""></a></li>")]
+        [InlineData(null, @"<div class=""wx-list-item-link""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-list-item-link""></div>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -41,9 +41,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the text property of the list item link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<li class=""list-group-item-action""><a class=""wx-link""></a></li>")]
-        [InlineData("abc", @"<li class=""list-group-item-action""><a class=""wx-link"">abc</a></li>")]
-        [InlineData("webexpress.webui:plugin.name", @"<li class=""list-group-item-action""><a class=""wx-link"">WebExpress.WebUI</a></li>")]
+        [InlineData(null, @"<div class=""wx-list-item-link""></div>")]
+        [InlineData("abc", @"<div class=""wx-list-item-link"">abc</div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-list-item-link"">WebExpress.WebUI</div>")]
         public void Text(string text, string expected)
         {
             // arrange
@@ -52,7 +52,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                Text = text,
+                Text = _ => text,
             };
 
             // act
@@ -63,12 +63,42 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the background color property of the list control.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeColorBackgroundList.Default, @"<div class=""wx-list-item-link""></div>")]
+        [InlineData(TypeColorBackgroundList.Primary, @"<div class=""wx-list-item-link"" data-bgcolor-css=""wx-list-bg-primary""></div>")]
+        [InlineData(TypeColorBackgroundList.Secondary, @"<div class=""wx-list-item-link"" data-bgcolor-css=""wx-list-bg-secondary""></div>")]
+        [InlineData(TypeColorBackgroundList.Warning, @"<div class=""wx-list-item-link"" data-bgcolor-css=""wx-list-bg-warning""></div>")]
+        [InlineData(TypeColorBackgroundList.Danger, @"<div class=""wx-list-item-link"" data-bgcolor-css=""wx-list-bg-danger""></div>")]
+        [InlineData(TypeColorBackgroundList.Dark, @"<div class=""wx-list-item-link"" data-bgcolor-css=""wx-list-bg-dark""></div>")]
+        [InlineData(TypeColorBackgroundList.Light, @"<div class=""wx-list-item-link"" data-bgcolor-css=""wx-list-bg-light""></div>")]
+        [InlineData(TypeColorBackgroundList.Highlight, @"<div class=""wx-list-item-link"" data-bgcolor-css=""wx-list-bg-highlight""></div>")]
+        [InlineData(TypeColorBackgroundList.Transparent, @"<div class=""wx-list-item-link"" data-bgcolor-css=""wx-list-bg-transparent""></div>")]
+        public void BackgroundColor(TypeColorBackgroundList backgroundColor, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlListItemLink()
+            {
+                BackgroundColor = _ => new PropertyColorBackgroundList(backgroundColor)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests the uri property of the list item link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<li class=""list-group-item-action""><a class=""wx-link""></a></li>")]
-        [InlineData("/a", @"<li class=""list-group-item-action""><a class=""wx-link"" href=""/a""></a></li>")]
-        [InlineData("/a/b", @"<li class=""list-group-item-action""><a class=""wx-link"" href=""/a/b""></a></li>")]
+        [InlineData(null, @"<div class=""wx-list-item-link""></div>")]
+        [InlineData("/a", @"<div class=""wx-list-item-link"" data-uri=""/a""></div>")]
+        [InlineData("/a/b", @"<div class=""wx-list-item-link"" data-uri=""/a/b""></div>")]
         public void Uri(string uri, string expected)
         {
             // arrange
@@ -77,7 +107,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                Uri = uri is not null ? new UriEndpoint(uri) : null,
+                Uri = _ => uri is not null ? new UriEndpoint(uri) : null,
             };
 
             // act
@@ -91,9 +121,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the title property of the list item link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<li class=""list-group-item-action""><a class=""wx-link""></a></li>")]
-        [InlineData("a", @"<li class=""list-group-item-action""><a class=""wx-link"" title=""a""></a></li>")]
-        [InlineData("b", @"<li class=""list-group-item-action""><a class=""wx-link"" title=""b""></a></li>")]
+        [InlineData(null, @"<div class=""wx-list-item-link""></div>")]
+        [InlineData("a", @"<div class=""wx-list-item-link"" data-title=""a""></div>")]
+        [InlineData("b", @"<div class=""wx-list-item-link"" data-title=""b""></div>")]
         public void Title(string title, string expected)
         {
             // arrange
@@ -102,7 +132,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                Title = title,
+                Title = _ => title,
             };
 
             // act
@@ -116,11 +146,11 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the target property of the list item link control.
         /// </summary>
         [Theory]
-        [InlineData(TypeTarget.None, @"<li class=""list-group-item-action""><a class=""wx-link""></a></li>")]
-        [InlineData(TypeTarget.Blank, @"<li class=""list-group-item-action""><a class=""wx-link"" target=""_blank""></a></li>")]
-        [InlineData(TypeTarget.Self, @"<li class=""list-group-item-action""><a class=""wx-link"" target=""_self""></a></li>")]
-        [InlineData(TypeTarget.Parent, @"<li class=""list-group-item-action""><a class=""wx-link"" target=""_parent""></a></li>")]
-        [InlineData(TypeTarget.Framename, @"<li class=""list-group-item-action""><a class=""wx-link"" target=""_framename""></a></li>")]
+        [InlineData(TypeTarget.None, @"<div class=""wx-list-item-link""></div>")]
+        [InlineData(TypeTarget.Blank, @"<div class=""wx-list-item-link"" data-target=""_blank""></div>")]
+        [InlineData(TypeTarget.Self, @"<div class=""wx-list-item-link"" data-target=""_self""></div>")]
+        [InlineData(TypeTarget.Parent, @"<div class=""wx-list-item-link"" data-target=""_parent""></div>")]
+        [InlineData(TypeTarget.Framename, @"<div class=""wx-list-item-link"" data-target=""_framename""></div>")]
         public void Target(TypeTarget target, string expected)
         {
             // arrange
@@ -129,7 +159,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                Target = target,
+                Target = _ => target,
             };
 
             // act
@@ -143,10 +173,10 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the tooltip property of the list item link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<li class=""list-group-item-action""><a class=""wx-link""></a></li>")]
-        [InlineData("a", @"<li class=""list-group-item-action""><a class=""wx-link"" data-bs-toggle=""tooltip""></a></li>")]
-        [InlineData("b", @"<li class=""list-group-item-action""><a class=""wx-link"" data-bs-toggle=""tooltip""></a></li>")]
-        [InlineData("a<br/>b", @"<li class=""list-group-item-action""><a class=""wx-link"" data-bs-toggle=""tooltip""></a></li>")]
+        [InlineData(null, @"<div class=""wx-list-item-link""></div>")]
+        [InlineData("a", @"<div class=""wx-list-item-link"" data-tooltip=""a""></div>")]
+        [InlineData("b", @"<div class=""wx-list-item-link"" data-tooltip=""b""></div>")]
+        [InlineData("a<br/>b", @"<div class=""wx-list-item-link"" data-tooltip=""a<br/>b""></div>")]
         public void Tooltip(string tooltip, string expected)
         {
             // arrange
@@ -155,7 +185,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                Tooltip = tooltip
+                Tooltip = _ => tooltip
             };
 
             // act
@@ -169,8 +199,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the icon property of the list item link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<li class=""list-group-item-action""><a class=""wx-link""></a></li>")]
-        [InlineData(typeof(IconStar), @"<li class=""list-group-item-action""><a class=""wx-link""><i class=""fas fa-star""></i></a></li>")]
+        [InlineData(null, @"<div class=""wx-list-item-link""></div>")]
+        [InlineData(typeof(IconStar), @"<div class=""wx-list-item-link"" data-icon=""fas fa-star""></div>")]
         public void Icon(Type icon, string expected)
         {
             // arrange
@@ -179,7 +209,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -193,8 +223,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the Active property of the list item link control.
         /// </summary>
         [Theory]
-        [InlineData(TypeActive.None, @"<li class=""list-group-item-action""><a class=""wx-link""></a></li>")]
-        [InlineData(TypeActive.Active, @"<li class=""list-group-item-action active""><a class=""wx-link""></a></li>")]
+        [InlineData(TypeActive.None, @"<div class=""wx-list-item-link""></div>")]
+        [InlineData(TypeActive.Active, @"<div class=""wx-list-item-link"" data-active=""active""></div>")]
         public void Active(TypeActive active, string expected)
         {
             // arrange
@@ -203,7 +233,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink(null)
             {
-                Active = active
+                Active = _ => active
             };
 
             // act
@@ -217,8 +247,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the primary action property of the list item link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<li class=""list-group-item-action""><a class=""wx-link""></a></li>")]
-        [InlineData("modal", @"<li class=""list-group-item-action""><a class=""wx-link"" data-wx-primary-action=""modal"" data-wx-primary-target=""#modal""></a></li>")]
+        [InlineData(null, @"<div class=""wx-list-item-link""></div>")]
+        [InlineData("modal", @"<div class=""wx-list-item-link"" data-wx-primary-action=""modal"" data-wx-primary-target=""#modal""></div>")]
         public void PrimaryAction(string modal, string expected)
         {
             // arrange
@@ -227,7 +257,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                PrimaryAction = new ActionModal(modal)
+                PrimaryAction = _ => new ActionModal(modal)
             };
 
             // act
@@ -241,8 +271,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the secondary action property of the list item link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<li class=""list-group-item-action""><a class=""wx-link""></a></li>")]
-        [InlineData("modal", @"<li class=""list-group-item-action""><a class=""wx-link"" data-wx-secondary-action=""modal"" data-wx-secondary-target=""#modal""></a></li>")]
+        [InlineData(null, @"<div class=""wx-list-item-link""></div>")]
+        [InlineData("modal", @"<div class=""wx-list-item-link"" data-wx-secondary-action=""modal"" data-wx-secondary-target=""#modal""></div>")]
         public void SecondaryAction(string modal, string expected)
         {
             // arrange
@@ -251,7 +281,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlListItemLink()
             {
-                SecondaryAction = new ActionModal(modal)
+                SecondaryAction = _ => new ActionModal(modal)
             };
 
             // act
@@ -271,17 +301,17 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control1 = new ControlListItemLink(null, new ControlIcon() { Icon = new IconStar() });
-            var control2 = new ControlListItemLink(null, [new ControlIcon() { Icon = new IconStar() }]);
-            var control3 = new ControlListItemLink(null, new List<ControlIcon>([new ControlIcon() { Icon = new IconStar() }]).ToArray());
+            var control1 = new ControlListItemLink(null).Add(new ControlIcon() { Icon = _ => new IconStar() });
+            var control2 = new ControlListItemLink(null).Add([new ControlIcon() { Icon = _ => new IconStar() }]);
+            var control3 = new ControlListItemLink(null).Add(new List<ControlIcon>([new ControlIcon() { Icon = _ => new IconStar() }]).ToArray());
             var control4 = new ControlListItemLink(null);
             var control5 = new ControlListItemLink(null);
             var control6 = new ControlListItemLink(null);
 
             // act
-            control4.Add(new ControlIcon() { Icon = new IconStar() });
-            control5.Add([new ControlIcon() { Icon = new IconStar() }]);
-            control6.Add(new List<ControlIcon>([new ControlIcon() { Icon = new IconStar() }]).ToArray());
+            control4.Add(new ControlIcon() { Icon = _ => new IconStar() });
+            control5.Add([new ControlIcon() { Icon = _ => new IconStar() }]);
+            control6.Add(new List<ControlIcon>([new ControlIcon() { Icon = _ => new IconStar() }]).ToArray());
 
             var html1 = control1.Render(context, visualTree);
             var html2 = control2.Render(context, visualTree);
@@ -291,12 +321,12 @@ namespace WebExpress.WebUI.Test.WebControl
             var html6 = control6.Render(context, visualTree);
 
             // validation
-            AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""wx-link""><i class=""fas fa-star""></i></a></li>", html1);
-            AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""wx-link""><i class=""fas fa-star""></i></a></li>", html2);
-            AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""wx-link""><i class=""fas fa-star""></i></a></li>", html3);
-            AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""wx-link""><i class=""fas fa-star""></i></a></li>", html4);
-            AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""wx-link""><i class=""fas fa-star""></i></a></li>", html5);
-            AssertExtensions.EqualWithPlaceholders(@"<li class=""list-group-item-action""><a class=""wx-link""><i class=""fas fa-star""></i></a></li>", html6);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-list-item-link""><i class=""fas fa-star""></i></div>", html1);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-list-item-link""><i class=""fas fa-star""></i></div>", html2);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-list-item-link""><i class=""fas fa-star""></i></div>", html3);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-list-item-link""><i class=""fas fa-star""></i></div>", html4);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-list-item-link""><i class=""fas fa-star""></i></div>", html5);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-list-item-link""><i class=""fas fa-star""></i></div>", html6);
         }
     }
 }

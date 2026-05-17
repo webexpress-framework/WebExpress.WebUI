@@ -43,6 +43,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<div class=""bg-danger""><div class=""row""></div></div>")]
         [InlineData(TypeColorBackground.Dark, @"<div class=""bg-dark""><div class=""row""></div></div>")]
         [InlineData(TypeColorBackground.Light, @"<div class=""bg-light""><div class=""row""></div></div>")]
+        [InlineData(TypeColorBackground.Highlight, @"<div class=""bg-highlight""><div class=""row""></div></div>")]
         [InlineData(TypeColorBackground.Transparent, @"<div class=""bg-transparent""><div class=""row""></div></div>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {
@@ -52,7 +53,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelGrid()
             {
-                BackgroundColor = new PropertyColorBackground(backgroundColor)
+                BackgroundColor = _ => new PropertyColorBackground(backgroundColor)
             };
 
             // act
@@ -78,7 +79,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelGrid()
             {
-                Direction = direction,
+                Direction = _ => direction,
             };
 
             // act
@@ -102,7 +103,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelGrid()
             {
-                Fluid = fluid,
+                Fluid = _ => fluid,
             };
 
             // act
@@ -126,7 +127,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelGrid()
             {
-                Theme = theme
+                Theme = _ => theme
             };
 
             // act

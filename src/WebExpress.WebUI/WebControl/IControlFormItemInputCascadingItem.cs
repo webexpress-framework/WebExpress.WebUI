@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebPage;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -12,33 +14,38 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFormItemInputCascadingItem : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns or sets the label of the selection item.
+        /// Gets or sets the label of the selection item.
         /// </summary>
-        string Text { get; }
+        Func<IRenderControlContext, string> Text { get; }
 
         /// <summary>
-        /// Returns or sets the icon associated with the selection item.
+        /// Gets or sets the icon associated with the selection item.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; }
 
         /// <summary>
-        /// Returns or sets the color of the label.
+        /// Gets or sets the image uri.
         /// </summary>
-        TypeColorSelection LabelColor { get; }
+        Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the selection item is disabled.
+        /// Gets or sets the color of the label.
+        /// </summary>
+        Func<IRenderControlContext, TypeColorSelection> LabelColor { get; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the selection item is disabled.
         /// </summary>
         [JsonPropertyName("disabled")]
-        bool Disabled { get; }
+        Func<IRenderControlContext, bool> Disabled { get; }
 
         /// <summary>
-        /// Returns or sets the content of the selection item.
+        /// Gets or sets the content of the selection item.
         /// </summary>
         public IControl Content { get; }
 
         /// <summary>
-        /// Returns the child cascading items.
+        /// Gets the child cascading items.
         /// </summary>
         IEnumerable<IControlFormItemInputCascadingItem> Children { get; }
 

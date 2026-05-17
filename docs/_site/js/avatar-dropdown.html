@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>AvatarDropdownCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="AvatarDropdownCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/avatar-dropdown.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="avatardropdownctrl">AvatarDropdownCtrl</h1>
+<p>The <code>AvatarDropdownCtrl</code> component combines an avatar display with a dropdown menu. Instead of a traditional button, the avatar thumbnail acts as the trigger element for the dropdown. Clicking the avatar opens the associated menu with all standard dropdown features including dynamic item lists, headers, dividers, icons, and actions.</p>
+<pre><code>   ┌──────────┐
+   │ [avatar] │
+   └──┬───────┘
+   ┌──┴────────────────┐
+   │ [header]          │
+   │   [icon] [label]  │
+   │   [icon] [label]  │
+   ├───────────────────┤
+   │ [icon] [label]    │
+   └───────────────────┘
+</code></pre>
+<h2 id="configuration">Configuration</h2>
+<p>The component is configured through <code>data-*</code> attributes on the main container. The avatar appearance and dropdown menu items are defined declaratively.</p>
+<h3 id="avatar-settings">Avatar Settings</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-name</code></td>
+<td>Display name for the avatar. Used for ARIA label and initials.</td>
+<td><code>data-name=&quot;Max Mustermann&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-src</code></td>
+<td>Image URL for the avatar. Falls back to initials on error.</td>
+<td><code>data-src=&quot;/img/users/max.png&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-initials</code></td>
+<td>Initials fallback. If not set, derived from <code>data-name</code>.</td>
+<td><code>data-initials=&quot;MM&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-shape</code></td>
+<td>Thumbnail shape: <code>circle</code> (default) or <code>rect</code>.</td>
+<td><code>data-shape=&quot;rect&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-size</code></td>
+<td>Edge length of the thumbnail in pixels; range 24…512, default 36.</td>
+<td><code>data-size=&quot;48&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="dropdown-settings">Dropdown Settings</h3>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-color</code></td>
+<td>A color class for styling the trigger element.</td>
+<td><code>data-color=&quot;btn-primary&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-menucss</code></td>
+<td>Additional CSS classes for the dropdown menu container (<code>&lt;ul&gt;</code>).</td>
+<td><code>data-menucss=&quot;shadow-lg&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="menu-item-types">Menu Item Types</h3>
+<p>The items within the dropdown menu are defined by child elements inside the main container. The type of each item is determined by its CSS class:</p>
+<ul>
+<li><strong><code>.wx-dropdown-item</code></strong>: A standard clickable menu item. It can contain text, an icon, and an image.</li>
+<li><strong><code>.wx-dropdown-header</code></strong>: A non-interactive header to group related menu items.</li>
+<li><strong><code>.wx-dropdown-divider</code></strong>: A visual separator between menu items.</li>
+</ul>
+<p>Individual items can be configured with their own <code>data-*</code> attributes, such as <code>data-icon</code>, <code>data-image</code>, or the <code>disabled</code> attribute.</p>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>After initialization, the properties of the component can be accessed programmatically.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<p>For avatar dropdowns defined declaratively in HTML, the instance is retrieved via the <code>getInstanceByElement(element)</code> method of the central <code>webexpress.webui.Controller</code>.</p>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const element = document.getElementById('userMenu');
+
+// retrieve the controller instance associated with the element
+const avatarDropdownCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (avatarDropdownCtrl) {
+    // update the avatar name
+    avatarDropdownCtrl.name = 'Alex Example';
+
+    // update the avatar image
+    avatarDropdownCtrl.src = '/img/users/alex.png';
+}
+</code></pre>
+<h3 id="manual-instantiation">Manual Instantiation</h3>
+<p>An avatar dropdown can also be created entirely programmatically.</p>
+<pre><code class="lang-javascript">// find the container element
+const container = document.getElementById('dynamic-avatar-dropdown');
+
+// create a new instance
+const avatarDropdownCtrl = new webexpress.webui.AvatarDropdownCtrl(container);
+</code></pre>
+<h3 id="properties">Properties</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td><code>string</code></td>
+<td>Gets or sets the display name. Re-renders on set.</td>
+</tr>
+<tr>
+<td><code>src</code></td>
+<td><code>string</code></td>
+<td>Gets or sets the image source. Re-renders on set.</td>
+</tr>
+<tr>
+<td><code>items</code></td>
+<td><code>Array</code></td>
+<td>Gets or sets the menu items array. Re-renders on set.</td>
+</tr>
+<tr>
+<td><code>menuCSS</code></td>
+<td><code>string|null</code></td>
+<td>Gets or sets additional CSS classes for the menu.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="events">Events</h2>
+<p>The component dispatches global events to allow other parts of the application to react to user interactions.</p>
+<ul>
+<li><strong><code>webexpress.webui.Event.CLICK_EVENT</code></strong>: This event is fired when a clickable menu item is selected. The <code>event.detail</code> object contains a reference to the sender and the specific item that was clicked.</li>
+<li><strong><code>webexpress.webui.Event.CHANGE_VISIBILITY_EVENT</code></strong>: This event is fired when the dropdown menu is shown or hidden. The <code>event.detail</code> object indicates whether the menu is now visible (<code>true</code>) or not (<code>false</code>).</li>
+</ul>
+<h2 id="use-case-examples">Use Case Examples</h2>
+<h3 id="simple-avatar-dropdown-with-initials">Simple avatar dropdown with initials</h3>
+<pre><code class="lang-html">&lt;div id=&quot;userMenu&quot;
+     class=&quot;wx-webui-avatar-dropdown&quot;
+     data-name=&quot;Max Mustermann&quot;
+     data-size=&quot;36&quot;&gt;
+
+    &lt;a class=&quot;wx-dropdown-item&quot; data-icon=&quot;fas fa-user&quot;&gt;
+        Profile
+    &lt;/a&gt;
+    &lt;a class=&quot;wx-dropdown-item&quot; data-icon=&quot;fas fa-cog&quot;&gt;
+        Settings
+    &lt;/a&gt;
+    &lt;div class=&quot;wx-dropdown-divider&quot;&gt;&lt;/div&gt;
+    &lt;a class=&quot;wx-dropdown-item&quot; data-icon=&quot;fas fa-sign-out-alt&quot;&gt;
+        Logout
+    &lt;/a&gt;
+&lt;/div&gt;
+</code></pre>
+<h3 id="avatar-dropdown-with-image-and-grouped-items">Avatar dropdown with image and grouped items</h3>
+<pre><code class="lang-html">&lt;div id=&quot;adminMenu&quot;
+     class=&quot;wx-webui-avatar-dropdown&quot;
+     data-name=&quot;Sara Sommer&quot;
+     data-src=&quot;/img/users/sara.png&quot;
+     data-size=&quot;48&quot;
+     data-shape=&quot;circle&quot;
+     data-menucss=&quot;shadow-lg&quot;&gt;
+
+    &lt;div class=&quot;wx-dropdown-header&quot; data-icon=&quot;fas fa-user&quot;&gt;
+        Account
+    &lt;/div&gt;
+    &lt;a class=&quot;wx-dropdown-item&quot; data-icon=&quot;fas fa-id-card&quot;&gt;
+        Profile
+    &lt;/a&gt;
+    &lt;a class=&quot;wx-dropdown-item&quot; data-icon=&quot;fas fa-cog&quot;&gt;
+        Settings
+    &lt;/a&gt;
+    &lt;div class=&quot;wx-dropdown-divider&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;wx-dropdown-header&quot; data-icon=&quot;fas fa-shield-alt&quot;&gt;
+        Administration
+    &lt;/div&gt;
+    &lt;a class=&quot;wx-dropdown-item&quot; data-icon=&quot;fas fa-users&quot;&gt;
+        User Management
+    &lt;/a&gt;
+    &lt;div class=&quot;wx-dropdown-divider&quot;&gt;&lt;/div&gt;
+    &lt;a class=&quot;wx-dropdown-item&quot; data-icon=&quot;fas fa-sign-out-alt&quot; data-color=&quot;text-danger&quot;&gt;
+        Logout
+    &lt;/a&gt;
+&lt;/div&gt;
+</code></pre>
+<h3 id="rectangular-avatar-with-disabled-item">Rectangular avatar with disabled item</h3>
+<pre><code class="lang-html">&lt;div id=&quot;teamMenu&quot;
+     class=&quot;wx-webui-avatar-dropdown&quot;
+     data-name=&quot;Chris Winter&quot;
+     data-initials=&quot;CW&quot;
+     data-shape=&quot;rect&quot;
+     data-size=&quot;40&quot;&gt;
+
+    &lt;a class=&quot;wx-dropdown-item&quot; data-icon=&quot;fas fa-home&quot;&gt;
+        Dashboard
+    &lt;/a&gt;
+    &lt;a class=&quot;wx-dropdown-item&quot; data-icon=&quot;fas fa-bell&quot; disabled&gt;
+        Notifications
+    &lt;/a&gt;
+&lt;/div&gt;
+</code></pre>
+<p>In each example, the component is initialized from the HTML. The avatar thumbnail acts as the dropdown trigger, displaying either the loaded image or initials. The dropdown menu items, headers, and dividers are all derived from the child elements.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/avatar-dropdown.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

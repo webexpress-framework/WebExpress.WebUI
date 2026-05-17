@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+ <g transform="translate(-1.5,-1.5)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
+  <g stroke-width="1.25">
+   <path d="m3 3h18v18h-18z"/>
+   <path d="m3 9h18"/>
+   <path d="m3 15h18"/>
+   <path d="m9 3v18"/>
+   <path d="m15 3v18"/>
+  </g>
+  <path d="m10.714 12.643 1.9294-1.9294 0.64312 0.64312-1.9294 1.9294h-0.64312z" stroke-width=".8039"/>
+ </g>
+</svg>

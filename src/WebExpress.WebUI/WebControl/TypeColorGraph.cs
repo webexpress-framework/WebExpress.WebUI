@@ -48,7 +48,12 @@
         /// <summary>
         /// Light color.
         /// </summary>
-        Light = 8
+        Light = 8,
+
+        /// <summary>
+        /// Highlight color.
+        /// </summary>
+        Highlight = 13
     }
 
     /// <summary>
@@ -73,6 +78,7 @@
                 TypeColorGraph.Danger => "danger",
                 TypeColorGraph.Light => "light",
                 TypeColorGraph.Dark => "dark",
+                TypeColorGraph.Highlight => "highlight",
                 _ => string.Empty,
             };
         }

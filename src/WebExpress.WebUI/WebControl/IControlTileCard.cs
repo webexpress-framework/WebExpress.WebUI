@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
@@ -10,31 +11,31 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlTileCard : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the header text.
+        /// Gets the header text.
         /// </summary>
-        string Header { get; }
+        Func<IRenderControlContext, string> Header { get; }
 
         /// <summary>
-        /// Returns the color scheme used for the tile card.
+        /// Gets the color scheme used for the tile card.
         /// </summary>
-        PropertyColorTile Color { get; }
+        Func<IRenderControlContext, PropertyColorTile> Color { get; }
 
         /// <summary>
-        /// Returns the content of the tile card.
+        /// Gets the content of the tile card.
         /// </summary>
         IEnumerable<IControl> Content { get; }
 
         /// <summary>
-        /// Returns the secondary action, typically triggered by a 
+        /// Gets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
-        IAction PrimaryAction { get; }
+        Func<IRenderControlContext, IAction> PrimaryAction { get; }
 
         /// <summary>
-        /// Returns the secondary action, typically triggered by a 
+        /// Gets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
-        IAction SecondaryAction { get; }
+        Func<IRenderControlContext, IAction> SecondaryAction { get; }
 
         /// <summary>
         /// Adds one or more items to the tile card.

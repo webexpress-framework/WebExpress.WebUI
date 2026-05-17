@@ -70,7 +70,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputRange(null)
             {
-                Min = min
+                Min = _ => min
             };
 
             // act
@@ -94,7 +94,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputRange(null)
             {
-                Max = max
+                Max = _ => max
             };
 
             // act
@@ -118,7 +118,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputRange(null)
             {
-                Step = step
+                Step = _ => step
             };
 
             // act
@@ -143,7 +143,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputRange(null)
             {
-                Description = description
+                Description = _ => description
             };
 
             // act
@@ -167,7 +167,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputRange(null)
             {
-                Disabled = disabled
+                Disabled = _ => disabled
             };
 
 
@@ -181,9 +181,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form range control.
         /// </summary>
         [Theory]
-        [InlineData(0, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data""><input name=""*"" type=""hidden""><main><div><fieldset class=""wx-form-group""><input class=""form-range"" type=""range"" min=""0"" max=""10"" step=""1"" value=""0""></fieldset></div></main><div></div></form>")]
-        [InlineData(1, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data""><input name=""*"" type=""hidden""><main><div><fieldset class=""wx-form-group""><input class=""form-range"" type=""range"" min=""0"" max=""10"" step=""1"" value=""1""></fieldset></div></main><div></div></form>")]
-        [InlineData(2.2, @"<form id=""*"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data""><input name=""*"" type=""hidden""><main><div><fieldset class=""wx-form-group""><input class=""form-range"" type=""range"" min=""0"" max=""10"" step=""1"" value=""2.2""></fieldset></div></main><div></div></form>")]
+        [InlineData(0, @"<form id=""*"" class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""*""><input name=""*"" type=""hidden""><input name=""*"" value=""Default"" type=""hidden""><main><div><fieldset class=""wx-form-group""><span></span><input class=""form-range"" type=""range"" min=""0"" max=""10"" step=""1"" value=""0""></fieldset></div></main><div></div></form>")]
+        [InlineData(1, @"<form id=""*"" class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""*""><input name=""*"" type=""hidden""><input name=""*"" value=""Default"" type=""hidden""><main><div><fieldset class=""wx-form-group""><span></span><input class=""form-range"" type=""range"" min=""0"" max=""10"" step=""1"" value=""1""></fieldset></div></main><div></div></form>")]
+        [InlineData(2.2, @"<form id=""id_*"" class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""id_*""><input name=""id_*"" type=""hidden""><input name=""controlform_id_*_state"" value=""Default"" type=""hidden""><main><div><fieldset class=""wx-form-group""><span></span><input class=""form-range"" type=""range"" min=""0"" max=""10"" step=""1"" value=""2.2""></fieldset></div></main><div></div></form>")]
         public void ValueForm(float value, string expected)
         {
             // arrange

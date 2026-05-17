@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemEdge()
             {
-                Label = label
+                Label = _ => label
             };
 
             // act
@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemEdge()
             {
-                Source = source
+                Source = _ => source
             };
 
             // act
@@ -96,7 +96,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemEdge()
             {
-                Target = target
+                Target = _ => target
             };
 
             // act
@@ -118,6 +118,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorGraph.Danger, @"<div class=""wx-graph-edge"" data-color-css=""danger""></div>")]
         [InlineData(TypeColorGraph.Dark, @"<div class=""wx-graph-edge"" data-color-css=""dark""></div>")]
         [InlineData(TypeColorGraph.Light, @"<div class=""wx-graph-edge"" data-color-css=""light""></div>")]
+        [InlineData(TypeColorGraph.Highlight, @"<div class=""wx-graph-edge"" data-color-css=""highlight""></div>")]
         public void SystemColor(TypeColorGraph color, string expected)
         {
             // arrange
@@ -126,7 +127,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemEdge()
             {
-                Color = new PropertyColorGraph(color)
+                Color = _ => new PropertyColorGraph(color)
             };
 
             // act
@@ -151,7 +152,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemEdge()
             {
-                Color = new PropertyColorGraph(color)
+                Color = _ => new PropertyColorGraph(color)
             };
 
             // act

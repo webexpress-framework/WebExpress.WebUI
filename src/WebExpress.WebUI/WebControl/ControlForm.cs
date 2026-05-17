@@ -48,37 +48,32 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlFormItem> Items => _items;
 
         /// <summary>
-        /// Returns or sets the name of the form.
+        /// Gets or sets the name of the form.
         /// </summary>
-        public string Name { get; set; }
+        public Func<IRenderControlFormContext, string> Name { get; set; }
 
         /// <summary>
-        /// Returns or sets the target uri.
+        /// Gets or sets the target uri.
         /// </summary>
-        public IUri Uri { get; set; }
+        public Func<IRenderControlFormContext, IUri> Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the redirect uri.
+        /// Gets or sets the redirect uri.
         /// </summary>
-        public IUri RedirectUri { get; set; }
+        public Func<IRenderControlFormContext, IUri> RedirectUri { get; set; }
 
         /// <summary>
-        /// Returns or sets the form layout.
+        /// Gets or sets the form layout.
         /// </summary>
-        public TypeLayoutForm FormLayout { get; set; } = TypeLayoutForm.Default;
+        public Func<IRenderControlFormContext, TypeLayoutForm> FormLayout { get; set; } = _ => TypeLayoutForm.Default;
 
         /// <summary>
-        /// Returns or sets the item layout.
+        /// Gets or sets the item layout.
         /// </summary>
-        public TypeLayoutFormItem ItemLayout { get; set; } = TypeLayoutFormItem.Vertical;
+        public Func<IRenderControlFormContext, TypeLayoutFormItem> ItemLayout { get; set; } = _ => TypeLayoutFormItem.Vertical;
 
         /// <summary>
-        /// Return the current state of the form.
-        /// </summary>
-        public TypeFormState State { get; protected set; } = TypeFormState.Default;
-
-        /// <summary>
-        /// Returns or sets the hidden field that contains the session id.
+        /// Gets or sets the hidden field that contains the session id.
         /// </summary>
         public ControlFormItemInputHidden FormId { get; } = new ControlFormItemInputHidden().Initialize
         (
@@ -86,52 +81,52 @@ namespace WebExpress.WebUI.WebControl
         ) as ControlFormItemInputHidden;
 
         /// <summary>
-        /// Returns or sets the request method.
+        /// Gets or sets the request method.
         /// </summary>
-        public RequestMethod Method { get; set; } = RequestMethod.POST;
+        public Func<IRenderControlFormContext, RequestMethod> Method { get; set; } = _ => RequestMethod.POST;
 
         /// <summary>
-        /// Returns or sets the header preferences section.
+        /// Gets or sets the header preferences section.
         /// </summary>
         protected IEnumerable<IFragmentContext> HeaderPreferences { get; } = [];
 
         /// <summary>
-        /// Returns or sets the header primary section.
+        /// Gets or sets the header primary section.
         /// </summary>
         protected IEnumerable<IFragmentContext> HeaderPrimary { get; } = [];
 
         /// <summary>
-        /// Returns or sets the header secondary section.
+        /// Gets or sets the header secondary section.
         /// </summary>
         protected IEnumerable<IFragmentContext> HeaderSecondary { get; } = [];
 
         /// <summary>
-        /// Returns or sets the button panel preferences section.
+        /// Gets or sets the button panel preferences section.
         /// </summary>
         protected IEnumerable<IFragmentContext> ButtonPanelPreferences { get; } = [];
 
         /// <summary>
-        /// Returns or sets the button panel primary section.
+        /// Gets or sets the button panel primary section.
         /// </summary>
         protected IEnumerable<IFragmentContext> ButtonPanelPrimary { get; } = [];
 
         /// <summary>
-        /// Returns or sets the button panel secondary section.
+        /// Gets or sets the button panel secondary section.
         /// </summary>
         protected IEnumerable<IFragmentContext> ButtonPanelSecondary { get; } = [];
 
         /// <summary>
-        /// Returns or sets the footer preferences section.
+        /// Gets or sets the footer preferences section.
         /// </summary>
         protected IEnumerable<IFragmentContext> FooterPreferences { get; } = [];
 
         /// <summary>
-        /// Returns or sets the footer primary section.
+        /// Gets or sets the footer primary section.
         /// </summary>
         protected IEnumerable<IFragmentContext> FooterPrimary { get; } = [];
 
         /// <summary>
-        /// Returns or sets the footer secondary section.
+        /// Gets or sets the footer secondary section.
         /// </summary>
         protected IEnumerable<IFragmentContext> FooterSecondary { get; } = [];
 
@@ -141,19 +136,19 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlFormItemButton> Buttons => _preferencesButtons.Union(_primaryButtons).Union(_secondaryButtons);
 
         /// <summary>
-        /// Returns or sets the horizontal alignment of the items.
+        /// Gets or sets the horizontal alignment of the items.
         /// </summary>
-        public virtual TypeJustifiedFlex Justify
+        public virtual Func<IRenderControlFormContext, TypeJustifiedFlex> Justify
         {
-            get => (TypeJustifiedFlex)GetProperty(TypeJustifiedFlex.Start);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeJustifiedFlex>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the confirmation control that is displayed 
+        /// Gets or sets the confirmation control that is displayed 
         /// instead of the form after the form has been successfully submitted.
         /// </summary>
-        public IControl Conformation { get; set; }
+        public Func<IRenderControlFormContext, IControl> Conformation { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -171,7 +166,8 @@ namespace WebExpress.WebUI.WebControl
         public ControlForm(string id, params IControlFormItem[] items)
             : base(id)
         {
-            FormId.Name = id?.Replace('.', '-');
+            FormId.Name = _ => id?.Replace('.', '-');
+            Name = FormId.Name;
             _items.AddRange(items);
         }
 
@@ -219,7 +215,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return Render(renderContext, visualTree, Items);
+            return Render(renderContext, visualTree, _items);
         }
 
         /// <summary>
@@ -233,7 +229,18 @@ namespace WebExpress.WebUI.WebControl
         {
             var renderFormContext = new RenderControlFormContext(renderContext, this);
 
-            return Render(renderFormContext, visualTree, items);
+            return Render(renderFormContext, visualTree);
+        }
+
+        /// <summary>
+        /// Convert to html.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <returns>The control as html.</returns>
+        public virtual IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
+        {
+            return Render(renderContext, visualTree, _items);
         }
 
         /// <summary>
@@ -246,12 +253,28 @@ namespace WebExpress.WebUI.WebControl
         public virtual IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlFormItem> items)
         {
             var validationResults = new List<ValidationResult>();
-            var name = Name ?? Id;
+            var name = Name?.Invoke(renderContext);
+            var stateParameterName = $"controlform_{(string.IsNullOrWhiteSpace(name) ? Id ?? "" : name).Replace('.', '-')}_state";
+            var state = TypeFormState.Default;
+            var stateValue = renderContext.Request.GetParameter(stateParameterName)?.Value;
+            var role = Role?.Invoke(renderContext);
+
+            if (Enum.TryParse<TypeFormState>(stateValue, true, out var stateFromRequest))
+            {
+                state = stateFromRequest;
+            }
+
+            var redirectUri = RedirectUri?.Invoke(renderContext);
+            var conformation = Conformation?.Invoke(renderContext);
+            var formLayout = FormLayout?.Invoke(renderContext) ?? TypeLayoutForm.Default;
+            var method = Method?.Invoke(renderContext) ?? RequestMethod.POST;
+            var itemLayout = ItemLayout?.Invoke(renderContext) ?? TypeLayoutFormItem.Vertical;
+            var uri = Uri?.Invoke(renderContext) ?? renderContext.Uri;
 
             // check if and how the form was submitted
-            if (!renderContext.Request.HasParameter(name) || State == TypeFormState.Success)
+            if (!renderContext.Request.HasParameter(name) || state == TypeFormState.Success)
             {
-                State = TypeFormState.Default;
+                state = TypeFormState.Default;
 
                 // uninizialized form
                 // fill the form with data
@@ -268,7 +291,7 @@ namespace WebExpress.WebUI.WebControl
             }
             else
             {
-                State = TypeFormState.Error;
+                state = TypeFormState.Error;
 
                 // fill the form with data
                 foreach (var item in items
@@ -279,7 +302,10 @@ namespace WebExpress.WebUI.WebControl
                 }
 
                 // valid the form
-                var validateEventArgument = new ControlFormEventFormValidate() { Context = renderContext };
+                var validateEventArgument = new ControlFormEventFormValidate()
+                {
+                    Context = renderContext
+                };
 
                 foreach (var item in items
                     .Where(x => x is IControlFormValidation)
@@ -293,7 +319,7 @@ namespace WebExpress.WebUI.WebControl
 
                 if (validationResults.Count == 0)
                 {
-                    State = TypeFormState.Success;
+                    state = TypeFormState.Success;
 
                     foreach (var item in items
                         .Where(x => x is IControlFormProcess)
@@ -305,16 +331,17 @@ namespace WebExpress.WebUI.WebControl
                     // valid form
                     OnProcess(new ControlFormEventFormProcess() { Context = renderContext });
 
-                    if (RedirectUri?.Empty == false)
+                    if (redirectUri?.Empty == false)
                     {
-                        throw new RedirectException(RedirectUri);
+                        throw new RedirectException(redirectUri);
                     }
 
                     if (Conformation is not null)
                     {
-                        return new HtmlElementFormForm(Conformation.Render(renderContext, visualTree))
+                        return new HtmlElementFormForm(conformation.Render(renderContext, visualTree))
                         {
-                            Id = Id
+                            Id = Id,
+                            Class = "wx-form"
                         };
                     }
                 }
@@ -324,20 +351,26 @@ namespace WebExpress.WebUI.WebControl
             var form = new HtmlElementFormForm()
             {
                 Id = Id,
-                Class = FormLayout == TypeLayoutForm.Inline
-                    ? Css.Concatenate("wx-form-inline", GetClasses())
-                    : GetClasses(),
+                Class = formLayout == TypeLayoutForm.Inline
+                    ? Css.Concatenate("wx-form wx-form-inline", GetClasses())
+                    : Css.Concatenate("wx-form", GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
-                Action = Uri?.ToString() ?? renderContext.Uri?.ToString(),
-                Method = (Method == RequestMethod.NONE
+                Role = role,
+                Action = uri?.ToString(),
+                Method = (method == RequestMethod.NONE
                     ? RequestMethod.POST
-                    : Method).ToString(),
+                    : method).ToString(),
                 Enctype = TypeEnctype.Multipart,
-                Name = Name
+                Name = name
             };
 
             form.Add(FormId.Render(renderContext, visualTree));
+            form.Add(new HtmlElementFieldInput()
+            {
+                Name = stateParameterName,
+                Value = state.ToString(),
+                Type = "hidden"
+            });
 
             var header = new HtmlElementSectionHeader();
 
@@ -377,10 +410,10 @@ namespace WebExpress.WebUI.WebControl
                 header.Add(new ControlAlert()
                 {
                     Classes = ["wx-validation-alert"],
-                    BackgroundColor = bgColor,
-                    Text = I18N.Translate(renderContext.Request?.Culture, v.Text),
-                    Dismissibility = TypeDismissibilityAlert.Dismissible,
-                    Fade = TypeFade.FadeShow
+                    BackgroundColor = _ => bgColor,
+                    Text = _ => I18N.Translate(renderContext.Request?.Culture, v.Text),
+                    Dismissibility = _ => TypeDismissibilityAlert.Dismissible,
+                    Fade = _ => TypeFade.FadeShow
                 }.Render(renderContext, visualTree));
             }
 
@@ -392,7 +425,7 @@ namespace WebExpress.WebUI.WebControl
             var main = new HtmlElementSectionMain();
             var group = default(ControlFormItemGroup);
 
-            group = ItemLayout switch
+            group = itemLayout switch
             {
                 TypeLayoutFormItem.Horizontal => new ControlFormItemGroupHorizontal(),
                 TypeLayoutFormItem.Mix => new ControlFormItemGroupMix(),
@@ -408,7 +441,7 @@ namespace WebExpress.WebUI.WebControl
 
             var buttonPannel = new HtmlElementTextContentDiv()
             {
-                Class = FormLayout == TypeLayoutForm.Inline ? "ms-2" : ""
+                Class = formLayout == TypeLayoutForm.Inline ? "ms-2" : ""
             };
             buttonPannel.Add(Buttons.Select(x => x?.Render(renderContext, visualTree)));
 

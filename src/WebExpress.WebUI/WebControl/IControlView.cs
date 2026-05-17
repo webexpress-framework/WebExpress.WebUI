@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -8,21 +10,26 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlView : IControl
     {
         /// <summary>
-        /// Returns the collection of headers that define the structure 
+        /// Gets the collection of headers that define the structure 
         /// and metadata of the control view.
         /// </summary>
         IEnumerable<IControlViewHeader> Headers { get; }
 
         /// <summary>
-        /// Returns the views of the control.
+        /// Gets the views of the control.
         /// </summary>
         IEnumerable<IControlViewItem> Views { get; }
 
         /// <summary>
-        /// Returns the collection of footers associated with the 
-        /// control view.
+        /// Gets the collection of footers that define the structure 
+        /// and metadata of the control view.
         /// </summary>
         IEnumerable<IControlViewFooter> Footers { get; }
+
+        /// <summary>
+        /// Return or specifies the layout.
+        /// </summary>
+        Func<IRenderControlContext, TypeLayoutView> Layout { get; set; }
 
         /// <summary>
         /// Adds one or more headers to the view control.

@@ -1,4 +1,7 @@
-﻿using WebExpress.WebCore.WebIcon;
+using System;
+using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -8,34 +11,39 @@ namespace WebExpress.WebUI.WebControl
     public class ControlSearchItemSuggestion
     {
         /// <summary>
-        /// Returns the unique identifier for the suggestion item.
+        /// Gets the unique identifier for the suggestion item.
         /// </summary>
         public string Id { get; }
 
         /// <summary>
-        /// Returns or sets the label text for the suggestion item.
+        /// Gets or sets the label text for the suggestion item.
         /// </summary>
-        public string Label { get; set; }
+        public Func<IRenderControlContext, string> Label { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon associated with the suggestion item.
+        /// Gets or sets the icon associated with the suggestion item.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the CSS class for styling the suggestion item.
+        /// Gets or sets the image uri.
         /// </summary>
-        public string Css { get; set; }
+        public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the suggestion item is marked as a favorite.
+        /// Gets or sets the CSS class for styling the suggestion item.
         /// </summary>
-        public bool Favorited { get; set; }
+        public Func<IRenderControlContext, string> Css { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the suggestion item is marked as a favorite.
+        /// </summary>
+        public Func<IRenderControlContext, bool> Favorited { get; set; }
 
         /// <summary>
         /// Gets or sets the value associated with the suggestion item.
         /// </summary>
-        public object Value { get; set; }
+        public Func<IRenderControlContext, object> Value { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.

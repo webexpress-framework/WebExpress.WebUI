@@ -49,7 +49,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Light color callout.
         /// </summary>
-        Light = 8
+        Light = 8,
+
+        /// <summary>
+        /// Highlight color.
+        /// </summary>
+        Highlight = 13
     }
 
     /// <summary>
@@ -74,6 +79,7 @@ namespace WebExpress.WebUI.WebControl
                 TypeColorDate.Danger => "bg-danger",
                 TypeColorDate.Light => "bg-light",
                 TypeColorDate.Dark => "bg-dark",
+                TypeColorDate.Highlight => "bg-highlight",
                 _ => string.Empty,
             };
         }

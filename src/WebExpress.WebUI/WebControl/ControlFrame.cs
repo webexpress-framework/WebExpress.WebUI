@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+using System;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
@@ -11,18 +12,14 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFrame : Control
     {
         /// <summary>
-        /// Returns or sets the URI associated with the current resource.
+        /// Gets or sets the URI associated with the current resource.
         /// </summary>
-        public IUri Uri { get; set; }
+        public Func<IRenderControlContext, IUri> Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the CSS selector used to identify elements in the DOM.
+        /// Gets or sets the CSS selector used to identify elements in the DOM.
         /// </summary>
-        /// <remarks>
-        /// The selector must be a valid CSS selector. If the value is null or empty, 
-        /// no elements will be matched.
-        /// </remarks>
-        public string Selector { get; set; }
+        public Func<IRenderControlContext, string> Selector { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -41,15 +38,19 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var role = Role?.Invoke(renderContext);
+            var uri = Uri?.Invoke(renderContext);
+            var selector = Selector?.Invoke(renderContext);
+
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-frame", GetClasses()),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             }
-                .AddUserAttribute("data-uri", Uri?.ToString())
-                .AddUserAttribute("data-selector", Selector);
+                .AddUserAttribute("data-uri", uri?.ToString())
+                .AddUserAttribute("data-selector", selector);
         }
     }
 }

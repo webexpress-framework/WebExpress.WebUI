@@ -1,7 +1,11 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using WebExpress.WebCore;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebUI.WebFragment;
 using WebExpress.WebUI.WebPage;
+using WebExpress.WebUI.WebSection;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -10,12 +14,32 @@ namespace WebExpress.WebUI.WebControl
     /// </summary>
     public class ControlTab : Control, IControlTab
     {
-        private readonly List<IControlTabView> _pages = [];
+        private readonly List<IControlTabView> _views = [];
+        private readonly List<IControlToolbarItem> _toolbarItems = [];
 
         /// <summary>
         /// Returns the pages of the tab.
         /// </summary>
-        public IEnumerable<IControlTabView> Pages => _pages;
+        public IEnumerable<IControlTabView> Views => _views;
+
+        /// <summary>
+        /// Returns the toolbar items of the tab.
+        /// </summary>
+        public IEnumerable<IControlToolbarItem> ToolbarItems => _toolbarItems;
+
+        /// <summary>
+        /// Gets or sets the highlight color for the active tab (used in Underline layout).
+        /// </summary>
+        public Func<IRenderControlContext, PropertyColorText> HighlightColor { get; set; } = _ => new PropertyColorText();
+
+        /// <summary>
+        /// Gets or sets the layout.
+        /// </summary>
+        public Func<IRenderControlContext, TypeLayoutTab> Layout
+        {
+            get => (Func<IRenderControlContext, TypeLayoutTab>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+        }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -25,7 +49,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlTab(string id = null, IControlTabView[] pages = null)
             : base(id)
         {
-            _pages.AddRange(pages ?? []);
+            _views.AddRange(pages ?? []);
         }
 
         /// <summary>
@@ -35,7 +59,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public virtual IControlTab Add(params IControlTabView[] pages)
         {
-            _pages.AddRange(pages);
+            _views.AddRange(pages);
 
             return this;
         }
@@ -47,7 +71,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public virtual IControlTab Add(IEnumerable<IControlTabView> pages)
         {
-            _pages.AddRange(pages);
+            _views.AddRange(pages);
 
             return this;
         }
@@ -59,7 +83,43 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public virtual IControlTab Remove(IControlTabView page)
         {
-            _pages.Remove(page);
+            _views.Remove(page);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds one or more toolbar items to the tab.
+        /// </summary>
+        /// <param name="items">The toolbar items to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlTab Add(params IControlToolbarItem[] items)
+        {
+            _toolbarItems.AddRange(items);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds one or more toolbar items to the tab.
+        /// </summary>
+        /// <param name="items">The toolbar items to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlTab Add(IEnumerable<IControlToolbarItem> items)
+        {
+            _toolbarItems.AddRange(items);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Removes the specified toolbar item from the tab.
+        /// </summary>
+        /// <param name="item">The toolbar item to remove.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlTab Remove(IControlToolbarItem item)
+        {
+            _toolbarItems.Remove(item);
 
             return this;
         }
@@ -72,7 +132,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return Render(renderContext, visualTree, _pages);
+            return Render(renderContext, visualTree, _views);
         }
 
         /// <summary>
@@ -85,15 +145,93 @@ namespace WebExpress.WebUI.WebControl
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlTabView> pages)
         {
             var classes = Classes.ToList();
+            var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-tab", classes),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
+            };
+
+            // Get tab view fragments
+            var viewPreferences = WebEx.ComponentHub.FragmentManager.GetFragments<IFragmentControl, SectionTabViewPreferences>
+            (
+                renderContext?.PageContext?.ApplicationContext,
+                [GetType()]
+            );
+            var viewPrimary = WebEx.ComponentHub.FragmentManager.GetFragments<IFragmentControl, SectionTabViewPrimary>
+            (
+                renderContext?.PageContext?.ApplicationContext,
+                [GetType()]
+            );
+            var viewSecondary = WebEx.ComponentHub.FragmentManager.GetFragments<IFragmentControl, SectionTabViewSecondary>
+            (
+                renderContext?.PageContext?.ApplicationContext,
+                [GetType()]
+            );
+
+            // Add standard views
+            html.Add(pages.Select(x => x.Render(renderContext, visualTree)));
+
+            // Add view fragments
+            html.Add(viewPreferences.Select(x => x.Render(renderContext, visualTree)));
+            html.Add(viewPrimary.Select(x => x.Render(renderContext, visualTree)));
+            html.Add(viewSecondary.Select(x => x.Render(renderContext, visualTree)));
+
+            html.AddUserAttribute("data-layout", (Layout?.Invoke(renderContext) ?? TypeLayoutTab.Default).ToString().ToLower());
+
+            if ((Layout?.Invoke(renderContext) ?? TypeLayoutTab.Default) == TypeLayoutTab.Underline && HighlightColor?.Invoke(renderContext) != null)
+            {
+                if ((TypeColor)HighlightColor?.Invoke(renderContext).SystemColor == TypeColor.User && !string.IsNullOrWhiteSpace(HighlightColor?.Invoke(renderContext).UserColor))
+                {
+                    html.AddStyle($"--bs-nav-underline-border-color: {HighlightColor?.Invoke(renderContext).UserColor};", $"--bs-nav-underline-link-active-color: {HighlightColor?.Invoke(renderContext).UserColor};");
+                }
+                else if ((TypeColor)HighlightColor?.Invoke(renderContext).SystemColor == TypeColor.Highlight)
+                {
+                    var colorVar = "var(--wx-highlight)";
+                    html.AddStyle($"--bs-nav-underline-border-color: {colorVar};", $"--bs-nav-underline-link-active-color: {colorVar};");
+                }
+                else if ((TypeColor)HighlightColor?.Invoke(renderContext).SystemColor != TypeColor.Default)
+                {
+                    var colorVar = $"var(--bs-{((TypeColor)HighlightColor?.Invoke(renderContext).SystemColor).ToClass()})";
+                    html.AddStyle($"--bs-nav-underline-border-color: {colorVar};", $"--bs-nav-underline-link-active-color: {colorVar};");
+                }
             }
-                .Add(pages.Select(x => x.Render(renderContext, visualTree)));
+
+            // Get toolbar fragments
+            var toolbarPreferences = WebEx.ComponentHub.FragmentManager.GetFragments<IFragmentControlToolbarItem, SectionTabToolbarPreferences>
+            (
+                renderContext?.PageContext?.ApplicationContext,
+                [GetType()]
+            );
+            var toolbarPrimary = WebEx.ComponentHub.FragmentManager.GetFragments<IFragmentControlToolbarItem, SectionTabToolbarPrimary>
+            (
+                renderContext?.PageContext?.ApplicationContext,
+                [GetType()]
+            );
+            var toolbarSecondary = WebEx.ComponentHub.FragmentManager.GetFragments<IFragmentControlToolbarItem, SectionTabToolbarSecondary>
+            (
+                renderContext?.PageContext?.ApplicationContext,
+                [GetType()]
+            );
+
+            // Render toolbar if there are items
+            if (_toolbarItems.Count > 0 || toolbarPreferences.Any() || toolbarPrimary.Any() || toolbarSecondary.Any())
+            {
+                var toolbarHtml = new HtmlElementTextContentDiv()
+                {
+                    Class = "wx-tab-toolbar"
+                };
+
+                toolbarHtml.Add(toolbarPreferences.OfType<IControlToolbarItem>().Select(x => x.Render(renderContext, visualTree)));
+                toolbarHtml.Add(_toolbarItems.Select(x => x.Render(renderContext, visualTree)));
+                toolbarHtml.Add(toolbarPrimary.OfType<IControlToolbarItem>().Select(x => x.Render(renderContext, visualTree)));
+                toolbarHtml.Add(toolbarSecondary.OfType<IControlToolbarItem>().Select(x => x.Render(renderContext, visualTree)));
+
+                html.Add(toolbarHtml);
+            }
 
             return html;
         }

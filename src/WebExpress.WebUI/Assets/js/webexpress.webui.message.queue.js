@@ -62,7 +62,7 @@ webexpress.webui.MessageQueueCtrl = class extends webexpress.webui.Ctrl {
         } catch (e) {
             // handle synchronous errors (rare for WebSocket constructor)
             this._status = "error";
-            this._lastError = e && e.message ? e.message : "WebSocket connection error";
+            this._lastError = e && e.message ? e.message : this._i18n("webexpress.webui:websocket.error", "WebSocket connection error");
             this.update();
             return;
         }
@@ -97,7 +97,7 @@ webexpress.webui.MessageQueueCtrl = class extends webexpress.webui.Ctrl {
         this._ws.addEventListener("error", (evt) => {
             // update status and inform listeners in case of error
             this._status = "error";
-            this._lastError = evt && evt.message ? evt.message : "WebSocket connection failed";
+            this._lastError = evt && evt.message ? evt.message : this._i18n("webexpress.webui:websocket.failed", "WebSocket connection failed");
             this.update();
             this._dispatch(webexpress.webui.Event.WS_ERROR_EVENT, { event: evt });
         });

@@ -16,8 +16,10 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         // configuration from data attributes
-        this._id = this._element.id;
+        this._id = this._element.getAttribute("id");
         this._name = this._element.getAttribute("name") || null;
+        this._element.removeAttribute("id");
+        this._element.removeAttribute("name");
         this._uploadUri = this._element.dataset.uri || "";
         this._multiple = this._element.dataset.multiple !== "false";
         this._accept = this._element.dataset.accept || "*/*";
@@ -50,6 +52,12 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
         // create a file input for triggering the file dialog
         this._fileInput = document.createElement("input");
         this._fileInput.type = "file";
+        if (this._id) {
+            this._fileInput.id = this._id;
+        }
+        if (this._name) {
+            this._fileInput.name = this._name;
+        }
         this._fileInput.style.display = "none";
         this._fileInput.multiple = this._multiple;
         this._fileInput.accept = this._accept;
@@ -60,7 +68,7 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
 
         // create upload button for manual uploads
         this._uploadButton = document.createElement("button");
-        this._uploadButton.textContent = "Upload Files";
+        this._uploadButton.textContent = this._i18n("webexpress.webui:upload.button", "Upload Files");
         this._uploadButton.className = "btn btn-primary mt-2";
         this._uploadButton.style.display = "none";
 
@@ -172,7 +180,7 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
 
         const removeBtn = document.createElement("button");
         removeBtn.className = "fas fa-times";
-        removeBtn.title = "Remove file";
+        removeBtn.title = this._i18n("webexpress.webui:upload.remove.file", "Remove file");
         removeBtn.onclick = (e) => {
             e.stopPropagation();
             this.files = this.files.filter(f => f.name !== file.name);
@@ -303,7 +311,7 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
      * @returns {string} The corresponding Font Awesome icon class (e.g., "fas fa-file-pdf").
      */
     _getIconForFilename(filename) {
-        const ext = filename.split('.').pop().toLowerCase();
+        const ext = filename.split(".").pop().toLowerCase();
         const iconMap = {
             "doc": "fas fa-file-word",
             "docx": "fas fa-file-word",

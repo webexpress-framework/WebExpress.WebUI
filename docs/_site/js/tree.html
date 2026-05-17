@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>TreeCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="TreeCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/tree.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="treectrl">TreeCtrl</h1>
+<p>The <code>TreeCtrl</code> component is used for displaying and managing hierarchical data in a tree structure. It allows users to navigate through nested nodes, expand and collapse branches by clicking, and—if enabled—reorganize the structure by dragging and dropping nodes.</p>
+<p>The component is designed to read its entire configuration and initial structure declaratively from the HTML markup and generate a fully interactive and ARIA-compliant tree view at runtime.</p>
+<pre><code>   ┌───────────────────────────┐
+   │                           │
+   │ ▼ [Icon] Parent Node 1    │  // Expanded Node
+   │   ► [Icon] Child Node 1.1 │
+   │   ► [Icon] Child Node 1.2 │
+   │ ► [Icon] Parent Node 2    │  // Collapsed Node
+   │                           │
+   └───────────────────────────┘
+</code></pre>
+<h2 id="declarative-configuration">Declarative Configuration</h2>
+<p>Initialization is handled entirely through <code>data-</code> attributes on the host element and a nested structure of <code>&lt;div&gt;</code> elements for the nodes.</p>
+<p><strong>Host Element Attributes:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-layout</code></td>
+<td>Defines the visual layout of the tree. Possible values include <code>wx-tree-group</code>, <code>wx-tree-flush</code>, <code>wx-tree-flat</code>, <code>wx-tree-horizontal</code>.</td>
+</tr>
+<tr>
+<td><code>data-indicator</code></td>
+<td>If set to <code>&quot;false&quot;</code>, the expand/collapse indicators (arrows/dots) are hidden. Default is <code>true</code>.</td>
+</tr>
+<tr>
+<td><code>data-indicator-leaf</code></td>
+<td>If set to <code>&quot;false&quot;</code>, hides dot indicators for leaf nodes. Any other value shows leaf dots (default).</td>
+</tr>
+<tr>
+<td><code>data-movable</code></td>
+<td>If set to <code>&quot;true&quot;</code>, drag-and-drop functionality for moving nodes is enabled.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Node Structure and Attributes:</strong></p>
+<p>The tree structure is defined by <code>&lt;div&gt;</code> elements with the class <code>.wx-tree-node</code>. Nested nodes are placed as child elements within their parent node.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>A unique ID for the node, used for events and programmatic control.</td>
+</tr>
+<tr>
+<td><code>data-label</code></td>
+<td>The visible text of the node.</td>
+</tr>
+<tr>
+<td><code>data-icon</code></td>
+<td>A base icon used for both the opened and closed states.</td>
+</tr>
+<tr>
+<td><code>data-icon-opened</code></td>
+<td>A specific icon for the expanded state.</td>
+</tr>
+<tr>
+<td><code>data-icon-closed</code></td>
+<td>A specific icon for the collapsed state.</td>
+</tr>
+<tr>
+<td><code>data-image</code> / <code>data-image-opened</code> / <code>data-image-closed</code></td>
+<td>Corresponds to the icon attributes, but for using image URLs.</td>
+</tr>
+<tr>
+<td><code>data-active</code></td>
+<td>If set to <code>&quot;true&quot;</code>, the node is marked as active (e.g., highlighted).</td>
+</tr>
+<tr>
+<td><code>data-expand</code></td>
+<td>If set to <code>&quot;true&quot;</code>, the node is initially displayed in an expanded state.</td>
+</tr>
+<tr>
+<td><code>data-uri</code> / <code>data-target</code></td>
+<td>Creates a link (<code>&lt;a&gt;</code>) instead of a button to point to a URL.</td>
+</tr>
+<tr>
+<td><code>data-tooltip</code></td>
+<td>Adds a tooltip to the node.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="architecture-and-functionality">Architecture and Functionality</h2>
+<p>The <code>TreeCtrl</code> is designed as a self-contained, reactive component.</p>
+<ul>
+<li><strong>Dynamic DOM Construction</strong>: During initialization, the component recursively parses the declared HTML structure and builds an internal data model (the <code>_nodes</code> array) from it. Subsequently, the host element is cleared, and a semantically correct, accessible tree structure made of <code>&lt;ul&gt;</code> and <code>&lt;li&gt;</code> elements with the appropriate <code>role</code> and <code>aria-</code> attributes is programmatically constructed.</li>
+<li><strong>State-Driven Rendering</strong>: The visual representation of the tree is a direct function of the <code>_nodes</code> data model. Any change to a node's state (e.g., the <code>expand</code> property) or to the structure itself (e.g., through drag-and-drop) triggers a call to the <code>render()</code> method, which redraws the tree.</li>
+<li><strong>Interaction Model</strong>:
+<ul>
+<li><strong>Expand/Collapse</strong>: A click on the indicator arrow or a double-click on the node itself toggles the <code>expand</code> property of the node and re-renders the child nodes (or hides them). This fires the <code>CHANGE_VISIBILITY_EVENT</code>.</li>
+<li><strong>Click</strong>: A single click on the node label fires the <code>CLICK_EVENT</code>, allowing the application to react to a node selection.</li>
+</ul>
+</li>
+<li><strong>Drag-and-Drop Logic</strong>: If <code>data-movable</code> is enabled, a complex drag-and-drop functionality is provided:
+<ul>
+<li><strong>Intelligent Target Detection</strong>: A node can be dropped above, below, or as a child of another node. The component detects the target position by evaluating the mouse position relative to the target element (top 25%, middle 50%, bottom 25%).</li>
+<li><strong>Visual Feedback</strong>: A horizontal line indicator (<code>.wx-tree-drag-indicator</code>) precisely shows the insertion position (above/below). If the node is inserted as a child, the target element is visually highlighted.</li>
+<li><strong>Validation</strong>: It prevents a parent node from being moved into one of its own child nodes to avoid inconsistent states.</li>
+<li><strong>Event Communication</strong>: After a successful move operation, the <code>MOVE_EVENT</code> is fired, containing the source and target node IDs as well as the position.</li>
+</ul>
+</li>
+</ul>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>The component can be fully controlled via its JavaScript instance after initialization. There are two primary ways to obtain or create an instance.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<p>For trees defined declaratively in HTML, the central <code>webexpress.webui.Controller</code> automatically creates an instance. Access to this instance is provided through the controller's <code>getInstanceByElement(element)</code> method.</p>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const element = document.getElementById('my-tree');
+
+// retrieve the controller instance associated with the element
+const treeCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (treeCtrl) {
+    // now the instance can be controlled programmatically
+    // e.g., to replace the entire tree with new data
+    treeCtrl.nodes = [
+        { 
+            id: 'new_node_1', 
+            label: 'New Root Node',
+            children: [
+                { id: 'new_child_1', label: 'Child' }
+            ]
+        }
+    ];
+
+    // e.g., to clear the entire tree
+    treeCtrl.clear();
+}
+</code></pre>
+<h3 id="manual-instantiation">Manual Instantiation</h3>
+<p>Alternatively, a tree can be created entirely programmatically. This is useful when data is loaded dynamically at runtime (e.g., from an API). The <code>new</code> constructor of the <code>TreeCtrl</code> class is used for this purpose.</p>
+<pre><code class="lang-javascript">// find the container element for the dynamic tree
+const container = document.getElementById('dynamic-tree-container');
+
+// create a new instance of TreeCtrl manually
+const dynamicTreeCtrl = new webexpress.webui.TreeCtrl(container);
+
+// the new instance is now ready to be used
+dynamicTreeCtrl.expandAll();
+</code></pre>
+<h2 id="event-handling">Event Handling</h2>
+<p>The <code>TreeCtrl</code> component communicates user interactions and state changes via global events dispatched on the host element.</p>
+<ul>
+<li><strong><code>webexpress.webui.Event.CLICK_EVENT</code></strong>: Fired when a user clicks on a node. The <code>event.detail</code> object contains the data of the clicked node.</li>
+<li><strong><code>webexpress.webui.Event.CHANGE_VISIBILITY_EVENT</code></strong>: Fired when a node is expanded or collapsed. The <code>event.detail</code> object contains the data of the affected node.</li>
+<li><strong><code>webexpress.webui.Event.MOVE_EVENT</code></strong>: Fired after a node has been successfully moved via drag-and-drop. The <code>event.detail</code> object contains <code>source</code> (ID of the moved node), <code>target</code> (ID of the target node), and <code>position</code> (<code>'before'</code>, <code>'after'</code>, or <code>'over'</code>).</li>
+</ul>
+<pre><code class="lang-javascript">const element = document.getElementById('file-explorer');
+
+element.addEventListener(webexpress.webui.Event.MOVE_EVENT, (event) =&gt; {
+    console.log('Node moved:', event.detail);
+    // e.g., { source: 'file-1a', target: 'folder-2', position: 'over' }
+});
+</code></pre>
+<h2 id="use-case-example">Use Case Example</h2>
+<pre><code class="lang-html">&lt;!--
+    Host element for a movable tree.
+    The framework will automatically initialize this as a TreeCtrl.
+--&gt;
+&lt;div id=&quot;file-explorer&quot;
+     class=&quot;wx-webui-tree&quot;
+     data-movable=&quot;true&quot;&gt;
+
+    &lt;!-- Root node, initially expanded --&gt;
+    &lt;div id=&quot;folder-1&quot; class=&quot;wx-tree-node&quot; data-label=&quot;Project Files&quot; data-icon=&quot;fas fa-folder&quot; data-expand=&quot;true&quot;&gt;
+        &lt;!-- Child nodes --&gt;
+        &lt;div id=&quot;file-1a&quot; class=&quot;wx-tree-node&quot; data-label=&quot;index.html&quot; data-icon=&quot;fas fa-file-code&quot;&gt;&lt;/div&gt;
+        &lt;div id=&quot;file-1b&quot; class=&quot;wx-tree-node&quot; data-label=&quot;styles.css&quot; data-icon=&quot;fas fa-file-alt&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Another root node --&gt;
+    &lt;div id=&quot;folder-2&quot; class=&quot;wx-tree-node&quot; data-label=&quot;Documents&quot; data-icon=&quot;fas fa-folder&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/tree.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

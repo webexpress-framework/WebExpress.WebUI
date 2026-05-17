@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemCombo()
             {
-                Text = text,
+                Text = _ => text,
             };
 
             // act
@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemCombo()
             {
-                Tooltip = tooltip,
+                Tooltip = _ => tooltip,
             };
 
             // act
@@ -99,7 +99,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemCombo()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -124,7 +124,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemCombo()
             {
-                Active = active
+                Active = _ => active
             };
 
             // act
@@ -145,6 +145,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Danger, @"<div class=""wx-toolbar-combo"" data-color-css=""text-danger""></div>")]
         [InlineData(TypeColorText.Dark, @"<div class=""wx-toolbar-combo"" data-color-css=""text-dark""></div>")]
         [InlineData(TypeColorText.Light, @"<div class=""wx-toolbar-combo"" data-color-css=""text-light""></div>")]
+        [InlineData(TypeColorText.Highlight, @"<div class=""wx-toolbar-combo"" data-color-css=""text-highlight""></div>")]
         public void Color(TypeColorText color, string expected)
         {
             // arrange
@@ -153,7 +154,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemCombo()
             {
-                Color = new PropertyColorText(color)
+                Color = _ => new PropertyColorText(color)
             };
 
             // act
@@ -178,7 +179,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemCombo()
             {
-                Alignment = alignment,
+                Alignment = _ => alignment,
             };
 
             // act
@@ -201,7 +202,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlToolbarItemCombo();
 
             // act
-            control.Add(new ControlFormItemInputComboItem() { Text = "webexpress.WebUI:plugin.name", Value = "1" });
+            control.Add(new ControlFormItemInputComboItem() { Text = _ => "webexpress.WebUI:plugin.name", Value = _ => "1" });
 
             // validation
             var html = control.Render(context, visualTree);

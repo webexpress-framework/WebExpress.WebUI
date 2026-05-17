@@ -6,7 +6,7 @@ namespace WebExpress.WebUI.WebMarkdown.Element
     public class MarkdownInlineElementUrl : MarkdownInlineElement
     {
         /// <summary>
-        /// Returns the address of the URL (e.g. "https://example.com").
+        /// Gets the address of the URL (e.g. "https://example.com").
         /// </summary>
         public string Url { get; }
 

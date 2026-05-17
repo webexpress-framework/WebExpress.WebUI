@@ -75,18 +75,22 @@ namespace WebExpress.WebUI.WebControl
 
                 if (item is IControlFormItemInput input)
                 {
-                    var icon = new ControlIcon() { Icon = input?.Icon };
+                    var icon = new ControlIcon() { Icon = _ => input?.Icon?.Invoke(renderContext) };
                     var label = default(IHtmlNode);
                     var help = new ControlFormItemHelpText(!string.IsNullOrEmpty(item.Id) ? item.Id + "_help" : string.Empty);
                     var fieldset = new HtmlElementFormFieldset() { Class = "wx-form-group" };
+                    var inputLabel = input.Label?.Invoke(renderContext);
+                    var inputHelp = input.Help?.Invoke(renderContext);
+                    var inputRequired = input.Required?.Invoke(renderContext) ?? false;
+                    var inputBind = input.Bind?.Invoke(renderContext);
 
-                    if (!string.IsNullOrWhiteSpace(input.Label) && !input.Required)
+                    if (!string.IsNullOrWhiteSpace(inputLabel) && !inputRequired)
                     {
-                        var text = I18N.Translate(renderGroupContext, input.Label);
+                        var text = I18N.Translate(renderGroupContext, inputLabel);
 
                         var l = new ControlFormItemLabel(!string.IsNullOrEmpty(item.Id) ? item.Id + "_label" : string.Empty)
                         {
-                            Text = text.EndsWith(":") ? text : text + ":"
+                            Text = _ => text.EndsWith(":") ? text : text + ":"
                         };
 
                         l.Initialize(renderGroupContext);
@@ -94,18 +98,18 @@ namespace WebExpress.WebUI.WebControl
 
                         label = l.Render(renderGroupContext, visualTree);
                     }
-                    else if (!string.IsNullOrWhiteSpace(input.Label))
+                    else if (!string.IsNullOrWhiteSpace(inputLabel))
                     {
-                        var text = I18N.Translate(renderGroupContext, input.Label)?.Trim(':');
+                        var text = I18N.Translate(renderGroupContext, inputLabel)?.Trim(':');
                         var l = new ControlFormItemLabel(!string.IsNullOrEmpty(item.Id) ? item.Id + "_label" : string.Empty)
                         {
-                            Text = text
+                            Text = _ => text
                         };
                         var required = new ControlFormItemLabel(null)
                         {
-                            Text = "*",
+                            Text = _ => "*",
                             Classes = ["wx-form-required"],
-                            TextColor = new PropertyColorText(TypeColorText.Danger)
+                            TextColor = _ => new PropertyColorText(TypeColorText.Danger)
                         };
 
                         l.Initialize(renderGroupContext);
@@ -121,7 +125,7 @@ namespace WebExpress.WebUI.WebControl
                     }
 
                     help.Initialize(renderGroupContext);
-                    help.Text = I18N.Translate(renderGroupContext.Request?.Culture, input?.Help);
+                    help.Text = _ => I18N.Translate(renderGroupContext.Request?.Culture, inputHelp);
 
                     if (icon.Icon is not null && label is null)
                     {
@@ -143,10 +147,12 @@ namespace WebExpress.WebUI.WebControl
 
                     fieldset.Add(item.Render(renderGroupContext, visualTree));
 
-                    if (!string.IsNullOrWhiteSpace(input?.Help))
+                    if (!string.IsNullOrWhiteSpace(inputHelp))
                     {
                         fieldset.Add(help.Render(renderGroupContext, visualTree));
                     }
+
+                    inputBind?.ApplyUserAttributes(fieldset);
 
                     div.Add(fieldset);
                 }

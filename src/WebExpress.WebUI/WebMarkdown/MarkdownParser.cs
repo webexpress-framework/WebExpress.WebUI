@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using WebExpress.WebUI.WebMarkdown.Element;
 
 namespace WebExpress.WebUI.WebMarkdown
@@ -10,6 +11,8 @@ namespace WebExpress.WebUI.WebMarkdown
     /// </summary>
     public class MarkdownParser
     {
+        private static readonly Regex _pluginParamRegex = new Regex(@"(?<key>[a-zA-Z_][a-zA-Z0-9_]*)=""(?<value>[^""]*)""", RegexOptions.Compiled);
+
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
@@ -113,6 +116,11 @@ namespace WebExpress.WebUI.WebMarkdown
             if (IsTable(tokenStream))
             {
                 return ParseTable(tokenStream);
+            }
+
+            if (IsBlockPlugin(tokenStream))
+            {
+                return ParseBlockPlugin(tokenStream);
             }
 
             return ParseParagraph(tokenStream);
@@ -766,6 +774,78 @@ namespace WebExpress.WebUI.WebMarkdown
         }
 
         /// <summary>
+        /// Determines whether the current position in the token stream represents a block plugin.
+        /// </summary>
+        /// <param name="tokenStream">The stream of markdown tokens.</param>
+        /// <returns>True if a block plugin opening tag is found; otherwise, false.</returns>
+        private static bool IsBlockPlugin(MarkdownTokenStream tokenStream)
+        {
+            return tokenStream.Peek(MarkdownTokenType.PluginBlock) is not null;
+        }
+
+        /// <summary>
+        /// Parses a block plugin from the current position in the token stream.
+        /// Consumes the opening tag, collects content until the matching closing tag, and returns a block plugin element.
+        /// </summary>
+        /// <param name="tokenStream">The stream of Markdown tokens to parse from.</param>
+        /// <returns>
+        /// A <see cref="MarkdownBlockElementPlugin"/> containing the parsed content.
+        /// </returns>
+        private static IMarkdownElement ParseBlockPlugin(MarkdownTokenStream tokenStream)
+        {
+            var openToken = tokenStream.Consume(MarkdownTokenType.PluginBlock);
+            var pluginName = openToken.Value;
+            var parameters = ParsePluginParameters(openToken.Parameter);
+            var contentLines = new List<MarkdownTokenStream>();
+
+            // skip optional EOL after opening tag
+            tokenStream.Consume(MarkdownTokenType.EOL);
+
+            // collect content until the matching closing tag
+            while (!tokenStream.IsAtEnd())
+            {
+                var closingToken = tokenStream.Peek(MarkdownTokenType.PluginBlockEnd);
+                if (closingToken is not null && closingToken.Value == pluginName)
+                {
+                    tokenStream.Skip(); // consume closing tag
+                    tokenStream.Consume(MarkdownTokenType.EOL); // skip optional EOL
+                    break;
+                }
+
+                contentLines.Add(tokenStream.ConsumeLine());
+            }
+
+            var contentDocument = Parse(new MarkdownTokenStream(contentLines));
+
+            return new MarkdownBlockElementPlugin(pluginName, parameters, contentDocument.Elements);
+        }
+
+        /// <summary>
+        /// Parses plugin parameters from a parameter string.
+        /// </summary>
+        /// <param name="paramString">The parameter string in the format: key1="val1" key2="val2".</param>
+        /// <returns>A dictionary of parameter key-value pairs.</returns>
+        private static Dictionary<string, string> ParsePluginParameters(string paramString)
+        {
+            var parameters = new Dictionary<string, string>();
+
+            if (string.IsNullOrWhiteSpace(paramString))
+            {
+                return parameters;
+            }
+
+            var paramRegex = _pluginParamRegex;
+            var matches = paramRegex.Matches(paramString);
+
+            foreach (Match match in matches)
+            {
+                parameters[match.Groups["key"].Value] = match.Groups["value"].Value;
+            }
+
+            return parameters;
+        }
+
+        /// <summary>
         /// Parses a Markdown paragraph from the current position in the token stream.
         /// Collects all tokens until an end-of-line or end-of-file token is reached.
         /// </summary>
@@ -799,7 +879,8 @@ namespace WebExpress.WebUI.WebMarkdown
                 !IsCallout(tokenStream) &&
                 !IsCode(tokenStream) &&
                 !IsList(tokenStream) &&
-                !IsTable(tokenStream)
+                !IsTable(tokenStream) &&
+                !IsBlockPlugin(tokenStream)
             );
 
             paragraph.Add(ParseInlineElements(new MarkdownTokenStream(lines)));
@@ -1079,6 +1160,12 @@ namespace WebExpress.WebUI.WebMarkdown
                     case MarkdownTokenType.Footnote:
                         {
                             inlines.Add(new MarkdownInlineElementFootnote(token.Value));
+                            break;
+                        }
+                    case MarkdownTokenType.InlinePlugin:
+                        {
+                            var parameters = ParsePluginParameters(token.Parameter);
+                            inlines.Add(new MarkdownInlineElementPlugin(token.Value, parameters));
                             break;
                         }
                     case MarkdownTokenType.Space:

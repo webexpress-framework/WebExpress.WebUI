@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+﻿using System;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -9,14 +10,14 @@ namespace WebExpress.WebUI.WebControl
     public class ControlTableTemplateColor : IControlTableTemplateEditable
     {
         /// <summary>
-        /// Returns or sets the unique identifier for the object.
+        /// Gets or sets the unique identifier for the object.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the current template is editable or read-only.
+        /// Gets or sets a value indicating whether the current template is editable or read-only.
         /// </summary>
-        public bool Editable { get; set; }
+        public Func<IRenderControlContext, bool> Editable { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -40,7 +41,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id
             }
                 .AddUserAttribute("data-type", "color")
-                .AddUserAttribute("data-editable", Editable ? "true" : null);
+                .AddUserAttribute("data-editable", Editable?.Invoke(renderContext) == true ? "true" : null);
 
             return html;
         }

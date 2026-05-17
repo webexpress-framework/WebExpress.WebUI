@@ -38,38 +38,38 @@ webexpress.webui.SmartViewCtrl = class extends webexpress.webui.Ctrl {
         const ctrl = webexpress.webui.Controller.getInstanceByElement(this._view);
 
         if (ctrl && ctrl instanceof webexpress.webui.EditorCtrl) {
-            return ctrl._viewElement?.innerHTML ?? '';
+            return ctrl._viewElement?.innerHTML ?? "";
         }
 
         // input
-        if (this._view?.tagName === 'INPUT') {
+        if (this._view?.tagName === "INPUT") {
             return this._view.value;
         }
 
         // textarea
-        if (this._view?.tagName === 'TEXTAREA') {
+        if (this._view?.tagName === "TEXTAREA") {
             return this._view.value;
         }
 
         // select
-        if (this._view?.tagName === 'SELECT') {
-            return this._view.options[this._view.selectedIndex]?.value ?? '';
+        if (this._view?.tagName === "SELECT") {
+            return this._view.options[this._view.selectedIndex]?.value ?? "";
         }
 
         // hidden input inside wrapper
-        let el = this._view?.querySelector('input');
+        let el = this._view?.querySelector("input");
         if (el) {
             return el.value;
         }
 
         // any data-value deep inside
-        el = element.querySelector('[data-value]');
+        el = element.querySelector("[data-value]");
         if (el) {
-            return el.getAttribute('data-value');
+            return el.getAttribute("data-value");
         }
 
         // fallback text
-        return (this._view?.textContent || '').trim();
+        return (this._view?.textContent || "").trim();
     }
 
     /**
@@ -99,18 +99,18 @@ webexpress.webui.SmartViewCtrl = class extends webexpress.webui.Ctrl {
                 ctrl instanceof webexpress.webui.ColorCtrl) {
                 ctrl.value = value;
             }
-        } else if (this._view?.tagName === 'SELECT') {
+        } else if (this._view?.tagName === "SELECT") {
             // single select assumption: pick first token
-            const first = Array.isArray(value) ? value[0] : String(value).split(';')[0];
+            const first = Array.isArray(value) ? value[0] : String(value).split(";")[0];
             const opt = Array.from(this._view.options).find(o => String(o.value) === String(first));
             if (opt) {
                 this._view.value = opt.value;
             }
-        } else if (this._view?.tagName === 'INPUT' || this._view?.tagName === 'TEXTAREA') {
+        } else if (this._view?.tagName === "INPUT" || this._view?.tagName === "TEXTAREA") {
             this._view.value = value;
         }
 
-        this._element.innerHTML = '';
+        this._element.innerHTML = "";
         if (this._view) {
             this._element.appendChild(this._view.cloneNode(true));
         }

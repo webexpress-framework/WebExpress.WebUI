@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+using System;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -9,22 +10,22 @@ namespace WebExpress.WebUI.WebControl
     public class ControlPagination : Control
     {
         /// <summary>
-        /// Returns or sets the number of pages.
+        /// Gets or sets the number of pages.
         /// </summary>
-        public uint Total { get; set; }
+        public Func<IRenderControlContext, uint> Total { get; set; }
 
         /// <summary>
-        /// Returns or sets the current page.
+        /// Gets or sets the current page.
         /// </summary>
-        public uint Page { get; set; }
+        public Func<IRenderControlContext, uint> Page { get; set; }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
-        public TypeSizePagination Size
+        public Func<IRenderControlContext, TypeSizePagination> Size
         {
-            get => (TypeSizePagination)GetProperty(TypeSizePagination.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeSizePagination>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
@@ -44,15 +45,21 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var backgroundColor = BackgroundColor?.Invoke(renderContext);
+            var borderColor = BorderColor?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
+            var page = Page?.Invoke(renderContext) ?? 0;
+            var total = Total?.Invoke(renderContext) ?? 0;
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-pagination", Css.Remove(GetClasses(), BackgroundColor?.ToClass(), BorderColor?.ToClass())),
-                Style = Style.Remove(GetStyles(), BackgroundColor.ToStyle()),
-                Role = Role
+                Class = Css.Concatenate("wx-webui-pagination", Css.Remove(GetClasses(), backgroundColor?.ToClass(), borderColor?.ToClass())),
+                Style = Style.Remove(GetStyles(), backgroundColor.ToStyle()),
+                Role = role
             }
-                .AddUserAttribute("data-page", Page > 0 ? Page.ToString() : null)
-                .AddUserAttribute("data-total", Total > 0 ? Total.ToString() : null);
+                .AddUserAttribute("data-page", page > 0 ? page.ToString() : null)
+                .AddUserAttribute("data-total", total > 0 ? total.ToString() : null);
 
             return html;
         }

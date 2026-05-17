@@ -43,6 +43,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<ul class=""nav bg-danger""></ul>")]
         [InlineData(TypeColorBackground.Dark, @"<ul class=""nav bg-dark""></ul>")]
         [InlineData(TypeColorBackground.Light, @"<ul class=""nav bg-light""></ul>")]
+        [InlineData(TypeColorBackground.Highlight, @"<ul class=""nav bg-highlight""></ul>")]
         [InlineData(TypeColorBackground.Transparent, @"<ul class=""nav bg-transparent""></ul>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {
@@ -52,7 +53,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigation()
             {
-                BackgroundColor = new PropertyColorBackground(backgroundColor)
+                BackgroundColor = _ => new PropertyColorBackground(backgroundColor)
             };
 
             // act
@@ -77,7 +78,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlNavigation()
             {
-                Layout = layout
+                Layout = _ => layout
             };
 
             // act
@@ -99,7 +100,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlNavigation();
 
             // act
-            control.Add(new ControlNavigationItemLink() { Text = "abc" });
+            control.Add(new ControlNavigationItemLink() { Text = _ => "abc" });
 
             var html = control.Render(context, visualTree);
 

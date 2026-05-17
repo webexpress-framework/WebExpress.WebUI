@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlUpload(null)
             {
-                Uri = !string.IsNullOrEmpty(uri)
+                Uri = _ => !string.IsNullOrEmpty(uri)
                     ? new UriEndpoint(uri)
                     : null
             };
@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlUpload(null)
             {
-                Multiple = multiple
+                Multiple = _ => multiple
             };
 
             // act
@@ -100,7 +100,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlUpload(null)
             {
-                Accept = accept
+                Accept = _ => accept
             };
 
             // act
@@ -124,7 +124,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlUpload(null)
             {
-                AutoUpload = autoupload
+                AutoUpload = _ => autoupload
             };
 
             // act
@@ -148,7 +148,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlUpload(null)
             {
-                FullScreenDropzone = fullScreenDropzone
+                FullScreenDropzone = _ => fullScreenDropzone
             };
 
             // act
@@ -173,7 +173,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlUpload(null)
             {
-                Placeholder = placeholder
+                Placeholder = _ => placeholder
             };
 
             // act

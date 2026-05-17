@@ -15,7 +15,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
-        [InlineData("id", @"<div id=""id"" class=""form-check""><input name=""id"" type=""checkbox"" class=""form-check-input""><label class=""form-check-label"" for=""id""></label></div>")]
+        [InlineData("id", @"<div class=""form-check""><input id=""id"" name=""id"" type=""checkbox"" class=""form-check-input""><label class=""form-check-label"" for=""id""></label></div>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -38,7 +38,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the auto id property of the form check box control.
         /// </summary>
         [Theory]
-        [InlineData(@"<div id=""*"" class=""form-check""><input name=""*"" type=""checkbox"" class=""form-check-input""><label class=""form-check-label"" for=""*""></label></div>")]
+        [InlineData(@"<div class=""form-check""><input id=""*"" name=""*"" type=""checkbox"" class=""form-check-input""><label class=""form-check-label"" for=""*""></label></div>")]
         public void AutoId(string expected)
         {
             // arrange
@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCheck(null)
             {
-                Inline = inline
+                Inline = _ => inline
             };
 
             // act
@@ -98,7 +98,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCheck(null)
             {
-                Description = description
+                Description = _ => description
             };
 
             // act
@@ -123,7 +123,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCheck(null)
             {
-                Layout = layout
+                Layout = _ => layout
             };
 
             // act

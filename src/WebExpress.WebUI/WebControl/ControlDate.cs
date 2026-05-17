@@ -10,19 +10,19 @@ namespace WebExpress.WebUI.WebControl
     public class ControlDate : Control, IControlTableTemplate
     {
         /// <summary>
-        /// Returns or sets the date format string used for formatting date values.
+        /// Gets or sets the date format string used for formatting date values.
         /// </summary>
-        public string Format { get; set; } = "yyyy-MM-dd";
+        public Func<IRenderControlContext, string> Format { get; set; } = _ => "yyyy-MM-dd";
 
         /// <summary>
-        /// Returns or sets the color associated with this date.
+        /// Gets or sets the color associated with this date.
         /// </summary>
-        public PropertyColorDate Color { get; set; }
+        public Func<IRenderControlContext, PropertyColorDate> Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the date associated with the current instance.
+        /// Gets or sets the date associated with the current instance.
         /// </summary>
-        public DateTime Date { get; set; }
+        public Func<IRenderControlContext, DateTime> Date { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -41,18 +41,22 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var date = Date > DateTime.MinValue
-                ? Date.ToString(Format, renderContext.Request.Culture)
-                : "";
+            var date = Date?.Invoke(renderContext);
+            var format = Format?.Invoke(renderContext);
+            var color = Color?.Invoke(renderContext);
 
-            var html = new HtmlElementTextContentDiv(new HtmlText(date))
+            var d = date > DateTime.MinValue
+                 ? date?.ToString(format, renderContext.Request.Culture)
+                 : "";
+
+            var html = new HtmlElementTextContentDiv(new HtmlText(d))
             {
                 Id = Id,
                 Class = "wx-webui-date"
             }
-                .AddUserAttribute("data-color-css", Color?.ToClass())
-                .AddUserAttribute("data-color-style", Color?.ToStyle())
-                .AddUserAttribute("data-format", Format);
+                .AddUserAttribute("data-color-css", color?.ToClass())
+                .AddUserAttribute("data-color-style", color?.ToStyle())
+                .AddUserAttribute("data-format", format);
 
             return html;
         }

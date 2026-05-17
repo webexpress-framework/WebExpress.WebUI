@@ -6,7 +6,7 @@ namespace WebExpress.WebUI.WebMarkdown.Element
     public class MarkdownInlineElementCheckbox : MarkdownInlineElement
     {
         /// <summary>
-        /// Returns the value of the checkbox (e.g., "true" for checked or "false" for unchecked).
+        /// Gets the value of the checkbox (e.g., "true" for checked or "false" for unchecked).
         /// </summary>
         public string Value { get; }
 

@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.WebFragment
     public abstract class FragmentControlButtonLink : ControlButtonLink, IFragmentControl<ControlButtonLink>
     {
         /// <summary>
-        /// Returns the context of the fragment.
+        /// Gets the context of the fragment.
         /// </summary>
         public IFragmentContext FragmentContext { get; }
 
@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.WebFragment
         /// </summary>
         /// <param name="fragmentContext">The context of the fragment.</param>
         protected FragmentControlButtonLink(IFragmentContext fragmentContext)
-            : base(fragmentContext?.FragmentId?.ToString())
+            : base(fragmentContext?.FragmentId?.ToString()?.Replace(".", "-"))
         {
             FragmentContext = fragmentContext;
         }

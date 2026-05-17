@@ -45,6 +45,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Warning, @"<template data-type=""numeric"" data-color-css=""text-warning""></template>")]
         [InlineData(TypeColorText.Danger, @"<template data-type=""numeric"" data-color-css=""text-danger""></template>")]
         [InlineData(TypeColorText.Light, @"<template data-type=""numeric"" data-color-css=""text-light""></template>")]
+        [InlineData(TypeColorText.Highlight, @"<template data-type=""numeric"" data-color-css=""text-highlight""></template>")]
         [InlineData(TypeColorText.Dark, @"<template data-type=""numeric"" data-color-css=""text-dark""></template>")]
         public void SystemColor(TypeColorText color, string expected)
         {
@@ -54,7 +55,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableTemplateNumeric()
             {
-                Color = new PropertyColorText(color)
+                Color = _ => new PropertyColorText(color)
             };
 
             // act
@@ -80,7 +81,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableTemplateNumeric()
             {
-                Color = new PropertyColorText(color)
+                Color = _ => new PropertyColorText(color)
             };
 
             // act
@@ -105,7 +106,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableTemplateNumeric(null)
             {
-                Placeholder = placeholder
+                Placeholder = _ => placeholder
             };
 
             // act

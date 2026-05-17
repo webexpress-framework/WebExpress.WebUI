@@ -51,7 +51,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemButton()
             {
-                Text = text,
+                Text = _ => text,
             };
 
             // act
@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemButton()
             {
-                Tooltip = tooltip,
+                Tooltip = _ => tooltip,
             };
 
             // act
@@ -98,7 +98,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemButton()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -122,7 +122,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemButton()
             {
-                Active = active
+                Active = _ => active
             };
 
             // act
@@ -145,7 +145,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemButton()
             {
-                PrimaryAction = new ActionModal(modal)
+                PrimaryAction = _ => new ActionModal(modal)
             };
 
             // act
@@ -169,7 +169,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemButton()
             {
-                SecondaryAction = new ActionModal(modal)
+                SecondaryAction = _ => new ActionModal(modal)
             };
 
             // act
@@ -194,7 +194,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemButton()
             {
-                Uri = uri is not null ? new UriEndpoint(uri) : null,
+                Uri = _ => uri is not null ? new UriEndpoint(uri) : null,
             };
 
             // act
@@ -214,6 +214,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Danger, @"<div class=""wx-toolbar-button"" data-color-css=""text-danger""></div>")]
         [InlineData(TypeColorText.Dark, @"<div class=""wx-toolbar-button"" data-color-css=""text-dark""></div>")]
         [InlineData(TypeColorText.Light, @"<div class=""wx-toolbar-button"" data-color-css=""text-light""></div>")]
+        [InlineData(TypeColorText.Highlight, @"<div class=""wx-toolbar-button"" data-color-css=""text-highlight""></div>")]
         [InlineData(TypeColorText.Muted, @"<div class=""wx-toolbar-button"" data-color-css=""text-muted""></div>")]
         public void Color(TypeColorText color, string expected)
         {
@@ -223,7 +224,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemButton()
             {
-                Color = new PropertyColorText(color)
+                Color = _ => new PropertyColorText(color)
             };
 
             // act
@@ -249,7 +250,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemButton()
             {
-                Target = target,
+                Target = _ => target,
             };
 
             // act
@@ -273,7 +274,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlToolbarItemButton()
             {
-                Alignment = alignment,
+                Alignment = _ => alignment,
             };
 
             // act

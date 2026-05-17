@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+ <g transform="matrix(.95781 0 0 .95781 .44303 .4254)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3051">
+  <rect x=".625" y=".67692" width="7.5204" height="7.5204" rx="1.003"/>
+  <rect x="12.855" y=".67692" width="7.5204" height="7.5204" rx="1.003"/>
+  <rect x=".625" y="12.839" width="7.5204" height="7.5204" rx="1.003"/>
+  <rect x="12.855" y="12.839" width="7.5204" height="7.5204" rx="1.003"/>
+ </g>
+</svg>

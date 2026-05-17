@@ -9,12 +9,12 @@ namespace WebExpress.WebUI.WebControl
     public class ActionFilter : IAction
     {
         /// <summary>
-        /// Returns or sets the group name associated with the current instance.
+        /// Gets or sets the group name associated with the current instance.
         /// </summary>
         public string Group { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the operation should be performed exclusively.
+        /// Gets or sets a value indicating whether the operation should be performed exclusively.
         /// </summary>
         public bool Exclusive { get; set; }
 

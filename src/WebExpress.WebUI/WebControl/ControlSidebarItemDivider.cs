@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+using System;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -19,14 +20,14 @@ namespace WebExpress.WebUI.WebControl
         public string Id => _id;
 
         /// <summary>
-        /// Returns or sets the link color.
+        /// Gets or sets the link color.
         /// </summary>
-        public PropertyColorText Color { get; set; }
+        public Func<IRenderControlContext, PropertyColorText> Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the mode of the type sidebar, which determines its behavior.
+        /// Gets or sets the mode of the type sidebar, which determines its behavior.
         /// </summary>
-        public virtual TypeSidebarMode Mode { get; set; }
+        public virtual Func<IRenderControlContext, TypeSidebarMode> Mode { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -45,14 +46,17 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var color = Color?.Invoke(renderContext);
+            var mode = Mode?.Invoke(renderContext) ?? TypeSidebarMode.Default;
+
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-sidebar-separator"
             }
-                .AddUserAttribute("data-mode", Mode != TypeSidebarMode.Default ? Mode.ToData() : null)
-                .AddUserAttribute("data-color-css", Color?.ToClass())
-                .AddUserAttribute("data-color-style", Color?.ToStyle());
+                .AddUserAttribute("data-mode", mode != TypeSidebarMode.Default ? mode.ToData() : null)
+                .AddUserAttribute("data-color-css", color?.ToClass())
+                .AddUserAttribute("data-color-style", color?.ToStyle());
         }
     }
 }

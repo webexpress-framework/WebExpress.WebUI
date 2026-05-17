@@ -9,17 +9,17 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormInputValueFile : IControlFormInputValue
     {
         /// <summary>
-        /// Returns or sets the file name value.
+        /// Gets or sets the file name value.
         /// </summary>
         public string Name { get; set; }
 
         /// <summary>
-        /// Returns or sets the content type.
+        /// Gets or sets the content type.
         /// </summary>
         public ContentType ContentType { get; set; }
 
         /// <summary>
-        /// Returns or sets the file data.
+        /// Gets or sets the file data.
         /// </summary>
         public byte[] Data { get; set; }
 

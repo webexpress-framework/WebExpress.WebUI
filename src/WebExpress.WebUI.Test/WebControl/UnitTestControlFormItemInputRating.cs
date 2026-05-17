@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputRating(null)
             {
-                Name = name
+                Name = _ => name
             };
 
             // act
@@ -124,7 +124,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputRating(null)
             {
-                MaxRating = value
+                MaxRating = _ => value
             };
 
             // act
@@ -150,7 +150,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputRating(null)
             {
-                Label = label
+                Label = _ => label
             };
 
             // act
@@ -176,7 +176,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var icon = iconType is not null ? Activator.CreateInstance(iconType) as IIcon : null;
             var control = new ControlFormItemInputRating(null)
             {
-                Icon = icon
+                Icon = _ => icon
             };
 
             // act

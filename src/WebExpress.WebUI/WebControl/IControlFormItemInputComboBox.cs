@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFormItemInputComboBox : IControlFormItemInput<ControlFormInputValueString>
     {
         /// <summary>
-        /// Returns the collection of items in the combobox.
+        /// Gets the collection of items in the combobox.
         /// </summary>
         IEnumerable<ControlFormItemInputComboItem> Items { get; }
 

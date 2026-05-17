@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -8,9 +10,9 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlSelection : IControl
     {
         /// <summary>
-        /// Returns the text.
+        /// Gets the text.
         /// </summary>
-        string Value { get; }
+        Func<IRenderControlContext, string> Value { get; }
 
         /// <summary>
         /// Adds one or more items to the selection options.

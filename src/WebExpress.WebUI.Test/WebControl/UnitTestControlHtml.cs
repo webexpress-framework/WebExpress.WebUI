@@ -46,7 +46,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlHtml()
             {
-                Html = rawHtml
+                Html = _ => rawHtml
             };
 
             // act

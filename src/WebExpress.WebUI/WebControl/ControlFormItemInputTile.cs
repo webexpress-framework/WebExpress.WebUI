@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -18,15 +19,15 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlTileCard> Items => _items;
 
         /// <summary>
-        /// Returns or sets a value indicating whether multiple items can be selected simultaneously.
+        /// Gets or sets a value indicating whether multiple items can be selected simultaneously.
         /// </summary>
-        public bool MultiSelect { get; set; }
+        public Func<IRenderControlContext, bool> MultiSelect { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether a large icon is displayed 
+        /// Gets or sets a value indicating whether a large icon is displayed 
         /// for the item.
         /// </summary>
-        public bool LargeIcon { get; set; }
+        public Func<IRenderControlContext, bool> LargeIcon { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -43,7 +44,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemInputTile(string id)
             : base(id)
         {
-            Margin = new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.Two, PropertySpacing.Space.None, PropertySpacing.Space.None);
+            Margin = _ => new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.Two, PropertySpacing.Space.None, PropertySpacing.Space.None);
         }
 
         /// <summary>
@@ -106,8 +107,12 @@ namespace WebExpress.WebUI.WebControl
                 null,
                 renderContext?.Request?.Culture
             );
+            var name = Name?.Invoke(renderContext);
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
+            var largeIcon = LargeIcon?.Invoke(renderContext) ?? false;
+            var role = Role?.Invoke(renderContext);
 
-            if (Disabled)
+            if (disabled)
             {
                 classes.Add("disabled");
             }
@@ -117,12 +122,12 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-input-tile", classes),
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
-                Role = Role
+                Role = role
             }
-                .AddUserAttribute("name", Name)
+                .AddUserAttribute("name", name)
                 .AddUserAttribute("data-value", value)
-                .AddUserAttribute("data-multiselect", MultiSelect ? "true" : null)
-                .AddUserAttribute("data-large-icon", LargeIcon ? "true" : null)
+                .AddUserAttribute("data-multiselect", MultiSelect?.Invoke(renderContext) == true ? "true" : null)
+                .AddUserAttribute("data-large-icon", largeIcon ? "true" : null)
                 .Add
                 (
                     _items.Select
@@ -145,9 +150,9 @@ namespace WebExpress.WebUI.WebControl
         public override IEnumerable<ValidationResult> Validate(IRenderControlFormContext renderContext)
         {
             var validationResults = new List<ValidationResult>(base.Validate(renderContext));
-            //var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
 
-            if (Disabled)
+            if (disabled)
             {
                 return [];
             }

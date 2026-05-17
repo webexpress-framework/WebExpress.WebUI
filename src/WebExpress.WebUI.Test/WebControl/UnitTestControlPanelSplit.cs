@@ -23,8 +23,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelSplit(id);
-            control.AddSidePanel(new ControlText() { Text = "p1" });
-            control.AddMainPanel(new ControlText() { Text = "p2" });
+            control.AddSidePanel(new ControlText() { Text = _ => "p1" });
+            control.AddMainPanel(new ControlText() { Text = _ => "p2" });
 
             // act
             var html = control.Render(context, visualTree);
@@ -46,10 +46,10 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelSplit()
             {
-                Orientation = orientation,
+                Orientation = _ => orientation,
             };
-            control.AddSidePanel(new ControlText() { Text = "p1" });
-            control.AddMainPanel(new ControlText() { Text = "p2" });
+            control.AddSidePanel(new ControlText() { Text = _ => "p1" });
+            control.AddMainPanel(new ControlText() { Text = _ => "p2" });
 
             // act
             var html = control.Render(context, visualTree);
@@ -68,6 +68,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<div * data-splitter-class=""bg-danger"">*</div>")]
         [InlineData(TypeColorBackground.Dark, @"<div * data-splitter-class=""bg-dark"">*</div>")]
         [InlineData(TypeColorBackground.Light, @"<div * data-splitter-class=""bg-light"">*</div>")]
+        [InlineData(TypeColorBackground.Highlight, @"<div * data-splitter-class=""bg-highlight"">*</div>")]
         [InlineData(TypeColorBackground.Transparent, @"<div * data-splitter-class=""bg-transparent"">*</div>")]
         public void SplitterColor(TypeColorBackground splitterColor, string expected)
         {
@@ -77,10 +78,10 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelSplit()
             {
-                SplitterColor = new PropertyColorBackground(splitterColor),
+                SplitterColor = _ => new PropertyColorBackground(splitterColor),
             };
-            control.AddSidePanel(new ControlText() { Text = "p1" });
-            control.AddMainPanel(new ControlText() { Text = "p2" });
+            control.AddSidePanel(new ControlText() { Text = _ => "p1" });
+            control.AddMainPanel(new ControlText() { Text = _ => "p2" });
 
             // act
             var html = control.Render(context, visualTree);
@@ -139,10 +140,10 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelSplit()
             {
-                SidePanelMinSize = size,
+                SidePanelMinSize = _ => size,
             };
-            control.AddSidePanel(new ControlText() { Text = "p1" });
-            control.AddMainPanel(new ControlText() { Text = "p2" });
+            control.AddSidePanel(new ControlText() { Text = _ => "p1" });
+            control.AddMainPanel(new ControlText() { Text = _ => "p2" });
 
             // act
             var html = control.Render(context, visualTree);
@@ -165,10 +166,10 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelSplit()
             {
-                SidePanelMaxSize = size,
+                SidePanelMaxSize = _ => size,
             };
-            control.AddSidePanel(new ControlText() { Text = "p1" });
-            control.AddMainPanel(new ControlText() { Text = "p2" });
+            control.AddSidePanel(new ControlText() { Text = _ => "p1" });
+            control.AddMainPanel(new ControlText() { Text = _ => "p2" });
 
             // act
             var html = control.Render(context, visualTree);
@@ -191,10 +192,10 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelSplit()
             {
-                SidePanelInitialSize = size,
+                SidePanelInitialSize = _ => size,
             };
-            control.AddSidePanel(new ControlText() { Text = "p1" });
-            control.AddMainPanel(new ControlText() { Text = "p2" });
+            control.AddSidePanel(new ControlText() { Text = _ => "p1" });
+            control.AddMainPanel(new ControlText() { Text = _ => "p2" });
 
             // act
             var html = control.Render(context, visualTree);
@@ -217,10 +218,10 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelSplit()
             {
-                SplitterSize = size,
+                SplitterSize = _ => size,
             };
-            control.AddSidePanel(new ControlText() { Text = "p1" });
-            control.AddMainPanel(new ControlText() { Text = "p2" });
+            control.AddSidePanel(new ControlText() { Text = _ => "p1" });
+            control.AddMainPanel(new ControlText() { Text = _ => "p2" });
 
             // act
             var html = control.Render(context, visualTree);
@@ -243,10 +244,10 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelSplit()
             {
-                Order = order,
+                Order = _ => order,
             };
-            control.AddSidePanel(new ControlText() { Text = "p1" });
-            control.AddMainPanel(new ControlText() { Text = "p2" });
+            control.AddSidePanel(new ControlText() { Text = _ => "p1" });
+            control.AddMainPanel(new ControlText() { Text = _ => "p2" });
 
             // act
             var html = control.Render(context, visualTree);
@@ -271,10 +272,10 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelSplit()
             {
-                Unit = unit,
+                Unit = _ => unit,
             };
-            control.AddSidePanel(new ControlText() { Text = "p1" });
-            control.AddMainPanel(new ControlText() { Text = "p2" });
+            control.AddSidePanel(new ControlText() { Text = _ => "p1" });
+            control.AddMainPanel(new ControlText() { Text = _ => "p2" });
 
             // act
             var html = control.Render(context, visualTree);

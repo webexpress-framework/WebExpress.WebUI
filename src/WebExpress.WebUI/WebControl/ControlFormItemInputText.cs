@@ -15,37 +15,37 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Determines whether it is a multi-line text box.
         /// </summary>
-        public TypeEditTextFormat Format { get; set; }
+        public Func<IRenderControlContext, TypeEditTextFormat> Format { get; set; }
 
         /// <summary>
-        /// Returns or sets the description.
+        /// Gets or sets the description.
         /// </summary>
-        public string Description { get; set; }
+        public Func<IRenderControlContext, string> Description { get; set; }
 
         /// <summary>
-        /// Returns or sets a placeholder text.
+        /// Gets or sets a placeholder text.
         /// </summary>
-        public string Placeholder { get; set; }
+        public Func<IRenderControlContext, string> Placeholder { get; set; }
 
         /// <summary>
-        /// Returns or sets the minimum length.
+        /// Gets or sets the minimum length.
         /// </summary>
-        public uint? MinLength { get; set; }
+        public Func<IRenderControlContext, uint?> MinLength { get; set; }
 
         /// <summary>
-        /// Returns or sets the maximum length.
+        /// Gets or sets the maximum length.
         /// </summary>
-        public uint? MaxLength { get; set; }
+        public Func<IRenderControlContext, uint?> MaxLength { get; set; }
 
         /// <summary>
-        /// Returns or sets a search pattern that checks the content.
+        /// Gets or sets a search pattern that checks the content.
         /// </summary>
-        public string Pattern { get; set; }
+        public Func<IRenderControlContext, string> Pattern { get; set; }
 
         /// <summary>
-        /// Returns or sets the height of the text field (for Multiline and WYSIWYG).
+        /// Gets or sets the height of the text field (for Multiline and WYSIWYG).
         /// </summary>
-        public uint? Rows { get; set; } = 8;
+        public Func<IRenderControlContext, uint?> Rows { get; set; } = _ => 8;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -62,7 +62,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemInputText(string id)
             : base(id)
         {
-            Margin = new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.Two, PropertySpacing.Space.None, PropertySpacing.Space.None);
+            Margin = _ => new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.Two, PropertySpacing.Space.None, PropertySpacing.Space.None);
         }
 
         /// <summary>
@@ -84,51 +84,62 @@ namespace WebExpress.WebUI.WebControl
         {
             var id = Id;
             var value = renderContext.GetValue<ControlFormInputValueString>(this);
+            var name = Name?.Invoke(renderContext);
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
+            var required = Required?.Invoke(renderContext) ?? false;
+            var format = Format?.Invoke(renderContext) ?? TypeEditTextFormat.Default;
+            var placeholder = Placeholder?.Invoke(renderContext);
+            var pattern = Pattern?.Invoke(renderContext);
+            var rows = Rows?.Invoke(renderContext);
+            var minLength = MinLength?.Invoke(renderContext);
+            var maxLength = MaxLength?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
+
             var classes = new List<string>(Classes)
             {
                 "form-control"
             };
 
-            if (Disabled)
+            if (disabled)
             {
                 classes.Add("disabled");
             }
 
-            return Format switch
+            return format switch
             {
                 TypeEditTextFormat.Multiline => new HtmlElementFormTextarea()
                 {
                     Id = Id,
                     Value = value?.Text,
-                    Name = Name,
+                    Name = name,
                     Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
                     Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
-                    Role = Role,
-                    Placeholder = I18N.Translate(renderContext.Request?.Culture, Placeholder),
-                    Rows = Rows.ToString()
+                    Role = role,
+                    Placeholder = I18N.Translate(renderContext, placeholder),
+                    Rows = rows?.ToString()
                 },
                 TypeEditTextFormat.Wysiwyg => new HtmlElementTextContentDiv(new HtmlText(value?.Text))
                 {
                     Id = id,
                     Class = Css.Concatenate("wx-webui-editor", classes),
                     Style = GetStyles(),
-                    Role = Role,
-                }.AddUserAttribute("name", Name),
+                    Role = role,
+                }.AddUserAttribute("name", name),
                 _ => new HtmlElementFieldInput()
                 {
                     Id = Id,
                     Value = value?.Text,
-                    Name = Name,
-                    MinLength = MinLength?.ToString(),
-                    MaxLength = MaxLength?.ToString(),
-                    Required = Required,
-                    Pattern = Pattern,
+                    Name = name,
+                    MinLength = minLength?.ToString(),
+                    MaxLength = maxLength?.ToString(),
+                    Required = required,
+                    Pattern = pattern,
                     Type = "text",
-                    Disabled = Disabled,
+                    Disabled = disabled,
                     Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
                     Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
-                    Role = Role,
-                    Placeholder = I18N.Translate(renderContext.Request?.Culture, Placeholder)
+                    Role = role,
+                    Placeholder = I18N.Translate(renderContext.Request?.Culture, placeholder)
                 },
             };
         }
@@ -144,13 +155,15 @@ namespace WebExpress.WebUI.WebControl
         {
             var validationResults = new List<ValidationResult>(base.Validate(renderContext));
             var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
+            var required = Required?.Invoke(renderContext) ?? false;
 
-            if (Disabled)
+            if (disabled)
             {
                 return [];
             }
 
-            if (Required && string.IsNullOrWhiteSpace(value))
+            if (required && string.IsNullOrWhiteSpace(value))
             {
                 validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, "webexpress.webui:form.inputtextbox.validation.required"));
 

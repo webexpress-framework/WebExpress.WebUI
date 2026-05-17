@@ -152,11 +152,68 @@ Inline elements are within a paragraph and only change the marked word or part o
 |Html                           |`<span style="color: red;">` | <span style="color: red;">red</span>
 |Checkbox                       |`[X]`                        |[X]
 |Footnote                       |`[^1]`                       |Text[^1]
+|Inline Plugin                  |`{{name param="val"}}`       |{{my_plugin}}
 
+## Plugins
+Plugins extend the Markdown syntax with additional semantic constructs, formatting options, and functional modules. They are treated as first-class elements of the Markdown syntax with full support for parameters, content, and nesting.
 
+### Inline Plugins
+Inline plugins are placed within a paragraph and behave like other inline elements. They use double curly braces with an identifier and optional key-value parameters.
 
+```markdown
+This text contains {{my_plugin}} an inline plugin reference.
+```
 
+Inline plugins can include parameters:
 
+```markdown
+{{video src="example.mp4" width="640"}}
+{{chart type="bar" data="sales"}}
+```
+
+**Syntax:** `{{plugin_name param1="value1" param2="value2"}}`
+
+- The plugin name must start with a letter or underscore and may contain letters, digits, and underscores.
+- Parameters are optional and use the format `key="value"`.
+- Multiple parameters are separated by spaces.
+
+### Block Plugins
+Block plugins wrap content and support nested Markdown inside. They use `{{% ... %}}` delimiters with an opening and closing tag.
+
+```markdown
+{{% note %}}
+This is a note. It can contain **bold**, *italic*, and other Markdown.
+{{% /note %}}
+```
+
+Block plugins can include parameters:
+
+```markdown
+{{% alert type="warning" title="Caution" %}}
+Be careful with this operation.
+{{% /alert %}}
+```
+
+**Syntax:**
+```
+{{% plugin_name param1="value1" %}}
+Content (supports full Markdown syntax)
+{{% /plugin_name %}}
+```
+
+- The opening tag contains the plugin name and optional parameters.
+- The closing tag contains only `/plugin_name`.
+- Content between the tags is parsed as standard Markdown and may include any block or inline elements.
+- Block plugins are block-level elements and are separated from surrounding content by blank lines.
+
+## Markdown Conversion (Round-Trip)
+The parser supports bidirectional conversion between Markdown and its internal AST representation:
+
+- **Markdown → AST:** `MarkdownParser.Parse(markdownText)` parses Markdown text into a `MarkdownDocument` AST.
+- **AST → HTML:** `document.ConvertToHtml(renderContext)` converts the AST to an HTML tree.
+- **AST → Markdown:** `document.ConvertToMarkdown()` converts the AST back to valid Markdown text.
+
+This enables a complete round-trip: Markdown can be parsed, transformed, and then serialized back to Markdown while preserving all structural elements including plugin syntax.
 
 
 

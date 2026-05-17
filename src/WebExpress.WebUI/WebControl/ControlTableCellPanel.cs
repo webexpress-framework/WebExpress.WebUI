@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -16,24 +17,24 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<IControl> _content = [];
 
         /// <summary>
-        /// Returns or sets the unique identifier for the entity.
+        /// Gets or sets the unique identifier for the entity.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Returns or sets the class or category associated with the current object.
+        /// Gets or sets the class or category associated with the current object.
         /// </summary>
-        public virtual string Class { get; set; }
+        public virtual Func<IRenderControlContext, string> Class { get; set; }
 
         /// <summary>
-        /// Returns or sets the style applied to the element.
+        /// Gets or sets the style applied to the element.
         /// </summary>
-        public virtual string Style { get; set; }
+        public virtual Func<IRenderControlContext, string> Style { get; set; }
 
         /// <summary>
-        /// Returns or sets the color scheme used for the cell.
+        /// Gets or sets the color scheme used for the cell.
         /// </summary>
-        public virtual TypeColorTable Color { get; set; } = TypeColorTable.Default;
+        public virtual Func<IRenderControlContext, TypeColorTable> Color { get; set; } = _ => TypeColorTable.Default;
 
         /// <summary> 
         /// Returns the content of the cell panel. 
@@ -108,13 +109,17 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var @class = Class?.Invoke(renderContext);
+            var style = Style?.Invoke(renderContext);
+            var color = Color?.Invoke(renderContext) ?? TypeColorTable.Default;
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Class,
-                Style = Style
+                Class = @class,
+                Style = style
             }
-                .AddUserAttribute("data-color", Color.ToClass())
+                .AddUserAttribute("data-color", color.ToClass())
                 .Add(_content.Select(x => x?.Render(renderContext, visualTree)));
 
             return html;

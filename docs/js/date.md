@@ -1,59 +1,72 @@
+```markdown
 ![WebExpress](https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png)
 
 # DateCtrl
 
-The `DateCtrl` component serves as a simple, read-only display for a date or date range. It is primarily used to present date values in a consistent and visually distinct manner, typically accompanied by a calendar icon. Unlike input controls, this component does not allow for user interaction to change the value.
+The `DateCtrl` component serves as a robust, read-only display for single dates or date ranges. It is specifically designed to present chronological data in a consistent and visually distinct manner without allowing user interaction. During initialization, the component automatically parses the text content of its host element, normalizes the value, and wraps it in a structured DOM element that includes a leading calendar icon. It gracefully handles single dates, date ranges, and custom formatting, making it ideal for displaying event dates, deadlines, or logging timestamps.
 
-```
+```text
    [#] 2025-09-08
+   [#] 2025-09-08 – 2025-09-10
 ```
 
 ## Configuration
 
-The component is configured declaratively. The value to be displayed is taken directly from the text content of the host element.
+The component is configured declaratively using `data-` attributes. The initial value to be displayed is taken directly from the text content of the host element. During initialization, the control parses this text content, recognizes single dates or ranges (separated by `-`, `–`, `;`, or `bis`), and applies the specified visual configurations. 
 
-| Attribute | Description | Example
-|-----------|-------------|--------
-|           |             |        
-
-The text content of the element itself is used as the initial value to be displayed.
+| Attribute          | Description                                                                                                                                      | Example                                 |
+|--------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------|
+| `data-format`      | Defines the output format for the date. Supports custom token patterns like `YYYY-MM-DD`, `DD.MM.YYYY`, or `mmmm DD, YYYY`.                      | `data-format="DD.MM.YYYY"`              |
+| `data-separator`   | Defines the string used to separate the start and end dates when displaying a date range. Defaults to ` – `.                                     | `data-separator=" to "`                 |
+| `data-color-css`   | A specific CSS class name that will be applied to the inner text wrapper, allowing you to easily colorize the date display (e.g., for statuses). | `data-color-css="text-danger"`          |
+| `data-color-style` | Inline CSS styles applied directly to the inner text wrapper.                                                                                    | `data-color-style="color: #ff0000;"`    |
+| `lang`             | The language attribute. Used as a fallback for internal localization (e.g., rendering localized month names).                                    | `lang="en-US"`                          |
 
 ## Functionality
 
-The core purpose of `DateCtrl` is the static display of a date string.
+The core purpose of the `DateCtrl` is the static, standardized presentation of date strings, completely abstracted from input mechanics.
 
-- **DOM Structure**: During initialization, the component wraps the provided text value in a `<span>` and prepends a calendar icon (`fa-solid fa-calendar-days`) for uniform styling.
-- **Read-Only**: The component is designed for display purposes only and does not offer any user interaction for changing the date.
-- **Form Support**: If a `name` attribute is present, a hidden input field (`<input type="hidden">`) is automatically generated to hold the value for form submission.
-- **Dynamic Updates**: The displayed value can be updated programmatically via the `value` property of the controller instance.
+- **DOM Structuring**: Upon initialization, the component clears its host element, adds the `wx-date` class, and injects a neatly structured `<span>`. This wrapper contains a FontAwesome calendar icon (`fa-solid fa-calendar-days`) followed by the formatted date text.
+- **Smart Parsing**: The component intelligently parses its initial text content or programmatically assigned values. It can detect single dates or date ranges provided as objects, arrays, or delimited strings (using semicolons or dashes). 
+- **Range Handling**: If a valid start and end date are detected, they are rendered using the configured `data-separator`. If the start and end dates fall on the exact same calendar day, the component smartly collapses the display to show just the single date.
+- **Read-Only**: The component is strictly for display purposes. It does not spawn hidden input fields for forms and does not trigger user interaction events.
 
 ## Programmatic Control
 
-While the component is read-only for the end-user, its value can be manipulated via JavaScript.
+While the component is read-only for the end-user, its value and formatting can be manipulated dynamically via JavaScript. The component automatically re-renders the display whenever these properties are updated.
 
 ### Accessing an Automatically Created Instance
 
-For a declaratively defined component, the instance is retrieved using the `getInstanceByElement` method.
+For a declaratively defined component, the instance is retrieved using the `getInstanceByElement` method from the central controller registry.
 
 ```javascript
 // find the host element in the DOM
 const element = document.getElementById('my-date-display');
 
-// retrieve the controller instance
+// retrieve the controller instance associated with the element
 const dateCtrl = webexpress.webui.Controller.getInstanceByElement(element);
 
 if (dateCtrl) {
-    // get the current raw value as a string
+    // get the current normalized value (returns a Date, a {start, end} object, or null)
     const currentValue = dateCtrl.value;
 
-    // set a new value, which updates the displayed text and the hidden input
+    // set a new single date using a string
     dateCtrl.value = '2025-12-31';
+
+    // set a new date range using an object
+    dateCtrl.value = {
+        start: new Date('2025-08-01'),
+        end: new Date('2025-08-15')
+    };
+
+    // change the display format dynamically
+    dateCtrl.format = 'mmmm DD, YYYY';
 }
 ```
 
 ### Manual Instantiation
 
-The component can also be created entirely dynamically in JavaScript.
+The component can also be instantiated entirely programmatically, which is useful when rendering dynamic data grids or UI cards.
 
 ```javascript
 // find the container element
@@ -62,33 +75,46 @@ const container = document.getElementById('dynamic-date-display');
 // create a new instance of DateCtrl
 const dynamicDateCtrl = new webexpress.webui.DateCtrl(container);
 
-// set the value to be displayed
-dynamicDateCtrl.value = '2025-08-15';
+// set the value and format to be displayed
+dynamicDateCtrl.format = 'YYYY-MM-DD';
+dynamicDateCtrl.value = '2025-08-15 - 2025-08-20';
 ```
 
-## Events
+## Use Case Examples
 
-- **`webexpress.webui.Event.CHANGE_VALUE_EVENT`**: This event is fired whenever the `value` property of the component is changed programmatically and results in a different displayed text.
+The following HTML examples show how to integrate the `DateCtrl` component declaratively, utilizing both single dates and date ranges with custom styling.
 
-## Use Case Example
-
-The following HTML example shows a simple declarative integration of the `DateCtrl` component.
+### Standard Single Date
 
 ```html
 <!--
-    The host element for the date display control.
-    The text content '2025-09-08' will be used as the initial value.
+    The text content '2025-09-08' will be parsed as the initial value.
 -->
-<div id="my-date-display" class="wx-webui-date">
+<div id="my-single-date" class="wx-webui-date" data-format="mmmm DD, YYYY">
     2025-09-08
+</div>
+```
+
+### Styled Date Range
+
+```html
+<!--
+    Parses a range, applies a custom separator, and colors the text red.
+-->
+<div id="my-range-date" 
+     class="wx-webui-date" 
+     data-format="DD.MM.YYYY" 
+     data-separator=" bis "
+     data-color-css="text-danger">
+    2025-01-01 - 2025-01-14
 </div>
 ```
 
 # InputDateCtrl
 
-The `InputDateCtrl` component is used for selecting a single date or a date range through an interactive user interface. It combines a text input field with a calendar icon, which, when activated, displays a calendar pop-up for date selection. This allows the user to either enter a date directly by manual input or select it visually from the calendar. The component is configured declaratively via `data-` attributes, enabling seamless integration into HTML forms.
+The `InputDateCtrl` component provides a highly interactive and versatile date picker for forms, combining a manual text input field with a Popper.js-powered calendar dropdown. It is designed to handle both single dates and date ranges gracefully. Users can type dates directly into the input field—benefiting from real-time format validation—or open the calendar pop-up to visually select days. The component supports advanced features such as ISO week numbers, visual highlighting for weekends and custom holidays, and interactive hover previews during range selection. 
 
-```
+```text
    ┌───────────────────────────┐
    │ 2025-07-01             [#]│
    └─┬─────────────────────────┘
@@ -103,36 +129,35 @@ The `InputDateCtrl` component is used for selecting a single date or a date rang
 
 ## Configuration
 
-The initialization and behavior of the component are managed through `data-` attributes on the host element. The placeholder text is defined using the standard `placeholder` attribute.
+The initialization and behavior of the component are managed purely declaratively via `data-` attributes on the host element. During setup, the component reads these attributes, cleans the host element, and dynamically constructs the input field and the calendar pop-up DOM structure.
 
 | Attribute      | Description                                                                                                         | Example
-|----------------|---------------------------------------------------------------------------------------------------------------------|---------
-| `data-range`   | Activates the date range selection mode when set to `"true"`.                                                       | `data-range="true"`
-| `data-value`   | Sets the initial value. In range mode, a string like `"YYYY-MM-DD - YYYY-MM-DD"` is expected.                       | `data-value="2025-07-01"`
-| `data-format`  | Defines the date format for manual input, display in the text field, and the value in the hidden input field.       | `data-format="YYYY-MM-DD"`
-| `data-holidays`| A comma-separated list of holidays in `"YYYY-MM-DD"` format, which are visually highlighted in the calendar pop-up. | `data-holidays="2025-12-25,2025-12-26"`
-| `placeholder`  | The text displayed in the input field as long as no date is selected.                                               | `placeholder="Select a date..."`
-| `name`         | The name for the input field that contains the formatted date value for form submissions.                           | `name="start_date"`
+|----------------|---------------------------------------------------------------------------------------------------------------------|-----------------------------------
+| `data-range`   | Activates the date range selection mode when set to `"true"`. Changes interaction and validation logic accordingly. | `data-range="true"`
+| `data-value`   | Sets the initial value. In range mode, a string formatted like `"YYYY-MM-DD - YYYY-MM-DD"` is expected.             | `data-value="2025-07-01"`
+| `data-format`  | Defines the strict date format for manual input parsing, field display, and internal value representation.          | `data-format="YYYY-MM-DD"`
+| `data-holidays`| A comma-separated list of holidays in strict `"YYYY-MM-DD"` format, which will be highlighted in red in the calendar.| `data-holidays="2025-12-25,2025-12-26"`
+| `placeholder`  | The placeholder text displayed inside the text input when no date is selected.                                      | `placeholder="Select a date..."`
+| `name`         | The name attribute applied to the dynamically generated text input field, ensuring proper form submission.          | `name="delivery_date"`
 
-## Features
+## Functionality
 
-The `InputDateCtrl` component offers a dual interaction model and a rich visual presentation.
+The `InputDateCtrl` acts as a hybrid input control, meaning the state is perfectly synchronized between the text input and the visual calendar. 
 
-- **Hybrid Input**: Users can enter a date either by direct text input into the field or by clicking the component to open a calendar pop-up and selecting a date from there.
-- **Live Validation**: During manual input, the value is validated in real-time. Invalid formats are indicated by a visual marking of the input field (e.g., with the CSS class `is-invalid`).
-- **Calendar Pop-up**: The pop-up provides a full month view with navigation elements for months and years.
-- **Visual Highlighting**: Within the calendar, the currently selected date or range, weekends, and defined holidays are color-coded for better orientation.
-- **ISO Week Numbers**: For improved planning, the calendar weeks according to the ISO 8601 standard are displayed in a separate column.
-- **"Today" Button**: A button at the bottom of the pop-up allows for the quick selection of the current date.
-- **Range Selection**: In `range` mode, users can select a start and end date. During selection, the prospective range is visually previewed.
+- **Hybrid Input & Live Validation**: Users can type the date manually. As they type, the component validates the input against the configured `data-format`. If the input is incomplete or incorrectly formatted, an `is-invalid` class is immediately applied to the text field. Once a valid date is detected, the calendar view synchronizes automatically.
+- **Interactive Calendar Pop-up**: Clicking the input field or the calendar icon reveals the dropdown menu. This menu utilizes the `PopperCtrl` foundation to ensure it is always positioned correctly on the screen without being clipped by overflow containers.
+- **Range Selection & Preview**: When `data-range="true"` is set, the user first clicks a start date and then an end date. While moving the mouse between the first click and the second, the calendar provides a live visual preview of the selected range, highlighting the start, middle, and end segments.
+- **Visual Highlighting**: To aid navigation, weekends and explicitly defined holidays are highlighted with a distinct red style (`wx-calendar-red`). Days outside the currently viewed month are grayed out.
+- **ISO Week Numbers**: For business planning contexts, ISO 8601 calendar weeks are displayed continuously in a dedicated leftmost column.
+- **"Today" Action**: A dedicated "Today" button at the bottom of the pop-up allows users to instantly jump to and select the current date.
 
 ## Programmatic Control
 
-After initialization, the selected date can also be set or retrieved programmatically via JavaScript.
+The selected date can be fully managed via JavaScript. The component normalizes various input types (Strings, Dates, Arrays, Objects) automatically and updates both the input field and the calendar visual state.
 
 ### Accessing an Automatically Created Instance
 
-For components defined declaratively in HTML, the associated instance is retrieved via the `getInstanceByElement(element)` method of the central `webexpress.webui.Controller`.
+For components initialized via HTML classes, you can retrieve the instance using the central controller registry.
 
 ```javascript
 // find the host element in the DOM
@@ -142,17 +167,21 @@ const element = document.getElementById('my-date-picker');
 const dateCtrl = webexpress.webui.Controller.getInstanceByElement(element);
 
 if (dateCtrl) {
-    // Get the current value, which is a Date object or an object {start, end}
+    // Get the current value
+    // Returns a Date object for single selection, or { start: Date, end: Date } for ranges
     const selectedValue = dateCtrl.value;
 
-    // Set a new date. This updates the input field and the hidden value.
-    dateCtrl.value = new Date('2025-08-15');
+    // Set a new single date using a string
+    dateCtrl.value = '2025-08-15';
+
+    // Set a new date range using an object or an array
+    dateCtrl.value = { start: new Date('2025-09-01'), end: new Date('2025-09-10') };
 }
 ```
 
 ### Manual Instantiation
 
-An `InputDateCtrl` component can also be created entirely programmatically. This is useful for dynamic UI scenarios where the configuration is determined at runtime.
+You can dynamically spawn an `InputDateCtrl` inside any container element using JavaScript, which is highly beneficial for dynamically generated form rows.
 
 ```javascript
 // find the container element for the dynamic date picker
@@ -160,146 +189,48 @@ const container = document.getElementById('dynamic-date-container');
 
 // create a new instance of InputDateCtrl manually
 const dynamicDateCtrl = new webexpress.webui.InputDateCtrl(container);
+
+// set properties programmatically
+dynamicDateCtrl.format = 'DD.MM.YYYY';
+dynamicDateCtrl.value = new Date();
 ```
 
 ## Events
 
-The component dispatches several events to enable interaction with the application.
+The component integrates deeply with the WebExpress event system, dispatching events to allow external scripts to react to state changes and UI interactions.
 
-- **`webexpress.webui.Event.CHANGE_VALUE_EVENT`**: Fired when a valid date is selected or cleared. The `detail` object contains the new value as a string in the defined format.
-- **`webexpress.webui.Event.DROPDOWN_SHOW_EVENT`**: Fired when the calendar pop-up is opened.
-- **`webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT`**: Fired when the calendar pop-up is closed.
+- **`webexpress.webui.Event.CHANGE_VALUE_EVENT`**: Dispatched whenever a valid date (or range) is successfully selected via the calendar or confirmed via valid manual text input. The `detail.value` property contains the newly formatted date string.
+- **`webexpress.webui.Event.DROPDOWN_SHOW_EVENT`**: Fired exactly when the calendar pop-up opens and becomes visible to the user.
+- **`webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT`**: Fired when the calendar pop-up is closed, either by finishing a selection, clicking outside the component, or pressing Escape.
 
-## Use Case Example
+## Use Case Examples
 
-The following HTML example shows the declarative configuration of a date selection field with a predefined value, a placeholder, and holidays.
+### Single Date Selection
+
+The following example configures a standard date picker with a predefined value, format, and highlighting for specific holidays.
 
 ```html
-<!--
-    The main container for the date control.
-    It is configured with an initial value, a specific format,
-    a placeholder, and highlighted holidays.
--->
-<div id="my-date-picker"
+<div id="delivery-date"
      class="wx-webui-input-date"
      name="delivery_date"
      data-value="2025-07-01"
      data-format="YYYY-MM-DD"
      data-holidays="2025-12-25,2025-12-26"
-     placeholder="Select delivery date">
+     placeholder="Select delivery date...">
 </div>
 ```
 
-# InputCalendarCtrl
+### Date Range Selection
 
-The `InputCalendarCtrl` component renders an always-visible calendar widget that, depending on its configuration, allows for either single-date or date-range selection. The entire user interface, including the month view and its associated tools, is integrated directly into the parent element without using a pop-up. Configuration is handled declaratively through `data-` attributes, allowing for straightforward integration into existing HTML structures.
-
-```
-   ┌─────────────────────────────────────────────────────────┐
-   │ ┌───────────────────────────┐ ┌───────────────────────┐ │
-   │ │ 2025-07-01 - 2025-07-15   │ │  [Today][Clear][Copy] │ │
-   │ └───────────────────────────┘ └───────────────────────┘ │
-   ├─────────────────────────────────────────────────────────┤
-   │ ┌─────────────────────────────────────────────────────┐ │
-   │ │ << <                  July 2025               >  >> │ │
-   │ │  WK  Mo  Tu  We  Th  Fr  Sa  Su                     │ │
-   │ │  27   1   2   3   4   5   6   7                     │ │
-   │ │  28   8   9  10  11  12  13  14                     │ │
-   │ │ ...                                                 │ │
-   │ └─────────────────────────────────────────────────────┘ │
-   └─────────────────────────────────────────────────────────┘
-```
-
-## Configuration
-
-The initialization and behavior of the component are managed via `data-` attributes on the host element.
-
-| Attribute      | Description                                                                                             | Example
-|----------------|---------------------------------------------------------------------------------------------------------|---------------------
-| `data-range`   | Activates the date range selection mode when set to `"true"`.                                           | `data-range="true"`
-| `data-value`   | Sets the initial value. In range mode, a string like `"YYYY-MM-DD - YYYY-MM-DD"` is expected.           | `data-value="2025-07-01"`
-| `data-format`  | Defines the date format for value processing and display.                                               | `data-format="YYYY-MM-DD"`
-| `data-holidays`| A comma-separated list of holidays in `"YYYY-MM-DD"` format, which will be highlighted in the calendar. | `data-holidays="2025-12-25,2025-12-26"`
-| `placeholder`  | The text that is displayed when no date is selected.                                                    | `placeholder="Select a date..."`
-| `name`         | The name for the hidden input field that holds the value for form submissions.                          | `name="selected_date"`
-
-## Features
-
-The component provides a comprehensive set of features for date interaction.
-
-- **Display Modes**: Two primary modes are supported: single-date selection (default) and date-range selection.
-- **Persistent Visibility**: The calendar is always visible and is not toggled by a click.
-- **Interaction Preview**: Hovering over days in the calendar displays a visual preview of the selection (either a single date or a range) without requiring manual input.
-- **Integrated Toolbar**: To the right of the date display, a toolbar provides buttons for common actions:
-    - **Today**: Selects the current date.
-    - **Clear**: Clears the current selection.
-    - **Copy**: Copies the selected date or range to the clipboard.
-- **Highlighting**: Weekends and holidays defined via `data-holidays` are visually highlighted for better orientation.
-- **ISO Week Numbers**: The calendar weeks, according to the ISO 8601 standard, are displayed in a dedicated column on the left side of the calendar.
-
-## Programmatic Control
-
-After initialization, the component's value can be accessed and modified programmatically.
-
-### Accessing an Automatically Created Instance
-
-For calendars defined declaratively in HTML, the associated instance is retrieved via the `getInstanceByElement(element)` method of the central `webexpress.webui.Controller`.
-
-```javascript
-// find the host element in the DOM
-const element = document.getElementById('my-calendar');
-
-// retrieve the controller instance associated with the element
-const inputCalendarCtrl = webexpress.webui.Controller.getInstanceByElement(element);
-
-if (inputCalendarCtrl) {
-    // Get the current value
-    // For single-date mode, this returns a Date object or null.
-    // For range mode, this returns an object: { start: Date, end: Date } or { start: null, end: null }.
-    const currentValue = inputCalendarCtrl.value;
-
-    // Set a new value for range mode
-    inputCalendarCtrl.value = {
-        start: new Date('2025-09-01'),
-        end: new Date('2025-09-05')
-    };
-}
-```
-
-### Manual Instantiation
-
-A calendar can also be created entirely programmatically. This is useful for dynamic UI scenarios where the configuration is determined at runtime.
-
-```javascript
-// find the container element for the dynamic calendar
-const container = document.getElementById('dynamic-calendar-container');
-
-// create a new instance of InputCalendarCtrl manually
-const dynamicInputCalendarCtrl = new webexpress.webui.InputCalendarCtrl(container);
-```
-
-## Events
-
-The component dispatches a central event to react to value changes.
-
-- **`webexpress.webui.Event.CHANGE_VALUE_EVENT`**: This event is fired whenever the user selects a date or date range, or clears the selection. The `detail` object of the event contains the new value as a string, formatted according to the `data-format` attribute.
-
-## Use Case Example
-
-The following HTML example demonstrates the declarative configuration of a calendar in range mode with pre-defined values and holidays.
+By adding `data-range="true"`, the exact same component transforms into a range picker. The `data-value` is structured to include both the start and end dates separated by a dash.
 
 ```html
-<!--
-    The main container for the calendar control.
-    It is configured for range selection, with a pre-selected range,
-    a specific date format, and highlighted holidays.
--->
-<div id="my-calendar"
-     class="wx-webui-input-calendar"
-     name="event_dates"
+<div id="vacation-dates"
+     class="wx-webui-input-date"
+     name="vacation_period"
      data-range="true"
-     data-value="2025-07-01 - 2025-07-15"
+     data-value="2025-08-01 - 2025-08-14"
      data-format="YYYY-MM-DD"
-     data-holidays="2025-12-24,2025-12-25,2025-12-26,2026-01-01">
+     placeholder="Select start and end date...">
 </div>
 ```

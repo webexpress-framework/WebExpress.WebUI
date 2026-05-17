@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlProgress()
             {
-                Format = format
+                Format = _ => format
             };
 
             // act
@@ -74,8 +74,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlProgress()
             {
-                Size = size,
-                Format = TypeFormatProgress.Colored
+                Size = _ => size,
+                Format = _ => TypeFormatProgress.Colored
             };
 
             // act
@@ -99,8 +99,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlProgress()
             {
-                Text = text,
-                Format = TypeFormatProgress.Colored
+                Text = _ => text,
+                Format = _ => TypeFormatProgress.Colored
             };
 
             // act
@@ -120,6 +120,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorProgress.Warning, @"<div class=""progress""><* class=""progress-bar bg-warning"" */div>")]
         [InlineData(TypeColorProgress.Danger, @"<div class=""progress""><* class=""progress-bar bg-danger"" */div>")]
         [InlineData(TypeColorProgress.Light, @"<div class=""progress""><* class=""progress-bar bg-light"" */div>")]
+        [InlineData(TypeColorProgress.Highlight, @"<div class=""progress""><* class=""progress-bar bg-highlight"" */div>")]
         [InlineData(TypeColorProgress.White, @"<div class=""progress""><* class=""progress-bar bg-white"" */div>")]
         public void Color(TypeColorProgress color, string expected)
         {
@@ -129,8 +130,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlProgress()
             {
-                Color = new PropertyColorProgress(color),
-                Format = TypeFormatProgress.Colored
+                Color = _ => new PropertyColorProgress(color),
+                Format = _ => TypeFormatProgress.Colored
             };
 
             // act
@@ -150,6 +151,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Warning, @"<div class=""progress""><* class=""progress-bar text-warning"" */div>")]
         [InlineData(TypeColorText.Danger, @"<div class=""progress""><* class=""progress-bar text-danger"" */div>")]
         [InlineData(TypeColorText.Light, @"<div class=""progress""><* class=""progress-bar text-light"" */div>")]
+        [InlineData(TypeColorText.Highlight, @"<div class=""progress""><* class=""progress-bar text-highlight"" */div>")]
         [InlineData(TypeColorText.White, @"<div class=""progress""><* class=""progress-bar text-white"" */div>")]
         [InlineData(TypeColorText.Muted, @"<div class=""progress""><* class=""progress-bar text-muted"" */div>")]
         public void TextColor(TypeColorText textColor, string expected)
@@ -160,8 +162,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlProgress()
             {
-                TextColor = new PropertyColorText(textColor),
-                Format = TypeFormatProgress.Colored
+                TextColor = _ => new PropertyColorText(textColor),
+                Format = _ => TypeFormatProgress.Colored
             };
 
             // act
@@ -185,7 +187,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlProgress()
             {
-                Min = min
+                Min = _ => min
             };
 
             // act
@@ -209,7 +211,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlProgress()
             {
-                Max = max
+                Max = _ => max
             };
 
             // act
@@ -233,7 +235,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlProgress()
             {
-                Value = value
+                Value = _ => value
             };
 
             // act

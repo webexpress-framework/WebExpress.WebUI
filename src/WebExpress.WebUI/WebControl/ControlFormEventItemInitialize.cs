@@ -8,7 +8,7 @@
         where TValue : IControlFormInputValue, new()
     {
         /// <summary>
-        /// Returns the value for the form item.
+        /// Gets the value for the form item.
         /// </summary>
         public TValue Value { get; } = new();
 

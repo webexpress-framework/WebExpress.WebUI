@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlColor()
             {
-                Color = color
+                Color = _ => color
             };
 
             // act
@@ -76,7 +76,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlColor()
             {
-                Tooltip = tooltip
+                Tooltip = _ => tooltip
             };
 
             // act

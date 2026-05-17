@@ -82,7 +82,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                 secondaryAction: Object.fromEntries(Object.entries(dataset)
                     .filter(([k]) => k.startsWith("wxSecondary"))
                     .map(([k, v]) => [
-                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        k.slice(11).replace(/^./, c => c.toLowerCase()),
                         v === "true" ? true : v === "false" ? false : v
                     ])
                 )
@@ -281,7 +281,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             const removeBtn = document.createElement("button");
             removeBtn.className = "btn wx-button-close";
             removeBtn.title = this._i18n ? this._i18n("webexpress.webui:remove", "Remove") : "Remove";
-            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+            removeBtn.innerHTML = `<i class="${this._iconClass("fas fa-times", "wx-icon-light-xmark")}"></i>`;
             removeBtn.addEventListener("click", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -335,7 +335,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             editBtn.type = "button";
             editBtn.className = "wx-sidebar-icon-edit";
             editBtn.title = this._i18n("webexpress.webui:edit", "Edit");
-            editBtn.innerHTML = '<i class="fas fa-pen"></i>';
+            editBtn.innerHTML = `<i class="${this._iconClass("fas fa-pen", "wx-icon-light-pen")}"></i>`;
             if (item.uri) {
                 editBtn.setAttribute("data-wx-uri", item.uri);
             }
@@ -419,17 +419,17 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
         for (const item of this._items) {
             if (item.type === "toolbar") {
                 this._toolbarElement = item.element;
-                
+
                 if (!this._toolbarElement._toolbarCtrl) {
                     // define as non-enumerable to prevent JSON.stringify circular reference issues
-                    Object.defineProperty(this._toolbarElement, '_toolbarCtrl', {
+                    Object.defineProperty(this._toolbarElement, "_toolbarCtrl", {
                         value: new webexpress.webui.ToolbarCtrl(this._toolbarElement),
                         writable: true,
                         configurable: true,
                         enumerable: false
                     });
                 }
-                
+
                 this._element.appendChild(this._toolbarElement);
                 break;
             }

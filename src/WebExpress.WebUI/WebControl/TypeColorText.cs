@@ -58,7 +58,12 @@
         /// <summary>
         /// Muted color.
         /// </summary>
-        Muted = 11
+        Muted = 11,
+
+        /// <summary>
+        /// Highlight color.
+        /// </summary>
+        Highlight = 13
     }
 
     /// <summary>
@@ -85,6 +90,7 @@
                 TypeColorText.Light => "text-light",
                 TypeColorText.Dark => "text-dark",
                 TypeColorText.White => "text-white",
+                TypeColorText.Highlight => "text-highlight",
                 _ => string.Empty,
             };
         }

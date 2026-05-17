@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Process/pipeline function: three stages connected by down-arrows -->
+<svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+ <g transform="matrix(.90859 0 0 .90859 15.44 .95977)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3758">
+  <rect x="-10.357" y=".51796" width="9.8391" height="3.8391" rx=".22362"/>
+  <rect x="-10.357" y="8.5805" width="9.8391" height="3.8391" rx=".22362"/>
+  <rect x="-10.357" y="16.643" width="9.8391" height="3.8391" rx=".22362"/>
+  <path d="m-5.4191 4.7987-0.036801 3.2298"/>
+  <path d="m-5.4375 12.99v3.1562"/>
+  <path d="m-7.2407 6.4863 1.7848 1.5421 1.8748-1.5498"/>
+  <path d="m-7.2223 14.604 1.7848 1.5421 1.8748-1.5498"/>
+ </g>
+</svg>

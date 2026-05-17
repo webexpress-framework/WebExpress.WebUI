@@ -8,10 +8,10 @@ namespace WebExpress.WebUI.WebFragment
     /// <summary>
     /// Represents a control panel that is part of a web fragment and implements the IFragmentControl interface.
     /// </summary>
-    public class FragmentControlPanel : ControlPanel, IFragmentControl<ControlPanel>
+    public abstract class FragmentControlPanel : ControlPanel, IFragmentControl<ControlPanel>
     {
         /// <summary>
-        /// Returns the context of the fragment.
+        /// Gets the context of the fragment.
         /// </summary>
         public IFragmentContext FragmentContext { get; private set; }
 
@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.WebFragment
         /// </summary>
         /// <param name="fragmentContext">The context of the fragment.</param>
         public FragmentControlPanel(IFragmentContext fragmentContext)
-            : base(fragmentContext?.FragmentId?.ToString())
+            : base(fragmentContext?.FragmentId?.ToString()?.Replace(".", "-"))
         {
             FragmentContext = fragmentContext;
         }

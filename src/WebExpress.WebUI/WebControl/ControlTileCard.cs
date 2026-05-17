@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
@@ -16,24 +18,29 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<IControl> _content = [];
 
         /// <summary>
-        /// Returns or sets the unique identifier for the entity.
+        /// Gets or sets the unique identifier for the entity.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Returns or sets the header text.
+        /// Gets or sets the header text.
         /// </summary>
-        public string Header { get; set; }
+        public Func<IRenderControlContext, string> Header { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
-        /// Returns or set the background color.
+        /// Gets or sets the image uri.
         /// </summary>
-        public PropertyColorTile Color { get; set; } = new PropertyColorTile(TypeColorTile.Default);
+        public Func<IRenderControlContext, IUri> Image { get; set; }
+
+        /// <summary>
+        /// Gets or set the background color.
+        /// </summary>
+        public Func<IRenderControlContext, PropertyColorTile> Color { get; set; } = _ => new PropertyColorTile(TypeColorTile.Default);
 
         /// <summary>
         /// Returns the content of the tile control.
@@ -41,16 +48,16 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControl> Content => _content;
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
-        public IAction PrimaryAction { get; set; }
+        public Func<IRenderControlContext, IAction> PrimaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
-        /// double‑click to open a modal or similar target.
+        /// Gets or sets the secondary action, typically triggered by a 
+        /// double-click to open a modal or similar target.
         /// </summary>
-        public IAction SecondaryAction { get; set; }
+        public Func<IRenderControlContext, IAction> SecondaryAction { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -105,20 +112,27 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var icon = Icon?.Invoke(renderContext);
+            var image = Image?.Invoke(renderContext);
+            var color = Color?.Invoke(renderContext) ?? new PropertyColorTile(TypeColorTile.Default);
+            var header = Header?.Invoke(renderContext);
+            var primaryAction = PrimaryAction?.Invoke(renderContext);
+            var secondaryAction = SecondaryAction?.Invoke(renderContext);
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-tile-card"
             }
-                .AddUserAttribute("data-label", I18N.Translate(renderContext, Header))
-                .AddUserAttribute("data-color-css", Color.ToClass())
-                .AddUserAttribute("data-color-style", Color.ToStyle())
-                .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri.ToString())
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, header))
+                .AddUserAttribute("data-color-css", color.ToClass())
+                .AddUserAttribute("data-color-style", color.ToStyle())
+                .AddUserAttribute("data-icon", (icon as Icon)?.Class)
+                .AddUserAttribute("data-image", image?.ToString() ?? (icon as ImageIcon)?.Uri?.ToString())
                 .Add(_content.Select(x => x.Render(renderContext, visualTree)));
 
-            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
-            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
+            primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            secondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

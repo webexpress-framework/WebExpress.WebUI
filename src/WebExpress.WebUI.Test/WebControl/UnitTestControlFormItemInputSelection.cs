@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputSelection(null)
             {
-                Name = name
+                Name = _ => name
             };
 
             // act
@@ -100,7 +100,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputSelection(null)
             {
-                Placeholder = placeholder
+                Placeholder = _ => placeholder
             };
 
             // act
@@ -125,7 +125,32 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputSelection(null)
             {
-                MultiSelect = multiSelect
+                MultiSelect = _ => multiSelect
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the StickySelection property of the form selection control.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-webui-input-selection""></div>")]
+        [InlineData(true, @"<div class=""wx-webui-input-selection"" data-sticky-selection=""true""></div>")]
+        public void StickySelection(bool stickySelection, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputSelection(null)
+            {
+                StickySelection = _ => stickySelection
             };
 
             // act
@@ -149,7 +174,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var icon = iconType is not null ? Activator.CreateInstance(iconType) as IIcon : null;
-            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Icon = icon })
+            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Icon = _ => icon })
             {
             };
 
@@ -174,7 +199,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Text = label })
+            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Text = _ => label })
             {
             };
 
@@ -198,7 +223,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Selected = selected })
+            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Selected = _ => selected })
             {
             };
 
@@ -222,7 +247,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Disabled = disabled })
+            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Disabled = _ => disabled })
             {
             };
 
@@ -246,7 +271,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var content = controlType is not null ? Activator.CreateInstance(controlType, [""]) as IControl : null;
-            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Content = content })
+            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { Content = _ => content })
             {
             };
 
@@ -262,24 +287,26 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeColorSelection.Default, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item""></div></div>")]
-        [InlineData(TypeColorSelection.Primary, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label-color=""wx-selection-primary""></div></div>")]
-        [InlineData(TypeColorSelection.Secondary, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label-color=""wx-selection-secondary""></div></div>")]
-        [InlineData(TypeColorSelection.Success, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label-color=""wx-selection-success""></div></div>")]
-        [InlineData(TypeColorSelection.Info, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label-color=""wx-selection-info""></div></div>")]
-        [InlineData(TypeColorSelection.Warning, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label-color=""wx-selection-warning""></div></div>")]
-        [InlineData(TypeColorSelection.Danger, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label-color=""wx-selection-danger""></div></div>")]
-        [InlineData(TypeColorSelection.Light, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label-color=""wx-selection-light""></div></div>")]
-        [InlineData(TypeColorSelection.Dark, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label-color=""wx-selection-dark""></div></div>")]
-        public void LabelColor(TypeColorSelection color, string expected)
+        [InlineData(TypeColorSelection.Primary, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-primary""></div></div>")]
+        [InlineData(TypeColorSelection.Secondary, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-secondary""></div></div>")]
+        [InlineData(TypeColorSelection.Success, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-success""></div></div>")]
+        [InlineData(TypeColorSelection.Info, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-info""></div></div>")]
+        [InlineData(TypeColorSelection.Warning, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-warning""></div></div>")]
+        [InlineData(TypeColorSelection.Danger, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-danger""></div></div>")]
+        [InlineData(TypeColorSelection.Light, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-light""></div></div>")]
+        [InlineData(TypeColorSelection.Highlight, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-highlight""></div></div>")]
+        [InlineData(TypeColorSelection.Dark, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-color=""wx-selection-dark""></div></div>")]
+        public void Color(TypeColorSelection color, string expected)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null) { LabelColor = color })
+            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null)
             {
-            };
+                Color = _ => color
+            });
 
             // act
             var html = control.Render(context, visualTree);
@@ -304,7 +331,7 @@ namespace WebExpress.WebUI.Test.WebControl
             };
 
             // act
-            control.Add(new ControlFormItemInputSelectionItem(null) { Text = "label" });
+            control.Add(new ControlFormItemInputSelectionItem(null) { Text = _ => "label" });
             var html = control.Render(context, visualTree);
 
             // validation

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>SidebarCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="SidebarCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/sidebar.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="sidebarctrl">SidebarCtrl</h1>
+<p>The <code>SidebarCtrl</code> component controls a responsive sidebar for web applications. It uses CSS classes prefixed with <code>wx-sidebar-</code> and integrates Popper.js to support overlay panels. The sidebar is flexibly configurable and automatically adapts to the window size, switching between compact and expanded view based on a set breakpoint.</p>
+<pre><code>   normal view
+   ┌─────────────────────────────────────────┐
+   │ [header]                                │&lt;--- Header
+   │ [icon] [link]                           │&lt;--- Link
+   │ [icon] [link]                       [x] │&lt;--- removeable Link
+   │ [icon] [link]                           │
+   ├─────────────────────────────────────────┤&lt;--- Separator
+   │ [panel]                                 │&lt;--- Panel
+   │                                         │
+   │ [footer]                                │&lt;--- Footer
+   └─────────────────────────────────────────┘
+   
+   compact view 
+   ┌──────────┐
+   │ [icon]   │&lt;--- Link
+   │ [icon]   │
+   │ [icon]   │
+   ├──────────┤&lt;--- Separator
+   │ [icon]   │&lt;--- Panel as overlay
+   │          │
+   │ [footer] │&lt;--- Footer
+   └──────────┘
+</code></pre>
+<h2 id="configuration">Configuration</h2>
+<p>The sidebar is initialized at the host element using child elements and attributes. Several child element types are supported:</p>
+<table>
+<thead>
+<tr>
+<th>Element Class</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.wx-sidebar-link</code></td>
+<td>Navigation entries or action links</td>
+</tr>
+<tr>
+<td><code>.wx-sidebar-separator</code></td>
+<td>Visual separator for structuring</td>
+</tr>
+<tr>
+<td><code>.wx-sidebar-header</code></td>
+<td>Section header within the sidebar</td>
+</tr>
+<tr>
+<td><code>.wx-sidebar-panel</code></td>
+<td>Panel with overlay functionality for additional content</td>
+</tr>
+</tbody>
+</table>
+<p>Supported attributes:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-mode</code></td>
+<td>Controls compact mode (&quot;hide&quot; hides the element, &quot;overlay&quot; shows an overlay)</td>
+</tr>
+<tr>
+<td><code>data-icon</code></td>
+<td>Icon class for the element (e.g. <code>fas fa-cog</code>)</td>
+</tr>
+<tr>
+<td><code>data-image</code></td>
+<td>Image URL for the element</td>
+</tr>
+<tr>
+<td><code>data-label</code></td>
+<td>Label text of the element</td>
+</tr>
+<tr>
+<td><code>data-uri</code></td>
+<td>Target URI for links</td>
+</tr>
+<tr>
+<td><code>data-tooltip</code></td>
+<td>Tooltip text for the element</td>
+</tr>
+<tr>
+<td><code>data-removeable</code></td>
+<td>Indicates whether the element can be removed</td>
+</tr>
+<tr>
+<td><code>data-breakpoint</code></td>
+<td>Pixel value for switching between compact and normal view</td>
+</tr>
+</tbody>
+</table>
+<h2 id="functionality">Functionality</h2>
+<p>The SidebarCtrl component parses the child elements, handles rendering and manages event handling. It reacts dynamically to window size changes and automatically adjusts the display:</p>
+<ul>
+<li><strong>Responsive Display:</strong> The sidebar checks whether the window is smaller than the specified breakpoint and then switches to compact mode. In compact mode, elements with <code>data-mode=&quot;hide&quot;</code> are hidden, panels with <code>data-mode=&quot;overlay&quot;</code> can be displayed as overlays when clicked.</li>
+<li><strong>Overlay Panel:</strong> Panels in overlay mode open an overlay window when clicked, positioned using Popper.js. The overlay can be closed by clicking outside or pressing the Escape key.</li>
+<li><strong>Toolbar:</strong> A toolbar at the bottom of the sidebar is automatically detected and integrated.</li>
+<li><strong>Removable Elements:</strong> Elements with <code>data-removeable=&quot;true&quot;</code> receive a button for removal from the sidebar.</li>
+<li><strong>Event Handling:</strong> The following events are triggered:
+<ul>
+<li><code>webexpress.webui.Event.REMOVE_EVENT</code> (when an element is removed)</li>
+<li><code>webexpress.webui.Event.SHOW_EVENT</code> (when the sidebar or an overlay is shown)</li>
+<li><code>webexpress.webui.Event.HIDE_EVENT</code> (when the sidebar or an overlay is hidden)</li>
+<li><code>webexpress.webui.Event.BREAKPOINT_CHANGE_EVENT</code> (when switching between compact and expanded view)</li>
+</ul>
+</li>
+</ul>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>After initialization, the sidebar can also be controlled via its controller instance. Main methods are:</p>
+<ul>
+<li><code>expand()</code>: Switches the sidebar to expanded view.</li>
+<li><code>reduce()</code>: Switches the sidebar to compact view.</li>
+<li><code>destroy()</code>: Removes resources and the footer element.</li>
+</ul>
+<p>Example for programmatic control:</p>
+<pre><code class="lang-javascript">const sidebarElement = document.getElementById('main-sidebar');
+const sidebarCtrl = webexpress.webui.Controller.getInstanceByElement(sidebarElement);
+
+if (sidebarCtrl) {
+    // activate compact view
+    sidebarCtrl.reduce();
+
+    // activate expanded view
+    sidebarCtrl.expand();
+}
+</code></pre>
+<h2 id="use-case-example">Use Case Example</h2>
+<p>The following example shows the declaration of a sidebar with various element types and overlay functionality:</p>
+<pre><code class="lang-html">&lt;div id=&quot;main-sidebar&quot;
+     class=&quot;wx-webui-sidebar&quot;
+     data-breakpoint=&quot;800&quot;&gt;
+
+    &lt;div class=&quot;wx-sidebar-header&quot; data-label=&quot;Navigation&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;wx-sidebar-link&quot; data-icon=&quot;fas fa-home&quot; data-label=&quot;Home&quot; data-uri=&quot;/&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;wx-sidebar-link&quot; data-icon=&quot;fas fa-user&quot; data-label=&quot;Profile&quot; data-uri=&quot;/profile&quot; data-removeable=&quot;true&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;wx-sidebar-separator&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;wx-sidebar-panel&quot; data-icon=&quot;fas fa-cog&quot; data-label=&quot;Settings&quot; data-mode=&quot;overlay&quot;&gt;
+        &lt;div&gt;
+            &lt;!-- Panel content for overlay --&gt;
+            &lt;form&gt;
+                &lt;label for=&quot;setting1&quot;&gt;Setting 1&lt;/label&gt;
+                &lt;input type=&quot;checkbox&quot; id=&quot;setting1&quot; /&gt;
+            &lt;/form&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;wx-sidebar-toolbar&quot;&gt;
+        &lt;!-- Toolbar content --&gt;
+        &lt;button type=&quot;button&quot;&gt;Support&lt;/button&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h2 id="events">Events</h2>
+<p>The SidebarCtrl component triggers the following events:</p>
+<ul>
+<li><strong>REMOVE_EVENT:</strong> When an element is removed.</li>
+<li><strong>SHOW_EVENT:</strong> When the sidebar or an overlay is shown.</li>
+<li><strong>HIDE_EVENT:</strong> When the sidebar or an overlay is hidden.</li>
+<li><strong>BREAKPOINT_CHANGE_EVENT:</strong> When switching between compact and expanded state.</li>
+</ul>
+<h2 id="summary">Summary</h2>
+<p>SidebarCtrl offers a structured and responsive sidebar with overlay panels, toolbar integration, removable elements, and extensive event handling. It is ideally suited for adaptive navigation structures in modern web applications.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/sidebar.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

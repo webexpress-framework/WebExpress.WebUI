@@ -51,7 +51,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFileList()
                 .Add(new ControlFileListItem()
                 {
-                    Name = name,
+                    Name = _ => name,
                 });
 
             // act
@@ -76,7 +76,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFileList()
                 .Add(new ControlFileListItem()
                 {
-                    Icon = icon is not null
+                    Icon = _ => icon is not null
                         ? Activator.CreateInstance(icon) as IIcon
                         : null
                 });
@@ -103,7 +103,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFileList()
                 .Add(new ControlFileListItem()
                 {
-                    Size = size,
+                    Size = _ => size,
                 });
 
             // act
@@ -128,7 +128,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFileList()
                 .Add(new ControlFileListItem()
                 {
-                    Description = description,
+                    Description = _ => description,
                 });
 
             // act

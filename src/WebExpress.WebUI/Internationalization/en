@@ -1,4 +1,4 @@
-﻿# Englisch
+﻿# en-US language resource file
 plugin.name=WebExpress.WebUI
 plugin.description=Provides basic components.
 
@@ -15,6 +15,10 @@ form.inputfile.validation.required=The text field must not be empty!
 form.inputtextbox.validation.required=The text field must not be empty!
 form.inputtextbox.validation.min=The text does not correspond to the minimum length of {0}!
 form.inputtextbox.validation.max=The text is larger than the maximum length of {0}!
+
+form.inputpassword.validation.required=The password field must not be empty!
+form.inputpassword.validation.min=The password does not meet the minimum length of {0} characters!
+form.inputpassword.validation.max=The password exceeds the maximum length of {0} characters!
 
 modal.close.label=Close
 
@@ -34,3 +38,6 @@ fileupload.header=Upload document
 fileupload.file.label=Document
 fileupload.file.description=Please select a document from your local device.
 fileupload.file.validation.error.nofile=No file was specified.
+
+darkmode.text.light=Activate dark mode
+darkmode.text.dark=Activate light mode

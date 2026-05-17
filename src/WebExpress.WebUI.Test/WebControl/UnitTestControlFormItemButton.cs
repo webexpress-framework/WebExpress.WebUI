@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButton()
             {
-                Text = text
+                Text = _ => text
             };
 
             // act
@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButton()
             {
-                Size = size
+                Size = _ => size
             };
 
             // act
@@ -95,6 +95,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<button type=""button"" class=""btn bg-danger""></button>")]
         [InlineData(TypeColorBackground.Dark, @"<button type=""button"" class=""btn bg-dark""></button>")]
         [InlineData(TypeColorBackground.Light, @"<button type=""button"" class=""btn bg-light""></button>")]
+        [InlineData(TypeColorBackground.Highlight, @"<button type=""button"" class=""btn bg-highlight""></button>")]
         [InlineData(TypeColorBackground.White, @"<button type=""button"" class=""btn bg-white""></button>")]
         [InlineData(TypeColorBackground.Transparent, @"<button type=""button"" class=""btn bg-transparent""></button>")]
         public void BackgroundColor(TypeColorBackground color, string expected)
@@ -106,7 +107,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButton()
             {
-                BackgroundColor = new PropertyColorBackground(color)
+                BackgroundColor = _ => new PropertyColorBackground(color)
             };
 
             // act
@@ -126,6 +127,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorButton.Danger, @"<button type=""button"" class=""btn btn-danger""></button>")]
         [InlineData(TypeColorButton.Dark, @"<button type=""button"" class=""btn btn-dark""></button>")]
         [InlineData(TypeColorButton.Light, @"<button type=""button"" class=""btn btn-light""></button>")]
+        [InlineData(TypeColorButton.Highlight, @"<button type=""button"" class=""btn btn-highlight""></button>")]
         public void Color(TypeColorButton color, string expected)
         {
             // arrange
@@ -135,7 +137,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButton()
             {
-                Color = new PropertyColorButton(color)
+                Color = _ => new PropertyColorButton(color)
             };
 
             // act
@@ -165,8 +167,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButton()
             {
-                Outline = outline,
-                Color = new PropertyColorButton(color)
+                Outline = _ => outline,
+                Color = _ => new PropertyColorButton(color)
             };
 
             // act
@@ -190,7 +192,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButton()
             {
-                Block = block
+                Block = _ => block
             };
 
             // act
@@ -214,7 +216,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemButton()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -234,17 +236,17 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control1 = new ControlFormItemButton(null, new ControlIcon() { Icon = new IconStar() });
-            var control2 = new ControlFormItemButton(null, [new ControlIcon() { Icon = new IconStar() }]);
-            var control3 = new ControlFormItemButton(null, new List<ControlIcon>([new ControlIcon() { Icon = new IconStar() }]).ToArray());
+            var control1 = new ControlFormItemButton(null, new ControlIcon() { Icon = _ => new IconStar() });
+            var control2 = new ControlFormItemButton(null, [new ControlIcon() { Icon = _ => new IconStar() }]);
+            var control3 = new ControlFormItemButton(null, new List<ControlIcon>([new ControlIcon() { Icon = _ => new IconStar() }]).ToArray());
             var control4 = new ControlFormItemButton(null);
             var control5 = new ControlFormItemButton(null);
             var control6 = new ControlFormItemButton(null);
 
             // act
-            control4.Add(new ControlIcon() { Icon = new IconStar() });
-            control5.Add([new ControlIcon() { Icon = new IconStar() }]);
-            control6.Add(new List<ControlIcon>([new ControlIcon() { Icon = new IconStar() }]));
+            control4.Add(new ControlIcon() { Icon = _ => new IconStar() });
+            control5.Add([new ControlIcon() { Icon = _ => new IconStar() }]);
+            control6.Add(new List<ControlIcon>([new ControlIcon() { Icon = _ => new IconStar() }]));
 
             var html1 = control1.Render(context, visualTree);
             var html2 = control2.Render(context, visualTree);

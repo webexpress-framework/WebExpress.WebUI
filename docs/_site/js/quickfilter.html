@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Quickfilter | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Quickfilter | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/quickfilter.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="quickfilter">Quickfilter</h1>
+<p>The Quickfilter component provides a highly responsive, client-side filtering system designed to manage and synchronize filter states across multiple UI elements without triggering immediate REST API calls. By centralizing the filter state within a dedicated browser registry (<code>webexpress.webui.FilterRegistry</code>), the system ensures that complex group rules—such as exclusive radio-button-like selections or multi-select combinations—are strictly enforced.</p>
+<p>Display components bind to this registry and react autonomously to state changes. Whether a component re-renders local data or decides to fetch new data from the server is entirely up to the consuming element. To ensure a persistent user experience, the registry automatically serializes the active filters and stores them safely in a debounced cookie. Upon initialization, the registry reads this cookie, validates the entries against a known list of allowed filters, and broadcasts the initial state so all UI components start consistently.</p>
+<pre><code>   ┌────────────────────────────────────────────────────────┐
+   │ [Group Reset] [Quickfilter 1] [Quickfilter 2 x]    [+] │
+   └────────────────────────────────────────────────────────┘
+</code></pre>
+<h2 id="initialization">Initialization</h2>
+<p>Initialization is handled declaratively by adding the <code>wx-webui-quickfilter</code> class to a host element. The control automatically connects to the global filter registry and listens for state changes.</p>
+<p>Within the host element, you can define static filter buttons. These are elements with the class <code>wx-quickfilter-button</code> that carry standard WebExpress action attributes. When the control initializes, it parses these static configurations, removes the initial static DOM nodes, and dynamically re-renders them as fully functional <code>wx-webui-button</code> instances alongside any currently active filter chips.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>wx-webui-quickfilter</code></td>
+<td>The controller class required on the host element to instantiate the Quickfilter control.</td>
+</tr>
+<tr>
+<td><code>wx-quickfilter-button</code></td>
+<td>Class used on child elements to define static filter buttons. These will be parsed and re-rendered dynamically.</td>
+</tr>
+<tr>
+<td><code>data-wx-primary-action</code></td>
+<td>Should be set to the corresponding registry action (e.g., <code>activate_quickfilter</code>).</td>
+</tr>
+<tr>
+<td><code>data-wx-primary-target</code></td>
+<td>The unique ID of the filter this button controls.</td>
+</tr>
+<tr>
+<td><code>data-wx-primary-group</code></td>
+<td>Optional. Assigns the filter to a specific group. Groups can be configured in the registry to be exclusive.</td>
+</tr>
+<tr>
+<td><code>data-wx-primary-reset</code></td>
+<td>Optional boolean (<code>true</code>). If set, the button acts as a reset trigger for its assigned group and will appear active when no other filters in that group are active.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="data-binding">Data Binding</h3>
+<p>Other components on the page that need to react to filter changes use an extensible binding schema. You specify <code>data-wx-bind=&quot;filter&quot;</code> to indicate that the component consumes filter data. If a binding type requires a specific source, an additional attribute in the format <code>data-wx-source-{Bindname}</code> is used. Since <code>filter</code> is a global state provided by the registry, no specific source attribute is strictly necessary, but the pattern ensures clean separation of data sources across the framework.</p>
+<h2 id="functionality">Functionality</h2>
+<p>When a user interacts with a Quickfilter button, the action delegates the request to the central filter registry. The registry updates its internal state, applying group exclusivity rules if necessary, and immediately writes the new state to the browser cookie.</p>
+<p>Once the state is updated, the registry dispatches a global <code>webexpress.webui.Event.CHANGE_FILTER_EVENT</code>. The <code>QuickFilterCtrl</code> listens to this event and completely re-renders its content. During the render cycle, it first recreates all predefined static buttons, automatically highlighting them as active if their corresponding filter is enabled (or if they serve as a reset button for a currently empty group). Afterwards, it generates removable chips for any active filters that are not already represented by a static button. These chips feature a close icon that directly triggers the deactivation of the respective filter.</p>
+<p>Because the component relies entirely on the central registry and events, you can place the Quickfilter UI anywhere on the page, and it will always remain perfectly synchronized with other filter controls and data views.</p>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>The component's visual state is driven entirely by the registry, but the UI controller instance itself can still be accessed programmatically if you need to manually trigger updates or interact with the DOM element.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const element = document.getElementById('my-quickfilter');
+
+// retrieve the controller instance associated with the element
+const quickfilterCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+</code></pre>
+<h3 id="manual-instantiation">Manual Instantiation</h3>
+<pre><code class="lang-javascript">// find the container element
+const container = document.getElementById('dynamic-quickfilter');
+
+// create a new instance of QuickFilterCtrl manually
+const dynamicQuickfilterCtrl = new webexpress.webui.QuickFilterCtrl(container);
+</code></pre>
+<h2 id="use-case-example">Use Case Example</h2>
+<p>The following example demonstrates how to set up a Quickfilter container with a set of predefined static buttons. It includes a reset button for a specific group, and an individual filter button.</p>
+<pre><code class="lang-html">&lt;!-- 
+  The host element initializes the QuickFilterCtrl. 
+  It listens to registry events and manages the display of buttons and chips.
+--&gt;
+&lt;div id=&quot;main-filter&quot; class=&quot;wx-webui-quickfilter&quot;&gt;
+    
+    &lt;!-- A static button acting as a default/reset for the &quot;status&quot; group --&gt;
+    &lt;button class=&quot;wx-quickfilter-button&quot;
+            data-wx-primary-action=&quot;activate_quickfilter&quot;
+            data-wx-primary-target=&quot;status_all&quot;
+            data-wx-primary-group=&quot;status&quot;
+            data-wx-primary-reset=&quot;true&quot;&gt;
+        All Statuses
+    &lt;/button&gt;
+
+    &lt;!-- A static button activating a specific filter in the &quot;status&quot; group --&gt;
+    &lt;button class=&quot;wx-quickfilter-button&quot;
+            data-wx-primary-action=&quot;activate_quickfilter&quot;
+            data-wx-primary-target=&quot;status_active&quot;
+            data-wx-primary-group=&quot;status&quot;&gt;
+        Active Only
+    &lt;/button&gt;
+    
+&lt;/div&gt;
+
+&lt;!-- 
+  A data list component binding to the filter state.
+  It will listen to the registry and append the active filter IDs to its own data requests.
+--&gt;
+&lt;div class=&quot;wx-webui-datalist&quot; 
+     data-wx-bind=&quot;filter&quot; 
+     data-wx-source-data=&quot;/api/items&quot;&gt;
+    &lt;!-- List content --&gt;
+&lt;/div&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/quickfilter.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

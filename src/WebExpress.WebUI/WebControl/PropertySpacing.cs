@@ -13,22 +13,22 @@ namespace WebExpress.WebUI.WebControl
         public enum Space { None, Null, One, Two, Three, Four, Five, Auto };
 
         /// <summary>
-        /// Returns the top spacing.
+        /// Gets the top spacing.
         /// </summary>
         public Space Top { get; private set; }
 
         /// <summary>
-        /// Returns the bottom spacing.
+        /// Gets the bottom spacing.
         /// </summary>
         public Space Bottom { get; private set; }
 
         /// <summary>
-        /// Returns the left spacing.
+        /// Gets the left spacing.
         /// </summary>
         public Space Left { get; private set; }
 
         /// <summary>
-        /// Returns the right spacing.
+        /// Gets the right spacing.
         /// </summary>
         public Space Right { get; private set; }
 

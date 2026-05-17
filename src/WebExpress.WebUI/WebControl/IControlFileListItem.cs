@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebCore.WebUri;
@@ -12,33 +12,38 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFileListItem : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the icon associated with this file.
+        /// Gets the icon associated with this file.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; }
 
         /// <summary>
-        /// Returns the name of the file, including its extension.
+        /// Gets or sets the image uri.
         /// </summary>
-        string Name { get; }
+        Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
-        /// Returns the uri of the file.
+        /// Gets the name of the file, including its extension.
         /// </summary>
-        IUri Uri { get; }
+        Func<IRenderControlContext, string> Name { get; }
 
         /// <summary>
-        /// Returns the size of the file in bytes.
+        /// Gets the uri of the file.
         /// </summary>
-        long Size { get; }
+        Func<IRenderControlContext, IUri> Uri { get; }
 
         /// <summary>
-        /// Returns the date of the file.
+        /// Gets the size of the file in bytes.
         /// </summary>
-        DateTime Date { get; }
+        Func<IRenderControlContext, long> Size { get; }
 
         /// <summary>
-        /// Returns the description associated with the file.
+        /// Gets the date of the file.
         /// </summary>
-        string Description { get; }
+        Func<IRenderControlContext, DateTime> Date { get; }
+
+        /// <summary>
+        /// Gets the description associated with the file.
+        /// </summary>
+        Func<IRenderControlContext, string> Description { get; }
     }
 }

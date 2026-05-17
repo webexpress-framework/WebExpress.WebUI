@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCombo(null)
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -96,7 +96,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCombo(null)
             {
-                Label = label
+                Label = _ => label
             };
 
             // act
@@ -120,7 +120,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCombo(null)
             {
-                Help = help
+                Help = _ => help
             };
 
             // act
@@ -144,7 +144,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCombo(null)
             {
-                Disabled = disabled
+                Disabled = _ => disabled
             };
 
             // act
@@ -165,7 +165,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCombo(null);
-            control.AddPrepend(new ControlText { Text = "prepend" });
+            control.AddPrepend(new ControlText { Text = _ => "prepend" });
 
             // act
             var html = control.Render(context, visualTree);
@@ -186,7 +186,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCombo(null);
-            control.AddPrepend(new ControlText { Text = "append" });
+            control.AddPrepend(new ControlText { Text = _ => "append" });
 
             // act
             var html = control.Render(context, visualTree);
@@ -210,7 +210,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputCombo(null)
             {
-                Tag = tag
+                Tag = _ => tag
             };
 
             // act

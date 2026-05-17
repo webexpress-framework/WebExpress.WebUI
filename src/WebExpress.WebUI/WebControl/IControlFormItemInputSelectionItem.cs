@@ -1,5 +1,7 @@
-﻿using WebExpress.WebCore.WebIcon;
+using System;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebPage;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -10,33 +12,38 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFormItemInputSelectionItem : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the text of the selection item.
+        /// Gets the text of the selection item.
         /// </summary>
-        string Text { get; }
+        Func<IRenderControlContext, string> Text { get; }
 
         /// <summary>
-        /// Returns the icon associated with the selection item.
+        /// Gets the icon associated with the selection item.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; }
 
         /// <summary>
-        /// Returns the color of the label.
+        /// Gets or sets the image uri.
         /// </summary>
-        TypeColorSelection LabelColor { get; }
+        Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
-        /// Returns a value indicating whether the selection item is selected.
+        /// Gets the color of the label.
         /// </summary>
-        bool Selected { get; }
+        Func<IRenderControlContext, TypeColorSelection> Color { get; }
 
         /// <summary>
-        /// Returns a value indicating whether the selection item is disabled.
+        /// Gets a value indicating whether the selection item is selected.
         /// </summary>
-        bool Disabled { get; }
+        Func<IRenderControlContext, bool> Selected { get; }
 
         /// <summary>
-        /// Returns the content of the selection item.
+        /// Gets a value indicating whether the selection item is disabled.
         /// </summary>
-        IControl Content { get; }
+        Func<IRenderControlContext, bool> Disabled { get; }
+
+        /// <summary>
+        /// Gets the content of the selection item.
+        /// </summary>
+        Func<IRenderControlContext, IControl> Content { get; }
     }
 }

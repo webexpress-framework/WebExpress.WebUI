@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
@@ -10,92 +11,87 @@ namespace WebExpress.WebUI.WebControl
     public interface IControl : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns or sets the horizontal alignment.
+        /// Gets or sets the horizontal alignment.
         /// </summary>
-        TypeHorizontalAlignment HorizontalAlignment { get; }
+        Func<IRenderControlContext, TypeHorizontalAlignment> HorizontalAlignment { get; }
 
         /// <summary>
-        /// Returns or sets the flex grow property of the control.
+        /// Gets or sets the flex grow property of the control.
         /// </summary>
-        TypeFlexGrow FlexGrow { get; }
+        Func<IRenderControlContext, TypeFlexGrow> FlexGrow { get; }
 
         /// <summary>
-        /// Returns or sets the text color.
+        /// Gets or sets the text color.
         /// </summary>
-        PropertyColorText TextColor { get; }
+        Func<IRenderControlContext, PropertyColorText> TextColor { get; }
 
         /// <summary>
-        /// Returns or sets the background color.
+        /// Gets or sets the background color.
         /// </summary>
-        PropertyColorBackground BackgroundColor { get; }
+        Func<IRenderControlContext, PropertyColorBackground> BackgroundColor { get; }
 
         /// <summary>
-        /// Returns or sets the border color.
+        /// Gets or sets the border color.
         /// </summary>
-        PropertyColorBorder BorderColor { get; }
+        Func<IRenderControlContext, PropertyColorBorder> BorderColor { get; }
 
         /// <summary>
-        /// Returns or sets the padding.
+        /// Gets or sets the padding.
         /// </summary>
-        PropertySpacingPadding Padding { get; }
+        Func<IRenderControlContext, PropertySpacingPadding> Padding { get; }
 
         /// <summary>
-        /// Returns or sets the margin.
+        /// Gets or sets the margin.
         /// </summary>
-        PropertySpacingMargin Margin { get; }
+        Func<IRenderControlContext, PropertySpacingMargin> Margin { get; }
 
         /// <summary>
-        /// Returns or sets the border.
+        /// Gets or sets the border.
         /// </summary>
-        PropertyBorder Border { get; }
+        Func<IRenderControlContext, PropertyBorder> Border { get; }
 
         /// <summary>
-        /// Returns or sets the column property if the control is on a grid.
+        /// Gets or sets the column property if the control is on a grid.
         /// </summary>
-        PropertyGrid GridColumn { get; }
+        Func<IRenderControlContext, PropertyGrid> GridColumn { get; }
 
         /// <summary>
-        /// Returns or sets the width property of the control.
+        /// Gets or sets the width property of the control.
         /// </summary>
-        TypeWidth Width { get; }
+        Func<IRenderControlContext, TypeWidth> Width { get; }
 
         /// <summary>
-        /// Returns or sets the height property of the control.
+        /// Gets or sets the height property of the control.
         /// </summary>
-        TypeHeight Height { get; }
+        Func<IRenderControlContext, TypeHeight> Height { get; }
 
         /// <summary>
-        /// Returns or sets the display type for the current object.
+        /// Gets or sets the display type for the current object.
         /// </summary>
         /// <remarks>
         /// This property determines how the object is visually represented. Setting this
         /// property may involve converting the value to a class representation.
         /// </remarks>
-        TypeDisplay Display { get; }
+        Func<IRenderControlContext, TypeDisplay> Display { get; }
 
         /// <summary>
-        /// Returns or sets the css class.
+        /// Gets or sets the css class.
         /// </summary>
         IEnumerable<string> Classes { get; }
 
         /// <summary>
-        /// Returns or sets the css style.
+        /// Gets or sets the css style.
         /// </summary>
         IEnumerable<string> Styles { get; }
 
         /// <summary>
-        /// Returns or sets the role.
+        /// Gets or sets the role.
         /// </summary>
-        string Role { get; }
-
-        /// <summary>
-        /// Returns or sets the OnClick attribute, which executes a java script on the client.
-        /// </summary>
-        PropertyOnClick OnClick { get; }
+        Func<IRenderControlContext, string> Role { get; }
 
         /// <summary>
         /// Determines whether the control is active and rendering.
         /// </summary>
-        bool Enable { get; }
+        Func<IRenderControlContext, bool> Enable { get; }
     }
 }

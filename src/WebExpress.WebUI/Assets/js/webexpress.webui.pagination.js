@@ -58,7 +58,7 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
             this._page = page;
             changed = true;
         }
-        
+
         if (changed) {
             // re-render but do NOT dispatch events
             this.render();
@@ -121,8 +121,8 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
                 return;
             }
 
-            this.page = page; 
-            
+            this.page = page;
+
             this._dispatch(webexpress.webui.Event.CLICK_EVENT, {
                 index: page
             });

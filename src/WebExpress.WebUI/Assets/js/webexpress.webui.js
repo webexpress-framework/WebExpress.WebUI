@@ -1,11 +1,11 @@
-﻿var webexpress = webexpress || {}
+var webexpress = webexpress || {}
 webexpress.webui = webexpress.webui || {}
 
 /**
  * Namespace webexpress.webui
  * The Controller class monitors changes in the DOM and creates instances
- * of registered classes for new DOM elements. These instances are managed 
- * in a map and are removed from the map when the corresponding DOM 
+ * of registered classes for new DOM elements. These instances are managed
+ * in a map and are removed from the map when the corresponding DOM
  * elements are removed.
  */
 webexpress.webui.Controller = new class {
@@ -17,7 +17,7 @@ webexpress.webui.Controller = new class {
         this.classRegistry = new Map();
         this._wxRegisteredElements = new WeakSet(); // prevent duplicate bindings
         this.observer = new MutationObserver(this.handleMutations.bind(this));
-        
+
         // observe attribute changes
         this.observer.observe(document, {
             childList: true,
@@ -27,25 +27,29 @@ webexpress.webui.Controller = new class {
                 "data-wx-primary-action",
                 "data-wx-secondary-action",
                 "data-wx-dismiss",
-                "data-wx-bind"
+                "data-wx-bind",
+                "data-wx-bind-icon-light",
+                "data-wx-bind-icon-dark",
+                "data-wx-bind-text-light",
+                "data-wx-bind-text-dark"
             ]
         });
-        
+
         this.overrideCreateElement();
         this.initModalHandler();
 
         // re-added native fullscreen listeners
-        document.addEventListener("fullscreenchange", () => { 
-            this._onFullscreenChange(); 
+        document.addEventListener("fullscreenchange", () => {
+            this._onFullscreenChange();
         });
-        document.addEventListener("webkitfullscreenchange", () => { 
-            this._onFullscreenChange(); 
+        document.addEventListener("webkitfullscreenchange", () => {
+            this._onFullscreenChange();
         });
-        document.addEventListener("mozfullscreenchange", () => { 
-            this._onFullscreenChange(); 
+        document.addEventListener("mozfullscreenchange", () => {
+            this._onFullscreenChange();
         });
-        document.addEventListener("MSFullscreenChange", () => { 
-            this._onFullscreenChange(); 
+        document.addEventListener("MSFullscreenChange", () => {
+            this._onFullscreenChange();
         });
     }
 
@@ -98,235 +102,34 @@ webexpress.webui.Controller = new class {
 
         let bound = false;
 
-        // primary actions
-        // modal
-        if (element.matches("[data-wx-primary-action='modal']")) {
-            element.addEventListener("click", () => {
-                const target = element.getAttribute("data-wx-primary-target") || null;
-                const uri = element.getAttribute("data-wx-primary-uri") || null;
-                const size = element.getAttribute("data-wx-primary-size") || null;
-                const instance = this.getInstance(target);
-
-                if (!instance) {
-                    // no instance found
-                } else if (typeof instance.show === "function") {
-                    if (size) {
-                        instance.size = size;
-                    }
-                    if (uri) {
-                        instance.uri = uri;
-                    }
-                    instance.show();
+        // primary actions – delegate to the Actions registry
+        const primaryAction = element.getAttribute("data-wx-primary-action");
+        if (primaryAction) {
+            const actionDef = webexpress.webui.Actions.get(primaryAction);
+            if (actionDef) {
+                element.addEventListener("click", (e) => {
+                    actionDef.execute(element, "primary", this, e);
+                });
+                if (typeof actionDef.init === "function") {
+                    actionDef.init(element, "primary", this);
                 }
-            });
-            bound = true;
+                bound = true;
+            }
         }
 
-        // frame
-        if (element.matches("[data-wx-primary-action='frame']")) {
-            element.addEventListener("click", () => {
-                const target = element.getAttribute("data-wx-primary-target") || null;
-                const uri = element.getAttribute("data-wx-primary-uri") || null;
-                const instance = this.getInstance(target);
-
-                if (!instance) {
-                    // no instance found
-                } else if (uri) {
-                    instance.uri = uri;
+        // secondary actions – delegate to the Actions registry
+        const secondaryAction = element.getAttribute("data-wx-secondary-action");
+        if (secondaryAction) {
+            const actionDef = webexpress.webui.Actions.get(secondaryAction);
+            if (actionDef) {
+                element.addEventListener("dblclick", (e) => {
+                    actionDef.execute(element, "secondary", this, e);
+                });
+                if (typeof actionDef.init === "function") {
+                    actionDef.init(element, "secondary", this);
                 }
-            });
-            bound = true;
-        }
-
-        // split
-        if (element.matches("[data-wx-primary-action='split']")) {
-            element.addEventListener("click", () => {
-                const target = element.getAttribute("data-wx-primary-target");
-                const instance = this.getInstance(target);
-                if (instance && typeof instance.toggleSidePane === "function") {
-                    instance.toggleSidePane();
-                }
-            });
-
-            document.addEventListener(webexpress.webui.Event.HIDE_EVENT, (e) => {
-                if (e.detail.sender === element) {
-                    const target = element.getAttribute("data-wx-primary-target");
-                    const instance = this.getInstance(target);
-                    if (instance) {
-                        instance.collapsed = true;
-                    }
-                }
-            });
-
-            document.addEventListener(webexpress.webui.Event.SHOW_EVENT, (e) => {
-                if (e.detail.sender === element) {
-                    const target = element.getAttribute("data-wx-primary-target");
-                    const instance = this.getInstance(target);
-                    if (instance) {
-                        instance.collapsed = false;
-                    }
-                }
-            });
-            bound = true;
-        }
-        
-        // css fullscreen toggle support
-        if (element.matches("[data-wx-primary-action='fullscreen']")) {
-            element.addEventListener("click", (e) => {
-                e.preventDefault();
-                e.stopPropagation(); // stop bubbling to prevent parent handlers from closing
-
-                const targetSelector = element.getAttribute("data-wx-primary-target");
-                // default to body if no target is specified
-                const targetEl = targetSelector ? document.querySelector(targetSelector) : document.body;
-                
-                if (targetEl) {
-                    this.toggleFullscreen(targetEl);
-                } else {
-                    console.warn("Fullscreen target not found:", targetSelector);
-                }
-            });
-            element.setAttribute("aria-pressed", "false");
-            bound = true;
-        }
-
-        // native browser fullscreen toggle support
-        if (element.matches("[data-wx-primary-action='native-fullscreen']")) {
-            element.addEventListener("click", (e) => {
-                e.preventDefault();
-                const targetSelector = element.getAttribute("data-wx-primary-target") || null;
-                const targetEl = targetSelector ? document.querySelector(targetSelector) : document.documentElement;
-                
-                if (targetEl) {
-                    this.toggleNativeFullscreen(targetEl);
-                }
-            });
-            element.setAttribute("aria-pressed", "false");
-            bound = true;
-        }
-        
-        // quickfilter actions
-        if (element.matches("[data-wx-primary-action='filter']")) {
-            element.addEventListener("click", (e) => {
-                e.preventDefault();
-                webexpress.webui.FilterRegistry.toggle(element.id);
-            });
-            bound = true;
-        }
-
-        // secondary actions
-        // modal
-        if (element.matches("[data-wx-secondary-action='modal']")) {
-            element.addEventListener("dblclick", () => {
-                const target = element.getAttribute("data-wx-secondary-target") || null;
-                const uri = element.getAttribute("data-wx-secondary-uri") || null;
-                const size = element.getAttribute("data-wx-secondary-size") || null;
-                const instance = this.getInstance(target);
-
-                if (!instance) {
-                    // no instance found
-                } else if (typeof instance.show === "function") {
-                    if (size) {
-                        instance.size = size;
-                    }
-                    if (uri) {
-                        instance.uri = uri;
-                    }
-                    instance.show();
-                }
-            });
-            bound = true;
-        }
-
-        // frame
-        if (element.matches("[data-wx-secondary-action='frame']")) {
-            element.addEventListener("dblclick", () => {
-                const target = element.getAttribute("data-wx-secondary-target") || null;
-                const uri = element.getAttribute("data-wx-secondary-uri") || null;
-                const instance = this.getInstance(target);
-
-                if (!instance) {
-                    // no instance found
-                } else if (uri) {
-                    instance.uri = uri;
-                }
-            });
-            bound = true;
-        }
-
-        // split
-        if (element.matches("[data-wx-secondary-action='split']")) {
-            element.addEventListener("dblclick", () => {
-                const target = element.getAttribute("data-wx-secondary-target");
-                const instance = this.getInstance(target);
-                if (instance && typeof instance.toggleSidePane === "function") {
-                    instance.toggleSidePane();
-                }
-            });
-
-            document.addEventListener(webexpress.webui.Event.HIDE_EVENT, (e) => {
-                if (e.detail.sender === element) {
-                    const target = element.getAttribute("data-wx-secondary-target");
-                    const instance = this.getInstance(target);
-                    if (instance) {
-                        instance.collapsed = true;
-                    }
-                }
-            });
-
-            document.addEventListener(webexpress.webui.Event.SHOW_EVENT, (e) => {
-                if (e.detail.sender === element) {
-                    const target = element.getAttribute("data-wx-secondary-target");
-                    const instance = this.getInstance(target);
-                    if (instance) {
-                        instance.collapsed = false;
-                    }
-                }
-            });
-            bound = true;
-        }
-
-        // css fullscreen toggle support
-        if (element.matches("[data-wx-secondary-action='fullscreen']")) {
-            element.addEventListener("dblclick", (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-
-                const targetSelector = element.getAttribute("data-wx-secondary-target");
-                const targetEl = targetSelector ? document.querySelector(targetSelector) : document.body;
-
-                if (targetEl) {
-                    this.toggleFullscreen(targetEl);
-                } else {
-                    console.warn("Fullscreen target not found:", targetSelector);
-                }
-            });
-            element.setAttribute("aria-pressed", "false");
-            bound = true;
-        }
-
-        // native browser fullscreen toggle support
-        if (element.matches("[data-wx-secondary-action='native-fullscreen']")) {
-            element.addEventListener("dblclick", (e) => {
-                e.preventDefault();
-                const targetSelector = element.getAttribute("data-wx-secondary-target") || null;
-                const targetEl = targetSelector ? document.querySelector(targetSelector) : document.documentElement;
-
-                if (targetEl) {
-                    this.toggleNativeFullscreen(targetEl);
-                }
-            });
-            element.setAttribute("aria-pressed", "false");
-            bound = true;
-        }
-
-        // quickfilter actions
-        if (element.matches("[data-wx-secondary-action='filter']")) {
-            element.addEventListener("dblclick", (e) => {
-                e.preventDefault();
-                webexpress.webui.FilterRegistry.toggle(element.id);
-            });
-            bound = true;
+                bound = true;
+            }
         }
 
         // dismiss actions
@@ -356,7 +159,7 @@ webexpress.webui.Controller = new class {
             element.addEventListener("click", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                this._exitNativeFullscreen(); 
+                this._exitNativeFullscreen();
             });
             bound = true;
         }
@@ -371,7 +174,12 @@ webexpress.webui.Controller = new class {
             });
 
             binds.forEach((bindName) => {
-                this._registerBind(element, bindName);
+                const bindDef = webexpress.webui.Binds.get(bindName);
+                if (bindDef) {
+                    bindDef.bind(element, this);
+                } else {
+                    console.warn(`Bind "${bindName}" is not registered.`);
+                }
             });
 
             bound = true;
@@ -439,7 +247,7 @@ webexpress.webui.Controller = new class {
             }
         }
     }
-    
+
     /**
      * Creates an instance from a registered classType string and a DOM element.
      * @param {string} classType - The registered class name (selector).
@@ -527,7 +335,7 @@ webexpress.webui.Controller = new class {
         if (element._wx_controller) {
             return element._wx_controller;
         }
-        
+
         if (this.instanceMap.has(element)) {
             const instance = this.instanceMap.get(element);
             if (ClassConstructor) {
@@ -555,16 +363,16 @@ webexpress.webui.Controller = new class {
         }
         return null;
     }
-    
+
     /**
      * Toggles "light" fullscreen state (CSS based) for the provided element.
      * @param {HTMLElement} el - target element to toggle fullscreen for
      */
     toggleFullscreen(el) {
-        if (!el) { 
-            return; 
+        if (!el) {
+            return;
         }
-        
+
         const isFullscreen = el.classList.toggle("wx-fullscreen-active");
 
         if (isFullscreen) {
@@ -584,8 +392,8 @@ webexpress.webui.Controller = new class {
      * @param {HTMLElement} el - target element
      */
     toggleNativeFullscreen(el) {
-        if (!el) { 
-            return; 
+        if (!el) {
+            return;
         }
         if (this._isNativeFullscreenElement(el)) {
             this._exitNativeFullscreen();
@@ -650,11 +458,11 @@ webexpress.webui.Controller = new class {
      */
     _onFullscreenChange(changedEl) {
         const nativeFsEl = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement || null;
-        
+
         document.querySelectorAll("[data-wx-primary-action='fullscreen']").forEach((btn) => {
             const targetSelector = btn.getAttribute("data-wx-primary-target") || null;
             const target = targetSelector ? document.querySelector(targetSelector) : document.documentElement;
-            
+
             const active = target && this._isCssFullscreenElement(target);
             this._updateButtonState(btn, active);
         });
@@ -662,7 +470,7 @@ webexpress.webui.Controller = new class {
         document.querySelectorAll("[data-wx-primary-action='native-fullscreen']").forEach((btn) => {
             const targetSelector = btn.getAttribute("data-wx-primary-target") || null;
             const target = targetSelector ? document.querySelector(targetSelector) : document.documentElement;
-            
+
             const active = target && (nativeFsEl === target);
             this._updateButtonState(btn, active);
         });
@@ -684,16 +492,14 @@ webexpress.webui.Controller = new class {
      */
     _updateButtonState(btn, active) {
         btn.setAttribute("aria-pressed", active ? "true" : "false");
-        
+
         if (active) {
             btn.setAttribute("data-wx-fullscreen-active", "true");
             const icon = btn.querySelector("i");
             if (icon) {
                 if (icon.classList.contains("fa-expand")) {
                     icon.classList.replace("fa-expand", "fa-compress");
-                    if (btn.title && btn.title.includes("Toggle")) {
-                        btn.title = "Exit Fullscreen";
-                    }
+                    btn.title = webexpress.webui.I18N.translate("webexpress.webui:fullscreen.exit");
                 }
             }
         } else {
@@ -702,65 +508,12 @@ webexpress.webui.Controller = new class {
             if (icon) {
                 if (icon.classList.contains("fa-compress")) {
                     icon.classList.replace("fa-compress", "fa-expand");
-                     if (btn.title && btn.title.includes("Exit")) {
-                        btn.title = "Toggle Fullscreen";
-                    }
+                    btn.title = webexpress.webui.I18N.translate("webexpress.webui:fullscreen.toggle");
                 }
             }
         }
     }
-    
-    /**
-     * Registers a single bind type for a given element.
-     * @param {HTMLElement} element - The bound DOM element.
-     * @param {string} bindName - The bind type identifier.
-     */
-    _registerBind(element, bindName) {
-        const sourceSelector = element.getAttribute(`data-wx-source-${bindName}`) ||
-            element.getAttribute("data-wx-source");
 
-        if (sourceSelector) {
-            const sourceElement = document.querySelector(sourceSelector);
-
-            if (!sourceElement) {
-                console.warn(`Source element not found for bind "${bindName}":`, sourceSelector);
-                return;
-            }
-
-            if (bindName == "search") {
-                sourceElement?.addEventListener(webexpress.webui.Event.CHANGE_FILTER_EVENT, (e) => {
-                    const query = e.detail?.value;
-                    const searchType = e.detail?.searchType;
-                    const instance = this.getInstanceByElement(element);
-                    if (typeof instance?.search === "function") {
-                        instance.search(query, searchType);
-                    }
-                });
-                return;
-            } else if (bindName == "paging") {
-                sourceElement?.addEventListener(webexpress.webui.Event.CHANGE_PAGE_EVENT, (e) => {
-                    const page = e.detail?.page;
-                    const instance = this.getInstanceByElement(element);
-                    if (typeof instance?.search === "function") {
-                        instance.paging(page);
-                    }
-                });
-                return;
-            } 
-        }
-
-        if (bindName == "filter") {
-            document?.addEventListener(webexpress.webui.Event.CHANGE_FILTER_EVENT, (e) => {
-                const instance = this.getInstanceByElement(element);
-                if (typeof instance?.filter === "function") {
-                    instance.filter(webexpress.webui.FilterRegistry.getActiveFilters());
-                } else {
-                    element.dispatchEvent(new Event("change", { bubbles: true }));
-                }
-            });
-        }
-    }
-    
     /**
      * Registers a quickfilter definition in the global FilterRegistry based on the given element.
      * Extracts relevant filter properties (id, name, group, exclusive) from the element's data attributes.
@@ -1109,6 +862,122 @@ webexpress.webui.FilterRegistry = new class {
 };
 
 /**
+ * Central singleton that tracks the current color scheme (light or dark),
+ * persists it to a cookie, applies it to the root element via
+ * <c>data-bs-theme</c>, and notifies observers via
+ * <c>webexpress.webui.Event.CHANGE_DARKMODE_EVENT</c>.
+ */
+webexpress.webui.DarkMode = new class {
+    /**
+     * Creates a new instance of the class.
+     */
+    constructor() {
+        this._cookieName = "wx_darkmode";
+        this._cookieMaxAgeDays = 365;
+        this._current = this._resolveInitialMode();
+
+        // apply the resolved mode so the cookie wins over the server-rendered default
+        this._apply(this._current);
+    }
+
+    /**
+     * Gets the current color mode.
+     * @returns {"light"|"dark"} The currently active mode.
+     */
+    get current() {
+        return this._current;
+    }
+
+    /**
+     * Sets the current color mode, updates the root element, persists the
+     * cookie and notifies observers. A no-op if the mode is unchanged.
+     * @param {"light"|"dark"} mode - The mode to switch to.
+     */
+    set current(mode) {
+        const normalized = mode === "dark" ? "dark" : "light";
+        if (normalized === this._current) {
+            return;
+        }
+        this._current = normalized;
+        this._apply(normalized);
+        this._writeCookie(normalized);
+        this._notify(normalized);
+    }
+
+    /**
+     * Toggles between the light and dark color modes.
+     * @returns {"light"|"dark"} The newly active mode.
+     */
+    toggle() {
+        this.current = this._current === "dark" ? "light" : "dark";
+        return this._current;
+    }
+
+    /**
+     * Determines the initial mode: cookie first, then the server-rendered
+     * attribute on the root element, then falling back to "light".
+     * @returns {"light"|"dark"} The initial mode.
+     */
+    _resolveInitialMode() {
+        const fromCookie = this._readCookie();
+        if (fromCookie === "dark" || fromCookie === "light") {
+            return fromCookie;
+        }
+        const attr = document.documentElement.getAttribute("data-bs-theme");
+        return attr === "dark" ? "dark" : "light";
+    }
+
+    /**
+     * Applies the given mode to the root element's <c>data-bs-theme</c>.
+     * @param {"light"|"dark"} mode - The mode to apply.
+     */
+    _apply(mode) {
+        document.documentElement.setAttribute("data-bs-theme", mode);
+    }
+
+    /**
+     * Dispatches the change event on the document.
+     * @param {"light"|"dark"} mode - The new mode.
+     */
+    _notify(mode) {
+        document.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_DARKMODE_EVENT, {
+            detail: { mode: mode },
+            bubbles: true
+        }));
+    }
+
+    /**
+     * Persists the given mode to the document cookie.
+     * @param {"light"|"dark"} mode - The mode to persist.
+     */
+    _writeCookie(mode) {
+        const date = new Date();
+        date.setTime(date.getTime() + (this._cookieMaxAgeDays * 24 * 60 * 60 * 1000));
+        const expires = "expires=" + date.toUTCString();
+        document.cookie = this._cookieName + "=" + encodeURIComponent(mode) + ";" + expires + ";path=/;SameSite=Strict";
+    }
+
+    /**
+     * Reads the persisted mode from the document cookie.
+     * @returns {string} The decoded cookie value or an empty string.
+     */
+    _readCookie() {
+        const nameEq = this._cookieName + "=";
+        const ca = document.cookie.split(";");
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === " ") {
+                c = c.substring(1, c.length);
+            }
+            if (c.indexOf(nameEq) === 0) {
+                return decodeURIComponent(c.substring(nameEq.length, c.length));
+            }
+        }
+        return "";
+    }
+};
+
+/**
  * Internationalization (i18n) helper class supporting key=value files.
  */
 webexpress.webui.I18N = new class {
@@ -1130,10 +999,10 @@ webexpress.webui.I18N = new class {
      */
     _detectBrowserLanguage() {
         if (navigator.language) {
-            return navigator.language.split('-')[0].toLowerCase();
+            return navigator.language.split("-")[0].toLowerCase();
         }
         if (navigator.languages && navigator.languages.length > 0) {
-            return navigator.languages[0].split('-')[0].toLowerCase();
+            return navigator.languages[0].split("-")[0].toLowerCase();
         }
         return "en";
     }
@@ -1230,7 +1099,7 @@ webexpress.webui.Syntax = new class {
 
         // store language-specific syntax configurations in syntax object
         this.syntax[language] = syntax || {};
-        
+
         // optional: Store under alias if provided
         if (alias) {
             this.syntax[alias] = syntax || {};
@@ -1250,6 +1119,252 @@ webexpress.webui.Syntax = new class {
 
         // return the syntax configuration for the given language or null if not found
         return this.syntax[language] || null;
+    }
+};
+
+/**
+ * Registry for action plugins.
+ * Allows actions to be extended freely from external files.
+ * Each action is identified by a name (e.g. "modal", "frame") and provides
+ * an execute callback that is invoked when the action is triggered.
+ */
+webexpress.webui.Actions = new class {
+    /**
+     * Creates a new instance of the class.
+     */
+    constructor() {
+        this._actions = {};
+    }
+
+    /**
+     * Registers a new action.
+     * @param {string} name - The unique action name (e.g. "modal", "frame").
+     * @param {object} definition - The action definition object.
+     * @param {Function} definition.execute - Called when the action is triggered.
+     *   Receives (element, prefix, controller, event) where prefix is "primary" or "secondary".
+     * @param {Function} [definition.init] - Optional initialization hook called once per element binding.
+     * @returns {this} The registry instance for chaining.
+     */
+    register(name, definition) {
+        if (!name || !definition) return this;
+
+        this._actions[name] = definition;
+        return this;
+    }
+
+    /**
+     * Retrieves an action definition by name.
+     * @param {string} name - The action name.
+     * @returns {object|null} The action definition or null if not found.
+     */
+    get(name) {
+        if (typeof name !== "string" || name.trim() === "") {
+            return null;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(this._actions, name)) {
+            return this._actions[name];
+        }
+
+        return null;
+    }
+
+    /**
+     * Checks whether an action is registered.
+     * @param {string} name - The action name.
+     * @returns {boolean} True if registered.
+     */
+    has(name) {
+        return Object.prototype.hasOwnProperty.call(this._actions, name);
+    }
+
+    /**
+     * Returns all registered action names.
+     * @returns {Array<string>} List of action names.
+     */
+    getAll() {
+        return Object.keys(this._actions);
+    }
+
+    /**
+     * Unregisters an action by name.
+     * @param {string} name - The action name to remove.
+     * @returns {void}
+     */
+    unregister(name) {
+        if (typeof name !== "string" || name.trim() === "") {
+            return;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(this._actions, name)) {
+            delete this._actions[name];
+        }
+    }
+
+    /**
+     * Clears the entire registry.
+     * @returns {void}
+     */
+    clear() {
+        this._actions = {};
+    }
+};
+
+/**
+ * Registry for bind plugins.
+ * Allows bindings to be extended freely from external files.
+ * Each bind is identified by a name (e.g. "filter", "darkmode") and provides
+ * a bind callback that is invoked once per element when the binding is registered.
+ */
+webexpress.webui.Binds = new class {
+    /**
+     * Creates a new instance of the class.
+     */
+    constructor() {
+        this._binds = {};
+    }
+
+    /**
+     * Registers a new bind.
+     * @param {string} name - The unique bind name (e.g. "filter", "darkmode").
+     * @param {object} definition - The bind definition object.
+     * @param {Function} definition.bind - Called once when the binding is established for an element.
+     *   Receives (element, controller) where element carries all data-wx-bind-* attributes.
+     * @returns {this} The registry instance for chaining.
+     */
+    register(name, definition) {
+        if (!name || !definition) return this;
+
+        this._binds[name] = definition;
+        return this;
+    }
+
+    /**
+     * Retrieves a bind definition by name.
+     * @param {string} name - The bind name.
+     * @returns {object|null} The bind definition or null if not found.
+     */
+    get(name) {
+        if (typeof name !== "string" || name.trim() === "") {
+            return null;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(this._binds, name)) {
+            return this._binds[name];
+        }
+
+        return null;
+    }
+
+    /**
+     * Checks whether a bind is registered.
+     * @param {string} name - The bind name.
+     * @returns {boolean} True if registered.
+     */
+    has(name) {
+        return Object.prototype.hasOwnProperty.call(this._binds, name);
+    }
+
+    /**
+     * Returns all registered bind names.
+     * @returns {Array<string>} List of bind names.
+     */
+    getAll() {
+        return Object.keys(this._binds);
+    }
+
+    /**
+     * Unregisters a bind by name.
+     * @param {string} name - The bind name to remove.
+     * @returns {void}
+     */
+    unregister(name) {
+        if (typeof name !== "string" || name.trim() === "") {
+            return;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(this._binds, name)) {
+            delete this._binds[name];
+        }
+    }
+
+    /**
+     * Clears the entire registry.
+     * @returns {void}
+     */
+    clear() {
+        this._binds = {};
+    }
+};
+
+/**
+ * Global icon-theme registry.
+ *
+ * The active theme is bound to the document root via
+ * <c>&lt;html data-icon-theme="light"&gt;</c>. When the attribute is missing
+ * or set to anything other than "light", the page is rendered in the
+ * default theme (FontAwesome glyphs). The light theme switches to the
+ * lightweight SVG variants defined in webexpress.webui.icon.css
+ * (the <c>wx-icon-light wx-icon-light-*</c> class pair).
+ *
+ * Controls should not read the document attribute directly; both
+ * <see cref="webexpress.webui.Ctrl#_iconTheme">_iconTheme()</see> and
+ * <see cref="webexpress.webui.Ctrl#_iconClass">_iconClass(fa, light)</see>
+ * are forwarded to this singleton, which also implements the
+ * cross-theme fallback (use FontAwesome when no light variant exists
+ * and vice versa).
+ */
+webexpress.webui.IconTheme = new class {
+    /**
+     * Returns the active icon theme as read from
+     * <c>document.documentElement.dataset.iconTheme</c>.
+     * @returns {"light" | "default"} The current icon theme.
+     */
+    current() {
+        const root = (typeof document !== "undefined") ? document.documentElement : null;
+        const value = (root?.dataset?.iconTheme || "").trim().toLowerCase();
+        return value === "light" ? "light" : "default";
+    }
+
+    /**
+     * Resolves an icon CSS class for the active theme with cross-theme
+     * fallback. When the active theme is "light", the light class is
+     * preferred; the FontAwesome class is used as a fallback when no light
+     * variant has been supplied. The reverse applies for the default theme.
+     *
+     * The light argument accepts either a full class string
+     * ("wx-icon-light wx-icon-light-pen") or the bare icon name
+     * ("pen"); in the latter case the "wx-icon-light wx-icon-light-"
+     * prefix is added automatically.
+     *
+     * @param {string|null|undefined} faClass - FontAwesome class string.
+     * @param {string|null|undefined} lightClass - Light-theme class or name.
+     * @returns {string} The resolved CSS class, or "" when both are empty.
+     */
+    resolve(faClass, lightClass) {
+        const fa = (faClass || "").trim();
+        const lightFull = this._normalizeLight(lightClass);
+
+        if (this.current() === "light") {
+            return lightFull || fa || "";
+        }
+        return fa || lightFull || "";
+    }
+
+    /**
+     * Normalises a light-theme value into a full CSS class string. Accepts
+     * either an already-prefixed class ("wx-icon-light wx-icon-light-foo"),
+     * just the modifier class ("wx-icon-light-foo") or the bare icon name
+     * ("foo").
+     * @param {string|null|undefined} value - Raw light-theme value.
+     * @returns {string} The full class string or "".
+     */
+    _normalizeLight(value) {
+        const v = (value || "").trim();
+        if (!v) return "";
+        if (v.startsWith("wx-icon-light ")) return v;
+        if (v.startsWith("wx-icon-light-")) return `wx-icon-light ${v}`;
+        return `wx-icon-light wx-icon-light-${v}`;
     }
 };
 
@@ -1288,10 +1403,10 @@ webexpress.webui.EditorPlugins = new class {
 
         if (!name || !definition) return this;
 
-        this._plugins.push({ 
-            name: name, 
+        this._plugins.push({
+            name: name,
             position: position,
-            definition: definition 
+            definition: definition
         });
 
         // ensure plugins are sorted by position
@@ -1342,9 +1457,9 @@ webexpress.webui.EditorAddOns = new class {
         // ensure the ID is included in the definition object for downstream usage
         definition.id = id;
 
-        this._addOns.push({ 
-            id: id, 
-            definition: definition 
+        this._addOns.push({
+            id: id,
+            definition: definition
         });
         return this;
     }
@@ -1386,6 +1501,103 @@ webexpress.webui.EditorAddOns = new class {
      */
     clear() {
         this._addOns = [];
+    }
+};
+
+/**
+ * Registry for editor slash commands and inline triggers.
+ */
+webexpress.webui.EditorShortcuts = new class {
+    /**
+     * Creates a new instance of the registry.
+     */
+    constructor() {
+        this._shortcuts = {};
+    }
+
+    /**
+     * Registers a new shortcut. Re-registering the same id replaces the entry.
+     * @param {string} id - Unique identifier for the shortcut (e.g. "insert.date").
+     * @param {object} definition - The shortcut definition object.
+     * @param {string} definition.label - Display name shown in the slash menu.
+     * @param {string} [definition.description] - Optional secondary line.
+     * @param {string} [definition.icon] - FontAwesome icon class. Defaults to 'fas fa-bolt'.
+     * @param {string} [definition.category] - Group header in the menu. Defaults to 'General'.
+     * @param {Array<string>} [definition.keywords] - Extra search terms.
+     * @param {Function} [definition.execute] - Handler called with (editor).
+     * @param {string} [definition.tag] - Alternative: applies formatBlock(<tag>).
+     * @param {string} [definition.cmd] - Alternative: runs execCommand(cmd).
+     * @param {string} [definition.cmdArg] - Optional argument to execCommand.
+     * @param {string} [definition.html] - Alternative: insertHtmlAtCursor(html).
+     * @returns {this} The registry instance for chaining.
+     */
+    register(id, definition) {
+        if (!id || !definition) {
+            return this;
+        }
+
+        // ensure the id is included in the definition object for downstream usage
+        definition.id = id;
+
+        this._shortcuts[id] = definition;
+        return this;
+    }
+
+    /**
+     * Retrieves a specific shortcut definition by id.
+     * @param {string} id - The shortcut id.
+     * @returns {object|null} The shortcut definition or null if not found.
+     */
+    get(id) {
+        if (typeof id !== "string" || id.trim() === "") {
+            return null;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(this._shortcuts, id)) {
+            return this._shortcuts[id];
+        }
+
+        return null;
+    }
+
+    /**
+     * Checks whether a shortcut is registered.
+     * @param {string} id - The shortcut id.
+     * @returns {boolean} True if registered.
+     */
+    has(id) {
+        return Object.prototype.hasOwnProperty.call(this._shortcuts, id);
+    }
+
+    /**
+     * Returns all registered shortcut definitions.
+     * @returns {Array<object>} List of all shortcut definitions in registration order.
+     */
+    getAll() {
+        return Object.values(this._shortcuts);
+    }
+
+    /**
+     * Unregisters a shortcut by id.
+     * @param {string} id - The shortcut id to remove.
+     * @returns {void}
+     */
+    unregister(id) {
+        if (typeof id !== "string" || id.trim() === "") {
+            return;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(this._shortcuts, id)) {
+            delete this._shortcuts[id];
+        }
+    }
+
+    /**
+     * Clears the entire registry. Useful for tests.
+     * @returns {void}
+     */
+    clear() {
+        this._shortcuts = {};
     }
 };
 
@@ -1653,7 +1865,6 @@ webexpress.webui.Ctrl = class {
      * This method must be implemented in the derived class.
      */
     render() {
-        throw new Error("The 'render()' method must be implemented in the derived class.");
     }
 
     /**
@@ -1683,7 +1894,7 @@ webexpress.webui.Ctrl = class {
         if (!element || !element.parentNode) return null;
 
         element.parentNode.removeChild(element);
-        
+
         return element;
     }
 
@@ -1703,7 +1914,7 @@ webexpress.webui.Ctrl = class {
             composed: true
         }));
     }
-    
+
     /**
      * Returns the translated text for the specified i18n key.
      * If no translation is configured or the I18N module is unavailable,
@@ -1726,6 +1937,40 @@ webexpress.webui.Ctrl = class {
      */
     _isVisible() {
         return this._element && this._element.offsetParent !== null;
+    }
+
+    /**
+     * Returns the active icon theme as read from the root <html data-icon-theme>
+     * attribute. Possible values are "light" (lightweight SVG variants from
+     * webexpress.webui.icon.css) or "default" (FontAwesome glyphs, also used
+     * when the attribute is missing).
+     *
+     * Derived controls should use this together with {@link _iconClass} to
+     * stay in sync with whatever theme the page sets, instead of mirroring
+     * the theme on every individual control via a per-control data attribute.
+     *
+     * @returns {"light" | "default"} The current icon theme.
+     */
+    _iconTheme() {
+        return webexpress.webui.IconTheme.current();
+    }
+
+    /**
+     * Resolves an icon CSS class for the active theme. Falls back to the
+     * other variant whenever the preferred one is missing - so passing only
+     * the FontAwesome name still produces a sensible result under the light
+     * theme, and vice versa.
+     *
+     * @param {string|null|undefined} faClass - The FontAwesome class string,
+     *     e.g. "fas fa-pen".
+     * @param {string|null|undefined} lightClass - The light-theme class
+     *     string, e.g. "wx-icon-light wx-icon-light-pen". Pass just the
+     *     icon name (e.g. "pen") and the "wx-icon-light wx-icon-light-"
+     *     prefix is added automatically.
+     * @returns {string} The CSS class string to apply to the icon element.
+     */
+    _iconClass(faClass, lightClass) {
+        return webexpress.webui.IconTheme.resolve(faClass, lightClass);
     }
 }
 
@@ -1928,4 +2173,6 @@ webexpress.webui.Event = class {
     static UPDATE_PAGINATION_EVENT = "webexpress.webui.update.pagination";
     // Event triggered when a tab is selected.
     static SELECTED_TAB_EVENT = "webexpress.webui.tab.selected";
+    // Event triggered when dark mode is toggled.
+    static CHANGE_DARKMODE_EVENT = "webexpress.webui.change.darkmode";
 }

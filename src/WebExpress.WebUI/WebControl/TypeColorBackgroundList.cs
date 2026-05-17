@@ -58,7 +58,12 @@
         /// <summary>
         /// Transparent background color.
         /// </summary>
-        Transparent = 10
+        Transparent = 10,
+
+        /// <summary>
+        /// Highlight background color.
+        /// </summary>
+        Highlight = 13
     }
 
     /// <summary>
@@ -75,16 +80,17 @@
         {
             return layout switch
             {
-                TypeColorBackgroundList.Primary => "list-group-item-primary",
-                TypeColorBackgroundList.Secondary => "list-group-item-secondary",
-                TypeColorBackgroundList.Success => "list-group-item-success",
-                TypeColorBackgroundList.Info => "list-group-item-info",
-                TypeColorBackgroundList.Warning => "list-group-item-warning",
-                TypeColorBackgroundList.Danger => "list-group-item-danger",
-                TypeColorBackgroundList.Light => "list-group-item-light",
-                TypeColorBackgroundList.Dark => "list-group-item-dark",
-                TypeColorBackgroundList.White => "bg-white",
-                TypeColorBackgroundList.Transparent => "bg-transparent",
+                TypeColorBackgroundList.Primary => "wx-list-bg-primary",
+                TypeColorBackgroundList.Secondary => "wx-list-bg-secondary",
+                TypeColorBackgroundList.Success => "wx-list-bg-success",
+                TypeColorBackgroundList.Info => "wx-list-bg-info",
+                TypeColorBackgroundList.Warning => "wx-list-bg-warning",
+                TypeColorBackgroundList.Danger => "wx-list-bg-danger",
+                TypeColorBackgroundList.Light => "wx-list-bg-light",
+                TypeColorBackgroundList.Dark => "wx-list-bg-dark",
+                TypeColorBackgroundList.White => "wx-list-bg-white",
+                TypeColorBackgroundList.Transparent => "wx-list-bg-transparent",
+                TypeColorBackgroundList.Highlight => "wx-list-bg-highlight",
                 _ => string.Empty,
             };
         }

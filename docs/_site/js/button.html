@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>ButtonCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="ButtonCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/button.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="buttonctrl">ButtonCtrl</h1>
+<p>The <code>ButtonCtrl</code> component represents a foundational UI component that renders a versatile button. It supports text labels, icons, and images, allowing for a wide range of visual representations. The component is designed for declarative initialization directly within the HTML markup, using <code>data-</code> attributes for configuration. This approach simplifies integration and promotes clean, readable code. By utilizing standard class names for styling, such as for color and size, it integrates seamlessly with CSS frameworks.</p>
+<pre><code>   ┌────────────────┐
+   │ [icon] [label] │
+   └────────────────┘
+</code></pre>
+<h2 id="declarative-configuration">Declarative Configuration</h2>
+<p>The initial state and appearance of the button are defined using standard HTML attributes and <code>data-</code> attributes on the host element (e.g., <code>&lt;button&gt;</code> or <code>&lt;a&gt;</code>). The text for the button is taken from the element's inner content.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-icon</code></td>
+<td>Specifies the CSS class for an icon to be displayed on the button.</td>
+<td><code>data-icon=&quot;fas fa-save&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-image</code></td>
+<td>Provides the URL for an image to be displayed on the button.</td>
+<td><code>data-image=&quot;/path/to/icon.png&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-color</code></td>
+<td>Applies a color-related CSS class, typically from a framework.</td>
+<td><code>data-color=&quot;btn-primary&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-size</code></td>
+<td>Applies a size-related CSS class.</td>
+<td><code>data-size=&quot;btn-sm&quot;</code></td>
+</tr>
+<tr>
+<td><code>disabled</code></td>
+<td>A standard boolean attribute to render the button in a disabled state.</td>
+<td><code>&lt;button disabled&gt;...&lt;/button&gt;</code></td>
+</tr>
+<tr>
+<td>Text Content</td>
+<td>The text label for the button is defined by the inner content of the HTML element.</td>
+<td><code>&lt;button&gt;Click Me&lt;/button&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p>Icons, images, and text labels can be used in any combination to achieve the desired appearance.</p>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>Once initialized, the properties of the button can be accessed and modified programmatically through its controller instance. Changes to properties like <code>label</code>, <code>icon</code>, or <code>color</code> will automatically trigger a re-render of the component.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<p>For buttons defined declaratively in HTML, the associated instance is retrieved via the <code>getInstanceByElement(element)</code> method of the central <code>webexpress.webui.Controller</code>.</p>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const buttonElement = document.getElementById('myButton');
+
+// retrieve the controller instance associated with the element
+const buttonCtrl = webexpress.webui.Controller.getInstanceByElement(buttonElement);
+
+// change the label and icon programmatically
+if (buttonCtrl) {
+    buttonCtrl.label = 'Updated Label';
+    buttonCtrl.icon = 'fas fa-check';
+}
+</code></pre>
+<h3 id="manual-instantiation">Manual Instantiation</h3>
+<p>A button can also be created entirely programmatically and attached to a host element. This is useful for dynamic UI scenarios.</p>
+<pre><code class="lang-javascript">// find the container element for the dynamic button
+const container = document.getElementById('button-container');
+
+// create a new instance of ButtonCtrl manually
+const dynamicButtonCtrl = new webexpress.webui.ButtonCtrl(container);
+</code></pre>
+<h2 id="events">Events</h2>
+<p>The component dispatches a single, standardized event to notify the application of user interaction.</p>
+<ul>
+<li><strong><code>webexpress.webui.Event.CLICK_EVENT</code></strong>: This event is fired when the user clicks the button. The event <code>detail</code> object contains a reference to the sender element.</li>
+</ul>
+<h2 id="use-case-examples">Use Case Examples</h2>
+<p>The following examples illustrate the declarative configuration for various button styles.</p>
+<pre><code class="lang-html">&lt;!-- A standard button with an icon and text --&gt;
+&lt;button id=&quot;save-button&quot; class=&quot;wx-webui-button&quot; data-icon=&quot;fas fa-save&quot; data-color=&quot;btn-primary&quot;&gt;
+    Save
+&lt;/button&gt;
+
+&lt;!-- A button with an icon only, useful for toolbars --&gt;
+&lt;button id=&quot;settings-button&quot; class=&quot;wx-webui-button&quot; data-icon=&quot;fas fa-cog&quot; data-size=&quot;btn-sm&quot; title=&quot;Settings&quot;&gt;
+&lt;/button&gt;
+
+&lt;!-- A disabled button --&gt;
+&lt;button id=&quot;disabled-button&quot; class=&quot;wx-webui-button&quot; data-icon=&quot;fas fa-trash&quot; disabled&gt;
+    Delete
+&lt;/button&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/button.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

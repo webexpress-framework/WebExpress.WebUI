@@ -7,14 +7,26 @@
 - name: API Documentation
   href: api/
 - name: JavaScript UI Documentation
-  href: javascript.md
+  href: js/
   children:
+    - name: Overview
+      href: js/index.md
+    - name: WebExpress.WebUI
+      href: js/webexpress.webui.md
     - name: Avatar
       href: js/avatar.md
+    - name: Avatar Dropdown
+      href: js/avatar-dropdown.md
     - name: Button
       href: js/button.md
+    - name: Cascading
+      href: js/cascading.md
+    - name: Chart
+      href: js/chart.md
     - name: Code
       href: js/code.md
+    - name: Color
+      href: js/color.md
     - name: Date
       href: js/date.md
     - name: Dropdown
@@ -25,16 +37,36 @@
       href: js/expandable.md
     - name: FileList
       href: js/filelist.md      
+    - name: Form
+      href: js/form.md
+    - name: Frame
+      href: js/frame.md
+    - name: Graph
+      href: js/graph.md
+    - name: List
+      href: js/list.md
     - name: Modal
       href: js/modal.md
     - name: Move
       href: js/move.md
     - name: Overflow
       href: js/overflow.md
+    - name: Page
+      href: js/page.md
     - name: Pagination
       href: js/pagination.md
+    - name: Panel Dismissible
+      href: js/panel.dismissible.md
+    - name: Password
+      href: js/password.md
+    - name: Quickfilter
+      href: js/quickfilter.md
+    - name: Rating
+      href: js/rating.md
     - name: Responsive
       href: js/responsive.md
+    - name: Scrum
+      href: js/scrum.md
     - name: Search
       href: js/search.md
     - name: Selection
@@ -47,6 +79,8 @@
       href: js/smartview.md
     - name: Split
       href: js/split.md
+    - name: Tab
+      href: js/tab.md
     - name: Table
       href: js/table.md
     - name: Tag
@@ -59,6 +93,12 @@
       href: js/tree.md
     - name: Upload
       href: js/upload.md
+    - name: View
+      href: js/view.md
+    - name: Wizard
+      href: js/wizard.md
+    - name: WQL
+      href: js/wql.md
 - name: Tutorials
   href: tutorials.md
 

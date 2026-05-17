@@ -8,10 +8,10 @@ namespace WebExpress.WebUI.WebFragment
     /// <summary>
     /// Represents a kanban control for a fragment, implementing the IFragmentControl interface.
     /// </summary>
-    public class FragmentControlKanban : ControlKanban, IFragmentControl<ControlKanban>
+    public abstract class FragmentControlKanban : ControlKanban, IFragmentControl<ControlKanban>
     {
         /// <summary>
-        /// Returns the context of the fragment.
+        /// Gets the context of the fragment.
         /// </summary>
         public IFragmentContext FragmentContext { get; }
 
@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.WebFragment
         /// </summary>
         /// <param name="fragmentContext">The context of the fragment.</param>
         protected FragmentControlKanban(IFragmentContext fragmentContext)
-            : base(fragmentContext?.FragmentId?.ToString())
+            : base(fragmentContext?.FragmentId?.ToString()?.Replace(".", "-"))
         {
             FragmentContext = fragmentContext;
         }

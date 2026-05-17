@@ -43,6 +43,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorLine.Warning, @"<hr class=""text-warning"">")]
         [InlineData(TypeColorLine.Danger, @"<hr class=""text-danger"">")]
         [InlineData(TypeColorLine.Light, @"<hr class=""text-light"">")]
+        [InlineData(TypeColorLine.Highlight, @"<hr class=""text-highlight"">")]
         [InlineData(TypeColorLine.Dark, @"<hr class=""text-dark"">")]
         public void Color(TypeColorLine color, string expected)
         {
@@ -52,7 +53,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlLine()
             {
-                Color = new PropertyColorLine(color)
+                Color = _ => new PropertyColorLine(color)
             };
 
             // act

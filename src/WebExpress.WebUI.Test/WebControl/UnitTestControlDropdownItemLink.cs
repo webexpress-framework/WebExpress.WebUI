@@ -51,7 +51,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDropdownItemLink()
             {
-                Text = text,
+                Text = _ => text,
             };
 
             // act
@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDropdownItemLink()
             {
-                Uri = uri is not null ? new UriEndpoint(uri) : null,
+                Uri = _ => uri is not null ? new UriEndpoint(uri) : null,
             };
 
             // act
@@ -101,7 +101,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDropdownItemLink()
             {
-                Target = target,
+                Target = _ => target,
             };
 
             // act
@@ -126,7 +126,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDropdownItemLink()
             {
-                Tooltip = tooltip
+                Tooltip = _ => tooltip
             };
 
             // act
@@ -149,7 +149,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDropdownItemLink()
             {
-                PrimaryAction = new ActionModal(modal)
+                PrimaryAction = _ => new ActionModal(modal)
             };
 
             // act
@@ -173,7 +173,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDropdownItemLink()
             {
-                SecondaryAction = new ActionModal(modal)
+                SecondaryAction = _ => new ActionModal(modal)
             };
 
             // act
@@ -197,7 +197,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDropdownItemLink()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -224,12 +224,12 @@ namespace WebExpress.WebUI.Test.WebControl
             var control6 = new ControlDropdownItemLink(null);
 
             // act
-            control1.Icon = new IconStar();
-            control2.Icon = new IconStar();
-            control3.Icon = new IconStar();
-            control4.Icon = new IconStar();
-            control5.Icon = new IconStar();
-            control6.Icon = new IconStar();
+            control1.Icon = _ => new IconStar();
+            control2.Icon = _ => new IconStar();
+            control3.Icon = _ => new IconStar();
+            control4.Icon = _ => new IconStar();
+            control5.Icon = _ => new IconStar();
+            control6.Icon = _ => new IconStar();
 
             var html1 = control1.Render(context, visualTree);
             var html2 = control2.Render(context, visualTree);

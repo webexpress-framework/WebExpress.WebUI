@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSidebarItemDynamic()
             {
-                Tooltip = tooltip,
+                Tooltip = _ => tooltip,
             };
 
             // act
@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSidebarItemDynamic()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -95,6 +95,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Danger, @"<div class=""wx-sidebar-control"" data-color-css=""text-danger""></div>")]
         [InlineData(TypeColorText.Dark, @"<div class=""wx-sidebar-control"" data-color-css=""text-dark""></div>")]
         [InlineData(TypeColorText.Light, @"<div class=""wx-sidebar-control"" data-color-css=""text-light""></div>")]
+        [InlineData(TypeColorText.Highlight, @"<div class=""wx-sidebar-control"" data-color-css=""text-highlight""></div>")]
         [InlineData(TypeColorText.Muted, @"<div class=""wx-sidebar-control"" data-color-css=""text-muted""></div>")]
         public void Color(TypeColorText color, string expected)
         {
@@ -104,7 +105,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSidebarItemDynamic()
             {
-                Color = new PropertyColorText(color)
+                Color = _ => new PropertyColorText(color)
             };
 
             // act
@@ -129,7 +130,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSidebarItemDynamic()
             {
-                Mode = mode
+                Mode = _ => mode
             };
 
             // act

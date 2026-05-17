@@ -53,7 +53,12 @@
         /// <summary>
         /// White background color.
         /// </summary>
-        White = 9
+        White = 9,
+
+        /// <summary>
+        /// Highlight background color.
+        /// </summary>
+        Highlight = 13
     }
 
     /// <summary>
@@ -79,6 +84,7 @@
                 TypeColorProgress.Light => "bg-light",
                 TypeColorProgress.Dark => "bg-dark",
                 TypeColorProgress.White => "bg-white",
+                TypeColorProgress.Highlight => "bg-highlight",
                 _ => string.Empty,
             };
         }

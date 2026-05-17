@@ -1,4 +1,4 @@
-﻿using WebExpress.WebCore.WebUri;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatar()
             {
-                User = user
+                Username = _ => user
             };
 
             // act
@@ -70,7 +70,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatar()
             {
-                Image = uri is not null ? new UriEndpoint(uri) : null
+                Image = _ => uri is not null ? new UriEndpoint(uri) : null
             };
 
             // act
@@ -91,6 +91,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Warning, @"<div class=""wx-profile text-warning""></div>")]
         [InlineData(TypeColorText.Danger, @"<div class=""wx-profile text-danger""></div>")]
         [InlineData(TypeColorText.Light, @"<div class=""wx-profile text-light""></div>")]
+        [InlineData(TypeColorText.Highlight, @"<div class=""wx-profile text-highlight""></div>")]
         [InlineData(TypeColorText.Dark, @"<div class=""wx-profile text-dark""></div>")]
         [InlineData(TypeColorText.Muted, @"<div class=""wx-profile text-muted""></div>")]
         public void TextColor(TypeColorText color, string expected)
@@ -101,7 +102,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatar()
             {
-                TextColor = new PropertyColorText(color)
+                TextColor = _ => new PropertyColorText(color)
             };
 
             // act
@@ -121,6 +122,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<div class=""wx-profile bg-danger""></div>")]
         [InlineData(TypeColorBackground.Dark, @"<div class=""wx-profile bg-dark""></div>")]
         [InlineData(TypeColorBackground.Light, @"<div class=""wx-profile bg-light""></div>")]
+        [InlineData(TypeColorBackground.Highlight, @"<div class=""wx-profile bg-highlight""></div>")]
         [InlineData(TypeColorBackground.Transparent, @"<div class=""wx-profile bg-transparent""></div>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {
@@ -130,7 +132,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatar()
             {
-                BackgroundColor = new PropertyColorBackground(backgroundColor)
+                BackgroundColor = _ => new PropertyColorBackground(backgroundColor)
             };
 
             // act
@@ -153,7 +155,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatar()
             {
-                Uri = uri is not null ? new UriEndpoint(uri) : null
+                Uri = _ => uri is not null ? new UriEndpoint(uri) : null
             };
 
             // act
@@ -167,8 +169,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeSizeAvatar.Default, @"<div class=""wx-profile""></div>")]
-        [InlineData(TypeSizeAvatar.Small, @"<div class=""wx-profile wx-prifile-sm""></div>")]
-        [InlineData(TypeSizeAvatar.Large, @"<div class=""wx-profile wx-prifile-lg""></div>")]
+        [InlineData(TypeSizeAvatar.Small, @"<div class=""wx-profile wx-profile-sm""></div>")]
+        [InlineData(TypeSizeAvatar.Large, @"<div class=""wx-profile wx-profile-lg""></div>")]
         public void Size(TypeSizeAvatar size, string expected)
         {
             // arrange
@@ -177,7 +179,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatar()
             {
-                Size = size
+                Size = _ => size
             };
 
             // act

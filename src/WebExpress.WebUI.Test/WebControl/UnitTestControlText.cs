@@ -48,8 +48,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlText()
             {
-                Text = text,
-                Format = format
+                Text = _ => text,
+                Format = _ => format
             };
 
             // act
@@ -70,6 +70,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Warning, @"<div class=""text-warning""></div>")]
         [InlineData(TypeColorText.Danger, @"<div class=""text-danger""></div>")]
         [InlineData(TypeColorText.Light, @"<div class=""text-light""></div>")]
+        [InlineData(TypeColorText.Highlight, @"<div class=""text-highlight""></div>")]
         [InlineData(TypeColorText.Dark, @"<div class=""text-dark""></div>")]
         [InlineData(TypeColorText.Muted, @"<div class=""text-muted""></div>")]
         public void TextColor(TypeColorText color, string expected)
@@ -80,7 +81,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlText()
             {
-                TextColor = new PropertyColorText(color)
+                TextColor = _ => new PropertyColorText(color)
             };
 
             // act
@@ -105,7 +106,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlText()
             {
-                Margin = new PropertySpacingMargin(spaceLeft, spaceRight, spaceTop, spaceBottom)
+                Margin = _ => new PropertySpacingMargin(spaceLeft, spaceRight, spaceTop, spaceBottom)
             };
 
             // act

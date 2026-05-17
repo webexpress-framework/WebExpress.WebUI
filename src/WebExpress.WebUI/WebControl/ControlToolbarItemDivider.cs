@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+﻿using System;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -16,14 +17,14 @@ namespace WebExpress.WebUI.WebControl
         public string Id => _id;
 
         /// <summary>
-        /// Returns or sets the alignment of the toolbar item.
+        /// Gets or sets the alignment of the toolbar item.
         /// </summary>
-        public TypeToolbarItemAlignment Alignment { get; set; } = TypeToolbarItemAlignment.Default;
+        public Func<IRenderControlContext, TypeToolbarItemAlignment> Alignment { get; set; } = _ => TypeToolbarItemAlignment.Default;
 
         /// <summary>
-        /// Returns the overflow behavior of the toolbar item.
+        /// Gets the overflow behavior of the toolbar item.
         /// </summary>
-        public TypeToolbarItemOverflow Overflow { get; set; } = TypeToolbarItemOverflow.Default;
+        public Func<IRenderControlContext, TypeToolbarItemOverflow> Overflow { get; set; } = _ => TypeToolbarItemOverflow.Default;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -42,13 +43,16 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var alignment = Alignment?.Invoke(renderContext) ?? TypeToolbarItemAlignment.Default;
+            var overflow = Overflow?.Invoke(renderContext) ?? TypeToolbarItemOverflow.Default;
+
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-toolbar-separator"
             }
-                .AddUserAttribute("data-align", Alignment.ToValue())
-                .AddUserAttribute("data-overflow", Overflow.ToValue());
+                .AddUserAttribute("data-align", alignment.ToValue())
+                .AddUserAttribute("data-overflow", overflow.ToValue());
         }
     }
 }

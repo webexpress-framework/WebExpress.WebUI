@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>UploadCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="UploadCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/upload.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="uploadctrl">UploadCtrl</h1>
+<p>The UploadCtrl component is used for uploading files via drag-and-drop or manual selection. It provides a user-friendly interface that allows users to drop files directly onto a designated area or choose them through a file picker. Once selected, the files are automatically sent to a configured server endpoint using a multipart/form-data POST request.
+The component is designed to be declaratively configured via HTML data- attributes and can be fully controlled programmatically after initialization. It supports multiple files, visual feedback during drag operations, and customizable upload behavior.</p>
+<pre><code>   ┌────────────────────────────────────┐
+   │                                    │
+   │ 📁 Drag files here                 │  // Dropzone
+   │ or click to select                 │
+   │                                    │
+   └────────────────────────────────────┘
+
+   ┌────────────────────────────────────┐
+   │ index.html                         │
+   │ ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░  75%      │  // Progress bar
+   └────────────────────────────────────┘
+
+</code></pre>
+<h3 id="declarative-configuration">Declarative Configuration</h3>
+<p>Initialization is handled through <code>data-</code> attributes on the host element. The component automatically binds drag-and-drop and file input events to enable seamless file selection and upload.</p>
+<p>Host Element Attributes:</p>
+<p><strong>Host Element Attributes:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-upload-url</code></td>
+<td>The server endpoint to which files will be uploaded.</td>
+</tr>
+<tr>
+<td><code>data-multiple</code></td>
+<td>If set to <code>false</code>, only a single file can be selected. Default is <code>true</code>.</td>
+</tr>
+<tr>
+<td><code>data-accept</code></td>
+<td>A comma-separated list of accepted MIME types (e.g., <code>image/*,application/pdf</code>).</td>
+</tr>
+<tr>
+<td><code>data-autoupload</code></td>
+<td>If <code>true</code>, files are uploaded immediately after selection. If <code>false</code>, manual triggering is required.</td>
+</tr>
+<tr>
+<td><code>data-label</code></td>
+<td>Custom label text displayed inside the dropzone.</td>
+</tr>
+<tr>
+<td><code>data-progress</code></td>
+<td>If <code>true</code>, a visual progress bar is shown during upload.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="architecture-and-functionality">Architecture and Functionality</h3>
+<p>The <code>UploadCtrl</code> is designed as a lightweight, reactive component.</p>
+<ul>
+<li><strong>Drag-and-Drop Support:</strong> The dropzone reacts to drag events with visual feedback and accepts dropped files.</li>
+<li><strong>File Selection:</strong> Clicking the dropzone opens a native file picker. Selected files are handled identically to dropped files.</li>
+<li><strong>Automatic Upload:</strong> If data-autoupload is enabled, files are sent immediately to the server using fetch() and FormData.</li>
+<li><strong>Progress Feedback (optional):</strong> The component can be extended to show upload progress using XMLHttpRequest or fetch with streams.</li>
+<li><strong>Error Handling:</strong> Upload failures are logged and can be intercepted via event listeners.</li>
+<li><strong>Progress Feedback:</strong> A progress bar is shown per file using XMLHttpRequest with onprogress.</li>
+<li><strong>Server-Side Validation:</strong> The upload proceeds only if the server returns a positive validation result.</li>
+</ul>
+<h3 id="programmatic-control">Programmatic Control</h3>
+<p>The component can be fully controlled via its JavaScript instance after initialization. There are two primary ways to obtain or create an instance.</p>
+<h4 id="1-accessing-an-automatically-created-instance">1. Accessing an Automatically Created Instance</h4>
+<pre><code class="lang-javascript">const element = document.getElementById('my-upload');
+const uploadCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (uploadCtrl) {
+    // manually trigger upload
+    uploadCtrl.upload();
+
+    // access selected files
+    console.log(uploadCtrl.files);
+}
+
+</code></pre>
+<h4 id="2-manual-instantiation">2. Manual Instantiation</h4>
+<pre><code class="lang-javascript">const container = document.getElementById('upload-container');
+const uploadCtrl = new webexpress.webui.UploadCtrl(container, {
+    uploadUrl: '/api/upload',
+    multiple: true,
+    accept: 'image/*',
+    autoupload: false
+});
+
+// manually trigger upload
+uploadCtrl.upload();
+
+</code></pre>
+<h3 id="event-handling">Event Handling</h3>
+<p>The <code>UploadCtrl</code> component dispatches events to communicate upload status and user interactions.</p>
+<ul>
+<li><strong>webexpress.webui.Event.FILE_SELECTED_EVENT</strong>: Fired when files are selected or dropped. event.detail.files contains the list of selected files.</li>
+<li><strong>webexpress.webui.Event.UPLOAD_SUCCESS_EVENT</strong>: Fired after successful upload. event.detail.response contains the server response.</li>
+<li><strong>webexpress.webui.Event.UPLOAD_ERROR_EVENT</strong>: Fired if the upload fails. event.detail.error contains the error object.</li>
+<li><strong>webexpress.webui.Event.VALIDATION_SUCCESS_EVENT</strong>: Fired after successful server-side validation.</li>
+<li><strong>webexpress.webui.Event.VALIDATION_ERROR_EVENT</strong>: Fired if validation fails.</li>
+<li><strong>webexpress.webui.Event.UPLOAD_PROGRESS_EVENT</strong>:	Fired during upload with progress percentage.</li>
+</ul>
+<pre><code class="lang-javascript">document.addEventListener(webexpress.webui.Event.UPLOAD_SUCCESS_EVENT, (event) =&gt; {
+    console.log('Upload erfolgreich:', event.detail.response);
+});
+</code></pre>
+<h3 id="use-case-example">Use Case Example</h3>
+<pre><code class="lang-html">&lt;!--
+    Host element for file upload.
+    Automatically initialized as UploadCtrl.
+--&gt;
+&lt;div id=&quot;my-upload&quot;
+     class=&quot;wx-webui-upload&quot;
+     data-upload-url=&quot;/api/upload&quot;
+     data-validate-url=&quot;/api/validate&quot;
+     data-multiple=&quot;true&quot;
+     data-accept=&quot;image/*,application/pdf&quot;
+     data-autoupload=&quot;true&quot;
+     data-progress=&quot;true&quot;
+     data-label=&quot;Drag files here or click to upload&quot;&gt;
+&lt;/div&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/upload.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

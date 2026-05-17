@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlLinkList()
             {
-                Name = name,
+                Name = _ => name,
             };
 
             // act
@@ -70,6 +70,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Warning, @"<div><span class=""text-warning"">abc</span></div>")]
         [InlineData(TypeColorText.Danger, @"<div><span class=""text-danger"">abc</span></div>")]
         [InlineData(TypeColorText.Light, @"<div><span class=""text-light"">abc</span></div>")]
+        [InlineData(TypeColorText.Highlight, @"<div><span class=""text-highlight"">abc</span></div>")]
         [InlineData(TypeColorText.Dark, @"<div><span class=""text-dark"">abc</span></div>")]
         [InlineData(TypeColorText.Muted, @"<div><span class=""text-muted"">abc</span></div>")]
         public void NameColor(TypeColorText color, string expected)
@@ -80,8 +81,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlLinkList()
             {
-                Name = "abc",
-                NameColor = new PropertyColorText(color)
+                Name = _ => "abc",
+                NameColor = _ => new PropertyColorText(color)
             };
 
             // act
@@ -104,7 +105,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlLinkList()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -124,6 +125,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Warning, @"<div class=""bg-warning""></div>")]
         [InlineData(TypeColorBackground.Danger, @"<div class=""bg-danger""></div>")]
         [InlineData(TypeColorBackground.Light, @"<div class=""bg-light""></div>")]
+        [InlineData(TypeColorBackground.Highlight, @"<div class=""bg-highlight""></div>")]
         [InlineData(TypeColorBackground.Dark, @"<div class=""bg-dark""></div>")]
         [InlineData(TypeColorBackground.White, @"<div class=""bg-white""></div>")]
         [InlineData(TypeColorBackground.Transparent, @"<div class=""bg-transparent""></div>")]
@@ -135,7 +137,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlLinkList()
             {
-                BackgroundColor = new PropertyColorBackground(backgroundColor)
+                BackgroundColor = _ => new PropertyColorBackground(backgroundColor)
             };
 
             // act
@@ -157,7 +159,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlLinkList();
 
             // act
-            control.Add(new ControlLink() { Text = "abc" });
+            control.Add(new ControlLink() { Text = _ => "abc" });
 
             var html = control.Render(context, visualTree);
 

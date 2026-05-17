@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>MoveCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="MoveCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/move.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="movectrl">MoveCtrl</h1>
+<p>The <code>MoveCtrl</code> component, when used in this context, is designed to display a read-only, flat list of options. It serves as a static display where certain options can be visually marked as &quot;selected&quot; based on an initial or programmatically set value.</p>
+<p>All options are rendered within a single <code>&lt;ul&gt;</code> list, without headers or action buttons. This makes it ideal for scenarios where a selection needs to be presented without allowing the user to modify it directly through the UI.</p>
+<pre><code>   ┌────────────────────────────────────────────────────────┐
+   │ ┌─────────────────┐ ┌─────────────────┐ ┌────────────┐ │
+   │ │ [icon] Option A │ │ [icon] Option B │ │ [icon] ... │ │
+   │ └─────────────────┘ └─────────────────┘ └────────────┘ │
+   └────────────────────────────────────────────────────────┘
+</code></pre>
+<h2 id="configuration">Configuration</h2>
+<p>Initialization is handled declaratively through <code>data-</code> attributes on the host element, with options defined as child elements.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-value</code></td>
+<td>A semicolon-separated list of option IDs that should be initially marked as selected.</td>
+</tr>
+</tbody>
+</table>
+<p>Each available option is defined by an element with the class <code>.wx-webui-move-option</code>.</p>
+<ul>
+<li><strong>ID</strong>: The <code>id</code> of the element serves as the unique value of the option.</li>
+<li><strong>Text Content</strong>: The text within the element is used as its label.</li>
+<li><strong><code>data-icon</code> / <code>data-image</code></strong>: Allows assigning an icon or an image to an option.</li>
+<li><strong><code>disabled</code></strong>: If present, the option is visually marked as disabled.</li>
+</ul>
+<h2 id="functionality">Functionality</h2>
+<ul>
+<li><strong>Static Rendering</strong>: The component renders a simple <code>&lt;ul&gt;</code> list of all available options.</li>
+<li><strong>Selection Highlighting</strong>: Options whose IDs are present in the <code>value</code> property are assigned the <code>.is-selected</code> CSS class, allowing for visual distinction.</li>
+<li><strong>Read-Only Display</strong>: The component does not implement any user interaction for changing the selection (no buttons, no drag-and-drop, no double-clicks). Its value can only be modified programmatically.</li>
+<li><strong>State Management</strong>: The component reads its initial state from the DOM and can be updated programmatically by setting its <code>value</code> or <code>options</code> properties. Any change triggers a full re-render of the list.</li>
+</ul>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>The component's selection and option list can be managed via its JavaScript instance.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const element = document.getElementById('my-options-list');
+
+// retrieve the controller instance associated with the element
+const moveCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (moveCtrl) {
+    // get the current selection (array of IDs)
+    const currentSelection = moveCtrl.value;
+
+    // set a new selection programmatically
+    // this will re-render the list with new highlights
+    moveCtrl.value = ['id1', 'id3'];
+}
+</code></pre>
+<h3 id="manual-instantiation">Manual Instantiation</h3>
+<pre><code class="lang-javascript">// find the container element
+const container = document.getElementById('dynamic-options-container');
+
+// create a new instance of MoveCtrl manually
+const dynamicMoveCtrl = new webexpress.webui.MoveCtrl(container);
+
+// set the properties programmatically
+dynamicMoveCtrl.options = [
+    { id: 'opt1', label: 'Option 1' },
+    { id: 'opt2', label: 'Option 2', icon: 'fas fa-check' }
+];
+dynamicMoveCtrl.value = ['opt2'];
+</code></pre>
+<h2 id="use-case-example">Use Case Example</h2>
+<p>The following example shows how to declare a read-only list where &quot;Editor&quot; and &quot;Viewer&quot; are pre-selected.</p>
+<pre><code class="lang-html">&lt;!--
+    The host element defines the read-only list.
+    The initial selection is 'item-2' and 'item-3'.
+--&gt;
+&lt;div id=&quot;user-role-display&quot;
+     class=&quot;wx-webui-move&quot;
+     data-value=&quot;item-2;item-3&quot;&gt;
+
+    &lt;!-- Each option is declared as a child element. --&gt;
+    &lt;div id=&quot;item-1&quot; class=&quot;wx-webui-move-option&quot; data-icon=&quot;fas fa-user-shield&quot;&gt;Administrator&lt;/div&gt;
+    &lt;div id=&quot;item-2&quot; class=&quot;wx-webui-move-option&quot; data-icon=&quot;fas fa-user-edit&quot;&gt;Editor&lt;/div&gt;
+    &lt;div id=&quot;item-3&quot; class=&quot;wx-webui-move-option&quot; data-icon=&quot;fas fa-user&quot;&gt;Viewer&lt;/div&gt;
+    &lt;div id=&quot;item-4&quot; class=&quot;wx-webui-move-option&quot; data-icon=&quot;fas fa-cog&quot; disabled&gt;System&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h1 id="inputmovectrl">InputMoveCtrl</h1>
+<p>The <code>InputMoveCtrl</code> component is used to manage a selection of items from a predefined set. It implements the &quot;dual list&quot; or &quot;list builder&quot; pattern, where two lists are displayed side-by-side: one for the available options (&quot;Available&quot;) and one for the already selected options (&quot;Selected&quot;). A central control panel with buttons allows for moving single or all items between the two lists. Additionally, interaction is supported through drag-and-drop as well as double-clicks.</p>
+<p>The component is designed to represent a selection for a form field and stores the IDs of the selected items in a hidden input field (<code>&lt;input type=&quot;hidden&quot;&gt;</code>), ensuring seamless integration into standard HTML forms.</p>
+<pre><code>   ┌──────────────────────┐   ┌──────┐   ┌──────────────────────┐
+   │ Header (Selected)    │   │      │   │ Header (Available)   │
+   ├──────────────────────┤   │  &lt;&lt;  │   ├──────────────────────┤
+   │                      │   │      │   │                      │
+   │ - Option A           │   │  &lt;   │   │ - Option C           │
+   │ - Option B           │   │      │   │ - Option D           │
+   │                      │   │  &gt;   │   │                      │
+   │                      │   │      │   │                      │
+   │                      │   │  &gt;&gt;  │   │                      │
+   │                      │   │      │   │                      │
+   └──────────────────────┘   └──────┘   └──────────────────────┘
+</code></pre>
+<h2 id="configuration-1">Configuration</h2>
+<p>The initialization of the component is done entirely declaratively. The host element defines the overall configuration, while the individual available options are declared as child elements.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>The name for the hidden input field used in form submission.</td>
+</tr>
+<tr>
+<td><code>data-value</code></td>
+<td>A semicolon-separated list of IDs that defines the initial selection.</td>
+</tr>
+<tr>
+<td><code>data-header-selected</code> / <code>data-header-available</code></td>
+<td>The text for the headers of the two lists.</td>
+</tr>
+<tr>
+<td><code>data-button-*</code></td>
+<td>Defines the labels for the four move buttons (e.g., <code>data-button-selectall</code>).</td>
+</tr>
+</tbody>
+</table>
+<p>Each available option is defined by an element with the class <code>.wx-webui-move-option</code>.</p>
+<ul>
+<li><strong>ID</strong>: The <code>id</code> of the element serves as the unique value of the option.</li>
+<li><strong>Text Content</strong>: The text within the element is used as its label.</li>
+<li><strong><code>data-icon</code> / <code>data-image</code></strong>: Allows assigning an icon or an image to an option.</li>
+</ul>
+<h2 id="functionality-1">Functionality</h2>
+<p>The <code>InputMoveCtrl</code> is designed as a self-contained system that manages its state internally and re-renders its view upon any change.</p>
+<ul>
+<li><strong>Dynamic DOM Construction</strong>: During initialization, the component reads all declared options and configurations from the HTML. Subsequently, the original DOM is completely removed and replaced by the programmatically created two-list structure.</li>
+<li><strong>State-Centric Architecture</strong>: The primary source of truth is the <code>_values</code> array, which contains the IDs of the currently selected items. Every interaction that changes the selection modifies this array. Immediately after, the <code>render()</code> method is called.</li>
+<li><strong>Reactive Rendering</strong>: The <code>render()</code> method is non-destructive to the state but completely destructive to the view. It clears both lists and rebuilds them from scratch based on the current <code>_values</code> array. In doing so, all necessary event listeners for clicks, double-clicks, and drag-and-drop are re-bound to the list items.</li>
+<li><strong>Diverse Interaction Models</strong>: It supports interactions via buttons, drag-and-drop, mouse double-clicks, and the keyboard.</li>
+<li><strong>Form Integration</strong>: The IDs of the selected items are stored as a semicolon-separated string in the <code>value</code> of a hidden <code>&lt;input&gt;</code> field, making the component compatible with standard form submissions.</li>
+</ul>
+<h2 id="programmatic-control-1">Programmatic Control</h2>
+<p>After initialization, the component can also be manipulated programmatically via its JavaScript instance.</p>
+<h3 id="accessing-an-automatically-created-instance-1">Accessing an Automatically Created Instance</h3>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const element = document.getElementById('my-move-control');
+
+// retrieve the controller instance associated with the element
+const moveCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (moveCtrl) {
+    // get the current selection (array of IDs)
+    const currentSelection = moveCtrl.value;
+
+    // set a new selection programmatically
+    // this will trigger a re-render
+    moveCtrl.value = ['id1', 'id3', 'id5'];
+}
+</code></pre>
+<h3 id="manual-instantiation-1">Manual Instantiation</h3>
+<pre><code class="lang-javascript">// find the container element for the dynamic move control
+const container = document.getElementById('dynamic-move-container');
+
+// create a new instance of InputMoveCtrl manually
+const dynamicMoveCtrl = new webexpress.webui.InputMoveCtrl(container);
+
+// set the properties programmatically
+dynamicMoveCtrl.name = 'dynamic-roles';
+dynamicMoveCtrl.options = [
+    { id: 'new1', label: 'New Option 1' },
+    { id: 'new2', label: 'New Option 2', icon: 'fas fa-star' }
+];
+dynamicMoveCtrl.value = ['new2'];
+</code></pre>
+<h2 id="events">Events</h2>
+<p>The component dispatches events to inform other parts of the application about user interactions.</p>
+<ul>
+<li><strong><code>webexpress.webui.Event.CLICK_EVENT</code></strong>: Fired when a user clicks on an item in one of the lists.</li>
+<li><strong><code>webexpress.webui.Event.CHANGE_VALUE_EVENT</code></strong>: Fired as soon as the selection of items (<code>value</code>) changes.</li>
+</ul>
+<h2 id="use-case-example-1">Use Case Example</h2>
+<pre><code class="lang-html">&lt;!--
+    The host element defines the control and its configuration.
+    The initial selection is 'item-2'.
+--&gt;
+&lt;div id=&quot;user-roles&quot;
+     class=&quot;wx-webui-input-move&quot;
+     name=&quot;roles&quot;
+     data-value=&quot;item-2&quot;
+     data-header-selected=&quot;Assigned Roles&quot;
+     data-header-available=&quot;Available Roles&quot;&gt;
+
+    &lt;!-- Each option is declared as a child element. --&gt;
+    &lt;div id=&quot;item-1&quot; class=&quot;wx-webui-move-option&quot; data-icon=&quot;fas fa-user-shield&quot;&gt;Administrator&lt;/div&gt;
+    &lt;div id=&quot;item-2&quot; class=&quot;wx-webui-move-option&quot; data-icon=&quot;fas fa-user-edit&quot;&gt;Editor&lt;/div&gt;
+    &lt;div id=&quot;item-3&quot; class=&quot;wx-webui-move-option&quot; data-icon=&quot;fas fa-user&quot;&gt;Viewer&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/move.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

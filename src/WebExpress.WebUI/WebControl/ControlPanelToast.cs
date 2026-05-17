@@ -1,10 +1,11 @@
-﻿using WebExpress.WebCore.WebHtml;
+using System;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a toast notification control panel that can contain 
+    /// Represents a toast notification control panel that can contain
     /// multiple child controls.
     /// </summary>
     public class ControlPanelToast : ControlPanel
@@ -12,34 +13,34 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or set the background color.
         /// </summary>
-        public new PropertyColorBackgroundAlert BackgroundColor
+        public new Func<IRenderControlContext, PropertyColorBackgroundAlert> BackgroundColor
         {
-            get => (PropertyColorBackgroundAlert)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+            get => (Func<IRenderControlContext, PropertyColorBackgroundAlert>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>
-        /// Returns or sets whether the control can be closed.
+        /// Gets or sets whether the control can be closed.
         /// </summary>
-        public TypeDismissibilityAlert Dismissible
+        public Func<IRenderControlContext, TypeDismissibilityAlert> Dismissible
         {
-            get => (TypeDismissibilityAlert)GetProperty(TypeDismissibilityAlert.Dismissible);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeDismissibilityAlert>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets whether the fader effect should be used.
+        /// Gets or sets whether the fader effect should be used.
         /// </summary>
-        public TypeFade Fade
+        public Func<IRenderControlContext, TypeFade> Fade
         {
-            get => (TypeFade)GetProperty(TypeFade.None);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeFade>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the headline.
+        /// Gets or sets the headline.
         /// </summary>
-        public string Head { get; set; }
+        public Func<IRenderControlContext, string> Head { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -59,9 +60,13 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var theme = Theme?.Invoke(renderContext) ?? TypeTheme.None;
+            var headText = Head?.Invoke(renderContext);
+            var dismissible = Dismissible?.Invoke(renderContext) ?? TypeDismissibilityAlert.Dismissible;
+
             var head = new HtmlElementTextSemanticsStrong
             (
-                new HtmlText(Head),
+                new HtmlText(headText),
                 new HtmlNbsp()
             );
 
@@ -79,11 +84,11 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("alert", GetClasses()),
                 Style = GetStyles(),
                 Role = "alert",
-                DataTheme = Theme.ToValue()
+                DataTheme = theme.ToValue()
             }
-                .Add(!string.IsNullOrWhiteSpace(Head) ? head : null)
+                .Add(!string.IsNullOrWhiteSpace(headText) ? head : null)
                 .Add(new ControlPanel().Add(Content).Render(renderContext, visualTree))
-                .Add(Dismissible != TypeDismissibilityAlert.None ? button : null);
+                .Add(dismissible != TypeDismissibilityAlert.None ? button : null);
         }
     }
 }

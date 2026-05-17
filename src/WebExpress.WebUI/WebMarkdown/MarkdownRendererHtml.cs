@@ -182,9 +182,9 @@ namespace WebExpress.WebUI.WebMarkdown
                 else if (element is MarkdownBlockElementTable table)
                 {
                     var tab = new ControlTable()
-                        .AddColumns(table.Columns.Select(x => new ControlTableColumn() { Title = x.PlainText }))
+                        .AddColumns(table.Columns.Select(x => new ControlTableColumn() { Title = _ => x.PlainText }))
                         .AddRows(table.Rows.Select(row => new ControlTableRow()
-                            .Add(row.Select(cell => new ControlTableCell() { Text = cell.PlainText }))));
+                            .Add(row.Select(cell => new ControlTableCell() { Text = _ => cell.PlainText }))));
 
                     list.Add(tab.Render(renderContext, null));
                 }
@@ -248,6 +248,38 @@ namespace WebExpress.WebUI.WebMarkdown
                 else if (element is MarkdownInlineElementPlainText text)
                 {
                     list.Add(new HtmlText(text.Text));
+                }
+                else if (element is MarkdownInlineElementPlugin inlinePlugin)
+                {
+                    var pluginDiv = new HtmlElementTextContentDiv()
+                    {
+                        Class = "wx-plugin wx-plugin-inline"
+                    };
+
+                    pluginDiv.AddUserAttribute("data-plugin", inlinePlugin.Name);
+
+                    foreach (var param in inlinePlugin.Parameters)
+                    {
+                        pluginDiv.AddUserAttribute($"data-plugin-{param.Key}", param.Value);
+                    }
+
+                    list.Add(pluginDiv);
+                }
+                else if (element is MarkdownBlockElementPlugin blockPlugin)
+                {
+                    var pluginDiv = new HtmlElementTextContentDiv(ConvertElement(blockPlugin.Content, renderContext))
+                    {
+                        Class = "wx-plugin wx-plugin-block"
+                    };
+
+                    pluginDiv.AddUserAttribute("data-plugin", blockPlugin.Name);
+
+                    foreach (var param in blockPlugin.Parameters)
+                    {
+                        pluginDiv.AddUserAttribute($"data-plugin-{param.Key}", param.Value);
+                    }
+
+                    list.Add(pluginDiv);
                 }
             }
 

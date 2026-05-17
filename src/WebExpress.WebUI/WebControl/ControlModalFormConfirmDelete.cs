@@ -26,8 +26,8 @@ namespace WebExpress.WebUI.WebControl
         public ControlModalFormConfirmDelete(string id, params IControlFormItem[] content)
             : base(id, content)
         {
-            SubmitButtonIcon = new IconTrash();
-            SubmitButtonColor = new PropertyColorButton(TypeColorButton.Danger);
+            SubmitButtonIcon = _ => new IconTrash();
+            SubmitButtonColor = _ => new PropertyColorButton(TypeColorButton.Danger);
         }
 
         /// <summary>
@@ -38,15 +38,22 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            if (string.IsNullOrWhiteSpace(Header))
+            var header = Header?.Invoke(renderContext);
+            var submitButtonLabel = SubmitButtonLabel?.Invoke(renderContext);
+
+            if (string.IsNullOrWhiteSpace(header))
             {
-                Header = I18N.Translate(renderContext, "webexpress.webui:delete.header");
+                Header = _ => I18N.Translate(renderContext, "webexpress.webui:delete.header");
             }
 
-            SubmitButtonLabel ??= I18N.Translate(renderContext, "webexpress.webui:delete.label");
+            if (string.IsNullOrWhiteSpace(submitButtonLabel))
+            {
+                SubmitButtonLabel = _ => I18N.Translate(renderContext, "webexpress.webui:delete.label");
+            }
+
             Content ??= new ControlFormItemStaticText()
             {
-                Text = I18N.Translate(renderContext, "webexpress.webui:delete.description")
+                Text = _ => I18N.Translate(renderContext, "webexpress.webui:delete.description")
             };
 
             return base.Render(renderContext, visualTree);

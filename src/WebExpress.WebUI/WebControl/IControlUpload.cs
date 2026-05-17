@@ -9,34 +9,34 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlUpload : IControl
     {
         /// <summary>
-        /// Returns the placeholder text displayed in the file upload area.
+        /// Gets the placeholder text displayed in the file upload area.
         /// </summary>
-        string Placeholder { get; }
+        Func<IRenderControlFormContext, string> Placeholder { get; }
 
         /// <summary>
-        /// Returns the URI associated with the form.
+        /// Gets the URI associated with the form.
         /// </summary>
-        IUri Uri { get; }
+        Func<IRenderControlFormContext, IUri> Uri { get; }
 
         /// <summary>
-        /// Returns a value indicating whether multiple selections are allowed.
+        /// Gets a value indicating whether multiple selections are allowed.
         /// </summary>
-        bool Multiple { get; }
+        Func<IRenderControlFormContext, bool> Multiple { get; }
 
         /// <summary>
-        /// Returns or sets the accept file types for the upload control.
+        /// Gets or sets the accept file types for the upload control.
         /// </summary> 
-        string Accept { get; }
+        Func<IRenderControlFormContext, string> Accept { get; }
 
         /// <summary>
-        /// Returns a value indicating whether automatic uploads are enabled.
+        /// Gets a value indicating whether automatic uploads are enabled.
         /// </summary>
-        bool AutoUpload { get; }
+        Func<IRenderControlFormContext, bool> AutoUpload { get; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the dropzone is displayed in full-screen mode.
+        /// Gets or sets a value indicating whether the dropzone is displayed in full-screen mode.
         /// </summary>
-        bool FullScreenDropzone { get; }
+        Func<IRenderControlFormContext, bool> FullScreenDropzone { get; }
 
         /// <summary>
         /// Checks the form for correctness of the data.

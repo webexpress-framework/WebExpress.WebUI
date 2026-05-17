@@ -62,7 +62,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         this._loadState();
         this.render();
     }
-    
+
     /**
      * Initializes or binds a pagination control and an information area.
      * @param {HTMLElement} host - The host element to search or attach the pager to.
@@ -70,7 +70,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
     _initTileContainer(host) {
         this._tileContainer = document.createElement("div");
         this._tileContainer.className = "wx-tile-container";
-        
+
         host.appendChild(this._tileContainer);
     }
 
@@ -130,7 +130,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
             colorCss: tileData.colorCss || tileData.color || null,
             colorStyle: tileData.colorStyle || null,
             visible: tileData.visible !== false,
-            
+
             // action attributes
             primaryAction: tileData.primaryAction,
             secondaryAction: tileData.secondaryAction,
@@ -302,7 +302,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
                 secondaryAction: Object.fromEntries(Object.entries(div.dataset)
                     .filter(([k]) => k.startsWith("wxSecondary"))
                     .map(([k, v]) => [
-                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        k.slice(11).replace(/^./, c => c.toLowerCase()),
                         v === "true" ? true : v === "false" ? false : v
                     ])
                 ),
@@ -360,7 +360,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
             const btn = document.createElement("button");
             btn.type = "button";
             btn.className = "wx-tile-remove-btn fas fa-times";
-            btn.setAttribute("aria-label", "Close tile");
+            btn.setAttribute("aria-label", this._i18n("webexpress.webui:tile.close", "Close tile"));
             btn.addEventListener("click", e => {
                 e.stopPropagation();
                 if (tile.id) {

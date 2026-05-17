@@ -1,3 +1,18 @@
+:root {
+    /* Unified dropdown shadow: subtle elevation for dropdown menus against white backgrounds */
+    --wx-dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    
+    /* Central highlight color */
+    --wx-highlight: #ff8c00;
+    --wx-highlight-rgb: 255, 140, 0;
+    --wx-highlight-contrast: #212529;
+}
+
+/* Global dropdown menu shadow for consistent elevation across all dropdown variants */
+.dropdown-menu {
+    box-shadow: var(--wx-dropdown-shadow);
+}
+
 body, html {
     height: 100%;
 }
@@ -30,7 +45,11 @@ pre {
 img.wx-icon {
     height: 1.2em;
     min-width: 1em;
-    vertical-align: middle; 
+    vertical-align: middle;
+}
+
+img.wx-icon-large {
+    height: 2.2em;
 }
 
 .wx-esm {
@@ -60,7 +79,7 @@ img.wx-icon {
     border-radius: 0;
     display: flex;
     flex-direction: column;
-    background-color: var(--bs-body-bg); 
+    background-color: var(--bs-body-bg);
 }
 
 .wx-breadcrumb {
@@ -176,26 +195,26 @@ img.wx-icon {
     line-height: 2em;
 }
 
-.wx-prifile-sm > b {
+.wx-profile-sm > b {
     width: 1.75em;
     height: 1.75em;
     line-height: 1.75em;
     font-size: 0.75em;
 }
 
-.wx-prifile-sm > img {
+.wx-profile-sm > img {
     width: 1.75em;
     height: 1.75em;
 }
 
-.wx-prifile-lg > b {
+.wx-profile-lg > b {
     width: 2.5em;
     height: 2.5em;
     line-height: 2.5em;
     font-size: 2em;
 }
 
-.wx-prifile-lg > img {
+.wx-profile-lg > img {
     width: 4em;
     height: 4em;
 }
@@ -267,22 +286,22 @@ img.wx-icon {
     border-left-color: var(--bs-light);
     background-color: var(--bs-body-bg);
 }
-    
+
 .wx-dragging {
     opacity: 0.5;
 }
-    
+
 .wx-drag-over {
     background: repeating-linear-gradient(
         45deg,
-        #eee,
-        #eee 6px,
-        #f8f8f8 6px,
-        #f8f8f8 12px
+        var(--bs-secondary-bg),
+        var(--bs-secondary-bg) 6px,
+        var(--bs-tertiary-bg) 6px,
+        var(--bs-tertiary-bg) 12px
     );
     outline: 2px dashed var(--bs-success); /* Adds a dashed border for visual emphasis */
     border-radius: 0.5rem;
-    z-index: 1000; 
+    z-index: 1000;
 }
 
 /* Resizable container that activates only on direct hover */
@@ -306,4 +325,105 @@ img.wx-icon {
 
 .list-group-item.active a:hover {
     color: var(--bs-light);
+}
+
+/* Highlight color utilities  */
+.text-highlight {
+    color: var(--wx-highlight) !important;
+}
+
+.bg-highlight {
+    background-color: var(--wx-highlight) !important;
+    color: var(--wx-highlight-contrast) !important;
+}
+
+.text-bg-highlight {
+    background-color: var(--wx-highlight) !important;
+    color: var(--wx-highlight-contrast) !important;
+}
+
+.border-highlight {
+    border-color: var(--wx-highlight) !important;
+}
+
+.btn-highlight {
+    background-color: var(--wx-highlight);
+    border-color: var(--wx-highlight);
+    color: var(--wx-highlight-contrast);
+}
+
+.btn-highlight:hover,
+.btn-highlight:focus,
+.btn-highlight:active {
+    background-color: var(--wx-highlight);
+    border-color: var(--wx-highlight);
+    color: var(--wx-highlight-contrast);
+    filter: brightness(0.95);
+}
+
+.btn-outline-highlight {
+    background-color: transparent;
+    border-color: var(--wx-highlight);
+    color: var(--wx-highlight);
+}
+
+.btn-outline-highlight:hover,
+.btn-outline-highlight:focus,
+.btn-outline-highlight:active {
+    background-color: var(--wx-highlight);
+    border-color: var(--wx-highlight);
+    color: var(--wx-highlight-contrast);
+}
+
+.alert-highlight {
+    background-color: rgba(var(--wx-highlight-rgb), 0.25);
+    border-color: rgba(var(--wx-highlight-rgb), 0.6);
+    color: var(--wx-highlight-contrast);
+}
+
+.navbar-highlight {
+    background-color: var(--wx-highlight);
+    color: var(--wx-highlight-contrast);
+}
+
+.table-highlight {
+    --bs-table-bg: rgba(var(--wx-highlight-rgb), 0.25);
+    --bs-table-color: var(--wx-highlight-contrast);
+    --bs-table-border-color: rgba(var(--wx-highlight-rgb), 0.6);
+    color: var(--wx-highlight-contrast);
+    background-color: rgba(var(--wx-highlight-rgb), 0.25);
+}
+
+.wx-callout-highlight {
+    border-left-color: var(--wx-highlight);
+    background-color: var(--bs-body-bg);
+}
+
+.wx-tag-highlight {
+    background-color: rgba(var(--wx-highlight-rgb), 0.25);
+    color: var(--wx-highlight-contrast);
+    border-color: var(--wx-highlight);
+}
+
+.wx-tile-highlight {
+    background-color: var(--wx-highlight);
+    color: var(--wx-highlight-contrast);
+    border-color: var(--wx-highlight);
+}
+
+.wx-list-bg-highlight {
+    background-color: var(--wx-highlight);
+    color: var(--wx-highlight-contrast);
+}
+
+.wx-selection-highlight {
+    background-color: rgba(var(--wx-highlight-rgb), 0.25);
+    color: var(--wx-highlight-contrast);
+    border-color: var(--wx-highlight);
+}
+
+/* Highlight breadcrumb support, mirroring the existing per-color rules */
+.wx-breadcrumb.text-highlight > li > a,
+.wx-breadcrumb.text-highlight > li > i {
+    color: var(--wx-highlight);
 }

@@ -1,7 +1,8 @@
-﻿using System.Text.Json.Serialization;
+using System;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
@@ -15,43 +16,42 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns the unique identifier of the selection item.
         /// </summary>
-        [JsonPropertyName("id")]
         public string Id { get; }
 
         /// <summary>
-        /// Returns or sets the text of the selection item.
+        /// Gets or sets the text of the selection item.
         /// </summary>
-        [JsonPropertyName("label")]
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon associated with the selection item.
+        /// Gets or sets the icon associated with the selection item.
         /// </summary>
-        [JsonPropertyName("icon")]
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the color of the label.
+        /// Gets or sets the image uri.
         /// </summary>
-        [JsonPropertyName("labelcolor")]
-        public TypeColorSelection LabelColor { get; set; }
+        public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the selection item is selected.
+        /// Gets or sets the color of the label.
         /// </summary>
-        [JsonPropertyName("selected")]
-        public bool Selected { get; set; }
+        public Func<IRenderControlContext, TypeColorSelection> Color { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the selection item is disabled.
+        /// Gets or sets a value indicating whether the selection item is selected.
         /// </summary>
-        [JsonPropertyName("disabled")]
-        public bool Disabled { get; set; }
+        public Func<IRenderControlContext, bool> Selected { get; set; }
 
         /// <summary>
-        /// Returns or sets the content of the selection item.
+        /// Gets or sets a value indicating whether the selection item is disabled.
         /// </summary>
-        public IControl Content { get; set; }
+        public Func<IRenderControlContext, bool> Disabled { get; set; }
+
+        /// <summary>
+        /// Gets or sets the content of the selection item.
+        /// </summary>
+        public Func<IRenderControlContext, IControl> Content { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
@@ -83,22 +83,20 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-selection-item"),
             }
-                .AddUserAttribute("data-label", I18N.Translate(Text))
-                .AddUserAttribute("data-icon", Icon is Icon ? (Icon as Icon).Class : null)
-                .AddUserAttribute("data-image", Icon is ImageIcon
-                    ? (Icon as ImageIcon).Uri?.ToString()
+                .AddUserAttribute("data-label", I18N.Translate(Text?.Invoke(renderContext)))
+                .AddUserAttribute("data-icon", Icon?.Invoke(renderContext) is Icon ? (Icon?.Invoke(renderContext) as Icon).Class : null)
+                .AddUserAttribute("data-image", Image?.Invoke(renderContext)?.ToString() ?? (Icon?.Invoke(renderContext) is ImageIcon imageIcon ? imageIcon.Uri?.ToString() : null))
+                .AddUserAttribute("data-color", (Color?.Invoke(renderContext) ?? TypeColorSelection.Default) != TypeColorSelection.Default
+                    ? (Color?.Invoke(renderContext) ?? TypeColorSelection.Default).ToClass()
                     : null)
-                .AddUserAttribute("data-label-color", LabelColor != TypeColorSelection.Default
-                    ? LabelColor.ToClass()
-                    : null)
-                .Add(Content?.Render(renderContext, visualTree));
+                .Add(Content?.Invoke(renderContext)?.Render(renderContext, visualTree));
 
-            if (Selected)
+            if (Selected?.Invoke(renderContext) == true)
             {
                 html.AddUserAttribute("selected");
             }
 
-            if (Disabled)
+            if (Disabled?.Invoke(renderContext) == true)
             {
                 html.AddUserAttribute("disabled");
             }

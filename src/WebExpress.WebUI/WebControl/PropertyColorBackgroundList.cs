@@ -9,8 +9,8 @@
         /// Initializes a new instance of the class with a specified color.
         /// </summary>
         /// <param name="color">The background color.</param>
-        public PropertyColorBackgroundList(TypeColorBackground color)
-            : base(color)
+        public PropertyColorBackgroundList(TypeColorBackgroundList color)
+            : base((TypeColorBackground)color)
         {
         }
 

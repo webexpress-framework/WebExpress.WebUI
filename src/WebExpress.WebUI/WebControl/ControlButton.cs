@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebTheme;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -23,71 +25,71 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControl> Content => _content;
 
         /// <summary>
-        /// Returns or sets the color.
+        /// Gets or sets the color.
         /// </summary>
-        public new PropertyColorButton BackgroundColor
+        public new Func<IRenderControlContext, PropertyColorButton> BackgroundColor
         {
-            get => (PropertyColorButton)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(Outline), () => value?.ToStyle(Outline));
+            get => (Func<IRenderControlContext, PropertyColorButton>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(Outline?.Invoke(null) ?? false), () => value?.Invoke(null)?.ToStyle(Outline?.Invoke(null) ?? false));
         }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
-        public TypeSizeButton Size
+        public Func<IRenderControlContext, TypeSizeButton> Size
         {
-            get => (TypeSizeButton)GetProperty(TypeSizeButton.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeSizeButton>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the outline property
+        /// Gets or sets the outline property
         /// </summary>
-        public bool Outline { get; set; }
+        public Func<IRenderControlContext, bool> Outline { get; set; } = _ => false;
 
         /// <summary>
-        /// Returns or sets whether the button should take up the full width.
+        /// Gets or sets whether the button should take up the full width.
         /// </summary>
-        public TypeBlockButton Block
+        public Func<IRenderControlContext, TypeBlockButton> Block
         {
-            get => (TypeBlockButton)GetProperty(TypeBlockButton.None);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeBlockButton>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
-        /// Returns or sets the value.
+        /// Gets or sets the value.
         /// </summary>
-        public string Value { get; set; }
+        public Func<IRenderControlContext, string> Value { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the primary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
-        public IAction PrimaryAction { get; set; }
+        public Func<IRenderControlContext, IAction> PrimaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
-        public IAction SecondaryAction { get; set; }
+        public Func<IRenderControlContext, IAction> SecondaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the activation status of the button.
+        /// Gets or sets the activation status of the button.
         /// </summary>
-        public TypeActive Active
+        public Func<IRenderControlContext, TypeActive> Active
         {
-            get => (TypeActive)GetProperty(TypeActive.None);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeActive>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
@@ -98,8 +100,12 @@ namespace WebExpress.WebUI.WebControl
         public ControlButton(string id = null, params IControl[] content)
             : base(id)
         {
-            Size = TypeSizeButton.Default;
             _content.AddRange(content);
+
+            BackgroundColor = _ => new PropertyColorButton(TypeColorButton.Default);
+            Size = _ => TypeSizeButton.Default;
+            Block = _ => TypeBlockButton.None;
+            Active = _ => TypeActive.None;
         }
 
         /// <summary>
@@ -146,33 +152,49 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            return Render(renderContext, visualTree, _content);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="content">The content to be rendered within the button.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControl> content)
+        {
+            var text = Text?.Invoke(renderContext);
+            var value = Value?.Invoke(renderContext);
+            var icon = Icon?.Invoke(renderContext)?.ApplyIconTheme(visualTree?.IconTheme ?? TypeIconTheme.Default);
+            var outline = Outline?.Invoke(renderContext) ?? false;
+            var primaryAction = PrimaryAction?.Invoke(renderContext);
+            var secondaryAction = SecondaryAction?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
+            var active = Active?.Invoke(renderContext);
+
             var html = new HtmlElementFieldButton()
             {
                 Id = Id,
+                Value = value,
                 Type = "button",
-                Value = Value,
                 Class = Css.Concatenate("wx-button btn", GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
-                Disabled = Active == TypeActive.Disabled
+                Role = role,
+                Disabled = active == TypeActive.Disabled
             };
 
-            if (Icon is not null)
+            if (icon is not null)
             {
                 html.Add(new ControlIcon()
                 {
-                    Icon = Icon
+                    Icon = _ => icon
                 }.Render(renderContext, visualTree));
             }
 
-            if (!string.IsNullOrWhiteSpace(Text))
+            if (!string.IsNullOrWhiteSpace(text))
             {
-                html.Add(new HtmlText(I18N.Translate(renderContext.Request.Culture, Text)));
-            }
-
-            if (!string.IsNullOrWhiteSpace(OnClick?.ToString()))
-            {
-                html.AddUserAttribute("onclick", OnClick?.ToString());
+                html.Add(new HtmlText(I18N.Translate(renderContext.Request.Culture, text)));
             }
 
             if (_content.Count != 0)
@@ -180,8 +202,8 @@ namespace WebExpress.WebUI.WebControl
                 html.Add(_content.Select(x => x.Render(renderContext, visualTree)).ToArray());
             }
 
-            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
-            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
+            primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            secondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

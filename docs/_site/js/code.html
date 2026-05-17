@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>CodeCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="CodeCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/code.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress-Framework"></p>
+<h1 id="codectrl">CodeCtrl</h1>
+<p>The <code>CodeCtrl</code> module provides a component that can display code with optional line numbers, a copy function, and language-dependent syntax highlighting. It is ideal for presenting code snippets in a user interface. Initialization is declarative via HTML, where configuration is controlled through <code>data-</code> attributes.</p>
+<p>The component consists of a header, which displays the name of the language and a button for copying, as well as the underlying code area.</p>
+<pre><code>   ┌──────────────────────────────────┐
+   │ [Language]          [Copy Button]│  // Header with language display and copy button
+   ├──────────────────────────────────┤
+   │ 1 │                              │
+   │ 2 │  [Code Content with Syntax]  │  // Code area with optional line numbers
+   │ 3 │                              │
+   └──────────────────────────────────┘
+</code></pre>
+<h3 id="configuration">Configuration</h3>
+<p>The component's configuration is managed via <code>data-</code> attributes directly on the host element.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-language</code></td>
+<td>The language for syntax highlighting. Also serves as the label in the header.</td>
+</tr>
+<tr>
+<td><code>data-line-numbers</code></td>
+<td>Controls whether line numbers are displayed (<code>true</code> or <code>false</code>).</td>
+</tr>
+</tbody>
+</table>
+<p>The code to be displayed is written directly as the text content of the host element.</p>
+<h3 id="features">Features</h3>
+<ul>
+<li><strong>Syntax Highlighting</strong>: The code can be highlighted depending on the specified language. The syntax highlighting is modular and can be extended by adding more external JavaScript files for new languages. These modules register the specific rules for a language, which are then automatically applied by the <code>CodeCtrl</code>.</li>
+<li><strong>Copy Functionality</strong>: The code can be copied to the clipboard with a click of the button.</li>
+<li><strong>Line Numbers</strong>: Optional line numbers can be displayed for better clarity.</li>
+<li><strong>Header</strong>: An optional header displays the programming language used.</li>
+</ul>
+<h3 id="programmatic-control">Programmatic Control</h3>
+<p>In addition to declarative initialization, the component can also be manipulated programmatically via its JavaScript instance after the page has loaded.</p>
+<h4 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h4>
+<p>For components defined declaratively in HTML, the associated instance is retrieved via the <code>getInstanceByElement(element)</code> method of the central <code>webexpress.webui.Controller</code>.</p>
+<pre><code class="lang-javascript">// Find the host element in the DOM
+const element = document.getElementById('code-section');
+
+// Retrieve the controller instance associated with the element
+const codeCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (codeCtrl) {
+    // Example: Programmatically update the code content
+    codeCtrl.code = 'console.log(&quot;New code!&quot;);';
+}
+</code></pre>
+<h4 id="manual-instantiation">Manual Instantiation</h4>
+<p>A <code>CodeCtrl</code> can also be created entirely programmatically, which is useful for dynamic UI scenarios.</p>
+<pre><code class="lang-javascript">// Find the container element for the code area
+const container = document.getElementById('dynamic-code-container');
+container.className = 'wx-webui-code'; // Assign the class for registration
+container.dataset.language = 'javascript';
+container.dataset.lineNumbers = 'true';
+container.textContent = 'console.log(&quot;Hello, World!&quot;);';
+
+
+// Create a new instance of CodeCtrl manually by initializing the controller on the container
+const dynamicCodeCtrl = new webexpress.webui.CodeCtrl(container);
+</code></pre>
+<h3 id="use-case-example">Use Case Example</h3>
+<p>The following example demonstrates the configuration of a code area with syntax highlighting for C# and enabled line numbers.</p>
+<pre><code class="lang-html">&lt;!--
+    The main container for the CodeCtrl component.
+    The code to be displayed is placed directly inside the element.
+    Configuration is done via data-attributes for language and line numbers.
+--&gt;
+&lt;div id=&quot;code-section&quot;
+     class=&quot;wx-webui-code&quot;
+     data-language=&quot;csharp&quot;
+     data-line-numbers=&quot;true&quot;&gt;public class HelloWorld 
+{ 
+    public static void Main() 
+    { 
+        Console.WriteLine(&quot;Hello, World!&quot;); 
+    } 
+}&lt;/div&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/code.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

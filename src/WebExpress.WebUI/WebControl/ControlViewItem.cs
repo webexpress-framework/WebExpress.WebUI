@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
@@ -16,44 +18,29 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<IControl> _content = [];
 
         /// <summary>
-        /// Returns or sets the unique identifier for the entity.
+        /// Gets or sets the unique identifier for the entity.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Returns or sets the title text.
+        /// Gets or sets the title text.
         /// </summary>
-        public string Title { get; set; }
+        public Func<IRenderControlContext, string> Title { get; set; }
 
         /// <summary>
-        /// Returns or sets the description of the view.
+        /// Gets or sets the description of the view.
         /// </summary>
-        public string Description { get; set; }
+        public Func<IRenderControlContext, string> Description { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the detail frame is enabled.
+        /// Gets or sets the image uri.
         /// </summary>
-        public bool DetailFrame { get; set; }
-
-        /// <summary>
-        /// Returns or sets the initial size of the detail pane (e.g. "300px" or "30%").
-        /// </summary>
-        public string DetailSize { get; set; }
-
-        /// <summary>
-        /// Returns or sets the minimum size of the detail pane in pixels.
-        /// </summary>
-        public int? DetailMinSide { get; set; }
-
-        /// <summary>
-        /// Returns or sets the maximum size of the detail pane in pixels.
-        /// </summary>
-        public int? DetailMaxSide { get; set; }
+        public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
         /// Returns the content of the view control.
@@ -113,19 +100,20 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var title = Title?.Invoke(renderContext);
+            var description = Description?.Invoke(renderContext);
+            var icon = Icon?.Invoke(renderContext);
+            var image = Image?.Invoke(renderContext);
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-view"
             }
-                .AddUserAttribute("data-label", I18N.Translate(renderContext, Title))
-                .AddUserAttribute("data-description", I18N.Translate(renderContext, Description))
-                .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri.ToString())
-                .AddUserAttribute("data-has-details", DetailFrame ? "true" : null)
-                .AddUserAttribute("data-detail-size", DetailSize)
-                .AddUserAttribute("data-detail-min-side", DetailMinSide?.ToString())
-                .AddUserAttribute("data-detail-max-side", DetailMaxSide?.ToString())
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, title))
+                .AddUserAttribute("data-description", I18N.Translate(renderContext, description))
+                .AddUserAttribute("data-icon", (icon as Icon)?.Class)
+                .AddUserAttribute("data-image", image?.ToString() ?? (icon as ImageIcon)?.Uri?.ToString())
                 .Add(_content.Select(x => x.Render(renderContext, visualTree)));
 
             return html;

@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text.Json;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -21,156 +23,86 @@ namespace WebExpress.WebUI.WebControl
         };
         private readonly List<ControlChartDataset> _datasets = [];
         private readonly List<string> _labels = [];
-        private TypeChart _type;
-        private string _title;
-        private string _titleX;
-        private string _titleY;
-        private int _width;
-        private int _height;
-        private float _minimum = float.MinValue;
-        private float _maximum = float.MaxValue;
-        private bool _responsive;
-        private bool _maintainAspectRatio;
-        private bool _legendDisplay;
-        private bool _titleDisplay;
-        private bool _yBeginAtZero;
-        private bool _xBeginAtZero;
 
         /// <summary>
-        /// Returns or sets the chart type. The setter returns the instance for fluent chaining.
+        /// Gets or sets the chart type. The setter returns the instance for fluent chaining.
         /// </summary>
-        public TypeChart Type
-        {
-            get { return _type; }
-            set { _type = value; }
-        }
+        public Func<IRenderControlContext, TypeChart> Type { get; set; } = _ => TypeChart.Line;
 
         /// <summary>
-        /// Returns or sets the chart title. The setter returns the instance for fluent chaining.
+        /// Gets or sets the chart title. The setter returns the instance for fluent chaining.
         /// </summary>
-        public string Title
-        {
-            get { return _title; }
-            set { _title = value; }
-        }
+        public Func<IRenderControlContext, string> Title { get; set; }
 
         /// <summary>
-        /// Returns or sets the x-axis title. The setter returns the instance for fluent chaining.
+        /// Gets or sets the x-axis title. The setter returns the instance for fluent chaining.
         /// </summary>
-        public string TitleX
-        {
-            get { return _titleX; }
-            set { _titleX = value; }
-        }
+        public Func<IRenderControlContext, string> TitleX { get; set; }
 
         /// <summary>
-        /// Returns or sets the y-axis title. The setter returns the instance for fluent chaining.
+        /// Gets or sets the y-axis title. The setter returns the instance for fluent chaining.
         /// </summary>
-        public string TitleY
-        {
-            get { return _titleY; }
-            set { _titleY = value; }
-        }
+        public Func<IRenderControlContext, string> TitleY { get; set; }
 
         /// <summary>
-        /// Returns or sets the chart width. The setter returns the instance for fluent chaining.
+        /// Gets or sets the chart width. The setter returns the instance for fluent chaining.
         /// </summary>
-        public new int Width
-        {
-            get { return _width; }
-            set { _width = value; }
-        }
+        public new Func<IRenderControlContext, int> Width { get; set; }
 
         /// <summary>
-        /// Returns or sets the chart height. The setter returns the instance for fluent chaining.
+        /// Gets or sets the chart height. The setter returns the instance for fluent chaining.
         /// </summary>
-        public new int Height
-        {
-            get { return _height; }
-            set { _height = value; }
-        }
+        public new Func<IRenderControlContext, int> Height { get; set; }
 
         /// <summary>
-        /// Returns or sets the minimum y-value. The setter returns the instance for fluent chaining.
+        /// Gets or sets the minimum y-value. The setter returns the instance for fluent chaining.
         /// </summary>
-        public float Minimum
-        {
-            get { return _minimum; }
-            set { _minimum = value; }
-        }
+        public Func<IRenderControlContext, float> Minimum { get; set; } = _ => float.MinValue;
 
         /// <summary>
-        /// Returns or sets the maximum y-value. The setter returns the instance for fluent chaining.
+        /// Gets or sets the maximum y-value. The setter returns the instance for fluent chaining.
         /// </summary>
-        public float Maximum
-        {
-            get { return _maximum; }
-            set { _maximum = value; }
-        }
+        public Func<IRenderControlContext, float> Maximum { get; set; } = _ => float.MaxValue;
 
         /// <summary>
-        /// Returns or sets whether the chart is responsive. The setter returns the instance for fluent chaining.
+        /// Gets or sets whether the chart is responsive. The setter returns the instance for fluent chaining.
         /// </summary>
-        public bool Responsive
-        {
-            get { return _responsive; }
-            set { _responsive = value; }
-        }
+        public Func<IRenderControlContext, bool> Responsive { get; set; } = _ => false;
 
         /// <summary>
-        /// Returns or sets whether the chart maintains aspect ratio. The setter returns the instance for fluent chaining.
+        /// Gets or sets whether the chart maintains aspect ratio. The setter returns the instance for fluent chaining.
         /// </summary>
-        public bool MaintainAspectRatio
-        {
-            get { return _maintainAspectRatio; }
-            set { _maintainAspectRatio = value; }
-        }
+        public Func<IRenderControlContext, bool> MaintainAspectRatio { get; set; } = _ => false;
 
         /// <summary>
-        /// Returns or sets whether the legend is displayed. The setter returns the instance for fluent chaining.
+        /// Gets or sets whether the legend is displayed. The setter returns the instance for fluent chaining.
         /// </summary>
-        public bool LegendDisplay
-        {
-            get { return _legendDisplay; }
-            set { _legendDisplay = value; }
-        }
+        public Func<IRenderControlContext, bool> LegendDisplay { get; set; } = _ => false;
 
         /// <summary>
-        /// Returns or sets whether the title is displayed. The setter returns the instance for fluent chaining.
+        /// Gets or sets whether the title is displayed. The setter returns the instance for fluent chaining.
         /// </summary>
-        public bool TitleDisplay
-        {
-            get { return _titleDisplay; }
-            set { _titleDisplay = value; }
-        }
+        public Func<IRenderControlContext, bool> TitleDisplay { get; set; } = _ => false;
 
         /// <summary>
-        /// Returns or sets whether the y-axis begins at zero. The setter returns the instance for fluent chaining.
+        /// Gets or sets whether the y-axis begins at zero. The setter returns the instance for fluent chaining.
         /// </summary>
-        public bool YBeginAtZero
-        {
-            get { return _yBeginAtZero; }
-            set { _yBeginAtZero = value; }
-        }
+        public Func<IRenderControlContext, bool> YBeginAtZero { get; set; } = _ => false;
 
         /// <summary>
-        /// Returns or sets whether the x-axis begins at zero. The setter returns the instance for fluent chaining.
+        /// Gets or sets whether the x-axis begins at zero. The setter returns the instance for fluent chaining.
         /// </summary>
-        public bool XBeginAtZero
-        {
-            get { return _xBeginAtZero; }
-            set { _xBeginAtZero = value; }
-        }
+        public Func<IRenderControlContext, bool> XBeginAtZero { get; set; } = _ => false;
 
         /// <summary>
         /// Returns the datasets.
         /// </summary>
-        public IEnumerable<ControlChartDataset> Data => _datasets;
+        public Func<IRenderControlContext, IEnumerable<ControlChartDataset>> Data { get; set; }
 
         /// <summary>
         /// Returns the labels. The setter returns the instance for fluent chaining.
         /// </summary>
-        public IEnumerable<string> Labels => _labels;
+        public Func<IRenderControlContext, IEnumerable<string>> Labels { get; set; }
 
         /// <summary>
         /// Adds one or more datasets to the control chart.
@@ -247,6 +179,8 @@ namespace WebExpress.WebUI.WebControl
             : base(id)
         {
             _datasets.AddRange(datasets);
+            Data = _ => _datasets;
+            Labels = _ => _labels;
         }
 
         /// <summary>
@@ -257,39 +191,57 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var type = Type?.Invoke(renderContext) ?? TypeChart.Line;
+            var labels = Labels?.Invoke(renderContext);
+            var responsive = Responsive?.Invoke(renderContext) ?? false;
+            var maintainAspectRatio = MaintainAspectRatio?.Invoke(renderContext) ?? false;
+            var legendDisplay = LegendDisplay?.Invoke(renderContext) ?? false;
+            var titleDisplay = TitleDisplay?.Invoke(renderContext) ?? false;
+            var title = Title?.Invoke(renderContext);
+            var yBeginAtZero = YBeginAtZero?.Invoke(renderContext) ?? false;
+            var titleY = TitleY?.Invoke(renderContext);
+            var xBeginAtZero = XBeginAtZero?.Invoke(renderContext) ?? false;
+            var titleX = TitleX?.Invoke(renderContext);
+            var minimum = Minimum?.Invoke(renderContext) ?? float.MinValue;
+            var maximum = Maximum?.Invoke(renderContext) ?? float.MaxValue;
+            var width = Width?.Invoke(renderContext) ?? 0;
+            var height = Height?.Invoke(renderContext) ?? 0;
+            var datasets = Data?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-chart", GetClasses()),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             }
                 // set chart type
-                .AddUserAttribute("data-type", _type.ToType())
+                .AddUserAttribute("data-type", type.ToType())
                 // set chart labels as json array
-                .AddUserAttribute("data-labels", _labels.Count != 0 ? SerializeJson(_labels) : null)
+                .AddUserAttribute("data-labels", labels?.Any() == true ? SerializeJson(labels) : null)
                 // set option flags
-                .AddUserAttribute("data-responsive", _responsive ? "true" : null)
-                .AddUserAttribute("data-maintain-aspect-ratio", _maintainAspectRatio ? "true" : null)
-                .AddUserAttribute("data-legend-display", _legendDisplay ? "true" : null)
-                .AddUserAttribute("data-title-display", _titleDisplay ? "true" : null)
+                .AddUserAttribute("data-responsive", responsive ? "true" : null)
+                .AddUserAttribute("data-maintain-aspect-ratio", maintainAspectRatio ? "true" : null)
+                .AddUserAttribute("data-legend-display", legendDisplay ? "true" : null)
+                .AddUserAttribute("data-title-display", titleDisplay ? "true" : null)
                 // set translated titles and axis settings
-                .AddUserAttribute("data-title-text", I18N.Translate(renderContext, _title))
-                .AddUserAttribute("data-scale-y-begin-at-zero", _yBeginAtZero ? "true" : null)
-                .AddUserAttribute("data-scale-y-title", I18N.Translate(renderContext, _titleY))
-                .AddUserAttribute("data-scale-x-begin-at-zero", _xBeginAtZero ? "true" : null)
-                .AddUserAttribute("data-scale-x-title", I18N.Translate(renderContext, _titleX))
+                .AddUserAttribute("data-title-text", I18N.Translate(renderContext, title))
+                .AddUserAttribute("data-scale-y-begin-at-zero", yBeginAtZero ? "true" : null)
+                .AddUserAttribute("data-scale-y-title", I18N.Translate(renderContext, titleY))
+                .AddUserAttribute("data-scale-x-begin-at-zero", xBeginAtZero ? "true" : null)
+                .AddUserAttribute("data-scale-x-title", I18N.Translate(renderContext, titleX))
                 // set min/max values for y axis
-                .AddUserAttribute("data-scale-y-min", _minimum > float.MinValue ? _minimum.ToString(CultureInfo.InvariantCulture) : null)
-                .AddUserAttribute("data-scale-y-max", _maximum < float.MaxValue ? _maximum.ToString(CultureInfo.InvariantCulture) : null)
+                .AddUserAttribute("data-scale-y-min", minimum > float.MinValue ? minimum.ToString(CultureInfo.InvariantCulture) : null)
+                .AddUserAttribute("data-scale-y-max", maximum < float.MaxValue ? maximum.ToString(CultureInfo.InvariantCulture) : null)
                 // set width and height
-                .AddUserAttribute("data-width", _width > 0 ? _width.ToString(CultureInfo.InvariantCulture) : null)
-                .AddUserAttribute("data-height", _height > 0 ? _height.ToString(CultureInfo.InvariantCulture) : null)
+                .AddUserAttribute("data-width", width > 0 ? width.ToString(CultureInfo.InvariantCulture) : null)
+                .AddUserAttribute("data-height", height > 0 ? height.ToString(CultureInfo.InvariantCulture) : null)
                 // set dataset count
-                .AddUserAttribute("data-dataset-count", _datasets.Count > 0 ? _datasets.Count.ToString(CultureInfo.InvariantCulture) : null);
+                .AddUserAttribute("data-dataset-count", datasets?.Any() == true ? datasets.Count().ToString(CultureInfo.InvariantCulture) : null);
 
             var dsIndex = 0;
-            foreach (var ds in _datasets)
+            foreach (var ds in datasets ?? [])
             {
                 if (dsIndex >= 10)
                 {

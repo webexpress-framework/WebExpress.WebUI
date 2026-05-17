@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
@@ -16,37 +18,47 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<IControl> _content = [];
 
         /// <summary>
-        /// Returns the id of the control.
+        /// Gets the id of the control.
         /// </summary>
         public string Id { get; private set; }
 
         /// <summary>
-        /// Returns or sets the title associated with the widget.
+        /// Gets or sets the title associated with the widget.
         /// </summary>
-        public string Title { get; set; }
+        public Func<IRenderControlContext, string> Title { get; set; }
 
         /// <summary>
-        /// Returns or sets the color associated with the widget.
+        /// Gets or sets the color associated with the widget.
         /// </summary>
-        public string Color { get; set; }
+        public Func<IRenderControlContext, string> Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon associated with this widget.
+        /// Gets or sets the icon associated with this widget.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the column index associated with this widget.
+        /// Gets or sets the image uri.
         /// </summary>
-        public uint Column { get; set; } = uint.MaxValue;
+        public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the widget can be moved.
+        /// Gets or sets the column index associated with this widget.
         /// </summary>
-        public bool Movable { get; set; }
+        public Func<IRenderControlContext, uint> Column { get; set; } = _ => uint.MaxValue;
 
         /// <summary>
-        /// Returns or sets the collection of controls that make up the content of the container.
+        /// Gets or sets a value indicating whether the widget can be moved.
+        /// </summary>
+        public Func<IRenderControlContext, bool> Movable { get; set; } = _ => false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the widget can be closed.
+        /// </summary>
+        public Func<IRenderControlContext, bool> Closeable { get; set; } = _ => false;
+
+        /// <summary>
+        /// Gets or sets the collection of controls that make up the content of the container.
         /// </summary>
         public IEnumerable<IControl> Content => _content;
 
@@ -103,18 +115,38 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            return Render(renderContext, visualTree, _content);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControl> content)
+        {
+            var title = Title?.Invoke(renderContext);
+            var color = Color?.Invoke(renderContext);
+            var icon = Icon?.Invoke(renderContext);
+            var image = Image?.Invoke(renderContext);
+            var column = Column?.Invoke(renderContext) ?? uint.MaxValue;
+            var movable = Movable?.Invoke(renderContext) ?? false;
+            var closeable = Closeable?.Invoke(renderContext) ?? false;
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-dashboard-widget"
             }
-                .AddUserAttribute("data-title", I18N.Translate(renderContext, Title))
-                .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-color", Color)
-                .AddUserAttribute("data-column", Column < uint.MaxValue ? Column.ToString() : null)
-                .AddUserAttribute("data-movable", Movable ? "true" : null)
-                .Add(_content.Select(x => x.Render(renderContext, visualTree)));
+                .AddUserAttribute("data-title", I18N.Translate(renderContext, title))
+                .AddUserAttribute("data-icon", (icon as Icon)?.Class)
+                .AddUserAttribute("data-image", image?.ToString() ?? (icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-color", color)
+                .AddUserAttribute("data-column", column < uint.MaxValue ? column.ToString() : null)
+                .AddUserAttribute("data-movable", movable ? "true" : null)
+                .AddUserAttribute("data-closeable", closeable ? "true" : null)
+                .Add(content.Select(x => x.Render(renderContext, visualTree)));
 
             return html;
         }

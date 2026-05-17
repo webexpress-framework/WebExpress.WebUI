@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.Internationalization;
+﻿using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -10,19 +11,19 @@ namespace WebExpress.WebUI.WebControl
     public sealed class ControlKanbanSwimlane : IControlKanbanSwimlane
     {
         /// <summary>
-        /// Returns the id of the control.
+        /// Gets the id of the control.
         /// </summary>
         public string Id { get; private set; }
 
         /// <summary>
-        /// Returns the title associated with the swimlane.
+        /// Gets the title associated with the swimlane.
         /// </summary>
-        public string Title { get; }
+        public Func<IRenderControlContext, string> Title { get; }
 
         /// <summary>
-        /// Returns a value indicating whether the content is currently expanded.
+        /// Gets a value indicating whether the content is currently expanded.
         /// </summary>
-        public bool Expanded { get; }
+        public Func<IRenderControlContext, bool> Expanded { get; }
 
         /// <summary>
         /// Initializes a new instance of class.
@@ -35,8 +36,8 @@ namespace WebExpress.WebUI.WebControl
         public ControlKanbanSwimlane(string id, string title, bool expanded = true)
         {
             Id = id;
-            Title = title;
-            Expanded = expanded;
+            Title = _ => title;
+            Expanded = _ => expanded;
         }
 
         /// <summary>
@@ -52,8 +53,8 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = "wx-swimlane"
             }
-                .AddUserAttribute("data-label", I18N.Translate(renderContext, Title))
-                .AddUserAttribute("data-expanded", !Expanded ? "false" : null);
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, Title?.Invoke(renderContext)))
+                .AddUserAttribute("data-expanded", !(Expanded?.Invoke(renderContext) ?? true) ? "false" : null);
 
             return html;
         }

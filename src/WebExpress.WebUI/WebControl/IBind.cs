@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebControl
     public interface IBind
     {
         /// <summary>
-        /// Returns the binding name.
+        /// Gets the binding name.
         /// </summary>
         string Name { get; }
 

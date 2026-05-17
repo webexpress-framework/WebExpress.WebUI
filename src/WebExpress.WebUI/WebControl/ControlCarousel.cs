@@ -73,6 +73,18 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            return Render(renderContext, visualTree, _items);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="items">The collection of carousel items to be rendered.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlCarouselItem> items)
+        {
             // indicators 
             var indicators = new HtmlElementTextContentDiv() { Class = "carousel-indicators" };
             var index = 0;
@@ -94,17 +106,21 @@ namespace WebExpress.WebUI.WebControl
             var inner = new HtmlElementTextContentDiv() { Class = "carousel-inner" };
             foreach (var v in Items)
             {
-                var i = new HtmlElementTextContentDiv(v?.Control.Render(renderContext, visualTree))
+                var control = v?.Control?.Invoke(renderContext);
+                var headline = v?.Headline?.Invoke(renderContext);
+                var text = v?.Text?.Invoke(renderContext);
+
+                var i = new HtmlElementTextContentDiv(control?.Render(renderContext, visualTree))
                 {
                     Class = index == 0 ? "carousel-item active" : "carousel-item"
                 };
 
-                if (!string.IsNullOrWhiteSpace(v.Headline) || !string.IsNullOrWhiteSpace(v.Text))
+                if (!string.IsNullOrWhiteSpace(headline) || !string.IsNullOrWhiteSpace(text))
                 {
                     var caption = new HtmlElementTextContentDiv
                     (
-                        new HtmlElementSectionH3() { Text = v.Headline },
-                        new HtmlElementTextContentP() { Text = v.Text }
+                        new HtmlElementSectionH3() { Text = headline },
+                        new HtmlElementTextContentP() { Text = text }
                     )
                     {
                         Class = "carousel-caption"

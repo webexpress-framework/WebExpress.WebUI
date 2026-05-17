@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormInputValueBool : IControlFormInputValue
     {
         /// <summary>
-        /// Returns or sets the boolean value.
+        /// Gets or sets the boolean value.
         /// </summary>
         public bool Checked { get; set; }
 

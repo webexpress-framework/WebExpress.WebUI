@@ -1,6 +1,8 @@
-﻿using WebExpress.WebCore.Internationalization;
+using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
@@ -12,34 +14,39 @@ namespace WebExpress.WebUI.WebControl
     public class ControlKanbanCard : IControlKanbanCard
     {
         /// <summary>
-        /// Returns the id of the control.
+        /// Gets the id of the control.
         /// </summary>
         public string Id { get; private set; }
 
         /// <summary>
-        /// Returns or sets the title associated with the card.
+        /// Gets or sets the title associated with the card.
         /// </summary>
-        public string Title { get; set; }
+        public Func<IRenderControlContext, string> Title { get; set; }
 
         /// <summary>
-        /// Returns or sets the color associated with the card.
+        /// Gets or sets the color associated with the card.
         /// </summary>
-        public string Color { get; set; }
+        public Func<IRenderControlContext, string> Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon associated with this card.
+        /// Gets or sets the icon associated with this card.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the column id associated with this card.
+        /// Gets or sets the image uri.
         /// </summary>
-        public string ColumnId { get; set; }
+        public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
-        /// Returns the unique identifier of the swimlane associated with this card.
+        /// Gets or sets the column id associated with this card.
         /// </summary>
-        public string SwimlaneId { get; set; }
+        public Func<IRenderControlContext, string> ColumnId { get; set; }
+
+        /// <summary>
+        /// Gets the unique identifier of the swimlane associated with this card.
+        /// </summary>
+        public Func<IRenderControlContext, string> SwimlaneId { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -63,12 +70,12 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = "wx-kanban-card"
             }
-                .AddUserAttribute("data-label", I18N.Translate(renderContext, Title))
-                .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-color", Color)
-                .AddUserAttribute("data-column-id", ColumnId)
-                .AddUserAttribute("data-swimlane-id", SwimlaneId);
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, Title?.Invoke(renderContext)))
+                .AddUserAttribute("data-icon", (Icon?.Invoke(renderContext) as Icon)?.Class)
+                .AddUserAttribute("data-image", Image?.Invoke(renderContext)?.ToString() ?? (Icon?.Invoke(renderContext) as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-color", Color?.Invoke(renderContext))
+                .AddUserAttribute("data-column-id", ColumnId?.Invoke(renderContext))
+                .AddUserAttribute("data-swimlane-id", SwimlaneId?.Invoke(renderContext));
 
             return html;
         }

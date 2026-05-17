@@ -8,10 +8,10 @@ namespace WebExpress.WebUI.WebFragment
     /// <summary>
     /// Represents a dropdown control within a fragment context.
     /// </summary>
-    public class FragmentControlDropdown : ControlDropdown, IFragmentControl<ControlDropdown>
+    public abstract class FragmentControlDropdown : ControlDropdown, IFragmentControl<ControlDropdown>
     {
         /// <summary>
-        /// Returns the context of the fragment.
+        /// Gets the context of the fragment.
         /// </summary>
         public IFragmentContext FragmentContext { get; private set; }
 
@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.WebFragment
         /// </summary>
         /// <param name="fragmentContext">The context of the fragment.</param>
         public FragmentControlDropdown(IFragmentContext fragmentContext)
-            : base(fragmentContext?.FragmentId?.ToString())
+            : base(fragmentContext?.FragmentId?.ToString()?.Replace(".", "-"))
         {
             FragmentContext = fragmentContext;
         }

@@ -1,6 +1,6 @@
 /**
  * DropdownCtrl is a control for dropdown buttons offering advanced features such as dynamically generated menu items.
- * 
+ *
  * The following events are triggered:
  * - webexpress.webui.Event.CLICK_EVENT
  * - webexpress.webui.Event.CHANGE_VISIBILITY_EVENT
@@ -8,7 +8,7 @@
 webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Creates a new dropdown button controller instance.
-     * Reads configuration from the HTML element's data attributes and child elements, 
+     * Reads configuration from the HTML element's data attributes and child elements,
      * cleans up the DOM, and triggers initial rendering.
      * @param {HTMLElement} element - The DOM element associated with the instance.
      */
@@ -181,7 +181,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                 const span = document.createElement("span");
                 span.textContent = item.text;
                 link.appendChild(span);
-                
+
                 if (item.role) { link.setAttribute("role", item.role); }
                 // apply all data-* attributes
                 item.data?.forEach(([key, value]) => {
@@ -273,12 +273,12 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
 
         // handle visibility change event
         // fires CHANGE_VISIBILITY_EVENT when the menu is shown or hidden
-        button.addEventListener('show.bs.dropdown', () => {
+        button.addEventListener("show.bs.dropdown", () => {
             this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
                 visible: true
             });
         });
-        button.addEventListener('hide.bs.dropdown', () => {
+        button.addEventListener("hide.bs.dropdown", () => {
             this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
                 visible: false
             });

@@ -4,11 +4,11 @@
 webexpress.webui.DialogPanels.register("editor-addon", {
     id: "editor-addon-page",
     parentId: null,
-    title: "AddOns",
+    title: webexpress.webui.I18N.translate("webexpress.webui:editor.addon.title"),
     iconClass: "fas fa-puzzle-piece",
 
     /**
-     * Renders the unified page UI for Add-on selection.
+     * Renders the unified page ui for add-on selection.
      * @param {HTMLElement} container - Host container for the page.
      * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
      */
@@ -17,7 +17,9 @@ webexpress.webui.DialogPanels.register("editor-addon", {
             modal._addonState = {
                 selectedId: null,
                 tileCtrl: null,
-                addons: []
+                addons: [],
+                submitHandler: null,
+                changeHandler: null
             };
         }
         const state = modal._addonState;
@@ -33,17 +35,19 @@ webexpress.webui.DialogPanels.register("editor-addon", {
         const searchInput = document.createElement("input");
         searchInput.type = "text";
         searchInput.className = "form-control wx-addon-search";
-        searchInput.placeholder = "Search AddOns...";
+        searchInput.placeholder = webexpress.webui.I18N.translate("webexpress.webui:editor.addon.search.placeholder");
 
         const catSelect = document.createElement("select");
         catSelect.className = "form-select w-auto wx-addon-cat";
-        
+
         // populate categories
         const categories = new Set();
-        state.addons.forEach(a => categories.add(a.category || "General"));
-        
-        catSelect.innerHTML = `<option value="all">All Categories</option>`;
-        Array.from(categories).sort().forEach(cat => {
+        state.addons.forEach((a) => {
+            categories.add(a.category || "General");
+        });
+
+        catSelect.innerHTML = `<option value="all">${webexpress.webui.I18N.translate("webexpress.webui:editor.addon.all.categories")}</option>`;
+        Array.from(categories).sort().forEach((cat) => {
             const opt = document.createElement("option");
             opt.value = cat;
             opt.textContent = cat;
@@ -70,33 +74,35 @@ webexpress.webui.DialogPanels.register("editor-addon", {
         // initialize input tile controller
         if (typeof webexpress.webui.InputTileCtrl === "function") {
             state.tileCtrl = new webexpress.webui.InputTileCtrl(tileHost);
-            
-            state.tileCtrl.tiles = state.addons.map(addon => ({
-                id: addon.id,
-                label: addon.label,
-                icon: addon.icon,
-                html: `<div class="d-none search-text">${addon.label} ${addon.description}</div>
-                       <p class="small text-muted mb-0">${addon.description || ''}</p>`,
-                class: "col-md-6 mb-2 wx-addon-card-wrapper"
-            }));
+
+            state.tileCtrl.tiles = state.addons.map((addon) => {
+                return {
+                    id: addon.id,
+                    label: addon.label,
+                    icon: addon.icon,
+                    html: `<div class="d-none search-text">${addon.label} ${addon.description || ""}</div><p class="small text-muted mb-0">${addon.description || ""}</p>`,
+                    class: "col-md-6 mb-2 wx-addon-card-wrapper"
+                };
+            });
         }
 
         // define filtering logic
         const applyFilter = () => {
-            const term = searchInput.value.toLowerCase();
+            const term = (searchInput.value || "").toLowerCase();
             const cat = catSelect.value;
 
-            // find all dynamically created radio inputs inside the tile host
             const inputs = tileHost.querySelectorAll('input[type="radio"]');
-            inputs.forEach(input => {
+            inputs.forEach((input) => {
                 const addonId = input.value;
-                const addon = state.addons.find(a => a.id === addonId);
+                const addon = state.addons.find((a) => {
+                    return a.id === addonId;
+                });
                 const col = input.closest(".wx-addon-card-wrapper");
-                
+
                 if (addon && col) {
                     const addonCat = addon.category || "General";
                     const isCatMatch = cat === "all" || addonCat === cat;
-                    const textContent = (addon.label + " " + (addon.description || "")).toLowerCase();
+                    const textContent = ((addon.label || "") + " " + (addon.description || "")).toLowerCase();
                     const isTextMatch = !term || textContent.includes(term);
 
                     if (isCatMatch && isTextMatch) {
@@ -111,23 +117,30 @@ webexpress.webui.DialogPanels.register("editor-addon", {
         searchInput.addEventListener("input", applyFilter);
         catSelect.addEventListener("change", applyFilter);
 
-        // handle selection change to toggle submit button
-        document.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, (e) => {
-            if (e.detail.sender === tileHost || tileHost.contains(e.detail.sender)) {
-                state.selectedId = e.detail.value;
-                const modalWrapper = container.closest(".modal-content") || document;
-                const submitBtn = modalWrapper.querySelector(".submit-btn");
-                if (submitBtn) {
-                    submitBtn.disabled = !state.selectedId;
+        // bind scoped change handler once and store reference for cleanup/reuse
+        if (!state.changeHandler) {
+            state.changeHandler = (e) => {
+                if (!e || !e.detail) {
+                    return;
                 }
-            }
-        });
+                if (e.detail.sender === tileHost || tileHost.contains(e.detail.sender)) {
+                    state.selectedId = e.detail.value;
+                    const modalRoot = container.closest(".modal") || container.closest(".modal-content") || document;
+                    const submitBtn = modalRoot.querySelector(".submit-btn");
+                    if (submitBtn) {
+                        submitBtn.disabled = !state.selectedId;
+                    }
+                }
+            };
+            document.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, state.changeHandler);
+        }
 
         // double click shortcut to insert
         tileHost.addEventListener("dblclick", (e) => {
             const card = e.target.closest(".wx-tile-card");
             if (card && state.selectedId) {
-                const submitBtn = container.closest(".modal-content")?.querySelector(".submit-btn");
+                const modalRoot = container.closest(".modal") || container.closest(".modal-content") || document;
+                const submitBtn = modalRoot.querySelector(".submit-btn");
                 if (submitBtn && !submitBtn.disabled) {
                     submitBtn.click();
                 }
@@ -144,10 +157,9 @@ webexpress.webui.DialogPanels.register("editor-addon", {
         if (!modal._addonState) {
             return;
         }
-        
+
         const state = modal._addonState;
-        
-        // reset form and selection
+
         state.selectedId = null;
         if (state.searchInput) {
             state.searchInput.value = "";
@@ -159,28 +171,24 @@ webexpress.webui.DialogPanels.register("editor-addon", {
             state.tileCtrl.setValue(null);
         }
 
-        // trigger filter update to show all tiles
         if (state.searchInput) {
             state.searchInput.dispatchEvent(new Event("input"));
         }
 
-        // bind click event to the dynamically managed submit button
         if (state.tileHost) {
-            const modalWrapper = state.tileHost.closest(".modal-content") || document;
-            const submitBtn = modalWrapper.querySelector(".submit-btn");
-            
+            const modalRoot = state.tileHost.closest(".modal") || state.tileHost.closest(".modal-content") || document;
+            const submitBtn = modalRoot.querySelector(".submit-btn");
+
             if (submitBtn) {
-                submitBtn.disabled = true; // reset button
-                
-                if (state.tileCtrl?.value) {
+                submitBtn.disabled = true;
+
+                if (state.tileCtrl && state.tileCtrl.value) {
                     state.selectedId = state.tileCtrl.value;
                     submitBtn.disabled = false;
                 }
-                
-                // ensure we only bind once
-                if (!state.submitBound) {
-                    submitBtn.addEventListener("click", () => {
-                        // ignore if this page isn't visible
+
+                if (!state.submitHandler) {
+                    state.submitHandler = () => {
                         if (state.tileHost.offsetParent === null) {
                             return;
                         }
@@ -190,9 +198,12 @@ webexpress.webui.DialogPanels.register("editor-addon", {
                         } else if (validationResult && validationResult.message) {
                             alert(validationResult.message);
                         }
-                    });
-                    state.submitBound = true;
+                    };
                 }
+
+                // prevent duplicate bindings
+                submitBtn.removeEventListener("click", state.submitHandler);
+                submitBtn.addEventListener("click", state.submitHandler);
             }
         }
     },
@@ -205,14 +216,14 @@ webexpress.webui.DialogPanels.register("editor-addon", {
     validate: function (modal) {
         const state = modal._addonState;
         if (!state || !state.selectedId) {
-            return { valid: false, message: "Please select an AddOn from the list." };
+            return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.addon.error.select") };
         }
-        
+
         const editor = modal ? modal._editor : null;
         if (!editor) {
-            return { valid: false, message: "Internal error: Editor instance not found." };
+            return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.addon.error.internal") };
         }
-        
+
         return true;
     },
 
@@ -226,7 +237,9 @@ webexpress.webui.DialogPanels.register("editor-addon", {
             return;
         }
 
-        const addon = state.addons.find(a => a.id === state.selectedId);
+        const addon = state.addons.find((a) => {
+            return a.id === state.selectedId;
+        });
         if (!addon) {
             return;
         }
@@ -250,16 +263,13 @@ webexpress.webui.DialogPanels.register("editor-addon", {
         const editor = modal._editor;
         if (editor && editor._addonPlugin) {
             const plugin = editor._addonPlugin;
-            
-            // pass explicit cursor tracking to the plugin
-            plugin._backupRange = modal._backupRange || null;
-            plugin._activeAddonNode = null; // assure we insert new node
+
+            // no explicit backup range handling here, editor restores selection by focus lifecycle
+            plugin._activeAddonNode = null;
 
             if (addon.properties && addon.properties.length > 0) {
-                // open the separate property dialog
-                plugin._openPropertyDialog(addon, plugin._backupRange);
+                plugin._openPropertyDialog(addon);
             } else {
-                // directly insert if there are no properties
                 plugin._insertAddon(addon, {});
             }
         }

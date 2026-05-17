@@ -10,17 +10,17 @@ namespace WebExpress.WebUI.WebPage
     public abstract class PageControl<T> : Page<T> where T : VisualTreeControl, new()
     {
         /// <summary>
-        /// Returns the links to the JavaScript files to be used, which are inserted in the header.
+        /// Gets the links to the JavaScript files to be used, which are inserted in the header.
         /// </summary>
         protected ICollection<string> HeaderScriptLinks { get; } = [];
 
         /// <summary>
-        /// Returns the links to the css files to use.
+        /// Gets the links to the css files to use.
         /// </summary>
         protected ICollection<string> CssLinks { get; } = [];
 
         /// <summary>
-        /// Returns the meta information.
+        /// Gets the meta information.
         /// </summary>
         protected List<KeyValuePair<string, string>> Meta { get; } = [];
 

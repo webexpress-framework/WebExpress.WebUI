@@ -16,66 +16,61 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<IControl> _content = [];
 
         /// <summary>
-        /// Returns or sets the content.
+        /// Gets or sets the content.
         /// </summary>
         public IEnumerable<IControl> Content => _content;
 
         /// <summary>
-        /// Returns or sets the color of the button.
+        /// Gets or sets the color of the button.
         /// </summary>
-        public PropertyColorButton Color
+        public Func<IRenderControlContext, PropertyColorButton> Color
         {
-            get => (PropertyColorButton)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(Outline), () => value?.ToStyle(Outline));
+            get => (Func<IRenderControlContext, PropertyColorButton>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
-        public TypeSizeButton Size
+        public Func<IRenderControlContext, TypeSizeButton> Size
         {
-            get => (TypeSizeButton)GetProperty(TypeSizeButton.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeSizeButton>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the Outline property.
+        /// Gets or sets the Outline property.
         /// </summary>
-        public bool Outline { get; set; }
+        public Func<IRenderControlContext, bool> Outline { get; set; } = _ => false;
 
         /// <summary>
-        /// Returns or sets whether the button should take up the full width.
+        /// Gets or sets whether the button should take up the full width.
         /// </summary>
-        public TypeBlockButton Block
+        public Func<IRenderControlContext, TypeBlockButton> Block
         {
-            get => (TypeBlockButton)GetProperty(TypeBlockButton.None);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeBlockButton>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets whether the button is disabled.
+        /// Gets or sets whether the button is disabled.
         /// </summary>
-        public bool Disabled { get; set; }
+        public Func<IRenderControlContext, bool> Disabled { get; set; } = _ => false;
 
         /// <summary>
-        /// Event is triggered when the button is clicked.
+        /// Gets or sets the text.
         /// </summary>
-        public EventHandler<ControlFormEvent> Click;
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the type. (button, submit, reset)
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, TypeButton> Type { get; set; } = _ => TypeButton.Default;
 
         /// <summary>
-        /// Returns or sets the type. (button, submit, reset)
+        /// Gets or sets the icon.
         /// </summary>
-        public TypeButton Type { get; set; } = TypeButton.Default;
-
-        /// <summary>
-        /// Returns or sets the icon.
-        /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -87,9 +82,9 @@ namespace WebExpress.WebUI.WebControl
         {
             _content.AddRange(content);
 
-            Name = Id;
-            Disabled = false;
-            Size = TypeSizeButton.Default;
+            Name = _ => Id;
+            Disabled = _ => false;
+            Size = _ => TypeSizeButton.Default;
         }
 
         /// <summary>
@@ -178,37 +173,49 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The control as html.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            var outline = Outline?.Invoke(renderContext) ?? false;
+            var color = Color?.Invoke(renderContext);
+            var size = Size?.Invoke(renderContext) ?? TypeSizeButton.Default;
+            var block = Block?.Invoke(renderContext) ?? TypeBlockButton.None;
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
+            var type = Type?.Invoke(renderContext) ?? TypeButton.Default;
+            var text = Text?.Invoke(renderContext);
+            var icon = Icon?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
+
+            var classes = Css.Replace(GetClasses(), color?.ToClass(), color?.ToClass(outline));
+            var styles = Style.Replace(GetStyles(), color?.ToStyle(), color?.ToStyle(outline));
+
             var html = new HtmlElementFieldButton()
             {
                 Id = Id,
-                Name = Name,
-                Type = Type.ToTypeString(),
-                Class = Css.Concatenate("btn", GetClasses()),
-                Style = GetStyles(),
-                Role = Role,
-                Disabled = Disabled,
-                OnClick = OnClick?.ToString()
+                Name = Name?.Invoke(renderContext),
+                Type = type.ToTypeString(),
+                Class = Css.Concatenate("btn", classes),
+                Style = styles,
+                Role = role,
+                Disabled = disabled
             };
 
-            if (Icon is not null)
+            if (icon is not null)
             {
                 html.Add(new ControlIcon()
                 {
-                    Icon = Icon,
-                    Margin = !string.IsNullOrWhiteSpace(Text) ? new PropertySpacingMargin
+                    Icon = _ => icon,
+                    Margin = _ => !string.IsNullOrWhiteSpace(text) ? new PropertySpacingMargin
                     (
                         PropertySpacing.Space.None,
                         PropertySpacing.Space.Two,
                         PropertySpacing.Space.None,
                         PropertySpacing.Space.None
                     ) : new PropertySpacingMargin(PropertySpacing.Space.None),
-                    VerticalAlignment = TypeVerticalAlignment.Default
+                    VerticalAlignment = _ => TypeVerticalAlignment.Default
                 }.Render(renderContext, visualTree));
             }
 
-            if (!string.IsNullOrWhiteSpace(Text))
+            if (!string.IsNullOrWhiteSpace(text))
             {
-                html.Add(new HtmlText(I18N.Translate(renderContext.Request?.Culture, Text)));
+                html.Add(new HtmlText(I18N.Translate(renderContext.Request?.Culture, text)));
             }
 
             if (_content.Count > 0)
@@ -217,15 +224,6 @@ namespace WebExpress.WebUI.WebControl
             }
 
             return html;
-        }
-
-        /// <summary>
-        /// Triggers the click event.
-        /// </summary>
-        /// <param name="e">The event argument.</param>
-        protected virtual void OnClickEvent(ControlFormEvent e)
-        {
-            Click?.Invoke(this, e);
         }
     }
 }

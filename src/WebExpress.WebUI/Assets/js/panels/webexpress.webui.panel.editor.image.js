@@ -12,19 +12,20 @@ function ensureImageState(modal) {
             uploadCtrl: null,
             fileListCtrl: null,
             uploadHost: null,
-            selectedSiteImage: null
+            selectedSiteImage: null,
+            uploadSuccessHandler: null
         };
     }
     return modal._image;
 }
 
 /**
- * Page: Image from web
+ * Page: Image from web.
  */
 webexpress.webui.DialogPanels.register("editor-image", {
     id: "image-web",
     parentId: null,
-    title: "From the Web",
+    title: webexpress.webui.I18N.translate("webexpress.webui:editor.image.web.title"),
     iconClass: "fas fa-globe",
 
     /**
@@ -39,25 +40,31 @@ webexpress.webui.DialogPanels.register("editor-image", {
 
         const urlGroup = document.createElement("div");
         urlGroup.className = "mb-3";
+
         const urlLabel = document.createElement("label");
         urlLabel.className = "form-label";
-        urlLabel.textContent = "Image URL";
+        urlLabel.textContent = webexpress.webui.I18N.translate("webexpress.webui:editor.image.url.label");
+
         const urlInput = document.createElement("input");
         urlInput.type = "url";
         urlInput.className = "form-control";
-        urlInput.placeholder = "https://example.com/image.png";
+        urlInput.placeholder = webexpress.webui.I18N.translate("webexpress.webui:editor.image.url.placeholder");
+
         urlGroup.appendChild(urlLabel);
         urlGroup.appendChild(urlInput);
 
         const altGroup = document.createElement("div");
         altGroup.className = "mb-3";
+
         const altLabel = document.createElement("label");
         altLabel.className = "form-label";
-        altLabel.textContent = "Alt Text";
+        altLabel.textContent = webexpress.webui.I18N.translate("webexpress.webui:editor.image.alt.label");
+
         const altInput = document.createElement("input");
         altInput.type = "text";
         altInput.className = "form-control";
-        altInput.placeholder = "Alternative text (optional)";
+        altInput.placeholder = webexpress.webui.I18N.translate("webexpress.webui:editor.image.alt.placeholder");
+
         altGroup.appendChild(altLabel);
         altGroup.appendChild(altInput);
 
@@ -69,9 +76,9 @@ webexpress.webui.DialogPanels.register("editor-image", {
         state.webAltInput = altInput;
 
         urlInput.addEventListener("input", function () {
-            const modalWrapper = this.closest("[data-key]") || document;
+            const modalWrapper = this.closest(".modal") || this.closest("[data-key]") || document;
             const submitBtn = modalWrapper.querySelector(".submit-btn");
-            
+
             if (submitBtn) {
                 if (this.value.trim() !== "") {
                     submitBtn.disabled = false;
@@ -89,44 +96,44 @@ webexpress.webui.DialogPanels.register("editor-image", {
      */
     onShow: function (modal) {
         const state = ensureImageState(modal);
-        
-        if (state.webUrlInput) {
-            // apply prefill or reset entirely
-            if (modal._imagePrefill) {
-                state.webUrlInput.value = modal._imagePrefill.url || "";
-                if (state.webAltInput) {
-                    state.webAltInput.value = modal._imagePrefill.alt || "";
-                }
+
+        if (!state.webUrlInput) {
+            return;
+        }
+
+        if (modal._imagePrefill) {
+            state.webUrlInput.value = modal._imagePrefill.url || "";
+            if (state.webAltInput) {
+                state.webAltInput.value = modal._imagePrefill.alt || "";
+            }
+        } else {
+            state.webUrlInput.value = "";
+            if (state.webAltInput) {
+                state.webAltInput.value = "";
+            }
+        }
+
+        state.webUrlInput.focus();
+        state.webUrlInput.select();
+
+        const modalWrapper = state.webUrlInput.closest(".modal") || state.webUrlInput.closest("[data-key]") || document;
+        const submitBtn = modalWrapper.querySelector(".submit-btn");
+
+        if (submitBtn) {
+            if (state.webUrlInput.value.trim() !== "") {
+                submitBtn.disabled = false;
             } else {
-                state.webUrlInput.value = "";
-                if (state.webAltInput) {
-                    state.webAltInput.value = "";
-                }
+                submitBtn.disabled = true;
             }
 
-            state.webUrlInput.focus();
-            state.webUrlInput.select();
-
-            const modalWrapper = state.webUrlInput.closest("[data-key]") || document;
-            const submitBtn = modalWrapper.querySelector(".submit-btn");
-            
-            if (submitBtn) {
-                if (state.webUrlInput.value.trim() !== "") {
-                    submitBtn.disabled = false;
-                } else {
-                    submitBtn.disabled = true;
+            submitBtn.onclick = () => {
+                const validationResult = this.validate(modal);
+                if (validationResult === true) {
+                    this.onSubmit(modal);
+                } else if (validationResult && validationResult.message) {
+                    alert(validationResult.message);
                 }
-
-                // explicitly assign the handler to the active tab
-                submitBtn.onclick = () => {
-                    const validationResult = this.validate(modal);
-                    if (validationResult === true) {
-                        this.onSubmit(modal);
-                    } else if (validationResult && validationResult.message) {
-                        alert(validationResult.message);
-                    }
-                };
-            }
+            };
         }
     },
 
@@ -138,16 +145,16 @@ webexpress.webui.DialogPanels.register("editor-image", {
     validate: function (modal) {
         const editor = modal ? modal._editor : null;
         const state = ensureImageState(modal);
-        
+
         if (!editor || !state.webUrlInput) {
-            return { valid: false, message: "Internal error: editor or field not available." };
+            return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.image.error.internal") };
         }
-        
+
         const urlVal = state.webUrlInput.value.trim();
         if (urlVal === "" || urlVal.toLowerCase().startsWith("javascript:")) {
-            return { valid: false, message: "Please provide a valid image URL." };
+            return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.image.error.url") };
         }
-        
+
         return true;
     },
 
@@ -158,37 +165,31 @@ webexpress.webui.DialogPanels.register("editor-image", {
     onSubmit: function (modal) {
         const editor = modal ? modal._editor : null;
         const state = ensureImageState(modal);
-        
+
         if (!editor || !state.webUrlInput) {
             return;
         }
-        
+
         let urlVal = state.webUrlInput.value.trim();
         if (urlVal === "" || urlVal.toLowerCase().startsWith("javascript:")) {
             return;
         }
-        
-        // append protocol if missing to prevent sanitizer from stripping
+
         if (!/^https?:\/\//i.test(urlVal) && !urlVal.startsWith("/") && !urlVal.startsWith(".") && !urlVal.startsWith("data:")) {
             urlVal = "https://" + urlVal;
         }
-        
+
         const safeUrl = urlVal.replace(/"/g, "%22");
         const alt = String((state.webAltInput && state.webAltInput.value) || "").trim();
-        
+
         const escapeHtml = function (text) {
             const div = document.createElement("div");
             div.textContent = text;
             return div.innerHTML;
         };
 
-        // strictly enforce backed up range
-        if (modal._backupRange) {
-            editor._savedRange = modal._backupRange.cloneRange();
-        }
-
         editor.insertHtmlAtCursor('<img src="' + safeUrl + '" alt="' + escapeHtml(alt) + '">');
-        
+
         if (typeof modal.hide === "function") {
             modal.hide();
         } else if (modal.ctrl && typeof modal.ctrl.hide === "function") {
@@ -206,12 +207,12 @@ webexpress.webui.DialogPanels.register("editor-image", {
 });
 
 /**
- * Page: Image from site
+ * Page: Image from site.
  */
 webexpress.webui.DialogPanels.register("editor-image", {
     id: "image-site",
     parentId: null,
-    title: "From the Site",
+    title: webexpress.webui.I18N.translate("webexpress.webui:editor.image.site.title"),
     iconClass: "fas fa-image",
 
     /**
@@ -234,17 +235,17 @@ webexpress.webui.DialogPanels.register("editor-image", {
             '         data-progress="true"',
             '         data-fullscreen-dropzone="false"',
             '         data-uri="">',
-            '    </div>',
-            '  </div>',
+            "    </div>",
+            "  </div>",
             '  <div class="col-12">',
             '    <div class="mb-2">',
-            '      <label class="form-label">Alt Text</label>',
-            '      <input type="text" class="form-control" placeholder="Alternative text (optional)" data-role="site-alt">',
-            '    </div>',
+            '      <label class="form-label">' + webexpress.webui.I18N.translate("webexpress.webui:editor.image.alt.label") + "</label>",
+            '      <input type="text" class="form-control" placeholder="' + webexpress.webui.I18N.translate("webexpress.webui:editor.image.alt.placeholder") + '" data-role="site-alt">',
+            "    </div>",
             '    <div class="wx-webui-file-list"></div>',
-            '    <div class="form-text">Click an entry in the list to select the image. Double-click inserts immediately.</div>',
-            '  </div>',
-            '</div>'
+            '    <div class="form-text">' + webexpress.webui.I18N.translate("webexpress.webui:editor.image.site.hint") + "</div>",
+            "  </div>",
+            "</div>"
         ].join("");
         container.appendChild(wrapper);
 
@@ -257,7 +258,7 @@ webexpress.webui.DialogPanels.register("editor-image", {
         state.selectedSiteImage = null;
 
         if (uploadHost) {
-            const uploadUri = editor ? (editor._imageUploadUri || "") : "";
+            const uploadUri = editor ? (editor.imageUploadUri || "") : "";
             uploadHost.dataset.uri = uploadUri;
             if (!uploadUri) {
                 uploadHost.style.display = "none";
@@ -265,12 +266,13 @@ webexpress.webui.DialogPanels.register("editor-image", {
         }
 
         try {
-            if (uploadHost && typeof webexpress?.webui?.UploadCtrl === "function" && editor && editor._imageUploadUri) {
+            if (uploadHost && typeof webexpress?.webui?.UploadCtrl === "function" && editor && editor.imageUploadUri) {
                 state.uploadCtrl = new webexpress.webui.UploadCtrl(uploadHost);
             }
         } catch (err) {
             // ignore init errors
         }
+
         try {
             if (listHost && typeof webexpress?.webui?.FileListCtrl === "function") {
                 state.fileListCtrl = new webexpress.webui.FileListCtrl(listHost);
@@ -283,13 +285,6 @@ webexpress.webui.DialogPanels.register("editor-image", {
             const div = document.createElement("div");
             div.textContent = text;
             return div.innerHTML;
-        };
-
-        const restoreAndInsert = function (htmlContent) {
-            if (modal._backupRange) {
-                editor._savedRange = modal._backupRange.cloneRange();
-            }
-            editor.insertHtmlAtCursor(htmlContent);
         };
 
         const closeModal = function () {
@@ -309,32 +304,33 @@ webexpress.webui.DialogPanels.register("editor-image", {
         };
 
         let selectedRow = null;
+
         container.addEventListener("click", function (e) {
             const link = e.target.closest(".wx-file-list a.link, .wx-webui-file-list a.link");
             const row = e.target.closest(".wx-file-list tr");
-            
+
             if (link) {
                 e.preventDefault();
+
                 let src = link.getAttribute("href");
                 const altGuess = link.textContent || "";
-                
-                // append protocol if needed
+
                 if (src && !/^https?:\/\//i.test(src) && !src.startsWith("/") && !src.startsWith(".") && !src.startsWith("data:")) {
                     src = "https://" + src;
                 }
-                
+
                 state.selectedSiteImage = { src: src, alt: altGuess };
-                
+
                 if (selectedRow) {
                     selectedRow.classList.remove("table-primary");
                 }
-                
+
                 if (row) {
                     selectedRow = row;
                     selectedRow.classList.add("table-primary");
                 }
 
-                const modalWrapper = container.closest("[data-key]") || document;
+                const modalWrapper = container.closest(".modal") || container.closest("[data-key]") || document;
                 const submitBtn = modalWrapper.querySelector(".submit-btn");
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -348,53 +344,54 @@ webexpress.webui.DialogPanels.register("editor-image", {
                 return;
             }
             e.preventDefault();
-            
+
             if (!editor) {
                 return;
             }
-            
+
             let src = link.getAttribute("href") || "";
             if (src.trim() === "" || src.toLowerCase().startsWith("javascript:")) {
                 return;
             }
-            
+
             if (!/^https?:\/\//i.test(src) && !src.startsWith("/") && !src.startsWith(".") && !src.startsWith("data:")) {
                 src = "https://" + src;
             }
-            
+
             const safeSrc = src.replace(/"/g, "%22");
             const alt = String((state.siteAltInput && state.siteAltInput.value) || "").trim() || (link.textContent || "");
-            
-            restoreAndInsert('<img src="' + safeSrc + '" alt="' + escapeHtml(alt) + '">');
+
+            editor.insertHtmlAtCursor('<img src="' + safeSrc + '" alt="' + escapeHtml(alt) + '">');
             closeModal();
         });
 
-        const onUploadSuccess = function (ev) {
-            if (!state.uploadCtrl) {
-                return;
-            }
-            if (!ev || !ev.detail || ev.detail.sender !== uploadHost) {
-                return;
-            }
-            
-            const file = ev.detail.file;
-            if (!file || !editor) {
-                return;
-            }
-            
-            if (editor.imageBaseUri || editor._imageBaseUri) {
-                const rawBase = editor.imageBaseUri || editor._imageBaseUri;
-                const base = rawBase.replace(/\/+$/, "");
-                const src = base + "/" + encodeURIComponent(file.name);
-                const safeSrc = src.replace(/"/g, "%22");
-                const alt = String((state.siteAltInput && state.siteAltInput.value) || "").trim() || file.name;
-                
-                restoreAndInsert('<img src="' + safeSrc + '" alt="' + escapeHtml(alt) + '">');
-                closeModal();
-            }
-        };
-        
-        document.addEventListener(webexpress.webui.Event.UPLOAD_SUCCESS_EVENT, onUploadSuccess);
+        if (!state.uploadSuccessHandler) {
+            state.uploadSuccessHandler = (ev) => {
+                if (!state.uploadCtrl) {
+                    return;
+                }
+                if (!ev || !ev.detail || ev.detail.sender !== uploadHost) {
+                    return;
+                }
+
+                const file = ev.detail.file;
+                if (!file || !editor) {
+                    return;
+                }
+
+                if (editor.imageBaseUri) {
+                    const rawBase = editor.imageBaseUri;
+                    const base = rawBase.replace(/\/+$/, "");
+                    const src = base + "/" + encodeURIComponent(file.name);
+                    const safeSrc = src.replace(/"/g, "%22");
+                    const alt = String((state.siteAltInput && state.siteAltInput.value) || "").trim() || file.name;
+
+                    editor.insertHtmlAtCursor('<img src="' + safeSrc + '" alt="' + escapeHtml(alt) + '">');
+                    closeModal();
+                }
+            };
+            document.addEventListener(webexpress.webui.Event.UPLOAD_SUCCESS_EVENT, state.uploadSuccessHandler);
+        }
     },
 
     /**
@@ -404,38 +401,40 @@ webexpress.webui.DialogPanels.register("editor-image", {
      */
     onShow: function (modal) {
         const state = ensureImageState(modal);
-        
-        if (state.siteAltInput) {
-            const wrapper = state.siteAltInput.closest("[data-key]") || document;
-            const submitBtn = wrapper.querySelector(".submit-btn");
-            
-            // apply prefill or clear previous selection state
-            if (!modal._imagePrefill) {
-                state.selectedSiteImage = null;
-                state.siteAltInput.value = "";
-                const selectedRows = wrapper.querySelectorAll(".table-primary");
-                selectedRows.forEach(row => row.classList.remove("table-primary"));
+
+        if (!state.siteAltInput) {
+            return;
+        }
+
+        const wrapper = state.siteAltInput.closest(".modal") || state.siteAltInput.closest("[data-key]") || document;
+        const submitBtn = wrapper.querySelector(".submit-btn");
+
+        if (!modal._imagePrefill) {
+            state.selectedSiteImage = null;
+            state.siteAltInput.value = "";
+            const selectedRows = wrapper.querySelectorAll(".table-primary");
+            selectedRows.forEach((row) => {
+                row.classList.remove("table-primary");
+            });
+        } else {
+            state.siteAltInput.value = modal._imagePrefill.alt || "";
+        }
+
+        if (submitBtn) {
+            if (state.selectedSiteImage && state.selectedSiteImage.src) {
+                submitBtn.disabled = false;
             } else {
-                state.siteAltInput.value = modal._imagePrefill.alt || "";
+                submitBtn.disabled = true;
             }
 
-            if (submitBtn) {
-                if (state.selectedSiteImage && state.selectedSiteImage.src) {
-                    submitBtn.disabled = false;
-                } else {
-                    submitBtn.disabled = true;
+            submitBtn.onclick = () => {
+                const validationResult = this.validate(modal);
+                if (validationResult === true) {
+                    this.onSubmit(modal);
+                } else if (validationResult && validationResult.message) {
+                    alert(validationResult.message);
                 }
-
-                // explicitly assign the handler to the active tab
-                submitBtn.onclick = () => {
-                    const validationResult = this.validate(modal);
-                    if (validationResult === true) {
-                        this.onSubmit(modal);
-                    } else if (validationResult && validationResult.message) {
-                        alert(validationResult.message);
-                    }
-                };
-            }
+            };
         }
     },
 
@@ -447,20 +446,20 @@ webexpress.webui.DialogPanels.register("editor-image", {
     validate: function (modal) {
         const editor = modal ? modal._editor : null;
         const state = ensureImageState(modal);
-        
+
         if (!editor) {
-            return { valid: false, message: "Internal error: editor not available." };
+            return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.image.site.error.internal") };
         }
-        
+
         if (!state.selectedSiteImage || !state.selectedSiteImage.src) {
-            return { valid: false, message: "Please select an image from the list." };
+            return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.image.site.error.select") };
         }
-        
+
         const srcVal = state.selectedSiteImage.src.trim();
         if (srcVal === "" || srcVal.toLowerCase().startsWith("javascript:")) {
-            return { valid: false, message: "Please select a valid image URL." };
+            return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.image.site.error.url") };
         }
-        
+
         return true;
     },
 
@@ -471,37 +470,31 @@ webexpress.webui.DialogPanels.register("editor-image", {
     onSubmit: function (modal) {
         const editor = modal ? modal._editor : null;
         const state = ensureImageState(modal);
-        
+
         if (!editor || !state.selectedSiteImage || !state.selectedSiteImage.src) {
             return;
         }
-        
+
         let srcVal = state.selectedSiteImage.src.trim();
         if (srcVal === "" || srcVal.toLowerCase().startsWith("javascript:")) {
             return;
         }
-        
-        // append protocol if missing to prevent sanitizer from stripping
+
         if (!/^https?:\/\//i.test(srcVal) && !srcVal.startsWith("/") && !srcVal.startsWith(".") && !srcVal.startsWith("data:")) {
             srcVal = "https://" + srcVal;
         }
-        
+
         const safeSrc = srcVal.replace(/"/g, "%22");
         const alt = String((state.siteAltInput && state.siteAltInput.value) || "").trim() || state.selectedSiteImage.alt || "";
-        
+
         const escapeHtml = function (text) {
             const div = document.createElement("div");
             div.textContent = text;
             return div.innerHTML;
         };
 
-        // strictly enforce backed up range
-        if (modal._backupRange) {
-            editor._savedRange = modal._backupRange.cloneRange();
-        }
-        
         editor.insertHtmlAtCursor('<img src="' + safeSrc + '" alt="' + escapeHtml(alt) + '">');
-        
+
         if (typeof modal.hide === "function") {
             modal.hide();
         } else if (modal.ctrl && typeof modal.ctrl.hide === "function") {

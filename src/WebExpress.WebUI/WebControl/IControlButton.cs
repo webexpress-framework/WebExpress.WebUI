@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -9,56 +11,56 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlButton : IControl
     {
         /// <summary>
-        /// Returns or sets the color. der Schaltfläche
+        /// Gets or sets the color. der Schaltfläche
         /// </summary>
-        new PropertyColorButton BackgroundColor { get; }
+        new Func<IRenderControlContext, PropertyColorButton> BackgroundColor { get; }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
-        TypeSizeButton Size { get; }
+        Func<IRenderControlContext, TypeSizeButton> Size { get; }
 
         /// <summary>
-        /// Returns or sets the outline property
+        /// Gets or sets the outline property
         /// </summary>
-        bool Outline { get; }
+        Func<IRenderControlContext, bool> Outline { get; set; }
 
         /// <summary>
-        /// Returns or sets whether the button should take up the full width.
+        /// Gets or sets whether the button should take up the full width.
         /// </summary>
-        TypeBlockButton Block { get; }
+        Func<IRenderControlContext, TypeBlockButton> Block { get; }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
-        string Text { get; }
+        Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
-        /// Returns or sets the value.
+        /// Gets or sets the value.
         /// </summary>
-        string Value { get; }
+        Func<IRenderControlContext, string> Value { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the activation status of the button.
+        /// Gets or sets the activation status of the button.
         /// </summary>
-        TypeActive Active { get; }
+        Func<IRenderControlContext, TypeActive> Active { get; }
 
         /// <summary>
-        /// Returns the secondary action, typically triggered by a 
+        /// Gets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
-        IAction PrimaryAction { get; }
+        Func<IRenderControlContext, IAction> PrimaryAction { get; set; }
 
         /// <summary>
-        /// Returns the secondary action, typically triggered by a 
+        /// Gets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
-        IAction SecondaryAction { get; }
+        Func<IRenderControlContext, IAction> SecondaryAction { get; set; }
 
         /// <summary>
         /// Adds one or more controls to the content.

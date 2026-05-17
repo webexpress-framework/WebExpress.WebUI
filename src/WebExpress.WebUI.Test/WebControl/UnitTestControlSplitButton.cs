@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSplitButton()
             {
-                Text = text
+                Text = _ => text
             };
 
             // act
@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSplitButton()
             {
-                Size = size
+                Size = _ => size
             };
 
             // act
@@ -91,6 +91,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorButton.Warning, @"<div class=""btn-group""><button class=""btn btn-warning""></button><button class=""btn * btn-warning"" *")]
         [InlineData(TypeColorButton.Danger, @"<div class=""btn-group""><button class=""btn btn-danger""></button><button class=""btn * btn-danger"" *")]
         [InlineData(TypeColorButton.Dark, @"<div class=""btn-group""><button class=""btn btn-dark""></button><button class=""btn * btn-dark"" *")]
+        [InlineData(TypeColorButton.Highlight, @"<div class=""btn-group""><button class=""btn btn-highlight""></button><button class=""btn * btn-highlight"" *")]
         public void BackgroundColor(TypeColorButton color, string expected)
         {
             // arrange
@@ -99,7 +100,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSplitButton()
             {
-                BackgroundColor = new PropertyColorButton(color)
+                BackgroundColor = _ => new PropertyColorButton(color)
             };
 
             // act
@@ -127,8 +128,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSplitButton()
             {
-                Outline = outline,
-                BackgroundColor = new PropertyColorButton(color)
+                Outline = _ => outline,
+                BackgroundColor = _ => new PropertyColorButton(color)
             };
 
             // act
@@ -151,7 +152,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSplitButton()
             {
-                Block = block
+                Block = _ => block
             };
 
             // act
@@ -174,7 +175,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSplitButton()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -193,17 +194,17 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control1 = new ControlSplitButton(null, new ControlSplitButtonItemLink() { Text = "abc" });
-            var control2 = new ControlSplitButton(null, [new ControlSplitButtonItemLink() { Text = "abc" }]);
-            var control3 = new ControlSplitButton(null, new List<IControlSplitButtonItem>([new ControlSplitButtonItemLink() { Text = "abc" }]).ToArray());
+            var control1 = new ControlSplitButton(null, new ControlSplitButtonItemLink() { Text = _ => "abc" });
+            var control2 = new ControlSplitButton(null, [new ControlSplitButtonItemLink() { Text = _ => "abc" }]);
+            var control3 = new ControlSplitButton(null, new List<IControlSplitButtonItem>([new ControlSplitButtonItemLink() { Text = _ => "abc" }]).ToArray());
             var control4 = new ControlSplitButton(null);
             var control5 = new ControlSplitButton(null);
             var control6 = new ControlSplitButton(null);
 
             // act
-            control4.Add(new ControlSplitButtonItemLink() { Text = "abc" });
-            control5.Add([new ControlSplitButtonItemLink() { Text = "abc" }]);
-            control6.Add(new List<IControlSplitButtonItem>([new ControlSplitButtonItemLink() { Text = "abc" }]).ToArray());
+            control4.Add(new ControlSplitButtonItemLink() { Text = _ => "abc" });
+            control5.Add([new ControlSplitButtonItemLink() { Text = _ => "abc" }]);
+            control6.Add(new List<IControlSplitButtonItem>([new ControlSplitButtonItemLink() { Text = _ => "abc" }]).ToArray());
 
             var html1 = control1.Render(context, visualTree);
             var html2 = control2.Render(context, visualTree);

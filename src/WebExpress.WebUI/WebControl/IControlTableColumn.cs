@@ -1,5 +1,7 @@
-﻿using WebExpress.WebCore.WebIcon;
+using System;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebPage;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -10,18 +12,23 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlTableColumn : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the header text.
+        /// Gets the header text.
         /// </summary>
-        string Title { get; }
+        Func<IRenderControlContext, string> Title { get; }
 
         /// <summary>
-        /// Returns the icon.
+        /// Gets the icon.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; }
 
         /// <summary>
-        /// Returns the color scheme used for the column.
+        /// Gets or sets the image uri.
         /// </summary>
-        TypeColorTable Color { get; }
+        Func<IRenderControlContext, IUri> Image { get; set; }
+
+        /// <summary>
+        /// Gets the color scheme used for the column.
+        /// </summary>
+        Func<IRenderControlContext, TypeColorTable> Color { get; }
     }
 }

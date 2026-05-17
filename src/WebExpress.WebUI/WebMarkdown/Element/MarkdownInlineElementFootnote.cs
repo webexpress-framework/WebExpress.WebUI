@@ -6,7 +6,7 @@ namespace WebExpress.WebUI.WebMarkdown.Element
     public class MarkdownInlineElementFootnote : MarkdownInlineElement
     {
         /// <summary>
-        /// Returns the footnote ID.
+        /// Gets the footnote ID.
         /// </summary>
         public string Id { get; }
 

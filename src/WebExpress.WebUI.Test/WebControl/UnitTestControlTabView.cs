@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTabView()
             {
-                Title = title
+                Title = _ => title
             };
 
             // act
@@ -76,7 +76,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var icon = iconType is not null ? Activator.CreateInstance(iconType) as IIcon : null;
             var control = new ControlTabView(null)
             {
-                Icon = icon
+                Icon = _ => icon
             };
 
             // act

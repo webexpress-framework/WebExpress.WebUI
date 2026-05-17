@@ -25,7 +25,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAlert(id)
             {
-                Dismissibility = TypeDismissibilityAlert.None
+                Dismissibility = _ => TypeDismissibilityAlert.None
             };
 
             // act
@@ -50,8 +50,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAlert()
             {
-                Dismissibility = TypeDismissibilityAlert.None,
-                Text = text
+                Dismissibility = _ => TypeDismissibilityAlert.None,
+                Text = _ => text
             };
 
             // act
@@ -74,6 +74,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackgroundAlert.Dark, @"<div class=""alert alert-dark"" role=""alert""></div>")]
         [InlineData(TypeColorBackgroundAlert.White, @"<div class=""alert bg-white"" role=""alert""></div>")]
         [InlineData(TypeColorBackgroundAlert.Transparent, @"<div class=""alert bg-transparent"" role=""alert""></div>")]
+        [InlineData(TypeColorBackgroundAlert.Highlight, @"<div class=""alert alert-highlight"" role=""alert""></div>")]
         public void BackgroundColor(TypeColorBackgroundAlert color, string expected)
         {
             // arrange
@@ -82,8 +83,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAlert()
             {
-                Dismissibility = TypeDismissibilityAlert.None,
-                BackgroundColor = new PropertyColorBackgroundAlert(color)
+                Dismissibility = _ => TypeDismissibilityAlert.None,
+                BackgroundColor = _ => new PropertyColorBackgroundAlert(color)
             };
 
             // act
@@ -98,7 +99,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeDismissibilityAlert.None, @"<div class=""alert"" role=""alert""></div>")]
-        [InlineData(TypeDismissibilityAlert.Dismissible, @"<div class=""alert alert-dismissible"" role=""alert""><button class=""btn wx-button-close"" data-bs-dismiss=""alert"" aria-label=""close""><i class=""fas fa-times""></i></button></div>")]
+        [InlineData(TypeDismissibilityAlert.Dismissible, @"<div class=""alert alert-dismissible"" role=""alert""><button class=""btn wx-button-close"" data-bs-dismiss=""alert"" aria-label=""close""><i class=""fas fa-xmark""></i></button></div>")]
         public void Dismissibility(TypeDismissibilityAlert dismissibility, string expected)
         {
             // arrange
@@ -107,7 +108,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAlert()
             {
-                Dismissibility = dismissibility
+                Dismissibility = _ => dismissibility
             };
 
             // act

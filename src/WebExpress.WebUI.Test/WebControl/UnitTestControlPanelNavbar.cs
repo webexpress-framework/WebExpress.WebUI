@@ -43,6 +43,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<nav class=""navbar bg-danger""></nav>")]
         [InlineData(TypeColorBackground.Dark, @"<nav class=""navbar bg-dark""></nav>")]
         [InlineData(TypeColorBackground.Light, @"<nav class=""navbar bg-light""></nav>")]
+        [InlineData(TypeColorBackground.Highlight, @"<nav class=""navbar bg-highlight""></nav>")]
         [InlineData(TypeColorBackground.Transparent, @"<nav class=""navbar bg-transparent""></nav>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {
@@ -52,7 +53,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelNavbar()
             {
-                BackgroundColor = new PropertyColorBackground(backgroundColor)
+                BackgroundColor = _ => new PropertyColorBackground(backgroundColor)
             };
 
             // act
@@ -78,7 +79,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelNavbar()
             {
-                Direction = direction,
+                Direction = _ => direction,
             };
 
             // act
@@ -102,7 +103,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelNavbar()
             {
-                Fluid = fluid,
+                Fluid = _ => fluid,
             };
 
             // act
@@ -126,7 +127,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelNavbar()
             {
-                Theme = theme
+                Theme = _ => theme
             };
 
             // act

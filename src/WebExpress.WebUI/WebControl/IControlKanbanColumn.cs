@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebPage;
+﻿using System;
+using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -9,13 +10,13 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlKanbanColumn : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the title associated with the column.
+        /// Gets the title associated with the column.
         /// </summary>
-        string Title { get; }
+        Func<IRenderControlContext, string> Title { get; }
 
         /// <summary>
-        /// Returns the size descriptor associated with the column.
+        /// Gets the size descriptor associated with the column.
         /// </summary>
-        string Size { get; }
+        Func<IRenderControlContext, string> Size { get; }
     }
 }

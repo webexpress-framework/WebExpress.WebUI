@@ -6,8 +6,10 @@ using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebComponent;
 using WebExpress.WebCore.WebEndpoint;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebMessage;
 using WebExpress.WebCore.WebPage;
+using WebExpress.WebCore.WebTheme;
 using WebExpress.WebUI.WebControl;
 
 namespace WebExpress.WebUI.WebPage
@@ -20,6 +22,7 @@ namespace WebExpress.WebUI.WebPage
         private int _statusCode = 200;
         private IRoute _base;
         private readonly IComponentHub _componentHub;
+        private readonly IPageContext _pageContext;
         private readonly List<Favicon> _favicons = [];
         private readonly List<string> _styles = [];
         private readonly List<string> _headerScriptLinks = [];
@@ -36,7 +39,7 @@ namespace WebExpress.WebUI.WebPage
         protected IComponentHub ComponentHub => _componentHub;
 
         /// <summary>
-        /// Returns or sets the HTTP status code associated with the response.
+        /// Gets or sets the HTTP status code associated with the response.
         /// </summary>
         public int StatusCode
         {
@@ -45,9 +48,23 @@ namespace WebExpress.WebUI.WebPage
         }
 
         /// <summary>
-        /// Returns the title of the html document.
+        /// Gets the title of the html document.
         /// </summary>
         public string Title { get; set; }
+
+        /// <summary>
+        /// Gets the active theme for the page. Resolved at construction time
+        /// by picking the first theme registered for the application; null
+        /// when the application has no theme.
+        /// </summary>
+        public IThemeContext Theme { get; protected set; }
+
+        /// <summary>
+        /// Gets the icon theme for the page. Mirrors <see cref="Theme"/> /
+        /// <c>Theme.IconTheme</c>; falls back to
+        /// <see cref="TypeIconTheme.Default"/> when no theme is registered.
+        /// </summary>
+        public TypeIconTheme IconTheme => Theme?.IconTheme ?? TypeIconTheme.Default;
 
         /// <summary>
         /// Returns the favicons.
@@ -108,11 +125,29 @@ namespace WebExpress.WebUI.WebPage
         {
             var contextPath = pageContext.ApplicationContext?.Route;
             _componentHub = componentHub;
+            _pageContext = pageContext;
 
             Title = pageContext?.PageTitle;
+
+            // Resolve the active theme once at construction:
+            //   1. [Theme<T>] declared on the application class wins, returned
+            //      via IApplicationContext.DefaultTheme.
+            //   2. Otherwise fall back to the first theme registered for the
+            //      application (preserves the long-standing "default = first"
+            //      convention documented in the Theme model).
+            //   3. Otherwise leave Theme null - downstream IconTheme falls back
+            //      to TypeIconTheme.Default.
+            // Per-user theme overrides are wired by application code: the
+            // page's Process override calls UseTheme<T>() based on whatever
+            // store the application maintains (session, identity profile, …).
+            var applicationContext = pageContext?.ApplicationContext;
+            Theme = applicationContext?.DefaultTheme
+                ?? componentHub?.ThemeManager?.Themes
+                    ?.FirstOrDefault(t => t.ApplicationContext == applicationContext);
+
             _favicons.Add(new Favicon(RouteEndpoint.Combine(contextPath, WebEx.Favicon)));
 
-            foreach (var include in _componentHub.IncludeManager
+            foreach (var include in _componentHub?.IncludeManager
                 .GetIncludes(pageContext.ApplicationContext))
             {
                 if (!include.Scopes.Any() || pageContext.Scopes.Intersect(include.Scopes).Any())
@@ -125,7 +160,7 @@ namespace WebExpress.WebUI.WebPage
                 }
             }
 
-            foreach (var include in _componentHub.IncludeManager
+            foreach (var include in _componentHub?.IncludeManager
                 .GetIncludes(pageContext.ApplicationContext))
             {
                 if (!include.Scopes.Any() || pageContext.Scopes.Intersect(include.Scopes).Any())
@@ -142,6 +177,64 @@ namespace WebExpress.WebUI.WebPage
 
             _meta.Add("charset", "UTF-8");
             _meta.Add("viewport", "width=device-width, initial-scale=1");
+        }
+
+        /// <summary>
+        /// Overrides the active theme with the one identified by
+        /// <typeparamref name="TTheme"/>. Looks the theme context up via the
+        /// active <c>ThemeManager</c> for the page's application; when no
+        /// matching theme is registered the call is a no-op and the previous
+        /// theme stays in place.
+        ///
+        /// Derived visual trees (notably WebApp variants) can override
+        /// <see cref="OnThemeChanged"/> to react to the swap, e.g. by
+        /// re-adding the new theme's <c>ThemeStyle</c> CSS link.
+        /// </summary>
+        /// <typeparam name="TTheme">The theme type to use.</typeparam>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual VisualTreeControl UseTheme<TTheme>()
+            where TTheme : class, ITheme
+        {
+            var resolved = _componentHub?.ThemeManager?
+                .GetThemes(_pageContext?.ApplicationContext, typeof(TTheme))
+                ?.FirstOrDefault();
+
+            return UseTheme(resolved);
+        }
+
+        /// <summary>
+        /// Overrides the active theme with the supplied resolved theme
+        /// context. The call is a no-op when <paramref name="theme"/> is
+        /// <see langword="null"/>; otherwise the previous theme is replaced
+        /// and <see cref="OnThemeChanged"/> is invoked so subclasses can
+        /// re-apply theme-specific resources. Use this overload when the
+        /// theme has been resolved through a non-type lookup (cookie,
+        /// session, identity preference, …).
+        /// </summary>
+        /// <param name="theme">The theme to activate.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual VisualTreeControl UseTheme(IThemeContext theme)
+        {
+            if (theme is null || theme == Theme)
+            {
+                return this;
+            }
+
+            var previous = Theme;
+            Theme = theme;
+            OnThemeChanged(previous, theme);
+            return this;
+        }
+
+        /// <summary>
+        /// Notification hook fired by <see cref="UseTheme{TTheme}"/> after the
+        /// active theme has been swapped. Default implementation is a no-op;
+        /// subclasses can override to re-apply theme-style CSS links etc.
+        /// </summary>
+        /// <param name="previousTheme">The theme that was active before the swap.</param>
+        /// <param name="newTheme">The newly selected theme.</param>
+        protected virtual void OnThemeChanged(IThemeContext previousTheme, IThemeContext newTheme)
+        {
         }
 
         /// <summary>

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -8,19 +10,19 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlTile : IControl
     {
         /// <summary>
-        /// Returns the items of the tile control.
+        /// Gets the items of the tile control.
         /// </summary>
         IEnumerable<IControlTileCard> Items { get; }
 
         /// <summary>
-        /// Returns a value indicating whether cards in the tile can be moved.
+        /// Gets a value indicating whether cards in the tile can be moved.
         /// </summary>
-        bool Movable { get; }
+        Func<IRenderControlContext, bool> Movable { get; }
 
         /// <summary>
-        /// Returns a value indicating whether items can be removed.
+        /// Gets a value indicating whether items can be removed.
         /// </summary>
-        bool AllowRemove { get; }
+        Func<IRenderControlContext, bool> AllowRemove { get; }
 
         /// <summary>
         /// Adds one or more items to the tile control.

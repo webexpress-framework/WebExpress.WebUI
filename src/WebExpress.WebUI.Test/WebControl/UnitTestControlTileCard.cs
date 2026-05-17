@@ -48,6 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorTile.Dark, @"<div class=""wx-tile-card"" data-color-css=""wx-tile-dark""></div>")]
         [InlineData(TypeColorTile.White, @"<div class=""wx-tile-card"" data-color-css=""wx-tile-white""></div>")]
         [InlineData(TypeColorTile.Transparent, @"<div class=""wx-tile-card"" data-color-css=""wx-tile-transparent""></div>")]
+        [InlineData(TypeColorTile.Highlight, @"<div class=""wx-tile-card"" data-color-css=""wx-tile-highlight""></div>")]
         public void Color(TypeColorTile color, string expected)
         {
             // arrange
@@ -56,7 +57,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTileCard()
             {
-                Color = new PropertyColorTile(color)
+                Color = _ => new PropertyColorTile(color)
             };
 
             // act
@@ -81,7 +82,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTileCard()
             {
-                Header = header
+                Header = _ => header
             };
 
             // act
@@ -106,7 +107,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var icon = iconType is not null ? Activator.CreateInstance(iconType) as IIcon : null;
             var control = new ControlTileCard(null)
             {
-                Icon = icon
+                Icon = _ => icon
             };
 
             // act
@@ -130,7 +131,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTileCard()
             {
-                PrimaryAction = new ActionModal(modal)
+                PrimaryAction = _ => new ActionModal(modal)
             };
 
             // act
@@ -154,7 +155,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTileCard()
             {
-                SecondaryAction = new ActionModal(modal)
+                SecondaryAction = _ => new ActionModal(modal)
             };
 
             // act

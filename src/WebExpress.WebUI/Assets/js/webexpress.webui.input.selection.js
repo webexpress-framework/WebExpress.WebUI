@@ -12,6 +12,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
     _filterInput = null;
     _optionfilter = null;
     _multiselect = false;
+    _stickySelection = false;
     _placeholder = "";
 
     /**
@@ -22,10 +23,12 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         super(element);
 
         // initialize properties from attributes and dataset
+        const id = element.getAttribute("id");
         const name = element.getAttribute("name");
         const value = element.dataset.value || null;
         this._placeholder = element.getAttribute("placeholder") || this._i18n("webexpress.webui:selection.placeholder", "Select an option");
         this._multiselect = element.dataset.multiselection === "true";
+        this._stickySelection = element.dataset.stickySelection === "true";
         this._values = [];
         this._items = [];
         // default filter logic
@@ -34,7 +37,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         };
 
         // create and append ui components
-        const hiddenInput = this._createHiddenInput(name);
+        const hiddenInput = this._createHiddenInput(id, name);
         const dropdown = this._createDropdown();
         const dropdownMenu = this._createDropdownMenu();
 
@@ -50,9 +53,11 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         }
 
         // clean up the element before adding new structure
+        element.removeAttribute("id");
         element.removeAttribute("name");
         element.removeAttribute("placeholder");
         element.removeAttribute("data-multiselection");
+        element.removeAttribute("data-sticky-selection");
         element.innerHTML = "";
         element.classList.add("wx-selection");
         element.appendChild(hiddenInput);
@@ -67,12 +72,16 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
 
     /**
      * Creates a hidden input for form submission.
+     * @param {string} id - The id attribute for the hidden input.
      * @param {string} name - The name attribute for the hidden input.
      * @returns {HTMLInputElement} The hidden input element.
      */
-    _createHiddenInput(name) {
+    _createHiddenInput(id, name) {
         const hiddenInput = document.createElement("input");
         hiddenInput.type = "hidden";
+        if (id) {
+            hiddenInput.id = id;
+        }
         hiddenInput.name = name || "";
         this._hidden = hiddenInput;
         return hiddenInput;
@@ -97,7 +106,6 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
 
         // toggle the dropdown menu on click
         dropdown.addEventListener("click", (e) => {
-            e.stopPropagation();
             if (this._dropdownmenu.style.display === "flex") {
                 this._dropdownmenu.dispatchEvent(new Event("hide"));
                 this._dropdownmenu.style.display = "none";
@@ -105,7 +113,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                 this._dropdownmenu.style.display = "flex";
                 this._dropdownmenu.dispatchEvent(new Event("show"));
                 if (this._filterInput) {
-                    this._filterInput.focus();
+                    this._filterInput.focus({ preventScroll: true });
                 }
             }
         });
@@ -147,7 +155,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                 if (!this._multiselect) {
                     this.value = [];
                 }
-                
+
                 // toggle selection or add unique
                 if (!this._values.includes(item.id)) {
                     this.value = [...this.value, item.id];
@@ -175,11 +183,11 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         const filterContainer = document.createElement("div");
         const filterInput = document.createElement("input");
         filterInput.type = "text";
-        filterInput.setAttribute("aria-label", "Filter");
+        filterInput.setAttribute("aria-label", this._i18n("webexpress.webui:selection.filter", "Filter"));
 
         const clearButton = document.createElement("a");
         clearButton.className = "fas fa-times";
-        clearButton.setAttribute("aria-label", "Clear Filter");
+        clearButton.setAttribute("aria-label", this._i18n("webexpress.webui:selection.filter.clear", "Clear Filter"));
         clearButton.setAttribute("role", "button");
         clearButton.style.cursor = "pointer";
 
@@ -229,7 +237,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                 items.push({
                     id: id,
                     label: elem.dataset.label || elem.textContent,
-                    labelColor: elem.dataset.labelColor,
+                    color: elem.dataset.color,
                     icon: elem.dataset.icon,
                     image: elem.dataset.image,
                     content: elem.innerHTML || elem.dataset.label,
@@ -278,7 +286,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                 li.className = "dropdown-item";
                 // store id for event delegation
                 li.dataset.id = item.id;
-                
+
                 if (item.disabled) {
                     li.classList.add("disabled");
                 }
@@ -301,11 +309,11 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                     contentWrapper.prepend(img);
                 }
                 li.appendChild(contentWrapper);
-               
+
                 fragment.appendChild(li);
             }
         });
-        
+
         // update dom in one go
         this._dropdownoptions.innerHTML = "";
         this._dropdownoptions.appendChild(fragment);
@@ -316,19 +324,12 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
             const item = this._items.find((i) => { return i.id === value; });
             if (item) {
                 const li = document.createElement("li");
-                if (item.labelColor) {
-                    li.className = item.labelColor;
+                if (item.color) {
+                    li.className = item.color;
                 }
-                
+
                 const span = document.createElement("span");
-                const closeButton = document.createElement("a");
-                closeButton.className = "fas fa-times";
-                closeButton.style.cursor = "pointer";
-                closeButton.addEventListener("click", (e) => {
-                    e.stopPropagation();
-                    this.value = this._values.filter((v) => { return v !== value; });
-                    this.render();
-                });
+                const isStickyActive = this._stickySelection && this._values.length > 0;
 
                 if (item.image) {
                     const img = document.createElement("img");
@@ -346,7 +347,18 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                 span.appendChild(labelSpan);
 
                 li.appendChild(span);
-                li.appendChild(closeButton);
+
+                if (!isStickyActive) {
+                    const closeButton = document.createElement("a");
+                    closeButton.className = "fas fa-times";
+                    closeButton.style.cursor = "pointer";
+                    closeButton.addEventListener("click", (e) => {
+                        e.stopPropagation();
+                        this.value = this._values.filter((v) => { return v !== value; });
+                        this.render();
+                    });
+                    li.appendChild(closeButton);
+                }
                 this._selection.appendChild(li);
             }
         });
@@ -410,6 +422,26 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
     }
 
     /**
+     * Gets whether sticky selection mode is enabled.
+     * @returns {boolean} True if the selection cannot be cleared once set.
+     */
+    get stickySelection() {
+        return this._stickySelection;
+    }
+
+    /**
+     * Sets whether sticky selection mode is enabled.
+     * When enabled and a value is selected, the selection cannot be cleared
+     * through the UI (remove icon or keyboard). The user may still replace
+     * the value by selecting another item.
+     * @param {boolean} enabled True to enable sticky selection.
+     */
+    set stickySelection(enabled) {
+        this._stickySelection = Boolean(enabled);
+        this.render();
+    }
+
+    /**
      * Gets the current value(s) of the selection.
      * @returns {Array} The currently selected values.
      */
@@ -421,6 +453,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
      * Sets the value(s) of the selection and triggers events and rendering.
      * Accepts:
      * - Array of ids
+     * - Array of objects with an id property (e.g. [{id: "abc", name: "Item"}])
      * - single id string
      * - semicolon separated string "id1;id2"
      * - null/undefined (clears selection)
@@ -432,8 +465,19 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         let normalized = [];
         if (values === null || values === undefined) {
             normalized = [];
-        } else if (Array.isArray(values)) {
-            normalized = values;
+        } else if(Array.isArray(values)) {
+            if (values.length === 0) {
+                normalized = [];
+            } else if (typeof values[0] === "string") {
+                // array of id strings
+                normalized = values.map(v => String(v));
+            } else if (typeof values[0] === "object" && values[0].id != null) {
+                // array of objects with id
+                normalized = values.map(v => String(v.id));
+            } else {
+                // fallback: unknown structure
+                normalized = [];
+            }
         } else if (typeof values === "string") {
             const trimmed = values.trim();
             if (trimmed.length > 0) {

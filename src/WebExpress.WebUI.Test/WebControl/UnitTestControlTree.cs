@@ -51,7 +51,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTree()
             {
-                DisableIndicator = disableIndicator
+                DisableIndicator = _ => disableIndicator
             };
 
             // act
@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTree()
             {
-                Movable = movable
+                Movable = _ => movable
             };
 
             // act
@@ -102,7 +102,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTree()
             {
-                Layout = layout
+                Layout = _ => layout
             };
 
             // act
@@ -147,35 +147,35 @@ namespace WebExpress.WebUI.Test.WebControl
                         [
                             new ControlTreeItem("1.1")
                             {
-                                Text = "Node 1.1", Uri = new UriEndpoint("/home")
+                                Text = _ => "Node 1.1", Uri = _ => new UriEndpoint("/home")
                             },
                             new ControlTreeItem("1.2")
                             {
-                                Text = "Node 1.2"
+                                Text = _ => "Node 1.2"
                             }
                         ])
                         {
-                            Text = "Node 1",
-                            Icon = new IconHome(),
-                            Expand = true
+                            Text = _ => "Node 1",
+                            Icon = _ => new IconHome(),
+                            Expand = _ => true
                         },
                         new ControlTreeItem("2",
                         [
                             new ControlTreeItem("2.1")
                             {
-                                Text = "Node 2.1",
-                                Uri = new UriEndpoint("/info"),
-                                Target = TypeTarget.Blank,
-                                Tooltip = "Tooltip"
+                                Text = _ => "Node 2.1",
+                                Uri = _ => new UriEndpoint("/info"),
+                                Target = _ => TypeTarget.Blank,
+                                Tooltip = _ => "Tooltip"
                             },
                             new ControlTreeItem("2.2")
                             {
-                                Text = "Node 2.2"
+                                Text = _ => "Node 2.2"
                             }
                         ])
                         {
-                            Text = "Node 2",
-                            Icon = new IconCog()
+                            Text = _ => "Node 2",
+                            Icon = _ => new IconCog()
                         }
                     ],
                     @"<div class=""wx-webui-tree""><div id=""1"" class=""wx-tree-node"" data-label=""Node 1"" data-expand=""true"" data-icon=""fas fa-home""><div id=""1.1"" class=""wx-tree-node"" data-label=""Node 1.1"" data-uri=""/home""></div><div id=""1.2"" class=""wx-tree-node"" data-label=""Node 1.2""></div></div><div id=""2"" class=""wx-tree-node"" data-label=""Node 2"" data-icon=""fas fa-cog""><div id=""2.1"" class=""wx-tree-node"" data-label=""Node 2.1"" data-tooltip=""Tooltip"" data-uri=""/info"" data-target=""_blank""></div><div id=""2.2"" class=""wx-tree-node"" data-label=""Node 2.2""></div></div></div>"

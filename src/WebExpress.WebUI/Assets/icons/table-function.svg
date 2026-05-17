@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Table-valued function: full table grid with right-pointing output arrow -->
+<svg width="21" height="21" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+  <path
+     id="table-function-grid"
+     d="M 1.5,3 H 14 V 18 H 1.5 Z M 3,4.5 H 12.5 V 16.5 H 3 Z"
+     style="fill:#000000;fill-rule:evenodd" />
+  <rect x="3" y="8.25" width="9.5" height="1.5" style="fill:#000000" />
+  <rect x="3" y="12.75" width="9.5" height="1.5" style="fill:#000000" />
+  <rect x="7.25" y="4.5" width="1.5" height="12" style="fill:#000000" />
+  <path
+     id="table-function-output"
+     d="M 14,9.5 H 16.5 V 8 L 20.5,10.5 L 16.5,13 V 11.5 H 14 Z"
+     style="fill:#000000" />
+</svg>

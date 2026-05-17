@@ -1,4 +1,5 @@
-﻿using System.Linq;
+using System;
+using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -11,24 +12,24 @@ namespace WebExpress.WebUI.WebControl
     public class ControlPanelMedia : ControlPanel
     {
         /// <summary>
-        /// Returns or sets the title.
+        /// Gets or sets the title.
         /// </summary>
-        public string Title { get; set; }
+        public Func<IRenderControlContext, string> Title { get; set; }
 
         /// <summary>
-        /// Returns or sets the uri to the image.
+        /// Gets or sets the uri to the image.
         /// </summary>
-        public string Image { get; set; }
+        public Func<IRenderControlContext, string> Image { get; set; }
 
         /// <summary>
-        /// Returns or sets the width of the image in pixel.
+        /// Gets or sets the width of the image in pixel.
         /// </summary>
-        public uint? ImageWidth { get; set; }
+        public Func<IRenderControlContext, uint?> ImageWidth { get; set; }
 
         /// <summary>
-        /// Returns or sets the height of the image in pixel.
+        /// Gets or sets the height of the image in pixel.
         /// </summary>
-        public uint? ImageHeight { get; set; }
+        public Func<IRenderControlContext, uint?> ImageHeight { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -48,24 +49,31 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var role = Role?.Invoke(renderContext);
+            var theme = Theme?.Invoke(renderContext) ?? TypeTheme.None;
+            var title = Title?.Invoke(renderContext);
+            var image = Image?.Invoke(renderContext);
+            var imageWidth = ImageWidth?.Invoke(renderContext);
+            var imageHeight = ImageHeight?.Invoke(renderContext);
+
             var img = new HtmlElementMultimediaImg()
             {
-                Src = Image?.ToString(),
+                Src = image?.ToString(),
                 Class = "me-3 mt-3 " // rounded-circle
             };
 
-            if (ImageWidth.HasValue)
+            if (imageWidth.HasValue)
             {
-                img.Width = (int)ImageWidth;
+                img.Width = (int)imageWidth;
             }
 
-            if (ImageHeight.HasValue)
+            if (imageHeight.HasValue)
             {
-                img.Height = (int)ImageHeight;
+                img.Height = (int)imageHeight;
             }
 
-            var heading = !string.IsNullOrWhiteSpace(Title)
-                ? new HtmlElementSectionH4(new HtmlText(I18N.Translate(renderContext.Request?.Culture, Title)))
+            var heading = !string.IsNullOrWhiteSpace(title)
+                ? new HtmlElementSectionH4(new HtmlText(I18N.Translate(renderContext.Request?.Culture, title)))
                 : null;
 
             var body = new HtmlElementTextContentDiv(heading)
@@ -80,8 +88,8 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("media", GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
-                DataTheme = Theme.ToValue()
+                Role = role,
+                DataTheme = theme.ToValue()
             };
 
             return html;

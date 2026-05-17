@@ -1,12 +1,12 @@
 /**
  * Plugin for basic text formatting.
- * Provides toolbar controls for bold, italic, underline, fonts, colors, lists, 
+ * Provides toolbar controls for bold, italic, underline, fonts, colors, lists,
  * alignment, and block formatting options.
  */
 webexpress.webui.EditorPlugins.register("formatting", 0, {
     _lastColor: "#000000",
     _lastHighlight: "#FFFF00", // default highlight color (yellow)
-    
+
     _colors: [
         // basic colors
         "#000000", "#FF0000", "#008000", "#0000FF", "#FFFF00",
@@ -24,13 +24,34 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
 
     /**
      * Initializes the plugin.
-     * Sets up listeners to update button states based on cursor selection.
+     * Sets up listeners to update button states based on cursor selection
+     * and the document's structural state. Keyboard, mouse and focus
+     * events keep the toolbar in sync the same way Word does - every
+     * cursor movement immediately updates the highlighted buttons.
      * @param {object} editor - The editor instance.
      */
     init: function(editor) {
-        document.addEventListener("selectionchange", () => { 
-            this._updateButtonStates(editor); 
+        const update = () => this._updateButtonStates(editor);
+
+        document.addEventListener("selectionchange", () => {
+            // limit work to the editor that currently owns the selection
+            const sel = window.getSelection();
+            if (!sel || sel.rangeCount === 0) {
+                return;
+            }
+            const el = editor.getEditorElement();
+            if (el && el.contains(sel.anchorNode)) {
+                update();
+            }
         });
+
+        const editorEl = editor.getEditorElement();
+        if (editorEl) {
+            editorEl.addEventListener("keyup", update);
+            editorEl.addEventListener("mouseup", update);
+            editorEl.addEventListener("focus", update);
+            editorEl.addEventListener("input", update);
+        }
     },
 
     /**
@@ -41,39 +62,236 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
     createToolbar: function(editor) {
         const toolbar = document.createElement("div");
         toolbar.classList.add("wx-editor-format-toolbar");
-        
+
         const fragment = document.createDocumentFragment();
         fragment.appendChild(this._createFormatDropdown(editor));
         fragment.appendChild(this._createSeparator());
         fragment.appendChild(this._createBasicButtons(editor));
         fragment.appendChild(this._createStyleDropdown(editor));
-        
+
         // separate buttons for text color and highlight
         fragment.appendChild(this._createSeparator());
         fragment.appendChild(this._createTextColorDropdown(editor));
         fragment.appendChild(this._createHighlightDropdown(editor));
-        
+
         fragment.appendChild(this._createSeparator());
         fragment.appendChild(this._createListButtons(editor));
         fragment.appendChild(this._createSeparator());
         fragment.appendChild(this._createIndentButtons(editor));
         fragment.appendChild(this._createSeparator());
         fragment.appendChild(this._createAlignButtons(editor));
-        
+        fragment.appendChild(this._createSeparator());
+        fragment.appendChild(this._createHorizontalRuleButton(editor));
+
         toolbar.appendChild(fragment);
         return toolbar;
     },
 
     /**
-     * Updates the active state of buttons based on current selection style.
+     * Updates the active state of every toolbar button to match the
+     * current selection. For inline commands (bold, italic, …) the
+     * browser-provided <c>queryCommandState</c> is reliable. For the
+     * alignment family <c>queryCommandState("justifyCenter")</c> etc. is
+     * notoriously inconsistent across browsers because modern execCommand
+     * implementations apply <c>style="text-align: …"</c> on the block
+     * ancestor rather than the deprecated <c>align</c> attribute. We
+     * therefore inspect the block ancestor's computed style directly,
+     * which always matches what the user sees.
+     *
+     * The update is also scoped to the editor that owns the current
+     * selection so multiple editors on the same page do not clobber each
+     * other's toolbars.
+     *
      * @param {object} editor - The editor instance.
      */
     _updateButtonStates: function(editor) {
-        const buttons = document.querySelectorAll(".wx-editor-btn");
+        const editorEl = editor.getEditorElement();
+        if (!editorEl) {
+            return;
+        }
+
+        const toolbar = this._findToolbar(editorEl);
+        const alignment = this._detectAlignment(editor);
+        const blockFormat = this._detectBlockFormat(editor);
+
+        const buttons = toolbar
+            ? toolbar.querySelectorAll(".wx-editor-btn")
+            : document.querySelectorAll(".wx-editor-btn");
+
         buttons.forEach((button) => {
-            const isActive = button.dataset.command ? document.queryCommandState(button.dataset.command) : false;
+            const cmd = button.dataset.command;
+            if (!cmd) {
+                return;
+            }
+
+            let isActive = false;
+            switch (cmd) {
+                case "justifyLeft":
+                    isActive = alignment === "left";
+                    break;
+                case "justifyCenter":
+                    isActive = alignment === "center";
+                    break;
+                case "justifyRight":
+                    isActive = alignment === "right";
+                    break;
+                case "justifyFull":
+                    isActive = alignment === "justify";
+                    break;
+                default:
+                    try {
+                        isActive = document.queryCommandState(cmd);
+                    } catch (e) {
+                        isActive = false;
+                    }
+            }
             button.classList.toggle("active", isActive);
         });
+
+        // reflect the current paragraph format in the dropdown label so
+        // the user always sees what kind of block the caret sits in -
+        // identical to Word's "Styles" indicator.
+        if (toolbar) {
+            this._updateFormatDropdown(toolbar, blockFormat);
+        }
+    },
+
+    /**
+     * Locates the toolbar element belonging to the editor that hosts
+     * <paramref name="editorEl"/>.
+     * @param {HTMLElement} editorEl - The contenteditable host.
+     * @returns {HTMLElement|null} The toolbar or null when not found.
+     */
+    _findToolbar: function(editorEl) {
+        if (!editorEl) {
+            return null;
+        }
+        // the toolbar is a sibling of the editor container under the wx-editor host
+        const host = editorEl.closest(".wx-editor");
+        if (host) {
+            return host.querySelector(".wx-editor-toolbar");
+        }
+        return null;
+    },
+
+    /**
+     * Determines the effective text alignment of the block the caret
+     * currently lives in. Walks up from the selection anchor through
+     * every block-level ancestor inside the editor and reads the
+     * computed <c>text-align</c> so the result reflects both inline
+     * styles and CSS rules. Logical values (<c>start</c>, <c>end</c>) are
+     * normalized into <c>left</c>/<c>right</c> using the document
+     * direction.
+     * @param {object} editor - The editor instance.
+     * @returns {"left"|"center"|"right"|"justify"} The alignment label.
+     */
+    _detectAlignment: function(editor) {
+        const editorEl = editor.getEditorElement();
+        if (!editorEl) {
+            return "left";
+        }
+
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0) {
+            return "left";
+        }
+
+        let node = sel.anchorNode;
+        if (!node || !editorEl.contains(node)) {
+            return "left";
+        }
+        if (node.nodeType === Node.TEXT_NODE) {
+            node = node.parentElement;
+        }
+
+        const dir = getComputedStyle(editorEl).direction || "ltr";
+
+        while (node && node !== editorEl) {
+            const style = getComputedStyle(node);
+            const display = style.display;
+            if (display === "block"
+                || display === "flex"
+                || display === "list-item"
+                || display === "table-cell"
+                || display === "flow-root") {
+                let align = style.textAlign;
+                if (align === "start") {
+                    align = dir === "rtl" ? "right" : "left";
+                } else if (align === "end") {
+                    align = dir === "rtl" ? "left" : "right";
+                } else if (align === "" || align === "normal") {
+                    align = "left";
+                }
+                return align;
+            }
+            node = node.parentElement;
+        }
+        return "left";
+    },
+
+    /**
+     * Detects the current block-level format (paragraph, heading,
+     * quote, code) of the caret position. Used to keep the format
+     * dropdown label in sync - the closest match in
+     * <c>_formatOptions</c> is taken.
+     * @param {object} editor - The editor instance.
+     * @returns {string|null} The lowercase tag name (<c>p</c>,
+     *          <c>h1</c>, <c>blockquote</c>, …) or <c>null</c>.
+     */
+    _detectBlockFormat: function(editor) {
+        const editorEl = editor.getEditorElement();
+        if (!editorEl) {
+            return null;
+        }
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0) {
+            return null;
+        }
+        let node = sel.anchorNode;
+        if (!node || !editorEl.contains(node)) {
+            return null;
+        }
+        if (node.nodeType === Node.TEXT_NODE) {
+            node = node.parentElement;
+        }
+
+        const known = new Set(["p", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "pre"]);
+        while (node && node !== editorEl) {
+            const tag = node.tagName && node.tagName.toLowerCase();
+            if (tag && known.has(tag)) {
+                return tag;
+            }
+            node = node.parentElement;
+        }
+        return null;
+    },
+
+    /**
+     * Updates the label of the format dropdown so it shows the block
+     * format the caret currently lives in (Word's "Styles" indicator).
+     * @param {HTMLElement} toolbar - The toolbar root for this editor.
+     * @param {string|null} blockFormat - The detected block tag.
+     */
+    _updateFormatDropdown: function(toolbar, blockFormat) {
+        const dropdown = toolbar.querySelector(".wx-editor-format-label");
+        if (!dropdown) {
+            return;
+        }
+
+        const labels = {
+            "p": webexpress.webui.I18N.translate("webexpress.webui:editor.paragraph"),
+            "h1": webexpress.webui.I18N.translate("webexpress.webui:editor.heading1"),
+            "h2": webexpress.webui.I18N.translate("webexpress.webui:editor.heading2"),
+            "h3": webexpress.webui.I18N.translate("webexpress.webui:editor.heading3"),
+            "h4": webexpress.webui.I18N.translate("webexpress.webui:editor.heading4"),
+            "h5": webexpress.webui.I18N.translate("webexpress.webui:editor.heading5"),
+            "h6": webexpress.webui.I18N.translate("webexpress.webui:editor.heading6"),
+            "blockquote": webexpress.webui.I18N.translate("webexpress.webui:editor.quote"),
+            "pre": webexpress.webui.I18N.translate("webexpress.webui:editor.codeblock")
+        };
+
+        const fallback = labels["p"];
+        dropdown.textContent = (blockFormat && labels[blockFormat]) || fallback;
     },
 
     /**
@@ -92,22 +310,29 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
     _createFormatDropdown: function(editor) {
         const container = document.createElement("div");
         container.className = "wx-editor-btn-group";
-        
+
         const button = document.createElement("button");
         button.className = "wx-editor-btn dropdown-toggle";
         button.type = "button";
         button.setAttribute("data-bs-toggle", "dropdown");
         const buttonText = document.createElement("span");
-        buttonText.textContent = "Paragraph";
+        buttonText.className = "wx-editor-format-label";
+        buttonText.textContent = webexpress.webui.I18N.translate("webexpress.webui:editor.paragraph");
         button.appendChild(buttonText);
-        
+
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu";
-        
+
         const options = [
-            { cmd: "p", lbl: "Paragraph" }, { cmd: "h1", lbl: "Heading 1" },
-            { cmd: "h2", lbl: "Heading 2" }, { cmd: "h3", lbl: "Heading 3" },
-            { cmd: "blockquote", lbl: "Quote" }, { cmd: "pre", lbl: "Code Block" }
+            { cmd: "p", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.paragraph") },
+            { cmd: "h1", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.heading1") },
+            { cmd: "h2", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.heading2") },
+            { cmd: "h3", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.heading3") },
+            { cmd: "h4", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.heading4") },
+            { cmd: "h5", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.heading5") },
+            { cmd: "h6", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.heading6") },
+            { cmd: "blockquote", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.quote") },
+            { cmd: "pre", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.codeblock") }
         ];
 
         options.forEach((opt) => {
@@ -117,9 +342,10 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
             btn.textContent = opt.lbl;
             btn.type = "button";
             btn.addEventListener("click", () => {
-                document.execCommand("formatBlock", false, opt.cmd);
+                editor.execCommand("formatBlock", opt.cmd);
                 buttonText.textContent = opt.lbl;
                 editor.getEditorElement().focus();
+                this._updateButtonStates(editor);
             });
             li.appendChild(btn);
             menu.appendChild(li);
@@ -135,12 +361,12 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
     _createBasicButtons: function(editor) {
         const frag = document.createDocumentFragment();
         const defs = [
-            { cmd: "bold", icon: "fas fa-bold", tip: "Bold" },
-            { cmd: "italic", icon: "fas fa-italic", tip: "Italic" },
-            { cmd: "underline", icon: "fas fa-underline", tip: "Underline" }
+            { cmd: "bold", icon: "fas fa-bold", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.bold") },
+            { cmd: "italic", icon: "fas fa-italic", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.italic") },
+            { cmd: "underline", icon: "fas fa-underline", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.underline") }
         ];
-        defs.forEach((d) => { 
-            frag.appendChild(this._createBtn(editor, d)); 
+        defs.forEach((d) => {
+            frag.appendChild(this._createBtn(editor, d));
         });
         return frag;
     },
@@ -156,16 +382,16 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         btn.type = "button";
         btn.innerHTML = '<i class="fas fa-text-height"></i>';
         btn.setAttribute("data-bs-toggle", "dropdown");
-        
+
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu";
-        
+
         const opts = [
-            { cmd: "strikethrough", icon: "fas fa-strikethrough", lbl: "Strike" },
-            { cmd: "superscript", icon: "fas fa-superscript", lbl: "Super" },
-            { cmd: "subscript", icon: "fas fa-subscript", lbl: "Sub" },
+            { cmd: "strikethrough", icon: "fas fa-strikethrough", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.strike") },
+            { cmd: "superscript", icon: "fas fa-superscript", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.super") },
+            { cmd: "subscript", icon: "fas fa-subscript", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.sub") },
             { separator: true },
-            { cmd: "removeFormat", icon: "fas fa-eraser", lbl: "Clear Format" }
+            { cmd: "removeFormat", icon: "fas fa-eraser", lbl: webexpress.webui.I18N.translate("webexpress.webui:editor.clearformat") }
         ];
 
         opts.forEach((o) => {
@@ -179,8 +405,8 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
                 b.type = "button";
                 b.className = "dropdown-item";
                 b.innerHTML = `<i class="${o.icon}"></i> ${o.lbl}`;
-                b.addEventListener("click", () => { 
-                    editor.execCommand(o.cmd); 
+                b.addEventListener("click", () => {
+                    editor.execCommand(o.cmd);
                 });
                 li.appendChild(b);
                 menu.appendChild(li);
@@ -199,14 +425,14 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
     _createTextColorDropdown: function(editor) {
         const container = document.createElement("div");
         container.className = "wx-editor-btn-group";
-        container.style.gap = "0"; 
+        container.style.gap = "0";
 
         // action button (apply current text color)
         const actionBtn = document.createElement("button");
         actionBtn.className = "wx-editor-btn";
         actionBtn.type = "button";
-        actionBtn.title = "Text Color";
-        
+        actionBtn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.textcolor");
+
         const icon = document.createElement("i");
         icon.className = "fas fa-font";
         icon.style.borderBottom = `3px solid ${this._lastColor}`;
@@ -221,12 +447,12 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         toggleBtn.className = "wx-editor-btn dropdown-toggle dropdown-toggle-split";
         toggleBtn.type = "button";
         toggleBtn.setAttribute("data-bs-toggle", "dropdown");
-        
+
         const menu = document.createElement("div");
         menu.className = "dropdown-menu";
         const picker = document.createElement("ul");
         picker.className = "wx-editor-color-picker";
-        
+
         this._colors.forEach((c) => {
             const li = document.createElement("li");
             const b = document.createElement("button");
@@ -243,7 +469,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         });
 
         menu.appendChild(picker);
-        
+
         container.appendChild(actionBtn);
         container.appendChild(toggleBtn);
         container.appendChild(menu);
@@ -264,7 +490,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         const actionBtn = document.createElement("button");
         actionBtn.className = "wx-editor-btn";
         actionBtn.type = "button";
-        actionBtn.title = "Highlight Color";
+        actionBtn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.highlightcolor");
 
         const icon = document.createElement("i");
         icon.className = "fas fa-highlighter";
@@ -283,16 +509,16 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
 
         const menu = document.createElement("div");
         menu.className = "dropdown-menu";
-        
+
         const picker = document.createElement("ul");
         picker.className = "wx-editor-color-picker";
 
         // requested highlight colors
         const markColors = [
-            { val: "#FFFF00", name: "Yellow" },
-            { val: "#00FFFF", name: "Cyan (Light Blue)" },
-            { val: "#00FF00", name: "Lime (Light Green)" },
-            { val: "#FF00FF", name: "Magenta" },
+            { val: "#FFFF00", name: webexpress.webui.I18N.translate("webexpress.webui:editor.color.yellow") },
+            { val: "#00FFFF", name: webexpress.webui.I18N.translate("webexpress.webui:editor.color.cyan") },
+            { val: "#00FF00", name: webexpress.webui.I18N.translate("webexpress.webui:editor.color.lime") },
+            { val: "#FF00FF", name: webexpress.webui.I18N.translate("webexpress.webui:editor.color.magenta") },
         ];
 
         markColors.forEach((c) => {
@@ -302,7 +528,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
             b.type = "button";
             b.style.backgroundColor = c.val;
             b.title = c.name;
-            b.style.border = "1px solid #dee2e6"; 
+            b.style.border = "1px solid #dee2e6";
 
             if (c.icon) {
                 b.innerHTML = `<i class="${c.icon}" style="font-size: 10px; color: #000;"></i>`;
@@ -334,10 +560,10 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
     _createListButtons: function(editor) {
         const frag = document.createDocumentFragment();
         [
-            { cmd: "insertUnorderedList", icon: "fas fa-list-ul", tip: "Bullet" },
-            { cmd: "insertOrderedList", icon: "fas fa-list-ol", tip: "Number" }
-        ].forEach((d) => { 
-            frag.appendChild(this._createBtn(editor, d)); 
+            { cmd: "insertUnorderedList", icon: "fas fa-list-ul", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.list.bullet") },
+            { cmd: "insertOrderedList", icon: "fas fa-list-ol", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.list.number") }
+        ].forEach((d) => {
+            frag.appendChild(this._createBtn(editor, d));
         });
         return frag;
     },
@@ -348,10 +574,10 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
     _createIndentButtons: function(editor) {
         const frag = document.createDocumentFragment();
         [
-            { cmd: "outdent", icon: "fas fa-outdent", tip: "Less" },
-            { cmd: "indent", icon: "fas fa-indent", tip: "More" }
-        ].forEach((d) => { 
-            frag.appendChild(this._createBtn(editor, d)); 
+            { cmd: "outdent", icon: "fas fa-outdent", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.indent.less") },
+            { cmd: "indent", icon: "fas fa-indent", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.indent.more") }
+        ].forEach((d) => {
+            frag.appendChild(this._createBtn(editor, d));
         });
         return frag;
     },
@@ -362,12 +588,12 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
     _createAlignButtons: function(editor) {
         const frag = document.createDocumentFragment();
         [
-            { cmd: "justifyLeft", icon: "fas fa-align-left", tip: "Left" },
-            { cmd: "justifyCenter", icon: "fas fa-align-center", tip: "Center" },
-            { cmd: "justifyRight", icon: "fas fa-align-right", tip: "Right" },
-            { cmd: "justifyFull", icon: "fas fa-align-justify", tip: "Justify" }
-        ].forEach((d) => { 
-            frag.appendChild(this._createBtn(editor, d)); 
+            { cmd: "justifyLeft", icon: "fas fa-align-left", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.align.left") },
+            { cmd: "justifyCenter", icon: "fas fa-align-center", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.align.center") },
+            { cmd: "justifyRight", icon: "fas fa-align-right", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.align.right") },
+            { cmd: "justifyFull", icon: "fas fa-align-justify", tip: webexpress.webui.I18N.translate("webexpress.webui:editor.align.justify") }
+        ].forEach((d) => {
+            frag.appendChild(this._createBtn(editor, d));
         });
         return frag;
     },
@@ -379,11 +605,33 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         const btn = document.createElement("button");
         btn.className = "wx-editor-btn";
         btn.title = def.tip;
+        btn.setAttribute("aria-label", def.tip);
         btn.dataset.command = def.cmd;
         btn.type = "button";
         btn.innerHTML = `<i class="${def.icon}"></i>`;
         btn.addEventListener("click", () => {
             editor.execCommand(def.cmd);
+            // refresh immediately so the alignment / list / style buttons
+            // flip their active state without waiting for selectionchange
+            this._updateButtonStates(editor);
+        });
+        return btn;
+    },
+
+    /**
+     * Creates the horizontal rule insertion button.
+     * @param {object} editor - The editor instance.
+     * @returns {HTMLElement} The button element.
+     */
+    _createHorizontalRuleButton: function(editor) {
+        const btn = document.createElement("button");
+        btn.className = "wx-editor-btn";
+        btn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.horizontal.rule");
+        btn.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.horizontal.rule"));
+        btn.type = "button";
+        btn.innerHTML = '<i class="fas fa-minus"></i>';
+        btn.addEventListener("click", () => {
+            editor.execCommand("insertHorizontalRule");
         });
         return btn;
     }

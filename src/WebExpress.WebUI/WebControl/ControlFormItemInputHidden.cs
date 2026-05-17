@@ -26,14 +26,16 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var value = renderContext?.GetValue<ControlFormInputValueString>(this)?.Text;
+            var name = Name?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
 
             return new HtmlElementFieldInput()
             {
                 Id = Id,
                 Value = value,
-                Name = Name,
+                Name = name,
                 Type = "hidden",
-                Role = Role
+                Role = role
             };
         }
 

@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemNode()
             {
-                Label = label
+                Label = _ => label
             };
 
             // act
@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemNode()
             {
-                Uri = !string.IsNullOrEmpty(uri) ? new UriEndpoint(uri) : null
+                Uri = _ => !string.IsNullOrEmpty(uri) ? new UriEndpoint(uri) : null
             };
 
             // act
@@ -99,7 +99,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemNode()
             {
-                Point = x == int.MinValue && y == int.MinValue
+                Point = _ => x == int.MinValue && y == int.MinValue
                     ? null
                     : new System.Drawing.Point(x, y)
             };
@@ -123,6 +123,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorGraph.Danger, @"<div class=""wx-graph-node"" data-foreground-css=""danger""></div>")]
         [InlineData(TypeColorGraph.Dark, @"<div class=""wx-graph-node"" data-foreground-css=""dark""></div>")]
         [InlineData(TypeColorGraph.Light, @"<div class=""wx-graph-node"" data-foreground-css=""light""></div>")]
+        [InlineData(TypeColorGraph.Highlight, @"<div class=""wx-graph-node"" data-foreground-css=""highlight""></div>")]
         public void SystemColor(TypeColorGraph color, string expected)
         {
             // arrange
@@ -131,7 +132,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemNode()
             {
-                Color = new PropertyColorGraph(color)
+                Color = _ => new PropertyColorGraph(color)
             };
 
             // act
@@ -156,7 +157,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemNode()
             {
-                Color = new PropertyColorGraph(color)
+                Color = _ => new PropertyColorGraph(color)
             };
 
             // act
@@ -179,6 +180,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackgroundGraph.Dark, @"<div class=""wx-graph-node"" data-background-css=""bg-dark""></div>")]
         [InlineData(TypeColorBackgroundGraph.White, @"<div class=""wx-graph-node"" data-background-css=""bg-white""></div>")]
         [InlineData(TypeColorBackgroundGraph.Transparent, @"<div class=""wx-graph-node"" data-background-css=""bg-transparent""></div>")]
+        [InlineData(TypeColorBackgroundGraph.Highlight, @"<div class=""wx-graph-node"" data-background-css=""bg-highlight""></div>")]
         public void SystemBackgroundColor(TypeColorBackgroundGraph color, string expected)
         {
             // arrange
@@ -187,7 +189,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemNode()
             {
-                BackgroundColor = new PropertyColorBackgroundGraph(color)
+                BackgroundColor = _ => new PropertyColorBackgroundGraph(color)
             };
 
             // act
@@ -212,7 +214,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemNode()
             {
-                BackgroundColor = new PropertyColorBackgroundGraph(color)
+                BackgroundColor = _ => new PropertyColorBackgroundGraph(color)
             };
 
             // act
@@ -236,7 +238,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemNode()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -261,7 +263,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphItemNode()
             {
-                Shape = shape
+                Shape = _ => shape
             };
 
             // act

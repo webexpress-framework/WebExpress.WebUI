@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -14,6 +15,8 @@ namespace WebExpress.WebUI.WebControl
     /// </remarks>
     public class ControlFormItemInputCascading : ControlFormItemInput<ControlFormInputValueStringList>, IControlFormItemInputCascading
     {
+        public new Func<IRenderControlContext, string> Name { get; set; }
+
         private readonly List<IControlFormItemInputCascadingItem> _options = [];
 
         /// <summary>
@@ -22,14 +25,9 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlFormItemInputCascadingItem> Options => _options;
 
         /// <summary>
-        /// Returns or sets the label of the selected options.
+        /// Gets or sets the label of the selected options.
         /// </summary>
-        public string Placeholder { get; set; }
-
-        /// <summary>
-        /// Returns or sets the OnChange attribute.
-        /// </summary>
-        public PropertyOnChange OnChange { get; set; }
+        public Func<IRenderControlContext, string> Placeholder { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
@@ -47,6 +45,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemInputCascading(string id, params IControlFormItemInputCascadingItem[] items)
             : base(id)
         {
+            Name = _ => id;
             _options.AddRange(items);
         }
 
@@ -83,10 +82,12 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var value = renderContext.GetValue<ControlFormInputValueStringList>(this)?.Items;
+            var name = Name?.Invoke(renderContext);
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
             var classes = new List<string>();
             classes.AddRange(Classes);
 
-            if (Disabled)
+            if (disabled)
             {
                 classes.Add("disabled");
             }
@@ -97,8 +98,8 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("wx-webui-input-cascading", classes),
                 Style = GetStyles()
             }
-                .AddUserAttribute("name", Name)
-                .AddUserAttribute("placeholder", I18N.Translate(Placeholder))
+                .AddUserAttribute("name", name)
+                .AddUserAttribute("placeholder", I18N.Translate(Placeholder?.Invoke(renderContext)))
                 .AddUserAttribute("data-value", string.Join(";", value ?? []))
                 .Add(_options.Select(x => x.Render(renderContext, visualTree)));
 

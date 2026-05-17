@@ -1,4 +1,7 @@
-﻿namespace WebExpress.WebUI.WebControl
+using System;
+using WebExpress.WebUI.WebPage;
+
+namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// Represents an item in a multiple progress bar control.
@@ -6,23 +9,23 @@
     public class ControlMultipleProgressBarItem
     {
         /// <summary>
-        /// Returns or sets the text color.
+        /// Gets or sets the text color.
         /// </summary>
-        public PropertyColorText Color { get; set; } = new PropertyColorText(TypeColorText.Default);
+        public Func<IRenderControlContext, PropertyColorText> Color { get; set; } = _ => new PropertyColorText(TypeColorText.Default);
 
         /// <summary>
-        /// Returns or sets the background color.
+        /// Gets or sets the background color.
         /// </summary>
-        public PropertyColorBackground BackgroundColor { get; set; } = new PropertyColorBackground(TypeColorBackground.Default);
+        public Func<IRenderControlContext, PropertyColorBackground> BackgroundColor { get; set; } = _ => new PropertyColorBackground(TypeColorBackground.Default);
 
         /// <summary>
-        /// Returns or sets the value.
+        /// Gets or sets the value.
         /// </summary>
-        public uint Value { get; set; }
+        public Func<IRenderControlContext, uint> Value { get; set; }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
     }
 }

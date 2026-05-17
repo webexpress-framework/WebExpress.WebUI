@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.Internationalization;
+using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebUri;
@@ -8,7 +9,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a sidebar item that displays an icon, with optional text and editing 
+    /// Represents a sidebar item that displays an icon, with optional text and editing
     /// capabilities, for use in a control sidebar UI.
     /// </summary>
     public class ControlSidebarItemIcon : IControlSidebarItem
@@ -21,47 +22,52 @@ namespace WebExpress.WebUI.WebControl
         public string Id => _id;
 
         /// <summary>
-        /// Returns or sets the icon associated with this instance.
+        /// Gets or sets the icon associated with this instance.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the target uri.
+        /// Gets or sets the image uri.
         /// </summary>
-        public IUri Uri { get; set; }
+        public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
-        /// Returns or sets the text to display as the icon representation.
+        /// Gets or sets the target uri.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, IUri> Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the icon can be edited.
+        /// Gets or sets the text to display as the icon representation.
         /// </summary>
-        public bool IconEdit { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets a value indicating whether the icon can be edited.
+        /// </summary>
+        public Func<IRenderControlContext, bool> IconEdit { get; set; }
+
+        /// <summary>
+        /// Gets or sets the secondary action, typically triggered by a
         /// click to open a modal or similar target.
         /// </summary>
-        public IAction PrimaryAction { get; set; }
+        public Func<IRenderControlContext, IAction> PrimaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
-        /// double‑click to open a modal or similar target.
+        /// Gets or sets the secondary action, typically triggered by a
+        /// double-click to open a modal or similar target.
         /// </summary>
-        public IAction SecondaryAction { get; set; }
+        public Func<IRenderControlContext, IAction> SecondaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the display mode of the type sidebar.
+        /// Gets or sets the display mode of the type sidebar.
         /// </summary>
-        public virtual TypeSidebarMode Mode { get; set; }
+        public virtual Func<IRenderControlContext, TypeSidebarMode> Mode { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class with the specified identifier.
         /// </summary>
         /// <param name="id">
-        /// The unique identifier for the icon. Can be null to indicate that no 
+        /// The unique identifier for the icon. Can be null to indicate that no
         /// identifier is assigned.
         /// </param>
         public ControlSidebarItemIcon(string id = null)
@@ -77,7 +83,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return Render(renderContext, visualTree, Icon, Uri, PrimaryAction, SecondaryAction);
+            return Render(renderContext, visualTree, Icon?.Invoke(renderContext), Uri?.Invoke(renderContext), PrimaryAction?.Invoke(renderContext), SecondaryAction?.Invoke(renderContext));
         }
 
         /// <summary>
@@ -87,26 +93,29 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="visualTree">The visual tree representing the control's structure.</param>
         /// <param name="icon">The icon to be rendered.</param>
         /// <param name="uri">The URI associated with the icon.</param>
-        /// <param name="primaryAction">The primary action associated with the control, usually invoked 
+        /// <param name="primaryAction">The primary action associated with the control, usually invoked
         /// when the user interacts with the main interactive element (e.g., a click).
-        /// </param>    
+        /// </param>
         /// <param name="secondaryAction">
         /// An optional secondary action that provides an alternative or contextual behavior.
-        /// </param>
         /// </param>
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IIcon icon, IUri uri, IAction primaryAction, IAction secondaryAction)
         {
+            var mode = Mode?.Invoke(renderContext) ?? TypeSidebarMode.Default;
+            var iconEdit = IconEdit?.Invoke(renderContext) ?? false;
+            var text = Text?.Invoke(renderContext);
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-sidebar-icon"
             }
-                .AddUserAttribute("data-mode", Mode != TypeSidebarMode.Default ? Mode.ToData() : null)
+                .AddUserAttribute("data-mode", mode != TypeSidebarMode.Default ? mode.ToData() : null)
                 .AddUserAttribute("data-icon", icon is Icon css ? css.Class : null)
                 .AddUserAttribute("data-image", icon is ImageIcon image ? image.Uri.ToString() : null)
-                .AddUserAttribute("data-icon-edit", IconEdit ? "true" : null)
-                .AddUserAttribute("data-icon-text", I18N.Translate(renderContext, Text))
+                .AddUserAttribute("data-icon-edit", iconEdit ? "true" : null)
+                .AddUserAttribute("data-icon-text", I18N.Translate(renderContext, text))
                 .AddUserAttribute("data-uri", uri?.ToString());
 
             primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);

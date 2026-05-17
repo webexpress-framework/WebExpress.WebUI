@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+﻿using System;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
@@ -12,47 +13,47 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns or set the background color.
         /// </summary>
-        public new PropertyColorBackgroundBadge BackgroundColor
+        public new Func<IRenderControlContext, PropertyColorBackgroundBadge> BackgroundColor
         {
-            get => (PropertyColorBackgroundBadge)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+            get => (Func<IRenderControlContext, PropertyColorBackgroundBadge>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>
         /// Return or specifies whether rounded corners should be used.
         /// </summary>
-        public TypePillBadge Pill
+        public Func<IRenderControlContext, TypePillBadge> Pill
         {
-            get => (TypePillBadge)GetProperty(TypePillBadge.None);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypePillBadge>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the target uri.
+        /// Gets or sets the target uri.
         /// </summary>
-        public IUri Uri { get; set; }
+        public Func<IRenderControlContext, IUri> Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the value.
+        /// Gets or sets the value.
         /// </summary>
-        public string Value { get; set; }
+        public Func<IRenderControlContext, string> Value { get; set; }
 
         /// <summary>
         /// Return or specifies the vertical orientation..
         /// </summary>
-        public TypeVerticalAlignment VerticalAlignment
+        public Func<IRenderControlContext, TypeVerticalAlignment> VerticalAlignment
         {
-            get => (TypeVerticalAlignment)GetProperty(TypeVerticalAlignment.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeVerticalAlignment>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
-        public PropertySizeText Size
+        public Func<IRenderControlContext, PropertySizeText> Size
         {
-            get => (PropertySizeText)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+            get => (Func<IRenderControlContext, PropertySizeText>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>
@@ -72,24 +73,28 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            if (Uri is not null)
+            var role = Role?.Invoke(renderContext);
+            var value = Value?.Invoke(renderContext);
+            var uri = Uri?.Invoke(renderContext);
+
+            if (uri is not null)
             {
-                return new HtmlElementTextSemanticsA(new HtmlText(Value))
+                return new HtmlElementTextSemanticsA(new HtmlText(value))
                 {
                     Id = Id,
                     Class = Css.Concatenate("badge link", GetClasses()),
                     Style = GetStyles(),
-                    Href = Uri.ToString(),
-                    Role = Role
+                    Href = uri?.ToString(),
+                    Role = role
                 };
             }
 
-            return new HtmlElementTextSemanticsSpan(new HtmlText(Value))
+            return new HtmlElementTextSemanticsSpan(new HtmlText(value))
             {
                 Id = Id,
                 Class = Css.Concatenate("badge", GetClasses()),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             };
         }
     }

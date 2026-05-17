@@ -8,10 +8,10 @@ namespace WebExpress.WebUI.WebFragment
     /// <summary>
     /// Represents a navigation control that is part of a web fragment.
     /// </summary>
-    public class FragmentControlNavigation : ControlNavigation, IFragmentControl<ControlNavigation>
+    public abstract class FragmentControlNavigation : ControlNavigation, IFragmentControl<ControlNavigation>
     {
         /// <summary>
-        /// Returns the context of the fragment.
+        /// Gets the context of the fragment.
         /// </summary>
         public IFragmentContext FragmentContext { get; private set; }
 
@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.WebFragment
         /// </summary>
         /// <param name="fragmentContext">The context of the fragment.</param>
         public FragmentControlNavigation(IFragmentContext fragmentContext)
-            : base(fragmentContext?.FragmentId?.ToString())
+            : base(fragmentContext?.FragmentId?.ToString()?.Replace(".", "-"))
         {
             FragmentContext = fragmentContext;
         }

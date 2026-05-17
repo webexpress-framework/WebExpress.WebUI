@@ -1,4 +1,4 @@
-﻿namespace WebExpress.WebUI.WebControl
+namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// The size options for avatar.
@@ -35,8 +35,8 @@
         {
             return size switch
             {
-                TypeSizeAvatar.Large => "wx-prifile-lg",
-                TypeSizeAvatar.Small => "wx-prifile-sm",
+                TypeSizeAvatar.Large => "wx-profile-lg",
+                TypeSizeAvatar.Small => "wx-profile-sm",
                 _ => string.Empty,
             };
         }

@@ -15,11 +15,11 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemButtonReset(string id = null, params IControl[] content)
             : base(id, content)
         {
-            Text = "webexpress.webui:form.reset.label";
-            Icon = new IconRotateLeft();
-            Color = new PropertyColorButton(TypeColorButton.Secondary);
-            Type = TypeButton.Reset;
-            Margin = new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.Two, PropertySpacing.Space.None, PropertySpacing.Space.None);
+            Text = _ => "webexpress.webui:form.reset.label";
+            Icon = _ => new IconRotateLeft();
+            Color = _ => new PropertyColorButton(TypeColorButton.Secondary);
+            Type = _ => TypeButton.Reset;
+            Margin = _ => new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.Two, PropertySpacing.Space.None, PropertySpacing.Space.None);
         }
     }
 }

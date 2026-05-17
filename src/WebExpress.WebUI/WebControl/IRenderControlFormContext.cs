@@ -9,12 +9,12 @@ namespace WebExpress.WebUI.WebControl
     public interface IRenderControlFormContext : IRenderControlContext
     {
         /// <summary>
-        /// Returns the form in which the control is rendered.
+        /// Gets the form in which the control is rendered.
         /// </summary>
         IControlForm Form { get; }
 
         /// <summary>
-        /// Returns the dictionary of input controls and their associated values.
+        /// Gets the dictionary of input controls and their associated values.
         /// </summary>
         IReadOnlyDictionary<IControlFormItemInput, IControlFormInputValue> Values { get; }
 

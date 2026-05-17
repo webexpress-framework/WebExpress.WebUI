@@ -8,10 +8,10 @@ namespace WebExpress.WebUI.WebFragment
     /// <summary>
     /// Represents a link item within a split button control that is part of a fragment.
     /// </summary>
-    public class FragmentControlSplitButtonItemLink : ControlSplitButtonItemLink, IFragmentControl<ControlSplitButtonItemLink>
+    public abstract class FragmentControlSplitButtonItemLink : ControlSplitButtonItemLink, IFragmentControl<ControlSplitButtonItemLink>
     {
         /// <summary>
-        /// Returns the context of the fragment.
+        /// Gets the context of the fragment.
         /// </summary>
         public IFragmentContext FragmentContext { get; private set; }
 
@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.WebFragment
         /// </summary>
         /// <param name="fragmentContext">The context of the fragment.</param>
         public FragmentControlSplitButtonItemLink(IFragmentContext fragmentContext)
-            : base(fragmentContext?.FragmentId?.ToString())
+            : base(fragmentContext?.FragmentId?.ToString()?.Replace(".", "-"))
         {
             FragmentContext = fragmentContext;
         }

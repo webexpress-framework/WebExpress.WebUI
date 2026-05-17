@@ -45,6 +45,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorDate.Warning, @"<template data-type=""calendar"" data-color-css=""bg-warning""></template>")]
         [InlineData(TypeColorDate.Danger, @"<template data-type=""calendar"" data-color-css=""bg-danger""></template>")]
         [InlineData(TypeColorDate.Light, @"<template data-type=""calendar"" data-color-css=""bg-light""></template>")]
+        [InlineData(TypeColorDate.Highlight, @"<template data-type=""calendar"" data-color-css=""bg-highlight""></template>")]
         [InlineData(TypeColorDate.Dark, @"<template data-type=""calendar"" data-color-css=""bg-dark""></template>")]
         public void SystemColor(TypeColorDate color, string expected)
         {
@@ -54,7 +55,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableTemplateCalendar()
             {
-                Color = new PropertyColorDate(color)
+                Color = _ => new PropertyColorDate(color)
             };
 
             // act
@@ -80,7 +81,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableTemplateCalendar()
             {
-                Color = new PropertyColorDate(color)
+                Color = _ => new PropertyColorDate(color)
             };
 
             // act
@@ -105,7 +106,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableTemplateCalendar(null)
             {
-                Placeholder = placeholder
+                Placeholder = _ => placeholder
             };
 
             // act
@@ -129,7 +130,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableTemplateCalendar(null)
             {
-                Format = format
+                Format = _ => format
             };
 
             // act

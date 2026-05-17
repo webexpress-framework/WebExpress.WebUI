@@ -1,5 +1,7 @@
-﻿using WebExpress.WebCore.WebIcon;
+using System;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebPage;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -10,28 +12,33 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlKanbanCard : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the title associated with the card.
+        /// Gets the title associated with the card.
         /// </summary>
-        string Title { get; }
+        Func<IRenderControlContext, string> Title { get; }
 
         /// <summary>
-        /// Returns the color associated with the card.
+        /// Gets the color associated with the card.
         /// </summary>
-        string Color { get; }
+        Func<IRenderControlContext, string> Color { get; }
 
         /// <summary>
-        /// Returns the icon associated with this card.
+        /// Gets the icon associated with this card.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; }
 
         /// <summary>
-        /// Returns the column id associated with this card.
+        /// Gets or sets the image uri.
         /// </summary>
-        string ColumnId { get; }
+        Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
-        /// Returns the unique identifier of the swimlane associated with this card.
+        /// Gets the column id associated with this card.
         /// </summary>
-        string SwimlaneId { get; }
+        Func<IRenderControlContext, string> ColumnId { get; }
+
+        /// <summary>
+        /// Gets the unique identifier of the swimlane associated with this card.
+        /// </summary>
+        Func<IRenderControlContext, string> SwimlaneId { get; }
     }
 }

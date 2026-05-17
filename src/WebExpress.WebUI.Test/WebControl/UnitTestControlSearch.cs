@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSearch()
             {
-                Placeholder = text
+                Placeholder = _ => text
             };
 
             // act
@@ -71,9 +71,9 @@ namespace WebExpress.WebUI.Test.WebControl
 
             var control = new ControlSearch(null, [new ControlSearchItemSuggestion("1")
             {
-                Label = "Home",
-                Icon = new IconHome(),
-                Favorited = true,
+                Label = _ => "Home",
+                Icon = _ => new IconHome(),
+                Favorited = _ => true,
             }])
             {
             };
@@ -99,7 +99,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlSearch()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -123,12 +123,12 @@ namespace WebExpress.WebUI.Test.WebControl
 
             var control = new ControlSearch(null, [new ControlSearchItemSuggestion("1")
             {
-                Label = "Home",
-                Icon = new IconHome(),
-                Favorited = true,
+                Label = _ => "Home",
+                Icon = _ => new IconHome(),
+                Favorited = _ => true,
             }])
             {
-                EnableFavorited = enableFavorited
+                EnableFavorited = _ => enableFavorited
             };
 
             // act
@@ -153,7 +153,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             var control = new ControlSearch()
             {
-                Value = searchTerm
+                Value = _ => searchTerm
             };
 
             // act

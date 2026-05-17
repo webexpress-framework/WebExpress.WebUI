@@ -9,10 +9,10 @@ The InlinePageCtrl is a lightweight component for embedding external HTML conten
 Initialization and behavior are controlled exclusively via `data-` attributes on the host element. The attributes are removed after reading to avoid leaking configuration into the DOM.
 
 | Attribute         | Description
-|-------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| `data-uri`        | Absolute or relative URL of the resource to be loaded. If empty or missing, the container is cleared.                                                |
-| `data-selector`   | CSS selector to extract from the loaded document. Default is `"body"`.                                                                              |
-| `data-autoload`   | Controls automatic loading when the instance is created. Any value except `"false"` will trigger autoload. Default is `"true"` (not case-sensitive). |
+|-------------------|-----------------------------------------------------------------------------------------------
+| `data-uri`        | Absolute or relative URL of the resource to be loaded. If empty or missing, the container is cleared.
+| `data-selector`   | CSS selector to extract from the loaded document. Default is `"body"`.
+| `data-autoload`   | Controls automatic loading when the instance is created. Any value except `"false"` will trigger autoload. Default is `"true"` (not case-sensitive).
 
 Additional behavior:
 - Requests use `fetch()` with `credentials: "same-origin"`.

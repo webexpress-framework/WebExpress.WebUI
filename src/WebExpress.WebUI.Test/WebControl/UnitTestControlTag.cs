@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTag()
             {
-                Value = text
+                Value = _ => text
             };
 
             // act
@@ -69,6 +69,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorTag.Warning, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-warning""></div>")]
         [InlineData(TypeColorTag.Danger, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-danger""></div>")]
         [InlineData(TypeColorTag.Light, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-light""></div>")]
+        [InlineData(TypeColorTag.Highlight, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-highlight""></div>")]
         [InlineData(TypeColorTag.Dark, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-dark""></div>")]
         public void SystemColor(TypeColorTag color, string expected)
         {
@@ -78,7 +79,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTag()
             {
-                Color = new PropertyColorTag(color)
+                Color = _ => new PropertyColorTag(color)
             };
 
             // act
@@ -104,7 +105,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTag()
             {
-                Color = new PropertyColorTag(color)
+                Color = _ => new PropertyColorTag(color)
             };
 
             // act

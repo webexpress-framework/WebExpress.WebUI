@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="21" height="21" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+  <style>.st1 {display:none}
+		.st2 {fill:#000000;stroke:#000000;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.749999}
+		.st3 {fill:none;fill-rule:evenodd;font-size:12px;overflow:visible;stroke-linecap:square;stroke-miterlimit:3}</style>
+  <g transform="scale(0.074083)">
+<g>
+		
+		
+		<g id="shape1-1" transform="translate(0.000280035,-0.0004331)">
+			
+			<rect x="0" y="-0.035" width="283.5" height="283.5" class="st1"/>
+		</g>
+		<g id="group2-3" transform="translate(71.9999,-71.9682)">
+			
+			<g id="group3-4" transform="translate(87.6623,-6.82121E-013)">
+				
+				<g id="shape4-5">
+					
+					<path d="M52.65 272.36 L52.65 272.35 L52.65 255.65 A11.1127 10.856 -90 0 0 41.8 244.54 L30.67 244.54 L30.67 181.23
+								 L21.98 181.23 L21.98 244.54 L10.86 244.54 A11.1127 10.856 -90 0 0 0 255.65 L0 283.46 L52.65 283.46
+								 L52.65 272.36 Z" class="st2"/>
+				</g>
+				<g id="shape5-7" transform="translate(7.32779,-109.85)">
+					
+					<path d="M10.86 283.46 L27.14 283.46 A10.856 9.62194 -0 0 0 38 273.84 L38 267.59 A10.856 9.62194 -0 0 0 27.14
+								 257.97 L10.86 257.97 A10.856 9.62194 -0 0 0 0 267.59 L0 273.84 A10.856 9.62194 -0 0 0 10.86 283.46
+								 ZM16.42 277.84 A8.03462 7.12126 180 0 1 8.39 270.72 A8.03462 7.12126 180 0 1 16.42 263.59 L21.58
+								 263.59 A8.03462 7.12126 180 0 1 29.61 270.72 A8.03462 7.12126 180 0 1 21.58 277.84 L16.42 277.84
+								 Z" class="st2"/>
+				</g>
+			</g>
+			<g id="shape6-9" transform="translate(7.03437E-013,-79.1569)">
+				
+				<path d="M0 277.8 A5.66942 5.66942 -180 0 0 5.67 283.46 L90.41 283.46 A5.66942 5.66942 -180 0 0 96.08 277.8 L96.08
+							 270.26 A5.66942 5.66942 -180 0 0 90.41 264.59 L5.67 264.59 A5.66942 5.66942 -180 0 0 0 270.26 L0 277.8
+							 Z" class="st2"/>
+			</g>
+			<g id="shape7-11" transform="translate(8.14201,0)">
+				
+				<path d="M81.28 213.15 L0 213.15 L15.28 283.46 L15.6 283.46 L65.68 283.46 L65.99 283.46 L81.28 213.15 Z"
+						class="st2"/>
+			</g>
+			<g id="shape8-13" transform="translate(14.6557,-106.884)">
+				
+				<path d="M68.39 283.46 A37.758 35.2821 -90 0 0 -0 283.46 L10.18 283.46 A27.331 25.5388 90 0 1 58.21 283.46 L68.39
+							 283.46 Z" class="st2"/>
+			</g>
+		</g>
+	</g>
+  </g>
+</svg>

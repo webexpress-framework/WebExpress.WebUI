@@ -1,54 +1,56 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
     public interface IControlFormItemButton : IControlFormItem
     {
         /// <summary>
-        /// Returns or sets the content.
+        /// Gets or sets the content.
         /// </summary>
         IEnumerable<IControl> Content { get; }
 
         /// <summary>
-        /// Returns or sets the color of the button.
+        /// Gets or sets the color of the button.
         /// </summary>
-        PropertyColorButton Color { get; }
+        Func<IRenderControlContext, PropertyColorButton> Color { get; }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
-        TypeSizeButton Size { get; }
+        Func<IRenderControlContext, TypeSizeButton> Size { get; }
 
         /// <summary>
-        /// Returns or sets the Outline property.
+        /// Gets or sets the Outline property.
         /// </summary>
-        bool Outline { get; }
+        Func<IRenderControlContext, bool> Outline { get; }
 
         /// <summary>
-        /// Returns or sets whether the button should take up the full width.
+        /// Gets or sets whether the button should take up the full width.
         /// </summary>
-        TypeBlockButton Block { get; }
+        Func<IRenderControlContext, TypeBlockButton> Block { get; }
 
         /// <summary>
-        /// Returns or sets whether the button is disabled.
+        /// Gets or sets whether the button is disabled.
         /// </summary>
-        bool Disabled { get; }
+        Func<IRenderControlContext, bool> Disabled { get; }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
-        string Text { get; }
+        Func<IRenderControlContext, string> Text { get; }
 
         /// <summary>
-        /// Returns or sets the type. (button, submit, reset)
+        /// Gets or sets the type. (button, submit, reset)
         /// </summary>
-        TypeButton Type { get; }
+        Func<IRenderControlContext, TypeButton> Type { get; }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; }
 
         /// <summary>
         /// Adds one or more controls to the content.

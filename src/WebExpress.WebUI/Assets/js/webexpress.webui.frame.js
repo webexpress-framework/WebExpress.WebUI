@@ -11,7 +11,7 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
      */
     constructor(element) {
         super(element);
-        
+
         this._uri = element.getAttribute("data-uri") || "";
         this._selector = element.getAttribute("data-selector") || "body";
         this._autoload = (element.getAttribute("data-autoload") || "true").toLowerCase() !== "false";
@@ -100,7 +100,7 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
             if (node.tagName === "SCRIPT") {
                 scriptsToExecute.push(node);
                 // remove original script from source
-                source.removeChild(node); 
+                source.removeChild(node);
             } else {
                 fragment.appendChild(node);
             }
@@ -122,7 +122,7 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
     _executeScripts(scripts) {
         scripts.forEach((oldScript) => {
             const newScript = document.createElement("script");
-            
+
             // copy attributes
             Array.from(oldScript.attributes).forEach((attr) => {
                 newScript.setAttribute(attr.name, attr.value);
@@ -133,7 +133,7 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
 
             // append to host to trigger execution
             this._element.appendChild(newScript);
-            
+
             // optionally remove script tag after execution to keep dom clean
             // this._element.removeChild(newScript);
         });
@@ -158,7 +158,7 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
         const messageDiv = document.createElement("div");
         messageDiv.className = "mb-2";
         messageDiv.textContent = this._i18n("webexpress.webui:frame.contentNotLoaded.details", "An error occurred while loading external content.");
-        
+
         // prepare stacktrace if available
         const stackDiv = document.createElement("pre");
         stackDiv.className = "bg-light border rounded p-2 mb-0";

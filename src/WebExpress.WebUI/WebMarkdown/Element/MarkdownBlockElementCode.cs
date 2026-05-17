@@ -6,12 +6,12 @@ namespace WebExpress.WebUI.WebMarkdown.Element
     public class MarkdownBlockElementCode : MarkdownBlockElement
     {
         /// <summary>
-        /// Returns or sets the code content.
+        /// Gets or sets the code content.
         /// </summary>
         public string Content { get; set;}
         
         /// <summary>
-        /// Returns or sets the optional programming language.
+        /// Gets or sets the optional programming language.
         /// </summary>
         public string Language { get; set; }
 

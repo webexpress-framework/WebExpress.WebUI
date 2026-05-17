@@ -12,10 +12,10 @@ namespace WebExpress.WebUI.WebFragment
     /// This class extends <see cref="ControlNavigationItemLink"/> to provide additional
     /// functionality for working with fragments.
     /// </remarks>
-    public class FragmentControlNavigationItemLink : ControlNavigationItemLink, IFragmentControl<ControlNavigationItemLink>, IFragmentControlNavigationItem
+    public abstract class FragmentControlNavigationItemLink : ControlNavigationItemLink, IFragmentControl<ControlNavigationItemLink>, IFragmentControlNavigationItem
     {
         /// <summary>
-        /// Returns the context of the fragment.
+        /// Gets the context of the fragment.
         /// </summary>
         public IFragmentContext FragmentContext { get; private set; }
 
@@ -24,7 +24,7 @@ namespace WebExpress.WebUI.WebFragment
         /// </summary>
         /// <param name="fragmentContext">The context of the fragment.</param>
         public FragmentControlNavigationItemLink(IFragmentContext fragmentContext)
-            : base(fragmentContext?.FragmentId?.ToString())
+            : base(fragmentContext?.FragmentId?.ToString()?.Replace(".", "-"))
         {
             FragmentContext = fragmentContext;
         }

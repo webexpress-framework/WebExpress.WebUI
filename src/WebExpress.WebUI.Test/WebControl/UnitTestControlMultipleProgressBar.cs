@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlMultipleProgressBar()
             {
-                Format = format
+                Format = _ => format
             };
 
             // act
@@ -70,10 +70,10 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var item = new ControlMultipleProgressBarItem() { Text = text };
+            var item = new ControlMultipleProgressBarItem() { Text = _ => text };
             var control = new ControlMultipleProgressBar(null, item)
             {
-                Format = TypeFormatProgress.Colored
+                Format = _ => TypeFormatProgress.Colored
             };
 
             // act
@@ -93,6 +93,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Warning, @"<div class=""progress""><div class=""progress-bar text-warning"" style=""width: 0%;""></div></div>")]
         [InlineData(TypeColorText.Danger, @"<div class=""progress""><div class=""progress-bar text-danger"" style=""width: 0%;""></div></div>")]
         [InlineData(TypeColorText.Light, @"<div class=""progress""><div class=""progress-bar text-light"" style=""width: 0%;""></div></div>")]
+        [InlineData(TypeColorText.Highlight, @"<div class=""progress""><div class=""progress-bar text-highlight"" style=""width: 0%;""></div></div>")]
         [InlineData(TypeColorText.White, @"<div class=""progress""><div class=""progress-bar text-white"" style=""width: 0%;""></div></div>")]
         public void Color(TypeColorText color, string expected)
         {
@@ -100,10 +101,10 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var item = new ControlMultipleProgressBarItem() { Color = new PropertyColorText(color) };
+            var item = new ControlMultipleProgressBarItem() { Color = _ => new PropertyColorText(color) };
             var control = new ControlMultipleProgressBar(null, item)
             {
-                Format = TypeFormatProgress.Colored
+                Format = _ => TypeFormatProgress.Colored
             };
 
             // act
@@ -123,6 +124,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Warning, @"<div class=""progress text-warning""></div>")]
         [InlineData(TypeColorText.Danger, @"<div class=""progress text-danger""></div>")]
         [InlineData(TypeColorText.Light, @"<div class=""progress text-light""></div>")]
+        [InlineData(TypeColorText.Highlight, @"<div class=""progress text-highlight""></div>")]
         [InlineData(TypeColorText.White, @"<div class=""progress text-white""></div>")]
         [InlineData(TypeColorText.Muted, @"<div class=""progress text-muted""></div>")]
         public void TextColor(TypeColorText textColor, string expected)
@@ -133,8 +135,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlMultipleProgressBar()
             {
-                TextColor = new PropertyColorText(textColor),
-                Format = TypeFormatProgress.Colored
+                TextColor = _ => new PropertyColorText(textColor),
+                Format = _ => TypeFormatProgress.Colored
             };
 
             // act
@@ -156,7 +158,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var item = new ControlMultipleProgressBarItem() { Value = value };
+            var item = new ControlMultipleProgressBarItem() { Value = _ => value };
             var control = new ControlMultipleProgressBar(null, item)
             {
             };

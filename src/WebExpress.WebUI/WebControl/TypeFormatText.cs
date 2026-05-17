@@ -158,6 +158,11 @@
         /// <summary>
         /// Marks text as Markdown, which is converted to HTML.
         /// </summary>
-        Markdown
+        Markdown,
+
+        /// <summary>
+        /// Gets the raw, unprocessed value.
+        /// </summary>
+        Raw
     }
 }

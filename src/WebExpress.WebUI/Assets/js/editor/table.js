@@ -67,22 +67,22 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
 
         const tables = Array.from(root.querySelectorAll("table"));
         tables.forEach(table => {
-            // ensure the table itself is not editable
-            table.setAttribute("contenteditable", "false");
-            
-            // ensure all cells are editable
+            // allow selection across multiple cells by making the table editable
+            table.setAttribute("contenteditable", "true");
+
+            // remove explicit contenteditable from cells to inherit from table
             const cells = table.querySelectorAll("td, th");
             cells.forEach(c => {
-                c.setAttribute("contenteditable", "true");
+                c.removeAttribute("contenteditable");
             });
 
             // check if the table already has a wrapper frame
             let frame = table.closest(".wx-addon-frame");
-            
+
             if (!frame) {
                 // it's a raw table, apply classes and wrap it
                 table.classList.add("table", "table-striped", "table-striped-columns", "table-bordered", "wx-native-table");
-                
+
                 const uniqueId = "table-" + Date.now() + "-" + Math.floor(Math.random() * 10000);
                 const dragHandle = '<span class="wx-addon-drag-handle" contenteditable="false"><i class="fas fa-grip-vertical"></i></span>';
 
@@ -97,7 +97,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                     <div class="card-header py-1 px-2 d-flex justify-content-between align-items-center" contenteditable="false">
                         <div class="small text-muted fw-bold d-flex align-items-center">
                             ${dragHandle}
-                            <i class="fas fa-table me-2"></i> 
+                            <i class="fas fa-table me-2"></i>
                             <span>Table</span>
                         </div>
                     </div>
@@ -199,13 +199,12 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                 const cols = row.cells.length;
                 const targetTbody = table.tBodies.length > 0 ? table.tBodies[0] : table.createTBody();
                 const newRow = targetTbody.insertRow();
-                
+
                 for (let i = 0; i < cols; i++) {
                     const newCell = document.createElement(i === 0 && firstCellIsHeader ? "th" : "td");
                     if (i === 0 && firstCellIsHeader) {
                         newCell.scope = "row";
                     }
-                    newCell.contentEditable = "true";
                     newCell.innerHTML = "<br>";
                     newRow.appendChild(newCell);
                 }
@@ -436,7 +435,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         customLabel.style.border = "1px solid #ccc";
         customLabel.style.borderRadius = "4px";
         customLabel.innerHTML = '<i class="fas fa-plus" style="font-size: 10px;"></i>';
-        
+
         const customInput = document.createElement("input");
         customInput.type = "color";
         customInput.style.position = "absolute";
@@ -456,27 +455,27 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         });
 
         return [
-            { label: "Insert Row Above", action: () => this._modifyTable(editor, "insertRowAbove"), icon: "wx-icon add-row-above" },
-            { label: "Insert Row Below", action: () => this._modifyTable(editor, "insertRowBelow"), icon: "wx-icon add-row-below" },
-            { label: "Insert Column Left", action: () => this._modifyTable(editor, "insertColumnLeft"), icon: "wx-icon add-col-above" },
-            { label: "Insert Column Right", action: () => this._modifyTable(editor, "insertColumnRight"), icon: "wx-icon add-col-below" },
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.insert.row.above"), action: () => this._modifyTable(editor, "insertRowAbove"), icon: "wx-icon add-row-above" },
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.insert.row.below"), action: () => this._modifyTable(editor, "insertRowBelow"), icon: "wx-icon add-row-below" },
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.insert.col.left"), action: () => this._modifyTable(editor, "insertColumnLeft"), icon: "wx-icon add-col-above" },
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.insert.col.right"), action: () => this._modifyTable(editor, "insertColumnRight"), icon: "wx-icon add-col-below" },
             { separator: true },
-            { label: "Add Intermediate Header", action: () => this._modifyTable(editor, "insertIntermediateHeader"), icon: "wx-icon add-row-below" },
-            { label: "Toggle Left Header", action: () => this._modifyTable(editor, "toggleLeftHeader"), icon: "wx-icon cell-background" },
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.add.intermediate.header"), action: () => this._modifyTable(editor, "insertIntermediateHeader"), icon: "wx-icon add-row-below" },
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.toggle.left.header"), action: () => this._modifyTable(editor, "toggleLeftHeader"), icon: "wx-icon cell-background" },
             { separator: true },
-            { label: "Merge Cells", action: () => this._modifyTable(editor, "mergeCells"), icon: "wx-icon merge-cells" },
-            { label: "Split Cell", action: () => this._modifyTable(editor, "splitCell"), icon: "wx-icon split-cell" },
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.merge.cells"), action: () => this._modifyTable(editor, "mergeCells"), icon: "wx-icon merge-cells" },
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.split.cell"), action: () => this._modifyTable(editor, "splitCell"), icon: "wx-icon split-cell" },
             { separator: true },
-            { 
-                label: "Cell Background", 
+            {
+                label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.cell.background"),
                 icon: "wx-icon cell-background",
                 submenu: colorItems,
                 submenuClass: "wx-editor-color-picker"
             },
             { separator: true },
-            { label: "Delete Row", action: () => this._modifyTable(editor, "deleteRow"), icon: "wx-icon delete-row" },
-            { label: "Delete Column", action: () => this._modifyTable(editor, "deleteColumn"), icon: "wx-icon delete-col" },
-            { label: "Delete Table", action: () => this._modifyTable(editor, "deleteTable"), icon: "wx-icon delete-table" }
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.delete.row"), action: () => this._modifyTable(editor, "deleteRow"), icon: "wx-icon delete-row" },
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.delete.col"), action: () => this._modifyTable(editor, "deleteColumn"), icon: "wx-icon delete-col" },
+            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.delete.table"), action: () => this._modifyTable(editor, "deleteTable"), icon: "wx-icon delete-table" }
         ];
     },
 
@@ -493,7 +492,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         button.type = "button";
         button.setAttribute("data-bs-toggle", "dropdown");
         button.innerHTML = '<i class="fas fa-table"></i>';
-        
+
         const menu = document.createElement("div");
         menu.className = "dropdown-menu p-3";
         const grid = document.createElement("div");
@@ -501,7 +500,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         const sizeDisplay = document.createElement("div");
         sizeDisplay.className = "wx-editor-table-size-display";
         sizeDisplay.textContent = "1 × 1";
-        
+
         const INITIAL_ROWS = 5;
         const INITIAL_COLS = 5;
         const ABS_MAX = 18;
@@ -536,7 +535,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
             matrix = [];
             grid.style.gridTemplateColumns = `repeat(${cols}, 24px)`;
             grid.style.gridTemplateRows = `repeat(${rows}, 24px)`;
-            
+
             for (let r = 0; r < rows; r++) {
                 matrix[r] = [];
                 for (let c = 0; c < cols; c++) {
@@ -545,7 +544,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                     cell.dataset.row = r + 1;
                     cell.dataset.col = c + 1;
                     matrix[r][c] = cell;
-                    
+
                     cell.addEventListener("mouseenter", () => {
                         // update selection matrix and display
                         selectedRows = r + 1;
@@ -564,7 +563,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                             updateSizeDisplay(selectedRows, selectedCols);
                         }
                     });
-                    
+
                     cell.addEventListener("click", (e) => {
                         // insert table with chosen dimensions
                         this._insertTable(editor, selectedRows, selectedCols);
@@ -595,15 +594,15 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         menu.appendChild(sizeDisplay);
         container.appendChild(button);
         container.appendChild(menu);
-        document.addEventListener("click", (event) => { 
+        document.addEventListener("click", (event) => {
             if (!container.contains(event.target)) {
-                resetGrid(); 
+                resetGrid();
             }
         });
-        button.addEventListener("click", () => { 
-            setTimeout(() => { 
-                resetGrid(); 
-            }, 0); 
+        button.addEventListener("click", () => {
+            setTimeout(() => {
+                resetGrid();
+            }, 0);
         });
         return container;
     },
@@ -616,20 +615,18 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
      * @param {number} cols - Number of columns.
      */
     _insertTable: function(editor, rows, cols) {
-        // the table itself is contenteditable="false"
-        let tableHtml = '<table class="table table-striped table-bordered wx-native-table" contenteditable="false">';
+        // the table itself is contenteditable="true" to allow multi-cell selection
+        let tableHtml = '<table class="table table-striped table-bordered wx-native-table" contenteditable="true">';
         tableHtml += "<thead><tr>";
         for (let c = 0; c < cols; c++) {
-            // only the th inner is editable
-            tableHtml += `<th scope="col" contenteditable="true">Header ${c + 1}</th>`;
+            tableHtml += `<th scope="col">Header ${c + 1}</th>`;
         }
         tableHtml += "</tr></thead>";
         tableHtml += "<tbody>";
         for (let r = 0; r < rows; r++) {
             tableHtml += "<tr>";
             for (let c = 0; c < cols; c++) {
-                // only the td inner is editable
-                tableHtml += '<td contenteditable="true"><br></td>';
+                tableHtml += '<td><br></td>';
             }
             tableHtml += "</tr>";
         }
@@ -639,21 +636,21 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         const dragHandle = '<span class="wx-addon-drag-handle" contenteditable="false"><i class="fas fa-grip-vertical"></i></span>';
 
         const frameHtml = `
-            <div class="wx-addon-frame card my-3 shadow-sm" 
-                 contenteditable="false" 
+            <div class="wx-addon-frame card my-3 shadow-sm"
+                 contenteditable="false"
                  draggable="true"
                  data-addon-id="${uniqueId}"
                  data-type="table">
-                
+
                 <div class="card-header py-1 px-2 d-flex justify-content-between align-items-center" contenteditable="false">
                     <div class="small text-muted fw-bold d-flex align-items-center">
                         ${dragHandle}
-                        <i class="fas fa-table me-2"></i> 
+                        <i class="fas fa-table me-2"></i>
                         <span>Table</span>
                     </div>
                 </div>
-                
-                <div class="card-body p-2 wx-addon-body-container" 
+
+                <div class="card-body p-2 wx-addon-body-container"
                      contenteditable="false">
                     ${tableHtml}
                 </div>
@@ -737,7 +734,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
             }
         } else if (action === "deleteColumn") {
             const colIndex = cell.cellIndex;
-            
+
             for (let r = 0; r < table.rows.length; r++) {
                 const tr = table.rows[r];
                 // ignore rows that are just spanning the whole table (intermediate headers)
@@ -745,7 +742,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                     tr.deleteCell(colIndex);
                 }
             }
-            
+
             // update colgroup
             const colgroup = table.querySelector("colgroup");
             if (colgroup && colgroup.children.length > colIndex) {
@@ -764,7 +761,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         } else if (action === "insertRowAbove" || action === "insertRowBelow") {
             const newRow = table.insertRow(action === "insertRowAbove" ? row.rowIndex : row.rowIndex + 1);
             const cols = row.cells.length;
-            
+
             // determine if first column is currently a vertical header
             const firstCellIsHeader = row.cells.length > 0 && row.cells[0].tagName === "TH";
 
@@ -773,13 +770,12 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                 if (i === 0 && firstCellIsHeader && tbody.tagName !== "THEAD") {
                     newCell.scope = "row";
                 }
-                newCell.contentEditable = "true";
                 newCell.innerHTML = "<br>";
                 newRow.appendChild(newCell);
             }
         } else if (action === "insertColumnLeft" || action === "insertColumnRight") {
             const colIndex = action === "insertColumnLeft" ? cell.cellIndex : cell.cellIndex + 1;
-            
+
             // update colgroup
             const colgroup = table.querySelector("colgroup");
             if (colgroup) {
@@ -800,7 +796,6 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                     continue;
                 }
                 const newCell = document.createElement(tr.parentElement.tagName === "THEAD" ? "th" : "td");
-                newCell.contentEditable = "true";
                 newCell.innerHTML = "<br>";
                 if (tr.cells.length > colIndex) {
                     tr.insertBefore(newCell, tr.cells[colIndex]);
@@ -815,15 +810,14 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
             const newRow = table.insertRow(row.rowIndex);
             const newTh = document.createElement("th");
             newTh.colSpan = maxCols;
-            newTh.contentEditable = "true";
             newTh.className = "table-light text-center"; // simple visual class
-            newTh.innerHTML = "Intermediate Header";
+            newTh.innerHTML = webexpress.webui.I18N.translate("webexpress.webui:editor.table.intermediate.header");
             newRow.appendChild(newTh);
 
         } else if (action === "toggleLeftHeader") {
             // checks if body has left header
             const bodyHasHeaders = table.tBodies.length > 0 && table.tBodies[0].rows.length > 0 && table.tBodies[0].rows[0].cells[0].tagName === "TH";
-            
+
             for (let r = 0; r < table.rows.length; r++) {
                 const tr = table.rows[r];
                 if (tr.parentElement.tagName === "THEAD") {
@@ -841,7 +835,6 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                     if (targetTag === "th") {
                         newCell.scope = "row";
                     }
-                    newCell.contentEditable = "true";
                     newCell.innerHTML = firstCell.innerHTML;
                     // copy styles and classes
                     if (firstCell.className) {
@@ -866,7 +859,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                 const content = next.innerHTML;
                 const currentSpan = parseInt(cell.getAttribute("colspan") || 1, 10);
                 const nextSpan = parseInt(next.getAttribute("colspan") || 1, 10);
-                
+
                 if (content !== "<br>") {
                     cell.innerHTML += " " + content;
                 }
@@ -882,7 +875,6 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                     if (cell.tagName === "TH" && cell.scope) {
                         newCell.scope = cell.scope;
                     }
-                    newCell.contentEditable = "true";
                     newCell.innerHTML = "<br>";
                     row.insertBefore(newCell, cell.nextElementSibling);
                 }

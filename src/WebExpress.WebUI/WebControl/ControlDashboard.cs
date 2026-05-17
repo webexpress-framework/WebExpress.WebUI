@@ -117,7 +117,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return Render(renderContext, visualTree, _widgets);
+            return Render(renderContext, visualTree, _columns, _widgets);
         }
 
         /// <summary>
@@ -125,9 +125,10 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="columns">The collection of columns to be rendered within the dashboard.</param>
         /// <param name="widgets">The collection of widgets to be rendered within the dashboard.</param>
         /// <returns>An HTML node representing the rendered control.</returns>
-        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlDashboardWidget> widgets)
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlDashboardColumn> columns, IEnumerable<IControlDashboardWidget> widgets)
         {
             var html = new HtmlElementTextContentDiv()
             {
@@ -135,7 +136,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("wx-webui-dashboard", GetClasses()),
                 Style = GetStyles()
             }
-                .Add(_columns.Select(x => x.Render(renderContext, visualTree)))
+                .Add(columns.Select(x => x.Render(renderContext, visualTree)))
                 .Add(widgets.Select(x => x.Render(renderContext, visualTree)));
 
             return html;

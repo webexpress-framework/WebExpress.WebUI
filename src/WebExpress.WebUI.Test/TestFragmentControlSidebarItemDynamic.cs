@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.Test
             {
                 return new ControlText()
                 {
-                    Text = "FragmentControlSidebarItemDynamic"
+                    Text = _ => "FragmentControlSidebarItemDynamic"
                 }
                     .Render(renderContext, visualTree);
             };

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>Introduction | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="Introduction | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="assets/webexpress.ico">
+      <link rel="stylesheet" href="public/docfx.min.css">
+      <link rel="stylesheet" href="public/main.css">
+      <meta name="docfx:navrel" content="toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/javascript.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="index.html">
+            <img id="logo" class="svg" src="assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+
+      <div class="content">
+        <div class="actionbar">
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress-Framework"></p>
+<h1 id="introduction">Introduction</h1>
+<p><code>WebExpress</code> is a powerful framework for creating modern web applications. This documentation provides a comprehensive overview of the JavaScript UI controls, explains their significance, highlights the differences from server-side controls, and demonstrates how these components can be used not only within <code>WebExpress</code> but also in other environments.</p>
+<h1 id="javascript-ui-api">JavaScript UI API</h1>
+<p>The user interface (UI) is a central component of any web application. Traditionally, server-side controls managed rendering and business logic on the server. With the increasing demand for real-time interactions and dynamic user experiences, the use of JavaScript-based UI elements has grown. <code>WebExpress</code> provides the foundation for effectively integrating with JavaScript-based UI elements, enabling developers to create smoother, more responsive applications.</p>
+<p>JavaScript UI elements have become indispensable in modern web development as they significantly enhance the user experience. By directly processing updates and interactions in the browser, these elements offer:</p>
+<ul>
+<li><strong>Smooth, interactive experiences:</strong> Users benefit from faster, more dynamic interactions, similar to desktop applications.</li>
+<li><strong>Reduced server load:</strong> With client-side logic, the need for constant server communication is reduced.</li>
+</ul>
+<p>A major advantage of these JavaScript UI elements is that they are not limited to <code>WebExpress</code>. They can be integrated into standalone web applications or used in combination with other frameworks such as <code>Angular</code>, <code>React</code>, or <code>Vue.js</code>. This versatility opens up a wide range of possibilities, allowing the enhancement of any project's user interface with modern, responsive UI elements.</p>
+<p>The goal of <code>WebExpress</code> is to create a robust, scalable, and efficient system for dynamically linking and interacting with UI elements. Emphasis is placed on modularity, performance, accessibility, and extensibility. The JavaScript classes should be decoupled from the HTML code as much as possible. This creates a clean, maintainable, and modular architecture. The separation helps manage logic entirely in JavaScript while using HTML solely for structure and semantic presentation of content.</p>
+<ul>
+<li><strong>Separation of logic and presentation</strong>: The HTML code should remain purely semantic and contain no references to the specific implementation in JavaScript.</li>
+<li><strong>Modularity and scalability</strong>: JavaScript classes should be extendable and maintainable independently of the HTML.</li>
+<li><strong>Central control</strong>: Introduction of a central controller that handles the initialization and management of containers and instances.</li>
+<li><strong>Flexibility</strong>: Support for dynamic changes to the DOM, such as adding containers at runtime without modifying the HTML code.</li>
+<li><strong>Clarity</strong>: Use of an abstracted data structure to configure containers via JavaScript.</li>
+</ul>
+<h1 id="architecture-overview">Architecture Overview</h1>
+<p>The development of modern web applications requires effective and efficient handling of user interfaces and their interactions. <code>WebExpress</code> enables the creation of dynamic and responsive web applications. The following is a closer look at the architecture of the JavaScript UI in <code>WebExpress</code>, with a focus on the modularity of the components:</p>
+<pre><code>╔WebExpress.WebUi══════════════════════════════════════════════════════════════════════╗
+║                             ┌──────────────────────┐                                 ║
+║                             │      Controller      │                                 ║
+║                             ├──────────────────────┤                                 ║
+║                             │  - Manages Containers│                                 ║
+║                             │  - Monitors DOM      │                                 ║
+║                             └──────────┬───────────┘                                 ║
+║                                        │                                             ║
+║                        ┌───────────────┴──────────────┐                              ║
+║                        │                              │                              ║
+║                        v                              v                              ║
+║             ┌──────────────────────┐       ┌──────────────────────┐                  ║
+║             │      Container 1     │       │      Container 2     │                  ║
+║             ├──────────────────────┤       ├──────────────────────┤                  ║
+║             │  - HTML Element      │       │  - HTML Element      │                  ║
+║             │  - Semantic Tags     │       │  - Semantic Tags     │                  ║
+║             │  - Data Attributes   │       │  - Data Attributes   │                  ║
+║             └──────────┬───────────┘       └──────────┬───────────┘                  ║
+║                        │                              │                              ║
+║                        v                              v                              ║
+║             ┌──────────────────────┐       ┌──────────────────────┐                  ║
+║             │      Instance 1      │       │      Instance 2      │                  ║
+║             ├──────────────────────┤       ├──────────────────────┤                  ║
+║             │  - JavaScript Class  │       │  - JavaScript Class  │                  ║
+║             │  - Handles Logic     │       │  - Handles Logic     │                  ║
+║             │  - Interacts with DOM│       │  - Interacts with DOM│                  ║
+║             └──────────┬───────────┘       └──────────┬───────────┘                  ║
+║                        │                              │                              ║
+║                        v                              v                              ║
+║             ┌─────────────────────────────────────────────────────┐                  ║
+║             │               jquery event system                   │                  ║
+║             └─────────────────────────────────────────────────────┘                  ║
+╚══════════════════════════════════════════════════════════════════════════════════════╝
+</code></pre>
+<p>The controller module is a central component for managing all containers and their associated instances. It registers containers during initialization and detects dynamic changes, for example through the use of the <code>MutationObserver</code>.</p>
+<p>Containers are defined in the HTML DOM structure and implemented with semantic HTML such as <code>section</code> or <code>article</code> instead of <code>div</code>. This structure is provided by the server-side controls in <code>WebExpress</code>. Data attributes like data-* can be used to store specific configurations, and accessibility is ensured through aria-* attributes.</p>
+<p>Each JavaScript UI instance represents the logic and behavior of a container and includes methods for interactions. The instances are separated from the presentation, enabling a clear separation of logic and DOM.</p>
+<p>The jQuery event system functions in the context of WebExpress as a lightweight pub/sub model that efficiently enables message passing between different containers and instances. By utilizing jQuery events, communication is optimized, direct dependencies are minimized, and debugging is simplified. A concrete example from WebExpress: when a form is submitted in Container 1, a custom event can be triggered using jQuery to signal Container 2 to update its display accordingly. This decoupling of components promotes a loosely coupled architecture, where modules can operate independently.</p>
+<h1 id="example-code">Example Code</h1>
+<p>The following example demonstrates how the separation of logic and presentation, the modularity of JavaScript classes, and the central control by the controller are implemented in <code>WebExpress</code>. First, the HTML structure is defined:</p>
+<pre><code class="lang-html">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
+    &lt;title&gt;WebExpress Example&lt;/title&gt;
+    &lt;script src=&quot;https://code.jquery.com/jquery-3.6.0.min.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;app.js&quot; defer&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;section class=&quot;webexpress-container container1&quot;&gt;
+        &lt;h2&gt;Container 1&lt;/h2&gt;
+        &lt;button id=&quot;button1&quot;&gt;Click me&lt;/button&gt;
+    &lt;/section&gt;
+    &lt;section class=&quot;webexpress-container container2&quot;&gt;
+        &lt;h2&gt;Container 2&lt;/h2&gt;
+        &lt;p id=&quot;message&quot;&gt;&lt;/p&gt;
+    &lt;/section&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>Next follows the JavaScript logic for managing and interacting with the containers:</p>
+<pre><code class="lang-javascript">$(document).ready(function() {
+    const controller = new Controller();
+
+    // Container 1 Logic
+    class Container1 {
+        constructor(element) {
+            this.element = $(element);
+            this.button = this.element.find('#button1');
+            this.init();
+        }
+
+        init() {
+            this.button.on('click', () =&gt; {
+                $(document).trigger('buttonClicked', ['Button in Container 1 was clicked']);
+            });
+        }
+    }
+
+    // Container 2 Logic
+    class Container2 {
+        constructor(element) {
+            this.element = $(element);
+            this.message = this.element.find('#message');
+            this.init();
+        }
+
+        init() {
+            $(document).on('buttonClicked', function(event, data) {
+                this.message.text(data);
+            }););
+        }
+    }
+
+    // Controller to manage containers
+    class Controller {
+        constructor() {
+            this.containers = [];
+            this.init();
+            this.observeMutations();
+        }
+
+        init() {
+            this.registerContainers();
+        }
+
+        // Registers containers based on CSS classes
+        registerContainers() {
+            $('.webexpress-container').each((index, section) =&gt; {
+                if ($(section).hasClass('container1')) {
+                    this.containers.push(new Container1(section));
+                } else if ($(section).hasClass('container2')) {
+                    this.containers.push(new Container2(section));
+                } else {
+                    console.warn(`Unknown container class: ${section.className}`);
+                }
+            });
+        }
+
+        // Observes DOM mutations to dynamically register new containers
+        observeMutations() {
+            const observer = new MutationObserver(mutations =&gt; {
+                mutations.forEach(mutation =&gt; {
+                    if (mutation.type === 'childList' &amp;&amp; mutation.addedNodes.length &gt; 0) {
+                        this.registerContainers();
+                    }
+                });
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        }
+    }
+
+    // Initialize the Controller
+    controller.init();
+});
+</code></pre>
+<p>In this simple example, the architecture of <code>WebExpress</code> is demonstrated by creating two containers (Container1 and Container2), each with its own logic, and communicating via the jquery event system. The <code>Controller</code> manages the initialization and registration of the containers.</p>
+<p><code>Container1</code> contains a button that triggers an event (<code>buttonClicked</code>) on the jquery event system when clicked.
+<code>Container2</code> listens for the <code>buttonClicked</code> event and updates the text content of a paragraph to display the message.</p>
+<p>This example shows how the separation of logic and presentation, the modularity of JavaScript classes, and the central control by the controller are implemented in <code>WebExpress</code>.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/javascript.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

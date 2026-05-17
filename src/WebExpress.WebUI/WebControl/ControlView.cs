@@ -1,21 +1,25 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
+using WebExpress.WebCore;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebScope;
+using WebExpress.WebUI.WebFragment;
 using WebExpress.WebUI.WebPage;
+using WebExpress.WebUI.WebSection;
 
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// Represents a view control.
     /// </summary>
-    public class ControlView : Control, IControlView
+    public class ControlView : Control, IControlView, IScope
     {
         private readonly List<IControlViewHeader> _headers = [];
         private readonly List<IControlViewItem> _views = [];
         private readonly List<IControlViewFooter> _footers = [];
 
         /// <summary>
-        /// Returns the collection of headers that define the structure 
+        /// Returns the collection of headers that define the structure
         /// and metadata of the control view.
         /// </summary>
         public IEnumerable<IControlViewHeader> Headers => _headers;
@@ -31,21 +35,14 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlViewFooter> Footers => _footers;
 
         /// <summary>
-        /// Returns or sets the explicit Id for the detail frame.
+        /// Gets or sets the layout used to render the view control.
         /// </summary>
-        public string DetailId { get; set; }
-
-        /// <summary>
-        /// Returns or sets the selector for the detail frame.
-        /// </summary>
-        public string DetailSelector { get; set; }
+        public System.Func<IRenderControlContext, TypeLayoutView> Layout { get; set; } = _ => TypeLayoutView.Default;
 
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        /// <param name="columns">The columns to add to the table.</param>
-        /// <param name="rows">The rows to add to the table.</param>
         public ControlView(string id = null)
             : base(id)
         {
@@ -168,19 +165,83 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var classes = Classes.ToList();
+            var layout = Layout?.Invoke(renderContext) ?? TypeLayoutView.Default;
+            var role = Role?.Invoke(renderContext);
+            var fragmentManager = WebEx.ComponentHub.FragmentManager;
+            var applicationContext = renderContext?.PageContext?.ApplicationContext;
+
+            // headers
+            var headerPreferences = fragmentManager.GetFragments<IFragmentControlViewHeader, SectionViewHeaderPreferences>
+            (
+                applicationContext,
+                [GetType()]
+            );
+            var headerPrimary = fragmentManager.GetFragments<IFragmentControlViewHeader, SectionViewHeaderPrimary>
+            (
+                applicationContext,
+                [GetType()]
+            );
+            var headerSecondary = fragmentManager.GetFragments<IFragmentControlViewHeader, SectionViewHeaderSecondary>
+            (
+                applicationContext,
+                [GetType()]
+            );
+
+            // views
+            var viewPreferences = fragmentManager.GetFragments<IFragmentControlViewItem, SectionViewItemPreferences>
+            (
+                applicationContext,
+                [GetType()]
+            );
+            var viewPrimary = fragmentManager.GetFragments<IFragmentControlViewItem, SectionViewItemPrimary>
+            (
+                applicationContext,
+                [GetType()]
+            );
+            var viewSecondary = fragmentManager.GetFragments<IFragmentControlViewItem, SectionViewItemSecondary>
+            (
+                applicationContext,
+                [GetType()]
+            );
+
+            // footers
+            var footerPreferences = fragmentManager.GetFragments<IFragmentControlViewFooter, SectionViewFooterPreferences>
+            (
+                applicationContext,
+                [GetType()]
+            );
+            var footerPrimary = fragmentManager.GetFragments<IFragmentControlViewFooter, SectionViewFooterPrimary>
+            (
+                applicationContext,
+                [GetType()]
+            );
+            var footerSecondary = fragmentManager.GetFragments<IFragmentControlViewFooter, SectionViewFooterSecondary>
+            (
+                applicationContext,
+                [GetType()]
+            );
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-view", classes),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             }
-                .AddUserAttribute("data-detail-id", DetailId)
-                .AddUserAttribute("data-detail-selector", DetailSelector)
+                .AddUserAttribute("data-layout", layout == TypeLayoutView.Default ? null : layout.ToValue())
+                .Add(headerPreferences.Select(x => x.Render(renderContext, visualTree)))
+                .Add(headerPrimary.Select(x => x.Render(renderContext, visualTree)))
                 .Add(_headers.Select(x => x.Render(renderContext, visualTree)))
+                .Add(headerSecondary.Select(x => x.Render(renderContext, visualTree)))
+                .Add(viewPreferences.Select(x => x.Render(renderContext, visualTree)))
+                .Add(viewPrimary.Select(x => x.Render(renderContext, visualTree)))
                 .Add(_views.Select(x => x.Render(renderContext, visualTree)))
-                .Add(_footers.Select(x => x.Render(renderContext, visualTree)));
+                .Add(viewSecondary.Select(x => x.Render(renderContext, visualTree)))
+                .Add(footerPreferences.Select(x => x.Render(renderContext, visualTree)))
+                .Add(footerPrimary.Select(x => x.Render(renderContext, visualTree)))
+                .Add(_footers.Select(x => x.Render(renderContext, visualTree)))
+                .Add(footerSecondary.Select(x => x.Render(renderContext, visualTree)))
+                ;
 
             return html;
         }

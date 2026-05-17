@@ -17,7 +17,7 @@ namespace WebExpress.WebUI.Test
         public TestFragmentControlPanelTool(IFragmentContext fragmentContext)
             : base(fragmentContext)
         {
-            Add(new ControlText() { Text = "TestFragmentControlPanelTool" });
+            Add(new ControlText() { Text = _ => "TestFragmentControlPanelTool" });
         }
     }
 }

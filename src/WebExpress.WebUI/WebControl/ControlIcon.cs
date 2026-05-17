@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+using System;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
@@ -11,31 +12,31 @@ namespace WebExpress.WebUI.WebControl
     public class ControlIcon : Control
     {
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the title.
+        /// Gets or sets the title.
         /// </summary>
-        public string Title { get; set; }
+        public Func<IRenderControlContext, string> Title { get; set; }
 
         /// <summary>
         /// Return or specifies the vertical orientation.
         /// </summary>
-        public TypeVerticalAlignment VerticalAlignment
+        public Func<IRenderControlContext, TypeVerticalAlignment> VerticalAlignment
         {
-            get => (TypeVerticalAlignment)GetProperty(TypeVerticalAlignment.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeVerticalAlignment>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
-        public PropertySizeText Size
+        public Func<IRenderControlContext, PropertySizeText> Size
         {
-            get => (PropertySizeText)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+            get => (Func<IRenderControlContext, PropertySizeText>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>
@@ -55,19 +56,22 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var css = Icon is ImageIcon
+            var icon = Icon?.Invoke(renderContext);
+            var title = Title?.Invoke(renderContext);
+            var css = icon is ImageIcon
                 ? Css.Concatenate("wx-icon", GetClasses())
                 : GetClasses();
+            var role = Role?.Invoke(renderContext);
 
-            var html = Icon?.Render
+            var html = icon?.Render
             (
                 renderContext,
                 visualTree,
                 Id,
-                Title,
+                title,
                 css,
                 GetStyles(),
-                Role
+                role
             );
 
             return html;

@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlTableCellPanel : IControlTableCell
     {
         /// <summary> 
-        /// Returns the content of the cell panel. 
+        /// Gets the content of the cell panel. 
         /// </summary> 
         /// <remarks> 
         /// The content property holds a collection of controls that represent 

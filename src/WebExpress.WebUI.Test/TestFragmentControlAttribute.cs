@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.Test
         public TestFragmentControlAttribute(IFragmentContext fragmentContext)
             : base(fragmentContext)
         {
-            Value = "TestFragmentControlAttribute";
+            Value = _ => "TestFragmentControlAttribute";
         }
     }
 }

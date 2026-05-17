@@ -10,12 +10,12 @@ namespace WebExpress.WebUI.WebControl
     public class RetrieveVirtualListItemEventArgs : EventArgs
     {
         /// <summary>
-        /// Returns the context for rendering controls within a web page.
+        /// Gets the context for rendering controls within a web page.
         /// </summary>
         public IRenderControlContext RenderContext { get; }
 
         /// <summary>
-        /// Returns or sets the items to retrieve.
+        /// Gets or sets the items to retrieve.
         /// </summary>
         public IEnumerable<ControlListItem> Items { get; set; }
 

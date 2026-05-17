@@ -23,6 +23,7 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         // read configuration from data attributes and set initial state
+        const id = element.getAttribute("id");
         const name = element.getAttribute("name");
         this._dateFormat = element.getAttribute("data-format") || this._i18n("webexpress.webui:calendar.format");
         this._rangeMode = element.getAttribute("data-range") === "true";
@@ -34,10 +35,10 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
             const parts = value.split(" - ");
             const start = this._parseDate(parts[0].trim(), this._dateFormat);
             const end = this._parseDate(parts[1].trim(), this._dateFormat);
-            
+
             this._rangeStart = start || null;
             this._rangeEnd = end || null;
-            
+
             if (this._rangeStart) {
                 this._viewDate = new Date(this._rangeStart);
             } else {
@@ -63,9 +64,10 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
             });
         }
 
-        this._hidden = this._createHiddenInput(name);
+        this._hidden = this._createHiddenInput(id, name);
 
         // clean up element attributes and prepare dom structure
+        element.removeAttribute("id");
         element.removeAttribute("name");
         element.removeAttribute("placeholder");
         element.removeAttribute("data-holidays");
@@ -193,12 +195,16 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Creates a hidden input for form submission.
+     * @param {string} id - The input id attribute.
      * @param {string} name - The input name attribute.
      * @returns {HTMLInputElement} Hidden input element.
      */
-    _createHiddenInput(name) {
+    _createHiddenInput(id, name) {
         const hiddenInput = document.createElement("input");
         hiddenInput.type = "hidden";
+        if (id) {
+            hiddenInput.id = id;
+        }
         hiddenInput.name = name || "";
         return hiddenInput;
     }
@@ -224,9 +230,9 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
                 ? this._formatDateString(this._selectedDate, this._dateFormat)
                 : "";
         }
-        
+
         // disable copy button if nothing is selected
-        const copyBtn = this._toolbar.querySelector('.wx-calendar-copy-btn');
+        const copyBtn = this._toolbar.querySelector(".wx-calendar-copy-btn");
         if ((this._rangeMode && (!this._rangeStart || !this._rangeEnd)) ||
             (!this._rangeMode && !this._selectedDate)) {
             if (copyBtn) {
@@ -633,7 +639,7 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
                 const td = document.createElement("td");
                 const button = document.createElement("button");
                 button.textContent = date.getDate().toString();
-                
+
                 // store timestamp for event delegation
                 button.dataset.ts = date.getTime().toString();
                 button.className = "wx-calendar-day";
@@ -689,10 +695,10 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
                 return;
             }
             e.stopPropagation();
-            
+
             const timestamp = parseInt(target.dataset.ts, 10);
             const currentDate = new Date(timestamp);
-            
+
             if (this._rangeMode) {
                 if (this._rangeStart && this._rangeEnd === null) {
                     if (currentDate < this._rangeStart) {
@@ -726,10 +732,10 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
                 if (!target || !target.dataset.ts) {
                     return;
                 }
-                
+
                 const hoverTs = parseInt(target.dataset.ts, 10);
                 const startTs = new Date(this._rangeStart).setHours(0, 0, 0, 0);
-                
+
                 const min = Math.min(startTs, hoverTs);
                 const max = Math.max(startTs, hoverTs);
 
@@ -744,7 +750,7 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
                     }
                 }
             });
-            
+
             tbody.addEventListener("mouseleave", () => {
                 const buttons = tbody.querySelectorAll(".wx-calendar-day");
                  for (let i = 0; i < buttons.length; i++) {

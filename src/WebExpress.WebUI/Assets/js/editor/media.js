@@ -33,8 +33,10 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
         const btnLink = document.createElement("button");
         btnLink.className = "wx-editor-btn";
         btnLink.type = "button";
+        btnLink.title = webexpress.webui.I18N.translate("webexpress.webui:editor.insert.link");
+        btnLink.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.insert.link"));
         btnLink.innerHTML = '<i class="fas fa-link"></i>';
-        
+
         // save selection firmly before focus shifts away from the editor
         btnLink.addEventListener("mousedown", (e) => {
             e.preventDefault(); // prevent losing focus
@@ -46,12 +48,12 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
         btnLink.addEventListener("click", () => {
             let prefillText = "";
             let activeRange = null;
-            
+
             if (editor._savedRange) {
                 activeRange = editor._savedRange.cloneRange();
                 prefillText = activeRange.toString().trim();
             }
-            
+
             this._openModal(editor, "linkModal", "editor-link", "webexpress.webui:editor.insert.link.title", { url: "", text: prefillText }, activeRange);
         });
         frag.appendChild(btnLink);
@@ -60,8 +62,10 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
         const btnImg = document.createElement("button");
         btnImg.className = "wx-editor-btn";
         btnImg.type = "button";
+        btnImg.title = webexpress.webui.I18N.translate("webexpress.webui:editor.insert.image");
+        btnImg.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.insert.image"));
         btnImg.innerHTML = '<i class="fas fa-image"></i>';
-        
+
         btnImg.addEventListener("mousedown", (e) => {
             e.preventDefault(); // prevent losing focus
             if (typeof editor._saveCurrentSelection === "function") {
@@ -90,23 +94,23 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
      */
     getContextMenuItems: function(editor, target) {
         const items = [];
-        
+
         // check for image element
         if (target && target.nodeName === "IMG") {
             items.push({
-                label: "Edit Image",
+                label: webexpress.webui.I18N.translate("webexpress.webui:editor.edit.image"),
                 icon: "fas fa-edit",
                 action: () => {
                     const sel = window.getSelection();
                     let activeRange = null;
-                    
+
                     if (sel) {
                         const range = document.createRange();
                         range.selectNode(target);
                         sel.removeAllRanges();
                         sel.addRange(range);
                         activeRange = range.cloneRange();
-                        
+
                         if (typeof editor._saveCurrentSelection === "function") {
                             editor._saveCurrentSelection();
                         }
@@ -116,12 +120,12 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
                         url: target.getAttribute("src") || "",
                         alt: target.getAttribute("alt") || ""
                     };
-                    this._openModal(editor, "imageModal", "editor-image", "Edit Image", prefill, activeRange);
+                    this._openModal(editor, "imageModal", "editor-image", "webexpress.webui:editor.insert.image.title", prefill, activeRange);
                 }
             });
-            
+
             items.push({
-                label: "Remove Image",
+                label: webexpress.webui.I18N.translate("webexpress.webui:editor.remove.image"),
                 icon: "fas fa-trash",
                 action: () => {
                     target.remove();
@@ -143,19 +147,19 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
 
         if (anchor && anchor.nodeName === "A") {
             items.push({
-                label: "Edit Link",
+                label: webexpress.webui.I18N.translate("webexpress.webui:editor.edit.link"),
                 icon: "fas fa-edit",
                 action: () => {
                     const sel = window.getSelection();
                     let activeRange = null;
-                    
+
                     if (sel) {
                         const range = document.createRange();
                         range.selectNode(anchor);
                         sel.removeAllRanges();
                         sel.addRange(range);
                         activeRange = range.cloneRange();
-                        
+
                         if (typeof editor._saveCurrentSelection === "function") {
                             editor._saveCurrentSelection();
                         }
@@ -165,12 +169,12 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
                         url: anchor.getAttribute("href") || "",
                         text: anchor.textContent || ""
                     };
-                    this._openModal(editor, "linkModal", "editor-link", "Edit Link", prefill, activeRange);
+                    this._openModal(editor, "linkModal", "editor-link", "webexpress.webui:editor.insert.link.title", prefill, activeRange);
                 }
             });
-            
+
             items.push({
-                label: "Remove Link",
+                label: webexpress.webui.I18N.translate("webexpress.webui:editor.remove.link"),
                 icon: "fas fa-unlink",
                 action: () => {
                     const sel = window.getSelection();
@@ -179,12 +183,12 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
                         range.selectNode(anchor);
                         sel.removeAllRanges();
                         sel.addRange(range);
-                        
+
                         if (typeof editor._saveCurrentSelection === "function") {
                             editor._saveCurrentSelection();
                         }
                     }
-                    
+
                     const text = anchor.textContent || "";
                     if (typeof editor.restoreSavedRange === "function") {
                         editor.restoreSavedRange();
@@ -219,13 +223,13 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
 
         if (this[modalProperty] && this[modalProperty].ctrl) {
             const ctrl = this[modalProperty].ctrl;
-            
+
             // provide editor reference to the modal controller
             ctrl._editor = editor;
-            
+
             // securely store the explicit cursor position
             ctrl._backupRange = activeRange || null;
-            
+
             // set or clear prefill data to force reset on reuse
             ctrl._linkPrefill = prefill || null;
             ctrl._imagePrefill = prefill || null;

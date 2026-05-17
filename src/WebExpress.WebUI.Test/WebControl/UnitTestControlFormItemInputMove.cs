@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputMove(null)
             {
-                Name = name
+                Name = _ => name
             };
 
             // act
@@ -97,7 +97,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputMove(null)
             {
-                SelectedHeader = header
+                SelectedHeader = _ => header
             };
 
             // act
@@ -122,7 +122,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputMove(null)
             {
-                AvailableHeader = header
+                AvailableHeader = _ => header
             };
 
             // act
@@ -169,7 +169,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var form = new ControlForm();
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlFormItemInputMove(null, new ControlFormItemInputMoveItem() { Text = label })
+            var control = new ControlFormItemInputMove(null, new ControlFormItemInputMoveItem() { Text = _ => label })
             {
             };
 
@@ -193,7 +193,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var icon = iconType is not null ? Activator.CreateInstance(iconType) as IIcon : null;
-            var control = new ControlFormItemInputMove(null, new ControlFormItemInputMoveItem() { Icon = icon })
+            var control = new ControlFormItemInputMove(null, new ControlFormItemInputMoveItem() { Icon = _ => icon })
             {
             };
 
@@ -219,7 +219,7 @@ namespace WebExpress.WebUI.Test.WebControl
             };
 
             // act
-            control.Add(new ControlFormItemInputMoveItem() { Text = "label" });
+            control.Add(new ControlFormItemInputMoveItem() { Text = _ => "label" });
             var html = control.Render(context, visualTree);
 
             Assert.NotEmpty(control.Options);

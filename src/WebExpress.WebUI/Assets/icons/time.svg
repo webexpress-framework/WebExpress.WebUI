@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="21" height="21" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+  <style>.st1 {display:none}
+		.st2 {fill:#000000;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.24}
+		.st3 {fill:none;fill-rule:evenodd;font-size:12px;overflow:visible;stroke-linecap:square;stroke-miterlimit:3}</style>
+  <g transform="scale(0.074083)">
+<g>
+		
+		
+		<g id="shape1-1" transform="translate(0.000280035,-0.0004331)">
+			
+			<rect x="0" y="-0.035" width="283.5" height="283.5" class="st1"/>
+		</g>
+		<g id="group19-3" transform="translate(72.0001,-77.6584)">
+			
+			<g id="shape7-4" transform="translate(56.2332,-44.0625)">
+				
+				<path d="M11.42 261.99 L11.42 230.34 A5.71086 5.71086 -180 0 0 5.71 224.63 A5.71086 5.71086 -180 0 0 0 230.34 L0
+							 264.44 A5.71086 5.71086 -180 0 0 1.17 267.91 A5.71086 5.71086 -180 0 0 2.38 269.31 L17.65 282.13 A5.71086
+							 5.71086 -180 0 0 25.7 281.42 A5.71086 5.71086 -180 0 0 24.99 273.38 L11.42 261.99 Z" class="st2"/>
+			</g>
+			<g id="shape17-6" transform="translate(39.0674,-7.79668) rotate(10)">
+				
+				<path d="M122.42 175.73 L119.3 186.82 A64.0919 64.0919 -180 1 0 105.9 267.96 L97.62 258.09 A51.2201 51.2201 0 1 1
+							 108.36 193.61 L97.87 189.58 A5.46256 5.46256 -180 0 0 90.81 192.72 A5.46256 5.46256 -180 0 0 93.95 199.78
+							 L117.9 208.97 A5.46256 5.46256 -180 0 0 118.67 209.25 A5.46256 5.46256 -180 0 0 125.41 205.47 L132.94
+							 178.69 A5.46256 5.46256 -180 0 0 129.16 171.95 A5.46256 5.46256 -180 0 0 122.42 175.73 Z" class="st2"/>
+			</g>
+		</g>
+	</g>
+  </g>
+</svg>

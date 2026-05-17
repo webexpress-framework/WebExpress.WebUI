@@ -48,7 +48,12 @@
         /// <summary>
         /// Light color.
         /// </summary>
-        Light = 8
+        Light = 8,
+
+        /// <summary>
+        /// Highlight color.
+        /// </summary>
+        Highlight = 13
     }
 
     /// <summary>
@@ -81,6 +86,8 @@
                     return "#f8f9fa";
                 case TypeColorChart.Dark:
                     return "#343a40";
+                case TypeColorChart.Highlight:
+                    return "var(--wx-highlight)";
                 case TypeColorChart.Default:
                     break;
             }

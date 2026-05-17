@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.Internationalization;
+﻿using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -10,14 +11,14 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormItemStaticText : ControlFormItem, IControlFormLabel
     {
         /// <summary>
-        /// Returns or sets the label.
+        /// Gets or sets the label.
         /// </summary>
-        public string Label { get; set; }
+        public Func<IRenderControlContext, string> Label { get; set; }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -44,13 +45,16 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            var text = Text?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
+
             var html = new HtmlElementTextContentP()
             {
                 Id = Id,
-                Text = I18N.Translate(renderContext.Request?.Culture, Text),
+                Text = I18N.Translate(renderContext.Request?.Culture, text),
                 Class = Css.Concatenate(GetClasses()),
                 Style = Style.Concatenate(GetStyles()),
-                Role = Role
+                Role = role
             };
 
             return html;

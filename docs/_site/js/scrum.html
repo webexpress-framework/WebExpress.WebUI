@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>ScrumBacklogCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="ScrumBacklogCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/scrum.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="scrumbacklogctrl">ScrumBacklogCtrl</h1>
+<p>The <code>ScrumBacklogCtrl</code> class is a specialized UI component for managing agile backlogs within modern web applications. It focuses on the structured presentation of active sprints, planned sprints, and the unassigned backlog. Data provisioning is handled seamlessly via a REST API or through embedded static configurations. Integrated features include drag-and-drop mechanics for moving tasks between different sections and a native dialog for creating new sprints, which utilizes existing date input components.</p>
+<pre><code>   ┌───────────────────────────────────────────────────────────┐
+   │ Backlog                                     [+ Erstellen] │ // Toolbar
+   ├───────────────────────────────────────────────────────────┤
+   │ [ACTIVE] Sprint 24               4 items  21 pts  [...]   │ // Section Header
+   ├───────────────────────────────────────────────────────────┤
+   │ [S] MVP-1   Login-Seite implementieren      [P1]  (8) [→] │ // Draggable Row
+   ├───────────────────────────────────────────────────────────┤
+   │ [PLANNED] Sprint 25              0 items   0 pts  [...]   │
+   ├───────────────────────────────────────────────────────────┤
+   │ [BACKLOG] Backlog               12 items  45 pts          │
+   └───────────────────────────────────────────────────────────┘
+</code></pre>
+<p>The following core features define the structure, behavior, and flexibility of the backlog component:</p>
+<ul>
+<li><strong>Declarative configuration:</strong> Base settings and data sources are defined via <code>data-</code> attributes on the host element.</li>
+<li><strong>REST integration:</strong> Automatic loading and saving of sprints and backlog items through a defined API endpoint (<code>data-rest-uri</code>).</li>
+<li><strong>Drag &amp; Drop:</strong> Tasks can be intuitively moved between backlog and planned sprints using standard <code>dataTransfer</code> mechanics.</li>
+<li><strong>Sprint management:</strong> An integrated dialog allows creating new sprints by specifying name, goal, timeframe, and capacity.</li>
+<li><strong>Static fallbacks:</strong> If no backend is available, the component can be initialized using embedded JSON via <code>&lt;script type=&quot;application/json&quot;&gt;</code>.</li>
+</ul>
+<h2 id="structure--configuration">Structure &amp; Configuration</h2>
+<p>The backlog component is initialized through a declarative markup structure that cleanly separates configuration from visual presentation.</p>
+<h2 id="host-attributes">Host Attributes</h2>
+<p>Host attributes define the essential connection parameters and labels directly on the component’s root element.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-rest-uri</code></td>
+<td>Defines the REST API endpoint for loading and saving sprint and backlog data</td>
+</tr>
+<tr>
+<td><code>data-title</code></td>
+<td>Overrides the default component title (default: “Backlog”)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="events">Events</h2>
+<p>The following events represent the primary interaction points for reacting to loading operations and user actions:</p>
+<ul>
+<li><code>webexpress.webui.Event.DATA_REQUESTED_EVENT</code></li>
+<li><code>webexpress.webui.Event.DATA_ARRIVED_EVENT</code></li>
+<li><code>webexpress.webui.Event.MOVE_EVENT</code></li>
+<li><code>webexpress.webui.Event.ADD_EVENT</code></li>
+<li><code>webexpress.webui.Event.UPDATED_EVENT</code></li>
+</ul>
+<h2 id="example-markup">Example Markup</h2>
+<p>Das folgende Beispiel illustriert ein minimales Setup, bei dem die Komponente ihre Daten selbstständig über die angegebene REST-URI bezieht.</p>
+<pre><code class="lang-html">&lt;div class=&quot;wx-webui-scrum-backlog&quot; 
+     data-rest-uri=&quot;/api/scrum/backlog&quot; 
+     data-title=&quot;Project Alpha Backlog&quot;&gt;
+&lt;/div&gt;
+
+## Programmatic Control
+
+Die programmatische Steuerung erlaubt es, direkt über JavaScript-APIs mit dem Backlog zu interagieren. Dies ist besonders nützlich, um Daten dynamisch zu aktualisieren oder Aufgaben systemgesteuert zu verschieben.
+
+Accessing an Automatically Created Instance
+Wenn die Komponente bereits durch das Markup initialisiert wurde, kann der Controller abgerufen und modifiziert werden:
+
+```js
+const backlogCtrl = webexpress.webui.Controller.getInstanceByElement(document.getElementById('my-backlog'));
+backlogCtrl.moveItemToSprint('item_123', 'sp_2');
+</code></pre>
+<h2 id="manual-instantiation">Manual Instantiation</h2>
+<p>Neue Controller-Instanzen können dynamisch erzeugt werden, um die volle Kontrolle über den Initialisierungszeitpunkt zu behalten.</p>
+<pre><code class="lang-js">const div = document.createElement('div');
+const ctrl = new webexpress.webui.ScrumBacklogCtrl(div);
+ctrl.data = {
+    sprints: [{ id: 'sp_1', name: 'Sprint 1', status: 'active' }],
+    items: [{ id: 'i_1', title: 'Task 1', points: 5, sprintId: 'sp_1' }]
+};
+document.body.appendChild(div);
+
+</code></pre>
+<h1 id="scrumsprintctrl">ScrumSprintCtrl</h1>
+<p>The <code>ScrumSprintCtrl</code> class extends the agile toolset with a detailed dashboard view for an active sprint. It visualizes key metrics such as goal progress, capacity utilization, and includes an automatically generated SVG-based burndown chart. This component is read-only and designed for quickly assessing the current sprint status.</p>
+<pre><code>   ┌─────────────────┬───────────┬───────────┬─────────────┐
+   │ ACTIVE SPRINT   │ PROGRESS  │ CAPACITY  │ BURNDOWN    │
+   │ Sprint 24       │ 18 / 47   │ 47 / 60   │ |\          │
+   │   MVP Goal      │ [====   ] │ [====== ] │ |  \        │
+   │ [Start] [End]   │ 38% done  │ 13 free   │ |____\____  │
+   └─────────────────┴───────────┴───────────┴─────────────┘
+</code></pre>
+<h2 id="extra-features">Extra Features</h2>
+<p>Zusätzlich zur reinen Datendarstellung bietet das Sprint-Dashboard erweiterte visuelle Hilfsmittel zur Überwachung der Team-Performance.</p>
+<p>Automatisches Burndown-Chart: Generiert ein responsives SVG-Liniendiagramm aus den übermittelten Ist- und Soll-Werten.
+Trend-Analyse: Berechnet automatisiert textuelle Trend-Indikatoren (&quot;on track&quot;, &quot;behind&quot;, &quot;ahead&quot;) basierend auf der Abweichung zur Ideallinie.
+Kapazitäts-Warnungen: Färbt Fortschrittsbalken automatisch ein, wenn die zugesagten Story-Points die Teamkapazität überschreiten.</p>
+<h2 id="additional-configuration">Additional Configuration</h2>
+<p>Die Konfiguration der Sprint-Übersicht erfolgt analog zum Backlog primär über die Definition der Datenquelle.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>data-rest-uri</td>
+<td>Definiert den REST-API-Endpunkt für den Abruf der Metriken des aktiven Sprints</td>
+</tr>
+</tbody>
+</table>
+<h2 id="events-1">Events</h2>
+<p>Die Sprint-Komponente emittiert Ereignisse bezüglich ihres Lebenszyklus und der Datenaktualisierung.</p>
+<p>webexpress.webui.Event.DATA_REQUESTED_EVENT (wird vor dem Laden der Sprint-Daten ausgelöst)
+webexpress.webui.Event.DATA_ARRIVED_EVENT (wird nach dem erfolgreichen Laden ausgelöst)
+webexpress.webui.Event.UPDATED_EVENT (wird nach jedem Render-Durchlauf ausgelöst)</p>
+<h2 id="example-markup-1">Example Markup</h2>
+<p>Das folgende Beispiel zeigt die Einbindung des Sprint-Dashboards über deklaratives Markup. Ein statisches Fallback kann optional über einen Skript-Block bereitgestellt werden.</p>
+<pre><code class="lang-HTML">&lt;div class=&quot;wx-webui-scrum-sprint&quot; data-rest-uri=&quot;/api/scrum/sprint/active&quot;&gt;
+    &lt;script type=&quot;application/json&quot;&gt;
+        {
+            &quot;name&quot;: &quot;Fallback Sprint&quot;,
+            &quot;capacity&quot;: 50,
+            &quot;committedPoints&quot;: 0
+        }
+    &lt;/script&gt;
+&lt;/div&gt;
+</code></pre>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>Die direkte Interaktion via JavaScript ermöglicht es, das Dashboard in Echtzeit mit neuen Metriken zu versorgen, ohne auf zyklische REST-Abfragen angewiesen zu sein.</p>
+<h2 id="accessing-instance">Accessing Instance</h2>
+<p>Bestehende Instanzen können abgerufen und mit aktualisierten Objekten überschrieben werden, was ein sofortiges Re-Rendering auslöst.</p>
+<pre><code class="lang-js">const sprintCtrl = webexpress.webui.Controller.getInstanceByElement(document.getElementById('active-sprint'));
+sprintCtrl.sprint = updatedSprintObjectFromWebsocket;
+</code></pre>
+<h2 id="manual-instantiation-1">Manual Instantiation</h2>
+<p>Die manuelle Erzeugung eignet sich für Single-Page-Applications, in denen Ansichten dynamisch aufgebaut und verworfen werden.</p>
+<pre><code class="lang-js">const div = document.createElement('div');
+const sprintCtrl = new webexpress.webui.ScrumSprintCtrl(div);
+sprintCtrl.sprint = {
+    name: &quot;Sprint 99&quot;,
+    status: &quot;active&quot;,
+    capacity: 40,
+    committedPoints: 38,
+    burndown: { ideal: [38, 0], actual: [38] }
+};
+document.body.appendChild(div);
+</code></pre>
+<h2 id="best-practices--advanced-integration">Best Practices &amp; Advanced Integration</h2>
+<p>Es wird empfohlen, <code>ScrumBacklogCtrl</code> als primäres Werkzeug für das Planning zu nutzen, während <code>ScrumSprintCtrl</code> auf dedizierten Dashboard- oder Daily-Scrum-Ansichten platziert werden sollte.
+Für Offline-Szenarien oder automatisierte Tests sollte die statische Dateninjektion via <code>&lt;script type=&quot;application/json&quot;&gt;</code> genutzt werden, um Netzwerkabhängigkeiten zu eliminieren.
+Eine Kombination beider Komponenten auf einer Übersichtsseite erfordert idealerweise eine synchronisierte Datenhaltung im Hintergrund, um Änderungen im Backlog sofort im Sprint-Dashboard zu reflektieren.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/scrum.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

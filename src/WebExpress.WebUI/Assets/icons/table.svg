@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+ <g transform="translate(.00020504 -.66764)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
+  <rect x="1.2781" y="4.5655" width="18.443" height="13.204" rx="1.003" stroke-width="1.1956"/>
+  <g stroke-width="1.25">
+   <path d="m1.3053 8.0433 18.389-0.088388"/>
+   <path d="m6.5406 8.0207 1.087e-4 9.7218"/>
+   <path d="m13.877 7.9829-0.17649 9.7596"/>
+   <path d="m1.3053 12.993h18.389"/>
+  </g>
+ </g>
+</svg>

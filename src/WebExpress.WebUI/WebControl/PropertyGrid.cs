@@ -6,12 +6,12 @@
     public class PropertyGrid : IProperty
     {
         /// <summary>
-        /// Returns the device type to be used.
+        /// Gets the device type to be used.
         /// </summary>
         public TypeDevice Device { get; private set; }
 
         /// <summary>
-        /// Returns the number of columns used.
+        /// Gets the number of columns used.
         /// Note: All columns within a PanelGrid must sum up to 12!
         /// </summary>
         public int Columns { get; private set; }

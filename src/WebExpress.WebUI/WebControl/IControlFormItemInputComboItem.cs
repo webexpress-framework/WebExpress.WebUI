@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -8,23 +10,23 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFormItemInputComboItem
     {
         /// <summary>
-        /// Returns the sub-items of the combobox item.
+        /// Gets the sub-items of the combobox item.
         /// </summary>
         IEnumerable<ControlFormItemInputComboItem> SubItems { get; }
 
         /// <summary>
-        /// Returns the text.
+        /// Gets the text.
         /// </summary>
-        string Text { get; }
+        Func<IRenderControlContext, string> Text { get; }
 
         /// <summary>
-        /// Returns a value.
+        /// Gets a value.
         /// </summary>
-        string Value { get; }
+        Func<IRenderControlContext, string> Value { get; }
 
         /// <summary>
-        /// Returns a tag value.
+        /// Gets a tag value.
         /// </summary>
-        object Tag { get; }
+        Func<IRenderControlContext, object> Tag { get; }
     }
 }

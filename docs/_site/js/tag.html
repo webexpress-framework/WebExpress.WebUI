@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>TagCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="TagCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/tag.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="tagctrl">TagCtrl</h1>
+<p>The <code>TagCtrl</code> component is a read-only control designed to display a static list of tags. Unlike its interactive counterpart, <code>InputTagCtrl</code>, this component does not provide any user interface for adding or removing tags. It is purely for presentation.</p>
+<p>The tags are rendered inside a <code>&lt;ul&gt;</code> element, making it an ideal choice for displaying data such as keywords associated with an article or labels on an item in a non-editable format.</p>
+<pre><code>   ┌──────────────────────────────────┐
+   │ ┌────────┐ ┌────────┐            │
+   │ │  tag1  │ │  tag2  │            │
+   │ └────────┘ └────────┘            │
+   └──────────────────────────────────┘
+</code></pre>
+<h2 id="configuration">Configuration</h2>
+<p>The component is configured via <code>data-</code> attributes on the host element.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-value</code></td>
+<td>A semicolon-separated string of tags to be displayed.</td>
+<td><code>data-value=&quot;html;css;js&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-color-css</code></td>
+<td>A CSS class to be applied to all tag elements for styling.</td>
+<td><code>data-color-css=&quot;bg-info&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-color-style</code></td>
+<td>An inline CSS style string to be applied to all tag elements.</td>
+<td><code>data-color-style=&quot;background-color: #28a745;&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<p>If neither <code>data-color-css</code> nor <code>data-color-style</code> is provided, a default class <code>wx-tag-primary</code> is applied to each tag.</p>
+<h2 id="functionality">Functionality</h2>
+<ul>
+<li><strong>Static Display</strong>: Renders a list of tags based on the provided <code>data-value</code>.</li>
+<li><strong>Read-Only</strong>: The component is for display purposes only. It does not include an input field or remove buttons.</li>
+<li><strong>Styling</strong>: The appearance of the tags can be customized globally for the component using either a CSS class or an inline style.</li>
+<li><strong>Programmatic Updates</strong>: The list of tags can be updated programmatically by setting the <code>value</code> property of the component's instance.</li>
+</ul>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>The tags displayed by the component can be managed via its JavaScript instance after initialization.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const element = document.getElementById('my-tag-display');
+
+// retrieve the controller instance associated with the element
+const tagCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (tagCtrl) {
+    // get the current tags as a semicolon-separated string
+    const currentTags = tagCtrl.value;
+
+    // set new tags to be displayed using a string
+    tagCtrl.value = 'react;vue;angular';
+
+    // or set new tags using an array
+    tagCtrl.value = ['Svelte', 'SolidJS'];
+}
+</code></pre>
+<h2 id="use-case-example">Use Case Example</h2>
+<p>The following HTML demonstrates how to display a static list of tags with a custom background color.</p>
+<pre><code class="lang-html">&lt;!--
+    A read-only display of tags.
+    The tags will have a custom green background color.
+--&gt;
+&lt;div id=&quot;article-tags&quot;
+     class=&quot;wx-webui-tag&quot;
+     data-value=&quot;WebExpress;WebUI;JavaScript&quot;
+     data-color-style=&quot;background-color: #28a745; color: white;&quot;&gt;
+&lt;/div&gt;
+</code></pre>
+<h1 id="inputtagctrl">InputTagCtrl</h1>
+<p>The <code>InputTagCtrl</code> component provides a user-friendly interface for entering and managing a list of tags. Users can add tags by typing and using separators (comma, semicolon, space) and remove them either by clicking a button on the tag itself or by using the backspace key in an empty input field.</p>
+<p>The component is designed to look and feel like a standard form input while offering enhanced functionality. The resulting tags are stored in a hidden input field, ensuring seamless integration with HTML forms.</p>
+<pre><code>   ┌──────────────────────────────────────────────────┐
+   │ ┌────────┐ ┌────────┐                            │
+   │ │ tag1 x │ │ tag2 x │ [Input field for new tags] │
+   │ └────────┘ └────────┘                            │
+   └──────────────────────────────────────────────────┘
+</code></pre>
+<h2 id="configuration-1">Configuration</h2>
+<p>The component is configured via <code>data-</code> attributes on the host element.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>The name for the hidden input field, used for form submission.</td>
+<td><code>name=&quot;keywords&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-value</code></td>
+<td>A semicolon-separated string of initial tags.</td>
+<td><code>data-value=&quot;html;css;js&quot;</code></td>
+</tr>
+<tr>
+<td><code>placeholder</code></td>
+<td>The placeholder text shown when no tags are present.</td>
+<td><code>placeholder=&quot;Add tags...&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-color-css</code></td>
+<td>A CSS class to be applied to all tag elements for styling.</td>
+<td><code>data-color-css=&quot;bg-secondary&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-color-style</code></td>
+<td>An inline CSS style string to be applied to all tag elements.</td>
+<td><code>data-color-style=&quot;background-color: #007bff;&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<p>If neither <code>data-color-css</code> nor <code>data-color-style</code> is provided, a default class <code>wx-tag-primary</code> is applied.</p>
+<h2 id="functionality-1">Functionality</h2>
+<ul>
+<li><strong>Tag Input</strong>: Users can type into the input field to create new tags.</li>
+<li><strong>Separator-Based Adding</strong>: Tags are automatically created from the input's content when a separator (<code>,</code>, <code>;</code>, or space) is typed.</li>
+<li><strong>Duplicate Prevention</strong>: The component automatically prevents duplicate tags from being added.</li>
+<li><strong>Tag Removal</strong>:
+<ul>
+<li>Each tag has a close button (<code>×</code>) to remove it individually.</li>
+<li>Pressing <code>Backspace</code> or <code>Delete</code> in the empty input field removes the last tag in the list.</li>
+</ul>
+</li>
+<li><strong>Form Integration</strong>: The list of tags is automatically synchronized to a hidden input field as a semicolon-separated string.</li>
+<li><strong>Styling</strong>: The appearance of the tags can be customized globally using either a CSS class or an inline style.</li>
+</ul>
+<h2 id="programmatic-control-1">Programmatic Control</h2>
+<p>The component's value can be accessed and modified programmatically after initialization.</p>
+<h3 id="accessing-an-automatically-created-instance-1">Accessing an Automatically Created Instance</h3>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const element = document.getElementById('my-tag-input');
+
+// retrieve the controller instance associated with the element
+const tagCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (tagCtrl) {
+    // get the current tags as a semicolon-separated string
+    const currentTags = tagCtrl.value;
+
+    // set new tags using a string
+    tagCtrl.value = 'react;vue;angular';
+
+    // or set new tags using an array
+    tagCtrl.value = ['Svelte', 'SolidJS'];
+}
+</code></pre>
+<h2 id="events">Events</h2>
+<ul>
+<li><code>webexpress.webui.Event.ADD_EVENT</code>: Fired when a new tag is added. The <code>detail</code> property of the event contains the tag string.</li>
+<li><code>webexpress.webui.Event.REMOVE_EVENT</code>: Fired when a tag is removed. The <code>detail</code> property contains the tag string that was removed.</li>
+</ul>
+<h2 id="use-case-example-1">Use Case Example</h2>
+<pre><code class="lang-html">&lt;!--
+    A tag input for blog post keywords, pre-filled with two tags.
+    The tags will have a custom blue background color.
+--&gt;
+&lt;div id=&quot;blog-keywords&quot;
+     class=&quot;wx-webui-input-tag&quot;
+     name=&quot;keywords&quot;
+     data-value=&quot;WebExpress;WebUI&quot;
+     data-color-style=&quot;background-color: #007bff; color: white;&quot;
+     placeholder=&quot;Enter keywords...&quot;&gt;
+&lt;/div&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/tag.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -17,7 +17,7 @@ namespace WebExpress.WebUI.Test
         public TestFragmentControlSidebarItemControl(IFragmentContext fragmentContext)
             : base(fragmentContext)
         {
-            Content = new ControlText() { Text = "TestFragmentControlSidebarItemControl" };
+            Content = new ControlText() { Text = _ => "TestFragmentControlSidebarItemControl" };
         }
     }
 }

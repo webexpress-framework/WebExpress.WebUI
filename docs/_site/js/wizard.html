@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>RestWizardCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="RestWizardCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/wizard.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="restwizardctrl">RestWizardCtrl</h1>
+<p>The <code>RestWizardCtrl</code> component seamlessly transforms a standard HTML form into a highly interactive, multi-step wizard. Extending the foundational <code>RestFormCtrl</code>, this component orchestrates complex data entry processes by breaking them down into digestible, sequential steps. It uniquely combines the simplicity of static, pre-rendered HTML form fields with the flexibility of dynamic, asynchronously loaded steps.</p>
+<p>As users navigate through the wizard, the controller automatically handles client-side validation, state preservation, and payload aggregation. A standout feature of this component is its server-driven skip logic: the server can dictate whether a specific step is necessary based on the data entered in previous steps, allowing for highly personalized and dynamic user journeys without requiring complex client-side rules.</p>
+<pre><code class="lang-text">   ┌────────────────────────────────────────────────────────┐
+   │ ── Basic Data ──── Settings ──── Description ────────  │
+   ├────────────────────────────────────────────────────────┤
+   │ Name                                                   │
+   │ [ John Doe                                           ] │
+   │                                                        │
+   │ E-Mail                                                 │
+   │ [ john@example.com                                   ] │
+   ├────────────────────────────────────────────────────────┤
+   │ [ Previous ]                                  [ Next ] │
+   └────────────────────────────────────────────────────────┘
+</code></pre>
+<h2 id="configuration">Configuration</h2>
+<p>Initialization is handled declaratively. The host <code>&lt;form&gt;</code> element requires the <code>wx-webapp-restwizard</code> class and a target <code>data-api</code> endpoint for the final submission. Individual steps are defined as child containers using the <code>wx-wizard-page</code> class.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute / Class</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>wx-webapp-restwizard</code></td>
+<td>The controller class required on the host <code>&lt;form&gt;</code> element.</td>
+<td><code>class=&quot;wx-webapp-restwizard&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-api</code></td>
+<td>The primary REST endpoint where the fully aggregated form payload will be submitted upon wizard completion.</td>
+<td><code>data-api=&quot;/api/wizard/submit&quot;</code></td>
+</tr>
+<tr>
+<td><code>wx-wizard-page</code></td>
+<td>The class used to designate a container as a distinct step (page) within the wizard.</td>
+<td><code>class=&quot;wx-wizard-page&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-title</code></td>
+<td>The human-readable title of the step, which is automatically rendered in the wizard's top progress bar.</td>
+<td><code>data-title=&quot;User Details&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-uri</code></td>
+<td>Optional. If provided, the step becomes <em>dynamic</em>. The wizard will perform an asynchronous POST request to this URI to fetch the step's HTML content before displaying it.</td>
+<td><code>data-uri=&quot;/api/wizard/step-2&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="functionality">Functionality</h2>
+<p>The <code>RestWizardCtrl</code> automates the entire lifecycle of a multi-step form, abstracting away the complexities of DOM manipulation, asynchronous loading, and state management.</p>
+<ul>
+<li><strong>Automated Layout Generation</strong>: Upon initialization, the controller extracts all <code>wx-wizard-page</code> containers and dynamically builds a surrounding UI. This includes a top-level progress indicator displaying the step titles, and a synchronized bottom navigation bar containing &quot;Previous&quot;, &quot;Next&quot;, and &quot;Finish&quot; buttons.</li>
+<li><strong>Static and Dynamic Steps</strong>: Steps without a <code>data-uri</code> are treated as static; their DOM is already present and validated immediately. Steps with a <code>data-uri</code> are dynamic. When the user attempts to navigate to a dynamic step, the wizard pauses, displays a loading spinner, and sends the <em>current accumulated form payload</em> via POST to the step's URI. The server evaluates this payload and returns the relevant HTML fragment, which is safely injected and initialized.</li>
+<li><strong>Server-Side Skip Logic (HTTP 204)</strong>: If a dynamic step is deemed unnecessary by the server (e.g., asking for shipping details when the user previously selected &quot;Digital Download&quot;), the server responds with a <code>204 No Content</code> HTTP status code. The wizard intercepts this, marks the step as permanently skipped, hides it from the progress bar, and seamlessly transitions to the subsequent step. This logic works bidirectionally, ensuring skipped steps are also bypassed when navigating backward.</li>
+<li><strong>Smart Caching</strong>: To minimize network traffic, the component calculates a hash of the form's payload before requesting a dynamic step. If the user navigates backward and forward again without altering any previous inputs, the wizard utilizes the cached HTML step rather than re-requesting it from the server.</li>
+<li><strong>Progressive Validation</strong>: Validation is enforced on a per-step basis. A user cannot proceed to the next step if the current step contains invalid inputs. Upon reaching the final step and clicking &quot;Finish&quot;, the entire aggregated form undergoes a final validation pass before the payload is submitted to the primary <code>data-api</code> endpoint.</li>
+<li><strong>Error Handling</strong>: If a dynamic step fails to load (e.g., HTTP 500), an error message is rendered securely within the step container, and forward navigation is blocked until the error is resolved.</li>
+</ul>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>While the wizard operates autonomously based on user interaction, the controller instance can be accessed to perform manual validations or trigger navigation.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<pre><code class="lang-javascript">// find the host form element in the DOM
+const formElement = document.getElementById('restWizard');
+
+// retrieve the controller instance associated with the element
+const wizardCtrl = webexpress.webui.Controller.getInstanceByElement(formElement);
+
+if (wizardCtrl) {
+    // manually trigger validation for the currently visible page
+    const isCurrentPageValid = wizardCtrl.validateCurrentPage();
+
+    // programmatically trigger the submission process (simulating the Finish button)
+    wizardCtrl.submit();
+}
+</code></pre>
+<h2 id="use-case-examples">Use Case Examples</h2>
+<p>The wizard supports both fully static configurations, where all DOM elements are pre-rendered, and hybrid configurations involving dynamic server communication.</p>
+<h3 id="static-wizard">Static Wizard</h3>
+<p>In this example, all pages are immediately available in the DOM. Navigation between them is instant and purely client-side.</p>
+<pre><code class="lang-html">&lt;form id=&quot;staticWizard&quot; name=&quot;registration&quot;
+      class=&quot;wx-webapp-restwizard&quot;
+      data-api=&quot;/api/users/register&quot;&gt;
+    
+    &lt;confirm&gt;The data was &lt;b&gt;successfully&lt;/b&gt; transmitted to the server.&lt;/confirm&gt;
+    &lt;h3&gt;Registration&lt;/h3&gt;
+
+    &lt;!-- Step 1 --&gt;
+    &lt;div class=&quot;wx-wizard-page&quot; data-title=&quot;Basic Data&quot;&gt;
+        &lt;div class=&quot;mb-3&quot;&gt;
+            &lt;label for=&quot;name&quot; class=&quot;form-label&quot;&gt;Name&lt;/label&gt;
+            &lt;input id=&quot;name&quot; name=&quot;name&quot; type=&quot;text&quot; class=&quot;form-control&quot; required minlength=&quot;2&quot; /&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Step 2 --&gt;
+    &lt;div class=&quot;wx-wizard-page&quot; data-title=&quot;Settings&quot;&gt;
+        &lt;div class=&quot;mb-3 form-check&quot;&gt;
+            &lt;input id=&quot;newsletter&quot; name=&quot;newsletter&quot; type=&quot;checkbox&quot; class=&quot;form-check-input&quot; value=&quot;true&quot; /&gt;
+            &lt;label for=&quot;newsletter&quot; class=&quot;form-check-label&quot;&gt;Subscribe to newsletter&lt;/label&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/form&gt;
+</code></pre>
+<h3 id="dynamic-wizard-with-skip-logic">Dynamic Wizard with Skip Logic</h3>
+<p>In this example, the second and third steps are dynamic. When the user clicks &quot;Next&quot; on the first step, the wizard sends the <code>name</code> and <code>email</code> data to <code>/api/wizard/settings</code>. Depending on that data, the server either returns an HTML form fragment for the settings, or returns <code>204 No Content</code> to skip directly to the &quot;Description&quot; step.</p>
+<pre><code class="lang-html">&lt;form id=&quot;dynamicWizard&quot; name=&quot;profileWizard&quot;
+      class=&quot;wx-webapp-restwizard&quot;
+      data-api=&quot;/api/profile/complete&quot;&gt;
+    
+    &lt;confirm&gt;Your profile has been updated.&lt;/confirm&gt;
+    &lt;h3&gt;Setup Profile&lt;/h3&gt;
+    
+    &lt;!-- Step 1: Static --&gt;
+    &lt;div class=&quot;wx-wizard-page&quot; data-title=&quot;Basic Data&quot;&gt;
+        &lt;div class=&quot;mb-3&quot;&gt;
+            &lt;label for=&quot;name&quot; class=&quot;form-label&quot;&gt;Name&lt;/label&gt;
+            &lt;input id=&quot;name&quot; name=&quot;name&quot; type=&quot;text&quot; class=&quot;form-control&quot; required /&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    
+    &lt;!-- Step 2: Dynamic (Server evaluates Step 1 data) --&gt;
+    &lt;div class=&quot;wx-wizard-page&quot; 
+         data-title=&quot;Settings&quot; 
+         data-uri=&quot;/api/wizard/settings&quot;&gt;
+    &lt;/div&gt;
+    
+    &lt;!-- Step 3: Dynamic --&gt;
+    &lt;div class=&quot;wx-wizard-page&quot; 
+         data-title=&quot;Description&quot; 
+         data-uri=&quot;/api/wizard/description&quot;&gt;
+    &lt;/div&gt;
+&lt;/form&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/wizard.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

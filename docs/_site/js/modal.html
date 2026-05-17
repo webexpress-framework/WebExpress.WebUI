@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>ModalCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="ModalCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/modal.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="modalctrl">ModalCtrl</h1>
+<p>The <code>ModalCtrl</code> component is used to create modal dialog windows based on the Bootstrap framework. It allows for the display of content in an overlay window that blocks the rest of the page until a user interaction occurs. The structure and content of the modal are defined declaratively directly in the HTML by using specific CSS classes to mark the header, content, and footer sections. The component takes these declared sections and constructs the required Bootstrap modal DOM structure at runtime.</p>
+<pre><code>   ┌──────────────────────────────────────────────────┐
+   │                                                  │
+   │  ┌────────────────────────────────────────────┐  │
+   │  │ [Header Title]                         [x] │  │
+   │  ├────────────────────────────────────────────┤  │
+   │  │                                            │  │
+   │  │         Body Content of the Modal          │  │
+   │  │                                            │  │
+   │  ├────────────────────────────────────────────┤  │
+   │  │                   [Custom Buttons] [Close] │  │
+   │  └────────────────────────────────────────────┘  │
+   │                                                  │
+   └──────────────────────────────────────────────────┘
+</code></pre>
+<h2 id="configuration">Configuration</h2>
+<p>The configuration and content of the modal are defined directly in the HTML markup. The component uses <code>data-</code> attributes to control its behavior and specific CSS classes to identify the content areas.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-size</code></td>
+<td>Defines the size of the modal. Accepts standard Bootstrap classes like <code>modal-sm</code>, <code>modal-lg</code>, or <code>modal-xl</code>.</td>
+</tr>
+<tr>
+<td><code>data-close-label</code></td>
+<td>Sets the text for the automatically generated &quot;Close&quot; button in the footer.</td>
+</tr>
+<tr>
+<td><code>data-auto-show</code></td>
+<td>If set to <code>&quot;true&quot;</code>, the modal will be displayed automatically when the page loads.</td>
+</tr>
+</tbody>
+</table>
+<p>To define the content, the following CSS classes are used within the host element:</p>
+<ul>
+<li><strong><code>.wx-modal-header</code></strong>: The content of this element is adopted as the title in the modal's header.</li>
+<li><strong><code>.wx-modal-content</code></strong>: The content of this element is placed into the main body of the modal.</li>
+<li><strong><code>.wx-modal-footer</code></strong>: The content of this element is inserted into the modal's footer, preceding the default &quot;Close&quot; button.</li>
+</ul>
+<h2 id="functionality">Functionality</h2>
+<p>The <code>ModalCtrl</code> is designed as a wrapper around the native Bootstrap modal functionality to allow for simple, declarative usage.</p>
+<ul>
+<li><strong>Dynamic DOM Construction</strong>: Upon initialization, the component reads the content marked with the <code>.wx-modal-*</code> classes, removes it from the original DOM, and inserts it into a newly created, Bootstrap-compliant modal structure.</li>
+<li><strong>Automatic Controls</strong>: A &quot;Close&quot; button (X) in the header and a &quot;Close&quot; button with text and an icon in the footer are automatically generated to ensure accessibility and consistent user guidance.</li>
+<li><strong>Programmatic Control</strong>: Through the <code>show()</code> and <code>hide()</code> methods, the visibility of the modal can be dynamically controlled via JavaScript.</li>
+</ul>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>After initialization, the modal can be fully controlled programmatically through its controller instance.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const element = document.getElementById('my-modal');
+
+// retrieve the controller instance associated with the element
+const modalCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (modalCtrl) {
+    // programmatically show the modal
+    modalCtrl.show();
+}
+</code></pre>
+<h3 id="manual-instantiation">Manual Instantiation</h3>
+<pre><code class="lang-javascript">// find the container element for the dynamic modal
+const container = document.getElementById('dynamic-modal-container');
+
+// create a new instance of ModalCtrl manually
+const dynamicModalCtrl = new webexpress.webui.ModalCtrl(container);
+
+// set the properties programmatically
+dynamicModalCtrl.header = 'Dynamic Modal';
+dynamicModalCtrl.content = '&lt;p&gt;This content was set programmatically.&lt;/p&gt;';
+dynamicModalCtrl.show();
+</code></pre>
+<h2 id="events">Events</h2>
+<p>The component dispatches standardized events to react to changes in its state and to allow for integration into the application logic.</p>
+<ul>
+<li><strong><code>webexpress.webui.Event.MODAL_SHOW_EVENT</code></strong>: Fired when the modal is about to be shown.</li>
+<li><strong><code>webexpress.webui.Event.MODAL_HIDE_EVENT</code></strong>: Fired after the modal has been completely hidden.</li>
+</ul>
+<h2 id="use-case-example">Use Case Example</h2>
+<p>The following example shows the complete declarative configuration of a modal that includes a title, text content, and a custom button in the footer.</p>
+<pre><code class="lang-html">&lt;!--
+    The main container for the modal control.
+    It is configured with a large size and will not show automatically.
+--&gt;
+&lt;div id=&quot;my-modal&quot;
+     class=&quot;wx-webui-modal&quot;
+     data-size=&quot;modal-lg&quot;
+     data-close-label=&quot;Cancel&quot;&gt;
+
+    &lt;!-- This content becomes the modal title. --&gt;
+    &lt;div class=&quot;wx-modal-header&quot;&gt;
+        Important Notice
+    &lt;/div&gt;
+
+    &lt;!-- This content becomes the modal body. --&gt;
+    &lt;div class=&quot;wx-modal-content&quot;&gt;
+        &lt;p&gt;Please confirm the following action to proceed.&lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;!-- This content is added to the modal footer. --&gt;
+    &lt;div class=&quot;wx-modal-footer&quot;&gt;
+        &lt;button type=&quot;button&quot; class=&quot;btn btn-primary&quot;&gt;Confirm Action&lt;/button&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h1 id="modalpagectrl">ModalPageCtrl</h1>
+<p>The <code>ModalPageCtrl</code> extends the basic functionality of the <code>ModalCtrl</code> by adding the capability to dynamically load the content of a modal dialog from an external resource via a URI. This component is specialized to serve as an &quot;empty shell&quot; for a modal that is filled with server-side generated HTML content only after it has been opened. This decouples the page logic from the modal's content logic and allows for the reuse of views or the loading of complex content without impacting the initial load time of the main page.</p>
+<p>During the loading process, a placeholder animation (skeleton screen) is displayed to the user to ensure a good user experience and to signal that content is being loaded.</p>
+<pre><code>   ┌──────────────────────────────────────────────────┐
+   │                                                  │
+   │  ┌────────────────────────────────────────────┐  │
+   │  │ [Header Title]                         [x] │  │
+   │  ├────────────────────────────────────────────┤  │
+   │  │  ┌──────────────────────────────────────┐  │  │
+   │  │  │ [Loading State Placeholder...]       │  │  │
+   │  │  └──────────────────────────────────────┘  │  │
+   │  ├────────────────────────────────────────────┤  │
+   │  │                                    [Close] │  │
+   │  └────────────────────────────────────────────┘  │
+   │                                                  │
+   └──────────────────────────────────────────────────┘
+</code></pre>
+<h2 id="configuration-1">Configuration</h2>
+<p>Configuration is handled via <code>data-</code> attributes on the host element. The component inherits all attributes from <code>ModalCtrl</code> and adds two specific attributes for dynamic loading.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-uri</code></td>
+<td>The mandatory URI from which the HTML content for the modal body should be loaded.</td>
+</tr>
+<tr>
+<td><code>data-selector</code></td>
+<td>An optional CSS selector that specifies which part of the HTML response should be extracted and used as the modal content. By default, the <code>&lt;body&gt;</code> content of the response is used.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="functionality-1">Functionality</h2>
+<p>The <code>ModalPageCtrl</code> builds upon the lifecycle of a Bootstrap modal to implement an asynchronous loading process.</p>
+<ul>
+<li><strong>Inheritance Model</strong>: As a direct extension of <code>ModalCtrl</code>, it inherits all of its logic for creating the basic modal structure, including the header, footer, and default close buttons.</li>
+<li><strong>Asynchronous Loading Cycle</strong>: When the <code>show()</code> method is called, the following occurs:
+<ol>
+<li>The modal is immediately displayed with a placeholder graphic (skeleton UI).</li>
+<li>Once the modal's opening animation is complete, a <code>fetch</code> request is sent to the specified <code>data-uri</code>.</li>
+<li>The HTML response from the server is received.</li>
+<li>Using the <code>DOMParser</code>, the response is parsed, and the content area specified by <code>data-selector</code> is extracted.</li>
+<li>The placeholder content in the modal body is replaced with the newly loaded content.</li>
+</ol>
+</li>
+<li><strong>Selective Content Extraction</strong>: The use of the <code>data-selector</code> attribute makes it possible to use only relevant parts of a larger HTML response.</li>
+</ul>
+<h2 id="programmatic-control-1">Programmatic Control</h2>
+<p>The programmatic interface corresponds to that of <code>ModalCtrl</code>, allowing for the explicit showing and hiding of the modal.</p>
+<h3 id="accessing-an-automatically-created-instance-1">Accessing an Automatically Created Instance</h3>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const element = document.getElementById('my-page-modal');
+
+// retrieve the controller instance associated with the element
+const modalPageCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (modalPageCtrl) {
+    // programmatically show the modal
+    // This will display the placeholder and then initiate the fetch request.
+    modalPageCtrl.show();
+}
+</code></pre>
+<h3 id="manual-instantiation-1">Manual Instantiation</h3>
+<pre><code class="lang-javascript">// find the container element for the dynamic modal page
+const container = document.getElementById('dynamic-modal-page-container');
+
+// create a new instance of ModalPageCtrl manually
+const dynamicModalPageCtrl = new webexpress.webui.ModalPageCtrl(container);
+
+// set the properties programmatically
+dynamicModalPageCtrl.uri = '/path/to/content';
+dynamicModalPageCtrl.header = 'Dynamic Content';
+dynamicModalPageCtrl.show();
+</code></pre>
+<h2 id="events-1">Events</h2>
+<p>The component extends the event model of its predecessor with two specific events that signal the loading cycle.</p>
+<ul>
+<li><strong><code>webexpress.webui.Event.MODAL_SHOW_EVENT</code> / <code>MODAL_HIDE_EVENT</code></strong>: Fired when the modal is shown or hidden.</li>
+<li><strong><code>webexpress.webui.Event.DATA_REQUESTED_EVENT</code></strong>: Fired just before the <code>fetch</code> request to load the content is sent.</li>
+<li><strong><code>webexpress.webui.Event.DATA_ARRIVED_EVENT</code></strong>: Fired after the data has been successfully received and the modal content has been updated.</li>
+</ul>
+<h2 id="use-case-example-1">Use Case Example</h2>
+<p>The following example shows the configuration of a modal that loads its content from a server endpoint and displays only a specific part of the response.</p>
+<pre><code class="lang-html">&lt;!--
+    The host element for the modal page.
+    'data-uri' points to the content source.
+    'data-selector' specifies that only the element with the ID '#profile-details'
+    from the response should be used as the modal's body.
+--&gt;
+&lt;div id=&quot;user-profile-modal&quot;
+     class=&quot;wx-webui-modalpage&quot;
+     data-uri=&quot;/users/ReneSchwarzer/details&quot;
+     data-selector=&quot;#profile-details&quot;
+     data-size=&quot;modal-lg&quot;&gt;
+
+    &lt;!-- The title is defined statically in the header. --&gt;
+    &lt;div class=&quot;wx-modal-header&quot;&gt;
+        User Profile
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h1 id="modalformctrl">ModalFormCtrl</h1>
+<p>The <code>ModalFormCtrl</code> is a specialized component that combines the functionality of a modal dialog (<code>ModalCtrl</code>) with the ability to load content (<code>ModalPageCtrl</code>) to manage complex HTML forms within a pop-up. Its core purpose is to replace the traditional form submission, which requires a full page reload, with an asynchronous AJAX process. This enables dynamic updates of the form within the modal, for instance, to display validation errors or success messages, without the user leaving the context of the dialog.</p>
+<pre><code>   ┌──────────────────────────────────────────────────┐
+   │                                                  │
+   │  ┌────────────────────────────────────────────┐  │
+   │  │ [Form Title]                           [x] │  │
+   │  ├────────────────────────────────────────────┤  │
+   │  │  ┌──────────────────────────────────────┐  │  │
+   │  │  │ [Validation Errors Alert]            │  │  │
+   │  │  ├──────────────────────────────────────┤  │  │
+   │  │  │                                      │  │  │
+   │  │  │  Form Fields (Input, Select, etc.)   │  │  │
+   │  │  │                                      │  │  │
+   │  │  └──────────────────────────────────────┘  │  │
+   │  ├────────────────────────────────────────────┤  │
+   │  │     [Submit Button] [Reset Button] [Close] │  │
+   │  └────────────────────────────────────────────┘  │
+   │                                                  │
+   └──────────────────────────────────────────────────┘
+</code></pre>
+<h2 id="functionality-2">Functionality</h2>
+<p>The component builds upon <code>ModalPageCtrl</code> and extends its functionality to provide seamless form interaction.</p>
+<ul>
+<li><strong>Asynchronous Form Submission</strong>: The <code>ModalFormCtrl</code> intercepts the form's <code>submit</code> event. Instead of reloading the page, it serializes the form data and sends it via a <code>fetch</code> request to the URL defined in the form's <code>action</code> attribute.</li>
+<li><strong>Dynamic Content Updates</strong>: After submission, the component expects an HTML response from the server. This response is parsed, and the new form state contained within it is extracted and used to update the modal's content.</li>
+<li><strong>Intelligent DOM Restructuring</strong>: During initialization and each update, the component restructures the DOM. It wraps the entire modal dialog in a <code>&lt;form&gt;</code> element. Buttons of type <code>submit</code> or <code>reset</code> contained in the server-provided HTML are automatically moved to the modal's footer.</li>
+<li><strong>Programmatic Error Display</strong>: A dedicated method, <code>showValidationErrors</code>, allows for the programmatic display of a list of validation errors. This method generates a summary warning (Bootstrap Alert) at the top of the modal body.</li>
+</ul>
+<h2 id="programmatic-control-2">Programmatic Control</h2>
+<p>Like its parent classes, the <code>ModalFormCtrl</code> can be programmatically controlled to open or close the modal.</p>
+<h3 id="accessing-an-automatically-created-instance-2">Accessing an Automatically Created Instance</h3>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const element = document.getElementById('my-modal-form');
+
+// retrieve the controller instance associated with the element
+const modalFormCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (modalFormCtrl) {
+    // programmatically show the modal, which will trigger fetching the initial form content
+    modalFormCtrl.show();
+}
+</code></pre>
+<h3 id="manual-instantiation-2">Manual Instantiation</h3>
+<pre><code class="lang-javascript">// find the container element for the dynamic modal form
+const container = document.getElementById('dynamic-modal-form-container');
+
+// create a new instance of ModalFormCtrl manually
+const dynamicModalFormCtrl = new webexpress.webui.ModalFormCtrl(container);
+
+// set the properties programmatically
+dynamicModalFormCtrl.uri = '/users/create/form';
+dynamicModalFormCtrl.show();
+</code></pre>
+<h3 id="programmatic-error-display">Programmatic Error Display</h3>
+<pre><code class="lang-javascript">// assuming modalFormCtrl is an existing instance
+const errors = [
+    { field: 'username', message: 'This username is already taken.' },
+    { field: 'password', message: 'Password must be at least 8 characters long.' }
+];
+modalFormCtrl.showValidationErrors(errors);
+</code></pre>
+<h2 id="events-2">Events</h2>
+<p>The component dispatches a series of events to allow for deep integration into the application logic.</p>
+<ul>
+<li><strong><code>webexpress.webui.Event.MODAL_SHOW_EVENT</code> / <code>MODAL_HIDE_EVENT</code></strong>: Fired when the modal is shown or hidden.</li>
+<li><strong><code>webexpress.webui.Event.DATA_REQUESTED_EVENT</code> / <code>DATA_ARRIVED_EVENT</code></strong>: Signals the start and completion of the initial loading request for the form content.</li>
+<li><strong><code>webexpress.webui.Event.UPDATED_EVENT</code></strong>: A key event that is fired after the modal's content has been successfully updated following a form submission.</li>
+</ul>
+<h2 id="use-case-example-2">Use Case Example</h2>
+<p>The configuration is declarative. The host element requires a URI from which the initial form HTML will be loaded.</p>
+<pre><code class="lang-html">&lt;!--
+    The host element for the modal form.
+    The 'data-uri' attribute specifies where to load the form from.
+    The controller will automatically handle the form submission found at that URI.
+--&gt;
+&lt;div id=&quot;create-user-modal&quot;
+     class=&quot;wx-webui-modalform&quot;
+     data-uri=&quot;/users/create/form&quot;
+     data-size=&quot;modal-lg&quot;&gt;
+&lt;/div&gt;
+</code></pre>
+<h1 id="modalsidebarpanel">ModalSidebarPanel</h1>
+<p>The <code>ModalSidebarPanel</code> component provides a modal dialog with a left-hand navigation tree and a right-hand content area. It extends the <code>ModalCtrl</code> base component and builds the modal body into a two-pane layout, using SplitCtrl for a resizable sidebar and TreeCtrl for hierarchical navigation. Pages (panels) can be autoloaded via a registry key or added programmatically. Validation can be scoped to either all pages or only the currently active one. A submit button is managed by the base class and is wired into <code>ModalSidebarPanel</code> via an element ID; on successful validation the modal closes, otherwise an error alert is shown above the split control.</p>
+<pre><code>   ┌──────────────────────────────────────────────────────┐
+   │                                                      │
+   │  ┌────────────────────────────────────────────────┐  │
+   │  │ [Form Title]                               [x] │  │
+   │  ├─────────────────────┬─┬────────────────────────┤  │
+   │  │                     │░│                        │  │
+   │  │ ▼ [Icon] Node 1     │░│ Panel content          │  │
+   │  │   ► [Icon] Node 1.1 │░│ (active pane)          │  │
+   │  │   ► [Icon] Node 1.2 │▓│                        │  │
+   │  │ ► [Icon] Node 2     │░│                        │  │
+   │  │                     │░│                        │  │
+   │  │                     │░│                        │  │
+   │  ├─────────────────────┴─┴────────────────────────┤  │
+   │  │                        [Custom Button] [Close] │  │
+   │  └────────────────────────────────────────────────┘  │
+   │                                                      │
+   └──────────────────────────────────────────────────────┘
+</code></pre>
+<h2 id="configuration-2">Configuration</h2>
+<p>Configuration is declared on the host element through data attributes. The header and footer are provided via dedicated CSS classes. The body is fully managed by this component and will be rebuilt into a split layout.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-key</code></td>
+<td>Registry key used to autoload pages from DialogPanels.</td>
+</tr>
+<tr>
+<td><code>data-side-width</code></td>
+<td>Initial sidebar width in pixels (default: 280).</td>
+</tr>
+<tr>
+<td><code>data-min-side-width</code></td>
+<td>Minimum sidebar width in pixels (default: 180).</td>
+</tr>
+<tr>
+<td><code>data-submit-id</code></td>
+<td>The ID of the submit button managed by the base class in the modal footer. ModalSidebarPanel only wires this button.</td>
+</tr>
+<tr>
+<td><code>data-validate-active-only</code></td>
+<td>When set to <code>&quot;true&quot;</code>, only the currently active page is validated and hidden pages are ignored (default: <code>&quot;false&quot;</code> = validate all pages).</td>
+</tr>
+</tbody>
+</table>
+<p>Content markers inside the host element:</p>
+<ul>
+<li><code>.wx-modal-header</code>: Its content becomes the modal title.</li>
+<li><code>.wx-modal-footer</code>: Its content is placed into the modal footer before the auto-generated “Close” button.</li>
+<li>Note: The body (<code>.wx-modal-content</code>) is not used; the component constructs the split layout itself.</li>
+</ul>
+<h2 id="functionality-3">Functionality</h2>
+<p>ModalSidebarPanel wraps the Bootstrap modal behavior from ModalCtrl and adds a navigable, two-pane layout.</p>
+<ul>
+<li>Dynamic body construction: The modal body is cleared and rebuilt into a split layout with a sidebar and a main area. SplitCtrl provides resizing; TreeCtrl renders the navigation tree.</li>
+<li>Page model and navigation: Pages are managed as a flat list and projected as a hierarchy in the tree via optional <code>parentId</code>. A node index is maintained for quick lookups; ancestors are expanded automatically to reveal selected nodes, and the active node is tracked and highlighted.</li>
+<li>Page API: Pages can expose <code>render(pane, ctrl)</code>, <code>onShow(ctrl)</code>, <code>validate(ctrl)</code>, and <code>onSubmit(ctrl)</code>. Each page receives its own pane element that is shown/hidden as the active page changes.</li>
+<li>Autoload from registry: Using <code>data-panels-key</code>/<code>data-key</code>, panels registered in <code>webexpress.webui.DialogPanels</code> are loaded. If a registered panel specifies <code>modalId</code>, it is loaded only when it matches the current modal’s ID. Missing or conflicting IDs are resolved by generating a unique, safe ID.</li>
+<li>Validation and submit: The submit button is created and managed by the base class; ModalSidebarPanel wires it via <code>data-submit-id</code>. On click, validation is performed. If validation fails, a Bootstrap alert (<code>alert alert-danger</code>) is shown above the split control and remains visible as long as errors persist. If validation passes, optional <code>onSubmit</code> hooks are invoked and the modal closes.</li>
+<li>Robust tree click handling: The global click listener for TreeCtrl is managed idempotently and reattached when the modal is shown. Sender checks are tolerant to ensure page switching remains reliable.</li>
+</ul>
+<h2 id="page-object-api">Page Object API</h2>
+<p>Pages supplied to ModalSidebarPanel (either autoloaded or added programmatically) follow this shape:</p>
+<ul>
+<li><code>id: string</code> – unique page ID. If omitted or duplicated, a safe ID is generated.</li>
+<li><code>title?: string</code> – label shown in the navigation tree (defaults to <code>id</code>).</li>
+<li><code>iconClass?: string</code> – optional icon CSS class for the node.</li>
+<li><code>image?: string</code> – optional image URL/class used by the tree control.</li>
+<li><code>parentId?: string|null</code> – optional parent page ID to form a hierarchy.</li>
+<li><code>render?: (pane: HTMLElement, ctrl: ModalSidebarPanel) =&gt; void</code> – render hook to populate the page pane.</li>
+<li><code>onShow?: (ctrl: ModalSidebarPanel) =&gt; void</code> – called when the page becomes visible.</li>
+<li><code>validate?: (ctrl: ModalSidebarPanel) =&gt; boolean | string | { valid: boolean, message?: string }</code> – validation hook. Returning:
+<ul>
+<li><code>true</code> means valid,</li>
+<li><code>false</code> or a non-empty <code>string</code> means invalid (string is used as message),</li>
+<li>an object can specify <code>{ valid: false, message: '...' }</code> for details.</li>
+</ul>
+</li>
+<li><code>onSubmit?: (ctrl: ModalSidebarPanel) =&gt; void</code> – optional hook executed after successful validation and before the modal closes.</li>
+</ul>
+<h2 id="public-methods">Public Methods</h2>
+<ul>
+<li><code>addPage(page)</code>: Adds a page to the navigation and creates its pane. If it is the first page, it becomes active.</li>
+<li><code>getActivePage()</code>: Returns the active page definition or <code>null</code>.</li>
+<li><code>selectPage(id)</code>: Programmatically activates a page by ID.</li>
+<li><code>submit()</code>: Triggers the submit workflow (validation, error alert handling, submit hooks, and modal close on success).</li>
+<li><code>fitSidePaneToContent()</code>: Asks the split controller to fit the sidebar to its content.</li>
+</ul>
+<h2 id="programmatic-control-3">Programmatic Control</h2>
+<h3 id="accessing-an-automatically-created-instance-3">Accessing an automatically created instance</h3>
+<pre><code class="lang-javascript">// locate the host element
+const el = document.getElementById('my-modal-sidebar');
+
+// get the controller instance
+const sidebarCtrl = webexpress.webui.Controller.getInstanceByElement(el);
+
+if (sidebarCtrl) {
+    // show the modal
+    sidebarCtrl.show();
+}
+</code></pre>
+<h3 id="adding-pages-and-validating">Adding pages and validating</h3>
+<pre><code class="lang-javascript">// add a page with render, validate and onSubmit hooks
+sidebarCtrl.addPage({
+    id: 'profile',
+    title: 'Profile',
+    parentId: null,
+    render: (pane, ctrl) =&gt; {
+        // render content
+        pane.innerHTML = `
+            &lt;div class=&quot;p-2&quot;&gt;
+                &lt;label for=&quot;profile-name&quot; class=&quot;form-label&quot;&gt;Name&lt;/label&gt;
+                &lt;input id=&quot;profile-name&quot; class=&quot;form-control&quot; /&gt;
+            &lt;/div&gt;`;
+    },
+    onShow: (ctrl) =&gt; {
+        // run after the pane becomes visible
+    },
+    validate: (ctrl) =&gt; {
+        // validate inputs on this page
+        const input = document.getElementById('profile-name');
+        if (!input || input.value.trim() === '') {
+            return { valid: false, message: 'Name is required.' };
+        }
+        return { valid: true };
+    },
+    onSubmit: (ctrl) =&gt; {
+        // persist data for this page
+        const input = document.getElementById('profile-name');
+        console.log('profile name:', input ? input.value : '');
+    }
+});
+
+// switch to the page
+sidebarCtrl.selectPage('profile');
+
+// optionally trigger submit programmatically
+sidebarCtrl.submit();
+</code></pre>
+<h3 id="validating-only-the-active-page">Validating only the active page</h3>
+<pre><code class="lang-html">&lt;!-- only the currently visible page is validated; hidden pages are ignored --&gt;
+&lt;div id=&quot;settings-modal&quot;
+     class=&quot;wx-webui-modal-sidebar-panel&quot;
+     data-size=&quot;modal-lg&quot;
+     data-close-label=&quot;Close&quot;
+     data-panels-key=&quot;settings&quot;
+     data-submit-id=&quot;settings-submit&quot;
+     data-validate-active-only=&quot;true&quot;&gt;
+
+    &lt;div class=&quot;wx-modal-header&quot;&gt;
+        Settings
+    &lt;/div&gt;
+
+    &lt;div class=&quot;wx-modal-footer&quot;&gt;
+        &lt;!-- base class manages this button; id must match data-submit-id --&gt;
+        &lt;button id=&quot;settings-submit&quot; type=&quot;button&quot; class=&quot;btn btn-primary&quot;&gt;Save&lt;/button&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h2 id="registering-pages-via-dialogpanels">Registering pages via DialogPanels</h2>
+<p>Pages can be registered centrally and autoloaded into any <code>ModalSidebarPanel</code> that specifies a matching <code>data-panels-key</code>. The following example registers a page under the key <code>&quot;key&quot;</code>. Any modal with <code>data-panels-key=&quot;key&quot;</code> will automatically load this page.</p>
+<pre><code class="lang-javascript">// register a page under a registry key; will be autoloaded by modals with data-panels-key=&quot;key&quot;
+webexpress.webui.DialogPanels.register(&quot;key&quot;, {
+    id: &quot;info-pane&quot;,
+    parentId: null,
+    title: &quot;Example Page&quot;,
+    iconClass: &quot;fas fa-info-circle&quot;,
+    render: function(pane, ctrl) {
+        // render content for this page
+        pane.innerHTML = '&lt;div class=&quot;p-2&quot;&gt;&lt;p&gt;This is an example page loaded via DialogPanels.register().&lt;/p&gt;&lt;/div&gt;';
+    },
+    onShow: function(ctrl) {
+        // run when this page becomes visible
+        // e.g., initialize controls or focus first input
+    },
+    onSubmit: function(ctrl) {
+        // handle submission for this page
+        // e.g., collect and send data to a server
+    }
+});
+</code></pre>
+<h2 id="events-3">Events</h2>
+<p>ModalSidebarPanel integrates with Bootstrap’s modal events and the base component’s events.</p>
+<ul>
+<li><code>shown.bs.modal</code>: After the modal is shown; renders the tree, ensures an active page, wires the submit button, and fits the sidebar.</li>
+<li><code>hidden.bs.modal</code>: After the modal is hidden; cleans up event handlers and hides any validation alert.</li>
+<li><code>webexpress.webui.Event.MODAL_SHOW_EVENT</code>: Emitted by the base class when opening.</li>
+<li><code>webexpress.webui.Event.MODAL_HIDE_EVENT</code>: Emitted by the base class when closing.</li>
+<li><code>webexpress.webui.Event.CLICK_EVENT</code>: Global tree click events; managed idempotently and reattached as needed.</li>
+</ul>
+<h2 id="example">Example</h2>
+<p>A declarative setup with autoloaded pages, a base-managed submit button bound via <code>data-submit-id</code>, and active-only validation:</p>
+<pre><code class="lang-html">&lt;div id=&quot;account-modal&quot;
+     class=&quot;wx-webui-modal-sidebar-panel&quot;
+     data-size=&quot;modal-lg&quot;
+     data-close-label=&quot;Cancel&quot;
+     data-panels-key=&quot;account&quot;
+     data-submit-id=&quot;account-submit&quot;
+     data-validate-active-only=&quot;true&quot;&gt;
+
+    &lt;div class=&quot;wx-modal-header&quot;&gt;
+        Account Settings
+    &lt;/div&gt;
+
+    &lt;div class=&quot;wx-modal-footer&quot;&gt;
+        &lt;button id=&quot;account-submit&quot; type=&quot;button&quot; class=&quot;btn btn-success&quot;&gt;
+            Save Changes
+        &lt;/button&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<p>At runtime, the body is composed into a split layout with a navigation tree and a content area. The first page is activated by default. Navigating in the tree switches the visible pane and expands ancestor nodes. On submit, validation runs either on all pages or only the active one, depending on the configuration; an error alert remains visible above the split control while errors persist. On success, any <code>onSubmit</code> hooks are executed and the modal closes.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/modal.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

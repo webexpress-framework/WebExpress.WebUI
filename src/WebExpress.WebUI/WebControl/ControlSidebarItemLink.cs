@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.Internationalization;
+using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebUri;
@@ -16,67 +17,71 @@ namespace WebExpress.WebUI.WebControl
     public class ControlSidebarItemLink : IControlSidebarItem
     {
         /// <summary>
-        /// Returns the unique identifier for the entity.
+        /// Gets the unique identifier for the entity.
         /// </summary>
         public string Id { get; }
 
         /// <summary>
-        /// Returns or sets whether the link is active or not.
+        /// Gets or sets whether the link is active or not.
         /// </summary>
-        public TypeActive Active { get; set; }
+        public Func<IRenderControlContext, TypeActive> Active { get; set; }
 
         /// <summary>
-        /// Returns or sets the label.
+        /// Gets or sets the label.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
-        /// Returns or sets the target uri.
+        /// Gets or sets the target uri.
         /// </summary>
-        public IUri Uri { get; set; }
+        public Func<IRenderControlContext, IUri> Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the target.
+        /// Gets or sets the target.
         /// </summary>
-        public TypeTarget Target { get; set; }
+        public Func<IRenderControlContext, TypeTarget> Target { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a
         /// click to open a modal or similar target.
         /// </summary>
-        public IAction PrimaryAction { get; set; }
+        public Func<IRenderControlContext, IAction> PrimaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
-        /// double‑click to open a modal or similar target.
+        /// Gets or sets the secondary action, typically triggered by a
+        /// double-click to open a modal or similar target.
         /// </summary>
-        public IAction SecondaryAction { get; set; }
+        public Func<IRenderControlContext, IAction> SecondaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets a tooltip text.
+        /// Gets or sets the image uri.
         /// </summary>
-        public string Tooltip { get; set; }
+        public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
-        /// Returns or sets the link color.
+        /// Gets or sets a tooltip text.
         /// </summary>
-        public PropertyColorText Color { get; set; }
+        public Func<IRenderControlContext, string> Tooltip { get; set; }
 
         /// <summary>
-        /// Returns or sets the mode of the type sidebar, which determines its behavior.
+        /// Gets or sets the link color.
         /// </summary>
-        public virtual TypeSidebarMode Mode { get; set; }
+        public Func<IRenderControlContext, PropertyColorText> Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the dismissibility behavior of the sidebar.
+        /// Gets or sets the mode of the type sidebar, which determines its behavior.
         /// </summary>
-        public TypeDismissibilitySidebar Dismissibility { get; set; }
+        public virtual Func<IRenderControlContext, TypeSidebarMode> Mode { get; set; }
 
+        /// <summary>
+        /// Gets or sets the dismissibility behavior of the sidebar.
+        /// </summary>
+        public Func<IRenderControlContext, TypeDismissibilitySidebar> Dismissibility { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -95,7 +100,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return Render(renderContext, visualTree, Text, Tooltip, Uri, Icon, PrimaryAction, SecondaryAction);
+            return Render(renderContext, visualTree, Text?.Invoke(renderContext), Tooltip?.Invoke(renderContext), Uri?.Invoke(renderContext), Icon?.Invoke(renderContext), PrimaryAction?.Invoke(renderContext), SecondaryAction?.Invoke(renderContext));
         }
 
         /// <summary>
@@ -113,23 +118,29 @@ namespace WebExpress.WebUI.WebControl
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, string text, string tooltip, IUri uri, IIcon icon, IAction primaryAction, IAction secondaryAction)
         {
             var resultUri = uri?.BindParameters(renderContext.Request);
+            var mode = Mode?.Invoke(renderContext) ?? TypeSidebarMode.Default;
+            var dismissibility = Dismissibility?.Invoke(renderContext) ?? TypeDismissibilitySidebar.None;
+            var image = Image?.Invoke(renderContext);
+            var target = Target?.Invoke(renderContext) ?? TypeTarget.None;
+            var color = Color?.Invoke(renderContext);
+            var active = Active?.Invoke(renderContext) ?? TypeActive.None;
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = "wx-sidebar-link"
             }
-                .AddUserAttribute("data-mode", Mode != TypeSidebarMode.Default ? Mode.ToData() : null)
-                .AddUserAttribute("data-dismissibility", Dismissibility != TypeDismissibilitySidebar.None ? "true" : null)
+                .AddUserAttribute("data-mode", mode != TypeSidebarMode.Default ? mode.ToData() : null)
+                .AddUserAttribute("data-dismissibility", dismissibility != TypeDismissibilitySidebar.None ? "true" : null)
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, text))
                 .AddUserAttribute("data-icon", (icon as Icon)?.Class)
-                .AddUserAttribute("data-image", (icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-image", image?.ToString() ?? (icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-uri", resultUri?.ToString())
-                .AddUserAttribute("data-target", Target.ToValue())
+                .AddUserAttribute("data-target", target.ToValue())
                 .AddUserAttribute("data-title", I18N.Translate(renderContext, tooltip))
-                .AddUserAttribute("data-color-css", Color?.ToClass())
-                .AddUserAttribute("data-color-style", Color?.ToStyle())
-                .AddUserAttribute("data-active", Active == TypeActive.Active ? "active" : Active == TypeActive.Disabled ? "disabled" : null);
+                .AddUserAttribute("data-color-css", color?.ToClass())
+                .AddUserAttribute("data-color-style", color?.ToStyle())
+                .AddUserAttribute("data-active", active == TypeActive.Active ? "active" : active == TypeActive.Disabled ? "disabled" : null);
 
             primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
             secondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);

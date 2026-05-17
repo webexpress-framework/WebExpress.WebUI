@@ -15,11 +15,11 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemButtonSubmit(string id = null, params IControl[] content)
             : base(id, content)
         {
-            Text = "webexpress.webui:form.submit.label";
-            Icon = new IconSave();
-            Color = new PropertyColorButton(TypeColorButton.Success);
-            Type = TypeButton.Submit;
-            Margin = new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.Two, PropertySpacing.Space.None, PropertySpacing.Space.None);
+            Text = _ => "webexpress.webui:form.submit.label";
+            Icon = _ => new IconSave();
+            Color = _ => new PropertyColorButton(TypeColorButton.Success);
+            Type = _ => TypeButton.Submit;
+            Margin = _ => new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.Two, PropertySpacing.Space.None, PropertySpacing.Space.None);
         }
     }
 }

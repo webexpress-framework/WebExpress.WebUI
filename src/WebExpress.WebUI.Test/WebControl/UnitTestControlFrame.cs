@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFrame()
             {
-                Uri = !string.IsNullOrWhiteSpace(uri) ? new UriEndpoint(uri) : null,
+                Uri = _ => !string.IsNullOrWhiteSpace(uri) ? new UriEndpoint(uri) : null,
             };
 
             // act
@@ -70,7 +70,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFrame()
             {
-                Selector = selector,
+                Selector = _ => selector,
             };
 
             // act

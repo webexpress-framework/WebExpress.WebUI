@@ -1,4 +1,7 @@
-﻿namespace WebExpress.WebUI.WebControl
+﻿using System;
+using WebExpress.WebUI.WebPage;
+
+namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// Represents a template control.
@@ -6,8 +9,8 @@
     public interface IControlTableTemplateEditable : IControlTableTemplate
     {
         /// <summary>
-        /// Returns a value indicating whether the current template is editable or read-only.
+        /// Gets a value indicating whether the current template is editable or read-only.
         /// </summary>
-        public bool Editable { get; }
+        Func<IRenderControlContext, bool> Editable { get; }
     }
 }

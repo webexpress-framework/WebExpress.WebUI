@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormInputValueInt : IControlFormInputValue
     {
         /// <summary>
-        /// Returns or sets the int value.
+        /// Gets or sets the int value.
         /// </summary>
         public int Number { get; set; }
 

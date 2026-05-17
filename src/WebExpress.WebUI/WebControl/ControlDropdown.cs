@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
@@ -21,64 +23,69 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlDropdownItem> Items => _items;
 
         /// <summary>
-        /// Returns or sets the color. 
+        /// Gets or sets the color. 
         /// </summary>
-        public PropertyColorButton Color { get; set; }
+        public Func<IRenderControlContext, PropertyColorButton> Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
-        public TypeSizeButton Size { get; set; }
+        public Func<IRenderControlContext, TypeSizeButton> Size { get; set; }
 
         /// <summary>
-        /// Returns or sets the outline property.
+        /// Gets or sets the outline property.
         /// </summary>
-        public bool Outline { get; set; }
+        public Func<IRenderControlContext, bool> Outline { get; set; }
 
         /// <summary>
-        /// Returns or sets whether the button should take up the full width.
+        /// Gets or sets whether the button should take up the full width.
         /// </summary>
-        public TypeBlockButton Block { get; set; }
+        public Func<IRenderControlContext, TypeBlockButton> Block { get; set; }
 
         /// <summary>
-        /// Returns or sets an indicator that indicates that a menu is present.
+        /// Gets or sets an indicator that indicates that a menu is present.
         /// </summary>
-        public TypeToggleDropdown Toggle { get; set; }
+        public Func<IRenderControlContext, TypeToggleDropdown> Toggle { get; set; }
 
         /// <summary>
-        /// Returns or sets the label.
+        /// Gets or sets the label.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
-        /// Returns or sets the tooltip.
+        /// Gets or sets the tooltip.
         /// </summary>
-        public string Tooltip { get; set; }
+        public Func<IRenderControlContext, string> Tooltip { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the activation status of the button.
+        /// Gets or sets the image uri.
         /// </summary>
-        public TypeActive Active { get; set; }
+        public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
-        /// Returns or sets the orientation of the menu.
+        /// Gets or sets the activation status of the button.
         /// </summary>
-        public TypeAlignmentDropdownMenu AlignmentMenu { get; set; }
+        public Func<IRenderControlContext, TypeActive> Active { get; set; }
 
         /// <summary>
-        /// Returns or sets the height.
+        /// Gets or sets the orientation of the menu.
         /// </summary>
-        public new int Height { get; set; } = -1;
+        public Func<IRenderControlContext, TypeAlignmentDropdownMenu> AlignmentMenu { get; set; }
 
         /// <summary>
-        /// Returns or sets the width.
+        /// Gets or sets the height.
         /// </summary>
-        public new int Width { get; set; } = -1;
+        public new Func<IRenderControlContext, int> Height { get; set; } = _ => -1;
+
+        /// <summary>
+        /// Gets or sets the width.
+        /// </summary>
+        public new Func<IRenderControlContext, int> Width { get; set; } = _ => -1;
 
         /// <summary>
         /// Initializes a new instance of the class with the specified id and items.
@@ -90,7 +97,7 @@ namespace WebExpress.WebUI.WebControl
         {
             _items.AddRange(items);
 
-            Size = TypeSizeButton.Default;
+            Size = _ => TypeSizeButton.Default;
         }
 
         /// <summary>
@@ -150,7 +157,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public IControlDropdown AddHeader(string text)
         {
-            _items.Add(new ControlDropdownItemHeader() { Text = text });
+            _items.Add(new ControlDropdownItemHeader() { Text = _ => text });
 
             return this;
         }
@@ -190,47 +197,58 @@ namespace WebExpress.WebUI.WebControl
             var buttonCss = "";
             var buttonStyle = "";
             var menuCss = "";
+            var role = Role?.Invoke(renderContext);
+            var color = Color?.Invoke(renderContext);
+            var outline = Outline?.Invoke(renderContext) ?? false;
+            var size = Size?.Invoke(renderContext);
+            var block = Block?.Invoke(renderContext);
+            var toggle = Toggle?.Invoke(renderContext);
+            var alignmentMenu = AlignmentMenu?.Invoke(renderContext);
+            var icon = Icon?.Invoke(renderContext);
+            var image = Image?.Invoke(renderContext);
+            var text = Text?.Invoke(renderContext);
+            var active = Active?.Invoke(renderContext);
 
-            if (Color is not null)
+            if (color is not null)
             {
-                buttonCss = Css.Concatenate(Color?.ToClass(Outline), buttonCss);
-                buttonStyle = Style.Concatenate(Color?.ToStyle(), buttonStyle);
+                buttonCss = Css.Concatenate(color?.ToClass(outline), buttonCss);
+                buttonStyle = Style.Concatenate(color?.ToStyle(), buttonStyle);
             }
 
-            if (Size != TypeSizeButton.Default)
+            if (size != TypeSizeButton.Default)
             {
-                buttonCss = Css.Concatenate(Size.ToClass(), buttonCss);
+                buttonCss = Css.Concatenate(size?.ToClass(), buttonCss);
             }
 
-            if (Block != TypeBlockButton.None)
+            if (block != TypeBlockButton.None)
             {
-                buttonCss = Css.Concatenate(Block.ToClass(), buttonCss);
+                buttonCss = Css.Concatenate(block?.ToClass(), buttonCss);
             }
 
-            if (Toggle != TypeToggleDropdown.None)
+            if (toggle != TypeToggleDropdown.None)
             {
-                buttonCss = Css.Concatenate(Toggle.ToClass(), buttonCss);
+                buttonCss = Css.Concatenate(toggle?.ToClass(), buttonCss);
             }
 
-            if (AlignmentMenu != TypeAlignmentDropdownMenu.Default)
+            if (alignmentMenu != TypeAlignmentDropdownMenu.Default)
             {
-                menuCss = Css.Concatenate(AlignmentMenu.ToClass(), menuCss);
+                menuCss = Css.Concatenate(alignmentMenu?.ToClass(), menuCss);
             }
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-dropdown", GetClasses()),
-                Role = Role ?? "button"
+                Role = role ?? "button"
             }
-                .AddUserAttribute("data-label", I18N.Translate(renderContext, Text))
-                .AddUserAttribute("data-icon", (Icon as Icon)?.Class)
-                .AddUserAttribute("data-image", (Icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, text))
+                .AddUserAttribute("data-icon", (icon as Icon)?.Class)
+                .AddUserAttribute("data-image", image?.ToString() ?? (icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-buttonCss", buttonCss)
                 .AddUserAttribute("data-buttonStyle", buttonStyle)
                 .AddUserAttribute("data-menuCss", menuCss)
-                .AddUserAttribute(Active == TypeActive.Active ? "active" : null)
-                .AddUserAttribute(Active == TypeActive.Disabled ? "disabled" : null)
+                .AddUserAttribute(active == TypeActive.Active ? "active" : null)
+                .AddUserAttribute(active == TypeActive.Disabled ? "disabled" : null)
                 .Add(_items.Select(x => x?.Render(renderContext, visualTree)));
 
             return html;

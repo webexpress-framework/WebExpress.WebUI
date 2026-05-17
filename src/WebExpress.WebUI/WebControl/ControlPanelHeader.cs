@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlPanelHeader : ControlPanel
     {
         /// <summary>
-        /// Returns or sets the fixed arrangement.
+        /// Gets or sets the fixed arrangement.
         /// </summary>
         public virtual TypeFixed Fixed
         {
@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns or sets the pinned arrangement when the toolbar is at the top.
+        /// Gets or sets the pinned arrangement when the toolbar is at the top.
         /// </summary>
         public virtual TypeSticky Sticky
         {
@@ -46,13 +46,15 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var role = Role?.Invoke(renderContext);
+
             return new HtmlElementSectionHeader([.. Content.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
                 Class = GetClasses(),
                 Style = GetStyles(),
-                Role = Role,
-                DataTheme = Theme.ToValue()
+                Role = role,
+                DataTheme = Theme?.Invoke(renderContext).ToValue()
             };
         }
     }

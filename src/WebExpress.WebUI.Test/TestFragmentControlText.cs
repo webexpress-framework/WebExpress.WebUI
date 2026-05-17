@@ -17,8 +17,8 @@ namespace WebExpress.WebUI.Test
         public TestFragmentControlText(IFragmentContext fragmentContext)
             : base(fragmentContext)
         {
-            Text = "TestFragmentControlText";
-            Format = TypeFormatText.Paragraph;
+            Text = _ => "TestFragmentControlText";
+            Format = _ => TypeFormatText.Paragraph;
         }
     }
 }

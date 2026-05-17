@@ -15,146 +15,141 @@ namespace WebExpress.WebUI.WebControl
         private readonly Dictionary<string, Tuple<object, Func<string>, Func<string>>> _propertys = [];
 
         /// <summary>
-        /// Returns or sets the id of the control.
+        /// Gets or sets the id of the control.
         /// </summary>
         public string Id { get; private set; }
 
         /// <summary>
-        /// Returns or sets the horizontal alignment.
+        /// Gets or sets the text color.
         /// </summary>
-        public virtual TypeHorizontalAlignment HorizontalAlignment
+        public virtual Func<IRenderControlContext, PropertyColorText> TextColor
         {
-            get => (TypeHorizontalAlignment)GetProperty(TypeHorizontalAlignment.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, PropertyColorText>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>
-        /// Returns or sets the text color.
+        /// Gets or sets the background color.
         /// </summary>
-        public virtual PropertyColorText TextColor
+        public virtual Func<IRenderControlContext, PropertyColorBackground> BackgroundColor
         {
-            get => (PropertyColorText)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+            get => (Func<IRenderControlContext, PropertyColorBackground>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>
-        /// Returns or sets the background color.
+        /// Gets or sets the border color.
         /// </summary>
-        public virtual PropertyColorBackground BackgroundColor
+        public virtual Func<IRenderControlContext, PropertyColorBorder> BorderColor
         {
-            get => (PropertyColorBackground)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+            get => (Func<IRenderControlContext, PropertyColorBorder>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>
-        /// Returns or sets the border color.
+        /// Gets or sets the padding.
         /// </summary>
-        public virtual PropertyColorBorder BorderColor
+        public virtual Func<IRenderControlContext, PropertySpacingPadding> Padding
         {
-            get => (PropertyColorBorder)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+            get => (Func<IRenderControlContext, PropertySpacingPadding>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the padding.
+        /// Gets or sets the margin.
         /// </summary>
-        public virtual PropertySpacingPadding Padding
+        public virtual Func<IRenderControlContext, PropertySpacingMargin> Margin
         {
-            get => (PropertySpacingPadding)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass());
+            get => (Func<IRenderControlContext, PropertySpacingMargin>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the margin.
+        /// Gets or sets the border.
         /// </summary>
-        public virtual PropertySpacingMargin Margin
+        public virtual Func<IRenderControlContext, PropertyBorder> Border
         {
-            get => (PropertySpacingMargin)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass());
+            get => (Func<IRenderControlContext, PropertyBorder>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the border.
+        /// Gets or sets the column property if the control is on a grid.
         /// </summary>
-        public virtual PropertyBorder Border
+        public virtual Func<IRenderControlContext, PropertyGrid> GridColumn
         {
-            get => (PropertyBorder)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass());
+            get => (Func<IRenderControlContext, PropertyGrid>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the column property if the control is on a grid.
+        /// Gets or sets the width property of the control.
         /// </summary>
-        public virtual PropertyGrid GridColumn
+        public virtual Func<IRenderControlContext, TypeWidth> Width
         {
-            get => (PropertyGrid)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass());
+            get => (Func<IRenderControlContext, TypeWidth>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the width property of the control.
+        /// Gets or sets the height property of the control.
         /// </summary>
-        public virtual TypeWidth Width
+        public virtual Func<IRenderControlContext, TypeHeight> Height
         {
-            get => (TypeWidth)GetProperty(TypeWidth.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeHeight>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the height property of the control.
+        /// Gets or sets the flex grow property of the control.
         /// </summary>
-        public virtual TypeHeight Height
+        public virtual Func<IRenderControlContext, TypeFlexGrow> FlexGrow
         {
-            get => (TypeHeight)GetProperty(TypeHeight.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeFlexGrow>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the flex grow property of the control.
-        /// </summary>
-        public virtual TypeFlexGrow FlexGrow
-        {
-            get => (TypeFlexGrow)GetProperty(TypeFlexGrow.None);
-            set => SetProperty(value, () => value.ToClass());
-        }
-
-        /// <summary>
-        /// Returns or sets the display type for the current object.
+        /// Gets or sets the display type for the current object.
         /// </summary>
         /// <remarks>
         /// This property determines how the object is visually represented. Setting this
         /// property may involve converting the value to a class representation.
         /// </remarks>
-        public virtual TypeDisplay Display
+        public virtual Func<IRenderControlContext, TypeDisplay> Display
         {
-            get => (TypeDisplay)GetProperty(TypeDisplay.None);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeDisplay>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the css class.
+        /// Gets or sets the horizontal alignment.
+        /// </summary>
+        public virtual Func<IRenderControlContext, TypeHorizontalAlignment> HorizontalAlignment
+        {
+            get => (Func<IRenderControlContext, TypeHorizontalAlignment>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+        }
+
+        /// <summary>
+        /// Gets or sets the css class.
         /// </summary>
         public IEnumerable<string> Classes { get; set; } = [];
 
         /// <summary>
-        /// Returns or sets the css style.
+        /// Gets or sets the css style.
         /// </summary>
         public IEnumerable<string> Styles { get; set; } = [];
 
         /// <summary>
-        /// Returns or sets the role.
+        /// Gets or sets the role.
         /// </summary>
-        public string Role { get; set; }
-
-        /// <summary>
-        /// Returns or sets the OnClick attribute, which executes a java script on the client.
-        /// </summary>
-        public PropertyOnClick OnClick { get; set; }
+        public Func<IRenderControlContext, string> Role { get; set; }
 
         /// <summary>
         /// Determines whether the control is active and rendering.
         /// </summary>
-        public bool Enable { get; set; } = true;
+        public Func<IRenderControlContext, bool> Enable { get; set; } = _ => true;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -164,10 +159,10 @@ namespace WebExpress.WebUI.WebControl
         {
             Id = id?.Replace('.', '-');
 
-            HorizontalAlignment = TypeHorizontalAlignment.Default;
-            BackgroundColor = new PropertyColorBackground(TypeColorBackground.Default);
-            Padding = new PropertySpacingPadding(PropertySpacing.Space.None);
-            Margin = new PropertySpacingMargin(PropertySpacing.Space.None);
+            HorizontalAlignment = _ => TypeHorizontalAlignment.Default;
+            BackgroundColor = _ => new PropertyColorBackground(TypeColorBackground.Default);
+            Padding = _ => new PropertySpacingPadding(PropertySpacing.Space.None);
+            Margin = _ => new PropertySpacingMargin(PropertySpacing.Space.None);
         }
 
         /// <summary>
@@ -211,6 +206,21 @@ namespace WebExpress.WebUI.WebControl
             if (_propertys.TryGetValue(propertyName, out Tuple<object, Func<string>, Func<string>> item))
             {
                 return (IProperty)item.Item1;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Returns a property.
+        /// </summary>
+        /// <param name="propertyName">The name of the property.</param>
+        /// <returns>The value.</returns>
+        protected object GetPropertyObjectValue([CallerMemberName] string propertyName = "")
+        {
+            if (_propertys.TryGetValue(propertyName, out Tuple<object, Func<string>, Func<string>> item))
+            {
+                return item.Item1;
             }
 
             return null;
@@ -286,6 +296,24 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Stores a property.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="callbackClass">The callback function to determine the css class.</param>
+        /// <param name="callbackStyle">The callback function to determine the css style.</param>
+        /// <param name="propertyName">The name of the property.</param>
+        protected void SetProperty(object value, Func<string> callbackClass, Func<string> callbackStyle = null, [CallerMemberName] string propertyName = "")
+        {
+            if (!_propertys.ContainsKey(propertyName))
+            {
+                _propertys.Add(propertyName, new Tuple<object, Func<string>, Func<string>>(value, callbackClass, callbackStyle));
+                return;
+            }
+
+            _propertys[propertyName] = new Tuple<object, Func<string>, Func<string>>(value, callbackClass, callbackStyle);
+        }
+
+        /// <summary>
         /// Returns all css classes.
         /// </summary>
         /// <returns>The css classes.</returns>
@@ -293,7 +321,7 @@ namespace WebExpress.WebUI.WebControl
         {
             var list = _propertys.Values
                 .Where(x => x.Item2 is not null)
-                .Select(x => x.Item2())
+                .Select(x => x.Item2?.Invoke())
                 .Where(x => !string.IsNullOrEmpty(x))
                 .Distinct();
 

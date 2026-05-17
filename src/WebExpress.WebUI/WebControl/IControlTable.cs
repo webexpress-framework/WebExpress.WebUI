@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -9,44 +11,44 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlTable : IControl
     {
         /// <summary>
-        /// Returns the columns of the table.
+        /// Gets the columns of the table.
         /// </summary>
         IEnumerable<IControlTableColumn> Columns { get; }
 
         /// <summary>
-        /// Returns the rows of the table.
+        /// Gets the rows of the table.
         /// </summary>
         IEnumerable<IControlTableRow> Rows { get; }
 
         /// <summary>
-        /// Returns a value indicating whether the table is striped.
+        /// Gets a value indicating whether the table is striped.
         /// </summary>
-        TypeStripedTable Striped { get; }
+        Func<IRenderControlContext, TypeStripedTable> Striped { get; }
 
         /// <summary>
-        /// Returns or sets the color scheme used for the table.
+        /// Gets or sets the color scheme used for the table.
         /// </summary>
-        TypeColorTable Color { get; }
+        Func<IRenderControlContext, TypeColorTable> Color { get; }
 
         /// <summary>
-        /// Returns the header color scheme used for the table.
+        /// Gets the header color scheme used for the table.
         /// </summary>
-        TypeColorTable HeaderColor { get; }
+        Func<IRenderControlContext, TypeColorTable> HeaderColor { get; }
 
         /// <summary>
-        /// Returns a value indicating whether the table has a visible border.
+        /// Gets a value indicating whether the table has a visible border.
         /// </summary>
-        TypeBorderTable TableBorder { get; }
+        Func<IRenderControlContext, TypeBorderTable> TableBorder { get; }
 
         /// <summary>
-        /// Returns a value indicating whether the item can be selected.
+        /// Gets a value indicating whether the item can be selected.
         /// </summary>
-        bool Selectable { get; }
+        Func<IRenderControlContext, bool> Selectable { get; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether columns should be hidden.
+        /// Gets or sets a value indicating whether columns should be hidden.
         /// </summary>
-        bool SuppressHeaders { get; }
+        Func<IRenderControlContext, bool> SuppressHeaders { get; }
 
         /// <summary>
         /// Adds a column to the table.

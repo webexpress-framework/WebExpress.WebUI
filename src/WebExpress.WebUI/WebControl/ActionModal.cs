@@ -13,7 +13,7 @@ namespace WebExpress.WebUI.WebControl
         private readonly TypeModalSize? _size;
 
         /// <summary>
-        /// Returns the unique identifier for this modal.
+        /// Gets the unique identifier for this modal.
         /// </summary>
         public string Target { get; private set; }
 
@@ -23,7 +23,7 @@ namespace WebExpress.WebUI.WebControl
         public string Size => _size?.ToClass();
 
         /// <summary>
-        /// Returns or sets the target uri.
+        /// Gets or sets the target uri.
         /// </summary>
         public IUri Uri { get; set; }
 

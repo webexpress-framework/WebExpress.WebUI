@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -18,14 +19,14 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlFormItemInputMoveItem> Options => _options;
 
         /// <summary>
-        /// Returns or sets the unique identifier for the object.
+        /// Gets or sets the unique identifier for the object.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the current template is editable or read-only.
+        /// Gets or sets a value indicating whether the current template is editable or read-only.
         /// </summary>
-        public bool Editable { get; set; }
+        public Func<IRenderControlContext, bool> Editable { get; set; } = _ => false;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -80,12 +81,14 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var editable = Editable?.Invoke(renderContext) ?? false;
+
             var html = new HtmlElement("template")
             {
                 Id = Id
             }
                 .AddUserAttribute("data-type", "move")
-                .AddUserAttribute("data-editable", Editable ? "true" : null)
+                .AddUserAttribute("data-editable", editable ? "true" : null)
                 .Add(_options.Select(x => x.Render(renderContext, visualTree)));
 
             return html;

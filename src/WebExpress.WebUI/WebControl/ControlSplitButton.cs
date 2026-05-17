@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
@@ -14,75 +15,75 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<IControlSplitButtonItem> _items = [];
 
         /// <summary>
-        /// Returns or sets the background color.
+        /// Gets or sets the background color.
         /// </summary>
-        public new PropertyColorButton BackgroundColor
+        public new Func<IRenderControlContext, PropertyColorButton> BackgroundColor
         {
-            get => (PropertyColorButton)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(Outline), () => value?.ToStyle(Outline));
+            get => (Func<IRenderControlContext, PropertyColorButton>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(Outline?.Invoke(null) ?? false), () => value?.Invoke(null)?.ToStyle(Outline?.Invoke(null) ?? false));
         }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
-        public TypeSizeButton Size
+        public Func<IRenderControlContext, TypeSizeButton> Size
         {
-            get => (TypeSizeButton)GetProperty(TypeSizeButton.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeSizeButton>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the outline property
+        /// Gets or sets the outline property
         /// </summary>
-        public bool Outline { get; set; }
+        public Func<IRenderControlContext, bool> Outline { get; set; } = _ => false;
 
         /// <summary>
-        /// Returns or sets whether the button should take up the full width.
+        /// Gets or sets whether the button should take up the full width.
         /// </summary>
-        public TypeBlockButton Block
+        public Func<IRenderControlContext, TypeBlockButton> Block
         {
-            get => (TypeBlockButton)GetProperty(TypeBlockButton.None);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeBlockButton>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
-        /// Returns or sets the value.
+        /// Gets or sets the value.
         /// </summary>
-        public string Value { get; set; }
+        public Func<IRenderControlContext, string> Value { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the activation status of the button.
+        /// Gets or sets the activation status of the button.
         /// </summary>
-        public TypeActive Active
+        public Func<IRenderControlContext, TypeActive> Active
         {
-            get => (TypeActive)GetProperty(TypeActive.None);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeActive>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
-        public IAction PrimaryAction { get; set; }
+        public Func<IRenderControlContext, IAction> PrimaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// double‑click to open a modal or similar target.
         /// </summary>
-        public IAction SecondaryAction { get; set; }
+        public Func<IRenderControlContext, IAction> SecondaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the content.
+        /// Gets or sets the content.
         /// </summary>
         public IEnumerable<IControlSplitButtonItem> Items => _items;
 
@@ -93,7 +94,9 @@ namespace WebExpress.WebUI.WebControl
         public ControlSplitButton(string id = null, params IControlSplitButtonItem[] items)
             : base(id)
         {
-            Size = TypeSizeButton.Default;
+            Size = _ => TypeSizeButton.Default;
+            Block = _ => TypeBlockButton.None;
+            Active = _ => TypeActive.None;
             _items.AddRange(items);
         }
 
@@ -139,7 +142,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The current instance for method chaining.</returns>
         public IControlSplitButton AddHeader(string text)
         {
-            _items.Add(new ControlSplitButtonItemHeader() { Text = text });
+            _items.Add(new ControlSplitButtonItemHeader() { Text = _ => text });
 
             return this;
         }
@@ -164,41 +167,47 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var margin = Margin?.Invoke(renderContext);
+            var horizontalAlignment = HorizontalAlignment?.Invoke(renderContext);
+            var icon = Icon?.Invoke(renderContext);
+            var text = Text?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
+
             var button = new HtmlElementFieldButton()
             {
                 Id = string.IsNullOrWhiteSpace(Id) ? "" : Id + "_btn",
-                Class = Css.Concatenate("btn", Css.Remove(GetClasses(), Margin.ToClass())),
+                Class = Css.Concatenate("btn", Css.Remove(GetClasses(), margin?.ToClass())),
                 Style = GetStyles()
             };
 
-            if (Icon is not null)
+            if (icon is not null)
             {
                 button.Add(new ControlIcon()
                 {
-                    Icon = Icon,
-                    Margin = !string.IsNullOrWhiteSpace(Text) ? new PropertySpacingMargin
+                    Icon = _ => icon,
+                    Margin = _ => !string.IsNullOrWhiteSpace(text) ? new PropertySpacingMargin
                     (
                         PropertySpacing.Space.None,
                         PropertySpacing.Space.Two,
                         PropertySpacing.Space.None,
                         PropertySpacing.Space.None
                     ) : new PropertySpacingMargin(PropertySpacing.Space.None),
-                    VerticalAlignment = TypeVerticalAlignment.Default
+                    VerticalAlignment = _ => TypeVerticalAlignment.Default
                 }.Render(renderContext, visualTree));
             }
 
-            if (!string.IsNullOrWhiteSpace(Text))
+            if (!string.IsNullOrWhiteSpace(text))
             {
-                button.Add(new HtmlText(Text));
+                button.Add(new HtmlText(text));
             }
 
-            PrimaryAction?.ApplyUserAttributes(button, TypeAction.Primary);
-            SecondaryAction?.ApplyUserAttributes(button, TypeAction.Secondary);
+            PrimaryAction?.Invoke(renderContext)?.ApplyUserAttributes(button, TypeAction.Primary);
+            SecondaryAction?.Invoke(renderContext)?.ApplyUserAttributes(button, TypeAction.Secondary);
 
             var dropdownButton = new HtmlElementFieldButton(new HtmlElementTextSemanticsSpan() { Class = "caret" })
             {
                 Id = string.IsNullOrWhiteSpace(Id) ? "" : Id + "_toggle",
-                Class = Css.Concatenate("btn dropdown-toggle dropdown-toggle-split", Css.Remove(GetClasses(), "btn-block", Margin.ToClass())),
+                Class = Css.Concatenate("btn dropdown-toggle dropdown-toggle-split", Css.Remove(GetClasses(), "btn-block", margin?.ToClass())),
                 Style = GetStyles(),
                 DataToggle = "dropdown"
             };
@@ -207,7 +216,7 @@ namespace WebExpress.WebUI.WebControl
 
             var dropdownElements = new HtmlElementTextContentUl
                 (
-                    Items.Select
+                    [.. Items.Select
                     (
                         x =>
                         x is null || x is ControlDropdownItemDivider || x is ControlLine ?
@@ -215,10 +224,10 @@ namespace WebExpress.WebUI.WebControl
                         x is ControlDropdownItemHeader ?
                         x.Render(renderContext, visualTree) :
                         new HtmlElementTextContentLi(x.Render(renderContext, visualTree)) { Class = "dropdown-item" }
-                    ).ToArray()
+                    )]
                 )
             {
-                Class = HorizontalAlignment == TypeHorizontalAlignment.Right ? "dropdown-menu dropdown-menu-right" : "dropdown-menu"
+                Class = horizontalAlignment == TypeHorizontalAlignment.Right ? "dropdown-menu dropdown-menu-right" : "dropdown-menu"
             };
 
             var html = new HtmlElementTextContentDiv
@@ -232,10 +241,10 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate
                 (
                     "btn-group",
-                    Margin.ToClass(),
-                    (Block == TypeBlockButton.Block ? "btn-block" : "")
+                    margin?.ToClass(),
+                    (Block?.Invoke(renderContext) == TypeBlockButton.Block ? "btn-block" : "")
                 ),
-                Role = Role
+                Role = role
             };
 
             return html;

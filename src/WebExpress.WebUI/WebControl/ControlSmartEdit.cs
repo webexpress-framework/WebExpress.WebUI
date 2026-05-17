@@ -40,24 +40,24 @@ namespace WebExpress.WebUI.WebControl
             .Select(x => x as IControlFormItemInput);
 
         /// <summary>
-        /// Returns or sets the id of the item.
+        /// Gets or sets the id of the item.
         /// </summary>
-        public string ObjectId { get; set; }
+        public Func<IRenderControlContext, string> ObjectId { get; set; }
 
         /// <summary>
-        /// Returns or sets the name of the item.
+        /// Gets or sets the name of the item.
         /// </summary>
-        public string ObjectName { get => _form.Name; set => _form.Name = value; }
+        public Func<IRenderControlFormContext, string> ObjectName { get => _form.Name; set => _form.Name = value; }
 
         /// <summary>
-        /// Returns or sets the target uri.
+        /// Gets or sets the target uri.
         /// </summary>
-        public IUri Uri { get => _form.Uri; set => _form.Uri = value; }
+        public Func<IRenderControlFormContext, IUri> Uri { get => _form.Uri; set => _form.Uri = value; }
 
         /// <summary>
-        /// Returns or sets the request method.
+        /// Gets or sets the request method.
         /// </summary>
-        public RequestMethod Method { get => _form.Method; set => _form.Method = value; }
+        public Func<IRenderControlFormContext, RequestMethod> Method { get => _form.Method; set => _form.Method = value; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -153,10 +153,11 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var formRenderContext = new RenderControlFormContext(renderContext, _form);
-            var name = _form.Name ?? _form.Id;
-            var uri = _form.Uri?.ToString() ?? formRenderContext.Uri?.ToString();
+            var name = _form.Name?.Invoke(formRenderContext) ?? _form.Id;
+            var uri = _form.Uri?.Invoke(formRenderContext)?.ToString() ?? formRenderContext.Uri?.ToString();
+            var method = _form.Method?.Invoke(formRenderContext) ?? RequestMethod.NONE;
 
-            var form = _form.Render(formRenderContext, visualTree, _form.Items);
+            var form = _form.Render(formRenderContext, visualTree);
 
             var html = new HtmlElementTextContentDiv()
             {
@@ -164,10 +165,10 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("wx-webui-smart-edit", GetClasses()),
                 Style = GetStyles()
             }
-                .AddUserAttribute("data-object-id", ObjectId)
+                .AddUserAttribute("data-object-id", ObjectId?.Invoke(renderContext))
                 .AddUserAttribute("data-object-name", name)
                 .AddUserAttribute("data-form-action", uri)
-                .AddUserAttribute("data-form-method", _form.Method.ToString())
+                .AddUserAttribute("data-form-method", method.ToString())
                 .Add(Items.Select(x => x.Render(formRenderContext, visualTree)));
 
             return html;

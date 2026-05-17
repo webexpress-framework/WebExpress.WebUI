@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
@@ -21,29 +23,34 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<ControlSearchItemSuggestion> Suggestions => _suggestion;
 
         /// <summary>
-        /// Returns or sets the value of the search input.
+        /// Gets or sets the value of the search input.
         /// </summary>
-        public string Value { get; set; }
+        public Func<IRenderControlContext, string> Value { get; set; }
 
         /// <summary>
-        /// Returns or sets the placeholder text displayed in the search input.
+        /// Gets or sets the placeholder text displayed in the search input.
         /// </summary>
-        public string Placeholder { get; set; }
+        public Func<IRenderControlContext, string> Placeholder { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon displayed in the search control.
+        /// Gets or sets the icon displayed in the search control.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets the footer control displayed below the search suggestions.
+        /// Gets or sets the image uri.
+        /// </summary>
+        public Func<IRenderControlContext, IUri> Image { get; set; }
+
+        /// <summary>
+        /// Gets or sets the footer control displayed below the search suggestions.
         /// </summary>
         public IControl Footer { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether favorited suggestions are enabled.
+        /// Gets or sets a value indicating whether favorited suggestions are enabled.
         /// </summary>
-        public bool EnableFavorited { get; set; }
+        public Func<IRenderControlContext, bool> EnableFavorited { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ControlSearch"/> class.
@@ -75,35 +82,46 @@ namespace WebExpress.WebUI.WebControl
         {
             var classes = new List<string>(["wx-webui-search"]);
             classes.AddRange(Classes);
+            var placeholder = Placeholder?.Invoke(renderContext);
+            var enableFavorited = EnableFavorited?.Invoke(renderContext) ?? false;
+            var value = Value?.Invoke(renderContext);
+            var icon = Icon?.Invoke(renderContext);
+            var image = Image?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv
             (
                 [.. _suggestion.Select(x =>
                 {
-                    var div = new HtmlElementTextContentDiv(new HtmlText(x.Label))
+                    var label = x.Label?.Invoke(renderContext);
+                    var xIcon = x.Icon?.Invoke(renderContext);
+                    var xImage = x.Image?.Invoke(renderContext);
+                    var xCss = x.Css?.Invoke(renderContext);
+                    var xFavorited = x.Favorited?.Invoke(renderContext) ?? false;
+
+                    var div = new HtmlElementTextContentDiv(new HtmlText(label))
                     {
                         Id = x.Id,
-                        Class = Css.Concatenate("wx-search-suggestion", x.Css),
+                        Class = Css.Concatenate("wx-search-suggestion", xCss),
                     };
 
-                    if (x.Icon is Icon icon)
+                    if (xIcon is Icon iconCss)
                     {
-                        div.AddUserAttribute("data-icon", icon.Class);
+                        div.AddUserAttribute("data-icon", iconCss.Class);
                     }
 
-                    if (x.Icon is ImageIcon image)
+                    if (xImage != null || xIcon is ImageIcon)
                     {
-                        div.AddUserAttribute("data-image", image.Uri?.ToString());
+                        div.AddUserAttribute("data-image", xImage?.ToString() ?? (xIcon as ImageIcon)?.Uri?.ToString());
                     }
 
-                    if (x.Favorited)
+                    if (xFavorited)
                     {
                         div.AddUserAttribute("data-favorited", "true");
                     }
 
-                    if (!string.IsNullOrWhiteSpace(x.Css))
+                    if (!string.IsNullOrWhiteSpace(xCss))
                     {
-                        div.AddUserAttribute("css", x.Css);
+                        div.AddUserAttribute("css", xCss);
                     }
 
                     return div;
@@ -114,11 +132,11 @@ namespace WebExpress.WebUI.WebControl
                 Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
                 Style = GetStyles()
             }
-                .AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder))
-                .AddUserAttribute("data-favorited", EnableFavorited ? "true" : null)
-                .AddUserAttribute("data-value", Value)
-                .AddUserAttribute("data-icon", Icon is Icon icon ? icon.Class : null)
-                .AddUserAttribute("data-image", Icon is ImageIcon image ? image.Uri?.ToString() : null);
+                .AddUserAttribute("placeholder", I18N.Translate(renderContext, placeholder))
+                .AddUserAttribute("data-favorited", enableFavorited ? "true" : null)
+                .AddUserAttribute("data-value", value)
+                .AddUserAttribute("data-icon", icon is Icon iconClass ? iconClass.Class : null)
+                .AddUserAttribute("data-image", image?.ToString() ?? (icon is ImageIcon imageIcon ? imageIcon.Uri?.ToString() : null));
 
             return html;
         }

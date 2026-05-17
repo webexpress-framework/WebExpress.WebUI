@@ -1,5 +1,7 @@
-﻿using WebExpress.WebCore.WebIcon;
+using System;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebPage;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -10,13 +12,18 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFormItemInputMoveItem : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the text of the selection item.
+        /// Gets the text of the selection item.
         /// </summary>
-        string Text { get; set; }
+        Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
-        /// Returns the icon associated with the selection item.
+        /// Gets the icon associated with the selection item.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; }
+
+        /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        Func<IRenderControlContext, IUri> Image { get; set; }
     }
 }

@@ -1,0 +1,325 @@
+using System;
+using System.Collections.Generic;
+using WebExpress.WebCore.Internationalization;
+using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebUri;
+using WebExpress.WebUI.WebIcon;
+using WebExpress.WebUI.WebPage;
+
+namespace WebExpress.WebUI.WebControl
+{
+    public class ControlFormItemGroupTabView : IControlFormItemGroupTabView
+    {
+        private readonly ControlFormItemGroup _group;
+
+        /// <summary>
+        /// Gets or sets the id of the tab.
+        /// </summary>
+        public string Id { get; set; }
+
+        /// <summary>
+        /// Gets or sets the title text.
+        /// </summary>
+        public Func<IRenderControlFormContext, string> Title { get; set; }
+
+        /// <summary>
+        /// Gets or sets the icon associated with this view.
+        /// </summary>
+        public Func<IRenderControlFormContext, IIcon> Icon { get; set; }
+
+        /// <summary>
+        /// Gets or sets the image uri.
+        /// </summary>
+        public Func<IRenderControlFormContext, IUri> Image { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the group.
+        /// </summary>
+        public Func<IRenderControlFormContext, string> Name
+        {
+            get => _group.Name;
+            set => _group.Name = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the horizontal alignment.
+        /// </summary>
+        public Func<IRenderControlContext, TypeHorizontalAlignment> HorizontalAlignment
+        {
+            get => _group.HorizontalAlignment;
+            set => _group.HorizontalAlignment = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the flex grow factor that determines how much available space 
+        /// the element should take up relative to its siblings.
+        /// </summary>
+        public Func<IRenderControlContext, TypeFlexGrow> FlexGrow
+        {
+            get => _group.FlexGrow;
+            set => _group.FlexGrow = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the text color.
+        /// </summary>
+        public Func<IRenderControlContext, PropertyColorText> TextColor
+        {
+            get => _group.TextColor;
+            set => _group.TextColor = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the background color.
+        /// </summary>
+        public Func<IRenderControlContext, PropertyColorBackground> BackgroundColor
+        {
+            get => _group.BackgroundColor;
+            set => _group.BackgroundColor = value;
+        }
+
+        /// <summary>
+        /// Returns the border color configuration for the element.
+        /// </summary>
+        public Func<IRenderControlContext, PropertyColorBorder> BorderColor
+        {
+            get => _group.BorderColor;
+            set => _group.BorderColor = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the padding applied to the property group content.
+        /// </summary>
+        public Func<IRenderControlContext, PropertySpacingPadding> Padding
+        {
+            get => _group.Padding;
+            set => _group.Padding = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the margin applied to the property group layout.
+        /// </summary>
+        public Func<IRenderControlContext, PropertySpacingMargin> Margin
+        {
+            get => _group.Margin;
+            set => _group.Margin = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the border settings for the group.
+        /// </summary>
+        public Func<IRenderControlContext, PropertyBorder> Border
+        {
+            get => _group.Border;
+            set => _group.Border = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the grid column associated with this group.
+        /// </summary>
+        public Func<IRenderControlContext, PropertyGrid> GridColumn
+        {
+            get => _group.GridColumn;
+            set => _group.GridColumn = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the width type for the group.
+        /// </summary>
+        public Func<IRenderControlContext, TypeWidth> Width
+        {
+            get => _group.Width;
+            set => _group.Width = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the height value for the group.
+        /// </summary>
+        public Func<IRenderControlContext, TypeHeight> Height
+        {
+            get => _group.Height;
+            set => _group.Height = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the display settings for the type group.
+        /// </summary>
+        public Func<IRenderControlContext, TypeDisplay> Display
+        {
+            get => _group.Display;
+            set => _group.Display = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the collection of CSS class names applied to the group.
+        /// </summary>
+        public IEnumerable<string> Classes
+        {
+            get => _group.Classes;
+            set => _group.Classes = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the collection of style names associated with the group.
+        /// </summary>
+        public IEnumerable<string> Styles
+        {
+            get => _group.Styles;
+            set => _group.Styles = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the role associated with the group.
+        /// </summary>
+        public Func<IRenderControlContext, string> Role
+        {
+            get => _group.Role;
+            set => _group.Role = value;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the group is enabled.
+        /// </summary>
+        public Func<IRenderControlContext, bool> Enable
+        {
+            get => _group.Enable;
+            set => _group.Enable = value;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the class.
+        /// </summary>
+        /// <param name="id">The id of the view.</param>
+        public ControlFormItemGroupTabView(string id = null)
+        {
+            Id = id;
+            _group = new ControlFormItemGroupVertical();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the class.
+        /// </summary>
+        /// <param name="group">The control form item group.</param>
+        public ControlFormItemGroupTabView(ControlFormItemGroup group)
+        {
+            _group = group;
+        }
+
+        /// <summary>
+        /// Adds one or more items to the view.
+        /// </summary>
+        /// <param name="items">The items to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlFormItemGroupTabView Add(params IControlFormItem[] items)
+        {
+            _group?.Add(items);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds one or more items to the view.
+        /// </summary>
+        /// <param name="items">The items to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlFormItemGroupTabView Add(IEnumerable<IControlFormItem> items)
+        {
+            _group.Add(items);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Removes the specified control from the view.
+        /// </summary>
+        /// <param name="item">The control to remove.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual IControlFormItemGroupTabView Remove(IControlFormItem item)
+        {
+            _group.Remove(item);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Initializes the control group with the specified render context.
+        /// </summary>
+        /// <param name="renderContext">
+        /// The context that provides rendering information and services for the control 
+        /// group. Cannot be null.
+        /// </param>
+        public void Initialize(IRenderControlFormContext renderContext)
+        {
+            _group?.Initialize(renderContext);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
+        {
+            var renderControlFormContext = new RenderControlFormContext(renderContext, null);
+
+            return Render(renderControlFormContext, visualTree);
+        }
+
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
+        {
+            var title = Title?.Invoke(renderContext);
+            var icon = Icon?.Invoke(renderContext);
+            var image = Image?.Invoke(renderContext);
+
+            var html = new HtmlElementTextContentDiv()
+            {
+                Id = Id,
+                Class = "wx-tab-view"
+            }
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, title))
+                .AddUserAttribute("data-icon", (icon as Icon)?.Class)
+                .AddUserAttribute("data-image", image?.ToString() ?? (icon as ImageIcon)?.Uri?.ToString())
+                .Add(_group?.Render(renderContext, visualTree));
+
+            return html;
+        }
+
+        /// <summary>
+        /// Adds one or more items to the view.
+        /// </summary>
+        /// <param name="items">The items to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        IControlFormItemGroup IControlFormItemGroup.Add(params IControlFormItem[] items)
+        {
+            return Add(items);
+        }
+
+        /// <summary>
+        /// Adds one or more items to the view.
+        /// </summary>
+        /// <param name="items">The items to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        IControlFormItemGroup IControlFormItemGroup.Add(IEnumerable<IControlFormItem> items)
+        {
+            return Add(items);
+        }
+
+        /// <summary>
+        /// Removes the specified control from the view.
+        /// </summary>
+        /// <param name="item">The control to remove.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        IControlFormItemGroup IControlFormItemGroup.Remove(IControlFormItem item)
+        {
+            return Remove(item);
+        }
+    }
+}

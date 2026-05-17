@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+using System;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
@@ -10,24 +11,24 @@ namespace WebExpress.WebUI.WebControl
     public class ControlImage : Control
     {
         /// <summary>
-        /// Returns or sets the image source.
+        /// Gets or sets the image source.
         /// </summary>
-        public IUri Uri { get; set; }
+        public Func<IRenderControlContext, IUri> Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the width.
+        /// Gets or sets the width.
         /// </summary>
-        public new int Width { get; set; }
+        public new Func<IRenderControlContext, int> Width { get; set; }
 
         /// <summary>
-        /// Returns or sets the height.
+        /// Gets or sets the height.
         /// </summary>
-        public new int Height { get; set; }
+        public new Func<IRenderControlContext, int> Height { get; set; }
 
         /// <summary>
-        /// Returns or sets a tooltip text.
+        /// Gets or sets a tooltip text.
         /// </summary>
-        public string Tooltip { get; set; }
+        public Func<IRenderControlContext, string> Tooltip { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -47,30 +48,37 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var horizontalAlignment = HorizontalAlignment?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
+            var uri = Uri?.Invoke(renderContext);
+            var tooltip = Tooltip?.Invoke(renderContext);
+            var width = Width?.Invoke(renderContext) ?? 0;
+            var height = Height?.Invoke(renderContext) ?? 0;
+
             var html = new HtmlElementMultimediaImg()
             {
                 Id = Id,
-                Class = Css.Concatenate(HorizontalAlignment.ToClass(), GetClasses()),
+                Class = Css.Concatenate(horizontalAlignment?.ToClass(), GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
-                Alt = Tooltip,
-                Src = Uri?.ToString(),
+                Role = role,
+                Alt = tooltip,
+                Src = uri?.ToString(),
             };
 
-            if (!string.IsNullOrWhiteSpace(Tooltip))
+            if (!string.IsNullOrWhiteSpace(tooltip))
             {
                 html.AddUserAttribute("data-toggle", "tooltip");
-                html.AddUserAttribute("title", Tooltip);
+                html.AddUserAttribute("title", tooltip);
             }
 
-            if (Width > 0)
+            if (width > 0)
             {
-                html.AddUserAttribute("width", Width.ToString());
+                html.AddUserAttribute("width", width.ToString());
             }
 
-            if (Height > 0)
+            if (height > 0)
             {
-                html.AddUserAttribute("height", Height.ToString());
+                html.AddUserAttribute("height", height.ToString());
             }
 
             return html;

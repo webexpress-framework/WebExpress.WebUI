@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableTemplateRating(null)
             {
-                MaxRating = value
+                MaxRating = _ => value
             };
 
             // act

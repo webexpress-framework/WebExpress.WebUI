@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="21" height="21" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+  <path
+     id="circle-xmark"
+     d="M 10.5,1.5 A 9,9 0 1 0 10.5,19.5 9,9 0 1 0 10.5,1.5 Z M 7.4,5.9 10.5,9 13.6,5.9 15.1,7.4 12,10.5 15.1,13.6 13.6,15.1 10.5,12 7.4,15.1 5.9,13.6 9,10.5 5.9,7.4 Z"
+     style="fill:#000000;fill-rule:evenodd" />
+</svg>

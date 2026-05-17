@@ -6,7 +6,7 @@
     public class RenderControlFormGroupContext : RenderControlFormContext, IRenderControlFormGroupContext
     {
         /// <summary>
-        /// Returns the group in which the control is rendered.
+        /// Gets the group in which the control is rendered.
         /// </summary>
         public ControlFormItemGroup Group { get; private set; }
 

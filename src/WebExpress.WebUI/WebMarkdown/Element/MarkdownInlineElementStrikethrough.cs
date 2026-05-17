@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebMarkdown.Element
     public class MarkdownInlineElementStrikethrough : MarkdownInlineElement
     {
         /// <summary>
-        /// Returns the collection of inline elements contained within the stroked text segment.
+        /// Gets the collection of inline elements contained within the stroked text segment.
         /// </summary>
         public IEnumerable<MarkdownInlineElement> Content { get; } = [];
 

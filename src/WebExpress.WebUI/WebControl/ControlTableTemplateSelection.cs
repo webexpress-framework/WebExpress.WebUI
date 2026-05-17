@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -19,24 +20,24 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlFormItemInputSelectionItem> Options => _options;
 
         /// <summary>
-        /// Returns or sets the unique identifier for the object.
+        /// Gets or sets the unique identifier for the object.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the current template is editable or read-only.
+        /// Gets or sets a value indicating whether the current template is editable or read-only.
         /// </summary>
-        public bool Editable { get; set; }
+        public Func<IRenderControlContext, bool> Editable { get; set; }
 
         /// <summary>
         /// Allows you to select multiple items.
         /// </summary>
-        public bool MultiSelect { get; set; }
+        public Func<IRenderControlContext, bool> MultiSelect { get; set; }
 
         /// <summary>
-        /// Returns or sets the placeholder text displayed when the input field is empty.
+        /// Gets or sets the placeholder text displayed when the input field is empty.
         /// </summary>
-        public string Placeholder { get; set; }
+        public Func<IRenderControlContext, string> Placeholder { get; set; }
 
         /// <summary>
         /// Adds one or more items to the selection options.
@@ -79,14 +80,18 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var multiSelect = MultiSelect?.Invoke(renderContext);
+            var placeholder = Placeholder?.Invoke(renderContext);
+            var editable = Editable?.Invoke(renderContext);
+
             var html = new HtmlElement("template")
             {
                 Id = Id
             }
                 .AddUserAttribute("data-type", "selection")
-                .AddUserAttribute("data-multiselection", MultiSelect ? "true" : null)
-                .AddUserAttribute("data-placeholder", I18N.Translate(renderContext, Placeholder))
-                .AddUserAttribute("data-editable", Editable ? "true" : null)
+                .AddUserAttribute("data-multiselection", multiSelect == true ? "true" : null)
+                .AddUserAttribute("data-placeholder", I18N.Translate(renderContext, placeholder))
+                .AddUserAttribute("data-editable", editable == true ? "true" : null)
                 .Add(_options.Select(x => x.Render(renderContext, visualTree)));
 
             return html;

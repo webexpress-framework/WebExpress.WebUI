@@ -48,7 +48,12 @@
         /// <summary>
         /// Light background color.
         /// </summary>
-        Light = 8
+        Light = 8,
+
+        /// <summary>
+        /// Highlight color.
+        /// </summary>
+        Highlight = 13
     }
 
     /// <summary>
@@ -73,6 +78,7 @@
                 TypeColorLine.Danger => "text-danger",
                 TypeColorLine.Light => "text-light",
                 TypeColorLine.Dark => "text-dark",
+                TypeColorLine.Highlight => "text-highlight",
                 _ => string.Empty,
             };
         }

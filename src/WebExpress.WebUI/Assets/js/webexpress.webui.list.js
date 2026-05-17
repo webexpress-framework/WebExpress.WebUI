@@ -4,6 +4,7 @@
  *  - webexpress.webui.Event.ROW_REORDER_EVENT          // emitted after reorder with new/previous order
  *  - webexpress.webui.Event.MOVE_EVENT                 // also used with action: "delete"
  *  - webexpress.webui.Event.SELECT_ITEM_EVENT          // emitted when an item is selected
+ *  - webexpress.webui.Event.SORT_CHANGE_EVENT          // emitted when sort direction changes
  *  - webexpress.webui.Event.START_INLINE_EDIT_EVENT    // integration only
  *  - webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT     // integration only
  *  - webexpress.webui.Event.END_INLINE_EDIT_EVENT      // integration only
@@ -12,6 +13,11 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
 
     // core elements
     _list = document.createElement("ul");
+
+    // header elements (title + sort)
+    _headerEl = null;
+    _sortBtnEl = null;
+    _sortIndicatorEl = null;
 
     // data
     _items = [];
@@ -25,6 +31,12 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
     _deleteLabel = "Delete";
     _deleteTitle = "Delete item";
     _selectable = false;
+
+    // title / sort
+    _title = null;
+    _sortable = false;
+    _sortField = "content.content";
+    _sortDir = null;   // null | "asc" | "desc"
 
     // drag state
     _draggedItem = null;
@@ -46,9 +58,10 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
     // change flash control
     _highlightChanges = true;
     _suppressFlashOnce = false;
-    
+
     // selection state
     _selectedItem = null;
+    _autoSelected = false;
 
     /**
      * Creates a new list control instance.
@@ -66,10 +79,14 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         this._deleteLabel = ds.deleteLabel || "Delete";
         this._deleteTitle = ds.deleteTitle || "Delete item";
         this._selectable = ds.selectable === "true";
+        this._title = ds.title || null;
+        this._sortable = ds.sortable === "true";
+        this._sortField = ds.sortField || "content";
+        this._layout = ds.layout || "list-group";
 
         // parse declarative config
         this._options = this._parseOptions(element.querySelector(":scope > .wx-list-options"));
-        this._items = this._parseItems(element.querySelectorAll(":scope > .wx-list-item"));
+        this._items = this._parseItems(element.querySelectorAll(":scope > .wx-list-item, :scope > .wx-list-item-link, :scope > .wx-list-item-button"));
 
         // load persisted state (order by id)
         this._loadStateFromCookie();
@@ -82,11 +99,38 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             "data-delete-confirm",
             "data-delete-label",
             "data-delete-title",
-            "data-selectable"
+            "data-selectable",
+            "data-title",
+            "data-sortable",
+            "data-sort-field",
+            "data-layout"
         ]);
 
+        if (this._layout && this._layout !== "list-unstyled" && this._layout !== "list-group list-group-flush") {
+            element.className = "wx-list";
+        }
+        if (this._layout && this._layout !== "list-unstyled") {
+            this._layout
+                .split(/\s+/)
+                .filter(Boolean)
+                .forEach(cls => this._list.classList.add(cls));
+        }
+
+        if (this._selectable) {
+            element.classList.add("wx-list-selectable");
+        }
+
+        // build header if title or sorting is requested
+        if (this._title !== null || this._sortable) {
+            this._headerEl = this._buildHeader();
+        }
+
         // mount
-        element.replaceChildren(this._list);
+        if (this._headerEl) {
+            element.replaceChildren(this._headerEl, this._list);
+        } else {
+            element.replaceChildren(this._list);
+        }
 
         // initial render
         this.render();
@@ -96,6 +140,41 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
 
         // inline editing integration
         this._bindInlineEditSaveListener();
+
+        // auto-select the first item on init when the list is selectable, and
+        // trigger its primary action so paired panels populate immediately.
+        if (this._selectable && !this._autoSelected && this._items.length > 0 && this._selectedItem === null) {
+            this._autoSelected = true;
+            const firstItem = this._items[0];
+            this._handleSelectionChange(firstItem, null, true);
+            this._triggerPrimaryAction(firstItem);
+        }
+    }
+
+    /**
+     * Triggers the item's `data-wx-primary-action` via the central Actions
+     * registry so callers don't have to dispatch synthetic clicks.
+     * @param {Object} item Data item whose anchor element carries the action.
+     */
+    _triggerPrimaryAction(item) {
+        const el = item?._anchorLi;
+        if (!el) {
+            return;
+        }
+        const actionName = el.getAttribute("data-wx-primary-action");
+        if (!actionName) {
+            return;
+        }
+        const actionDef = webexpress?.webui?.Actions?.get(actionName);
+        if (!actionDef || typeof actionDef.execute !== "function") {
+            return;
+        }
+        try {
+            const controller = webexpress.webui.Controller.getInstanceByElement ? webexpress.webui.Controller : webexpress.webui.Controller.prototype;
+            actionDef.execute(el, "primary", controller, null);
+        } catch (e) {
+            console.error("list: primary action execute failed", e);
+        }
     }
 
     /**
@@ -125,6 +204,43 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
      */
     suppressNextChangeFlash() {
         this._suppressFlashOnce = true;
+    }
+
+    /**
+     * Gets the current header title text.
+     * @returns {string|null}
+     */
+    get title() {
+        return this._title;
+    }
+
+    /**
+     * Sets the header title text and re-renders the header.
+     * @param {string|null} value
+     */
+    set title(value) {
+        this._title = value ?? null;
+        this._syncHeader();
+    }
+
+    /**
+     * Gets the current sort direction.
+     * @returns {"asc"|"desc"|null}
+     */
+    get sortDir() {
+        return this._sortDir;
+    }
+
+    /**
+     * Programmatically sets the sort direction and re-renders.
+     * @param {"asc"|"desc"|null} value
+     */
+    set sortDir(value) {
+        if (value !== "asc" && value !== "desc" && value !== null) {
+            return;
+        }
+        this._sortDir = value;
+        this._applySortAndRender();
     }
 
     /**
@@ -166,7 +282,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         }
 
         this._updateSnapshot(currentStates);
-        
+
         if (!this._initialized) {
             this._initialized = true;
         }
@@ -255,15 +371,15 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
     _setupEventDelegation() {
         this._list.addEventListener("click", (e) => {
             const target = e.target;
-            
+
             // 1. handle delete button click
             if (target.closest(".wx-list-delete")) {
                 e.preventDefault();
                 e.stopPropagation();
-                
+
                 const li = target.closest("li");
                 const item = li?._dataItemRef;
-                
+
                 if (item) {
                     if (this._deleteConfirm) {
                         const ok = window.confirm(this._i18n("webexpress.webui:list.delete.confirm", "Delete this item?"));
@@ -278,14 +394,15 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
 
             // 2. handle selection click (if enabled and not clicking interactive elements)
             if (this._selectable) {
-                // ignore clicks inside inputs, buttons (except row itself), or dropdowns
-                if (target.closest("input, button, a, .dropdown-menu, .wx-list-options")) {
+                // allow clicks on item-wrapper link/button elements; block other interactive elements
+                const isItemWrapper = target.closest(".wx-list-item-link-el, .wx-list-item-button-el");
+                if (!isItemWrapper && target.closest("input, button, a, .dropdown-menu, .wx-list-options")) {
                     return;
                 }
 
-                const li = target.closest("li.wx-list-li");
+                const li = target.closest("li.wx-list-item");
                 const item = li?._dataItemRef;
-                
+
                 if (item) {
                     this._handleSelectionChange(item, e);
                 }
@@ -302,21 +419,20 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
     _handleSelectionChange(item, originalEvent = null, dispatch = true) {
         // remove active class from previous
         if (this._selectedItem && this._selectedItem._anchorLi) {
-            this._selectedItem._anchorLi.classList.remove("active");
+            this._selectedItem._anchorLi.classList.remove("active", "wx-list-item-active");
             this._selectedItem._anchorLi.removeAttribute("aria-selected");
         }
 
         this._selectedItem = item;
 
-        // add active class to new
+        // add active class and highlight border to new selection
         if (this._selectedItem && this._selectedItem._anchorLi) {
-            this._selectedItem._anchorLi.classList.add("active");
+            this._selectedItem._anchorLi.classList.add("active", "wx-list-item-active");
             this._selectedItem._anchorLi.setAttribute("aria-selected", "true");
         }
 
         if (dispatch) {
             this._dispatch(webexpress.webui.Event.SELECT_ITEM_EVENT, {
-                item: this._selectedItem,
                 itemId: this._selectedItem?.id || null,
                 originalEvent: originalEvent
             });
@@ -363,7 +479,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                     secondaryAction: Object.fromEntries(Object.entries(dataset)
                         .filter(([k]) => k.startsWith("wxSecondary"))
                         .map(([k, v]) => [
-                            k.slice(9).replace(/^./, c => c.toLowerCase()),
+                            k.slice(11).replace(/^./, c => c.toLowerCase()),
                             v === "true" ? true : v === "false" ? false : v
                         ])
                     ),
@@ -385,7 +501,16 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
     _parseItems(itemDivs) {
         const items = [];
         for (const div of itemDivs) {
-            if (!(div instanceof HTMLElement) || !div.classList.contains("wx-list-item")) {
+            if (!(div instanceof HTMLElement)) {
+                continue;
+            }
+            const cl = div.classList;
+            let itemType = "default";
+            if (cl.contains("wx-list-item-link")) {
+                itemType = "link";
+            } else if (cl.contains("wx-list-item-button")) {
+                itemType = "button";
+            } else if (!cl.contains("wx-list-item")) {
                 continue;
             }
             const ds = div.dataset;
@@ -407,21 +532,33 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                 id: div.id || null,
                 class: div.className || null,
                 style: div.getAttribute("style") || null,
-                color: ds.color || null,
-                editable: ds.editable === "true",
-                rendererType: rendererType,
-                rendererOptions: rendererOptions,
-                content: {
-                    content: div.textContent.trim(),
-                    html: div.firstElementChild || null, // fallback if no specific renderer
-                    image: ds.image || null,
-                    icon: ds.icon || null,
-                    uri: ds.uri || null,
-                    target: ds.target || null,
-                    modal: ds.modal || null,
-                    objectId: ds.objectId || null
-                },
+                content: div.textContent.trim(),
+                image: ds.image || null,
+                icon: ds.icon || null,
+                uri: ds.uri || ds.href || null,
+                colorCss: ds.colorCss || null,
+                colorStyle: ds.colorStyle || null,
+                bgColorCss: ds.bgcolorCss || null,
+                bgColorStyle: ds.bgcolorStyle || null,
+                target: ds.target || null,
+                itemType: itemType,
+                disabled: div.hasAttribute("disabled") || ds.disabled === "true",
                 options: null,
+                // action attributes
+                primaryAction: Object.fromEntries(Object.entries(div.dataset)
+                    .filter(([k]) => k.startsWith("wxPrimary"))
+                    .map(([k, v]) => [
+                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                ),
+                secondaryAction: Object.fromEntries(Object.entries(div.dataset)
+                    .filter(([k]) => k.startsWith("wxSecondary"))
+                    .map(([k, v]) => [
+                        k.slice(11).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                ),
                 _anchorLi: null
             };
 
@@ -453,30 +590,42 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
      */
     _buildItem(data) {
         if (typeof data === "string") {
-            return { 
-                id: null, 
-                class: null, 
-                style: null, 
-                color: null, 
-                editable: false, 
+            return {
+                id: null,
+                class: null,
+                style: null,
+                colorCss: null,
+                colorStyle: null,
+                bgColorCss: null,
+                bgColorStyle: null,
+                editable: false,
                 rendererType: null,
                 rendererOptions: {},
-                content: { content: data }, 
-                options: null, 
-                _anchorLi: null 
+                content: { content: data },
+                itemType: "default",
+                disabled: false,
+                options: null,
+                _anchorLi: null
             };
         }
         return {
             id: data.id || null,
             class: data.class || null,
             style: data.style || null,
-            color: data.color || null,
+            colorCss: data.colorCss || null,
+            colorStyle: data.colorStyle || null,
+            bgColorCss: data.bgColorCss || null,
+            bgColorStyle: data.bgColorStyle || null,
+            image: data.image || null,
+            icon: data.icon || null,
             editable: !!data.editable,
             rendererType: data.rendererType || data.type || null,
             rendererOptions: data.rendererOptions || {},
-            content: (data.content && typeof data.content === "object") 
-                ? data.content 
-                : { content: String(data?.content ?? "") },
+            content: data.content || null,
+            itemType: data.itemType || "default",
+            disabled: !!data.disabled,
+            uri: data.uri || data.href || null,
+            target: data.target || null,
             options: Array.isArray(data.options) ? data.options : null,
             _anchorLi: null,
             // action attributes
@@ -487,32 +636,170 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Builds the sticky header element (title label + optional sort button).
+     * @returns {HTMLElement} The header div.
+     */
+    _buildHeader() {
+        const header = document.createElement("div");
+        header.className = "wx-list-header";
+
+        const titleEl = document.createElement("span");
+        titleEl.className = "wx-list-header-title";
+        titleEl.textContent = this._title ?? "";
+        header.appendChild(titleEl);
+
+        if (this._sortable) {
+            const sortBtn = document.createElement("button");
+            sortBtn.type = "button";
+            sortBtn.className = "wx-list-sort-btn btn btn-link btn-sm p-0";
+            sortBtn.title = this._i18n("webexpress.webui:list.sort.title", "Sort");
+            sortBtn.setAttribute("aria-label", this._i18n("webexpress.webui:list.sort.title", "Sort"));
+            sortBtn.innerHTML = `<i class="wx-icon-light wx-icon-light-sort"></i>`;
+
+            sortBtn.addEventListener("click", () => this._cycleSortDir());
+            header.appendChild(sortBtn);
+            this._sortBtnEl = sortBtn;
+        }
+
+        return header;
+    }
+
+    /**
+     * Syncs the header DOM to the current `_title` / `_sortable` state.
+     * Creates the header if it does not exist yet; removes it if both are absent.
+     */
+    _syncHeader() {
+        if (this._title !== null || this._sortable) {
+            if (!this._headerEl) {
+                this._headerEl = this._buildHeader();
+                this._element.prepend(this._headerEl);
+            } else {
+                const titleEl = this._headerEl.querySelector(".wx-list-header-title");
+                if (titleEl) {
+                    titleEl.textContent = this._title ?? "";
+                }
+            }
+        } else if (this._headerEl) {
+            this._headerEl.remove();
+            this._headerEl = null;
+            this._sortBtnEl = null;
+            this._sortIndicatorEl = null;
+        }
+
+        this._updateSortIndicator();
+    }
+
+    /**
+     * Cycles sort direction: null → "asc" → "desc" → null.
+     */
+    _cycleSortDir() {
+        if (this._sortDir === null) {
+            this._sortDir = "asc";
+        } else if (this._sortDir === "asc") {
+            this._sortDir = "desc";
+        } else {
+            this._sortDir = null;
+        }
+        this._applySortAndRender();
+    }
+
+    /**
+     * Updates the sort indicator arrow and aria-pressed state.
+     */
+    _updateSortIndicator() {
+        if (!this._sortBtnEl) {
+            return;
+        }
+
+        this._sortBtnEl.setAttribute("aria-pressed", this._sortDir !== null ? "true" : "false");
+        this._sortBtnEl.dataset.sortDir = this._sortDir ?? "";
+
+        if (this._sortIndicatorEl) {
+            if (this._sortDir === "asc") {
+                this._sortIndicatorEl.textContent = " ▴";
+            } else if (this._sortDir === "desc") {
+                this._sortIndicatorEl.textContent = " ▾";
+            } else {
+                this._sortIndicatorEl.textContent = "";
+            }
+        }
+    }
+
+    /**
+     * Reads a nested property value from an item using dot-notation path.
+     * Example path: "content.content"
+     * @param {Object} item The item object.
+     * @param {string} path Dot-notation path.
+     * @returns {string} The resolved value (coerced to string) or "".
+     */
+    _getNestedValue(item, path) {
+        const parts = (path || "").split(".");
+        let val = item;
+        for (const p of parts) {
+            if (val == null) {
+                return "";
+            }
+            val = val[p];
+        }
+        return String(val ?? "").toLowerCase();
+    }
+
+    /**
+     * Applies the current sort direction to the item array, then calls render().
+     * Dispatches SORT_CHANGE_EVENT.
+     */
+    _applySortAndRender() {
+        this._updateSortIndicator();
+
+        if (this._sortDir !== null) {
+            const dir = this._sortDir === "asc" ? 1 : -1;
+            const field = this._sortField;
+            this._items.sort((a, b) => {
+                const va = this._getNestedValue(a, field);
+                const vb = this._getNestedValue(b, field);
+                return va < vb ? -dir : va > vb ? dir : 0;
+            });
+        }
+
+        this._dispatch(webexpress.webui.Event.SORT_CHANGE_EVENT ?? "wx:sort-change", {
+            sortDir: this._sortDir,
+            sortField: this._sortField
+        });
+
+        this.render();
+    }
+
+    /**
      * Renders list items into the UL.
      */
     _renderItems() {
-        const fragment = document.createDocumentFragment();
+
+        this._list.innerHTML = "";
 
         for (const it of this._items) {
             const li = document.createElement("li");
-            li.className = "wx-list-li d-flex align-items-start gap-2";
-            
+
+            if (this._layout && this._layout !== "list-unstyled") {
+                li.className = "wx-list-item";
+            }
+
             // restore selection state
             if (this._selectedItem === it) {
-                li.classList.add("active");
+                li.classList.add("active", "wx-list-item-active");
                 li.setAttribute("aria-selected", "true");
             }
 
-            if (it.color) {
-                li.classList.add(it.color);
+            if (it.colorCss) {
+                li.classList.add(it.colorCss);
             }
-            if (it.class) {
-                const classes = it.class.split(/\s+/).filter(Boolean);
-                if (classes.length) {
-                    li.classList.add(...classes);
-                }
+            if (it.bgColorCss) {
+                li.classList.add(it.bgColorCss);
             }
-            if (it.style) {
-                li.setAttribute("style", it.style);
+            if (it.colorStyle) {
+                li.cssText += it.colorStyle;
+            }
+            if (it.bgColorStyle) {
+                li.cssText += it.bgColorStyle;
             }
 
             // apply action attributes
@@ -533,20 +820,45 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                     }
                 }
             }
-            
+
             li._dataItemRef = it;
             it._anchorLi = li;
 
             if (this._movableItem) {
                 const handle = document.createElement("span");
                 handle.className = "wx-list-drag-handle user-select-none";
-                handle.textContent = "☰";
+                handle.textContent = "⠿";
                 handle.title = this._i18n("webexpress.webui:list.handle.title", "Move");
                 handle.setAttribute("aria-label", "Move item");
                 handle.setAttribute("tabindex", "0");
-                handle.setAttribute("role", "button"); 
+                handle.setAttribute("role", "button");
                 li.appendChild(handle);
                 this._enableDragAndDropItem(handle, it);
+            }
+
+            // build content wrapper - for link/button types wrap inside the action element
+            let actionEl = null;
+            if (it.itemType === "link") {
+                actionEl = document.createElement("a");
+                actionEl.className = "wx-list-item-link-el list-group-item list-group-item-action";
+                actionEl.href = it.uri || "#";
+                if (it.target) {
+                    actionEl.target = it.target;
+                }
+                if (it.disabled) {
+                    actionEl.classList.add("disabled");
+                    actionEl.setAttribute("aria-disabled", "true");
+                    actionEl.removeAttribute("href");
+                }
+            } else if (it.itemType === "button") {
+                actionEl = document.createElement("button");
+                actionEl.type = "button";
+                actionEl.className = "wx-list-item-button-el list-group-item list-group-item-action";
+                if (it.disabled) {
+                    actionEl.classList.add("disabled");
+                    actionEl.setAttribute("aria-disabled", "true");
+                    actionEl.disabled = true;
+                }
             }
 
             const body = document.createElement("div");
@@ -556,21 +868,21 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             const contentWrap = document.createElement("span");
             contentWrap.className = "wx-list-content";
 
-            // 1. Check for specific TableTemplate Renderer
+            // 1. check for specific TableTemplate Renderer
             if (it.rendererType && webexpress.webui.TableTemplates) {
                 const tmpl = webexpress.webui.TableTemplates.get(it.rendererType);
                 if (tmpl) {
                     try {
-                        // Merge options: item options + edit state + objectId
+                        // merge options: item options + edit state + objectId
                         const opts = Object.assign({}, it.rendererOptions || {});
                         if (it.editable) opts.editable = true;
-                        
-                        // Fake column/cell structure for compatibility with TableTemplates
+
+                        // fake column/cell structure for compatibility with TableTemplates
                         const fakeCell = { content: it.content?.content };
-                        
+
                         // invoke renderer
                         const result = tmpl.fn(it.content?.content, this, it, fakeCell, it.id || "list_item", opts);
-                        
+
                         if (result instanceof Node) {
                             contentWrap.appendChild(result);
                         } else {
@@ -578,24 +890,29 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                         }
                     } catch (e) {
                         console.error("ListCtrl renderer error:", e);
-                        contentWrap.textContent = "Renderer Error";
+                        contentWrap.textContent = this._i18n("webexpress.webui:list.renderer.error", "Renderer Error");
                     }
                     body.appendChild(contentWrap);
                 } else {
-                    // Fallback if renderer not found
+                    // fallback if renderer not found
                     this._renderDefaultContent(it, contentWrap, body);
                 }
             } else {
-                // 2. Default Rendering logic
+                // 2. default Rendering logic
                 this._renderDefaultContent(it, contentWrap, body);
             }
 
-            li.appendChild(body);
+            if (actionEl) {
+                actionEl.appendChild(body);
+                li.appendChild(actionEl);
+            } else {
+                li.appendChild(body);
+            }
 
             // options or delete button
             if (it.options && it.options.length) {
                 const opt = document.createElement("div");
-                opt.dataset.icon = "fas fa-cog";
+                opt.dataset.icon = this._iconClass("fas fa-cog", "wx-icon-light-cog");
                 opt.dataset.size = "btn-sm";
                 opt.dataset.border = "false";
                 new webexpress.webui.DropdownCtrl(opt).items = it.options;
@@ -614,10 +931,8 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                 li.appendChild(placeholder);
             }
 
-            fragment.appendChild(li);
+            this._list.appendChild(li);
         }
-
-        this._list.replaceChildren(fragment);
     }
 
     /**
@@ -627,46 +942,23 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
      * @param {HTMLElement} body Body element.
      */
     _renderDefaultContent(it, contentWrap, body) {
-        if (it.content?.image) {
+        if (it.image) {
             const img = document.createElement("img");
-            img.className = "wx-icon";
-            img.src = it.content.image;
+            img.className = "wx-icon wx-icon-large";
+            img.src = it.image;
             img.alt = "";
             img.loading = "lazy";
             contentWrap.appendChild(img);
         }
-        if (it.content?.icon) {
+        if (it.icon) {
             const i = document.createElement("i");
-            i.className = it.content.icon;
+            i.className = it.icon + " wx-icon-large";
             contentWrap.appendChild(i);
         }
 
-        const textContent = it.content?.content || "";
+        const textContent = it.content || "";
 
-        if (it.editable) {
-            if (it.content?.objectId) {
-                contentWrap.id = it.id || ("it_" + crypto.randomUUID());
-                contentWrap.setAttribute("data-object-id", it.content.objectId);
-            }
-            const input = document.createElement("input");
-            input.type = "text";
-            input.className = "form-control";
-            input.value = textContent;
-            input.name = it.id || "item";
-            contentWrap.appendChild(input);
-            
-            const smartEditCtrl = new webexpress.webui.SmartEditCtrl(contentWrap);
-            smartEditCtrl.value = textContent;
-        } else {
-            if (it.content?.html instanceof Element) {
-                const tpl = it.content.html.cloneNode(true);
-                contentWrap.appendChild(tpl);
-                const smartViewCtrl = new webexpress.webui.SmartViewCtrl(contentWrap);
-                smartViewCtrl.value = textContent;
-            } else {
-                contentWrap.appendChild(document.createTextNode(textContent));
-            }
-        }
+        contentWrap.appendChild(document.createTextNode(textContent));
         body.appendChild(contentWrap);
     }
 
@@ -678,7 +970,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
     _deleteItemByIndex(index) {
         const item = this._items[index];
         this._items.splice(index, 1);
-        
+
         // deselect if deleted
         if (this._selectedItem === item) {
             this._handleSelectionChange(null, null, true);
@@ -746,7 +1038,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
             e.dataTransfer.setDragImage(img, 0, 0);
         });
-        
+
         handle.addEventListener("dragend", () => {
             if (this._itemDragActive) {
                 this._finalizeItemDrag();
@@ -783,7 +1075,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         this._itemPlaceholder = document.createElement("li");
         this._itemPlaceholder.className = "wx-list-drag-placeholder";
         this._itemPlaceholder.style.height = `${rect.height}px`;
-        
+
         // insert placeholder after current item
         li.after(this._itemPlaceholder);
 
@@ -801,7 +1093,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         }
         e.preventDefault();
         e.dataTransfer.dropEffect = "move";
-        
+
         this._lastPointerY = e.clientY;
 
         const li = e.target.closest("li");
@@ -809,14 +1101,14 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         if (!li || li === this._itemPlaceholder || li === this._draggedItem._anchorLi) {
             return;
         }
-        
+
         if (!li._dataItemRef) {
             return;
         }
 
         const rect = li.getBoundingClientRect();
         const threshold = rect.top + (rect.height / 2);
-        
+
         if (e.clientY < threshold) {
             // mouse in upper half -> insert before
             if (li.previousElementSibling !== this._itemPlaceholder) {
@@ -859,13 +1151,13 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         if (!siblings.length) {
             return;
         }
-        
+
         let currentIndex = this._computePlaceholderIndex();
         let targetIndex = currentIndex + delta;
-        
+
         // clamp index
         targetIndex = Math.max(0, Math.min(targetIndex, siblings.length));
-        
+
         if (targetIndex === currentIndex) {
             return;
         }
@@ -888,12 +1180,12 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         if (!this._itemDragActive || this._lastPointerY === null) {
             return;
         }
-        
+
         const container = this._list.parentElement || document.scrollingElement;
         const rect = container.getBoundingClientRect();
         const threshold = 40;
         const scrollSpeed = 10;
-        
+
         if (this._lastPointerY < rect.top + threshold) {
             container.scrollTop -= scrollSpeed;
         } else if (this._lastPointerY > rect.bottom - threshold) {
@@ -914,14 +1206,14 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
 
         const prevOrder = [...this._items];
         const oldIndex = this._items.indexOf(this._draggedItem);
-        
+
         if (oldIndex !== -1) {
             // remove from old position
             this._items.splice(oldIndex, 1);
             // insert at new position
             const insertIndex = Math.min(Math.max(this._dragInsertIndex, 0), this._items.length);
             this._items.splice(insertIndex, 0, this._draggedItem);
-            
+
             // dispatch events only if index actually changed
             if (oldIndex !== insertIndex) {
                 this._dispatch(webexpress.webui.Event.ROW_REORDER_EVENT, {
@@ -963,16 +1255,16 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
     _cleanupItemDrag(li) {
         this._itemPlaceholder?.remove();
         this._itemPlaceholder = null;
-        
+
         if (li) {
             li.classList.remove("wx-list-dragging");
         }
-        
+
         this._draggedItem = null;
         this._itemDragActive = false;
         this._lastPointerY = null;
         this._dragInsertIndex = null;
-        
+
         if (this._autoScrollInterval) {
             clearInterval(this._autoScrollInterval);
             this._autoScrollInterval = null;
@@ -992,18 +1284,18 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             if (!(src instanceof HTMLElement)) {
                 return;
             }
-            
+
             // verify this event belongs to an item in this list
             if (src.closest("ul") !== this._list) {
                 return;
             }
-            
+
             const li = src.closest("li");
             const item = li?._dataItemRef;
             if (!item) {
                 return;
             }
-            
+
             this._updateItemSnapshotFromDom(item);
             this._flashItem(item);
         });
@@ -1044,12 +1336,12 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         }
         // persist only if all items have IDs to ensure restoration works
         const allHaveIds = this._items.every(it => !!it.id);
-        
+
         const state = {
             v: 1,
             order: allHaveIds ? this._items.map(it => it.id) : null
         };
-        
+
         const json = encodeURIComponent(JSON.stringify(state));
         this._setCookie(this._persistKey, json, 365);
     }
@@ -1070,7 +1362,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             if (Array.isArray(obj.order) && obj.order.length > 0) {
                 const map = new Map(this._items.map(it => [it.id, it]));
                 const reordered = [];
-                
+
                 // restore order for known items
                 obj.order.forEach(id => {
                     const item = map.get(id);
@@ -1079,10 +1371,10 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                         map.delete(id);
                     }
                 });
-                
+
                 // append remaining new items
                 map.forEach(item => reordered.push(item));
-                
+
                 this._items = reordered;
             }
         } catch (e) {
@@ -1101,7 +1393,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             return null;
         }
         const matches = document.cookie.match(new RegExp(
-            "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+            "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, "\\$1") + "=([^;]*)"
         ));
         return matches ? decodeURIComponent(matches[1]) : null;
     }
@@ -1131,10 +1423,10 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         for (const it of this._items) {
             const key = this._getItemKey(it);
             if (key) {
-                list.push({ 
-                    item: it, 
-                    key, 
-                    signature: this._computeItemSignature(it) 
+                list.push({
+                    item: it,
+                    key,
+                    signature: this._computeItemSignature(it)
                 });
             }
         }
@@ -1208,7 +1500,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         // trigger reflow
         void li.offsetWidth;
         li.classList.add("wx-row-flash");
-        
+
         setTimeout(() => {
             if (li.isConnected) {
                 li.classList.remove("wx-row-flash");

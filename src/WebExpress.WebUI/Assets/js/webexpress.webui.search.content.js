@@ -9,6 +9,8 @@
  * - data-icon: optional icon class (default: "fas fa-search").
  * - data-target-ids: comma-separated list of element IDs to search within (required).
  * - data-highlight-color: optional css color for highlight background (default: "yellow").
+ *   The literal value "highlight" is resolved to the central CSS variable
+ *   var(--wx-highlight) defined in webexpress.webui.css.
  *
  * The following events are triggered:
  * - webexpress.webui.Event.CHANGE_FILTER_EVENT
@@ -31,12 +33,11 @@ webexpress.webui.SearchContentCtrl = class extends webexpress.webui.Ctrl {
         // read configuration from attributes
         const name = element.getAttribute("name") || null;
         const placeholder = element.getAttribute("placeholder") || null;
-        const icon = element.dataset.icon || "fas fa-search";
+        const icon = element.dataset.icon || this._iconClass("fas fa-search", "wx-icon-light-search");
         const idsAttr = element.getAttribute("data-target-ids") || element.dataset.targets || "";
         const colorAttr = element.getAttribute("data-highlight-color") || element.dataset.highlightColor || "yellow";
 
-        // normalize and store settings
-        this._highlightColor = colorAttr;
+        this._highlightColor = colorAttr === "highlight" ? "var(--wx-highlight)" : colorAttr;
         this._targetIds = idsAttr
             .split(",")
             .map((s) => s.trim())
@@ -135,7 +136,7 @@ webexpress.webui.SearchContentCtrl = class extends webexpress.webui.Ctrl {
     _createSearchClearButton() {
         const searchClear = document.createElement("span");
         const icon = document.createElement("i");
-        icon.className = "fas fa-times";
+        icon.className = this._iconClass("fas fa-times", "wx-icon-light-xmark");
         searchClear.appendChild(icon);
         searchClear.style.cursor = "pointer";
 

@@ -17,7 +17,7 @@ namespace WebExpress.WebUI.Test
         public TestFragmentControlForm(IFragmentContext fragmentContext)
             : base(fragmentContext)
         {
-            Add(new ControlText() { Text = "FragmentControlForm" });
+            Add(new ControlText() { Text = _ => "FragmentControlForm" });
         }
     }
 }

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>DropdownCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="DropdownCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/dropdown.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="dropdownctrl">DropdownCtrl</h1>
+<p>The <code>Dropdown</code> component generates a button with a dropdown menu. It is designed to create dynamic and interactive menu elements based on a declarative HTML structure. Instead of a programmatic configuration, the component is defined by <code>data-</code> attributes on the host element and by its child elements, which represent the individual menu items.</p>
+<pre><code>   ┌────────────────┐
+   │ [icon] [label] │
+   └─┬──────────────┘
+   ┌─┴────────────────┐
+   │ [header]         │
+   │   [icon] [label] │
+   │   [icon] [label] │
+   ├──────────────────┤
+   │ [icon] [label]   │
+   └──────────────────┘
+</code></pre>
+<h2 id="configuration">Configuration</h2>
+<p>The component is configured through <code>data-</code> attributes on the main container and by defining the menu items as child elements with specific CSS classes.</p>
+<h3 id="button-settings">Button Settings</h3>
+<p>The appearance and behavior of the main dropdown button are controlled by the following attributes on the host element:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-label</code></td>
+<td>The text label displayed on the button.</td>
+<td><code>data-label=&quot;Actions&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-icon</code></td>
+<td>A CSS class for an icon to be displayed on the button.</td>
+<td><code>data-icon=&quot;fas fa-cog&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-image</code></td>
+<td>The URL of an image to be displayed on the button.</td>
+<td><code>data-image=&quot;/path/to/image.png&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-color</code></td>
+<td>A color class (e.g., from a CSS framework) for styling the button.</td>
+<td><code>data-color=&quot;btn-primary&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-buttoncss</code></td>
+<td>Additional CSS classes to be applied to the button.</td>
+<td><code>data-buttoncss=&quot;btn-sm custom-style&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-buttonstyle</code></td>
+<td>Inline CSS styles for the button.</td>
+<td><code>data-buttonstyle=&quot;margin-right: 10px;&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-menucss</code></td>
+<td>Additional CSS classes for the dropdown menu container (<code>&lt;ul&gt;</code>).</td>
+<td><code>data-menucss=&quot;shadow-lg&quot;</code></td>
+</tr>
+<tr>
+<td><code>active</code></td>
+<td>Indicates that the button is in an active state.</td>
+<td><code>&lt;div active&gt;&lt;/div&gt;</code></td>
+</tr>
+<tr>
+<td><code>disabled</code></td>
+<td>Disables the button, preventing user interaction.</td>
+<td><code>&lt;div disabled&gt;&lt;/div&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="menu-item-types">Menu Item Types</h3>
+<p>The items within the dropdown menu are defined by child elements inside the main container. The type of each item is determined by its CSS class:</p>
+<ul>
+<li><strong><code>.wx-dropdown-item</code></strong>: A standard clickable menu item. It can contain text, an icon, and an image.</li>
+<li><strong><code>.wx-dropdown-header</code></strong>: A non-interactive header to group related menu items.</li>
+<li><strong><code>.wx-dropdown-divider</code></strong>: A visual separator between menu items.</li>
+</ul>
+<p>Individual items can be configured with their own <code>data-</code> attributes, such as <code>data-icon</code>, <code>data-image</code>, or the <code>disabled</code> attribute.</p>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>After initialization, the properties of the component can be accessed programmatically.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<p>For dropdowns defined declaratively in HTML, the instance is retrieved via the <code>getInstanceByElement(element)</code> method of the central <code>webexpress.webui.Controller</code>.</p>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const element = document.getElementById('mainDropdown');
+
+// retrieve the controller instance associated with the element
+const dropdownCtrl = webexpress.webui.Controller.getInstanceByElement(element);
+
+if (dropdownCtrl) {
+    // disable the dropdown programmatically
+    dropdownCtrl.disabled = true;
+}
+</code></pre>
+<h3 id="manual-instantiation">Manual Instantiation</h3>
+<p>A dropdown can also be created entirely programmatically. This is useful for dynamic UI scenarios.</p>
+<pre><code class="lang-javascript">// find the container element for the dynamic dropdown
+const container = document.getElementById('dynamic-dropdown-container');
+
+// create a new instance of DropdownCtrl manually
+const dynamicDropdownCtrl = new webexpress.webui.DropdownCtrl(container);
+</code></pre>
+<h2 id="events">Events</h2>
+<p>The component dispatches global events to allow other parts of the application to react to user interactions.</p>
+<ul>
+<li><strong><code>webexpress.webui.Event.CLICK_EVENT</code></strong>: This event is fired when a clickable menu item is selected. The <code>event.detail</code> object contains a reference to the sender and the specific item that was clicked.</li>
+<li><strong><code>webexpress.webui.Event.CHANGE_VISIBILITY_EVENT</code></strong>: This event is fired when the dropdown menu is shown or hidden. The <code>event.detail</code> object indicates whether the menu is now visible (<code>true</code>) or not (<code>false</code>).</li>
+</ul>
+<h2 id="use-case-example">Use Case Example</h2>
+<p>The following code demonstrates how to create a <code>DropdownCtrl</code> using a declarative HTML structure.</p>
+<pre><code class="lang-html">&lt;!-- The main container for the dropdown button control --&gt;
+&lt;div id=&quot;mainDropdown&quot; class=&quot;wx-webui-dropdown&quot; data-label=&quot;Actions&quot; data-icon=&quot;fas fa-ellipsis-v&quot; data-color=&quot;btn-secondary&quot;&gt;
+
+    &lt;!-- A header for the first group of items --&gt;
+    &lt;div class=&quot;wx-dropdown-header&quot; data-icon=&quot;fas fa-cog&quot;&gt;
+        Settings
+    &lt;/div&gt;
+
+    &lt;!-- A clickable item with an icon and a text color class --&gt;
+    &lt;a id=&quot;home-item&quot; class=&quot;wx-dropdown-item text-primary&quot; data-icon=&quot;fas fa-home&quot;&gt;
+        Home
+    &lt;/a&gt;
+
+    &lt;!-- Another clickable item with an image --&gt;
+    &lt;a id=&quot;profile-item&quot; class=&quot;wx-dropdown-item&quot; data-image=&quot;/path/to/profile.jpg&quot;&gt;
+        Profile
+    &lt;/a&gt;
+
+    &lt;!-- A visual divider --&gt;
+    &lt;div class=&quot;wx-dropdown-divider&quot;&gt;&lt;/div&gt;
+
+    &lt;!-- A disabled item that cannot be clicked --&gt;
+    &lt;a id=&quot;logout-item&quot; class=&quot;wx-dropdown-item&quot; data-icon=&quot;fas fa-sign-out-alt&quot; disabled&gt;
+        Logout
+    &lt;/a&gt;
+&lt;/div&gt;
+</code></pre>
+<p>In this example, the component is initialized from the HTML. The main button will have the label &quot;Actions&quot; and an icon. The dropdown menu will contain a header, two active items, a divider, and one disabled item, all derived from the child elements.</p>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/dropdown.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

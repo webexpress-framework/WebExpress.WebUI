@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- List/array function: square bracket notation [•••] -->
+<svg width="21" height="21" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+  <path
+     id="list-function-bracket-left"
+     d="M 2.5,3 H 7 V 4.5 H 4 V 16.5 H 7 V 18 H 2.5 Z"
+     style="fill:#000000" />
+  <path
+     id="list-function-bracket-right"
+     d="M 18.5,3 H 14 V 4.5 H 17 V 16.5 H 14 V 18 H 18.5 Z"
+     style="fill:#000000" />
+  <rect x="8.5" y="6" width="4" height="1.5" style="fill:#000000" />
+  <rect x="8.5" y="9.75" width="4" height="1.5" style="fill:#000000" />
+  <rect x="8.5" y="13.5" width="4" height="1.5" style="fill:#000000" />
+</svg>

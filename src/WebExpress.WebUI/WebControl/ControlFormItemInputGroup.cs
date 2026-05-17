@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormItemInputGroup : ControlFormItemInput<ControlFormInputValueString>
     {
         /// <summary>
-        /// Returns the group.
+        /// Gets the group.
         /// </summary>
         public ControlFormItemGroup Group { get; private set; }
 
@@ -23,7 +23,7 @@ namespace WebExpress.WebUI.WebControl
             : base(id)
         {
             Group = group;
-            Margin = new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.Two, PropertySpacing.Space.None, PropertySpacing.Space.None);
+            Margin = _ => new PropertySpacingMargin(PropertySpacing.Space.None, PropertySpacing.Space.Two, PropertySpacing.Space.None, PropertySpacing.Space.None);
         }
 
         /// <summary>
@@ -55,7 +55,9 @@ namespace WebExpress.WebUI.WebControl
         /// </returns>
         public override IEnumerable<ValidationResult> Validate(IRenderControlFormContext renderContext)
         {
-            if (Disabled)
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
+
+            if (disabled)
             {
                 return [];
             }

@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.Internationalization;
+using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -10,48 +11,48 @@ namespace WebExpress.WebUI.WebControl
     public class ControlProgress : Control
     {
         /// <summary>
-        /// Returns or sets the format of the progress bar.
+        /// Gets or sets the format of the progress bar.
         /// </summary>
-        public TypeFormatProgress Format { get; set; }
+        public Func<IRenderControlContext, TypeFormatProgress> Format { get; set; }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
-        public TypeSizeProgress Size
+        public Func<IRenderControlContext, TypeSizeProgress> Size
         {
-            get => (TypeSizeProgress)GetProperty(TypeSizeButton.Default);
-            set => SetProperty(value, () => value.ToClass(), () => value.ToStyle());
+            get => (Func<IRenderControlContext, TypeSizeProgress>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass(), () => value?.Invoke(null).ToStyle());
         }
 
         /// <summary>
-        /// Returns or sets the progress bar color.
+        /// Gets or sets the progress bar color.
         /// </summary>
-        public PropertyColorProgress Color { get; set; }
+        public Func<IRenderControlContext, PropertyColorProgress> Color { get; set; }
 
         /// <summary>
-        /// Returns or sets the text color.
+        /// Gets or sets the text color.
         /// </summary>
-        public new PropertyColorText TextColor { get; set; }
+        public new Func<IRenderControlContext, PropertyColorText> TextColor { get; set; }
 
         /// <summary>
-        /// Returns or sets the value.
+        /// Gets or sets the value.
         /// </summary>
-        public uint Value { get; set; } = 0;
+        public Func<IRenderControlContext, uint> Value { get; set; } = _ => 0;
 
         /// <summary>
-        /// Returns or sets the minimum value.
+        /// Gets or sets the minimum value.
         /// </summary>
-        public uint Min { get; set; } = 0;
+        public Func<IRenderControlContext, uint> Min { get; set; } = _ => 0;
 
         /// <summary>
-        /// Returns or sets the maximum value.
+        /// Gets or sets the maximum value.
         /// </summary>
-        public uint Max { get; set; } = 100;
+        public Func<IRenderControlContext, uint> Max { get; set; } = _ => 100;
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -60,7 +61,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlProgress(string id = null)
             : base(id)
         {
-            BackgroundColor = new PropertyColorBackground(TypeColorBackground.Default);
+            BackgroundColor = _ => new PropertyColorBackground(TypeColorBackground.Default);
         }
 
         /// <summary>
@@ -71,45 +72,54 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            if (Format == TypeFormatProgress.Default)
+            var role = Role?.Invoke(renderContext);
+            var format = Format?.Invoke(renderContext) ?? TypeFormatProgress.Default;
+            var color = Color?.Invoke(renderContext);
+            var textColor = TextColor?.Invoke(renderContext);
+            var value = Value?.Invoke(renderContext) ?? 0;
+            var min = Min?.Invoke(renderContext) ?? 0;
+            var max = Max?.Invoke(renderContext) ?? 100;
+            var text = Text?.Invoke(renderContext);
+
+            if (format == TypeFormatProgress.Default)
             {
-                return new HtmlElementFormProgress(Value + "%")
+                return new HtmlElementFormProgress(value + "%")
                 {
                     Id = Id,
                     Class = GetClasses(),
                     Style = GetStyles(),
-                    Role = Role,
-                    Min = Min.ToString(),
-                    Max = Max.ToString(),
-                    Value = Value.ToString()
+                    Role = role,
+                    Min = min.ToString(),
+                    Max = max.ToString(),
+                    Value = value.ToString()
                 };
             }
 
-            var bar = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext.Request?.Culture, Text)))
+            var bar = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext.Request?.Culture, text)))
             {
                 Role = "progressbar",
                 Class = Css.Concatenate
                 (
                     "progress-bar",
-                    Color?.ToClass(),
-                    TextColor?.ToClass(),
-                    Format.ToClass()
+                    color?.ToClass(),
+                    textColor?.ToClass(),
+                    format.ToClass()
                 ),
                 Style = Css.Concatenate
                 (
-                    "width: " + Value + "%;",
-                    Color?.ToStyle(),
-                    TextColor?.ToStyle()
+                    "width: " + value + "%;",
+                    color?.ToStyle(),
+                    textColor?.ToStyle()
                 )
             };
-            bar.AddUserAttribute("aria-valuenow", Value.ToString());
-            bar.AddUserAttribute("aria-valuemin", Min.ToString());
-            bar.AddUserAttribute("aria-valuemax", Max.ToString());
+            bar.AddUserAttribute("aria-valuenow", value.ToString());
+            bar.AddUserAttribute("aria-valuemin", min.ToString());
+            bar.AddUserAttribute("aria-valuemax", max.ToString());
 
             var html = new HtmlElementTextContentDiv(bar)
             {
                 Id = Id,
-                Role = Role,
+                Role = role,
                 Class = Css.Concatenate
                 (
                     "progress",

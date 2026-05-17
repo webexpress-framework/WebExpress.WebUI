@@ -8,7 +8,7 @@
     gap: clamp(0.2em, 0.3vw, 0.5em);
     white-space: nowrap;
 }
-   
+
 /* Dropdown (Popper-target) */
 .wx-overflow-menu {
     display: none;
@@ -30,7 +30,7 @@
 }
 
 /* Wrappers for moved items */
-.wx-overflow-menu-item {   
+.wx-overflow-menu-item {
     display: flex;
     flex-direction: row;
     padding: 0.25em 1em;
@@ -104,15 +104,15 @@
     background-color: var(--bs-primary);
 }
 
-/* 
- * Styles for custom items in toolbar 
+/*
+ * Styles for custom items in toolbar
  */
 .wx-toolbar-custom {
     display: inline-flex;
     align-items: center;
 }
 
-/* 
+/*
  * Styles for toolpanels (custom user extensions)
  */
 .wx-toolpanel {

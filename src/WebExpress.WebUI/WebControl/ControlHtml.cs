@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+using System;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -9,15 +10,14 @@ namespace WebExpress.WebUI.WebControl
     public class ControlHtml : Control
     {
         /// <summary>
-        /// Returns or sets the html source code.
+        /// Gets or sets the html source code.
         /// </summary>
-        public string Html { get; set; }
+        public Func<IRenderControlContext, string> Html { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
-        /// <param name="value">The text.</param>
         public ControlHtml(string id = null)
             : base(id)
         {
@@ -33,7 +33,7 @@ namespace WebExpress.WebUI.WebControl
         {
             var html = new HtmlRaw
             {
-                Html = Html
+                Html = Html?.Invoke(renderContext)
             };
 
             return html;

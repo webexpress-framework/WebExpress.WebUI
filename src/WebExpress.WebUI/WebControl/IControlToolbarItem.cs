@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebPage;
+﻿using System;
+using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -9,13 +10,13 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlToolbarItem : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the alignment of the toolbar item.
+        /// Gets the alignment of the toolbar item.
         /// </summary>
-        TypeToolbarItemAlignment Alignment { get; }
+        Func<IRenderControlContext, TypeToolbarItemAlignment> Alignment { get; }
 
         /// <summary>
-        /// Returns the overflow behavior of the toolbar item.
+        /// Gets the overflow behavior of the toolbar item.
         /// </summary>
-        TypeToolbarItemOverflow Overflow { get; }
+        Func<IRenderControlContext, TypeToolbarItemOverflow> Overflow { get; }
     }
 }

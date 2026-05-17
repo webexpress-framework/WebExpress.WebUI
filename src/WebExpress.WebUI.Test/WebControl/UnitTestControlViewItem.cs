@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlViewItem()
             {
-                Title = title
+                Title = _ => title
             };
 
             // act
@@ -75,7 +75,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlViewItem()
             {
-                Description = description
+                Description = _ => description
             };
 
             // act
@@ -101,31 +101,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var icon = iconType is not null ? Activator.CreateInstance(iconType) as IIcon : null;
             var control = new ControlViewItem(null)
             {
-                Icon = icon
-            };
-
-            // act
-            var html = control.Render(context, visualTree);
-
-            // validation
-            AssertExtensions.EqualWithPlaceholders(expected, html);
-        }
-
-        /// <summary>
-        /// Tests the detail frame property of the view item control.
-        /// </summary>
-        [Theory]
-        [InlineData(false, @"<div class=""wx-view""></div>")]
-        [InlineData(true, @"<div class=""wx-view"" data-has-details=""true""></div>")]
-        public void DetailFrame(bool hasFrame, string expected)
-        {
-            // arrange
-            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CreateRenderContextMock();
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlViewItem(null)
-            {
-                DetailFrame = hasFrame
+                Icon = _ => icon
             };
 
             // act

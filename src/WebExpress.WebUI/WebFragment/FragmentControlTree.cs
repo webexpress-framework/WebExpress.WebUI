@@ -9,10 +9,10 @@ namespace WebExpress.WebUI.WebFragment
     /// Represents a control tree for a fragment, implementing the IFragmentControl interface.
     /// </summary>
     /// <typeparam name="ControlTree">The type of control tree.</typeparam>
-    public class FragmentControlTree : ControlTree, IFragmentControl<ControlTree>
+    public abstract class FragmentControlTree : ControlTree, IFragmentControl<ControlTree>
     {
         /// <summary>
-        /// Returns the context of the fragment.
+        /// Gets the context of the fragment.
         /// </summary>
         public IFragmentContext FragmentContext { get; }
 
@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.WebFragment
         /// </summary>
         /// <param name="fragmentContext">The context of the fragment.</param>
         protected FragmentControlTree(IFragmentContext fragmentContext)
-            : base(fragmentContext?.FragmentId?.ToString())
+            : base(fragmentContext?.FragmentId?.ToString()?.Replace(".", "-"))
         {
             FragmentContext = fragmentContext;
         }

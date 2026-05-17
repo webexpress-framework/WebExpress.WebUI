@@ -1,8 +1,8 @@
-/* 
+/**
  * A control for uploading and cropping a profile image with circular or rectangular mask.
  *
  * The following events are triggered:
- * - webexpress.webui.Event.FILE_SELECTED_EVENT 
+ * - webexpress.webui.Event.FILE_SELECTED_EVENT
  */
 webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
 
@@ -14,8 +14,10 @@ webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         // configuration from attributes and data-* settings
-        this._id = this._element.id;
+        this._id = this._element.getAttribute("id");
         this._name = this._element.getAttribute("name") || "avatar";
+        this._element.removeAttribute("id");
+        this._element.removeAttribute("name");
         this._uploadUri = this._element.dataset.uri || "";
         this._shape = (this._element.dataset.shape === "rect") ? "rect" : "circle";
         this._viewport = parseInt(this._element.dataset.viewport || "320", 10);
@@ -72,6 +74,9 @@ webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
         // hidden file input
         this._fileInput = document.createElement("input");
         this._fileInput.type = "file";
+        if (this._id) {
+            this._fileInput.id = this._id;
+        }
         this._fileInput.accept = this._accept;
         this._fileInput.style.display = "none";
         this._element.appendChild(this._fileInput);

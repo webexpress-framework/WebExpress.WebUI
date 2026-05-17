@@ -6,59 +6,64 @@
     public enum TypeColorTile
     {
         /// <summary>
-        /// Default color tile card.
+        /// Default tile card color.
         /// </summary>
         Default,
 
         /// <summary>
-        /// Primary color tile card.
+        /// Primary tile card color.
         /// </summary>
         Primary,
 
         /// <summary>
-        /// Secondary color tile card.
+        /// Secondary tile card color.
         /// </summary>
         Secondary,
 
         /// <summary>
-        /// Success color tile card.
+        /// Success tile card color.
         /// </summary>
         Success,
 
         /// <summary>
-        /// Info color tile card.
+        /// Info tile card color.
         /// </summary>
         Info,
 
         /// <summary>
-        /// Warning color tile card.
+        /// Warning tile card color.
         /// </summary>
         Warning,
 
         /// <summary>
-        /// Danger color tile card.
+        /// Danger tile card color.
         /// </summary>
         Danger,
 
         /// <summary>
-        /// Dark color tile card.
+        /// Dark tile card color.
         /// </summary>
         Dark,
 
         /// <summary>
-        /// Light color tile card.
+        /// Light tile card color.
         /// </summary>
         Light,
 
         /// <summary>
-        /// White color tile card.
+        /// White tile card color.
         /// </summary>
         White,
 
         /// <summary>
-        /// Transparent color tile card.
+        /// Transparent tile card color.
         /// </summary>
-        Transparent
+        Transparent,
+
+        /// <summary>
+        /// Highlight tile card color.
+        /// </summary>
+        Highlight
     }
 
     /// <summary>
@@ -85,6 +90,7 @@
                 TypeColorTile.Dark => "wx-tile-dark",
                 TypeColorTile.White => "wx-tile-white",
                 TypeColorTile.Transparent => "wx-tile-transparent",
+                TypeColorTile.Highlight => "wx-tile-highlight",
                 _ => string.Empty,
             };
         }

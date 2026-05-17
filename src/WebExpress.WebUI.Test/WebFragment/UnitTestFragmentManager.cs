@@ -1,4 +1,4 @@
-﻿using WebExpress.WebCore.WebScope;
+using WebExpress.WebCore.WebScope;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebPage;
 
@@ -99,7 +99,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlList()
         {
             // arrange
-            var expected = @"<ul id=""webexpress-webui-test-testfragmentcontrollist""><li></li></ul>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrollist"" class=""wx-webui-list""><div class=""wx-list-item""></div></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
@@ -209,7 +209,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlDropdownItemLink()
         {
             // arrange
-            var expected = @"<div id=""webexpress.webui.test.testfragmentcontroldropdownitemlink"" class=""wx-dropdown-item"">TestFragmentControlDropdownItemLink</div>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroldropdownitemlink"" class=""wx-dropdown-item"">TestFragmentControlDropdownItemLink</div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
@@ -385,7 +385,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlTree()
         {
             // arrange
-            var expected = @"<ul id=""webexpress-webui-test-testfragmentcontroltree""><li></li></ul>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroltree"" class=""wx-webui-list""><div class=""wx-list-item""></div></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
@@ -407,7 +407,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlForm()
         {
             // arrange
-            var expected = @"<form id=""webexpress-webui-test-testfragmentcontrolform-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>";
+            var expected = @"<form id=""webexpress-webui-test-testfragmentcontrolform-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""form_webexpress-webui-test-testfragmentcontrolform"">*</form>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
@@ -451,7 +451,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlToolbarItemButton()
         {
             // arrange
-            var expected = @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritembutton"" class=""wx-toolbar-button"" data-label=""TestFragmentControlToolbarItemButton""></div>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroltoolbaritembutton"" class=""wx-toolbar-button"" data-label=""TestFragmentControlToolbarItemButton""></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
@@ -473,7 +473,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlToolbarItemCombo()
         {
             // arrange
-            var expected = @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritemcombo"" class=""wx-toolbar-combo"" data-label=""TestFragmentControlToolbarItemCombo""></div>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroltoolbaritemcombo"" class=""wx-toolbar-combo"" data-label=""TestFragmentControlToolbarItemCombo""></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
@@ -495,7 +495,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlToolbarItemDropdown()
         {
             // arrange
-            var expected = @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritemdropdown"" class=""wx-toolbar-dropdown"" data-label=""TestFragmentControlToolbarItemDropdown""></div>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroltoolbaritemdropdown"" class=""wx-toolbar-dropdown"" data-label=""TestFragmentControlToolbarItemDropdown""></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
@@ -517,7 +517,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlToolbarItemLabel()
         {
             // arrange
-            var expected = @"<div id=""webexpress.webui.test.testfragmentcontroltoolbaritemlabel"" class=""wx-toolbar-label"" data-label=""TestFragmentControlToolbarItemLabel""></div>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroltoolbaritemlabel"" class=""wx-toolbar-label"" data-label=""TestFragmentControlToolbarItemLabel""></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
@@ -561,7 +561,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlSidebarItemLink()
         {
             // arrange
-            var expected = @"<div id=""webexpress.webui.test.testfragmentcontrolsidebaritemlink"" class=""wx-sidebar-link"" data-label=""TestFragmentControlSidebarItemLink""></div>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolsidebaritemlink"" class=""wx-sidebar-link"" data-label=""TestFragmentControlSidebarItemLink""></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
@@ -583,7 +583,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlSidebarItemIcon()
         {
             // arrange
-            var expected = @"<div id=""webexpress.webui.test.testfragmentcontrolsidebaritemicon"" class=""wx-sidebar-icon"" data-icon-text=""TestFragmentControlSidebarItemIcon""></div>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolsidebaritemicon"" class=""wx-sidebar-icon"" data-icon-text=""TestFragmentControlSidebarItemIcon""></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
@@ -605,7 +605,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlSidebarItemHeader()
         {
             // arrange
-            var expected = @"<div id=""webexpress.webui.test.testfragmentcontrolsidebaritemheader"" class=""wx-sidebar-header"" data-label=""TestFragmentControlSidebarItemHeader""></div>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolsidebaritemheader"" class=""wx-sidebar-header"" data-label=""TestFragmentControlSidebarItemHeader""></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
@@ -627,7 +627,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlSidebarItemControl()
         {
             // arrange
-            var expected = @"<div id=""webexpress.webui.test.testfragmentcontrolsidebaritemcontrol"" class=""wx-sidebar-control""><div>TestFragmentControlSidebarItemControl</div></div>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolsidebaritemcontrol"" class=""wx-sidebar-control""><div>TestFragmentControlSidebarItemControl</div></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
@@ -649,7 +649,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlSidebarItemDynamic()
         {
             // arrange
-            var expected = @"<div id=""webexpress.webui.test.testfragmentcontrolsidebaritemdynamic"" class=""wx-sidebar-control""><div>FragmentControlSidebarItemDynamic</div></div>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolsidebaritemdynamic"" class=""wx-sidebar-control""><div>FragmentControlSidebarItemDynamic</div></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
@@ -797,13 +797,37 @@ namespace WebExpress.WebUI.Test.WebFragment
         }
 
         /// <summary>
+        /// Test the render function of the fragment manager for the dismissible
+        /// panel fragment-control. The base class composes both its own content
+        /// and any fragments registered for the body section.
+        /// </summary>
+        [Fact]
+        public void Render_TestSectionFragmentControlPanelDismissible()
+        {
+            // arrange
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolpaneldismissible"" class=""wx-webui-panel-dismissible"" data-title=""FragmentPanel""><div>fragment-content</div></div>";
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+
+            // act
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlPanelDismissibleBody));
+
+            // validation
+            Assert.NotNull(html);
+            Assert.NotEmpty(html);
+            AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
+        }
+
+        /// <summary>
         /// Test the render function of the fragment manager for tab control items.
         /// </summary>
         [Fact]
         public void Render_TestSectionFragmentControlTab()
         {
             // arrange
-            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroltab"" class=""wx-webui-tab""><div class=""wx-tab-view""></div></div>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroltab"" class=""wx-webui-tab"" data-layout=""default""><div class=""wx-tab-view""></div></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);

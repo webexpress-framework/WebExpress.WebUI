@@ -13,12 +13,12 @@ namespace WebExpress.WebUI.WebIcon
     public class ImageIcon : IIcon
     {
         /// <summary>
-        /// Returns the size associated with the icon.
+        /// Gets the size associated with the icon.
         /// </summary>
         public PropertySizeIcon Size { get; }
 
         /// <summary>
-        /// Returns the URI associated with the icon. This property must be 
+        /// Gets the URI associated with the icon. This property must be 
         /// implemented by derived classes to provide the specific URI of the icon.
         /// </summary>
         public IUri Uri { get; }

@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+﻿using System;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -9,19 +10,19 @@ namespace WebExpress.WebUI.WebControl
     public class ControlTableTemplateRating : IControlTableTemplateEditable
     {
         /// <summary>
-        /// Returns or sets the unique identifier for the object.
+        /// Gets or sets the unique identifier for the object.
         /// </summary>
         public string Id { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the current template is editable or read-only.
+        /// Gets or sets a value indicating whether the current template is editable or read-only.
         /// </summary>
-        public bool Editable { get; set; }
+        public Func<IRenderControlContext, bool> Editable { get; set; }
 
         /// <summary>
-        /// Returns or sets the maximum rating value (stars) that can be assigned.
+        /// Gets or sets the maximum rating value (stars) that can be assigned.
         /// </summary>
-        public uint MaxRating { get; set; } = uint.MaxValue;
+        public Func<IRenderControlContext, uint> MaxRating { get; set; } = _ => uint.MaxValue;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -40,13 +41,16 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var maxRating = MaxRating?.Invoke(renderContext);
+            var editable = Editable?.Invoke(renderContext);
+
             var html = new HtmlElement("template")
             {
                 Id = Id
             }
                 .AddUserAttribute("data-type", "rating")
-                .AddUserAttribute("data-stars", MaxRating != uint.MaxValue ? MaxRating.ToString() : null)
-                .AddUserAttribute("data-editable", Editable ? "true" : null);
+                .AddUserAttribute("data-stars", maxRating != uint.MaxValue ? maxRating.ToString() : null)
+                .AddUserAttribute("data-editable", editable == true ? "true" : null);
 
             return html;
         }

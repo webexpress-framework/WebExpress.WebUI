@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.Internationalization;
+using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -10,12 +11,12 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormItemLabel : ControlFormItem
     {
         /// <summary>
-        /// Returns or sets the text of the label.
+        /// Gets or sets the text of the label.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
-        /// Returns or sets the associated form field.
+        /// Gets or sets the associated form field.
         /// </summary>
         public IControlFormItem FormItem { get; set; }
 
@@ -44,17 +45,21 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            var name = FormItem?.Name?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
+            var text = Text?.Invoke(renderContext);
+
             return new HtmlElementFieldLabel()
             {
                 Id = Id,
-                Text = I18N.Translate(renderContext.Request?.Culture, Text),
+                Text = I18N.Translate(renderContext.Request?.Culture, text),
                 Class = Css.Concatenate("wx-form-label", GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
+                Role = role,
                 For = FormItem is not null ?
                     string.IsNullOrWhiteSpace(FormItem.Id) ?
-                    FormItem.Name :
-                    FormItem.Id :
+                        name :
+                        FormItem.Id :
                     null
             };
         }

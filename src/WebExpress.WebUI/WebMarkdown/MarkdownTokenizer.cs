@@ -16,6 +16,9 @@ namespace WebExpress.WebUI.WebMarkdown
         private static readonly Regex _htmlRegex = HtmlRegex();
         private static readonly Regex _checkboxRegex = CheckboxRegex();
         private static readonly Regex _footnoteRegex = FootnoteRegex();
+        private static readonly Regex _inlinePluginRegex = InlinePluginRegex();
+        private static readonly Regex _pluginBlockRegex = PluginBlockRegex();
+        private static readonly Regex _pluginBlockEndRegex = PluginBlockEndRegex();
 
         [GeneratedRegex(@"(?<url>((https?|ftp|ftps|ldap|ldaps|file):\/\/[^\s\)\]\}]+[^\.\s\)\]\}])|(mailto:[^\s\)\]\}]+[^\.\s\)\]\}]))", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
         private static partial Regex UrlRegex();
@@ -34,6 +37,15 @@ namespace WebExpress.WebUI.WebMarkdown
 
         [GeneratedRegex(@"\[\^\s*(?<footnote>[^\]]+)\s*\]", RegexOptions.IgnoreCase | RegexOptions.Compiled)] // Regex for footnotes
         private static partial Regex FootnoteRegex();
+
+        [GeneratedRegex(@"\{\{(?!%)(?<name>[a-zA-Z_][a-zA-Z0-9_]*)(?<params>(?:\s+[a-zA-Z_][a-zA-Z0-9_]*=""[^""]*"")*)\s*\}\}", RegexOptions.Compiled)]
+        private static partial Regex InlinePluginRegex();
+
+        [GeneratedRegex(@"\{\{%\s*(?<name>[a-zA-Z_][a-zA-Z0-9_]*)(?<params>(?:\s+[a-zA-Z_][a-zA-Z0-9_]*=""[^""]*"")*)\s*%\}\}", RegexOptions.Compiled)]
+        private static partial Regex PluginBlockRegex();
+
+        [GeneratedRegex(@"\{\{%\s*/(?<name>[a-zA-Z_][a-zA-Z0-9_]*)\s*%\}\}", RegexOptions.Compiled)]
+        private static partial Regex PluginBlockEndRegex();
 
         private readonly string _input;
         private int _pos;
@@ -60,6 +72,38 @@ namespace WebExpress.WebUI.WebMarkdown
             var tokens = new List<MarkdownToken>();
             while (_pos < _length)
             {
+                // Check for block plugin end tag {{% /name %}}
+                var pluginBlockEndMatch = _pluginBlockEndRegex.Match(_input, _pos);
+                if (pluginBlockEndMatch.Success && pluginBlockEndMatch.Index == _pos)
+                {
+                    string pluginName = pluginBlockEndMatch.Groups["name"].Value;
+                    tokens.Add(new MarkdownToken(MarkdownTokenType.PluginBlockEnd, pluginName, _pos, pluginBlockEndMatch.Length));
+                    _pos += pluginBlockEndMatch.Length;
+                    continue;
+                }
+
+                // Check for block plugin opening tag {{% name params %}}
+                var pluginBlockMatch = _pluginBlockRegex.Match(_input, _pos);
+                if (pluginBlockMatch.Success && pluginBlockMatch.Index == _pos)
+                {
+                    string pluginName = pluginBlockMatch.Groups["name"].Value;
+                    string pluginParams = pluginBlockMatch.Groups["params"].Value.Trim();
+                    tokens.Add(new MarkdownToken(MarkdownTokenType.PluginBlock, pluginName, pluginParams, _pos, pluginBlockMatch.Length));
+                    _pos += pluginBlockMatch.Length;
+                    continue;
+                }
+
+                // Check for inline plugin {{name params}}
+                var inlinePluginMatch = _inlinePluginRegex.Match(_input, _pos);
+                if (inlinePluginMatch.Success && inlinePluginMatch.Index == _pos)
+                {
+                    string pluginName = inlinePluginMatch.Groups["name"].Value;
+                    string pluginParams = inlinePluginMatch.Groups["params"].Value.Trim();
+                    tokens.Add(new MarkdownToken(MarkdownTokenType.InlinePlugin, pluginName, pluginParams, _pos, inlinePluginMatch.Length));
+                    _pos += inlinePluginMatch.Length;
+                    continue;
+                }
+
                 // Check for HTML tags
                 var htmlMatch = _htmlRegex.Match(_input, _pos);
                 if (htmlMatch.Success && htmlMatch.Index == _pos)
@@ -350,6 +394,28 @@ namespace WebExpress.WebUI.WebMarkdown
             if ("|<[=+`\r\n ".Contains(input[pos]))
             {
                 return true;
+            }
+
+            // Check for plugin syntax start {{ only if it's a valid plugin pattern
+            if (input[pos] == '{' && pos + 1 < input.Length && input[pos + 1] == '{')
+            {
+                var inlinePluginMatch = _inlinePluginRegex.Match(input, pos);
+                if (inlinePluginMatch.Success && inlinePluginMatch.Index == pos)
+                {
+                    return true;
+                }
+
+                var pluginBlockMatch = _pluginBlockRegex.Match(input, pos);
+                if (pluginBlockMatch.Success && pluginBlockMatch.Index == pos)
+                {
+                    return true;
+                }
+
+                var pluginBlockEndMatch = _pluginBlockEndRegex.Match(input, pos);
+                if (pluginBlockEndMatch.Success && pluginBlockEndMatch.Index == pos)
+                {
+                    return true;
+                }
             }
 
             // Check for URLs using regex (if the current position is at the start of a valid URL)

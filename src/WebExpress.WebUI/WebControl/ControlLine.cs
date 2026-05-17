@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+using System;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -9,17 +10,17 @@ namespace WebExpress.WebUI.WebControl
     public class ControlLine : Control, IControlSplitButtonItem, IControlDropdownItem
     {
         /// <summary>
-        /// Returns or set the background color.
+        /// Gets or set the background color.
         /// </summary>
-        public new PropertyColorBackground BackgroundColor { get; private set; }
+        public new Func<IRenderControlContext, PropertyColorBackground> BackgroundColor { get; private set; }
 
         /// <summary>
-        /// Returns or sets the color.
+        /// Gets or sets the color.
         /// </summary>
-        public PropertyColorLine Color
+        public Func<IRenderControlContext, PropertyColorLine> Color
         {
-            get => (PropertyColorLine)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+            get => (Func<IRenderControlContext, PropertyColorLine>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>
@@ -39,12 +40,14 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var role = Role?.Invoke(renderContext);
+
             var html = new HtmlElementTextContentHr()
             {
                 Id = Id,
                 Class = GetClasses(),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             };
 
             return html;

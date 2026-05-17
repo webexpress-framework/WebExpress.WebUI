@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebMarkdown.Element
     public class MarkdownInlineElementBold : MarkdownInlineElement
     {
         /// <summary>
-        /// Returns the collection of inline elements contained within the bold text segment.
+        /// Gets the collection of inline elements contained within the bold text segment.
         /// </summary>
         public IEnumerable<IMarkdownElement> Content { get; } = [];
 

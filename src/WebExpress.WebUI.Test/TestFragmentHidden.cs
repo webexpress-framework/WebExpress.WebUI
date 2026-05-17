@@ -19,7 +19,7 @@ namespace WebExpress.WebUI.Test
         public TestFragmentHidden(IFragmentContext fragmentContext)
             : base(fragmentContext)
         {
-            Text = "TestFragmentHidden";
+            Text = _ => "TestFragmentHidden";
         }
     }
 }

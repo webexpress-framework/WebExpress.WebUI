@@ -43,6 +43,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<div class=""media bg-danger""><img class=""me-3 mt-3 ""><div class=""media-body""></div></div>")]
         [InlineData(TypeColorBackground.Dark, @"<div class=""media bg-dark""><img class=""me-3 mt-3 ""><div class=""media-body""></div></div>")]
         [InlineData(TypeColorBackground.Light, @"<div class=""media bg-light""><img class=""me-3 mt-3 ""><div class=""media-body""></div></div>")]
+        [InlineData(TypeColorBackground.Highlight, @"<div class=""media bg-highlight""><img class=""me-3 mt-3 ""><div class=""media-body""></div></div>")]
         [InlineData(TypeColorBackground.Transparent, @"<div class=""media bg-transparent""><img class=""me-3 mt-3 ""><div class=""media-body""></div></div>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {
@@ -52,7 +53,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelMedia()
             {
-                BackgroundColor = new PropertyColorBackground(backgroundColor)
+                BackgroundColor = _ => new PropertyColorBackground(backgroundColor)
             };
 
             // act
@@ -78,7 +79,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelMedia()
             {
-                Direction = direction,
+                Direction = _ => direction,
             };
 
             // act
@@ -102,7 +103,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelMedia()
             {
-                Fluid = fluid,
+                Fluid = _ => fluid,
             };
 
             // act
@@ -126,7 +127,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelMedia()
             {
-                Title = title
+                Title = _ => title
             };
 
             // act
@@ -149,7 +150,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelMedia()
             {
-                Image = image
+                Image = _ => image
             };
 
             // act
@@ -172,7 +173,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelMedia()
             {
-                ImageWidth = imageWidth
+                ImageWidth = _ => imageWidth
             };
 
             // act
@@ -195,7 +196,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelMedia()
             {
-                ImageHeight = imageHeight
+                ImageHeight = _ => imageHeight
             };
 
             // act
@@ -219,7 +220,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelMedia()
             {
-                Theme = theme
+                Theme = _ => theme
             };
 
             // act

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -17,55 +18,55 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlNavigationItem> Items => _items;
 
         /// <summary>
-        /// Returns or sets the layout.
+        /// Gets or sets the layout.
         /// </summary>
-        public TypeLayoutTab Layout
+        public Func<IRenderControlContext, TypeLayoutTab> Layout
         {
-            get => (TypeLayoutTab)GetProperty(TypeLayoutTab.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeLayoutTab>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the horizontal arrangement.
+        /// Gets or sets the horizontal arrangement.
         /// </summary>
-        public new TypeHorizontalAlignmentTab HorizontalAlignment
+        public new Func<IRenderControlContext, TypeHorizontalAlignmentTab> HorizontalAlignment
         {
-            get => (TypeHorizontalAlignmentTab)GetProperty(TypeHorizontalAlignmentTab.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeHorizontalAlignmentTab>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets whether the tab tabs should be the same size.
+        /// Gets or sets whether the tab tabs should be the same size.
         /// </summary>
-        public TypeJustifiedTab Justified
+        public Func<IRenderControlContext, TypeJustifiedTab> Justified
         {
-            get => (TypeJustifiedTab)GetProperty(TypeJustifiedTab.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeJustifiedTab>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the horizontal or vertical orientation.
+        /// Gets or sets the horizontal or vertical orientation.
         /// </summary>
-        public TypeOrientationTab Orientation
+        public Func<IRenderControlContext, TypeOrientationTab> Orientation
         {
-            get => (TypeOrientationTab)GetProperty(TypeOrientationTab.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeOrientationTab>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the active color.
+        /// Gets or sets the active color.
         /// </summary>
-        public PropertyColorBackground ActiveColor { get; set; } = new PropertyColorBackground();
+        public Func<IRenderControlContext, PropertyColorBackground> ActiveColor { get; set; } = _ => new PropertyColorBackground();
 
         /// <summary>
-        /// Returns or sets the active text color.
+        /// Gets or sets the active text color.
         /// </summary>
-        public PropertyColorText ActiveTextColor { get; set; } = new PropertyColorText();
+        public Func<IRenderControlContext, PropertyColorText> ActiveTextColor { get; set; } = _ => new PropertyColorText();
 
         /// <summary>
-        /// Returns or sets the link color.
+        /// Gets or sets the link color.
         /// </summary>
-        public PropertyColorText LinkColor { get; set; } = new PropertyColorText();
+        public Func<IRenderControlContext, PropertyColorText> LinkColor { get; set; } = _ => new PropertyColorText();
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -76,28 +77,24 @@ namespace WebExpress.WebUI.WebControl
             : base(id)
         {
             _items.AddRange(items);
-
-            //ActiveColor = LayoutSchema.NavigationActiveBackground;
-            //ActiveTextColor = LayoutSchema.NavigationActive;
-            //LinkColor = LayoutSchema.NavigationLink;
         }
 
-        /// <summary> 
+        /// <summary>
         /// Adds one or more items to the content of the control.
-        /// </summary> 
-        /// <param name="items">The items to add to the control.</param> 
-        /// <remarks> 
-        /// This method allows adding one or multiple items to the collection of 
+        /// </summary>
+        /// <param name="items">The items to add to the control.</param>
+        /// <remarks>
+        /// This method allows adding one or multiple items to the collection of
         /// the control.
-        /// 
-        /// Example usage: 
-        /// <code> 
-        /// var control = new ControlNavigation(); 
+        ///
+        /// Example usage:
+        /// <code>
+        /// var control = new ControlNavigation();
         /// var text1 = new ControlNavigationItemLink { Text = "A" };
         /// var text2 = new ControlNavigationItemLink { Text = "B" };
         /// control.Add(text1, text2);
-        /// </code> 
-        /// 
+        /// </code>
+        ///
         /// This method accepts any items that implements the <see cref="IControlNavigationItem"/> interface.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
@@ -108,22 +105,22 @@ namespace WebExpress.WebUI.WebControl
             return this;
         }
 
-        /// <summary> 
+        /// <summary>
         /// Adds one or more items to the content of the control.
-        /// </summary> 
-        /// <param name="items">The items to add to the control.</param> 
-        /// <remarks> 
-        /// This method allows adding one or multiple items to the collection of 
+        /// </summary>
+        /// <param name="items">The items to add to the control.</param>
+        /// <remarks>
+        /// This method allows adding one or multiple items to the collection of
         /// the control.
-        /// 
-        /// Example usage: 
-        /// <code> 
-        /// var control = new ControlNavigation(); 
+        ///
+        /// Example usage:
+        /// <code>
+        /// var control = new ControlNavigation();
         /// var text1 = new ControlNavigationItemLink { Text = "A" };
         /// var text2 = new ControlNavigationItemLink { Text = "B" };
         /// control.Add(text1, text2);
-        /// </code> 
-        /// 
+        /// </code>
+        ///
         /// This method accepts any items that implements the <see cref="IControlNavigationItem"/> interface.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
@@ -139,7 +136,7 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="item">The item to remove from the content.</param>
         /// <remarks>
-        /// This method allows removing a specific item from the collection of 
+        /// This method allows removing a specific item from the collection of
         /// the control.
         /// </remarks>
         /// <returns>The current instance for method chaining.</returns>
@@ -171,22 +168,27 @@ namespace WebExpress.WebUI.WebControl
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlNavigationItem> items)
         {
             var htmlItems = new List<HtmlElement>();
+            var role = Role?.Invoke(renderContext);
+            var activeColor = ActiveColor?.Invoke(renderContext);
+            var activeTextColor = ActiveTextColor?.Invoke(renderContext);
+            var linkColor = LinkColor?.Invoke(renderContext);
+
             foreach (var item in items)
             {
                 var i = item.Render(renderContext, visualTree) as HtmlElement;
 
                 if (item is ControlNavigationItemLink link)
                 {
-                    i.RemoveClass(link.TextColor?.ToClass());
-                    i.RemoveStyle(link.TextColor?.ToStyle());
+                    i.RemoveClass(link.TextColor?.Invoke(renderContext)?.ToClass());
+                    i.RemoveStyle(link.TextColor?.Invoke(renderContext)?.ToStyle());
 
                     i.AddClass
                     (
                         Css.Concatenate
                         (
                             "nav-link",
-                            link.Active == TypeActive.Active ? ActiveColor?.ToClass() : "",
-                            link.Active == TypeActive.Active ? ActiveTextColor?.ToClass() : LinkColor?.ToClass()
+                            link.Active?.Invoke(renderContext) == TypeActive.Active ? activeColor?.ToClass() : "",
+                            link.Active?.Invoke(renderContext) == TypeActive.Active ? activeTextColor?.ToClass() : linkColor?.ToClass()
                         )
                     );
 
@@ -194,8 +196,8 @@ namespace WebExpress.WebUI.WebControl
                     (
                         Style.Concatenate
                         (
-                            link.Active == TypeActive.Active ? ActiveColor?.ToStyle() : "",
-                            link.Active == TypeActive.Active ? ActiveTextColor?.ToStyle() : LinkColor?.ToStyle()
+                            link.Active?.Invoke(renderContext) == TypeActive.Active ? activeColor?.ToStyle() : "",
+                            link.Active?.Invoke(renderContext) == TypeActive.Active ? activeTextColor?.ToStyle() : linkColor?.ToStyle()
                         )
                     );
 
@@ -203,24 +205,26 @@ namespace WebExpress.WebUI.WebControl
                 }
                 else if (item is ControlNavigationItemDropdown dropdown)
                 {
-                    i.RemoveClass(dropdown.TextColor?.ToClass());
-                    i.RemoveStyle(dropdown.TextColor?.ToStyle());
+                    var active = dropdown.Active?.Invoke(renderContext);
+
+                    i.RemoveClass(dropdown.TextColor?.Invoke(renderContext)?.ToClass());
+                    i.RemoveStyle(dropdown.TextColor?.Invoke(renderContext)?.ToStyle());
 
                     i.AddClass
                     (
                         Css.Concatenate
                         (
                             "nav-link",
-                            dropdown.Active == TypeActive.Active ? ActiveColor?.ToClass() : "",
-                            dropdown.Active == TypeActive.Active ? ActiveTextColor?.ToClass() : ""
+                            active == TypeActive.Active ? activeColor?.ToClass() : "",
+                            active == TypeActive.Active ? activeTextColor?.ToClass() : ""
                         )
                     );
                     i.AddStyle
                     (
                         Style.Concatenate
                         (
-                            dropdown.Active == TypeActive.Active ? ActiveColor?.ToStyle() : "",
-                            dropdown.Active == TypeActive.Active ? ActiveTextColor?.ToStyle() : ""
+                            active == TypeActive.Active ? activeColor?.ToStyle() : "",
+                            active == TypeActive.Active ? activeTextColor?.ToStyle() : ""
                         )
                     );
                 }
@@ -240,7 +244,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("nav", GetClasses()),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             };
 
             return html;

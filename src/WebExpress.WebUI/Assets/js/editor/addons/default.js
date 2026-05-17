@@ -5,7 +5,7 @@ webexpress.webui.EditorAddOns.register("info-box", {
     icon: "fas fa-info-circle",
     type: "block",
     category: "Widgets",
-    isContainer: true, 
+    isContainer: true,
     content: '<div class="alert alert-info mb-0"><strong>Note:</strong> Type here...</div>',
     description: "A nestable container for information."
 });
@@ -19,7 +19,7 @@ webexpress.webui.EditorAddOns.register("warning-box", {
     content: '<div class="alert alert-warning mb-0"><strong>Warning:</strong> Static alert.</div>',
     description: "Inserts a static warning box."
 });
-    
+
     // --- Layout ---
 webexpress.webui.EditorAddOns.register("card-container", {
     label: "Card Container",
@@ -30,7 +30,7 @@ webexpress.webui.EditorAddOns.register("card-container", {
     content: '<p>Card content goes here...</p>',
     description: "A standard card frame."
 });
-        
+
 webexpress.webui.EditorAddOns.register("hr-styled", {
     label: "Styled Line",
     icon: "fas fa-minus",

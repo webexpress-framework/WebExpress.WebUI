@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlCardCounter()
             {
-                Text = text,
+                Text = _ => text,
             };
 
             // act
@@ -76,7 +76,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlCardCounter()
             {
-                Value = value,
+                Value = _ => value,
             };
 
             // act
@@ -101,7 +101,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlCardCounter()
             {
-                Progress = value
+                Progress = _ => value
             };
 
             // act
@@ -125,7 +125,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlCardCounter()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -147,6 +147,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorText.Warning, @"<span class=""card-counter text-warning"">*</span>")]
         [InlineData(TypeColorText.Danger, @"<span class=""card-counter text-danger"">*</span>")]
         [InlineData(TypeColorText.Light, @"<span class=""card-counter text-light"">*</span>")]
+        [InlineData(TypeColorText.Highlight, @"<span class=""card-counter text-highlight"">*</span>")]
         [InlineData(TypeColorText.Dark, @"<span class=""card-counter text-dark"">*</span>")]
         [InlineData(TypeColorText.Muted, @"<span class=""card-counter text-muted"">*</span>")]
         public void TextColor(TypeColorText color, string expected)
@@ -157,7 +158,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlCardCounter()
             {
-                TextColor = new PropertyColorText(color)
+                TextColor = _ => new PropertyColorText(color)
             };
 
             // act
@@ -178,6 +179,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<span class=""card-counter bg-danger"">*</span>")]
         [InlineData(TypeColorBackground.Dark, @"<span class=""card-counter bg-dark"">*</span>")]
         [InlineData(TypeColorBackground.Light, @"<span class=""card-counter bg-light""><*/span>")]
+        [InlineData(TypeColorBackground.Highlight, @"<span class=""card-counter bg-highlight""><*/span>")]
         [InlineData(TypeColorBackground.Transparent, @"<span class=""card-counter bg-transparent"">*</span>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {
@@ -187,7 +189,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlCardCounter()
             {
-                BackgroundColor = new PropertyColorBackground(backgroundColor)
+                BackgroundColor = _ => new PropertyColorBackground(backgroundColor)
             };
 
             // act

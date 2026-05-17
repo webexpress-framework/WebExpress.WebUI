@@ -1,15 +1,12 @@
-.wx-dropdown {
-}
-
 .wx-dropdown > button {
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
-}  
+}
 
 .wx-dropdown > button > img {
-    vertical-align: middle; 
-}  
+    vertical-align: middle;
+}
 
 .wx-dropdown > ul > li > span,
 .wx-dropdown > ul > li > a {
@@ -17,7 +14,4 @@
     align-items: center;
     cursor: pointer;
     gap: 0.5em;
-}
-
-.wx-dropdown > ul > li > a > img {
 }

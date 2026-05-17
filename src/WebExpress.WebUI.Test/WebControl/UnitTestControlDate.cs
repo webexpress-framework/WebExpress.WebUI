@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDate(null)
             {
-                Format = format
+                Format = _ => format
             };
 
             // act
@@ -71,7 +71,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDate(null)
             {
-                Date = string.IsNullOrWhiteSpace(date) ? default : DateTime.Parse(date)
+                Date = _ => string.IsNullOrWhiteSpace(date) ? default : DateTime.Parse(date)
             };
 
             // act
@@ -93,6 +93,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorDate.Warning, @"<div class=""wx-webui-date"" data-color-css=""bg-warning"" data-format=""yyyy-MM-dd""></div>")]
         [InlineData(TypeColorDate.Danger, @"<div class=""wx-webui-date"" data-color-css=""bg-danger"" data-format=""yyyy-MM-dd""></div>")]
         [InlineData(TypeColorDate.Light, @"<div class=""wx-webui-date"" data-color-css=""bg-light"" data-format=""yyyy-MM-dd""></div>")]
+        [InlineData(TypeColorDate.Highlight, @"<div class=""wx-webui-date"" data-color-css=""bg-highlight"" data-format=""yyyy-MM-dd""></div>")]
         [InlineData(TypeColorDate.Dark, @"<div class=""wx-webui-date"" data-color-css=""bg-dark"" data-format=""yyyy-MM-dd""></div>")]
         public void SystemColor(TypeColorDate color, string expected)
         {
@@ -102,7 +103,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDate()
             {
-                Color = new PropertyColorDate(color)
+                Color = _ => new PropertyColorDate(color)
             };
 
             // act
@@ -128,7 +129,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlDate()
             {
-                Color = new PropertyColorDate(color)
+                Color = _ => new PropertyColorDate(color)
             };
 
             // act

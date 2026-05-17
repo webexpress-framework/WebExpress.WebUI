@@ -43,6 +43,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Danger, @"<div class=""bg-danger""></div>")]
         [InlineData(TypeColorBackground.Dark, @"<div class=""bg-dark""></div>")]
         [InlineData(TypeColorBackground.Light, @"<div class=""bg-light""></div>")]
+        [InlineData(TypeColorBackground.Highlight, @"<div class=""bg-highlight""></div>")]
         [InlineData(TypeColorBackground.Transparent, @"<div class=""bg-transparent""></div>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {
@@ -52,7 +53,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanel()
             {
-                BackgroundColor = new PropertyColorBackground(backgroundColor)
+                BackgroundColor = _ => new PropertyColorBackground(backgroundColor)
             };
 
             // act
@@ -78,7 +79,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanel()
             {
-                Direction = direction
+                Direction = _ => direction
             };
 
             // act
@@ -102,7 +103,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanel()
             {
-                Fluid = fluid
+                Fluid = _ => fluid
             };
 
             // act
@@ -126,7 +127,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanel()
             {
-                Theme = theme
+                Theme = _ => theme
             };
 
             // act

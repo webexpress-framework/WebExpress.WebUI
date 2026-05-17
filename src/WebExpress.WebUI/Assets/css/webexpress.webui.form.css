@@ -1,4 +1,13 @@
-﻿.wx-form-label {
+.wx-form {
+    padding: 0.5em;
+    background-color: var(--bs-light);
+}
+
+[data-bs-theme="dark"] .wx-form {
+    background-color: var(--bs-body-bg);
+}
+
+.wx-form-label {
     display: inline-flex;
     gap: 0;
     align-items: baseline;
@@ -127,8 +136,12 @@
     vertical-align: middle;
 }
 
-wx-form > footer {
+.wx-form > footer {
     margin-top: 0.5em;
+}
+
+[data-bs-theme="dark"] .wx-form .form-control {
+    background-color: black;
 }
 
 .wx-validation-alert {
@@ -139,4 +152,8 @@ wx-form > footer {
     border-radius: 0.375rem;
     font-size: 0.95rem;
     margin-bottom: 1rem;
+}
+
+.wx-login {
+    flex: 1;
 }

@@ -293,7 +293,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 secondaryAction: Object.fromEntries(Object.entries(dataset)
                     .filter(([k]) => k.startsWith("wxSecondary"))
                     .map(([k, v]) => [
-                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        k.slice(11).replace(/^./, c => c.toLowerCase()),
                         v === "true" ? true : v === "false" ? false : v
                     ])
                 )
@@ -412,7 +412,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             if (node.tooltip) {
                 labelContainer.setAttribute("title", node.tooltip);
             }
-            
+
             // apply action attributes
             if (node.primaryAction) labelContainer.dataset.wxPrimaryAction = node.primaryAction;
             if (node.primaryTarget) labelContainer.dataset.wxPrimaryTarget = node.primaryTarget;

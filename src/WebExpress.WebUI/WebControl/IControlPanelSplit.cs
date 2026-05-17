@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -9,54 +11,54 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlPanelSplit : IControl
     {
         /// <summary>
-        /// Returns the left or top panel in the ControlPanelSplit.
+        /// Gets the left or top panel in the ControlPanelSplit.
         /// </summary>
         IEnumerable<IControl> SidePanel { get; }
 
         /// <summary>
-        /// Returns the right or bottom pane in the ControlPanelSplit.
+        /// Gets the right or bottom pane in the ControlPanelSplit.
         /// </summary>
         IEnumerable<IControl> MainPanel { get; }
 
         /// <summary>
-        /// Returns or sets whether the splitter is horziontal or vertically oriented.
+        /// Gets or sets whether the splitter is horziontal or vertically oriented.
         /// </summary>
-        TypeOrientationSplit Orientation { get; }
+        Func<IRenderControlContext, TypeOrientationSplit> Orientation { get; }
 
         /// <summary>
-        /// Returns or sets the color of the splitter.
+        /// Gets or sets the color of the splitter.
         /// </summary>
-        PropertyColorBackground SplitterColor { get; }
+        Func<IRenderControlContext, PropertyColorBackground> SplitterColor { get; }
 
         /// <summary>
-        /// Returns or sets the width of the splitter.
+        /// Gets or sets the width of the splitter.
         /// </summary>
-        int SplitterSize { get; }
+        Func<IRenderControlContext, int> SplitterSize { get; }
 
         /// <summary>
-        /// Returns or sets the minimum size of the left or top area in the ControlPanelSplit.
+        /// Gets or sets the minimum size of the left or top area in the ControlPanelSplit.
         /// </summary>
-        int SidePanelMinSize { get; }
+        Func<IRenderControlContext, int> SidePanelMinSize { get; }
 
         /// <summary>
-        /// Returns or sets the initial size of the left or top area in the ControlPanelSplit in %.
+        /// Gets or sets the initial size of the left or top area in the ControlPanelSplit in %.
         /// </summary>
-        int SidePanelInitialSize { get; }
+        Func<IRenderControlContext, int> SidePanelInitialSize { get; }
 
         /// <summary>
-        /// Returns or sets the maximum size of the left or top area in the ControlPanelSplit.
+        /// Gets or sets the maximum size of the left or top area in the ControlPanelSplit.
         /// </summary>
-        int SidePanelMaxSize { get; }
+        Func<IRenderControlContext, int> SidePanelMaxSize { get; }
 
         /// <summary>
         /// Return or sets the order in which the main and side components are arranged.
         /// </summary>
-        TypeSplitOrder Order { get; }
+        Func<IRenderControlContext, TypeSplitOrder> Order { get; }
 
         /// <summary>
-        /// Returns or sets the unit of measurement for the type size.
+        /// Gets or sets the unit of measurement for the type size.
         /// </summary>
-        TypeSizeUnit Unit { get; }
+        Func<IRenderControlContext, TypeSizeUnit> Unit { get; }
 
         /// <summary>
         /// Adds one or more controls to the left or top panel (Panel1).

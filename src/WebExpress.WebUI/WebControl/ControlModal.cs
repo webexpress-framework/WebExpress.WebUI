@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -19,12 +20,12 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControl> Content => _content;
 
         /// <summary>
-        /// Returns or sets the header.
+        /// Gets or sets the header.
         /// </summary>
-        public string Header { get; set; }
+        public Func<IRenderControlContext, string> Header { get; set; }
 
         /// <summary>  
-        /// Returns or sets the size of the modal dialog.  
+        /// Gets or sets the size of the modal dialog.  
         /// </summary>  
         /// <value>  
         /// One of the values of the <see cref="TypeModalSize"/> enumeration, specifying the size of the modal.  
@@ -32,12 +33,12 @@ namespace WebExpress.WebUI.WebControl
         /// <remarks>  
         /// This property allows you to define the size of the modal dialog, such as Default, Small, Large, ExtraLarge, or Fullscreen.  
         /// </remarks>  
-        public TypeModalSize Size { get; set; }
+        public Func<IRenderControlContext, TypeModalSize> Size { get; set; }
 
         /// <summary>
-        /// Returns or sets the label for the close button of the modal.
+        /// Gets or sets the label for the close button of the modal.
         /// </summary>
-        public string CloseLabel { get; set; } = "webexpress.webui:modal.close.label";
+        public Func<IRenderControlContext, string> CloseLabel { get; set; } = _ => "webexpress.webui:modal.close.label";
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -136,7 +137,11 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(Header)))
+            var title = Header?.Invoke(renderContext);
+            var size = Size?.Invoke(renderContext) ?? TypeModalSize.Default;
+            var closeLabel = CloseLabel?.Invoke(renderContext);
+
+            var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(title)))
             {
                 Class = "wx-modal-header"
             };
@@ -156,8 +161,8 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-modal", GetClasses())
             }
-            .AddUserAttribute("data-size", Size.ToClass())
-            .AddUserAttribute("data-close-label", I18N.Translate(CloseLabel));
+                .AddUserAttribute("data-size", size.ToClass())
+                .AddUserAttribute("data-close-label", I18N.Translate(closeLabel));
 
             return html;
         }

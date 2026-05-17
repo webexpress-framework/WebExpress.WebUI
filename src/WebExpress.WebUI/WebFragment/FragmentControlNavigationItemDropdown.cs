@@ -12,10 +12,10 @@ namespace WebExpress.WebUI.WebFragment
     /// <remarks>This class extends <see cref="ControlNavigationItemDropdown"/> to include fragment-specific
     /// functionality, such as rendering based on fragment conditions. It is typically used in scenarios where
     /// navigation items are dynamically generated based on fragment contexts.</remarks>
-    public class FragmentControlNavigationItemDropdown : ControlNavigationItemDropdown, IFragmentControl<ControlNavigationItemDropdown>, IFragmentControlNavigationItem
+    public abstract class FragmentControlNavigationItemDropdown : ControlNavigationItemDropdown, IFragmentControl<ControlNavigationItemDropdown>, IFragmentControlNavigationItem
     {
         /// <summary>
-        /// Returns the context of the fragment.
+        /// Gets the context of the fragment.
         /// </summary>
         public IFragmentContext FragmentContext { get; private set; }
 
@@ -24,7 +24,7 @@ namespace WebExpress.WebUI.WebFragment
         /// </summary>
         /// <param name="fragmentContext">The context of the fragment.</param>
         public FragmentControlNavigationItemDropdown(IFragmentContext fragmentContext)
-            : base(fragmentContext?.FragmentId?.ToString())
+            : base(fragmentContext?.FragmentId?.ToString()?.Replace(".", "-"))
         {
             FragmentContext = fragmentContext;
         }

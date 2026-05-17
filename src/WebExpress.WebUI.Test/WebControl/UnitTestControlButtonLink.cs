@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
-                Text = text
+                Text = (c) => text
             };
 
             // act
@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
-                Tooltip = tooltip
+                Tooltip = _ => tooltip
             };
 
             // act
@@ -98,7 +98,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
-                Size = size
+                Size = _ => size
             };
 
             // act
@@ -117,6 +117,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorButton.Warning, @"<a class=""btn btn-warning""></a>")]
         [InlineData(TypeColorButton.Danger, @"<a class=""btn btn-danger""></a>")]
         [InlineData(TypeColorButton.Dark, @"<a class=""btn btn-dark""></a>")]
+        [InlineData(TypeColorButton.Highlight, @"<a class=""btn btn-highlight""></a>")]
         public void BackgroundColor(TypeColorButton color, string expected)
         {
             // arrange
@@ -125,7 +126,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
-                BackgroundColor = new PropertyColorButton(color)
+                BackgroundColor = _ => new PropertyColorButton(color)
             };
 
             // act
@@ -153,8 +154,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
-                Outline = outline,
-                BackgroundColor = new PropertyColorButton(color)
+                Outline = _ => outline,
+                BackgroundColor = _ => new PropertyColorButton(color)
             };
 
             // act
@@ -177,7 +178,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
-                Block = block
+                Block = _ => block
             };
 
             // act
@@ -200,7 +201,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -223,7 +224,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
-                PrimaryAction = new ActionModal(modal)
+                PrimaryAction = _ => new ActionModal(modal)
             };
 
             // act
@@ -247,7 +248,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlButtonLink()
             {
-                SecondaryAction = new ActionModal(modal)
+                SecondaryAction = _ => new ActionModal(modal)
             };
 
             // act
@@ -267,9 +268,9 @@ namespace WebExpress.WebUI.Test.WebControl
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var context = UnitTestControlFixture.CreateRenderContextMock();
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control1 = new ControlButtonLink(null, new ControlIcon() { Icon = new IconStar() });
-            var control2 = new ControlButtonLink(null, [new ControlIcon() { Icon = new IconStar() }]);
-            var control3 = new ControlButtonLink(null, new List<ControlIcon>([new ControlIcon() { Icon = new IconStar() }]).ToArray());
+            var control1 = new ControlButtonLink(null, new ControlIcon() { Icon = _ => new IconStar() });
+            var control2 = new ControlButtonLink(null, [new ControlIcon() { Icon = _ => new IconStar() }]);
+            var control3 = new ControlButtonLink(null, new List<ControlIcon>([new ControlIcon() { Icon = _ => new IconStar() }]).ToArray());
 
             // act
             var html1 = control1.Render(context, visualTree);

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+ <style>.st1 {display:none}
+		.st2 {fill:#000000;stroke:#000000;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.24}
+		.st3 {fill:none;fill-rule:evenodd;font-size:12px;overflow:visible;stroke-linecap:square;stroke-miterlimit:3}</style>
+ <g transform="matrix(1.6953 0 0 1.6953 -7.3383 -7.3527)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width=".73732">
+  <path d="m12.9 6.9774a4.3457 3.5528 0 0 0-4.3457 3.5522 4.3457 3.5528 0 0 0 4.3457 3.5538 4.3457 3.5528 0 0 0 0.23438-0.0063v-7.095a4.3457 3.5528 0 0 0-0.23438-0.00476z"/>
+  <path d="m15.669 8.9773-2.5344 0.052488"/>
+  <path d="m15.669 12.089-2.5344-0.01513"/>
+  <path d="m5.334 10.499h3.2205"/>
+ </g>
+</svg>

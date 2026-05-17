@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>EditorCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="EditorCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/editor.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="editorctrl">EditorCtrl</h1>
+<p>The <code>EditorCtrl</code> component provides a &quot;What You See Is What You Get&quot; (WYSIWYG) editor that enables the creation and editing of rich text content directly in the browser. The component is declaratively integrated into the HTML markup and initializes its content from the existing markup of the host element. For seamless integration into forms, a <code>name</code> attribute is used to automatically synchronize the editor's content with a hidden input field.</p>
+<p>Beyond plain formatting, the editor ships with inline triggers for mentions, links, and AddOns, markdown-style auto-formatting, a floating selection toolbar, and an instruction text tool. All of these are optional and extensible through dedicated registries.</p>
+<h2 id="declarative-configuration">Declarative Configuration</h2>
+<p>The editor is initialized directly in the HTML. The initial content is taken from the <code>innerHTML</code> of the host element, and the editor can be bound to a form using the <code>name</code> attribute.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>Defines the name for a hidden input field that submits the editor's content with a form submission.</td>
+<td><code>name=&quot;content&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-image-upload-uri</code></td>
+<td>The URI endpoint for image uploads.</td>
+<td><code>data-image-upload-uri=&quot;/api/upload&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-image-base-uri</code></td>
+<td>The base URI for resolving image paths.</td>
+<td><code>data-image-base-uri=&quot;/images/&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-mention-uri</code></td>
+<td>REST endpoint for the <code>@</code>-mention search. The presence of this attribute enables the mention picker.</td>
+<td><code>data-mention-uri=&quot;/api/users/search&quot;</code></td>
+</tr>
+<tr>
+<td>Text Content</td>
+<td>The initial HTML content of the editor.</td>
+<td><code>&lt;div class=&quot;wx-webui-editor&quot;&gt;Initial &lt;b&gt;text&lt;/b&gt;.&lt;/div&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="inline-triggers">Inline Triggers</h2>
+<p>The editor recognises direct triggers that map to specific actions or pickers:</p>
+<table>
+<thead>
+<tr>
+<th>Trigger</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@</code></td>
+<td>Opens the mention picker (only when <code>data-mention-uri</code> is set)</td>
+</tr>
+<tr>
+<td><code>[[</code></td>
+<td>Opens the link dialog</td>
+</tr>
+<tr>
+<td><code>{{</code></td>
+<td>Opens the AddOn library</td>
+</tr>
+<tr>
+<td><code>//</code></td>
+<td>Inserts a date control at the cursor</td>
+</tr>
+</tbody>
+</table>
+<p>The double-character triggers (<code>[[</code>, <code>{{</code>, <code>//</code>) consume both characters; the surface document never contains the literal trigger.</p>
+<h2 id="markdown-shortcuts">Markdown Shortcuts</h2>
+<p>The editor auto-formats common markdown patterns inline. Block patterns fire on <code>Space</code> at the start of a line; inline patterns fire on <code>Space</code> after the closing delimiter.</p>
+<h3 id="block-level-patterns">Block-level patterns</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code># </code></td>
+<td>Heading 1</td>
+</tr>
+<tr>
+<td><code>## </code></td>
+<td>Heading 2</td>
+</tr>
+<tr>
+<td><code>### </code></td>
+<td>Heading 3</td>
+</tr>
+<tr>
+<td><code>&gt; </code></td>
+<td>Block quote</td>
+</tr>
+<tr>
+<td><code>```</code></td>
+<td>Code block</td>
+</tr>
+<tr>
+<td><code>- </code> or <code>* </code></td>
+<td>Bullet list</td>
+</tr>
+<tr>
+<td><code>1. </code></td>
+<td>Numbered list</td>
+</tr>
+<tr>
+<td><code>--- </code></td>
+<td>Horizontal rule</td>
+</tr>
+</tbody>
+</table>
+<h3 id="inline-patterns">Inline patterns</h3>
+<table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>**bold**</code></td>
+<td><code>&lt;strong&gt;bold&lt;/strong&gt;</code></td>
+</tr>
+<tr>
+<td><code>*italic*</code> or <code>_italic_</code></td>
+<td><code>&lt;em&gt;italic&lt;/em&gt;</code></td>
+</tr>
+<tr>
+<td><code>~~strike~~</code></td>
+<td><code>&lt;s&gt;strike&lt;/s&gt;</code></td>
+</tr>
+<tr>
+<td><code>`code`</code></td>
+<td><code>&lt;code&gt;code&lt;/code&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="bubble-menu">Bubble Menu</h2>
+<p>When text is selected, a floating mini-toolbar appears <strong>below</strong> the selection with the most common formatting actions: <strong>Bold</strong>, <em>Italic</em>, <u>Underline</u>, <del>Strike</del>, Link, Clear Format.</p>
+<p>The toolbar is always anchored below the selection. It repositions itself on scroll and on window resize, clamps against the viewport edges, and disappears when the selection collapses, the editor loses focus, or the user clicks outside.</p>
+<h2 id="instruction-text">Instruction Text</h2>
+<p>The editor provides a tool to insert instruction texts (Anweisungstexte) for authors via a toolbar button. Clicking the button opens a prompt asking for the text. The entered text is inserted into the editor as a highly visible, distinct block. This block is read-only (<code>contenteditable=&quot;false&quot;</code>) to prevent accidental editing of the structure. Outside the editor context, the instruction text is hidden via CSS, making it completely invisible on the published page.</p>
+<h2 id="mentions-api">Mentions API</h2>
+<p>When <code>data-mention-uri</code> is set, pressing <code>@</code> opens a search dropdown that calls the configured endpoint.</p>
+<h3 id="request">Request</h3>
+<p>The editor performs a <code>GET</code> to the configured URI, appending a <code>q</code> query parameter:</p>
+<pre><code class="lang-http">GET /api/users/search?q=anna
+Accept: application/json
+</code></pre>
+<p>The query is debounced (~180 ms) so rapid typing won't flood the backend.</p>
+<h3 id="response">Response</h3>
+<p>The endpoint must respond with a JSON array of mention candidates:</p>
+<pre><code class="lang-json">[
+  {
+    &quot;id&quot;: &quot;u123&quot;,
+    &quot;label&quot;: &quot;Anna Müller&quot;,
+    &quot;image&quot;: &quot;/avatars/u123.png&quot;,
+    &quot;uri&quot;: &quot;/profile/u123&quot;,
+    &quot;description&quot;: &quot;Engineering&quot;
+  }
+]
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>string</td>
+<td><strong>Required.</strong> Stored as <code>data-id</code> on the inserted mention.</td>
+</tr>
+<tr>
+<td><code>label</code></td>
+<td>string</td>
+<td>Display text. Falls back to <code>name</code>, then <code>id</code>.</td>
+</tr>
+<tr>
+<td><code>image</code></td>
+<td>string</td>
+<td>Optional avatar URL.</td>
+</tr>
+<tr>
+<td><code>uri</code></td>
+<td>string</td>
+<td>Optional link target.</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>string</td>
+<td>Optional secondary line in the picker.</td>
+</tr>
+</tbody>
+</table>
+<p>When the user picks an entry, the editor inserts:</p>
+<pre><code class="lang-html">&lt;a class=&quot;wx-mention&quot; data-id=&quot;u123&quot; href=&quot;/profile/u123&quot; contenteditable=&quot;false&quot;&gt;@Anna Müller&lt;/a&gt;
+</code></pre>
+<p>Mention nodes are <code>contenteditable=&quot;false&quot;</code> and act as atomic units: a single <code>Backspace</code> removes the whole mention.</p>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>After initialization, the editor's instance can be controlled programmatically to read or modify its content.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<p>For an editor defined declaratively in HTML, the associated instance is retrieved via the <code>getInstanceByElement(element)</code> method of the central <code>webexpress.webui.Controller</code>.</p>
+<pre><code class="lang-javascript">// find the host element in the DOM
+const editorElement = document.getElementById('myEditor');
+
+// retrieve the controller instance associated with the element
+const editorCtrl = webexpress.webui.Controller.getInstanceByElement(editorElement);
+
+// get or set the content programmatically using the value property
+if (editorCtrl) {
+    const currentContent = editorCtrl.value;
+    editorCtrl.value = '&lt;p&gt;New content that replaces the old one.&lt;/p&gt;';
+}
+</code></pre>
+<h3 id="manual-instantiation">Manual Instantiation</h3>
+<p>An editor can also be created entirely programmatically and attached to a host element, which is useful in dynamic UI scenarios.</p>
+<pre><code class="lang-javascript">// find the container element for the dynamic editor
+const container = document.getElementById('editor-container');
+
+// create a new instance of EditorCtrl manually
+const dynamicEditorCtrl = new webexpress.webui.EditorCtrl(container);
+
+// set initial content using the value property
+dynamicEditorCtrl.value = '&lt;p&gt;Dynamically created editor.&lt;/p&gt;';
+</code></pre>
+<h3 id="inserting-content-at-the-caret">Inserting Content at the Caret</h3>
+<p>For custom commands or AddOn integrations, content can be inserted at the current cursor position without disturbing the surrounding markup.</p>
+<pre><code class="lang-javascript">editorCtrl.insertHtmlAtCursor('&lt;strong&gt;Inserted at caret&lt;/strong&gt;&amp;nbsp;');
+</code></pre>
+<p>Input HTML is sanitized through the editor's allow-list before insertion. Unknown tags are unwrapped; unsafe attributes (event handlers, <code>javascript:</code> URLs, dangerous <code>style</code> values) are stripped.</p>
+<h2 id="events">Events</h2>
+<p>The <code>EditorCtrl</code> dispatches a change event whenever its content is modified, enabling external components to react to content updates.</p>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>change_value_event</code></td>
+<td>Dispatched whenever the editor content changes. The event detail contains the current content.</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="lang-javascript">const editorElement = document.getElementById('myEditor');
+const editorCtrl = webexpress.webui.Controller.getInstanceByElement(editorElement);
+
+editorElement.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, (e) =&gt; {
+    console.log('Content changed:', e.detail.value);
+});
+</code></pre>
+<p>Synchronization with a form occurs automatically on the <code>submit</code> event of the enclosing form.</p>
+<h2 id="keyboard-shortcuts">Keyboard Shortcuts</h2>
+<p>The editor supports the following keyboard shortcuts:</p>
+<table>
+<thead>
+<tr>
+<th>Shortcut</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Ctrl+B</code> / <code>⌘+B</code></td>
+<td>Bold</td>
+</tr>
+<tr>
+<td><code>Ctrl+I</code> / <code>⌘+I</code></td>
+<td>Italic</td>
+</tr>
+<tr>
+<td><code>Ctrl+U</code> / <code>⌘+U</code></td>
+<td>Underline</td>
+</tr>
+<tr>
+<td><code>Ctrl+Z</code> / <code>⌘+Z</code></td>
+<td>Undo</td>
+</tr>
+<tr>
+<td><code>Ctrl+Y</code> / <code>⌘+Y</code></td>
+<td>Redo</td>
+</tr>
+<tr>
+<td><code>Ctrl+Shift+Z</code> / <code>⌘+Shift+Z</code></td>
+<td>Redo</td>
+</tr>
+<tr>
+<td><code>@</code></td>
+<td>Open mention picker (when <code>data-mention-uri</code> is set)</td>
+</tr>
+<tr>
+<td><code>[[</code></td>
+<td>Open link dialog</td>
+</tr>
+<tr>
+<td><code>{{</code></td>
+<td>Open AddOn library</td>
+</tr>
+<tr>
+<td><code>//</code></td>
+<td>Insert date control</td>
+</tr>
+<tr>
+<td><code>Tab</code> (in list)</td>
+<td>Indent list item</td>
+</tr>
+<tr>
+<td><code>Shift+Tab</code> (in list)</td>
+<td>Outdent list item</td>
+</tr>
+</tbody>
+</table>
+<h3 id="deletion-behavior">Deletion Behavior</h3>
+<p>Backspace/Delete remove typed whitespace first and only remove adjacent non-editable blocks when the caret is truly at the block boundary (word-processor-like behavior).</p>
+<h2 id="extending-the-editor">Extending the Editor</h2>
+<p>The editor exposes registry-style extension points. Each registry is a singleton on the <code>webexpress.webui</code> namespace and follows the same shape used elsewhere in the framework.</p>
+<h3 id="plugins">Plugins</h3>
+<p>Toolbar buttons, context menu items, and behavior plugins register with <code>webexpress.webui.EditorPlugins</code>:</p>
+<pre><code class="lang-javascript">webexpress.webui.EditorPlugins.register(&quot;my-plugin&quot;, 80, {
+    init: (editor) =&gt; { /* called once per editor */ },
+    createToolbar: (editor) =&gt; { /* return an HTMLElement or null */ },
+    getContextMenuItems: (editor, target) =&gt; [ /* menu items */ ],
+    onContentChange: (editor) =&gt; { /* called when value is set externally */ }
+});
+</code></pre>
+<p>The numeric position (default <code>10</code>) controls the order of toolbar groups. The bubble menu, placeholder, and other core features are themselves plugins registered at positions 50–70.</p>
+<h3 id="addons">AddOns</h3>
+<p>Rich embeddable blocks register with <code>webexpress.webui.EditorAddOns</code>:</p>
+<pre><code class="lang-javascript">webexpress.webui.EditorAddOns.register(&quot;alert-box&quot;, {
+    label: &quot;Alert&quot;,
+    icon: &quot;fas fa-exclamation-triangle&quot;,
+    type: &quot;block&quot;,
+    category: &quot;Widgets&quot;,
+    isContainer: false,
+    properties: [
+        { name: &quot;variant&quot;, label: &quot;Style&quot;, type: &quot;text&quot;, default: &quot;info&quot; },
+        { name: &quot;title&quot;, label: &quot;Title&quot;, type: &quot;text&quot;, default: &quot;Note&quot; }
+    ],
+    renderer: (data) =&gt; `
+        &lt;div class=&quot;alert alert-${data.variant}&quot;&gt;
+            &lt;strong&gt;${data.title}:&lt;/strong&gt; Your text here.
+        &lt;/div&gt;`
+});
+</code></pre>
+<p>AddOns appear in the AddOn picker (opened via <code>{{</code>, or the toolbar button). When the AddOn has <code>properties</code>, a property dialog opens before insertion.</p>
+<h2 id="use-case-examples">Use Case Examples</h2>
+<h3 id="form-with-mentions">Form with mentions</h3>
+<pre><code class="lang-html">&lt;form action=&quot;/submit-comment&quot; method=&quot;post&quot;&gt;
+    &lt;div class=&quot;wx-webui-editor&quot;
+         name=&quot;comment&quot;
+         data-mention-uri=&quot;/api/users/search&quot;&gt;
+    &lt;/div&gt;
+    &lt;button type=&quot;submit&quot;&gt;Post&lt;/button&gt;
+&lt;/form&gt;
+</code></pre>
+<h3 id="declarative-configuration-of-a-rich-content-editor">Declarative configuration of a rich-content editor</h3>
+<pre><code class="lang-html">&lt;form action=&quot;/submit-content&quot; method=&quot;post&quot;&gt;
+    &lt;div id=&quot;my-editor&quot; class=&quot;wx-webui-editor&quot; name=&quot;article_content&quot;&gt;
+        &lt;h2&gt;Article Title&lt;/h2&gt;
+        &lt;p&gt;This is the initial &lt;b&gt;content&lt;/b&gt; of the editor. It can be &lt;i&gt;formatted&lt;/i&gt;.&lt;/p&gt;
+        &lt;ul&gt;
+            &lt;li&gt;List item 1&lt;/li&gt;
+            &lt;li&gt;List item 2&lt;/li&gt;
+        &lt;/ul&gt;
+    &lt;/div&gt;
+    &lt;button type=&quot;submit&quot;&gt;Submit&lt;/button&gt;
+&lt;/form&gt;
+</code></pre>
+<h3 id="reacting-to-content-changes">Reacting to content changes</h3>
+<pre><code class="lang-javascript">const editorElement = document.getElementById('my-editor');
+
+editorElement.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, (e) =&gt; {
+    document.getElementById('preview').innerHTML = e.detail.value;
+});
+</code></pre>
+<h3 id="programmatic-insertion-of-an-addon">Programmatic insertion of an AddOn</h3>
+<pre><code class="lang-javascript">const ctrl = webexpress.webui.Controller.getInstanceByElement(
+    document.getElementById('my-editor')
+);
+
+ctrl.insertHtmlAtCursor(`
+    &lt;div class=&quot;wx-addon-frame card my-3 shadow-sm&quot;
+         contenteditable=&quot;false&quot;
+         data-addon-id=&quot;game-of-life&quot;&gt;
+        &lt;div class=&quot;card-body p-2 wx-addon-body-widget&quot; contenteditable=&quot;false&quot;&gt;
+            &lt;div class=&quot;wx-webui-gameoflife&quot;
+                 style=&quot;width:100%;height:300px&quot;
+                 data-cell-size=&quot;12&quot;&gt;&lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+`);
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/editor.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

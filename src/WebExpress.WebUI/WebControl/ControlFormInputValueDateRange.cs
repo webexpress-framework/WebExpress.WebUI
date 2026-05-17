@@ -9,12 +9,12 @@ namespace WebExpress.WebUI.WebControl
     public class ControlFormInputValueDateRange : IControlFormInputValue
     {
         /// <summary>
-        /// Returns or sets the start date of the range.
+        /// Gets or sets the start date of the range.
         /// </summary>
         public DateTime? From { get; set; }
 
         /// <summary>
-        /// Returns or sets the end date of the range.
+        /// Gets or sets the end date of the range.
         /// </summary>
         public DateTime? To { get; set; }
 

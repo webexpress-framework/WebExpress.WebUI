@@ -7,49 +7,54 @@ namespace WebExpress.WebUI.WebControl
     public enum TypeColorTag
     {
         /// <summary>
-        /// Default color callout.
+        /// Default tag color.
         /// </summary>
         Default = 0,
 
         /// <summary>
-        /// Primary color callout.
+        /// Primary tag color.
         /// </summary>
         Primary = 1,
 
         /// <summary>
-        /// Secondary color callout.
+        /// Secondary tag color.
         /// </summary>
         Secondary = 2,
 
         /// <summary>
-        /// Success color callout.
+        /// Success tag color.
         /// </summary>
         Success = 3,
 
         /// <summary>
-        /// Info color callout.
+        /// Info tag color.
         /// </summary>
         Info = 4,
 
         /// <summary>
-        /// Warning color callout.
+        /// Warning tag color.
         /// </summary>
         Warning = 5,
 
         /// <summary>
-        /// Danger color callout.
+        /// Danger tag color.
         /// </summary>
         Danger = 6,
 
         /// <summary>
-        /// Dark color callout.
+        /// Dark tag color.
         /// </summary>
         Dark = 7,
 
         /// <summary>
-        /// Light color callout.
+        /// Light tag color.
         /// </summary>
-        Light = 8
+        Light = 8,
+
+        /// <summary>
+        /// Highlight tag color.
+        /// </summary>
+        Highlight = 13
     }
 
     /// <summary>
@@ -74,6 +79,7 @@ namespace WebExpress.WebUI.WebControl
                 TypeColorTag.Danger => "wx-tag-danger",
                 TypeColorTag.Light => "wx-tag-light",
                 TypeColorTag.Dark => "wx-tag-dark",
+                TypeColorTag.Highlight => "wx-tag-highlight",
                 _ => string.Empty,
             };
         }

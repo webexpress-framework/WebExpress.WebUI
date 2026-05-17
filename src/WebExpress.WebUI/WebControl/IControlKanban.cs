@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlKanban : IControl
     {
         /// <summary>
-        /// Returns the collection of cards.
+        /// Gets the collection of cards.
         /// </summary>
         IEnumerable<IControlKanbanCard> Cards { get; }
 

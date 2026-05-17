@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.Internationalization;
+using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -7,30 +8,27 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a radio button input form item control.
     /// </summary>
-    /// <remarks>
-    /// This class provides the functionality for a radio button input within a form.
-    /// </remarks>
     public class ControlFormItemInputRadio : ControlFormItemInput<ControlFormInputValueString>
     {
         /// <summary>
-        /// Returns or sets the value of the option.
+        /// Gets or sets the value of the option.
         /// </summary>
-        public string Option { get; set; }
+        public Func<IRenderControlContext, string> Option { get; set; }
 
         /// <summary>
-        /// Returns or sets a value indicating whether the content should be rendered inline.
+        /// Gets or sets a value indicating whether the content should be rendered inline.
         /// </summary>
-        public bool Inline { get; set; }
+        public Func<IRenderControlContext, bool> Inline { get; set; }
 
         /// <summary>
-        /// Returns or sets the description.
+        /// Gets or sets the description.
         /// </summary>
-        public string Description { get; set; }
+        public Func<IRenderControlContext, string> Description { get; set; }
 
         /// <summary>
-        /// Returns or sets whether the radio button is selected
+        /// Gets or sets whether the radio button is selected.
         /// </summary>
-        public bool Checked { get; set; }
+        public Func<IRenderControlContext, bool> Checked { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
@@ -59,35 +57,41 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var value = renderContext?.GetValue<ControlFormInputValueString>(this)?.Text;
+            var name = Name?.Invoke(renderContext);
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
+            var option = Option?.Invoke(renderContext);
+            var inline = Inline?.Invoke(renderContext) ?? false;
+            var description = Description?.Invoke(renderContext);
+            var @checked = Checked?.Invoke(renderContext) ?? false;
 
             if (!string.IsNullOrWhiteSpace(value))
             {
-                Checked = value == Option;
+                @checked = value == option;
             }
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("form-check", Inline ? "form-check-inline" : null, GetClasses()),
+                Class = Css.Concatenate("form-check", inline ? "form-check-inline" : null, GetClasses()),
                 Style = GetStyles(),
             }
                 .Add(new HtmlElementFieldInput()
                 {
-                    Name = Name,
+                    Name = name,
                     Type = "radio",
-                    Value = Option,
-                    Disabled = Disabled,
+                    Value = option,
+                    Disabled = disabled,
                     Class = Css.Concatenate("form-check-input"),
-                    Checked = Checked
+                    Checked = @checked
                 })
                 .Add(new HtmlElementFieldLabel()
                 {
                     Class = Css.Concatenate("form-check-label"),
                     For = Id
                 }
-                    .Add(new HtmlText(string.IsNullOrWhiteSpace(Description) ?
+                    .Add(new HtmlText(string.IsNullOrWhiteSpace(description) ?
                         string.Empty :
-                        I18N.Translate(renderContext.Request?.Culture, Description)
+                        I18N.Translate(renderContext.Request?.Culture, description)
                     )));
 
             return html;
@@ -97,11 +101,14 @@ namespace WebExpress.WebUI.WebControl
         /// Creates an value from the specified string representation.
         /// </summary>
         /// <param name="value">
-        /// The string representation of the value to be converted. Cannot be null.
+        /// The string representation of the value to be parsed and stored.
         /// </param>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="renderContext">
+        /// The context in which the control is rendered.
+        /// </param>
         /// <returns>
-        /// The value created from the specified string representation.
+        /// A instance representing the parsed value, or an instance with a default 
+        /// value if parsing fails.
         /// </returns>
         protected override ControlFormInputValueString CreateValue(string value, IRenderControlFormContext renderContext)
         {

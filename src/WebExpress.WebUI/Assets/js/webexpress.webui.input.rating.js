@@ -12,6 +12,7 @@ webexpress.webui.InputRatingCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         // read configuration
+        this._id = element.getAttribute("id") || "";
         this._name = element.getAttribute("name") || "";
         this._total = parseInt(element.dataset.stars, 10);
         if (isNaN(this._total) || this._total <= 0) {
@@ -24,12 +25,13 @@ webexpress.webui.InputRatingCtrl = class extends webexpress.webui.Ctrl {
         }
 
         // cleanup attributes on host
+        element.removeAttribute("id");
         element.removeAttribute("name");
         element.removeAttribute("data-value");
         element.classList.add("wx-rating");
 
         // build structure
-        this._hidden = this._createHiddenInput(this._name);
+        this._hidden = this._createHiddenInput(this._id, this._name);
         this._container = document.createElement("div");
         this._container.className = "wx-rating-container";
         this._container.setAttribute("role", "radiogroup");
@@ -69,12 +71,16 @@ webexpress.webui.InputRatingCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Create hidden input.
+     * @param {string} id Input id.
      * @param {string} name Input name.
      * @returns {HTMLInputElement} Hidden input.
      */
-    _createHiddenInput(name) {
+    _createHiddenInput(id, name) {
         const hidden = document.createElement("input");
         hidden.type = "hidden";
+        if (id) {
+            hidden.id = id;
+        }
         hidden.name = name;
         return hidden;
     }
@@ -90,7 +96,7 @@ webexpress.webui.InputRatingCtrl = class extends webexpress.webui.Ctrl {
             star.className = "wx-rating-star";
             star.setAttribute("data-index", String(i));
             star.setAttribute("role", "radio");
-            star.setAttribute("aria-label", i + " von " + this._total);
+            star.setAttribute("aria-label", i + " " + this._i18n("webexpress.webui:rating.of", "of") + " " + this._total);
             star.setAttribute("aria-checked", (i === this._value) ? "true" : "false");
             star.setAttribute("tabindex", (i - 1 === this._focusedIndex) ? "0" : "-1");
 

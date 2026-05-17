@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -8,19 +10,19 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlFormItemInputMove : IControlFormItemInput<ControlFormInputValueStringList>
     {
         /// <summary>
-        /// Returns the collection of available options for the control.
+        /// Gets the collection of available options for the control.
         /// </summary>
         IEnumerable<IControlFormItemInputMoveItem> Options { get; }
 
         /// <summary>
-        /// Returns or sets the label displayed for the selected options list.
+        /// Gets or sets the label displayed for the selected options list.
         /// </summary>
-        string SelectedHeader { get; }
+        Func<IRenderControlContext, string> SelectedHeader { get; }
 
         /// <summary>
-        /// Returns or sets the label displayed for the available options list.
+        /// Gets or sets the label displayed for the available options list.
         /// </summary>
-        string AvailableHeader { get; }
+        Func<IRenderControlContext, string> AvailableHeader { get; }
 
         /// <summary>
         /// Adds one or more items to the available options list.

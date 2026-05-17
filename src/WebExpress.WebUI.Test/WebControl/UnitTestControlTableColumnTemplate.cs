@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableColumnTemplate()
             {
-                Title = text
+                Title = _ => text
             };
 
             // act
@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableColumnTemplate()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -93,6 +93,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorTable.Warning, @"<div data-color=""table-warning""></div>")]
         [InlineData(TypeColorTable.Danger, @"<div data-color=""table-danger""></div>")]
         [InlineData(TypeColorTable.Light, @"<div data-color=""table-light""></div>")]
+        [InlineData(TypeColorTable.Highlight, @"<div data-color=""table-highlight""></div>")]
         [InlineData(TypeColorTable.Dark, @"<div data-color=""table-dark""></div>")]
         public void Color(TypeColorTable color, string expected)
         {
@@ -102,7 +103,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlTableColumnTemplate()
             {
-                Color = color
+                Color = _ => color
             };
 
             // act

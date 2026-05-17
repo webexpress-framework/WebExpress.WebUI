@@ -109,12 +109,13 @@ The component's value is managed internally and synchronized with a hidden input
 
 The component is initialized on a host element and configured using `data-` attributes.
 
-| Attribute            | Description                                                   | Example
-|----------------------|---------------------------------------------------------------|----------------------------------
-| `name`               | The name for the hidden input field used for form submission. | `name="categories"`
-| `data-value`         | A semicolon-separated list of IDs for the initial selection.  | `data-value="id2;id3"`
-| `data-multiselection`| Set to `"true"` to enable multi-select mode.                  | `data-multiselection="true"`
-| `placeholder`        | The text displayed when no items are selected.                | `placeholder="Select an item..."`
+| Attribute              | Description                                                            | Example
+|------------------------|------------------------------------------------------------------------|----------------------------------
+| `name`                 | The name for the hidden input field used for form submission.          | `name="categories"`
+| `data-value`           | A semicolon-separated list of IDs for the initial selection.           | `data-value="id2;id3"`
+| `data-multiselection`  | Set to `"true"` to enable multi-select mode.                           | `data-multiselection="true"`
+|`data-sticky-selection` | Set to `"true"` to prevent deselection of items in single-select mode. | `data-sticky-selection="true"`
+| `placeholder`          | The text displayed when no items are selected.                         | `placeholder="Select an item..."`
 
 ### Options and Structural Elements
 
@@ -157,8 +158,16 @@ if (selectionCtrl) {
     // get the current selection (array of IDs)
     const currentSelection = selectionCtrl.value;
 
-    // set a new selection programmatically
+    // set a new selection programmatically using an array of IDs
     selectionCtrl.value = ['id1', 'id4'];
+
+    // set a new selection using an array of objects
+    // objects that are not already registered as options are added automatically.
+    // the display label is resolved from 'label', 'name', 'text', or 'title' (in that order).
+    selectionCtrl.value = [
+        { id: 'game-1', name: 'The Secret of Monkey Island', releaseYear: 1990 },
+        { id: 'game-2', name: 'Monkey Island 2: LeChuck\'s Revenge', releaseYear: 1991 }
+    ];
 
     // update the available options
     selectionCtrl.options = [
@@ -167,6 +176,18 @@ if (selectionCtrl) {
     ];
 }
 ```
+
+### Accepted Value Formats
+
+The `value` setter accepts the following formats:
+
+| Format                  | Example                                                              | Description
+|-------------------------|----------------------------------------------------------------------|--------------------------------------------------------------
+| Array of IDs            | `['id1', 'id2']`                                                     | Selects items whose IDs match.
+| Array of objects        | `[{ id: 'id1', name: 'Item 1' }]`                                   | Extracts IDs; stores display metadata for rendering selected items. Does not add entries to the dropdown options.
+| Semicolon-separated     | `'id1;id2'`                                                          | Splits by `;` and selects matching items.
+| Single ID string        | `'id1'`                                                              | Selects a single item.
+| `null` / `undefined`    | `null`                                                               | Clears the selection.
 
 ## Events
 

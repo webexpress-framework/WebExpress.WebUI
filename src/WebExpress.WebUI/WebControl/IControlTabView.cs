@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebPage;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -11,14 +13,24 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlTabView : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the title text.
+        /// Gets the title text.
         /// </summary>
-        string Title { get; }
+        Func<IRenderControlContext, string> Title { get; }
 
         /// <summary>
-        /// Returns the icon associated with this view.
+        /// Gets the icon associated with this view.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; }
+
+        /// <summary>
+        /// Gets the image uri.
+        /// </summary>
+        Func<IRenderControlContext, IUri> Image { get; }
+
+        /// <summary>
+        /// Gets the items of the view control.
+        /// </summary>
+        public IEnumerable<IControl> Items { get; }
 
         /// <summary>
         /// Adds one or more items to the view.

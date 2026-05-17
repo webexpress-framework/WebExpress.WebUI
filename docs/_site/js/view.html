@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title> | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content=" | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/view.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<p>The <code>View</code> control acts as an intelligent container for applications with multiple views. It enables switching between different work areas within a single DOM container. Each view is defined by a child element with the <code>.wx-view</code> class and can be configured using attributes such as <code>data-title</code>, <code>data-description</code>, and <code>data-icon-css</code>. A persistent header and footer can optionally be defined and remain visible while the active view changes.</p>
+<p>The control supports two layouts that determine how view switching is presented to the user:</p>
+<ul>
+<li><strong>Default</strong> — The host renders a toolbar that displays the title and description of the active view. Switching is performed through a dropdown menu.</li>
+<li><strong>ToggleGroup</strong> — The host renders a compact toggle bar in which all available views can be selected directly. The title and description of the active view are intentionally omitted, so switching only requires a single click on the corresponding label or icon.</li>
+</ul>
+<p>The header area, search bar, main content area and footer remain fully intact in both layouts; only the navigation itself differs.</p>
+<pre><code>   Default layout:
+   ┌────────────────────────────────────────────────────────┐ 
+   │ [Icon] Title / Description                   [▼ Views] │ 
+   ├────────────────────────────────────────────────────────┤ 
+   │ Header                                                 │ 
+   ├────────────────────────────────────────────────────────┤ 
+   │ Active view content                                    │ 
+   │                                                        │ 
+   ├────────────────────────────────────────────────────────┤ 
+   │ Footer                                                 │ 
+   └────────────────────────────────────────────────────────┘
+
+   ToggleGroup layout:
+   ┌────────────────────────────────────────────────────────┐ 
+   │                         [ View 1 ][ View 2 ][ View 3 ] │ 
+   ├────────────────────────────────────────────────────────┤ 
+   │ Header                                                 │ 
+   ├────────────────────────────────────────────────────────┤ 
+   │ Active view content                                    │ 
+   │                                                        │ 
+   ├────────────────────────────────────────────────────────┤ 
+   │ Footer                                                 │ 
+   └────────────────────────────────────────────────────────┘
+</code></pre>
+<h2 id="configuration">Configuration</h2>
+<p>The initialization is handled declaratively through the HTML structure. The host element acts as the container, and direct children define the views and optional layout areas.</p>
+<h3 id="host-element">Host Element</h3>
+<p>The host element requires no specific attributes. The optional <code>data-layout</code> attribute selects the layout used to render the switcher:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Values</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-layout</code></td>
+<td><code>default</code>, <code>togglegroup</code></td>
+<td>Controls how view switching is rendered. Defaults to <code>default</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="child-elements">Child Elements</h3>
+<p>The controller scans the host for specific classes to build the layout:</p>
+<table>
+<thead>
+<tr>
+<th>Selector Class</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.wx-view</code></td>
+<td>Defines a selectable view. Multiple elements allowed.</td>
+</tr>
+<tr>
+<td><code>.wx-header</code></td>
+<td>(Optional) Defines a persistent header area above the views.</td>
+</tr>
+<tr>
+<td><code>.wx-footer</code></td>
+<td>(Optional) Defines a persistent footer area below the views.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="view-configuration-wx-view">View Configuration (<code>.wx-view</code>)</h3>
+<p>Attributes on the <code>.wx-view</code> elements control the appearance and behavior:</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-title</code></td>
+<td>The display name of the view (shown in the toolbar, dropdown or toggle bar).</td>
+</tr>
+<tr>
+<td><code>data-description</code></td>
+<td>A short description displayed below the title in the default toolbar. Ignored by the <code>togglegroup</code> layout.</td>
+</tr>
+<tr>
+<td><code>data-icon-css</code></td>
+<td>CSS class for an icon (e.g., <code>fa fa-list</code>).</td>
+</tr>
+<tr>
+<td><code>data-icon-img</code></td>
+<td>URL to an image icon (alternative to CSS icon).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="functionality">Functionality</h2>
+<ul>
+<li><strong>Dynamic Layout</strong>: The controller restructures the DOM, moving <code>.wx-view</code> contents into a managed container structure (<code>.wx-main-pane</code>).</li>
+<li><strong>View Switching</strong>: Only one view is visible at a time. Switching is instant and preserves the DOM state of the hidden views.</li>
+<li><strong>State Persistence</strong>: The index of the active view is stored in a cookie (Key: <code>wx_view_state_{elementId}</code>). On reload, the last active view is restored.</li>
+<li><strong>External Integration</strong>: If <code>.wx-header</code> or <code>.wx-footer</code> elements are provided, they are preserved and placed outside the scrollable view area, ensuring they remain visible.</li>
+</ul>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>The component can be controlled via its JavaScript instance.</p>
+<h3 id="accessing-the-instance">Accessing the Instance</h3>
+<pre><code class="lang-javascript">// find the host element
+const viewContainer = document.getElementById('my-main-view');
+
+// retrieve the controller instance
+const viewCtrl = webexpress.webui.Controller.getInstanceByElement(viewContainer);
+
+if (viewCtrl) {
+    // switch to the second defined view (index 1)
+    viewCtrl.switchView(1);
+}
+</code></pre>
+<h2 id="events">Events</h2>
+<p>The component dispatches events to inform the application about state changes.</p>
+<ul>
+<li>webexpress.webui.Event.CHANGE_VISIBILITY_EVENT: Fired when the active view changes.</li>
+</ul>
+<h2 id="use-case-example">Use Case Example</h2>
+<p>The following example defines a layout with two simple views rendered in the <code>togglegroup</code> layout.</p>
+<pre><code class="lang-html">&lt;div id=&quot;app-view-container&quot; class=&quot;wx-ctrl-view&quot; data-layout=&quot;togglegroup&quot;&gt;
+
+    &lt;!-- persistent header --&gt;
+    &lt;div class=&quot;wx-header&quot;&gt;
+        &lt;input type=&quot;text&quot; placeholder=&quot;Global Search...&quot;&gt;
+    &lt;/div&gt;
+
+    &lt;!-- view 1 --&gt;
+    &lt;div class=&quot;wx-view&quot;
+         data-title=&quot;Customer List&quot;
+         data-description=&quot;Manage all customers&quot;
+         data-icon-css=&quot;fa fa-users&quot;&gt;
+        &lt;table class=&quot;table&quot;&gt;
+            &lt;!-- ... --&gt;
+        &lt;/table&gt;
+    &lt;/div&gt;
+
+    &lt;!-- view 2 --&gt;
+    &lt;div class=&quot;wx-view&quot;
+         data-title=&quot;Settings&quot;
+         data-description=&quot;System configuration&quot;
+         data-icon-css=&quot;fa fa-cogs&quot;&gt;
+        &lt;form&gt;
+            &lt;!-- ... --&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+
+    &lt;!-- persistent footer --&gt;
+    &lt;div class=&quot;wx-footer&quot;&gt;
+        &lt;span&gt;Status: Online&lt;/span&gt;
+    &lt;/div&gt;
+
+&lt;/div&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/view.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebPage;
+using WebExpress.WebCore.WebTheme;
 using WebExpress.WebUI.WebControl;
 
 namespace WebExpress.WebUI.WebPage
@@ -11,57 +13,82 @@ namespace WebExpress.WebUI.WebPage
     public interface IVisualTreeControl : IVisualTree
     {
         /// <summary>
-        /// Returns the title of the html document.
+        /// Gets the title of the html document.
         /// </summary>
         string Title { get; set; }
 
         /// <summary>
-        /// Returns or sets the HTTP status code associated with the response.
+        /// Gets the active theme for the current page. Resolved at
+        /// construction time from <c>ThemeManager.Themes</c> using the first
+        /// theme registered for the page's application, or <c>null</c> when
+        /// the application has no theme.
+        /// </summary>
+        IThemeContext Theme { get; }
+
+        /// <summary>
+        /// Gets the icon theme used to render icons on this page. Pulled from
+        /// <see cref="Theme"/>; falls back to
+        /// <see cref="TypeIconTheme.Default"/> when no theme is registered.
+        /// </summary>
+        TypeIconTheme IconTheme { get; }
+
+        /// <summary>
+        /// Overrides the active theme with the one identified by
+        /// <typeparamref name="TTheme"/>. The theme is looked up via the
+        /// <c>ThemeManager</c> for the page's application; the call is a
+        /// no-op when no matching theme is registered.
+        /// </summary>
+        /// <typeparam name="TTheme">The theme type to use.</typeparam>
+        /// <returns>The current instance for method chaining.</returns>
+        VisualTreeControl UseTheme<TTheme>() where TTheme : class, ITheme;
+
+        /// <summary>
+        /// Gets or sets the HTTP status code associated with the response.
         /// </summary>
         int StatusCode { get; set; }
 
         /// <summary>
-        /// Returns the favicons.
+        /// Gets the favicons.
         /// </summary>
         IEnumerable<Favicon> Favicons { get; }
 
         /// <summary>
-        /// Returns the internal stylesheet.  
+        /// Gets the internal stylesheet.  
         /// </summary>
         IEnumerable<string> Styles { get; }
 
         /// <summary>
-        /// Returns the links to the java script files to be used, which are inserted in the header.
+        /// Gets the links to the java script files to be used, which are inserted in the header.
         /// </summary>
         IEnumerable<string> HeaderScriptLinks { get; }
 
         /// <summary>
-        /// Returns the links to the java script files to be used.
+        /// Gets the links to the java script files to be used.
         /// </summary>
         IEnumerable<string> ScriptLinks { get; }
 
         /// <summary>
-        /// Returns the links to the java script files to be used, which are inserted in the header.
+        /// Gets the links to the java script files to be used, which are inserted in the header.
         /// </summary>
         IEnumerable<string> HeaderScripts { get; }
 
         /// <summary>
-        /// Returns the links to the java script files to be used.
+        /// Gets the links to the java script files to be used.
         /// </summary>
         IReadOnlyDictionary<string, string> Scripts { get; }
 
         /// <summary>
-        /// Returns the links to the css files to be used.
+        /// Gets the links to the css files to be used.
         /// </summary>
         IEnumerable<string> CssLinks { get; }
 
         /// <summary>
-        /// Returns the meta information.
+        /// Gets the meta information.
         /// </summary>
         IReadOnlyDictionary<string, string> Meta { get; }
 
         /// <summary>
-        /// Returns the content.
+        /// Gets the content.
         /// </summary>
         IEnumerable<IControl> Content { get; }
 

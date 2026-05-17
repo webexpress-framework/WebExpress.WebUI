@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
-using WebExpress.WebCore.WebMessage;
 using WebExpress.WebCore.WebParameter;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
@@ -27,86 +26,91 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControl> Controls => _controls;
 
         /// <summary>
-        /// Returns or sets whether the link is active or not.
+        /// Gets or sets whether the link is active or not.
         /// </summary>
-        public TypeActive Active
+        public System.Func<IRenderControlContext, TypeActive> Active
         {
-            get => (TypeActive)GetProperty(TypeActive.None);
-            set => SetProperty(value, () => value.ToClass());
+            get => (System.Func<IRenderControlContext, TypeActive>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets whether the link is underlined or not.
+        /// Gets or sets whether the link is underlined or not.
         /// </summary>
-        public TypeTextDecoration Decoration
+        public System.Func<IRenderControlContext, TypeTextDecoration> Decoration
         {
-            get => (TypeTextDecoration)GetProperty(TypeTextDecoration.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (System.Func<IRenderControlContext, TypeTextDecoration>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
-        public string Text { get; set; }
+        public System.Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
-        /// Returns or sets the title.
+        /// Gets or sets the title.
         /// </summary>
-        public string Title { get; set; }
+        public System.Func<IRenderControlContext, string> Title { get; set; }
 
         /// <summary>
-        /// Returns or sets the target uri.
+        /// Gets or sets the target uri.
         /// </summary>
-        public IUri Uri { get; set; }
+        public System.Func<IRenderControlContext, IUri> Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the target.
+        /// Gets or sets the target.
         /// </summary>
-        public TypeTarget Target { get; set; }
+        public System.Func<IRenderControlContext, TypeTarget> Target { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a 
         /// click to open a modal or similar target.
         /// </summary>
-        public IAction PrimaryAction { get; set; }
+        public System.Func<IRenderControlContext, IAction> PrimaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the secondary action, typically triggered by a 
-        /// double‑click to open a modal or similar target.
+        /// Gets or sets the secondary action, typically triggered by a 
+        /// double-click to open a modal or similar target.
         /// </summary>
-        public IAction SecondaryAction { get; set; }
+        public System.Func<IRenderControlContext, IAction> SecondaryAction { get; set; }
 
         /// <summary>
-        /// Returns or sets the icon.
+        /// Gets or sets the icon.
         /// </summary>
-        public IIcon Icon { get; set; }
+        public System.Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
-        /// Returns or sets a tooltip text.
+        /// Gets or sets the image uri.
         /// </summary>
-        public string Tooltip { get; set; }
+        public System.Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
-        /// Returns or sets the parameters that apply to the link.
+        /// Gets or sets a tooltip text.
         /// </summary>
-        public List<Parameter> Params { get; set; } = [];
+        public System.Func<IRenderControlContext, string> Tooltip { get; set; }
+
+        /// <summary>
+        /// Gets or sets the parameters that apply to the link.
+        /// </summary>
+        public System.Func<IRenderControlContext, List<Parameter>> Params { get; set; }
 
         /// <summary>
         /// Return or specifies the vertical orientation..
         /// </summary>
-        public TypeVerticalAlignment VerticalAlignment
+        public System.Func<IRenderControlContext, TypeVerticalAlignment> VerticalAlignment
         {
-            get => (TypeVerticalAlignment)GetProperty(TypeVerticalAlignment.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (System.Func<IRenderControlContext, TypeVerticalAlignment>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
-        public PropertySizeText Size
+        public System.Func<IRenderControlContext, PropertySizeText> Size
         {
-            get => (PropertySizeText)GetPropertyObject();
-            set => SetProperty(value, () => value?.ToClass(), () => value?.ToStyle());
+            get => (System.Func<IRenderControlContext, PropertySizeText>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
         }
 
         /// <summary>
@@ -118,6 +122,11 @@ namespace WebExpress.WebUI.WebControl
             : base(id)
         {
             _controls.AddRange(content);
+            Active = _ => TypeActive.None;
+            Decoration = _ => TypeTextDecoration.Default;
+            Target = _ => TypeTarget.None;
+            VerticalAlignment = _ => TypeVerticalAlignment.Default;
+            Params = _ => [];
         }
 
         /// <summary>
@@ -171,16 +180,17 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns all local and temporary parameters.
         /// </summary>
-        /// <param name="request">The context in which the control is rendered.</param>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <returns>The parameters as a query string.</returns>
-        private string GetParams(IRequest request)
+        private string GetParams(IRenderControlContext renderContext)
         {
             var dict = new Dictionary<string, Parameter>();
+            var p = Params?.Invoke(renderContext);
 
             // transfer of the parameters from the request.
-            if (Params is not null)
+            if (p is not null)
             {
-                foreach (var v in Params)
+                foreach (var v in p)
                 {
                     if (v.Scope == ParameterScope.Parameter)
                     {
@@ -207,40 +217,57 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var param = GetParams(renderContext?.Request);
+            return Render(renderContext, visualTree, _controls);
+        }
 
-            var html = new HtmlElementTextSemanticsA([.. _controls.Select(x => x.Render(renderContext, visualTree))])
+        /// <summary>
+        /// Converts the control to an HTML representation.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="controls">The controls to render within the link.</param>
+        /// <returns>An HTML node representing the rendered control.</returns>
+        public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControl> controls)
+        {
+            var param = GetParams(renderContext);
+
+            var icon = Icon?.Invoke(renderContext);
+            var title = Title?.Invoke(renderContext);
+            var tooltip = Tooltip?.Invoke(renderContext);
+            var text = Text?.Invoke(renderContext);
+            var role = Role?.Invoke(renderContext);
+
+            var html = new HtmlElementTextSemanticsA([.. controls.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-link", Icon is ImageIcon ? "d-inline-flex align-items-baseline" : null, GetClasses()),
+                Class = Css.Concatenate("wx-link", icon is ImageIcon ? "d-inline-flex align-items-baseline" : null, GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
-                Href = Uri?.ToString() + (param.Length > 0 ? "?" + param : string.Empty),
-                Target = Target,
-                Title = string.IsNullOrEmpty(Title) ? I18N.Translate(renderContext.Request, Tooltip) : I18N.Translate(renderContext.Request, Title),
-                OnClick = OnClick?.ToString()
+                Role = role,
+                Href = Uri?.Invoke(renderContext)?.ToString() + (param.Length > 0 ? "?" + param : string.Empty),
+                Target = Target?.Invoke(renderContext) ?? TypeTarget.None,
+                Title = string.IsNullOrEmpty(title) ? I18N.Translate(renderContext.Request, tooltip) : I18N.Translate(renderContext.Request, title)
             };
 
-            if (Icon is not null)
+            if (icon is not null)
             {
                 html.Add(new ControlIcon()
                 {
-                    Icon = Icon
+                    Icon = _ => icon
                 }.Render(renderContext, visualTree));
             }
 
-            if (!string.IsNullOrWhiteSpace(Text))
+            if (!string.IsNullOrWhiteSpace(text))
             {
-                html.Add(new HtmlText(I18N.Translate(renderContext.Request, Text)));
+                html.Add(new HtmlText(I18N.Translate(renderContext.Request, text)));
             }
 
-            if (!string.IsNullOrWhiteSpace(Tooltip))
+            if (!string.IsNullOrWhiteSpace(tooltip))
             {
                 html.AddUserAttribute("data-bs-toggle", "tooltip");
             }
 
-            PrimaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
-            SecondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
+            PrimaryAction?.Invoke(renderContext)?.ApplyUserAttributes(html, TypeAction.Primary);
+            SecondaryAction?.Invoke(renderContext)?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

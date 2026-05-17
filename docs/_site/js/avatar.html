@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>AvatarCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="AvatarCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/avatar.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="avatarctrl">AvatarCtrl</h1>
+<p>AvatarCtrl is a read-only avatar display with a name, optional subtitle, badge, and a hover info card. The image is loaded from a URL; if no image is available or a load error occurs, an initials tile is shown automatically. The info card appears on hover or focus and can be populated with custom content by providing a child element. Basic form integration is supported via a hidden field.</p>
+<pre><code>    ┌────────────────────┐
+    │ [thumb] [name]     │ ← Avatar (image/initials) + text
+    │         [subtitle] │
+    │         [badge]    │
+    └─┬──────────────────┘
+    ┌─┴────────────────┐
+    │ [custom content] │ ← hover card
+    └──────────────────┘
+</code></pre>
+<h2 id="declarative-configuration">Declarative Configuration</h2>
+<p>Initialize declaratively on a host element, for example <code>&lt;div class=&quot;wx-webui-avatar&quot;&gt;</code>. Texts and behavior are configured via standard attributes and <code>data-*</code> attributes.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Identifier of the host; used for ARIA references and as the default value of the hidden field.</td>
+<td><code>id=&quot;user42&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-name</code></td>
+<td>Display name for the avatar, card title, and ARIA descriptions.</td>
+<td><code>data-name=&quot;Max Mustermann&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-subtitle</code></td>
+<td>Subtitle below the name and fallback content of the card if no info element is provided.</td>
+<td><code>data-subtitle=&quot;Engineering&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-src</code></td>
+<td>Image URL. On error or empty value, the component falls back to initials.</td>
+<td><code>data-src=&quot;/img/users/max.png&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-initials</code></td>
+<td>Initials fallback; if not set, derived from <code>data-name</code>.</td>
+<td><code>data-initials=&quot;MM&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-shape</code></td>
+<td>Thumbnail shape: <code>circle</code> (default) or <code>rect</code>.</td>
+<td><code>data-shape=&quot;rect&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-size</code></td>
+<td>Edge length of the thumbnail in pixels; range 24…512, default 64.</td>
+<td><code>data-size=&quot;96&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-placement</code></td>
+<td>Position of the hover card relative to the host: <code>top</code> (default), <code>right</code>, <code>bottom</code>, <code>left</code>.</td>
+<td><code>data-placement=&quot;right&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-badge</code></td>
+<td>Small badge text label on the thumbnail.</td>
+<td><code>data-badge=&quot;PRO&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<p>Optionally, provide a child element with the class <code>.wx-avatar-info</code>. This element is cloned before the DOM is rebuilt and used as the content of the card body.</p>
+<h2 id="structure-and-behavior">Structure and Behavior</h2>
+<ul>
+<li><p>Rendering</p>
+<ul>
+<li>The host element receives the class <code>wx-avatar</code> and ARIA attributes. Inside, the thumbnail, name, subtitle, and the hover card are created.</li>
+<li>The thumbnail shows either the loaded image or initials. When the image loads successfully, initials are hidden; on load error, initials are shown.</li>
+<li>The badge is only displayed if <code>data-badge</code> is non-empty.</li>
+<li>The shape (<code>circle</code>/<code>rect</code>) is applied via CSS classes.</li>
+</ul>
+</li>
+<li><p>Info Card</p>
+<ul>
+<li>The card title is the display name.</li>
+<li>The body uses the provided <code>.wx-avatar-info</code> child (cloned) if present. If no info element is found, the subtitle is shown as simple text (if set).</li>
+<li>The card appears on mouse hover and keyboard focus, and hides when leaving or on focus loss. Positioning depends on <code>data-placement</code> and is recalculated on window resize and scroll.</li>
+</ul>
+</li>
+<li><p>Initials</p>
+<ul>
+<li>Derivation: first letter of the first and last word (uppercase). For single-word names, the first two letters are used. Whitespace is normalized.</li>
+</ul>
+</li>
+</ul>
+<h2 id="form-integration">Form Integration</h2>
+<p>If the host has a <code>name</code> attribute, a hidden field is created:</p>
+<ul>
+<li><code>type=&quot;hidden&quot;</code>, <code>name</code> equals the host’s <code>name</code> attribute.</li>
+<li><code>value</code> is taken from <code>data-value</code>; otherwise, the host’s <code>id</code> (or empty if none).</li>
+</ul>
+<p>The hidden field is intended to carry an identifier in forms. The visual representation (image/initials/badge) does not affect the value; no client-side image upload happens here.</p>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>The instance can be obtained to update the name or image source at runtime.</p>
+<pre><code class="lang-javascript">// get host element
+const host = document.getElementById('user-avatar');
+
+// get controller instance
+const avatar = webexpress.webui.Controller.getInstanceByElement(host);
+
+if (avatar) {
+    // set display name (recomputes initials and re-renders)
+    avatar.name = 'Alex Example';
+
+    // set image source (falls back to initials on load error)
+    avatar.src = '/assets/avatars/alex.png';
+}
+</code></pre>
+<p>Note: The public API exposes the properties <code>name</code> and <code>src</code>. Internal methods are not intended for stable use.</p>
+<h2 id="accessibility">Accessibility</h2>
+<ul>
+<li>Host
+<ul>
+<li><code>role=&quot;group&quot;</code>, <code>tabindex=&quot;0&quot;</code> for keyboard focus.</li>
+</ul>
+</li>
+<li>Thumbnail
+<ul>
+<li><code>role=&quot;img&quot;</code> with <code>aria-label</code> “Avatar of {Name}” or “Avatar” if no name is set.</li>
+</ul>
+</li>
+<li>Card
+<ul>
+<li><code>role=&quot;dialog&quot;</code>, <code>aria-hidden</code> toggles while showing/hiding.</li>
+<li>If the name line has an id, <code>aria-labelledby</code> points to it.</li>
+</ul>
+</li>
+<li>Keyboard
+<ul>
+<li>The card shows on focus gain and hides on focus loss.</li>
+</ul>
+</li>
+</ul>
+<h2 id="events">Events</h2>
+<p>No custom events are emitted.</p>
+<h2 id="examples">Examples</h2>
+<p>Simple avatar with initials (circle, default size):</p>
+<pre><code class="lang-html">&lt;div id=&quot;u1&quot;
+     class=&quot;wx-webui-avatar&quot;
+     data-name=&quot;Max Mustermann&quot;
+     data-subtitle=&quot;Engineering&quot;&gt;
+&lt;/div&gt;
+</code></pre>
+<p>Avatar with image, badge, and right-positioned card:</p>
+<pre><code class="lang-html">&lt;div id=&quot;u2&quot;
+     class=&quot;wx-webui-avatar&quot;
+     data-name=&quot;Sara Sommer&quot;
+     data-subtitle=&quot;Product&quot;
+     data-src=&quot;/img/users/sara.png&quot;
+     data-badge=&quot;PRO&quot;
+     data-placement=&quot;right&quot;
+     data-size=&quot;80&quot;&gt;
+&lt;/div&gt;
+</code></pre>
+<p>Avatar with custom info content inside the card:</p>
+<pre><code class="lang-html">&lt;div id=&quot;u3&quot;
+     class=&quot;wx-webui-avatar&quot;
+     data-name=&quot;Chris Winter&quot;
+     data-subtitle=&quot;Design&quot;&gt;
+  &lt;div class=&quot;wx-avatar-info&quot;&gt;
+    &lt;p&gt;&lt;strong&gt;Contact&lt;/strong&gt;&lt;/p&gt;
+    &lt;p&gt;c.winter@example.com&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h1 id="inputavatarctrl">InputAvatarCtrl</h1>
+<p>InputAvatarCtrl is a versatile control for uploading and optionally cropping a profile image. It supports drag &amp; drop, file dialog selection, and zoom/pan/pinch gestures. For raster formats (PNG, JPEG, WebP, AVIF, BMP), it provides a square workspace with a configurable mask (circle or square) to crop the image. For formats where pixel cropping is not meaningful (SVG, GIF), the control uses a pass-through mode: the original file is preserved without any cropping.</p>
+<pre><code>   ┌─────────────────────────────────┐
+   │ ┌─────────────────────────────┐ │
+   │ │           [canvas]          │ │ ← crop, mask, overlay (raster)
+   │ └─────────────────────────────┘ │
+   │             [Zoom]              │
+   │         [Select image]          │
+   └─────────────────────────────────┘
+</code></pre>
+<h2 id="declarative-configuration-1">Declarative Configuration</h2>
+<p>Initialize declaratively on a host element (e.g., <code>&lt;div class=&quot;wx-webui-input-avatar&quot;&gt;</code>). Texts and behavior are configured via standard attributes and <code>data-*</code> attributes. The preview uses a canvas with a fixed CSS size; the logical resolution adapts to the device pixel ratio.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>name</code></td>
+<td>Enables form integration; creates a hidden field to participate in submit.</td>
+<td><code>name=&quot;avatar&quot;</code></td>
+</tr>
+<tr>
+<td><code>accept</code></td>
+<td>Allowed file types; overrides the default.</td>
+<td><code>accept=&quot;image/png,image/svg+xml&quot;</code></td>
+</tr>
+<tr>
+<td><code>placeholder</code></td>
+<td>Placeholder text in the dropzone.</td>
+<td><code>placeholder=&quot;Drop image here or double click&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-field</code></td>
+<td>Name of the hidden field; default is <code>${name}_data</code>.</td>
+<td><code>data-field=&quot;avatar_data&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-viewport</code></td>
+<td>Edge length of the preview area in CSS pixels (square).</td>
+<td><code>data-viewport=&quot;320&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-shape</code></td>
+<td>Crop mask: <code>circle</code> (default) or <code>rect</code>.</td>
+<td><code>data-shape=&quot;rect&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-size</code></td>
+<td>Target output size in pixels (square).</td>
+<td><code>data-size=&quot;512&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-output-format</code></td>
+<td>Output MIME type for raster formats (e.g., <code>image/png</code>, <code>image/jpeg</code>, <code>image/webp</code>, <code>image/avif</code>).</td>
+<td><code>data-output-format=&quot;image/png&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-output-quality</code></td>
+<td>Quality factor for compressed raster formats (0…1).</td>
+<td><code>data-output-quality=&quot;0.92&quot;</code></td>
+</tr>
+<tr>
+<td><code>data-overlay-alpha</code></td>
+<td>Opacity of the outside overlay (0…1) for raster cropping.</td>
+<td><code>data-overlay-alpha=&quot;0.5&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<p>Default <code>accept</code> (if not provided):<br>
+<code>image/png,image/jpeg,image/webp,image/avif,image/gif,image/bmp,image/svg+xml</code></p>
+<h2 id="supported-formats-and-behavior">Supported Formats and Behavior</h2>
+<ul>
+<li>Cropping (raster): PNG, JPEG, WebP, AVIF, BMP
+<ul>
+<li>Zoom, pan, pinch, and mask overlay available.</li>
+<li>Output image is rendered at <code>data-size</code> with <code>data-output-format</code> and <code>data-output-quality</code>.</li>
+</ul>
+</li>
+<li>Pass-through (no cropping): SVG, GIF
+<ul>
+<li>No overlay or mask; zoom control is disabled.</li>
+<li>The original file is preserved and submitted as-is.</li>
+<li>Preview: SVG is rasterized by the browser for display; GIF shows its first frame.</li>
+</ul>
+</li>
+</ul>
+<p>Note: <code>data-output-format</code> and <code>data-output-quality</code> affect raster formats only. SVG and GIF are not converted.</p>
+<h2 id="form-integration-1">Form Integration</h2>
+<p>When the host has a <code>name</code> attribute, a hidden input is created (name from <code>data-field</code> or default <code>${name}_data</code>). On form submit:</p>
+<ul>
+<li>Raster images: the cropped result is generated according to the configuration and serialized as a Data URL (<code>data:&lt;mime&gt;;base64,…</code>) into the hidden field.</li>
+<li>SVG/GIF (pass-through): the original file is serialized as a Data URL (<code>image/svg+xml</code> or <code>image/gif</code>) into the hidden field.</li>
+</ul>
+<p>Server-side guidance:</p>
+<ul>
+<li>Decode the Data URL to obtain the file bytes and content type.</li>
+<li>For SVG, consider sanitizing/validating content due to potential active payloads.</li>
+</ul>
+<p>Alternative: Instead of the hidden field, intercept submit and send a <code>FormData</code> with the cropped <code>Blob</code> (raster) or original <code>File</code> (SVG/GIF) via <code>fetch</code> for <code>multipart/form-data</code>.</p>
+<h2 id="programmatic-control-1">Programmatic Control</h2>
+<p>Obtain the controller instance to trigger actions like resetting the crop or exporting a blob.</p>
+<pre><code class="lang-javascript">// get the host element
+const host = document.getElementById('my-avatar');
+
+// get the controller instance
+const avatarCtrl = webexpress.webui.Controller.getInstanceByElement(host);
+
+if (avatarCtrl) {
+    // reset crop to initial cover state (raster only)
+    if (typeof avatarCtrl._resetCrop === 'function') {
+        avatarCtrl._resetCrop();
+    }
+
+    // export as Blob:
+    // - cropped raster output (configured size/format/quality)
+    // - original file for SVG/GIF (pass-through)
+    avatarCtrl._exportCroppedBlob().then(blob =&gt; {
+        // e.g., upload via fetch/FormData
+    });
+}
+</code></pre>
+<p>Note: The API is primarily designed for declarative use. Methods prefixed with an underscore are internal and may change.</p>
+<h2 id="accessibility-1">Accessibility</h2>
+<ul>
+<li>Dropzone is keyboard-accessible (<code>role=&quot;button&quot;</code>, <code>tabindex=&quot;0&quot;</code>).
+<ul>
+<li>Open file dialog via Enter/Space; double-click supported.</li>
+</ul>
+</li>
+<li>The crop canvas is non-focusable; interactions occur via pointer/gesture input.</li>
+</ul>
+<h2 id="events-1">Events</h2>
+<ul>
+<li><code>webexpress.webui.Event.FILE_SELECTED_EVENT</code><br>
+Fired after a file was selected. The <code>detail</code> object includes the original <code>File</code> and a reference to the host element.</li>
+</ul>
+<h2 id="examples-1">Examples</h2>
+<pre><code class="lang-html">&lt;!-- Raster image with circle crop, output as PNG 512×512 --&gt;
+&lt;div id=&quot;avatar&quot;
+     class=&quot;wx-webui-input-avatar&quot;
+     name=&quot;avatar&quot;
+     data-viewport=&quot;320&quot;
+     data-shape=&quot;circle&quot;
+     data-size=&quot;512&quot;
+     data-output-format=&quot;image/png&quot;
+     data-output-quality=&quot;0.92&quot;
+     placeholder=&quot;Drop image here or double click&quot;&gt;
+&lt;/div&gt;
+</code></pre>
+<pre><code class="lang-html">&lt;!-- SVG pass-through (no cropping), hidden field explicitly named &quot;logo_svg&quot; --&gt;
+&lt;div id=&quot;logo&quot;
+     class=&quot;wx-webui-input-avatar&quot;
+     name=&quot;logo&quot;
+     data-field=&quot;logo_svg&quot;
+     accept=&quot;image/svg+xml&quot;
+     placeholder=&quot;Drop SVG here or double click&quot;&gt;
+&lt;/div&gt;
+</code></pre>
+<pre><code class="lang-html">&lt;!-- Broad accept list, square mask crop --&gt;
+&lt;div id=&quot;picture&quot;
+     class=&quot;wx-webui-input-avatar&quot;
+     name=&quot;picture&quot;
+     data-viewport=&quot;360&quot;
+     data-shape=&quot;rect&quot;
+     data-size=&quot;720&quot;
+     data-overlay-alpha=&quot;0.35&quot;
+     accept=&quot;image/png,image/jpeg,image/webp,image/avif,image/gif,image/bmp,image/svg+xml&quot;&gt;
+&lt;/div&gt;
+</code></pre>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/avatar.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

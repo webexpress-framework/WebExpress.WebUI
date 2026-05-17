@@ -70,7 +70,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputRadio(null)
             {
-                Inline = inline
+                Inline = _ => inline
             };
 
             // act
@@ -95,7 +95,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputRadio(null)
             {
-                Description = description
+                Description = _ => description
             };
 
             // act
@@ -119,7 +119,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputRadio(null)
             {
-                Option = option
+                Option = _ => option
             };
 
             // act
@@ -143,7 +143,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputRadio(null)
             {
-                Option = "option"
+                Option = _ => "option"
             };
             var form = new ControlForm().Add(control).Initialize(renderContext =>
             {
@@ -173,7 +173,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlFormItemInputRadio(null)
             {
-                Option = "option"
+                Option = _ => "option"
             }.Initialize(args =>
             {
                 args.Value.Text = value?.ToString() == "True" ? "option" : null;

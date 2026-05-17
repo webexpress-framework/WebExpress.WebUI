@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlSidebar : IControl
     {
         /// <summary>
-        /// Returns the list of sidebar items.
+        /// Gets the list of sidebar items.
         /// </summary>
         /// <value>
         /// A list of <see cref="IControlToolbarItem"/> representing the items in the toolbar.
@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.WebControl
         IEnumerable<IControlSidebarItem> Items { get; }
 
         /// <summary>
-        /// Returns the collection of toolbar items associated with the control.
+        /// Gets the collection of toolbar items associated with the control.
         /// </summary>
         IEnumerable<IControlToolbarItem> ToolbarItems { get; }
 

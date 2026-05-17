@@ -1,46 +1,44 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>disable</Nullable>
-    <IsPackable>false</IsPackable>
-    <IsTestProject>true</IsTestProject>
-    <Configurations>Debug;Release;Test;DebugLocal</Configurations>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+		<IsPackable>false</IsPackable>
+		<IsTestProject>true</IsTestProject>
+		<OutputType>Exe</OutputType>
+		<TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+		<Configurations>Debug;Release;Test;DebugLocal</Configurations>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="Data\ComplexExample1.md" />
-    <None Remove="Data\ComplexExample2.md" />
-    <None Remove="Data\ComplexExample3.md" />
-    <None Remove="Data\ComplexForm.txt" />
-    <None Remove="Data\TableExample1.md" />
-    <None Remove="Data\TableExample2.md" />
-    <None Remove="Data\TableExample3.md" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Remove="Data\ComplexExample1.md" />
+		<None Remove="Data\ComplexExample2.md" />
+		<None Remove="Data\ComplexExample3.md" />
+		<None Remove="Data\ComplexForm.txt" />
+		<None Remove="Data\TableExample1.md" />
+		<None Remove="Data\TableExample2.md" />
+		<None Remove="Data\TableExample3.md" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
-    <PackageReference Include="WebExpress.WebCore" Version="0.0.10-alpha" />
-    <PackageReference Include="xunit" Version="2.9.3" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
+		<PackageReference Include="WebExpress.WebCore" Version="0.0.11-alpha" />
+		<PackageReference Include="xunit.v3" Version="3.2.2" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\WebExpress.WebUI\WebExpress.WebUI.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\WebExpress.WebUI\WebExpress.WebUI.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Data\ComplexExample1.md" />
-    <EmbeddedResource Include="Data\ComplexExample2.md" />
-    <EmbeddedResource Include="Data\ComplexExample3.md" />
-    <EmbeddedResource Include="Data\ComplexForm.txt" />
-    <EmbeddedResource Include="Data\TableExample1.md" />
-    <EmbeddedResource Include="Data\TableExample2.md" />
-    <EmbeddedResource Include="Data\TableExample3.md" />
-  </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Data\ComplexExample1.md" />
+		<EmbeddedResource Include="Data\ComplexExample2.md" />
+		<EmbeddedResource Include="Data\ComplexExample3.md" />
+		<EmbeddedResource Include="Data\ComplexForm.txt" />
+		<EmbeddedResource Include="Data\TableExample1.md" />
+		<EmbeddedResource Include="Data\TableExample2.md" />
+		<EmbeddedResource Include="Data\TableExample3.md" />
+	</ItemGroup>
 
 </Project>

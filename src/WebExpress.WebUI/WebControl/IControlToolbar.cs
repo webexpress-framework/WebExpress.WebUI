@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlToolbar : IControl
     {
         /// <summary>
-        /// Returns the list of toolbar items.
+        /// Gets the list of toolbar items.
         /// </summary>
         /// <value>
         /// A list of <see cref="IControlToolbarItem"/> representing the items in the toolbar.
@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.WebControl
         IEnumerable<IControlToolbarItem> Items { get; }
 
         /// <summary>
-        /// Returns a collection of additional dropdown items.
+        /// Gets a collection of additional dropdown items.
         /// </summary>
         IEnumerable<IControlDropdownItem> More { get; }
 

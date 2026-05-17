@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.Internationalization;
+using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -10,9 +11,9 @@ namespace WebExpress.WebUI.WebControl
     public class ControlNavigationItemHeader : Control, IControlNavigationItem
     {
         /// <summary>
-        /// Returns or sets the text.
+        /// Gets or sets the text.
         /// </summary>
-        public string Text { get; set; }
+        public Func<IRenderControlContext, string> Text { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -31,12 +32,15 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            return new HtmlElementTextContentLi(new HtmlText(I18N.Translate(renderContext.Request?.Culture, Text)))
+            var role = Role?.Invoke(renderContext);
+            var text = Text?.Invoke(renderContext);
+
+            return new HtmlElementTextContentLi(new HtmlText(I18N.Translate(renderContext.Request?.Culture, text)))
             {
                 Id = Id,
                 Class = Css.Concatenate("dropdown-header", GetClasses()),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             };
         }
     }

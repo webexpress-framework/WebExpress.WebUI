@@ -1,5 +1,7 @@
-﻿using WebExpress.WebCore.WebIcon;
+using System;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebPage;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -10,28 +12,38 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlDashboardWidget : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
         /// <summary>
-        /// Returns the title associated with the widget.
+        /// Gets the title associated with the widget.
         /// </summary>
-        string Title { get; }
+        Func<IRenderControlContext, string> Title { get; }
 
         /// <summary>
-        /// Returns the color associated with the widget.
+        /// Gets the color associated with the widget.
         /// </summary>
-        string Color { get; }
+        Func<IRenderControlContext, string> Color { get; }
 
         /// <summary>
-        /// Returns the icon associated with this widget.
+        /// Gets the icon associated with this widget.
         /// </summary>
-        IIcon Icon { get; }
+        Func<IRenderControlContext, IIcon> Icon { get; }
 
         /// <summary>
-        /// Returns the column index associated with this widget.
+        /// Gets or sets the image uri.
         /// </summary>
-        uint Column { get; }
+        Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
-        /// Returns a value indicating whether the widget can be moved.
+        /// Gets the column index associated with this widget.
         /// </summary>
-        bool Movable { get; }
+        Func<IRenderControlContext, uint> Column { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the widget can be moved.
+        /// </summary>
+        Func<IRenderControlContext, bool> Movable { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the widget can be closed.
+        /// </summary>
+        Func<IRenderControlContext, bool> Closeable { get; }
     }
 }

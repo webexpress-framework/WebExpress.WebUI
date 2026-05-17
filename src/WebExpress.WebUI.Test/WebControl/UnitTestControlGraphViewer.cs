@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphViewer()
             {
-                NodeStyle = style
+                NodeStyle = _ => style
             };
 
             // act
@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlGraphViewer()
             {
-                EdgeStyle = style
+                EdgeStyle = _ => style
             };
 
             // act

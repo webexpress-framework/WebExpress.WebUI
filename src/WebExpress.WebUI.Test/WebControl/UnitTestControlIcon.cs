@@ -26,7 +26,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlIcon(id)
             {
-                Icon = new IconStar()
+                Icon = _ => new IconStar()
             };
 
             // act
@@ -49,8 +49,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlIcon()
             {
-                Icon = new IconStar(),
-                Title = title
+                Icon = _ => new IconStar(),
+                Title = _ => title
             };
 
             // act
@@ -73,7 +73,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlIcon()
             {
-                Icon = icon is not null ? Activator.CreateInstance(icon) as IIcon : null
+                Icon = _ => icon is not null ? Activator.CreateInstance(icon) as IIcon : null
             };
 
             // act
@@ -99,8 +99,8 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlIcon()
             {
-                Icon = new IconStar(),
-                Size = new PropertySizeText(size)
+                Icon = _ => new IconStar(),
+                Size = _ => new PropertySizeText(size)
             };
 
             // act
@@ -126,14 +126,61 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlIcon()
             {
-                Icon = new IconStar(),
-                VerticalAlignment = verticalAlignment
+                Icon = _ => new IconStar(),
+                VerticalAlignment = _ => verticalAlignment
             };
 
             // act
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
+        }
+
+        /// <summary>
+        /// Tests that the parameterless constructor selects the default theme and
+        /// that an explicit <see cref="TypeIconTheme"/> argument switches the rendered
+        /// CSS class to the light SVG variant.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeIconTheme.Default, @"<i class=""fas fa-star""></i>")]
+        [InlineData(TypeIconTheme.Light, @"<i class=""wx-icon-light wx-icon-light-star""></i>")]
+        public void Theme(TypeIconTheme theme, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlIcon()
+            {
+                Icon = _ => new IconStar(theme)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
+        }
+
+        /// <summary>
+        /// Tests that omitting the constructor argument falls back to
+        /// <see cref="TypeIconTheme.Default"/> and that the icon's <see cref="Icon.Theme"/>
+        /// property reflects the selected value.
+        /// </summary>
+        [Fact]
+        public void ThemeDefaultsToDefault()
+        {
+            // arrange
+            var implicitDefault = new IconStar();
+            var explicitDefault = new IconStar(TypeIconTheme.Default);
+            var light = new IconStar(TypeIconTheme.Light);
+
+            // assert
+            Assert.Equal(TypeIconTheme.Default, implicitDefault.Theme);
+            Assert.Equal(TypeIconTheme.Default, explicitDefault.Theme);
+            Assert.Equal(TypeIconTheme.Light, light.Theme);
+            Assert.Equal("fas fa-star", implicitDefault.Class);
+            Assert.Equal("fas fa-star", explicitDefault.Class);
+            Assert.Equal("wx-icon-light wx-icon-light-star", light.Class);
         }
     }
 }

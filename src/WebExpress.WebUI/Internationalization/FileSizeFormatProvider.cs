@@ -14,7 +14,7 @@ namespace WebExpress.WebUI.Internationalization
         private const decimal OneGigaByte = OneMegaByte * 1024M;
 
         /// <summary>
-        /// Returns or sets the culture.
+        /// Gets or sets the culture.
         /// </summary>
         public CultureInfo Culture { get; set; }
 

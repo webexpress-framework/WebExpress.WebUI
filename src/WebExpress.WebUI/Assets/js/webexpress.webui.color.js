@@ -52,7 +52,7 @@ webexpress.webui.ColorCtrl = class extends webexpress.webui.Ctrl {
         }
 
         el.appendChild(swatch);
-        
+
         // store reference for updates
         this._swatch = swatch;
     }

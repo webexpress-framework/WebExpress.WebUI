@@ -11,12 +11,12 @@ namespace WebExpress.WebUI.WebControl
     public class ActionFrame : IAction
     {
         /// <summary>
-        /// Returns the unique identifier for this modal.
+        /// Gets the unique identifier for this modal.
         /// </summary>
         public string Target { get; private set; }
 
         /// <summary>
-        /// Returns or sets the target uri.
+        /// Gets or sets the target uri.
         /// </summary>
         public IUri Uri { get; set; }
 

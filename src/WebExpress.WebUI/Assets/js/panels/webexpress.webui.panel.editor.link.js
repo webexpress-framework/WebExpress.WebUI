@@ -4,7 +4,7 @@
 webexpress.webui.DialogPanels.register("editor-link", {
     id: "editor-link-page",
     parentId: null,
-    title: "Link",
+    title: webexpress.webui.I18N.translate("webexpress.webui:editor.link.title"),
     iconClass: "fas fa-link",
 
     /**
@@ -19,11 +19,12 @@ webexpress.webui.DialogPanels.register("editor-link", {
         urlGroup.className = "mb-3";
         const urlLabel = document.createElement("label");
         urlLabel.className = "form-label";
-        urlLabel.textContent = "URL";
+        urlLabel.textContent = webexpress.webui.I18N.translate("webexpress.webui:editor.link.url.label");
+
         const urlInput = document.createElement("input");
         urlInput.type = "url";
         urlInput.className = "form-control";
-        urlInput.placeholder = "https://example.com";
+        urlInput.placeholder = webexpress.webui.I18N.translate("webexpress.webui:editor.link.url.placeholder");
         urlGroup.appendChild(urlLabel);
         urlGroup.appendChild(urlInput);
 
@@ -31,11 +32,12 @@ webexpress.webui.DialogPanels.register("editor-link", {
         textGroup.className = "mb-3";
         const textLabel = document.createElement("label");
         textLabel.className = "form-label";
-        textLabel.textContent = "Text";
+        textLabel.textContent = webexpress.webui.I18N.translate("webexpress.webui:editor.link.text.label");
+
         const textInput = document.createElement("input");
         textInput.type = "text";
         textInput.className = "form-control";
-        textInput.placeholder = "Link text (optional)";
+        textInput.placeholder = webexpress.webui.I18N.translate("webexpress.webui:editor.link.text.placeholder");
         textGroup.appendChild(textLabel);
         textGroup.appendChild(textInput);
 
@@ -50,9 +52,9 @@ webexpress.webui.DialogPanels.register("editor-link", {
         modal._link.textInput = textInput;
 
         urlInput.addEventListener("input", function () {
-            const modalWrapper = this.closest("[data-key]") || document;
+            const modalWrapper = this.closest(".modal") || this.closest("[data-key]") || document;
             const submitBtn = modalWrapper.querySelector(".submit-btn");
-            
+
             if (submitBtn) {
                 if (this.value.trim() !== "") {
                     submitBtn.disabled = false;
@@ -69,46 +71,48 @@ webexpress.webui.DialogPanels.register("editor-link", {
      * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
      */
     onShow: function (modal) {
-        if (modal && modal._link && modal._link.urlInput) {
-            const urlInput = modal._link.urlInput;
-            const textInput = modal._link.textInput;
-            
-            // reset or prefill fields on every show
-            if (modal._linkPrefill) {
-                urlInput.value = modal._linkPrefill.url || "";
-                if (textInput) {
-                    textInput.value = modal._linkPrefill.text || "";
-                }
+        if (!(modal && modal._link && modal._link.urlInput)) {
+            return;
+        }
+
+        const urlInput = modal._link.urlInput;
+        const textInput = modal._link.textInput;
+
+        // reset or prefill fields on every show
+        if (modal._linkPrefill) {
+            urlInput.value = modal._linkPrefill.url || "";
+            if (textInput) {
+                textInput.value = modal._linkPrefill.text || "";
+            }
+        } else {
+            urlInput.value = "";
+            if (textInput) {
+                textInput.value = "";
+            }
+        }
+
+        urlInput.focus();
+        urlInput.select();
+
+        const modalWrapper = urlInput.closest(".modal") || urlInput.closest("[data-key]") || document;
+        const submitBtn = modalWrapper.querySelector(".submit-btn");
+
+        if (submitBtn) {
+            if (urlInput.value.trim() !== "") {
+                submitBtn.disabled = false;
             } else {
-                urlInput.value = "";
-                if (textInput) {
-                    textInput.value = "";
-                }
+                submitBtn.disabled = true;
             }
-            
-            urlInput.focus();
-            urlInput.select();
 
-            const modalWrapper = urlInput.closest("[data-key]") || document;
-            const submitBtn = modalWrapper.querySelector(".submit-btn");
-            
-            if (submitBtn) {
-                if (urlInput.value.trim() !== "") {
-                    submitBtn.disabled = false;
-                } else {
-                    submitBtn.disabled = true;
+            // cleanly bind to this active tab
+            submitBtn.onclick = () => {
+                const validationResult = this.validate(modal);
+                if (validationResult === true) {
+                    this.onSubmit(modal);
+                } else if (validationResult && validationResult.message) {
+                    alert(validationResult.message);
                 }
-
-                // cleanly bind to this active tab
-                submitBtn.onclick = () => {
-                    const validationResult = this.validate(modal);
-                    if (validationResult === true) {
-                        this.onSubmit(modal);
-                    } else if (validationResult && validationResult.message) {
-                        alert(validationResult.message);
-                    }
-                };
-            }
+            };
         }
     },
 
@@ -120,22 +124,25 @@ webexpress.webui.DialogPanels.register("editor-link", {
     validate: function (modal) {
         const editor = modal ? modal._editor : null;
         const urlInput = modal && modal._link ? modal._link.urlInput : null;
-        
+
         if (!editor || !urlInput) {
-            return { valid: false, message: "Internal error: editor or field not available." };
+            return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.link.error.internal") };
         }
-        
+
         const urlVal = urlInput.value.trim();
         if (urlVal === "") {
-            return { valid: false, message: "Please enter a valid URL." };
+            return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.link.error.url") };
         }
-        
+
+        if (urlVal.toLowerCase().startsWith("javascript:")) {
+            return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.link.error.url") };
+        }
+
         return true;
     },
 
     /**
      * Handles submit and inserts the link into the editor.
-     * 
      * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
      * @returns {void}
      */
@@ -143,37 +150,37 @@ webexpress.webui.DialogPanels.register("editor-link", {
         const editor = modal ? modal._editor : null;
         const urlInput = modal && modal._link ? modal._link.urlInput : null;
         const textInput = modal && modal._link ? modal._link.textInput : null;
-        
+
         if (!editor || !urlInput) {
             return;
         }
-        
+
         let urlVal = urlInput.value.trim();
         if (urlVal === "") {
             return;
         }
-        
+
+        if (urlVal.toLowerCase().startsWith("javascript:")) {
+            return;
+        }
+
         // append protocol if missing to prevent sanitizer from stripping
         if (!/^https?:\/\//i.test(urlVal) && !urlVal.startsWith("/") && !urlVal.startsWith("#") && !urlVal.startsWith("mailto:")) {
             urlVal = "https://" + urlVal;
         }
-        
+
         const rawText = String((textInput && textInput.value) || "").trim() || urlVal.replace(/^https?:\/\//i, "");
         const safeUrl = urlVal.replace(/"/g, "%22");
-        
+
         const escapeHtml = function (text) {
             const div = document.createElement("div");
             div.textContent = text;
             return div.innerHTML;
         };
-        
-        // strictly enforce backed up range to ensure exact selection replacement
-        if (modal._backupRange) {
-            editor._savedRange = modal._backupRange.cloneRange();
-        }
-        
-        editor.insertHtmlAtCursor(' <a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(rawText) + "</a> ");
-               
+
+        // editor restores the saved range internally on focus/insert
+        editor.insertHtmlAtCursor('<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(rawText) + "</a>");
+
         // close modal
         if (typeof modal.hide === "function") {
             modal.hide();

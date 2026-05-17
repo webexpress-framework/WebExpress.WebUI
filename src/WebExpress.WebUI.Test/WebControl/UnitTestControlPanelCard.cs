@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelCard()
             {
-                Header = header
+                Header = _ => header
             };
 
             // act
@@ -71,7 +71,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelCard()
             {
-                HeaderImage = headerImage is not null ? new UriEndpoint(headerImage) : null
+                HeaderImage = _ => headerImage is not null ? new UriEndpoint(headerImage) : null
             };
 
             // act
@@ -94,7 +94,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelCard()
             {
-                Headline = headline
+                Headline = _ => headline
             };
 
             // act
@@ -117,7 +117,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelCard()
             {
-                Footer = footer
+                Footer = _ => footer
             };
 
             // act
@@ -140,7 +140,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelCard()
             {
-                FooterImage = footerImage is not null ? new UriEndpoint(footerImage) : null
+                FooterImage = _ => footerImage is not null ? new UriEndpoint(footerImage) : null
             };
 
             // act
@@ -164,7 +164,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlPanelCard()
             {
-                Theme = theme
+                Theme = _ => theme
             };
 
             // act

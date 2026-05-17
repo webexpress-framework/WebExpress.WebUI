@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     public class ControlPanelTool : ControlPanel
     {
         /// <summary>
-        /// Returns the tools.
+        /// Gets the tools.
         /// </summary>
         public ControlDropdown Tools { get; } = new ControlDropdown();
 
@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.WebControl
         public ControlPanelTool(string id = null, params Control[] items)
             : base(id, items)
         {
-            Border = new PropertyBorder(true);
+            Border = _ => new PropertyBorder(true);
         }
 
         /// <summary>
@@ -32,16 +32,17 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var role = Role?.Invoke(renderContext);
             var dropDown = Tools.Render(renderContext, visualTree);
-            var content = new HtmlElementTextContentDiv(Content.Select(x => x.Render(renderContext, visualTree)).ToArray());
+            var content = new HtmlElementTextContentDiv([.. Content.Select(x => x.Render(renderContext, visualTree))]);
 
             var html = new HtmlElementTextContentDiv(dropDown, content)
             {
                 Id = Id,
                 Class = Css.Concatenate("toolpanel", GetClasses()),
                 Style = GetStyles(),
-                Role = Role,
-                DataTheme = Theme.ToValue()
+                Role = role,
+                DataTheme = Theme?.Invoke(renderContext).ToValue()
             };
 
             return html;

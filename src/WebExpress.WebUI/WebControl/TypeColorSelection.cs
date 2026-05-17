@@ -48,7 +48,12 @@
         /// <summary>
         /// Light button color.
         /// </summary>
-        Light = 8
+        Light = 8,
+
+        /// <summary>
+        /// Highlight button color.
+        /// </summary>
+        Highlight = 13
     }
 
     /// <summary>
@@ -82,6 +87,8 @@
                     return "wx-selection-light";
                 case TypeColorSelection.Dark:
                     return "wx-selection-dark";
+                case TypeColorSelection.Highlight:
+                    return "wx-selection-highlight";
             }
 
             return string.Empty;

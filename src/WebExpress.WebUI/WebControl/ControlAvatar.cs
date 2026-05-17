@@ -12,33 +12,40 @@ namespace WebExpress.WebUI.WebControl
     public class ControlAvatar : Control
     {
         /// <summary>
-        /// Returns or sets the avatar image.
+        /// Gets or sets the avatar image.
         /// </summary>
-        public IUri Image { get; set; }
+        public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
-        /// Returns or sets the name of the user.
+        /// Gets or sets the name of the user.
         /// </summary>
-        public string User { get; set; }
+        public Func<IRenderControlContext, string> Username { get; set; }
 
         /// <summary>
-        /// Returns or sets a link.
+        /// Gets or sets a link.
         /// </summary>
-        public IUri Uri { get; set; }
+        public Func<IRenderControlContext, IUri> Uri { get; set; }
 
         /// <summary>
-        /// Returns or sets the size.
+        /// Gets or sets the size.
         /// </summary>
-        public TypeSizeAvatar Size
+        public Func<IRenderControlContext, TypeSizeAvatar> Size
         {
-            get => (TypeSizeAvatar)GetProperty(TypeSizeAvatar.Default);
-            set => SetProperty(value, () => value.ToClass());
+            get => (Func<IRenderControlContext, TypeSizeAvatar>)GetPropertyObjectValue();
+            set => SetProperty(value, () => value?.Invoke(null).ToClass());
         }
 
         /// <summary>
-        /// Returns or sets a modal dialogue.
+        /// Gets or sets the secondary action, typically triggered by a 
+        /// click to open a modal or similar target.
         /// </summary>
-        public ControlModal Modal { get; set; }
+        public Func<IRenderControlContext, IAction> PrimaryAction { get; set; }
+
+        /// <summary>
+        /// Gets or sets the secondary action, typically triggered by a 
+        /// double‑click to open a modal or similar target.
+        /// </summary>
+        public Func<IRenderControlContext, IAction> SecondaryAction { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -57,17 +64,24 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var role = Role?.Invoke(renderContext);
+            var image = Image?.Invoke(renderContext);
+            var username = Username?.Invoke(renderContext);
+            var uri = Uri?.Invoke(renderContext);
+            var primaryAction = PrimaryAction?.Invoke(renderContext);
+            var secondaryAction = SecondaryAction?.Invoke(renderContext);
+
             var img = default(HtmlElement);
 
-            if (Image is not null)
+            if (image is not null)
             {
-                img = new HtmlElementMultimediaImg() { Src = Image.ToString(), Class = "" };
+                img = new HtmlElementMultimediaImg() { Src = image.ToString(), Class = "" };
             }
-            else if (!string.IsNullOrWhiteSpace(User))
+            else if (!string.IsNullOrWhiteSpace(username))
             {
-                var split = User.Split(' ');
+                var split = username.Split(' ');
                 var i = split[0].FirstOrDefault().ToString();
-                i += split.Count() > 1 ? split[1].FirstOrDefault().ToString() : "";
+                i += split.Length > 1 ? split[1].FirstOrDefault().ToString() : "";
 
                 img = new HtmlElementTextSemanticsB(new HtmlText(i))
                 {
@@ -80,27 +94,22 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-profile", GetClasses()),
                 Style = GetStyles(),
-                Role = Role
+                Role = role
             }
                 .Add(img)
                 .Add
                 (
-                    Uri is not null
-                        ? new HtmlElementTextSemanticsA(User)
+                    uri is not null
+                        ? new HtmlElementTextSemanticsA(username)
                         {
-                            Href = Uri.ToString(),
+                            Href = uri.ToString(),
                             Class = "wx-link"
                         }
-                        : new HtmlText(User)
+                        : new HtmlText(username)
                 );
 
-            if (Modal is not null)
-            {
-                html.AddUserAttribute("data-bs-toggle", "modal");
-                html.AddUserAttribute("data-bs-target", "#" + Modal.Id);
-
-                return new HtmlList(html, Modal.Render(renderContext, visualTree));
-            }
+            primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
+            secondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
         }

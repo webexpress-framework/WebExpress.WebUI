@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+      <title>TableCtrl | WebExpress.WebUI </title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="title" content="TableCtrl | WebExpress.WebUI ">
+      
+      
+      <link rel="icon" href="../assets/webexpress.ico">
+      <link rel="stylesheet" href="../public/docfx.min.css">
+      <link rel="stylesheet" href="../public/main.css">
+      <meta name="docfx:navrel" content="../toc.html">
+      <meta name="docfx:tocrel" content="toc.html">
+      
+      <meta name="docfx:rel" content="../">
+      
+      
+      <meta name="docfx:docurl" content="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/table.md/#L1">
+      <meta name="loc:inThisArticle" content="In this article">
+      <meta name="loc:searchResultsCount" content="{count} results for &quot;{query}&quot;">
+      <meta name="loc:searchNoResults" content="No results for &quot;{query}&quot;">
+      <meta name="loc:tocFilter" content="Filter by title">
+      <meta name="loc:nextArticle" content="Next">
+      <meta name="loc:prevArticle" content="Previous">
+      <meta name="loc:themeLight" content="Light">
+      <meta name="loc:themeDark" content="Dark">
+      <meta name="loc:themeAuto" content="Auto">
+      <meta name="loc:changeTheme" content="Change theme">
+      <meta name="loc:copy" content="Copy">
+      <meta name="loc:downloadPdf" content="Download PDF">
+
+      <script type="module" src="./../public/docfx.min.js"></script>
+
+      <script>
+        const theme = localStorage.getItem('theme') || 'auto'
+        document.documentElement.setAttribute('data-bs-theme', theme === 'auto' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme)
+      </script>
+
+  </head>
+
+  <body class="tex2jax_ignore" data-layout="" data-yaml-mime="">
+    <header class="bg-body border-bottom">
+      <nav id="autocollapse" class="navbar navbar-expand-md" role="navigation">
+        <div class="container-xxl flex-nowrap">
+          <a class="navbar-brand" href="../index.html">
+            <img id="logo" class="svg" src="../assets/webexpress.svg" alt="WebExpress.WebUI">
+            WebExpress.WebUI
+          </a>
+          <button class="btn btn-lg d-md-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navpanel" aria-controls="navpanel" aria-expanded="false" aria-label="Toggle navigation">
+            <i class="bi bi-three-dots"></i>
+          </button>
+          <div class="collapse navbar-collapse" id="navpanel">
+            <div id="navbar">
+              <form class="search" role="search" id="search">
+                <i class="bi bi-search"></i>
+                <input class="form-control" id="search-query" type="search" disabled placeholder="Search" autocomplete="off" aria-label="Search">
+              </form>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-xxl">
+      <div class="toc-offcanvas">
+        <div class="offcanvas-md offcanvas-start" tabindex="-1" id="tocOffcanvas" aria-labelledby="tocOffcanvasLabel">
+          <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="tocOffcanvasLabel">Table of Contents</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#tocOffcanvas" aria-label="Close"></button>
+          </div>
+          <div class="offcanvas-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="actionbar">
+          <button class="btn btn-lg border-0 d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#tocOffcanvas" aria-controls="tocOffcanvas" aria-expanded="false" aria-label="Show table of contents">
+            <i class="bi bi-list"></i>
+          </button>
+
+          <nav id="breadcrumb"></nav>
+        </div>
+
+        <article data-uid="">
+
+<p><img src="https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png" alt="WebExpress"></p>
+<h1 id="tablectrl">TableCtrl</h1>
+<p>The <code>TableCtrl</code> class is a modular, CSS Grid-based table component designed for modern web applications. It focuses on rendering, cell templating, hierarchical data presentation, and providing a flexible architecture for custom renderer integration. All manipulation features (such as column/row reordering, persistence, drag and drop) are deliberately left out for maximum separation of concerns and extensibility.</p>
+<pre><code>   ┌────────────────────┬──────────────────┬─────┐
+   │ [Icon] Column 1   ▼│ [Icon] Column 2  │     │  // Sortable, resizable Headers
+   ├────────────────────┼──────────────────┼─────┤
+   │ ▼ Row 1            │ Cell 1.2         │ […] │  // Collapsible, Options
+   ├────────────────────┼──────────────────┼─────┤
+   │   ► Sub-row 1.1    │ Cell 1.1.2       │ […] │
+   ├────────────────────┼──────────────────┼─────┤
+   │ ► Row 2            │ Cell 2.2         │ […] │
+   ├────────────────────┼──────────────────┼─────┤
+   │ Footer 1           │ Footer 2         │     │
+   └────────────────────┴──────────────────┴─────┘
+</code></pre>
+<h2 id="features">Features</h2>
+<p>The following core features define the structure, behavior, and extensibility of the `WebExpress`` table component:</p>
+<ul>
+<li><strong>Declarative Configuration:</strong> Structure and settings are provided via <code>data-</code> attributes and a set of nested <code>&lt;div&gt;</code> elements following a semantic hierarchy.</li>
+<li><strong>CSS Grid Layout:</strong> Tables use CSS Grid instead of HTML <code>&lt;table&gt;</code>, allowing flexible, responsive layouts and programmatic control of column widths (<code>--wx-grid-template</code>).</li>
+<li><strong>Hierarchical Trees:</strong> Nested <code>.wx-table-row</code> elements represent parent-child relationships; toggles for collapse/expand are automatically inserted.</li>
+<li><strong>Cell Templating:</strong> Cell content is delegated to the global <code>TableTemplates</code> registry, supporting both built-in and user-defined renderers via <code>&lt;template data-type=&quot;...&quot;&gt;</code> nodes or programmatically via JS. Built-in types: <code>date</code>, <code>tag</code>, <code>selection</code>, <code>combo</code>, <code>text</code>, <code>numeric</code>, <code>move</code>, <code>rating</code>, <code>editor</code>. Options/choices can be passed via nested children and <code>data-*</code>.</li>
+<li><strong>Sorting:</strong> Column header click cycles between ascending, descending, and none; sort state is visualized and <code>TABLE_SORT_EVENT</code> is fired.</li>
+<li><strong>Resizable Columns:</strong> All columns except the last visible and columns with <code>resizable=false</code> have a draggable resize grip. Autosize is supported via double click.</li>
+<li><strong>Change Highlighting:</strong> When data updates via API or program logic, rows with signature change flash (<code>wx-change-flash</code>), and new rows flash with (<code>wx-new-flash</code>).</li>
+<li><strong>Options Column:</strong> If <code>.wx-table-options</code> or per-row actions exist, an actions column will automatically be appended.</li>
+</ul>
+<h2 id="structure--configuration">Structure &amp; Configuration</h2>
+<p>The Table component is defined through a declarative markup structure that separates configuration, layout, and behavior. The following overview explains how host attributes and nested elements work together to form a fully customizable table hierarchy.</p>
+<h3 id="host-attributes">Host Attributes</h3>
+<p>Host attributes define the table’s visual appearance and high‑level behavior, allowing key presentation settings to be configured directly on the root element.
+Wenn du möchtest, kann ich es noch technischer, kürzer oder stärker an API‑Dokumentationen anlehnen.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-color</code></td>
+<td>Sets table color scheme (Bootstrap etc.)</td>
+</tr>
+<tr>
+<td><code>data-border</code></td>
+<td>Adds border style</td>
+</tr>
+<tr>
+<td><code>data-striped</code></td>
+<td>Enables zebra striping for rows</td>
+</tr>
+</tbody>
+</table>
+<h3 id="child-elements">Child Elements</h3>
+<p>Child elements define the internal structure of the table, specifying columns, rows, footers, and optional action menus through a nested hierarchy of semantic <code>&lt;div&gt;</code> blocks.</p>
+<ul>
+<li><code>.wx-table-columns</code>: list of <code>&lt;div&gt;</code> column configs, with optional <code>&lt;template&gt;</code> for custom rendering</li>
+<li><code>.wx-table-row</code>: tree structure via nested rows and cells</li>
+<li><code>.wx-table-footer</code>: one or more summary/total/footer cells</li>
+<li><code>.wx-table-options</code>: global dropdown menu definitions for action column</li>
+</ul>
+<h3 id="example-markup">Example Markup</h3>
+<p>The following example illustrates a minimal declarative setup, showing how columns, rows, and optional features are expressed in markup.</p>
+<pre><code class="lang-html">&lt;div id=&quot;orders-table&quot; class=&quot;wx-webui-table&quot;&gt;
+  &lt;div class=&quot;wx-table-columns&quot;&gt;
+    &lt;div data-id=&quot;id&quot; data-label=&quot;#&quot;&gt;&lt;/div&gt;
+    &lt;div data-id=&quot;customer&quot; data-label=&quot;Customer&quot;&gt;&lt;/div&gt;
+    &lt;div data-id=&quot;date&quot; data-label=&quot;Order Date&quot;&gt;
+      &lt;template data-type=&quot;date&quot; data-format=&quot;yyyy-MM-dd&quot;&gt;&lt;/template&gt;
+    &lt;/div&gt;
+    &lt;div data-id=&quot;status&quot; data-label=&quot;Status&quot;&gt;
+      &lt;template data-type=&quot;move&quot;&gt;
+        &lt;div id=&quot;open&quot; data-icon=&quot;far fa-circle&quot;&gt;Open&lt;/div&gt;
+        &lt;div id=&quot;shipped&quot; data-icon=&quot;fas fa-truck&quot;&gt;Shipped&lt;/div&gt;
+        &lt;div id=&quot;closed&quot; data-icon=&quot;fas fa-check&quot;&gt;Closed&lt;/div&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;wx-table-row&quot; id=&quot;ord-100&quot;&gt;
+    &lt;div&gt;100&lt;/div&gt;
+    &lt;div&gt;Acme Corp&lt;/div&gt;
+    &lt;div&gt;2023-10-01&lt;/div&gt;
+    &lt;div&gt;shipped&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h3 id="events">Events</h3>
+<p>The following events form the central interaction points of the table control system, enabling flexible handling of sort changes and visibility updates in tree structures.</p>
+<ul>
+<li><code>TABLE_SORT_EVENT</code> (sort changes)</li>
+</ul>
+<h2 id="programmatic-control">Programmatic Control</h2>
+<p>Programmatic control allows you to interact with the table and customize its structure, data, and behavior directly via JavaScript APIs. This is especially useful for building dynamic applications, updating data on the fly, or integrating with other JavaScript modules.</p>
+<p>You can access automatically created instances or instantiate a new TableCtrl explicitly.</p>
+<h3 id="accessing-an-automatically-created-instance">Accessing an Automatically Created Instance</h3>
+<p>If the table has already been initialized (for example, via markup plus auto-detection), you can retrieve its controller and update it as needed:</p>
+<pre><code class="lang-js">const tableCtrl = webexpress.webui.Controller.getInstanceByElement(document.getElementById('orders-table'));
+tableCtrl.insertRow({ id: 'p99', cells: [{ text: 'New Product' }, { text: '2025-12-01' }] });
+</code></pre>
+<h3 id="manual-instantiation">Manual Instantiation</h3>
+<p>Create new table controller instances dynamically, giving you full control over when and how the instance is created and configured.</p>
+<pre><code class="lang-js">const div = document.createElement('div');
+const ctrl = new webexpress.webui.TableCtrl(div);
+ctrl.setColumns([
+    { id: 'name', label: 'Name' },
+    { id: 'date', label: 'Date', rendererType: 'date', rendererOptions: { format: 'yyyy-MM-dd' } }
+]);
+ctrl.insertRow({ id: 'p01', cells: [{ text: 'Sample' }, { text: '2025-05-01' }] });
+document.body.appendChild(div);
+</code></pre>
+<h1 id="tablectrlreorderable">TableCtrlReorderable</h1>
+<p><code>TableCtrlReorderable</code> extends <code>TableCtrl</code> with interactive manipulation abilities and persistence. It enables users to reorder columns and rows, hide columns, manage view state, and move rows within hierarchical structures (trees). It is ideal for UIs where table structure needs to be configurable and persistent across sessions.</p>
+<pre><code>   ┌─┬──────────────────┬──────────────────┬─────┐
+   │≡│ [Icon] Column 1 ▼│ [Icon] Column 2  │ [+] │  // Drag &amp; Drop, Sortable, resizable Headers
+   ├─┼──────────────────┼──────────────────┼─────┤
+   │≡│ ▼ Row 1          │ Cell 1.2         │ […] │  // Row drag handle, Collapsible, Options
+   ├─┼──────────────────┼──────────────────┼─────┤
+   │≡│   ► Sub-row 1.1  │ Cell 1.1.2       │ […] │
+   ├─┼──────────────────┼──────────────────┼─────┤
+   │≡│ ► Row 2          │ Cell 2.2         │ […] │
+   ├─┼──────────────────┼──────────────────┼─────┤
+   │ │ Footer 1         │ Footer 2         │     │
+   └─┴──────────────────┴──────────────────┴─────┘
+</code></pre>
+<h2 id="extra-features">Extra Features</h2>
+<p>Beyond its core functionality, the table control component offers a range of advanced features that enhance usability, customization, and interaction.</p>
+<ul>
+<li><strong>Column Drag &amp; Drop:</strong> CTRL+drag header to move columns; indicator visualizes destination.</li>
+<li><strong>Column Modal:</strong> Button in rightmost header cell opens a column management modal (reorder, show/hide, resize, sort). Can use an external DialogPanel via key <code>table-columns</code>.</li>
+<li><strong>Column Visibility Management:</strong> Easily hide or show columns via modal; modal can search/filter columns.</li>
+<li><strong>Persistence:</strong> View state (columns, widths, tree collapsed/expanded, sort) is saved in a cookie using <code>data-persist-key</code> and restored on initialization.</li>
+<li><strong>Row Reordering:</strong> Drag handle (<code>≡</code>) in leftmost column when <code>data-movable-row=&quot;true&quot;</code>; support for hierarchical drag and drop including reparenting.</li>
+<li><strong>Auto-Expand on Row Hover:</strong> When dragging a row, hovering for &gt;2 seconds over a collapsed parent with children auto-expands the parent to enable dropping as a child.</li>
+<li><strong>Action/Options Column:</strong> Automatically handled; supports per-row or global action dropdowns for contextual table actions.</li>
+<li><strong>All base features:</strong> Hierarchy, cell templates, flexible, responsive rendering.</li>
+</ul>
+<h2 id="additional-configuration">Additional Configuration</h2>
+<p>In addition to its interactive features, the table control component can be further tailored through several optional configuration attributes that extend behavior, persistence, and integration with external UI elements.</p>
+<table>
+<thead>
+<tr>
+<th>Attribute</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>data-movable-row=&quot;true&quot;</code></td>
+<td>enables row drag-and-drop reordering</td>
+</tr>
+<tr>
+<td><code>data-persist-key</code></td>
+<td>enables view state persistence</td>
+</tr>
+<tr>
+<td><code>data-allow-column-remove</code></td>
+<td>allows columns to be hidden via modal</td>
+</tr>
+<tr>
+<td><code>data-columns-modal-key</code></td>
+<td>links modal to external DialogPanel</td>
+</tr>
+</tbody>
+</table>
+<h2 id="events-1">Events</h2>
+<p>In addition to the core event set, the table control component emits several extended events that capture user-driven structural changes—such as reordering columns, toggling visibility, or rearranging rows—while still supporting all base interaction events.</p>
+<ul>
+<li><code>COLUMN_REORDER_EVENT</code>: details about column move</li>
+<li><code>COLUMN_VISIBILITY_EVENT</code>: toggling columns on/off</li>
+<li><code>ROW_REORDER_EVENT</code>: details about row move/reparenting (includes parentId, toIndex)</li>
+</ul>
+<h2 id="example-markup-1">Example Markup</h2>
+<p>The following example demonstrates a minimal yet fully functional table control setup, showcasing how the key attributes and features come together in practical markup.</p>
+<pre><code class="lang-html">&lt;div id=&quot;orders-table&quot; class=&quot;wx-webui-table-reorderable&quot;
+     data-persist-key=&quot;orders-view&quot;
+     data-movable-row=&quot;true&quot;
+     data-allow-column-remove=&quot;true&quot;&gt;
+  &lt;div class=&quot;wx-table-columns&quot;&gt;
+    &lt;div data-id=&quot;id&quot; data-label=&quot;#&quot;&gt;&lt;/div&gt;
+    &lt;div data-id=&quot;customer&quot; data-label=&quot;Customer&quot;&gt;&lt;/div&gt;
+    &lt;div data-id=&quot;status&quot; data-label=&quot;Status&quot;&gt;
+      &lt;template data-type=&quot;move&quot;&gt;
+        &lt;div id=&quot;open&quot; data-icon=&quot;far fa-circle&quot;&gt;Open&lt;/div&gt;
+        &lt;div id=&quot;shipped&quot; data-icon=&quot;fas fa-truck&quot;&gt;Shipped&lt;/div&gt;
+        &lt;div id=&quot;closed&quot; data-icon=&quot;fas fa-check&quot;&gt;Closed&lt;/div&gt;
+      &lt;/template&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;wx-table-row&quot; id=&quot;ord-100&quot;&gt;
+    &lt;div&gt;100&lt;/div&gt;&lt;div&gt;Acme Corp&lt;/div&gt;&lt;div&gt;shipped&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<h2 id="programmatic-control-1">Programmatic Control</h2>
+<p>Programmatic control allows you to interact with the table and customize its structure, data, and behavior directly via JavaScript APIs. This is especially useful for building dynamic applications, updating data on the fly, or integrating with other JavaScript modules.</p>
+<p>You can access automatically created instances or instantiate a new TableCtrlReorderable explicitly.</p>
+<h3 id="accessing-instance">Accessing Instance</h3>
+<p>If the table has already been initialized (e.g., via markup combined with automatic controller detection), you can obtain the corresponding controller instance and apply configuration updates programmatically.</p>
+<pre><code class="lang-js">const reorderCtrl = webexpress.webui.Controller.getInstanceByElement(document.getElementById('orders-table'));
+reorderCtrl.insertRow({ id: 'p01', cells: [{ text: 'Sample' }, { text: '2025-05-01' }] });
+</code></pre>
+<h3 id="manual-instantiation-1">Manual Instantiation</h3>
+<p>Dynamically creating new table controller instances gives you full control over when and how they are initialized and configured.</p>
+<pre><code class="lang-js">const div = document.createElement('div');
+div.dataset.movableRow = &quot;true&quot;;
+div.dataset.persistKey = &quot;demo-table&quot;;
+const reorderCtrl = new webexpress.webui.TableCtrlReorderable(div);
+reorderCtrl.setColumns([
+    { id: 'name', label: 'Name' },
+    { id: 'date', label: 'Date', rendererType: 'date', rendererOptions: { format: 'yyyy-MM-dd' } }
+]);
+reorderCtrl.insertRow({
+    id: 'p01',
+    cells: [{ text: 'Sample' }, { text: '2025-05-01' }]
+});
+document.body.appendChild(div);
+</code></pre>
+<h1 id="best-practices--advanced-integration">Best Practices &amp; Advanced Integration</h1>
+<ul>
+<li>Use <code>TableCtrl</code> for pure data presentation with custom rendering and trees.</li>
+<li>Use <code>TableCtrlReorderable</code> for interactive, user-configurable layout with drag &amp; drop, persistent views, and hierarchical editing.</li>
+<li>Integrate external modal panels via <code>table-columns</code> for advanced workflows.</li>
+</ul>
+
+</article>
+
+        <div class="contribution d-print-none">
+          <a href="https://github.com/ReneSchwarzer/WebExpress.WebUI/blob/develop/docs/js/table.md/#L1" class="edit-link">Edit this page</a>
+        </div>
+
+        <div class="next-article d-print-none border-top" id="nextArticle"></div>
+
+      </div>
+
+      <div class="affix">
+        <nav id="affix"></nav>
+      </div>
+    </main>
+
+    <div class="container-xxl search-results" id="search-results"></div>
+
+    <footer class="border-top text-secondary">
+      <div class="container-xxl">
+        <div class="flex-fill">
+          <span>Made with <a href="https://dotnet.github.io/docfx">docfx</a></span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
