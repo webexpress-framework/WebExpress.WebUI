@@ -33,6 +33,16 @@ namespace WebExpress.WebUI.WebPage
         TypeIconTheme IconTheme { get; }
 
         /// <summary>
+        /// Overrides the active theme with the one identified by
+        /// <typeparamref name="TTheme"/>. The theme is looked up via the
+        /// <c>ThemeManager</c> for the page's application; the call is a
+        /// no-op when no matching theme is registered.
+        /// </summary>
+        /// <typeparam name="TTheme">The theme type to use.</typeparam>
+        /// <returns>The current instance for method chaining.</returns>
+        VisualTreeControl UseTheme<TTheme>() where TTheme : class, ITheme;
+
+        /// <summary>
         /// Gets or sets the HTTP status code associated with the response.
         /// </summary>
         int StatusCode { get; set; }

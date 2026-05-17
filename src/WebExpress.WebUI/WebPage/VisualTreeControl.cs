@@ -22,6 +22,7 @@ namespace WebExpress.WebUI.WebPage
         private int _statusCode = 200;
         private IRoute _base;
         private readonly IComponentHub _componentHub;
+        private readonly IPageContext _pageContext;
         private readonly List<Favicon> _favicons = [];
         private readonly List<string> _styles = [];
         private readonly List<string> _headerScriptLinks = [];
@@ -124,16 +125,22 @@ namespace WebExpress.WebUI.WebPage
         {
             var contextPath = pageContext.ApplicationContext?.Route;
             _componentHub = componentHub;
+            _pageContext = pageContext;
 
             Title = pageContext?.PageTitle;
 
-            // resolve the active theme once at construction. The first theme
-            // registered for the application is treated as the default
-            // (matching the convention documented in the Theme model);
-            // applications without a theme leave Theme/IconTheme at their
-            // fallback values.
-            Theme = componentHub?.ThemeManager?.Themes
-                ?.FirstOrDefault(t => t.ApplicationContext == pageContext?.ApplicationContext);
+            // Resolve the active theme once at construction:
+            //   1. [Theme<T>] declared on the application class wins, returned
+            //      via IApplicationContext.DefaultTheme.
+            //   2. Otherwise fall back to the first theme registered for the
+            //      application (preserves the long-standing "default = first"
+            //      convention documented in the Theme model).
+            //   3. Otherwise leave Theme null - downstream IconTheme falls back
+            //      to TypeIconTheme.Default.
+            var applicationContext = pageContext?.ApplicationContext;
+            Theme = applicationContext?.DefaultTheme
+                ?? componentHub?.ThemeManager?.Themes
+                    ?.FirstOrDefault(t => t.ApplicationContext == applicationContext);
 
             _favicons.Add(new Favicon(RouteEndpoint.Combine(contextPath, WebEx.Favicon)));
 
@@ -167,6 +174,46 @@ namespace WebExpress.WebUI.WebPage
 
             _meta.Add("charset", "UTF-8");
             _meta.Add("viewport", "width=device-width, initial-scale=1");
+        }
+
+        /// <summary>
+        /// Overrides the active theme with the one identified by
+        /// <typeparamref name="TTheme"/>. Looks the theme context up via the
+        /// active <c>ThemeManager</c> for the page's application; when no
+        /// matching theme is registered the call is a no-op and the previous
+        /// theme stays in place.
+        ///
+        /// Derived visual trees (notably WebApp variants) can override
+        /// <see cref="OnThemeChanged"/> to react to the swap, e.g. by
+        /// re-adding the new theme's <c>ThemeStyle</c> CSS link.
+        /// </summary>
+        /// <typeparam name="TTheme">The theme type to use.</typeparam>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual VisualTreeControl UseTheme<TTheme>() where TTheme : class, ITheme
+        {
+            var resolved = _componentHub?.ThemeManager?
+                .GetThemes(_pageContext?.ApplicationContext, typeof(TTheme))
+                ?.FirstOrDefault();
+            if (resolved is null)
+            {
+                return this;
+            }
+
+            var previous = Theme;
+            Theme = resolved;
+            OnThemeChanged(previous, resolved);
+            return this;
+        }
+
+        /// <summary>
+        /// Notification hook fired by <see cref="UseTheme{TTheme}"/> after the
+        /// active theme has been swapped. Default implementation is a no-op;
+        /// subclasses can override to re-apply theme-style CSS links etc.
+        /// </summary>
+        /// <param name="previousTheme">The theme that was active before the swap.</param>
+        /// <param name="newTheme">The newly selected theme.</param>
+        protected virtual void OnThemeChanged(IThemeContext previousTheme, IThemeContext newTheme)
+        {
         }
 
         /// <summary>
