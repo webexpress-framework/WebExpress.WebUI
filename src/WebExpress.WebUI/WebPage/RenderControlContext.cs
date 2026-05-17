@@ -1,4 +1,4 @@
-﻿using WebExpress.WebCore.WebEndpoint;
+using WebExpress.WebCore.WebEndpoint;
 using WebExpress.WebCore.WebMessage;
 using WebExpress.WebCore.WebPage;
 

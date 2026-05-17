@@ -4,6 +4,7 @@ using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebTheme;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -165,7 +166,7 @@ namespace WebExpress.WebUI.WebControl
         {
             var text = Text?.Invoke(renderContext);
             var value = Value?.Invoke(renderContext);
-            var icon = Icon?.Invoke(renderContext);
+            var icon = Icon?.Invoke(renderContext)?.ApplyIconTheme(visualTree?.IconTheme ?? TypeIconTheme.Default);
             var outline = Outline?.Invoke(renderContext) ?? false;
             var primaryAction = PrimaryAction?.Invoke(renderContext);
             var secondaryAction = SecondaryAction?.Invoke(renderContext);

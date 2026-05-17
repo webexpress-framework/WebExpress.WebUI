@@ -137,6 +137,9 @@ namespace WebExpress.WebUI.WebPage
             //      convention documented in the Theme model).
             //   3. Otherwise leave Theme null - downstream IconTheme falls back
             //      to TypeIconTheme.Default.
+            // Per-user theme overrides are wired by application code: the
+            // page's Process override calls UseTheme<T>() based on whatever
+            // store the application maintains (session, identity profile, …).
             var applicationContext = pageContext?.ApplicationContext;
             Theme = applicationContext?.DefaultTheme
                 ?? componentHub?.ThemeManager?.Themes
@@ -189,19 +192,37 @@ namespace WebExpress.WebUI.WebPage
         /// </summary>
         /// <typeparam name="TTheme">The theme type to use.</typeparam>
         /// <returns>The current instance for method chaining.</returns>
-        public virtual VisualTreeControl UseTheme<TTheme>() where TTheme : class, ITheme
+        public virtual VisualTreeControl UseTheme<TTheme>()
+            where TTheme : class, ITheme
         {
             var resolved = _componentHub?.ThemeManager?
                 .GetThemes(_pageContext?.ApplicationContext, typeof(TTheme))
                 ?.FirstOrDefault();
-            if (resolved is null)
+
+            return UseTheme(resolved);
+        }
+
+        /// <summary>
+        /// Overrides the active theme with the supplied resolved theme
+        /// context. The call is a no-op when <paramref name="theme"/> is
+        /// <see langword="null"/>; otherwise the previous theme is replaced
+        /// and <see cref="OnThemeChanged"/> is invoked so subclasses can
+        /// re-apply theme-specific resources. Use this overload when the
+        /// theme has been resolved through a non-type lookup (cookie,
+        /// session, identity preference, …).
+        /// </summary>
+        /// <param name="theme">The theme to activate.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public virtual VisualTreeControl UseTheme(IThemeContext theme)
+        {
+            if (theme is null || theme == Theme)
             {
                 return this;
             }
 
             var previous = Theme;
-            Theme = resolved;
-            OnThemeChanged(previous, resolved);
+            Theme = theme;
+            OnThemeChanged(previous, theme);
             return this;
         }
 

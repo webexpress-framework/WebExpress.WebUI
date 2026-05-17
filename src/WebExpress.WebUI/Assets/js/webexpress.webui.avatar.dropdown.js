@@ -381,5 +381,5 @@ webexpress.webui.AvatarDropdownCtrl = class extends webexpress.webui.Ctrl {
     }
 };
 
-// Register the class in the controller
+// register the class in the controller
 webexpress.webui.Controller.registerClass("wx-webui-avatar-dropdown", webexpress.webui.AvatarDropdownCtrl);

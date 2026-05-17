@@ -4,6 +4,7 @@ using WebExpress.WebCore;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebPage;
+using WebExpress.WebCore.WebTheme;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
 
@@ -108,7 +109,7 @@ namespace WebExpress.WebUI.WebControl
                 }
 
                 var displayText = path.GetDisplayText(renderContext);
-                var pathIcon = path.GetIcon(renderContext);
+                var pathIcon = path.GetIcon(renderContext)?.ApplyIconTheme(visualTree.IconTheme);
 
                 if (last?.IsHidden ?? false)
                 {
@@ -140,7 +141,7 @@ namespace WebExpress.WebUI.WebControl
                 else if (endpointContext is PageContext page)
                 {
                     var display = I18N.Translate(renderContext.Request?.Culture, page.PageTitle);
-                    var icon = page?.PageIcon;
+                    var icon = page?.PageIcon?.ApplyIconTheme(visualTree.IconTheme);
 
                     html.Add
                     (
