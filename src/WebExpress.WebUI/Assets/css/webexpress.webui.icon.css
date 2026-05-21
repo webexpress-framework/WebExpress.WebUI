@@ -1728,3 +1728,88 @@
     -webkit-mask-image: url("../icons/undo.svg");
     mask-image: url("../icons/undo.svg");
 }
+
+.wx-icon-light-edit {
+    -webkit-mask-image: url("../icons/edit.svg");
+    mask-image: url("../icons/edit.svg");
+}
+
+.wx-icon-light-clock {
+    -webkit-mask-image: url("../icons/clock.svg");
+    mask-image: url("../icons/clock.svg");
+}
+
+.wx-icon-light-globe {
+    -webkit-mask-image: url("../icons/globe.svg");
+    mask-image: url("../icons/globe.svg");
+}
+
+.wx-icon-light-phone {
+    -webkit-mask-image: url("../icons/phone.svg");
+    mask-image: url("../icons/phone.svg");
+}
+
+.wx-icon-light-mail {
+    -webkit-mask-image: url("../icons/mail.svg");
+    mask-image: url("../icons/mail.svg");
+}
+
+.wx-icon-light-building {
+    -webkit-mask-image: url("../icons/building.svg");
+    mask-image: url("../icons/building.svg");
+}
+
+.wx-icon-light-palette {
+    -webkit-mask-image: url("../icons/palette.svg");
+    mask-image: url("../icons/palette.svg");
+}
+
+.wx-icon-light-shield {
+    -webkit-mask-image: url("../icons/shield.svg");
+    mask-image: url("../icons/shield.svg");
+}
+
+.wx-icon-light-devices {
+    -webkit-mask-image: url("../icons/devices.svg");
+    mask-image: url("../icons/devices.svg");
+}
+
+.wx-icon-light-smartphone {
+    -webkit-mask-image: url("../icons/smartphone.svg");
+    mask-image: url("../icons/smartphone.svg");
+}
+
+.wx-icon-light-camera {
+    -webkit-mask-image: url("../icons/camera.svg");
+    mask-image: url("../icons/camera.svg");
+}
+
+.wx-icon-light-logout {
+    -webkit-mask-image: url("../icons/logout.svg");
+    mask-image: url("../icons/logout.svg");
+}
+
+.wx-icon-light-refresh {
+    -webkit-mask-image: url("../icons/refresh.svg");
+    mask-image: url("../icons/refresh.svg");
+}
+
+.wx-icon-light-shield-check {
+    -webkit-mask-image: url("../icons/shield-check.svg");
+    mask-image: url("../icons/shield-check.svg");
+}
+
+.wx-icon-light-sun {
+    -webkit-mask-image: url("../icons/sun.svg");
+    mask-image: url("../icons/sun.svg");
+}
+
+.wx-icon-light-github {
+    -webkit-mask-image: url("../icons/github.svg");
+    mask-image: url("../icons/github.svg");
+}
+
+.wx-icon-light-slack {
+    -webkit-mask-image: url("../icons/slack.svg");
+    mask-image: url("../icons/slack.svg");
+}
