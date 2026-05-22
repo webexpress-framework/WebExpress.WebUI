@@ -100,7 +100,7 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
             var renderGroupContext = new RenderControlFormGroupContext(renderContext, this);
-            var layout = Layout?.Invoke(renderContext);
+            var layout = Layout?.Invoke(renderContext) ?? TypeLayoutTab.Default;
             var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
@@ -110,7 +110,9 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(),
                 Role = role
             }
-                .AddUserAttribute("data-layout", layout.ToString().ToLower())
+                .AddUserAttribute("data-layout", layout != TypeLayoutTab.Default
+                    ? layout.ToString().ToLower()
+                    : null)
                 .Add(_views.Select(x => x.Render(renderContext, visualTree)));
 
             return html;
