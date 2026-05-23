@@ -19,7 +19,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual Func<IRenderControlContext, TypeLayoutTab> Layout
         {
             get => (Func<IRenderControlContext, TypeLayoutTab>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-tab", Classes),
-                Style = GetStyles(),
+                Style = GetStyles(renderContext),
                 Role = role
             }
                 .AddUserAttribute("data-layout", layout != TypeLayoutTab.Default

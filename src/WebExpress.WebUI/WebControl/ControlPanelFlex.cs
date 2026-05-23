@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual Func<IRenderControlContext, TypeLayoutFlex> Layout
         {
             get => (Func<IRenderControlContext, TypeLayoutFlex>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual Func<IRenderControlContext, TypeJustifiedFlex> Justify
         {
             get => (Func<IRenderControlContext, TypeJustifiedFlex>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual Func<IRenderControlContext, TypeAlignFlex> Align
         {
             get => (Func<IRenderControlContext, TypeAlignFlex>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual Func<IRenderControlContext, TypeWrap> Wrap
         {
             get => (Func<IRenderControlContext, TypeWrap>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual Func<IRenderControlContext, TypeGap> Gap
         {
             get => (Func<IRenderControlContext, TypeGap>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -78,8 +78,8 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementTextContentDiv([.. Content.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
-                Class = Css.Concatenate("", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role,
                 DataTheme = Theme?.Invoke(renderContext).ToValue()
             };

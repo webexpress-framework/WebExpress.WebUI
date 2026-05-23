@@ -99,7 +99,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-tile", classes),
-                Style = GetStyles(),
+                Style = GetStyles(renderContext),
                 Role = role
             }
                 .AddUserAttribute("data-movable", movable ? "true" : null)

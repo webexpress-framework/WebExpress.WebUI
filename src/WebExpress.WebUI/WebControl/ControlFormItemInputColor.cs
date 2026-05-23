@@ -45,8 +45,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-input-color", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-webui-input-color", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
             }
               .AddUserAttribute("data-value", value ?? color);
 

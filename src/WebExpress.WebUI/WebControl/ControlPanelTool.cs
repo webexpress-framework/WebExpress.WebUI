@@ -39,8 +39,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv(dropDown, content)
             {
                 Id = Id,
-                Class = Css.Concatenate("toolpanel", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("toolpanel", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role,
                 DataTheme = Theme?.Invoke(renderContext).ToValue()
             };

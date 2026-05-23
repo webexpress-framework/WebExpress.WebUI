@@ -28,7 +28,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeDirection> Direction
         {
             get => (Func<IRenderControlContext, TypeDirection>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypePanelContainer> Fluid
         {
             get => (Func<IRenderControlContext, TypePanelContainer>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -170,7 +170,7 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementTextContentDiv([.. content.Select(x => x?.Render(renderContext, visualTree))])
             {
                 Id = Id,
-                Class = GetClasses(),
+                Class = GetClasses(renderContext),
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
                 Role = role,
                 DataTheme = theme.ToValue()

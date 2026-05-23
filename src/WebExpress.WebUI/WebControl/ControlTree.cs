@@ -110,7 +110,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id,
                 Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
-                Style = GetStyles()
+                Style = GetStyles(renderContext)
             };
 
             if (layout != TypeLayoutTree.Default)

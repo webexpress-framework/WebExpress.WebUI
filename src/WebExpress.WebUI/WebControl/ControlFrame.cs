@@ -45,8 +45,8 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-frame", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-webui-frame", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role
             }
                 .AddUserAttribute("data-uri", uri?.ToString())

@@ -159,7 +159,7 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv(header, content, footer)
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-modal", GetClasses())
+                Class = Css.Concatenate("wx-webui-modal", GetClasses(renderContext))
             }
                 .AddUserAttribute("data-size", size.ToClass())
                 .AddUserAttribute("data-close-label", I18N.Translate(closeLabel));

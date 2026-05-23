@@ -30,8 +30,8 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-overflow", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-webui-overflow", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 DataTheme = Theme?.Invoke(renderContext).ToValue()
             }
                 .Add(Content.Select(x => x.Render(renderContext, visualTree)));

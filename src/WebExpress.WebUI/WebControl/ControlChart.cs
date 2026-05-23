@@ -212,8 +212,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-chart", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-webui-chart", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role
             }
                 // set chart type

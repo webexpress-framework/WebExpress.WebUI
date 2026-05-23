@@ -181,8 +181,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-kanban", GetClasses()),
-                Style = GetStyles()
+                Class = Css.Concatenate("wx-webui-kanban", GetClasses(renderContext)),
+                Style = GetStyles(renderContext)
             }
                 .Add(_columns.Select(x => x.Render(renderContext, visualTree)))
                 .Add(_swimlane.Select(x => x.Render(renderContext, visualTree)))

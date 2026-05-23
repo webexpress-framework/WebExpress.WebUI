@@ -360,8 +360,8 @@ namespace WebExpress.WebUI.WebControl
                 {
                     Id = !string.IsNullOrWhiteSpace(Id) ? $"{Id}-form" : null,
                     Class = formLayout == TypeLayoutForm.Inline
-                        ? Css.Concatenate("wx-form-inline", GetClasses())
-                        : GetClasses(),
+                        ? Css.Concatenate("wx-form-inline", GetClasses(renderContext))
+                        : GetClasses(renderContext),
                     Role = _form.Role?.Invoke(formRenderContext),
                     Action = Uri?.ToString() ?? renderContext.Request.Uri?.ToString(),
                     Method = (method == RequestMethod.NONE

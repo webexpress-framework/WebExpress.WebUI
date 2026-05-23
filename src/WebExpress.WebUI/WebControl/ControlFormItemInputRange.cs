@@ -71,8 +71,8 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id,
                 Name = name,
-                Class = Css.Concatenate("form-range", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("form-range", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Type = "range",
                 Min = min.ToString(CultureInfo.InvariantCulture),
                 Max = max.ToString(CultureInfo.InvariantCulture),

@@ -32,7 +32,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeSizeAvatar> Size
         {
             get => (Func<IRenderControlContext, TypeSizeAvatar>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -92,8 +92,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-profile", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-profile", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role
             }
                 .Add(img)

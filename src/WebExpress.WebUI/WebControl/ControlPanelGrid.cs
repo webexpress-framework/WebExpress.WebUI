@@ -35,8 +35,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = GetClasses(),
-                Style = GetStyles(),
+                Class = GetClasses(renderContext),
+                Style = GetStyles(renderContext),
                 Role = role,
                 DataTheme = Theme?.Invoke(renderContext).ToValue()
             };

@@ -124,8 +124,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-panel-dismissible", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-webui-panel-dismissible", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role
             }
                 .AddUserAttribute("data-title", I18N.Translate(renderContext, title))

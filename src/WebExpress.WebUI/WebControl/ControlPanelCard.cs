@@ -69,8 +69,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("card", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("card", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role,
                 DataTheme = theme.ToValue()
             };

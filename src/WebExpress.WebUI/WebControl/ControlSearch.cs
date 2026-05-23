@@ -130,7 +130,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id,
                 Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
-                Style = GetStyles()
+                Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("placeholder", I18N.Translate(renderContext, placeholder))
                 .AddUserAttribute("data-favorited", enableFavorited ? "true" : null)

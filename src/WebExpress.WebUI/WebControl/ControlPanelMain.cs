@@ -33,8 +33,8 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementSectionMain([.. Content.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
-                Class = GetClasses(),
-                Style = GetStyles(),
+                Class = GetClasses(renderContext),
+                Style = GetStyles(renderContext),
                 Role = role,
                 DataTheme = Theme?.Invoke(renderContext).ToValue()
             };

@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeSizeText> Size
         {
             get => (Func<IRenderControlContext, TypeSizeText>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -67,8 +67,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentOl()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-breadcrumb", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-breadcrumb", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
             };
 
             if (!string.IsNullOrWhiteSpace(prefix))

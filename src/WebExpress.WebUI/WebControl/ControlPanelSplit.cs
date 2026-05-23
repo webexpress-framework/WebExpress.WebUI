@@ -182,8 +182,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv(container1, container2)
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-split", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-webui-split", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role
             }
                 .AddUserAttribute

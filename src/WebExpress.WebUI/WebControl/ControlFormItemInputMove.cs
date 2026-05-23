@@ -110,7 +110,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-input-move", classes),
-                Style = GetStyles()
+                Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("name", name)
                 .Add(_options.Select(x => x.Render(renderContext, visualTree)));

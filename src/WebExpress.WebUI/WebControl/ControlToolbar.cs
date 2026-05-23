@@ -32,7 +32,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual TypeOrientationToolBar Orientation
         {
             get => (TypeOrientationToolBar)GetProperty(TypeOrientationToolBar.Default);
-            set => SetProperty(value, () => value.ToClass());
+            set => SetProperty(value, (renderContext) => value.ToClass());
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual TypeFixed Fixed
         {
             get => (TypeFixed)GetProperty(TypeFixed.None);
-            set => SetProperty(value, () => value.ToClass());
+            set => SetProperty(value, (renderContext) => value.ToClass());
         }
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual TypeSticky Sticky
         {
             get => (TypeSticky)GetProperty(TypeSticky.None);
-            set => SetProperty(value, () => value.ToClass());
+            set => SetProperty(value, (renderContext) => value.ToClass());
         }
 
         /// <summary>
@@ -233,8 +233,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementSectionNav()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-toolbar", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-webui-toolbar", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role
             }
                 .Add(items.Select(x => x.Render(renderContext, visualTree)))

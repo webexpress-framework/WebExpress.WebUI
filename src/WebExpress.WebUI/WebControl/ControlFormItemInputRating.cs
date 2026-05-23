@@ -59,7 +59,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-input-rating", classes),
-                Style = GetStyles()
+                Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("name", name)
                 .AddUserAttribute("data-stars", maxRating != uint.MaxValue ? maxRating.ToString() : null);

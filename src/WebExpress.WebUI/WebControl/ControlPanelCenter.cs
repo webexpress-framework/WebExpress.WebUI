@@ -32,7 +32,7 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementTextContentDiv([.. Content.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
-                Class = GetClasses(),
+                Class = GetClasses(renderContext),
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
                 Role = role,
                 DataTheme = Theme?.Invoke(renderContext).ToValue()

@@ -153,8 +153,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-sidebar", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-webui-sidebar", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role
             }
                 .Add(items.Select(x => x.Render(renderContext, visualTree)))

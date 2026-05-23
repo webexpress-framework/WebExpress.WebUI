@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, PropertyColorCallout> Color
         {
             get => (Func<IRenderControlContext, PropertyColorCallout>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>
@@ -49,8 +49,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-callout", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-callout", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role,
                 DataTheme = theme.ToValue()
             };

@@ -46,8 +46,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-form-group-horizontal", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-form-group-horizontal", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
             };
 
             var body = new HtmlElementTextContentDiv() { };

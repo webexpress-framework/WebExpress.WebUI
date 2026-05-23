@@ -89,8 +89,8 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-graph-viewer", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-webui-graph-viewer", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = "region"
             }
                 .AddUserAttribute("data-node-style", (NodeStyle?.Invoke(renderContext) ?? TypeStyleGraphNode.Default) != TypeStyleGraphNode.Default ? (NodeStyle?.Invoke(renderContext) ?? TypeStyleGraphNode.Default).ToValue() : null)

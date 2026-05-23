@@ -133,8 +133,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-dashboard", GetClasses()),
-                Style = GetStyles()
+                Class = Css.Concatenate("wx-webui-dashboard", GetClasses(renderContext)),
+                Style = GetStyles(renderContext)
             }
                 .Add(columns.Select(x => x.Render(renderContext, visualTree)))
                 .Add(widgets.Select(x => x.Render(renderContext, visualTree)));

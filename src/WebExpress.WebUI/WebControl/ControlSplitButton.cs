@@ -20,7 +20,7 @@ namespace WebExpress.WebUI.WebControl
         public new Func<IRenderControlContext, PropertyColorButton> BackgroundColor
         {
             get => (Func<IRenderControlContext, PropertyColorButton>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(Outline?.Invoke(null) ?? false), () => value?.Invoke(null)?.ToStyle(Outline?.Invoke(null) ?? false));
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(Outline?.Invoke(null) ?? false), (renderContext) => value?.Invoke(renderContext)?.ToStyle(Outline?.Invoke(renderContext) ?? false));
         }
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeSizeButton> Size
         {
             get => (Func<IRenderControlContext, TypeSizeButton>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeBlockButton> Block
         {
             get => (Func<IRenderControlContext, TypeBlockButton>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeActive> Active
         {
             get => (Func<IRenderControlContext, TypeActive>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -176,8 +176,8 @@ namespace WebExpress.WebUI.WebControl
             var button = new HtmlElementFieldButton()
             {
                 Id = string.IsNullOrWhiteSpace(Id) ? "" : Id + "_btn",
-                Class = Css.Concatenate("btn", Css.Remove(GetClasses(), margin?.ToClass())),
-                Style = GetStyles()
+                Class = Css.Concatenate("btn", Css.Remove(GetClasses(renderContext), margin?.ToClass())),
+                Style = GetStyles(renderContext)
             };
 
             if (icon is not null)
@@ -207,8 +207,8 @@ namespace WebExpress.WebUI.WebControl
             var dropdownButton = new HtmlElementFieldButton(new HtmlElementTextSemanticsSpan() { Class = "caret" })
             {
                 Id = string.IsNullOrWhiteSpace(Id) ? "" : Id + "_toggle",
-                Class = Css.Concatenate("btn dropdown-toggle dropdown-toggle-split", Css.Remove(GetClasses(), "btn-block", margin?.ToClass())),
-                Style = GetStyles(),
+                Class = Css.Concatenate("btn dropdown-toggle dropdown-toggle-split", Css.Remove(GetClasses(renderContext), "btn-block", margin?.ToClass())),
+                Style = GetStyles(renderContext),
                 DataToggle = "dropdown"
             };
             dropdownButton.AddUserAttribute("data-bs-toggle", "dropdown");

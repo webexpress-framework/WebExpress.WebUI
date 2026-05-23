@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, PropertySizeText> Size
         {
             get => (Func<IRenderControlContext, PropertySizeText>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>
@@ -59,8 +59,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentPre(new HtmlText(decode))
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-code", GetClasses()),
-                Style = GetStyles()
+                Class = Css.Concatenate("wx-webui-code", GetClasses(renderContext)),
+                Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("data-line-numbers", lineNumbers ? "true" : null)
                 .AddUserAttribute("data-language", language.ToLanguage())

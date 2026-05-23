@@ -82,8 +82,8 @@ namespace WebExpress.WebUI.WebControl
                 Value = value,
                 Name = name,
                 Type = "file",
-                Class = Css.Concatenate("form-control-file", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("form-control-file", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role,
                 Placeholder = placeholder
             };

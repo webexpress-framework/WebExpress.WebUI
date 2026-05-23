@@ -58,8 +58,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementMultimediaImg()
             {
                 Id = Id,
-                Class = Css.Concatenate(horizontalAlignment?.ToClass(), GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate(horizontalAlignment?.ToClass(), GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role,
                 Alt = tooltip,
                 Src = uri?.ToString(),

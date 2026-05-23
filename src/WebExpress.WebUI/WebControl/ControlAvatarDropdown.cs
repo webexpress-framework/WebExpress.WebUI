@@ -153,7 +153,7 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-avatar-dropdown", GetClasses()),
+                Class = Css.Concatenate("wx-webui-avatar-dropdown", GetClasses(renderContext)),
                 Role = role ?? "button"
             }
                 .AddUserAttribute("data-name", I18N.Translate(renderContext, username))

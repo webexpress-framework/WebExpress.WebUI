@@ -155,8 +155,8 @@ namespace WebExpress.WebUI.WebControl
             )
             {
                 Id = Id,
-                Class = Css.Concatenate("carousel slide", GetClasses()),
-                Style = GetStyles()
+                Class = Css.Concatenate("carousel slide", GetClasses(renderContext)),
+                Style = GetStyles(renderContext)
             };
 
             html.AddUserAttribute("data-bs-ride", "carousel");

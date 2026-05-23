@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeSizeProgress> Size
         {
             get => (Func<IRenderControlContext, TypeSizeProgress>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass(), () => value?.Invoke(null).ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass(), (renderContext) => value?.Invoke(renderContext).ToStyle());
         }
 
         /// <summary>
@@ -86,8 +86,8 @@ namespace WebExpress.WebUI.WebControl
                 return new HtmlElementFormProgress(value + "%")
                 {
                     Id = Id,
-                    Class = GetClasses(),
-                    Style = GetStyles(),
+                    Class = GetClasses(renderContext),
+                    Style = GetStyles(renderContext),
                     Role = role,
                     Min = min.ToString(),
                     Max = max.ToString(),
@@ -123,9 +123,9 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate
                 (
                     "progress",
-                    GetClasses()
+                    GetClasses(renderContext)
                 ),
-                Style = GetStyles()
+                Style = GetStyles(renderContext)
             };
 
             return html;

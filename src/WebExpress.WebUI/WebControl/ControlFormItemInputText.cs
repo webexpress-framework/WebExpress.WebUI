@@ -122,7 +122,7 @@ namespace WebExpress.WebUI.WebControl
                 {
                     Id = id,
                     Class = Css.Concatenate("wx-webui-editor", classes),
-                    Style = GetStyles(),
+                    Style = GetStyles(renderContext),
                     Role = role,
                 }.AddUserAttribute("name", name),
                 _ => new HtmlElementFieldInput()

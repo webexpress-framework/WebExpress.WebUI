@@ -17,7 +17,7 @@ namespace WebExpress.WebUI.WebControl
         public new virtual Func<IRenderControlContext, PropertyColorText> TextColor
         {
             get => (Func<IRenderControlContext, PropertyColorText>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, PropertySizeText> Size
         {
             get => (Func<IRenderControlContext, PropertySizeText>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>
@@ -80,8 +80,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextContentP(text)
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -89,8 +89,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextSemanticsI(text)
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -98,8 +98,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextSemanticsB(text)
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -107,8 +107,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextSemanticsU(text)
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -116,8 +116,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextSemanticsS(text)
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -125,8 +125,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextSemanticsCite(text)
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -134,8 +134,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementSectionH1(text)
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -143,8 +143,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementSectionH2(text)
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -152,8 +152,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementSectionH3(text)
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -161,8 +161,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementSectionH4(text)
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -170,8 +170,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementSectionH5(text)
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -179,8 +179,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementSectionH6(text)
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -188,8 +188,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextSemanticsSpan(new HtmlText(text))
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -197,8 +197,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextSemanticsSmall(new HtmlText(text))
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -206,8 +206,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextSemanticsStrong(new HtmlText(text))
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -215,8 +215,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextContentDiv(new HtmlText(text))
                     {
                         Id = Id,
-                        Class = Css.Concatenate("text-center", GetClasses()),
-                        Style = GetStyles(),
+                        Class = Css.Concatenate("text-center", GetClasses(renderContext)),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -225,15 +225,15 @@ namespace WebExpress.WebUI.WebControl
                         ? new HtmlElementTextContentPre(new HtmlText(text))
                         {
                             Id = Id,
-                            Class = GetClasses(),
-                            Style = GetStyles(),
+                            Class = GetClasses(renderContext),
+                            Style = GetStyles(renderContext),
                             Role = role
                         }
                         : new HtmlElementTextSemanticsCode(new HtmlText(text))
                         {
                             Id = Id,
-                            Class = GetClasses(),
-                            Style = GetStyles(),
+                            Class = GetClasses(renderContext),
+                            Style = GetStyles(renderContext),
                             Role = role
                         };
                     break;
@@ -241,8 +241,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextSemanticsSamp(new HtmlText(text))
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -250,8 +250,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextSemanticsTime(new HtmlText(text))
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -259,8 +259,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextSemanticsMark(new HtmlText(text))
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -268,8 +268,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextSemanticsEm(new HtmlText(text))
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -277,8 +277,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextSemanticsDfn(new HtmlText(text))
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -286,8 +286,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextSemanticsAbbr(new HtmlText(text))
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -295,8 +295,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextSemanticsKdb(new HtmlText(text))
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -304,8 +304,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextContentBlockquote(new HtmlText(text))
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -313,8 +313,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextContentFigcaption(new HtmlText(text))
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -322,8 +322,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextContentPre(new HtmlText(text))
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;
@@ -335,8 +335,8 @@ namespace WebExpress.WebUI.WebControl
                     html = new HtmlElementTextContentDiv(new HtmlText(text))
                     {
                         Id = Id,
-                        Class = GetClasses(),
-                        Style = GetStyles(),
+                        Class = GetClasses(renderContext),
+                        Style = GetStyles(renderContext),
                         Role = role
                     };
                     break;

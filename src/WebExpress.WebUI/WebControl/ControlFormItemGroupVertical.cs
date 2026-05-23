@@ -46,8 +46,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
             };
 
             foreach (var item in Items)

@@ -87,8 +87,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-file-list", GetClasses()),
-                Style = GetStyles()
+                Class = Css.Concatenate("wx-webui-file-list", GetClasses(renderContext)),
+                Style = GetStyles(renderContext)
             }
                 .Add(files.Select(x => x.Render(renderContext, visualTree)));
 

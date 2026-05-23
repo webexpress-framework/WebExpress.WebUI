@@ -40,8 +40,8 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-login", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-webui-login", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
             }
                 .AddUserAttribute("dataset-username", username)
                 .AddUserAttribute("dataset-title", I18N.Translate(renderContext, title));

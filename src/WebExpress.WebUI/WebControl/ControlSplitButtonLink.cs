@@ -101,8 +101,8 @@ namespace WebExpress.WebUI.WebControl
             var button = new HtmlElementTextSemanticsA()
             {
                 Id = string.IsNullOrWhiteSpace(Id) ? "" : Id + "_btn",
-                Class = Css.Concatenate("btn", Css.Remove(GetClasses(), margin?.ToClass())),
-                Style = GetStyles(),
+                Class = Css.Concatenate("btn", Css.Remove(GetClasses(renderContext), margin?.ToClass())),
+                Style = GetStyles(renderContext),
                 Target = target,
                 Href = uri?.ToString()
             };
@@ -134,8 +134,8 @@ namespace WebExpress.WebUI.WebControl
             var dropdownButton = new HtmlElementTextSemanticsSpan(new HtmlElementTextSemanticsSpan() { Class = "caret" })
             {
                 Id = string.IsNullOrWhiteSpace(Id) ? "" : Id + "_btn",
-                Class = Css.Concatenate("btn dropdown-toggle dropdown-toggle-split", Css.Remove(GetClasses(), "btn-block", margin?.ToClass())),
-                Style = GetStyles()
+                Class = Css.Concatenate("btn dropdown-toggle dropdown-toggle-split", Css.Remove(GetClasses(renderContext), "btn-block", margin?.ToClass())),
+                Style = GetStyles(renderContext)
             };
             dropdownButton.AddUserAttribute("data-bs-toggle", "dropdown");
             dropdownButton.AddUserAttribute("aria-expanded", "false");

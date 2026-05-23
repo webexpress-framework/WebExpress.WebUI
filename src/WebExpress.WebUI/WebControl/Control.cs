@@ -12,7 +12,7 @@ namespace WebExpress.WebUI.WebControl
     /// </summary>
     public abstract class Control : IControl
     {
-        private readonly Dictionary<string, Tuple<object, Func<string>, Func<string>>> _propertys = [];
+        private readonly Dictionary<string, Tuple<object, Func<IRenderControlContext, string>, Func<IRenderControlContext, string>>> _propertys = [];
 
         /// <summary>
         /// Gets or sets the id of the control.
@@ -25,7 +25,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual Func<IRenderControlContext, PropertyColorText> TextColor
         {
             get => (Func<IRenderControlContext, PropertyColorText>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual Func<IRenderControlContext, PropertyColorBackground> BackgroundColor
         {
             get => (Func<IRenderControlContext, PropertyColorBackground>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual Func<IRenderControlContext, PropertyColorBorder> BorderColor
         {
             get => (Func<IRenderControlContext, PropertyColorBorder>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual Func<IRenderControlContext, PropertySpacingPadding> Padding
         {
             get => (Func<IRenderControlContext, PropertySpacingPadding>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass());
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual Func<IRenderControlContext, PropertySpacingMargin> Margin
         {
             get => (Func<IRenderControlContext, PropertySpacingMargin>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass());
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual Func<IRenderControlContext, PropertyBorder> Border
         {
             get => (Func<IRenderControlContext, PropertyBorder>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass());
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual Func<IRenderControlContext, PropertyGrid> GridColumn
         {
             get => (Func<IRenderControlContext, PropertyGrid>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass());
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual Func<IRenderControlContext, TypeWidth> Width
         {
             get => (Func<IRenderControlContext, TypeWidth>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual Func<IRenderControlContext, TypeHeight> Height
         {
             get => (Func<IRenderControlContext, TypeHeight>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual Func<IRenderControlContext, TypeFlexGrow> FlexGrow
         {
             get => (Func<IRenderControlContext, TypeFlexGrow>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual Func<IRenderControlContext, TypeDisplay> Display
         {
             get => (Func<IRenderControlContext, TypeDisplay>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual Func<IRenderControlContext, TypeHorizontalAlignment> HorizontalAlignment
         {
             get => (Func<IRenderControlContext, TypeHorizontalAlignment>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The value.</returns>
         protected Enum GetProperty(Enum defaultValue, [CallerMemberName] string propertyName = "")
         {
-            if (_propertys.TryGetValue(propertyName, out Tuple<object, Func<string>, Func<string>> item))
+            if (_propertys.TryGetValue(propertyName, out Tuple<object, Func<IRenderControlContext, string>, Func<IRenderControlContext, string>> item))
             {
                 return (Enum)item.Item1;
             }
@@ -188,7 +188,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The value.</returns>
         protected Enum GetProperty([CallerMemberName] string propertyName = "")
         {
-            if (_propertys.TryGetValue(propertyName, out Tuple<object, Func<string>, Func<string>> item))
+            if (_propertys.TryGetValue(propertyName, out Tuple<object, Func<IRenderControlContext, string>, Func<IRenderControlContext, string>> item))
             {
                 return (Enum)item.Item1;
             }
@@ -203,7 +203,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The value.</returns>
         protected IProperty GetPropertyObject([CallerMemberName] string propertyName = "")
         {
-            if (_propertys.TryGetValue(propertyName, out Tuple<object, Func<string>, Func<string>> item))
+            if (_propertys.TryGetValue(propertyName, out Tuple<object, Func<IRenderControlContext, string>, Func<IRenderControlContext, string>> item))
             {
                 return (IProperty)item.Item1;
             }
@@ -218,7 +218,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The value.</returns>
         protected object GetPropertyObjectValue([CallerMemberName] string propertyName = "")
         {
-            if (_propertys.TryGetValue(propertyName, out Tuple<object, Func<string>, Func<string>> item))
+            if (_propertys.TryGetValue(propertyName, out Tuple<object, Func<IRenderControlContext, string>, Func<IRenderControlContext, string>> item))
             {
                 return item.Item1;
             }
@@ -233,9 +233,9 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The value.</returns>
         protected string GetPropertyValue([CallerMemberName] string propertyName = "")
         {
-            if (_propertys.TryGetValue(propertyName, out Tuple<object, Func<string>, Func<string>> item))
+            if (_propertys.TryGetValue(propertyName, out Tuple<object, Func<IRenderControlContext, string>, Func<IRenderControlContext, string>> item))
             {
-                return item.Item2();
+                return item.Item2?.Invoke(null);
             }
 
             return null;
@@ -248,15 +248,15 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="callbackClass">The callback function to determine the css class.</param>
         /// <param name="callbackStyle">The callback function to determine the css style.</param>
         /// <param name="propertyName">The name of the property.</param>
-        protected void SetProperty(Enum value, Func<string> callbackClass, Func<string> callbackStyle = null, [CallerMemberName] string propertyName = "")
+        protected void SetProperty(Enum value, Func<IRenderControlContext, string> callbackClass, Func<IRenderControlContext, string> callbackStyle = null, [CallerMemberName] string propertyName = "")
         {
             if (!_propertys.ContainsKey(propertyName))
             {
-                _propertys.Add(propertyName, new Tuple<object, Func<string>, Func<string>>(value, callbackClass, callbackStyle));
+                _propertys.Add(propertyName, new Tuple<object, Func<IRenderControlContext, string>, Func<IRenderControlContext, string>>(value, callbackClass, callbackStyle));
                 return;
             }
 
-            _propertys[propertyName] = new Tuple<object, Func<string>, Func<string>>(value, callbackClass, callbackStyle);
+            _propertys[propertyName] = new Tuple<object, Func<IRenderControlContext, string>, Func<IRenderControlContext, string>>(value, callbackClass, callbackStyle);
         }
 
         /// <summary>
@@ -266,15 +266,15 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="callbackClass">The callback function to determine the css class.</param>
         /// <param name="callbackStyle">The callback function to determine the css style.</param>
         /// <param name="propertyName">The name of the property.</param>
-        protected void SetProperty(IProperty value, Func<string> callbackClass, Func<string> callbackStyle = null, [CallerMemberName] string propertyName = "")
+        protected void SetProperty(IProperty value, Func<IRenderControlContext, string> callbackClass, Func<IRenderControlContext, string> callbackStyle = null, [CallerMemberName] string propertyName = "")
         {
             if (!_propertys.ContainsKey(propertyName))
             {
-                _propertys.Add(propertyName, new Tuple<object, Func<string>, Func<string>>(value, callbackClass, callbackStyle));
+                _propertys.Add(propertyName, new Tuple<object, Func<IRenderControlContext, string>, Func<IRenderControlContext, string>>(value, callbackClass, callbackStyle));
                 return;
             }
 
-            _propertys[propertyName] = new Tuple<object, Func<string>, Func<string>>(value, callbackClass, callbackStyle);
+            _propertys[propertyName] = new Tuple<object, Func<IRenderControlContext, string>, Func<IRenderControlContext, string>>(value, callbackClass, callbackStyle);
         }
 
         /// <summary>
@@ -284,15 +284,15 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="callbackClass">The callback function to determine the css class.</param>
         /// <param name="callbackStyle">The callback function to determine the css style.</param>
         /// <param name="propertyName">The name of the property.</param>
-        protected void SetProperty(Func<string> callbackClass, Func<string> callbackStyle = null, [CallerMemberName] string propertyName = "")
+        protected void SetProperty(Func<IRenderControlContext, string> callbackClass, Func<IRenderControlContext, string> callbackStyle = null, [CallerMemberName] string propertyName = "")
         {
             if (!_propertys.ContainsKey(propertyName))
             {
-                _propertys.Add(propertyName, new Tuple<object, Func<string>, Func<string>>(null, callbackClass, callbackStyle));
+                _propertys.Add(propertyName, new Tuple<object, Func<IRenderControlContext, string>, Func<IRenderControlContext, string>>(null, callbackClass, callbackStyle));
                 return;
             }
 
-            _propertys[propertyName] = new Tuple<object, Func<string>, Func<string>>(null, callbackClass, callbackStyle);
+            _propertys[propertyName] = new Tuple<object, Func<IRenderControlContext, string>, Func<IRenderControlContext, string>>(null, callbackClass, callbackStyle);
         }
 
         /// <summary>
@@ -302,26 +302,27 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="callbackClass">The callback function to determine the css class.</param>
         /// <param name="callbackStyle">The callback function to determine the css style.</param>
         /// <param name="propertyName">The name of the property.</param>
-        protected void SetProperty(object value, Func<string> callbackClass, Func<string> callbackStyle = null, [CallerMemberName] string propertyName = "")
+        protected void SetProperty(object value, Func<IRenderControlContext, string> callbackClass, Func<IRenderControlContext, string> callbackStyle = null, [CallerMemberName] string propertyName = "")
         {
             if (!_propertys.ContainsKey(propertyName))
             {
-                _propertys.Add(propertyName, new Tuple<object, Func<string>, Func<string>>(value, callbackClass, callbackStyle));
+                _propertys.Add(propertyName, new Tuple<object, Func<IRenderControlContext, string>, Func<IRenderControlContext, string>>(value, callbackClass, callbackStyle));
                 return;
             }
 
-            _propertys[propertyName] = new Tuple<object, Func<string>, Func<string>>(value, callbackClass, callbackStyle);
+            _propertys[propertyName] = new Tuple<object, Func<IRenderControlContext, string>, Func<IRenderControlContext, string>>(value, callbackClass, callbackStyle);
         }
 
         /// <summary>
         /// Returns all css classes.
         /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <returns>The css classes.</returns>
-        protected string GetClasses()
+        protected string GetClasses(IRenderControlContext renderContext)
         {
             var list = _propertys.Values
                 .Where(x => x.Item2 is not null)
-                .Select(x => x.Item2?.Invoke())
+                .Select(x => x.Item2?.Invoke(renderContext))
                 .Where(x => !string.IsNullOrEmpty(x))
                 .Distinct();
 
@@ -331,12 +332,13 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Returns all css styles.
         /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
         /// <returns>The css styles.</returns>
-        protected string GetStyles()
+        protected string GetStyles(IRenderControlContext renderContext)
         {
             var list = _propertys.Values
                 .Where(x => x.Item3 is not null)
-                .Select(x => x.Item3())
+                .Select(x => x.Item3(renderContext))
                 .Where(x => !string.IsNullOrEmpty(x))
                 .Distinct();
 

@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeVerticalAlignment> VerticalAlignment
         {
             get => (Func<IRenderControlContext, TypeVerticalAlignment>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, PropertySizeText> Size
         {
             get => (Func<IRenderControlContext, PropertySizeText>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>
@@ -59,8 +59,8 @@ namespace WebExpress.WebUI.WebControl
             var icon = Icon?.Invoke(renderContext);
             var title = Title?.Invoke(renderContext);
             var css = icon is ImageIcon
-                ? Css.Concatenate("wx-icon", GetClasses())
-                : GetClasses();
+                ? Css.Concatenate("wx-icon", GetClasses(renderContext))
+                : GetClasses(renderContext);
             var role = Role?.Invoke(renderContext);
 
             var html = icon?.Render
@@ -70,7 +70,7 @@ namespace WebExpress.WebUI.WebControl
                 Id,
                 title,
                 css,
-                GetStyles(),
+                GetStyles(renderContext),
                 role
             );
 

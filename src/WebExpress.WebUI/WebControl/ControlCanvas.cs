@@ -34,8 +34,8 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementScriptingCanvas()
             {
                 Id = Id,
-                Class = Css.Concatenate("", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role
             };
         }

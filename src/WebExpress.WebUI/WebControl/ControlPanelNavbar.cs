@@ -32,8 +32,8 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementSectionNav([.. Content.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
-                Class = Css.Concatenate("navbar", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("navbar", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role,
                 DataTheme = Theme?.Invoke(renderContext).ToValue()
             };

@@ -31,7 +31,7 @@ namespace WebExpress.WebUI.WebControl
         public System.Func<IRenderControlContext, TypeActive> Active
         {
             get => (System.Func<IRenderControlContext, TypeActive>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace WebExpress.WebUI.WebControl
         public System.Func<IRenderControlContext, TypeTextDecoration> Decoration
         {
             get => (System.Func<IRenderControlContext, TypeTextDecoration>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace WebExpress.WebUI.WebControl
         public System.Func<IRenderControlContext, TypeVerticalAlignment> VerticalAlignment
         {
             get => (System.Func<IRenderControlContext, TypeVerticalAlignment>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace WebExpress.WebUI.WebControl
         public System.Func<IRenderControlContext, PropertySizeText> Size
         {
             get => (System.Func<IRenderControlContext, PropertySizeText>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>
@@ -240,8 +240,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextSemanticsA([.. controls.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-link", icon is ImageIcon ? "d-inline-flex align-items-baseline" : null, GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-link", icon is ImageIcon ? "d-inline-flex align-items-baseline" : null, GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role,
                 Href = Uri?.Invoke(renderContext)?.ToString() + (param.Length > 0 ? "?" + param : string.Empty),
                 Target = Target?.Invoke(renderContext) ?? TypeTarget.None,

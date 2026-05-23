@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.WebControl
         public new Func<IRenderControlContext, PropertyColorBackgroundAlert> BackgroundColor
         {
             get => (Func<IRenderControlContext, PropertyColorBackgroundAlert>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeDismissibilityAlert> Dismissibility
         {
             get => (Func<IRenderControlContext, TypeDismissibilityAlert>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeFade> Fade
         {
             get => (Func<IRenderControlContext, TypeFade>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -86,8 +86,8 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("alert", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("alert", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = "alert"
             }
                 .Add(!string.IsNullOrWhiteSpace(h) ? head : null)

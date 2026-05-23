@@ -88,8 +88,8 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id,
                 Name = name,
-                Class = Css.Concatenate("form-select", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("form-select", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role,
                 Disabled = disabled
             };

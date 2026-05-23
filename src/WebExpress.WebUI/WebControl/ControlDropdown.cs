@@ -238,7 +238,7 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-dropdown", GetClasses()),
+                Class = Css.Concatenate("wx-webui-dropdown", GetClasses(renderContext)),
                 Role = role ?? "button"
             }
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, text))

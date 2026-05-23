@@ -96,7 +96,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-input-cascading", classes),
-                Style = GetStyles()
+                Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("name", name)
                 .AddUserAttribute("placeholder", I18N.Translate(Placeholder?.Invoke(renderContext)))

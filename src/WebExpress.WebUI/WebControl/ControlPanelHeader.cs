@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual TypeFixed Fixed
         {
             get => (TypeFixed)GetProperty(TypeFixed.None);
-            set => SetProperty(value, () => value.ToClass());
+            set => SetProperty(value, (renderContext) => value.ToClass());
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual TypeSticky Sticky
         {
             get => (TypeSticky)GetProperty(TypeSticky.None);
-            set => SetProperty(value, () => value.ToClass());
+            set => SetProperty(value, (renderContext) => value.ToClass());
         }
 
         /// <summary>
@@ -51,8 +51,8 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementSectionHeader([.. Content.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
-                Class = GetClasses(),
-                Style = GetStyles(),
+                Class = GetClasses(renderContext),
+                Style = GetStyles(renderContext),
                 Role = role,
                 DataTheme = Theme?.Invoke(renderContext).ToValue()
             };

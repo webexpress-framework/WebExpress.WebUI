@@ -52,8 +52,8 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id,
                 Text = I18N.Translate(renderContext.Request?.Culture, text),
-                Class = Css.Concatenate(GetClasses()),
-                Style = Style.Concatenate(GetStyles()),
+                Class = Css.Concatenate(GetClasses(renderContext)),
+                Style = Style.Concatenate(GetStyles(renderContext)),
                 Role = role
             };
 

@@ -48,8 +48,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextSemanticsA()
             {
                 Id = Id,
-                Class = Css.Concatenate("btn", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("btn", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role,
                 Href = Uri?.Invoke(renderContext)?.BindParameters(renderContext.Request.Parameters).ToString(),
                 Title = I18N.Translate(renderContext, Tooltip?.Invoke(renderContext))

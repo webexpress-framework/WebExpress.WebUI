@@ -143,7 +143,7 @@ namespace WebExpress.WebUI.WebControl
             )
             {
                 Id = Id,
-                Class = GetClasses(),
+                Class = GetClasses(renderContext),
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
                 Role = role
             };

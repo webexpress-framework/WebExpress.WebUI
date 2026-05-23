@@ -15,7 +15,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, PropertyColorTag> Color
         {
             get => (Func<IRenderControlContext, PropertyColorTag>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>

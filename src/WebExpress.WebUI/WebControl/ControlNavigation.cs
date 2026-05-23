@@ -23,7 +23,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeLayoutTab> Layout
         {
             get => (Func<IRenderControlContext, TypeLayoutTab>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace WebExpress.WebUI.WebControl
         public new Func<IRenderControlContext, TypeHorizontalAlignmentTab> HorizontalAlignment
         {
             get => (Func<IRenderControlContext, TypeHorizontalAlignmentTab>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeJustifiedTab> Justified
         {
             get => (Func<IRenderControlContext, TypeJustifiedTab>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeOrientationTab> Orientation
         {
             get => (Func<IRenderControlContext, TypeOrientationTab>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -242,8 +242,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentUl(htmlItems.ToArray())
             {
                 Id = Id,
-                Class = Css.Concatenate("nav", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("nav", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role
             };
 

@@ -162,8 +162,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-smart-edit", GetClasses()),
-                Style = GetStyles()
+                Class = Css.Concatenate("wx-webui-smart-edit", GetClasses(renderContext)),
+                Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("data-object-id", ObjectId?.Invoke(renderContext))
                 .AddUserAttribute("data-object-name", name)
