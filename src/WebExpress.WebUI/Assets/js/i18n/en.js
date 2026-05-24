@@ -336,5 +336,9 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "login.password": "Password",
     "login.submit": "Login",
     "login.failed": "Login failed. Please check your credentials.",
-    "login.error": "An error occurred. Please try again."
+    "login.error": "An error occurred. Please try again.",
+
+    "slider.invalid": "Invalid range.",
+    "slider.out-of-bounds": "Range is out of bounds.",
+    "slider.inverted": "Lower bound must not exceed upper bound."
 });

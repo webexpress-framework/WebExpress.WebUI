@@ -40,6 +40,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/webexpress.webui.input.password.js")]
     [Asset("/assets/js/webexpress.webui.input.rating.js")]
     [Asset("/assets/js/webexpress.webui.input.selection.js")]
+    [Asset("/assets/js/webexpress.webui.input.slider.js")]
     [Asset("/assets/js/webexpress.webui.input.tag.js")]
     [Asset("/assets/js/webexpress.webui.input.tile.js")]
     [Asset("/assets/js/webexpress.webui.kanban.js")]

@@ -44,6 +44,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/css/webexpress.webui.search.css")]
     [Asset("/assets/css/webexpress.webui.selection.css")]
     [Asset("/assets/css/webexpress.webui.sidebar.css")]
+    [Asset("/assets/css/webexpress.webui.slider.css")]
     [Asset("/assets/css/webexpress.webui.smartedit.css")]
     [Asset("/assets/css/webexpress.webui.smartview.css")]
     [Asset("/assets/css/webexpress.webui.split.css")]

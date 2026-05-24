@@ -1,0 +1,156 @@
+/* Dual-handle range slider control.
+ *
+ * The server-side ControlFormItemInputSlider renders the host element with
+ * class "wx-webui-input-slider". The framework controller strips that
+ * marker class on init and the JavaScript component replaces it with the
+ * shorter "wx-slider" class - so all post-init styling targets .wx-slider.
+ * A small fallback rule keeps the host visible while JS is still loading.
+ *
+ * Theme tokens (set on the host element; overridable via .wx-slider-color-*
+ * marker classes that are produced by PropertyColorSlider on the server,
+ * or via an inline style override for user-defined colors):
+ *   --wx-slider-track-bg    default: #e9ecef
+ *   --wx-slider-band-bg     default: linear-gradient from #0d6efd to #6610f2
+ *   --wx-slider-handle-bg   default: #ffffff
+ *   --wx-slider-handle-bd   default: #0d6efd
+ *   --wx-slider-label-color default: #495057
+ */
+.wx-slider,
+.wx-webui-input-slider {
+    --wx-slider-track-bg: #e9ecef;
+    --wx-slider-band-bg: linear-gradient(90deg, #0d6efd 0%, #6610f2 100%);
+    --wx-slider-handle-bg: #ffffff;
+    --wx-slider-handle-bd: #0d6efd;
+    --wx-slider-label-color: #495057;
+
+    position: relative;
+    padding: 0.75rem 0.75rem 1.75rem 0.75rem;
+    user-select: none;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 3rem;
+}
+
+/* Track - clickable for jump-to-position */
+.wx-slider .wx-slider-track {
+    position: relative;
+    height: 0.5rem;
+    background: var(--wx-slider-track-bg);
+    border-radius: 999px;
+    margin: 0.5rem 0;
+    cursor: pointer;
+    touch-action: none;
+}
+
+/* Colored band connecting the two handles */
+.wx-slider .wx-slider-band {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: var(--wx-slider-band-bg);
+    border-radius: 999px;
+    pointer-events: none;
+    transition: left .05s linear, width .05s linear;
+}
+
+/* Handle */
+.wx-slider .wx-slider-handle {
+    position: absolute;
+    top: 50%;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 50%;
+    background: var(--wx-slider-handle-bg);
+    border: 2px solid var(--wx-slider-handle-bd);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+    transform: translate(-50%, -50%);
+    cursor: grab;
+    touch-action: none;
+    transition: box-shadow .15s ease;
+    outline: none;
+    z-index: 2;
+}
+
+.wx-slider .wx-slider-handle:hover,
+.wx-slider .wx-slider-handle:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.wx-slider .wx-slider-handle.dragging {
+    cursor: grabbing;
+    box-shadow: 0 0 0 0.4rem rgba(13, 110, 253, 0.30);
+}
+
+/* Value labels below the handles */
+.wx-slider .wx-slider-label {
+    position: absolute;
+    bottom: 0.25rem;
+    transform: translateX(-50%);
+    font-size: 0.75rem;
+    color: var(--wx-slider-label-color);
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+/* Disabled state */
+.wx-slider.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.wx-slider.disabled .wx-slider-track {
+    cursor: not-allowed;
+}
+
+.wx-slider.disabled .wx-slider-handle {
+    cursor: not-allowed;
+    pointer-events: none;
+    box-shadow: none;
+}
+
+/* Theme color variants. Each one overrides the band + handle border color
+ * so the lower handle, the upper handle and the connecting band stay in
+ * sync with the chosen TypeColorSlider value. */
+.wx-slider.wx-slider-color-primary {
+    --wx-slider-band-bg: linear-gradient(90deg, #0d6efd 0%, #6610f2 100%);
+    --wx-slider-handle-bd: #0d6efd;
+}
+.wx-slider.wx-slider-color-secondary {
+    --wx-slider-band-bg: #6c757d;
+    --wx-slider-handle-bd: #6c757d;
+}
+.wx-slider.wx-slider-color-success {
+    --wx-slider-band-bg: linear-gradient(90deg, #198754 0%, #20c997 100%);
+    --wx-slider-handle-bd: #198754;
+}
+.wx-slider.wx-slider-color-info {
+    --wx-slider-band-bg: linear-gradient(90deg, #0dcaf0 0%, #0d6efd 100%);
+    --wx-slider-handle-bd: #0dcaf0;
+}
+.wx-slider.wx-slider-color-warning {
+    --wx-slider-band-bg: linear-gradient(90deg, #ffc107 0%, #fd7e14 100%);
+    --wx-slider-handle-bd: #fd7e14;
+}
+.wx-slider.wx-slider-color-danger {
+    --wx-slider-band-bg: linear-gradient(90deg, #dc3545 0%, #d63384 100%);
+    --wx-slider-handle-bd: #dc3545;
+}
+.wx-slider.wx-slider-color-light {
+    --wx-slider-band-bg: #f8f9fa;
+    --wx-slider-handle-bd: #dee2e6;
+}
+.wx-slider.wx-slider-color-dark {
+    --wx-slider-band-bg: #212529;
+    --wx-slider-handle-bd: #212529;
+}
+.wx-slider.wx-slider-color-highlight {
+    --wx-slider-band-bg: linear-gradient(90deg, #ffc107 0%, #dc3545 100%);
+    --wx-slider-handle-bd: #ffc107;
+}
+
+/* Dark theme support: invert label color and lighten the track */
+[data-bs-theme="dark"] .wx-slider {
+    --wx-slider-track-bg: #343a40;
+    --wx-slider-label-color: #dee2e6;
+    --wx-slider-handle-bg: #1f2326;
+}

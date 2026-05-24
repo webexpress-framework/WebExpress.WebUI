@@ -336,5 +336,9 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "login.password": "Passwort",
     "login.submit": "Anmelden",
     "login.failed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Zugangsdaten.",
-    "login.error": "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
+    "login.error": "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
+
+    "slider.invalid": "Ungültiger Wertebereich.",
+    "slider.out-of-bounds": "Wertebereich liegt außerhalb der zulässigen Grenzen.",
+    "slider.inverted": "Der untere Wert darf den oberen Wert nicht überschreiten."
 });
