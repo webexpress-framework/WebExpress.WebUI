@@ -18,6 +18,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/webexpress.webui.avatar.dropdown.js")]
     [Asset("/assets/js/webexpress.webui.button.js")]
     [Asset("/assets/js/webexpress.webui.button.split.toggle.js")]
+    [Asset("/assets/js/webexpress.webui.card.js")]
     [Asset("/assets/js/webexpress.webui.chart.js")]
     [Asset("/assets/js/webexpress.webui.code.js")]
     [Asset("/assets/js/webexpress.webui.color.js")]

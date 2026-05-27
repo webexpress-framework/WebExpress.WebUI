@@ -1,0 +1,100 @@
+/*
+ * Card panel rendered by webexpress.webui.PanelCardCtrl. The structure mirrors
+ * the Bootstrap card layout but lives in the wx-* namespace so the same markup
+ * works without pulling in bootstrap's `.card` rules.
+ *
+ * Spacing, colour and radius values are sourced from the bootstrap CSS
+ * variables that ship with WebExpress.WebUI so the card picks up theme
+ * switches (light / dark) and the bootstrap utility classes (.border, text
+ * colours, background utilities) without extra work.
+ */
+
+.wx-card {
+    --wx-card-spacer-y: 1rem;
+    --wx-card-spacer-x: 1rem;
+    --wx-card-title-spacer-y: 0.5rem;
+    --wx-card-cap-padding-y: 0.5rem;
+    --wx-card-cap-padding-x: 1rem;
+    --wx-card-cap-bg: rgba(var(--bs-body-color-rgb), 0.03);
+    --wx-card-border-width: var(--bs-border-width);
+    --wx-card-border-color: var(--bs-border-color-translucent);
+    --wx-card-border-radius: var(--bs-border-radius);
+    --wx-card-inner-radius: calc(var(--bs-border-radius) - var(--bs-border-width));
+    --wx-card-bg: var(--bs-body-bg);
+    --wx-card-color: var(--bs-body-color);
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    color: var(--wx-card-color);
+    word-wrap: break-word;
+    background-color: var(--wx-card-bg);
+    background-clip: border-box;
+    border-radius: var(--wx-card-border-radius);
+}
+
+/* the .border utility shipped by bootstrap already paints a 1px outline; the
+   wx-card class only adds it when the consumer asked for it via the C#
+   `Border` property */
+.wx-card.border {
+    border-color: var(--wx-card-border-color);
+}
+
+.wx-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: var(--wx-card-cap-padding-y) var(--wx-card-cap-padding-x);
+    margin-bottom: 0;
+    background-color: var(--wx-card-cap-bg);
+    border-bottom: var(--wx-card-border-width) solid var(--wx-card-border-color);
+    border-top-left-radius: var(--wx-card-inner-radius);
+    border-top-right-radius: var(--wx-card-inner-radius);
+}
+
+.wx-card-body {
+    flex: 1 1 auto;
+    padding: var(--wx-card-spacer-y) var(--wx-card-spacer-x);
+}
+
+.wx-card-title {
+    margin-bottom: var(--wx-card-title-spacer-y);
+}
+
+.wx-card-text:last-child {
+    margin-bottom: 0;
+}
+
+.wx-card-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: var(--wx-card-cap-padding-y) var(--wx-card-cap-padding-x);
+    background-color: var(--wx-card-cap-bg);
+    border-top: var(--wx-card-border-width) solid var(--wx-card-border-color);
+    border-bottom-right-radius: var(--wx-card-inner-radius);
+    border-bottom-left-radius: var(--wx-card-inner-radius);
+}
+
+/* header / footer icons render either as a glyph (<i>) or as an inline image
+   (<img class="wx-icon">). Keep both flavours visually aligned with the
+   surrounding text. */
+.wx-card-header > i,
+.wx-card-footer > i {
+    line-height: 1;
+}
+
+.wx-card-header > img,
+.wx-card-footer > img {
+    width: 1.25em;
+    height: 1.25em;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+/* dark theme: keep cap and body backgrounds in sync with the body palette */
+[data-bs-theme="dark"] .wx-card {
+    --wx-card-bg: var(--bs-dark);
+    --wx-card-cap-bg: rgba(255, 255, 255, 0.05);
+}

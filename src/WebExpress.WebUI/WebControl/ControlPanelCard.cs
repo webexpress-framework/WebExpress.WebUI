@@ -1,16 +1,30 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
-using WebExpress.WebCore.WebUri;
+using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebTheme;
+using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// Represents a control panel card with a header, footer, and content area.
+    /// Header and footer accept an icon (image- or CSS-based) as well as
+    /// independent background / text colors so the two ends of the card can be
+    /// styled separately from the card body.
     /// </summary>
+    /// <remarks>
+    /// The C# side only emits a host element carrying the
+    /// <c>wx-webui-panel-card</c> class plus the relevant <c>data-*</c>
+    /// attributes; the actual card structure (wx-card-header / wx-card-body /
+    /// wx-card-title / wx-card-text / wx-card-footer) is built at runtime by
+    /// <c>webexpress.webui.PanelCardCtrl</c>. Colour properties are forwarded
+    /// as a CSS class (system colours such as <c>bg-primary</c>) and an inline
+    /// style (user colours such as <c>"gold"</c>); the JS controller applies
+    /// both to the corresponding section element.
+    /// </remarks>
     public class ControlPanelCard : ControlPanel
     {
         /// <summary>
@@ -19,9 +33,22 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, string> Header { get; set; }
 
         /// <summary>
-        /// Gets or sets the header image.
+        /// Gets or sets the header icon. The icon can be image-based
+        /// (<see cref="ImageIcon"/>) or CSS-based (any <see cref="Icon"/>).
         /// </summary>
-        public Func<IRenderControlContext, IUri> HeaderImage { get; set; }
+        public Func<IRenderControlContext, IIcon> HeaderIcon { get; set; }
+
+        /// <summary>
+        /// Gets or sets the background color of the header row. Accepts both
+        /// system colors (e.g. <see cref="TypeColorBackground.Primary"/>) and
+        /// user-defined colors (e.g. <c>"gold"</c>).
+        /// </summary>
+        public Func<IRenderControlContext, PropertyColorBackground> HeaderBackgroundColor { get; set; }
+
+        /// <summary>
+        /// Gets or sets the text color of the header row.
+        /// </summary>
+        public Func<IRenderControlContext, PropertyColorText> HeaderTextColor { get; set; }
 
         /// <summary>
         /// Gets or sets the headline.
@@ -34,9 +61,20 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, string> Footer { get; set; }
 
         /// <summary>
-        /// Gets or sets the footer image.
+        /// Gets or sets the footer icon. The icon can be image-based
+        /// (<see cref="ImageIcon"/>) or CSS-based (any <see cref="Icon"/>).
         /// </summary>
-        public Func<IRenderControlContext, IUri> FooterImage { get; set; }
+        public Func<IRenderControlContext, IIcon> FooterIcon { get; set; }
+
+        /// <summary>
+        /// Gets or sets the background color of the footer row.
+        /// </summary>
+        public Func<IRenderControlContext, PropertyColorBackground> FooterBackgroundColor { get; set; }
+
+        /// <summary>
+        /// Gets or sets the text color of the footer row.
+        /// </summary>
+        public Func<IRenderControlContext, PropertyColorText> FooterTextColor { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -60,68 +98,38 @@ namespace WebExpress.WebUI.WebControl
             var role = Role?.Invoke(renderContext);
             var theme = Theme?.Invoke(renderContext) ?? TypeTheme.None;
             var header = Header?.Invoke(renderContext);
-            var headerImage = HeaderImage?.Invoke(renderContext);
+            var headerIcon = HeaderIcon?.Invoke(renderContext)?.ApplyIconTheme(visualTree?.IconTheme ?? TypeIconTheme.Default);
+            var headerBg = HeaderBackgroundColor?.Invoke(renderContext);
+            var headerColor = HeaderTextColor?.Invoke(renderContext);
             var headline = Headline?.Invoke(renderContext);
             var footer = Footer?.Invoke(renderContext);
-            var footerImage = FooterImage?.Invoke(renderContext);
+            var footerIcon = FooterIcon?.Invoke(renderContext)?.ApplyIconTheme(visualTree?.IconTheme ?? TypeIconTheme.Default);
+            var footerBg = FooterBackgroundColor?.Invoke(renderContext);
+            var footerColor = FooterTextColor?.Invoke(renderContext);
 
-            var content = Content;
-            var html = new HtmlElementTextContentDiv()
+            var html = new HtmlElementTextContentDiv([.. Content.Select(x => x?.Render(renderContext, visualTree))])
             {
                 Id = Id,
-                Class = Css.Concatenate("card", GetClasses(renderContext)),
+                Class = Css.Concatenate("wx-webui-card", GetClasses(renderContext)),
                 Style = GetStyles(renderContext),
                 Role = role,
                 DataTheme = theme.ToValue()
-            };
-
-            if (!string.IsNullOrWhiteSpace(header))
-            {
-                html.Add(new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(header))) { Class = "card-header" });
             }
-
-            if (headerImage is not null)
-            {
-                html.Add(new HtmlElementMultimediaImg()
-                {
-                    Src = headerImage?.ToString(),
-                    Class = "card-img-top"
-                });
-            }
-
-            if (!string.IsNullOrWhiteSpace(headline))
-            {
-                var headContent = (IEnumerable<IControl>)[new ControlText()
-                {
-                    Text = _ => I18N.Translate(headline),
-                    Classes = new List<string>(["card-title"]),
-                    Format = _ => TypeFormatText.H4
-                }];
-
-                content = headContent.Concat(Content);
-            }
-
-            html.Add(new HtmlElementTextContentDiv(new HtmlElementTextContentDiv([.. content.Select(x => x?.Render(renderContext, visualTree))])
-            {
-                Class = "card-text"
-            })
-            {
-                Class = "card-body"
-            });
-
-            if (footerImage is not null)
-            {
-                html.Add(new HtmlElementMultimediaImg()
-                {
-                    Src = footerImage?.ToString(),
-                    Class = "card-img-top"
-                });
-            }
-
-            if (!string.IsNullOrWhiteSpace(footer))
-            {
-                html.Add(new HtmlElementTextContentDiv(new HtmlText(footer)) { Class = "card-footer" });
-            }
+                .AddUserAttribute("data-header", I18N.Translate(renderContext, header))
+                .AddUserAttribute("data-header-icon-css", (headerIcon as Icon)?.Class)
+                .AddUserAttribute("data-header-icon-image", (headerIcon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-header-bg-class", headerBg?.ToClass())
+                .AddUserAttribute("data-header-bg-style", headerBg?.ToStyle())
+                .AddUserAttribute("data-header-color-class", headerColor?.ToClass())
+                .AddUserAttribute("data-header-color-style", headerColor?.ToStyle())
+                .AddUserAttribute("data-headline", I18N.Translate(renderContext, headline))
+                .AddUserAttribute("data-footer", I18N.Translate(renderContext, footer))
+                .AddUserAttribute("data-footer-icon-css", (footerIcon as Icon)?.Class)
+                .AddUserAttribute("data-footer-icon-image", (footerIcon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-footer-bg-class", footerBg?.ToClass())
+                .AddUserAttribute("data-footer-bg-style", footerBg?.ToStyle())
+                .AddUserAttribute("data-footer-color-class", footerColor?.ToClass())
+                .AddUserAttribute("data-footer-color-style", footerColor?.ToStyle());
 
             return html;
         }

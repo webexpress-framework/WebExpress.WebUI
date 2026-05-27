@@ -13,6 +13,7 @@ This section documents the JavaScript UI controllers and components of `WebExpre
 - [Avatar](avatar.md)
 - [Avatar Dropdown](avatar-dropdown.md)
 - [Button](button.md)
+- [Card](card.md)
 - [Cascading](cascading.md)
 - [Chart](chart.md)
 - [Code](code.md)
