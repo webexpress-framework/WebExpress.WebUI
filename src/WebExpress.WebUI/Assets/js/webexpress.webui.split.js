@@ -8,11 +8,11 @@
  * - Min/Max constraints.
  * - Collapsible side pane (double click or drag beyond threshold).
  * - Automatic resizing via ResizeObserver.
- * - Content-visibility aware: if every child of the side or main pane becomes
+ * - Content-visibility aware: if all children of the side or main pane become
  *   invisible (display:none, visibility:hidden, the hidden attribute, or an
- *   empty pane) the splitter and that pane are removed from the DOM and the
- *   remaining pane takes the full container; both are restored when content
- *   becomes visible again.
+ *   empty pane), the splitter and that pane are hidden rather than removed
+ *   from the DOM. The remaining pane expands to fill the entire container.
+ *   Both are restored once content becomes visible again.
  *
  * The following events are triggered:
  * - webexpress.webui.Event.SIZE_CHANGE_EVENT
@@ -50,6 +50,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     _sideContentObserver = null;
     _mainContentObserver = null;
     _contentVisibilityPending = false;
+    _contentObserverConfig = null;
 
     /**
      * Constructor
@@ -523,10 +524,10 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
      * takes the full container; when content becomes visible again the
      * original three-element layout is restored.
      */
-    _initContentVisibility() {
+     _initContentVisibility() {
         if (typeof MutationObserver === "undefined") return;
 
-        const config = {
+        this._contentObserverConfig = {
             attributes: true,
             attributeFilter: ["style", "class", "hidden"],
             childList: true,
@@ -536,13 +537,12 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
 
         if (this._sidePane) {
             this._sideContentObserver = new MutationObserver(schedule);
-            this._sideContentObserver.observe(this._sidePane, config);
+            this._sideContentObserver.observe(this._sidePane, this._contentObserverConfig);
         }
         if (this._mainPane) {
             this._mainContentObserver = new MutationObserver(schedule);
-            this._mainContentObserver.observe(this._mainPane, config);
+            this._mainContentObserver.observe(this._mainPane, this._contentObserverConfig);
         }
-
         // initial pass once the browser has had a chance to apply styles
         schedule();
     }
@@ -575,43 +575,50 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         this._sideContentHidden = sideHidden;
         this._mainContentHidden = mainHidden;
 
-        if (sideHidden && mainHidden) {
-            // nothing to show - clear everything from the container
-            this._detachFromContainer(this._sidePane);
-            this._detachFromContainer(this._splitter);
-            this._detachFromContainer(this._mainPane);
-            return;
-        }
-
-        if (sideHidden) {
-            this._detachFromContainer(this._sidePane);
-            this._detachFromContainer(this._splitter);
-            this._reattachInOrder();
-            this._fillContainer(this._mainPane);
-            return;
-        }
-
-        if (mainHidden) {
-            this._detachFromContainer(this._mainPane);
-            this._detachFromContainer(this._splitter);
-            this._reattachInOrder();
-            this._fillContainer(this._sidePane);
-            return;
-        }
-
-        // both visible again - restore the three-element layout and resize
-        this._reattachInOrder();
-        if (this._sidePaneCollapsed) {
-            // honor the existing user-driven collapse state
-            const prop = this._orientation === "vertical" ? "height" : "width";
-            const splitSize = this._getSplitterSize();
-            const collapseTo = this._minSide || 0;
-            if (this._mainPane) {
-                this._mainPane.style[prop] = `calc(100% - ${splitSize}px - ${collapseTo}px)`;
+        this._withContentObserversPaused(() => {
+            if (sideHidden && mainHidden) {
+                this._hideNode(this._sidePane);
+                this._hideNode(this._splitter);
+                this._hideNode(this._mainPane);
+                return;
             }
-        } else {
-            this._setPaneSizes(this._sideSize);
-        }
+
+            if (sideHidden) {
+                this._hideNode(this._sidePane);
+                this._hideNode(this._splitter);
+                this._fillContainer(this._mainPane);
+                return;
+            }
+
+            if (mainHidden) {
+                this._hideNode(this._mainPane);
+                this._hideNode(this._splitter);
+                this._fillContainer(this._sidePane);
+                return;
+            }
+
+            this._showNode(this._splitter);
+            this._showNode(this._sidePane);
+            this._showNode(this._mainPane);
+
+            if (this._sidePaneCollapsed) {
+                const prop = this._orientation === "vertical" ? "height" : "width";
+                const minProp = this._orientation === "vertical" ? "minHeight" : "minWidth";
+                const splitSize = this._getSplitterSize();
+                const collapseTo = this._minSide || 0;
+                if (collapseTo === 0) {
+                    this._sidePane.style.display = "none";
+                } else {
+                    this._sidePane.style[prop] = `${collapseTo}px`;
+                    this._sidePane.style[minProp] = `${collapseTo}px`;
+                }
+                if (this._mainPane) {
+                    this._mainPane.style[prop] = `calc(100% - ${splitSize}px - ${collapseTo}px)`;
+                }
+            } else {
+                this._setPaneSizes(this._sideSize);
+            }
+        });
     }
 
     /**
@@ -637,38 +644,42 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         }
         return false;
     }
-
+    
     /**
-     * Removes a node from the host container if it is currently attached.
-     * @param {HTMLElement} node Element to detach.
+     * Hides a node without removing it from the DOM. Staying connected is
+     * important so that getComputedStyle() can still correctly detect
+     * class‑based hiding (e.g., Bootstrap’s .d-none) on the child elements.
      */
-    _detachFromContainer(node) {
-        if (node && node.parentNode === this._element) {
-            this._element.removeChild(node);
-        }
+    _hideNode(node) {
+        if (node) node.style.display = "none";
     }
 
     /**
-     * Re-inserts side, splitter and main in the configured order, skipping
-     * any node that the visibility logic wants to keep detached.
+     * Makes a node visible again after it was previously hidden with _hideNode.
      */
-    _reattachInOrder() {
-        const sequence = this._paneOrder === "main-side"
-            ? [this._mainPane, this._splitter, this._sidePane]
-            : [this._sidePane, this._splitter, this._mainPane];
+    _showNode(node) {
+        if (node) node.style.display = "";
+    }
 
-        const fragment = document.createDocumentFragment();
-        for (const node of sequence) {
-            if (!node) continue;
-            if (node === this._sidePane && this._sideContentHidden) continue;
-            if (node === this._mainPane && this._mainContentHidden) continue;
-            if (node === this._splitter && (this._sideContentHidden || this._mainContentHidden)) continue;
-            if (node.parentNode === this._element) {
-                this._element.removeChild(node);
+    /**
+     * Executes fn() while the content observers are disabled, preventing
+     * visibility checks from being triggered by styles written by SplitCtrl
+     * itself. Since fn() is synchronous, no real external mutation can be
+     * lost during this window.
+     */
+    _withContentObserversPaused(fn) {
+        if (this._sideContentObserver) this._sideContentObserver.disconnect();
+        if (this._mainContentObserver) this._mainContentObserver.disconnect();
+        try {
+            fn();
+        } finally {
+            if (this._sideContentObserver && this._sidePane) {
+                this._sideContentObserver.observe(this._sidePane, this._contentObserverConfig);
             }
-            fragment.appendChild(node);
+            if (this._mainContentObserver && this._mainPane) {
+                this._mainContentObserver.observe(this._mainPane, this._contentObserverConfig);
+            }
         }
-        this._element.appendChild(fragment);
     }
 
     /**
