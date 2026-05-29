@@ -140,7 +140,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
                     break;
                 default:
                     try {
-                        isActive = document.queryCommandState(cmd);
+                        isActive = editor.queryCommandState(cmd);
                     } catch (e) {
                         isActive = false;
                     }

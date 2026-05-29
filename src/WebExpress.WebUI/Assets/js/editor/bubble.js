@@ -279,7 +279,7 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
             else if (icon.classList.contains("fa-strikethrough")) cmd = "strikeThrough";
             if (cmd) {
                 try {
-                    btn.classList.toggle("active", document.queryCommandState(cmd));
+                    btn.classList.toggle("active", this._currentEditor.queryCommandState(cmd));
                 } catch (_) { /* noop */ }
             }
         });
