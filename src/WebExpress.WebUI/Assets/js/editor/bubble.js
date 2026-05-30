@@ -293,7 +293,7 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
         b.className = "wx-editor-bubble-btn";
         b.title = title;
         b.setAttribute("aria-label", title);
-        b.innerHTML = `<i class="${icon}"></i>`;
+        b.innerHTML = `<i class="${webexpress.webui.IconTheme.resolveFa(icon)}"></i>`;
         // keep the editor selection alive and up to date for execCommand
         b.addEventListener("mousedown", (e) => {
             e.preventDefault();
@@ -491,7 +491,7 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
         row.className = "wx-editor-bubble-menu-item";
         if (icon) {
             const i = document.createElement("i");
-            i.className = icon;
+            i.className = webexpress.webui.IconTheme.resolveFa(icon);
             row.appendChild(i);
         }
         const span = document.createElement("span");

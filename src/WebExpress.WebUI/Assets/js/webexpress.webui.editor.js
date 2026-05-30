@@ -3225,7 +3225,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         btn.title = title;
         btn.setAttribute("aria-label", title);
         btn.dataset.command = command;
-        btn.innerHTML = `<i class="${iconClass}"></i>`;
+        btn.innerHTML = `<i class="${webexpress.webui.IconTheme.resolveFa(iconClass)}"></i>`;
         btn.type = "button";
 
         btn.addEventListener("click", () => {

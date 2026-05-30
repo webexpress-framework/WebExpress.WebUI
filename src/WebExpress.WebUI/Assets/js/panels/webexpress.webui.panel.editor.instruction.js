@@ -148,7 +148,7 @@ webexpress.webui.DialogPanels.register("editor-instruction", {
         // the running text instead of forcing its own line/block. A trailing
         // no-break space gives the caret a place to land after the element.
         const html =
-            `<span class="wx-editor-instruction" contenteditable="false"><i class="fas fa-info-circle"></i> ${safeText}</span>&nbsp;`;
+            `<span class="wx-editor-instruction" contenteditable="false"><i class="${webexpress.webui.IconTheme.resolveFa("fas fa-info-circle")}"></i> ${safeText}</span>&nbsp;`;
 
         // editor.insertHtmlAtCursor focuses editor and restores saved range internally
         editor.insertHtmlAtCursor(html);

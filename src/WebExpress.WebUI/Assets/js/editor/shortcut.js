@@ -402,7 +402,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
         item.dataset.index = String(index);
 
         const icon = document.createElement("i");
-        icon.className = def.icon || "fas fa-bolt";
+        icon.className = webexpress.webui.IconTheme.resolveFa(def.icon || "fas fa-bolt");
         item.appendChild(icon);
 
         const body = document.createElement("div");
@@ -1039,7 +1039,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
                 item.appendChild(img);
             } else {
                 const icon = document.createElement("i");
-                icon.className = "fas fa-user";
+                icon.className = webexpress.webui.IconTheme.resolveFa("fas fa-user");
                 item.appendChild(icon);
             }
 

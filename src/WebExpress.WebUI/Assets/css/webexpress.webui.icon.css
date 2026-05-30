@@ -1813,3 +1813,125 @@
     -webkit-mask-image: url("../icons/slack.svg");
     mask-image: url("../icons/slack.svg");
 }
+
+/* Editor (rich-text) icons */
+
+.wx-icon-light-bold {
+    -webkit-mask-image: url("../icons/bold.svg");
+    mask-image: url("../icons/bold.svg");
+}
+
+.wx-icon-light-italic {
+    -webkit-mask-image: url("../icons/italic.svg");
+    mask-image: url("../icons/italic.svg");
+}
+
+.wx-icon-light-underline {
+    -webkit-mask-image: url("../icons/underline.svg");
+    mask-image: url("../icons/underline.svg");
+}
+
+.wx-icon-light-strikethrough {
+    -webkit-mask-image: url("../icons/strikethrough.svg");
+    mask-image: url("../icons/strikethrough.svg");
+}
+
+.wx-icon-light-superscript {
+    -webkit-mask-image: url("../icons/superscript.svg");
+    mask-image: url("../icons/superscript.svg");
+}
+
+.wx-icon-light-subscript {
+    -webkit-mask-image: url("../icons/subscript.svg");
+    mask-image: url("../icons/subscript.svg");
+}
+
+.wx-icon-light-heading {
+    -webkit-mask-image: url("../icons/heading.svg");
+    mask-image: url("../icons/heading.svg");
+}
+
+.wx-icon-light-font {
+    -webkit-mask-image: url("../icons/font.svg");
+    mask-image: url("../icons/font.svg");
+}
+
+.wx-icon-light-text-height {
+    -webkit-mask-image: url("../icons/text-height.svg");
+    mask-image: url("../icons/text-height.svg");
+}
+
+.wx-icon-light-highlighter {
+    -webkit-mask-image: url("../icons/highlighter.svg");
+    mask-image: url("../icons/highlighter.svg");
+}
+
+.wx-icon-light-eraser {
+    -webkit-mask-image: url("../icons/eraser.svg");
+    mask-image: url("../icons/eraser.svg");
+}
+
+.wx-icon-light-list-ul {
+    -webkit-mask-image: url("../icons/list-ul.svg");
+    mask-image: url("../icons/list-ul.svg");
+}
+
+.wx-icon-light-list-ol {
+    -webkit-mask-image: url("../icons/list-ol.svg");
+    mask-image: url("../icons/list-ol.svg");
+}
+
+.wx-icon-light-indent {
+    -webkit-mask-image: url("../icons/indent.svg");
+    mask-image: url("../icons/indent.svg");
+}
+
+.wx-icon-light-outdent {
+    -webkit-mask-image: url("../icons/outdent.svg");
+    mask-image: url("../icons/outdent.svg");
+}
+
+.wx-icon-light-align-left {
+    -webkit-mask-image: url("../icons/align-left.svg");
+    mask-image: url("../icons/align-left.svg");
+}
+
+.wx-icon-light-align-center {
+    -webkit-mask-image: url("../icons/align-center.svg");
+    mask-image: url("../icons/align-center.svg");
+}
+
+.wx-icon-light-align-right {
+    -webkit-mask-image: url("../icons/align-right.svg");
+    mask-image: url("../icons/align-right.svg");
+}
+
+.wx-icon-light-align-justify {
+    -webkit-mask-image: url("../icons/align-justify.svg");
+    mask-image: url("../icons/align-justify.svg");
+}
+
+.wx-icon-light-quote-right {
+    -webkit-mask-image: url("../icons/quote-right.svg");
+    mask-image: url("../icons/quote-right.svg");
+}
+
+.wx-icon-light-smile {
+    -webkit-mask-image: url("../icons/smile.svg");
+    mask-image: url("../icons/smile.svg");
+}
+
+.wx-icon-light-redo {
+    -webkit-mask-image: url("../icons/redo.svg");
+    mask-image: url("../icons/redo.svg");
+}
+
+.wx-icon-light-unlink {
+    -webkit-mask-image: url("../icons/unlink.svg");
+    mask-image: url("../icons/unlink.svg");
+}
+
+.wx-icon-light-gamepad {
+    -webkit-mask-image: url("../icons/gamepad.svg");
+    mask-image: url("../icons/gamepad.svg");
+}

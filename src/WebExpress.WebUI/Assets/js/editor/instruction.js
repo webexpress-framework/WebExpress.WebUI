@@ -83,7 +83,7 @@ webexpress.webui.EditorPlugins.register("instruction", 5000, {
         btn.type = "button";
         btn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.instruction.title");
         btn.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.instruction.title"));
-        btn.innerHTML = '<i class="fas fa-info-circle"></i>';
+        btn.innerHTML = `<i class="${webexpress.webui.IconTheme.resolveFa("fas fa-info-circle")}"></i>`;
 
         btn.addEventListener("mousedown", (e) => {
             e.preventDefault(); // prevent losing focus

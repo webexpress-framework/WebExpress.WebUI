@@ -1366,6 +1366,35 @@ webexpress.webui.IconTheme = new class {
         if (v.startsWith("wx-icon-light-")) return `wx-icon-light ${v}`;
         return `wx-icon-light wx-icon-light-${v}`;
     }
+
+    /**
+     * Resolves a FontAwesome class to the theme-appropriate class by deriving
+     * the matching light-theme icon name from the FontAwesome name. A small
+     * alias map covers icons whose light variant is published under a different
+     * name. This lets callers pass only the familiar FontAwesome class.
+     * @param {string} faClass - FontAwesome class string, e.g. "fas fa-bold".
+     * @returns {string} The resolved CSS class for the active theme.
+     */
+    resolveFa(faClass) {
+        const alias = {
+            "info-circle": "circle-info",
+            "puzzle-piece": "puzzle",
+            "ellipsis-v": "more",
+            "ellipsis-vertical": "more",
+            "square": "card",
+            "tag": "label",
+            "exclamation-triangle": "triangle-exclamation",
+            "grip-vertical": "grip-lines-vertical",
+            "calendar-day": "calendar",
+            "trash-alt": "trash"
+        };
+        const match = /fa-([a-z0-9-]+)/.exec(faClass || "");
+        const base = match ? match[1] : "";
+        if (!base) {
+            return faClass || "";
+        }
+        return this.resolve(faClass, alias[base] || base);
+    }
 };
 
 /**

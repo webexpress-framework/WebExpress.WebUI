@@ -380,7 +380,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         const btn = document.createElement("button");
         btn.className = "wx-editor-btn dropdown-toggle";
         btn.type = "button";
-        btn.innerHTML = '<i class="fas fa-text-height"></i>';
+        btn.innerHTML = `<i class="${webexpress.webui.IconTheme.resolveFa("fas fa-text-height")}"></i>`;
         btn.setAttribute("data-bs-toggle", "dropdown");
 
         const menu = document.createElement("ul");
@@ -404,7 +404,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
                 const b = document.createElement("button");
                 b.type = "button";
                 b.className = "dropdown-item";
-                b.innerHTML = `<i class="${o.icon}"></i> ${o.lbl}`;
+                b.innerHTML = `<i class="${webexpress.webui.IconTheme.resolveFa(o.icon)}"></i> ${o.lbl}`;
                 b.addEventListener("click", () => {
                     editor.execCommand(o.cmd);
                 });
@@ -434,7 +434,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         actionBtn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.textcolor");
 
         const icon = document.createElement("i");
-        icon.className = "fas fa-font";
+        icon.className = webexpress.webui.IconTheme.resolveFa("fas fa-font");
         icon.style.borderBottom = `3px solid ${this._lastColor}`;
         actionBtn.appendChild(icon);
 
@@ -493,7 +493,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         actionBtn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.highlightcolor");
 
         const icon = document.createElement("i");
-        icon.className = "fas fa-highlighter";
+        icon.className = webexpress.webui.IconTheme.resolveFa("fas fa-highlighter");
         icon.style.borderBottom = `3px solid ${this._lastHighlight}`;
         actionBtn.appendChild(icon);
 
@@ -608,7 +608,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         btn.setAttribute("aria-label", def.tip);
         btn.dataset.command = def.cmd;
         btn.type = "button";
-        btn.innerHTML = `<i class="${def.icon}"></i>`;
+        btn.innerHTML = `<i class="${webexpress.webui.IconTheme.resolveFa(def.icon)}"></i>`;
         btn.addEventListener("click", () => {
             editor.execCommand(def.cmd);
             // refresh immediately so the alignment / list / style buttons
@@ -629,7 +629,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         btn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.horizontal.rule");
         btn.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.horizontal.rule"));
         btn.type = "button";
-        btn.innerHTML = '<i class="fas fa-minus"></i>';
+        btn.innerHTML = `<i class="${webexpress.webui.IconTheme.resolveFa("fas fa-minus")}"></i>`;
         btn.addEventListener("click", () => {
             editor.execCommand("insertHorizontalRule");
         });

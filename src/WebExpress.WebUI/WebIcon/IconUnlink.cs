@@ -3,15 +3,15 @@ using WebExpress.WebCore.WebIcon;
 namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
-    /// Represents an icon that aligns text to justify.
+    /// Represents an icon for removing a link (unlink).
     /// </summary>
-    public class IconAlignJustify : Icon
+    public class IconUnlink : Icon
     {
         /// <summary>
         /// Initializes a new instance of the class using the
         /// <see cref="TypeIconTheme.Default"/> theme.
         /// </summary>
-        public IconAlignJustify()
+        public IconUnlink()
         {
         }
 
@@ -19,7 +19,7 @@ namespace WebExpress.WebUI.WebIcon
         /// Initializes a new instance of the class using the specified theme.
         /// </summary>
         /// <param name="theme">The theme to use when rendering the icon.</param>
-        public IconAlignJustify(TypeIconTheme theme)
+        public IconUnlink(TypeIconTheme theme)
             : base(theme)
         {
         }
@@ -30,7 +30,7 @@ namespace WebExpress.WebUI.WebIcon
         /// otherwise the FontAwesome glyph is used.
         /// </summary>
         public override string Class => Theme == TypeIconTheme.Light
-            ? "wx-icon-light wx-icon-light-align-justify"
-            : "fas fa-align-justify";
+            ? "wx-icon-light wx-icon-light-unlink"
+            : "fas fa-unlink";
     }
 }

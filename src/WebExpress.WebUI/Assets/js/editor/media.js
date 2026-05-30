@@ -35,7 +35,7 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
         btnLink.type = "button";
         btnLink.title = webexpress.webui.I18N.translate("webexpress.webui:editor.insert.link");
         btnLink.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.insert.link"));
-        btnLink.innerHTML = '<i class="fas fa-link"></i>';
+        btnLink.innerHTML = `<i class="${webexpress.webui.IconTheme.resolveFa("fas fa-link")}"></i>`;
 
         // save selection firmly before focus shifts away from the editor
         btnLink.addEventListener("mousedown", (e) => {
@@ -64,7 +64,7 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
         btnImg.type = "button";
         btnImg.title = webexpress.webui.I18N.translate("webexpress.webui:editor.insert.image");
         btnImg.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.insert.image"));
-        btnImg.innerHTML = '<i class="fas fa-image"></i>';
+        btnImg.innerHTML = `<i class="${webexpress.webui.IconTheme.resolveFa("fas fa-image")}"></i>`;
 
         btnImg.addEventListener("mousedown", (e) => {
             e.preventDefault(); // prevent losing focus

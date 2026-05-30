@@ -81,7 +81,7 @@ webexpress.webui.DialogPanels.register("editor-addon", {
             tile.dataset.id = addon.id;
 
             const icon = document.createElement("i");
-            icon.className = (addon.icon || "fas fa-puzzle-piece") + " wx-addon-tile-icon";
+            icon.className = webexpress.webui.IconTheme.resolveFa(addon.icon || "fas fa-puzzle-piece") + " wx-addon-tile-icon";
             tile.appendChild(icon);
 
             const bodyEl = document.createElement("div");
