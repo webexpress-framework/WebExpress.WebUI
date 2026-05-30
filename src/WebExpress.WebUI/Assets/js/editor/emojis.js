@@ -92,121 +92,127 @@ webexpress.webui.EditorPlugins.register("emojis", 2000, {
     },
 
     /**
+     * Representative glyph shown on each category tab.
+     */
+    _categoryIcons: {
+        "Faces": "😀", "Hands": "👋", "Hearts": "❤️", "Animals": "🐶",
+        "Food": "🍎", "Objects": "📱", "Symbols": "✅", "Nature": "🌸"
+    },
+
+    /**
      * Builds the dropdown menu containing search, category tabs and emoji grid.
      * @param {object} editor - the editor instance
      * @returns {HTMLElement} dropdown menu element
      */
     _createDropdown: function(editor) {
-        // create container for menu
         const menu = document.createElement("div");
-        menu.className = "dropdown-menu shadow p-0";
-        menu.style.width = "320px";
-        menu.style.maxHeight = "400px";
-        menu.style.overflow = "hidden"; // hidden because tabs will scroll content
+        menu.className = "dropdown-menu shadow wx-emoji-picker";
 
-        // search bar
+        // sticky search bar
         const searchWrap = document.createElement("div");
-        searchWrap.className = "p-2 border-bottom";
+        searchWrap.className = "wx-emoji-search-wrap";
+
+        const searchIcon = document.createElement("i");
+        searchIcon.className = "fas fa-search wx-emoji-search-icon";
+        searchWrap.appendChild(searchIcon);
+
         const searchInput = document.createElement("input");
         searchInput.type = "text";
-        searchInput.className = "form-control form-control-sm";
+        searchInput.className = "wx-emoji-search";
         searchInput.placeholder = webexpress.webui.I18N.translate("webexpress.webui:editor.emoji.search");
         searchInput.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.emoji.search.label"));
         searchWrap.appendChild(searchInput);
         menu.appendChild(searchWrap);
 
-        // header with category tabs
-        const header = document.createElement("div");
-        header.className = "d-flex border-bottom bg-light";
-        header.style.overflowX = "auto";
-        header.style.whiteSpace = "nowrap";
+        // category tabs (icon based)
+        const tabs = document.createElement("div");
+        tabs.className = "wx-emoji-tabs";
 
-        // content area where emojis are rendered
+        // scrollable content with a sticky category title
         const content = document.createElement("div");
-        content.className = "p-2";
-        content.style.maxHeight = "260px";
-        content.style.overflowY = "auto";
+        content.className = "wx-emoji-content";
 
-        // render tabs for each category
-        let firstCategory = true;
-        Object.keys(this._emojis).forEach(category => {
+        const title = document.createElement("div");
+        title.className = "wx-emoji-cat-title";
+        content.appendChild(title);
+
+        const grid = document.createElement("div");
+        grid.className = "wx-emoji-grid";
+        content.appendChild(grid);
+
+        const categories = Object.keys(this._emojis);
+        const selectCategory = (category, tabBtn) => {
+            searchInput.value = "";
+            tabs.querySelectorAll(".wx-emoji-tab").forEach(b => b.classList.remove("active"));
+            if (tabBtn) {
+                tabBtn.classList.add("active");
+            }
+            this._renderCategory(title, grid, category, editor, menu);
+            content.scrollTop = 0;
+        };
+
+        categories.forEach((category, index) => {
             const tab = document.createElement("button");
             tab.type = "button";
-            tab.className = "btn btn-sm btn-light border-0 rounded-0 px-3";
-            tab.textContent = category;
+            tab.className = "wx-emoji-tab";
+            tab.textContent = this._categoryIcons[category] || (this._emojis[category][0] || "•");
+            tab.title = category;
+            tab.setAttribute("aria-label", category);
 
-            if (firstCategory) {
-                tab.classList.add("active", "fw-bold");
-                this._renderCategory(content, category, editor, menu);
-                firstCategory = false;
+            if (index === 0) {
+                tab.classList.add("active");
+                this._renderCategory(title, grid, category, editor, menu);
             }
 
-            tab.addEventListener("click", (e) => {
-                // clear search when switching tabs
-                searchInput.value = "";
-                // update tab visual state
-                header.querySelectorAll("button").forEach(b => {
-                    b.classList.remove("active", "fw-bold");
-                });
-                e.target.classList.add("active", "fw-bold");
-
-                // render content for selected category
-                this._renderCategory(content, category, editor, menu);
-            });
-
-            header.appendChild(tab);
+            tab.addEventListener("click", () => selectCategory(category, tab));
+            tabs.appendChild(tab);
         });
 
         // wire search input
         searchInput.addEventListener("input", () => {
             const query = searchInput.value.trim().toLowerCase();
             if (query.length === 0) {
-                // revert to active tab's category
-                const activeTab = header.querySelector("button.active");
-                const cat = activeTab ? activeTab.textContent : Object.keys(this._emojis)[0];
-                this._renderCategory(content, cat, editor, menu);
+                const activeTab = tabs.querySelector(".wx-emoji-tab.active") || tabs.querySelector(".wx-emoji-tab");
+                const cat = activeTab ? activeTab.title : categories[0];
+                this._renderCategory(title, grid, cat, editor, menu);
             } else {
-                this._renderSearchResults(content, query, editor, menu);
+                this._renderSearchResults(title, grid, query, editor, menu);
             }
         });
+        searchInput.addEventListener("click", (e) => e.stopPropagation());
 
-        // prevent dropdown from closing when typing in search
-        searchInput.addEventListener("click", (e) => {
-            e.stopPropagation();
-        });
-
-        menu.appendChild(header);
+        menu.appendChild(tabs);
         menu.appendChild(content);
 
-        // prevent dropdown from closing when interacting inside it
-        menu.addEventListener("click", (e) => {
-             e.stopPropagation();
-        });
+        // keep the dropdown open while interacting inside it
+        menu.addEventListener("click", (e) => e.stopPropagation());
 
         return menu;
     },
 
     /**
      * Renders search results matching the query across all categories.
-     * @param {HTMLElement} container - target element
+     * @param {HTMLElement} title - the category title element
+     * @param {HTMLElement} grid - the emoji grid element
      * @param {string} query - lowercase search query
      * @param {object} editor - the editor instance
      * @param {HTMLElement} menu - dropdown menu element
      */
-    _renderSearchResults: function(container, query, editor, menu) {
-        container.innerHTML = "";
-
-        const grid = document.createElement("div");
-        grid.style.display = "grid";
-        grid.style.gridTemplateColumns = "repeat(auto-fill, minmax(32px, 1fr))";
-        grid.style.gap = "4px";
+    _renderSearchResults: function(title, grid, query, editor, menu) {
+        grid.innerHTML = "";
+        title.textContent = webexpress.webui.I18N.translate("webexpress.webui:editor.emoji.search.label");
 
         let found = false;
+        const seen = new Set();
         Object.values(this._emojis).forEach(emojis => {
             emojis.forEach(emoji => {
+                if (seen.has(emoji)) {
+                    return;
+                }
                 const name = (this._emojiNames[emoji] || emoji).toLowerCase();
                 if (name.includes(query) || emoji.includes(query)) {
                     found = true;
+                    seen.add(emoji);
                     grid.appendChild(this._createEmojiButton(emoji, editor, menu));
                 }
             });
@@ -214,38 +220,26 @@ webexpress.webui.EditorPlugins.register("emojis", 2000, {
 
         if (!found) {
             const msg = document.createElement("div");
-            msg.className = "text-muted text-center p-3";
+            msg.className = "wx-emoji-empty";
             msg.textContent = webexpress.webui.I18N.translate("webexpress.webui:editor.emoji.notfound");
-            container.appendChild(msg);
-        } else {
-            container.appendChild(grid);
+            grid.appendChild(msg);
         }
     },
 
     /**
-     * Renders a grid of emojis for the given category into the provided container.
-     * clicking an emoji inserts it into the editor.
-     * @param {HTMLElement} container - target element to place emoji grid
+     * Renders a grid of emojis for the given category.
+     * @param {HTMLElement} title - the category title element
+     * @param {HTMLElement} grid - the emoji grid element
      * @param {string} category - emoji category key
      * @param {object} editor - the editor instance
      * @param {HTMLElement} menu - dropdown menu element (used to close dropdown)
      */
-    _renderCategory: function(container, category, editor, menu) {
-        // clear previous content
-        container.innerHTML = "";
-
-        // create a responsive grid
-        const grid = document.createElement("div");
-        grid.style.display = "grid";
-        grid.style.gridTemplateColumns = "repeat(auto-fill, minmax(32px, 1fr))";
-        grid.style.gap = "4px";
-
-        // render each emoji as a button
+    _renderCategory: function(title, grid, category, editor, menu) {
+        grid.innerHTML = "";
+        title.textContent = category;
         this._emojis[category].forEach(emoji => {
             grid.appendChild(this._createEmojiButton(emoji, editor, menu));
         });
-
-        container.appendChild(grid);
     },
 
     /**
@@ -258,20 +252,23 @@ webexpress.webui.EditorPlugins.register("emojis", 2000, {
     _createEmojiButton: function(emoji, editor, menu) {
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.className = "btn btn-sm btn-light p-0 d-flex align-items-center justify-content-center";
-        btn.style.width = "100%";
-        btn.style.height = "32px";
-        btn.style.fontSize = "1.2rem";
+        btn.className = "wx-emoji-btn";
         btn.textContent = emoji;
 
         const name = this._emojiNames[emoji] || emoji;
         btn.title = name;
         btn.setAttribute("aria-label", name);
 
+        // keep the editor caret alive so the emoji is inserted at the cursor
+        btn.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            if (typeof editor._saveCurrentSelection === "function") {
+                editor._saveCurrentSelection();
+            }
+        });
+
         btn.addEventListener("click", () => {
-            // insert emoji as plain text at caret position
             editor.execCommand("insertText", emoji);
-            // close dropdown: remove 'show' class from menu and its trigger if present
             menu.classList.remove("show");
             if (menu.previousElementSibling) {
                 menu.previousElementSibling.classList.remove("show");

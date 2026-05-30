@@ -766,9 +766,118 @@ webexpress.webui.EditorFormat = class {
      */
     static _execToggleRange(root, range, spec) {
         if (this._isRangeFormatted(root, range, spec)) {
-            this._transformRange(root, range, (frag) => this._stripFormatInFrag(frag, spec));
+            // When the whole selection sits inside a single matching format
+            // wrapper (e.g. selecting part of a <strong>), extractContents would
+            // NOT carry the wrapper, so stripping the (wrapper-less) fragment is
+            // a no-op and the bold/italic/... silently survives. Splitting the
+            // wrapper around the selection removes the format reliably.
+            const wrapper = spec.selector ? this._commonFormatAncestor(range, spec.selector, root) : null;
+            if (wrapper) {
+                this._unwrapWithinWrapper(wrapper, range, spec);
+            } else {
+                this._transformRange(root, range, (frag) => this._stripFormatInFrag(frag, spec));
+            }
         } else {
             this._transformRange(root, range, (frag) => this._wrapBareTextInFrag(frag, spec));
+        }
+    }
+
+    /**
+     * Returns the nearest ancestor matching selector that fully contains the
+     * range (i.e. the range lives entirely inside one format wrapper), or null.
+     * @param {Range} range - The selection range.
+     * @param {string} selector - The format selector.
+     * @param {HTMLElement} root - Search boundary.
+     * @returns {HTMLElement|null}
+     */
+    static _commonFormatAncestor(range, selector, root) {
+        return this._closestWithin(range.commonAncestorContainer, selector, root);
+    }
+
+    /**
+     * Removes a toggle format that wraps the whole selection by splitting the
+     * wrapper into up to three parts: the content before the selection stays
+     * wrapped, the selected content is unwrapped (plain), and the content after
+     * the selection is re-wrapped. The selection is restored on the plain part.
+     * @param {HTMLElement} wrapper - The format element enclosing the selection.
+     * @param {Range} range - The selection range (inside the wrapper).
+     * @param {object} spec - Toggle spec.
+     * @returns {void}
+     */
+    static _unwrapWithinWrapper(wrapper, range, spec) {
+        const parent = wrapper.parentNode;
+        if (!parent) {
+            return;
+        }
+        const tag = wrapper.tagName;
+
+        const startC = range.startContainer;
+        const startO = range.startOffset;
+        const endC = range.endContainer;
+        const endO = range.endOffset;
+
+        // 1) take the content AFTER the selection out of the wrapper
+        const postR = document.createRange();
+        postR.setStart(endC, endO);
+        postR.setEnd(wrapper, wrapper.childNodes.length);
+        const postFrag = postR.extractContents();
+
+        // 2) take the SELECTED content out of the (now shortened) wrapper
+        const midR = document.createRange();
+        midR.setStart(startC, startO);
+        midR.setEnd(wrapper, wrapper.childNodes.length);
+        const midFrag = midR.extractContents();
+
+        // the middle becomes plain text - clear any nested matching format/style
+        this._stripFormatInFrag(midFrag, spec);
+
+        // re-wrap the trailing content, preserving the wrapper's attributes
+        let postWrapper = null;
+        if (postFrag.childNodes.length) {
+            postWrapper = document.createElement(tag);
+            this._copyAttributes(wrapper, postWrapper);
+            postWrapper.appendChild(postFrag);
+        }
+
+        const midFirst = midFrag.firstChild;
+        const midLast = midFrag.lastChild;
+
+        const after = wrapper.nextSibling;
+        if (postWrapper) {
+            parent.insertBefore(postWrapper, after);
+        }
+        parent.insertBefore(midFrag, postWrapper || after);
+
+        // drop the original wrapper when its leading part is now empty
+        if (this._isEffectivelyEmpty(wrapper)) {
+            parent.removeChild(wrapper);
+        }
+
+        if (midFirst && midLast) {
+            const sel = document.createRange();
+            sel.setStartBefore(midFirst);
+            sel.setEndAfter(midLast);
+            webexpress.webui.EditorSelection.apply(sel);
+        }
+    }
+
+    /**
+     * Copies all attributes from one element to another.
+     * @param {HTMLElement} src - Source element.
+     * @param {HTMLElement} dst - Destination element.
+     * @returns {void}
+     */
+    static _copyAttributes(src, dst) {
+        if (!src || !dst || !src.attributes) {
+            return;
+        }
+        for (let i = 0; i < src.attributes.length; i++) {
+            const attr = src.attributes[i];
+            try {
+                dst.setAttribute(attr.name, attr.value);
+            } catch (e) {
+                /* noop */
+            }
         }
     }
 
@@ -1317,9 +1426,50 @@ webexpress.webui.EditorBlocks = class {
      * @returns {void}
      */
     static _align(root, range, value) {
-        this._selectedBlocks(root, range).forEach((b) => {
+        this._alignTargets(root, range).forEach((b) => {
             b.style.textAlign = value;
         });
+    }
+
+    /**
+     * Collects the elements that alignment should target. Unlike _selectedBlocks
+     * this also returns list items (<li>) so text in a bullet/numbered list can
+     * be aligned, which _nearestBlock deliberately skips for formatBlock.
+     * @param {HTMLElement} root - The editor content element.
+     * @param {Range} range - The selection range.
+     * @returns {HTMLElement[]}
+     */
+    static _alignTargets(root, range) {
+        const set = new Set();
+        const add = (node) => {
+            let el = node && node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
+            if (!el || !el.closest) {
+                return;
+            }
+            if (el.closest('[contenteditable="false"]')) {
+                return;
+            }
+            const li = el.closest("li");
+            if (li && root.contains(li)) {
+                set.add(li);
+                return;
+            }
+            const b = this._nearestBlock(node, root);
+            if (b) {
+                set.add(b);
+            }
+        };
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+        let n;
+        while ((n = walker.nextNode())) {
+            if (range.intersectsNode(n)) {
+                add(n);
+            }
+        }
+        if (set.size === 0) {
+            add(range.startContainer);
+        }
+        return Array.from(set);
     }
 
     /**
@@ -2025,7 +2175,11 @@ webexpress.webui.EditorList = class {
         const first = run[0];
         const prev = first.previousElementSibling;
         if (!prev || prev.tagName !== "LI") {
-            return; // cannot indent without a preceding item
+            // nesting is impossible (no preceding item, e.g. the first/only
+            // item) - indent the item(s) via a left margin instead so the
+            // indent command still does something visible.
+            run.forEach((li) => this._adjustIndent(li, 1));
+            return;
         }
         const listTag = first.parentElement.tagName.toLowerCase();
         let sub = prev.lastElementChild;
@@ -2042,6 +2196,13 @@ webexpress.webui.EditorList = class {
      * @returns {void}
      */
     static _outdentRun(run) {
+        // step a margin indent back first (mirrors the _indentRun fallback)
+        const firstMargin = parseInt(run[0].style.marginLeft, 10) || 0;
+        if (firstMargin > 0) {
+            run.forEach((li) => this._adjustIndent(li, -1));
+            return;
+        }
+
         const list = run[0].parentElement;
         const parentLi = list.parentElement && list.parentElement.tagName === "LI"
             ? list.parentElement : null;
@@ -2454,7 +2615,7 @@ webexpress.webui.EditorHistory = class {
         this._restoring = true;
         try {
             el.innerHTML = entry.html;
-            el.focus();
+            el.focus({ preventScroll: true });
             // structure matches the snapshot, so the selection resolves exactly;
             // the live selection then survives the plugin rewiring below
             this._restoreSelection(entry.bookmark);
@@ -2476,6 +2637,9 @@ webexpress.webui.EditorHistory = class {
         this._typingTimer = setTimeout(() => {
             this._typingTimer = null;
             this._flushTyping();
+            // a coalesced typing burst just became its own committed step, so
+            // the undo/redo availability changed - refresh the button states.
+            this._editor._updateUndoRedoStates();
         }, webexpress.webui.EditorHistory.TYPING_DELAY);
     }
 
@@ -2669,6 +2833,8 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         this._notifyPluginsContentChanged();
 
         this._history.reset();
+        // reflect the clean baseline on the buttons (undo and redo disabled)
+        this._updateUndoRedoStates();
     }
 
     /**
@@ -2684,6 +2850,94 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Returns true when the element is an inline, non-editable atomic that must
+     * remain part of the surrounding text flow (instruction text, mentions,
+     * inline add-ons, inline date controls, images).
+     * @param {Node} el - The element to test.
+     * @returns {boolean}
+     */
+    _isInlineAtomic(el) {
+        if (!el || el.nodeType !== Node.ELEMENT_NODE) {
+            return false;
+        }
+        if (el.tagName === "IMG") {
+            return true;
+        }
+        return !!(el.matches && el.matches(
+            ".wx-editor-instruction, .wx-addon-inline-frame, .wx-mention, .wx-webui-date, .wx-date, .wx-editor-date"
+        ));
+    }
+
+    /**
+     * Wraps stray inline or text content that sits directly inside the editor
+     * root into a paragraph, so block level commands (lists, indentation,
+     * alignment, block format) always have a block element to operate on.
+     * Existing block elements and block level non-editable frames are left
+     * untouched.
+     * @returns {boolean} True when the dom was modified.
+     */
+    _ensureBlockStructure() {
+        const editor = this._editorElement;
+        if (!editor) {
+            return false;
+        }
+
+        const BLOCK_TAGS = new Set([
+            "P", "H1", "H2", "H3", "H4", "H5", "H6", "UL", "OL", "BLOCKQUOTE",
+            "PRE", "DIV", "TABLE", "HR", "FIGURE", "SECTION", "ARTICLE", "FORM", "DL"
+        ]);
+
+        const isBlock = (node) => {
+            if (!node || node.nodeType !== Node.ELEMENT_NODE) {
+                return false;
+            }
+            if (BLOCK_TAGS.has(node.tagName)) {
+                return true;
+            }
+            // block level non-editable frame (block add-on, table frame)
+            if (node.getAttribute && node.getAttribute("contenteditable") === "false" &&
+                !this._isInlineAtomic(node)) {
+                return true;
+            }
+            return false;
+        };
+
+        let modified = false;
+        let run = [];
+
+        const flush = () => {
+            if (!run.length) {
+                return;
+            }
+            const onlyWhitespace = run.every((n) =>
+                n.nodeType === Node.TEXT_NODE && (n.textContent || "").trim() === "");
+            if (onlyWhitespace) {
+                run = [];
+                return;
+            }
+            const p = document.createElement("p");
+            run[0].parentNode.insertBefore(p, run[0]);
+            run.forEach((n) => p.appendChild(n));
+            run = [];
+            modified = true;
+        };
+
+        let child = editor.firstChild;
+        while (child) {
+            const next = child.nextSibling;
+            if (isBlock(child)) {
+                flush();
+            } else {
+                run.push(child);
+            }
+            child = next;
+        }
+        flush();
+
+        return modified;
+    }
+
+    /**
      * Ensures there is always an empty paragraph before, after, and between non-editable elements.
      * This totally prevents the cursor trap issue.
      */
@@ -2693,15 +2947,27 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         }
  
         const MARKER = webexpress.webui.EditorSelection.MARKER_ATTR;
-        let modified = false;
         const editor = this._editorElement;
+
+        // make sure stray inline / text content always lives inside a block so
+        // list, indent and alignment commands can find a block to act on (this
+        // is what made the very first line / loaded plain text un-formattable).
+        let modified = this._ensureBlockStructure();
+
         const nonEditables = Array.from(editor.querySelectorAll('[contenteditable="false"]'));
- 
+
         nonEditables.forEach((el) => {
             if (el.parentElement && el.parentElement.closest('[contenteditable="false"]')) {
                 return;
             }
- 
+
+            // inline atomics (instruction text, mentions, inline add-ons, inline
+            // date controls) stay in the text flow and must not be pushed onto
+            // their own line by surrounding guard paragraphs.
+            if (this._isInlineAtomic(el)) {
+                return;
+            }
+
             const parentP = el.closest("p");
             if (parentP && parentP.parentElement === editor) {
                 editor.insertBefore(el, parentP.nextSibling);
@@ -2759,6 +3025,17 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             toolbar.addEventListener("mousedown", (e) => {
                 e.stopPropagation();
                 this._saveRangeOnFocusLost();
+                // keep the caret alive in the editor when a command button is
+                // pressed. Without this the editor blurs and the (collapsed)
+                // selection is lost, which is why inline formatting only worked
+                // with an explicit selection. Inputs/search fields inside the
+                // toolbar (e.g. the emoji search) must still be focusable, so we
+                // only suppress the default focus shift for plain buttons.
+                const target = e.target;
+                if (target && target.closest && target.closest("button") &&
+                    !target.closest("input, textarea, select, [contenteditable='true']")) {
+                    e.preventDefault();
+                }
             }, true);
         }
 
@@ -2893,13 +3170,46 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         historyGroup.className = "wx-editor-btn-group";
         historyGroup.style.marginLeft = "auto";
 
-        const undoBtn = this._createHistoryButton("undo", "Undo (Ctrl+Z)", "fas fa-undo");
-        const redoBtn = this._createHistoryButton("redo", "Redo (Ctrl+Y)", "fas fa-redo");
+        const undoBtn = this._createHistoryButton("undo", webexpress.webui.I18N.translate("webexpress.webui:editor.undo"), "fas fa-undo");
+        const redoBtn = this._createHistoryButton("redo", webexpress.webui.I18N.translate("webexpress.webui:editor.redo"), "fas fa-redo");
 
         historyGroup.appendChild(undoBtn);
         historyGroup.appendChild(redoBtn);
 
+        historyGroup.appendChild(this._createSeparator());
+        historyGroup.appendChild(this._createFullscreenButton());
+
         return historyGroup;
+    }
+
+    /**
+     * Creates a visual separator element for the toolbar.
+     * @returns {HTMLElement} The separator element.
+     */
+    _createSeparator() {
+        const sep = document.createElement("span");
+        sep.className = "wx-editor-separator";
+        return sep;
+    }
+
+    /**
+     * Creates the fullscreen toggle button. It reuses the framework's CSS based
+     * fullscreen mechanism (data-wx-primary-action="fullscreen"), targeting the
+     * editor host, so the controller toggles the wx-fullscreen-active class and
+     * swaps the icon automatically.
+     * @returns {HTMLElement} The fullscreen toggle button.
+     */
+    _createFullscreenButton() {
+        const btn = document.createElement("button");
+        btn.className = "wx-editor-btn";
+        btn.type = "button";
+        btn.title = webexpress.webui.I18N.translate("webexpress.webui:fullscreen.toggle");
+        btn.setAttribute("aria-label", btn.title);
+        btn.setAttribute("aria-pressed", "false");
+        btn.setAttribute("data-wx-primary-action", "fullscreen");
+        btn.setAttribute("data-wx-primary-target", "#" + this._uiContainer.id);
+        btn.innerHTML = '<i class="fas fa-expand"></i>';
+        return btn;
     }
 
     /**
@@ -2974,6 +3284,17 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     _createStatusBar(element) {
         const statusBar = document.createElement("div");
         statusBar.classList.add("wx-editor-status");
+
+        // "done" button to leave fullscreen; only visible while the editor is in
+        // (css) fullscreen via the .wx-editor-status visibility rules.
+        const finishBtn = document.createElement("button");
+        finishBtn.type = "button";
+        finishBtn.className = "btn btn-primary btn-sm wx-editor-finish";
+        finishBtn.textContent = webexpress.webui.I18N.translate("webexpress.webui:editor.done");
+        finishBtn.setAttribute("data-wx-dismiss", "fullscreen");
+        finishBtn.setAttribute("data-wx-target", "#" + this._uiContainer.id);
+        statusBar.appendChild(finishBtn);
+
         element.appendChild(statusBar);
     }
 
@@ -3049,7 +3370,9 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             return;
         }
 
-        this._editorElement.focus();
+        // preventScroll keeps the document/editor at its current scroll position
+        // instead of jumping to the caret when a toolbar action is triggered.
+        this._editorElement.focus({ preventScroll: true });
         this.restoreSavedRange();
 
         if (webexpress.webui.EditorFormat.handles(command)) {
@@ -3103,10 +3426,10 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         if (!editor) {
             return;
         }
- 
-        editor.focus();
+
+        editor.focus({ preventScroll: true });
         this.restoreSavedRange();
- 
+
         let range = Sel.getRange(editor);
         if (!range) {
             // Never fall back to innerHTML += - place the caret at the end instead.
@@ -3166,7 +3489,15 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         }
         const clean = this._sanitizeHtml(v || "");
         this._editorElement.innerHTML = clean;
+        // normalize the same way the constructor does so programmatic content
+        // gets framed tables, block structure and typing space too
+        this._notifyPluginsContentChanged();
+        this._ensureTypingSpace();
+        this._notifyPluginsContentChanged();
         this._syncValue();
+        if (this._history) {
+            this._history.reset();
+        }
         this._updateUndoRedoStates();
     }
 

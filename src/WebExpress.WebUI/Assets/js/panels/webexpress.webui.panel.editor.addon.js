@@ -16,136 +16,151 @@ webexpress.webui.DialogPanels.register("editor-addon", {
         if (!modal._addonState) {
             modal._addonState = {
                 selectedId: null,
-                tileCtrl: null,
                 addons: [],
-                submitHandler: null,
-                changeHandler: null
+                tiles: [],
+                currentCat: "all",
+                submitHandler: null
             };
         }
         const state = modal._addonState;
         state.addons = webexpress.webui.EditorAddOns.getAll() || [];
 
-        const wrapper = document.createElement("div");
-        wrapper.className = "d-flex flex-column h-100 p-3";
+        const root = document.createElement("div");
+        root.className = "wx-addon-library";
 
-        // build toolbar with search and category filter
-        const toolbar = document.createElement("div");
-        toolbar.className = "d-flex gap-2 mb-3";
+        // left side-pane: category list
+        const cats = document.createElement("div");
+        cats.className = "wx-addon-cats";
+        root.appendChild(cats);
+
+        // right pane: search + tile grid
+        const main = document.createElement("div");
+        main.className = "wx-addon-main";
 
         const searchInput = document.createElement("input");
         searchInput.type = "text";
         searchInput.className = "form-control wx-addon-search";
         searchInput.placeholder = webexpress.webui.I18N.translate("webexpress.webui:editor.addon.search.placeholder");
+        main.appendChild(searchInput);
 
-        const catSelect = document.createElement("select");
-        catSelect.className = "form-select w-auto wx-addon-cat";
+        const grid = document.createElement("div");
+        grid.className = "wx-addon-grid";
+        main.appendChild(grid);
 
-        // populate categories
-        const categories = new Set();
-        state.addons.forEach((a) => {
-            categories.add(a.category || "General");
-        });
+        root.appendChild(main);
+        container.appendChild(root);
 
-        catSelect.innerHTML = `<option value="all">${webexpress.webui.I18N.translate("webexpress.webui:editor.addon.all.categories")}</option>`;
-        Array.from(categories).sort().forEach((cat) => {
-            const opt = document.createElement("option");
-            opt.value = cat;
-            opt.textContent = cat;
-            catSelect.appendChild(opt);
-        });
-
-        toolbar.appendChild(searchInput);
-        toolbar.appendChild(catSelect);
-        wrapper.appendChild(toolbar);
-
-        // build tile container
-        const tileHost = document.createElement("div");
-        tileHost.className = "wx-addon-tile-list row g-2 overflow-auto";
-        tileHost.dataset.multiselect = "false";
-        wrapper.appendChild(tileHost);
-
-        container.appendChild(wrapper);
-
-        // store refs
         state.searchInput = searchInput;
-        state.catSelect = catSelect;
-        state.tileHost = tileHost;
+        state.catsHost = cats;
+        state.grid = grid;
 
-        // initialize input tile controller
-        if (typeof webexpress.webui.InputTileCtrl === "function") {
-            state.tileCtrl = new webexpress.webui.InputTileCtrl(tileHost);
-
-            state.tileCtrl.tiles = state.addons.map((addon) => {
-                return {
-                    id: addon.id,
-                    label: addon.label,
-                    icon: addon.icon,
-                    html: `<div class="d-none search-text">${addon.label} ${addon.description || ""}</div><p class="small text-muted mb-0">${addon.description || ""}</p>`,
-                    class: "col-md-6 mb-2 wx-addon-card-wrapper"
-                };
-            });
-        }
-
-        // define filtering logic
-        const applyFilter = () => {
-            const term = (searchInput.value || "").toLowerCase();
-            const cat = catSelect.value;
-
-            const inputs = tileHost.querySelectorAll('input[type="radio"]');
-            inputs.forEach((input) => {
-                const addonId = input.value;
-                const addon = state.addons.find((a) => {
-                    return a.id === addonId;
-                });
-                const col = input.closest(".wx-addon-card-wrapper");
-
-                if (addon && col) {
-                    const addonCat = addon.category || "General";
-                    const isCatMatch = cat === "all" || addonCat === cat;
-                    const textContent = ((addon.label || "") + " " + (addon.description || "")).toLowerCase();
-                    const isTextMatch = !term || textContent.includes(term);
-
-                    if (isCatMatch && isTextMatch) {
-                        col.classList.remove("d-none");
-                    } else {
-                        col.classList.add("d-none");
-                    }
-                }
-            });
+        // helper to enable/disable the modal submit button
+        const setSubmitEnabled = (enabled) => {
+            const modalRoot = container.closest(".modal") || container.closest(".modal-content") || document;
+            const submitBtn = modalRoot.querySelector(".submit-btn");
+            if (submitBtn) {
+                submitBtn.disabled = !enabled;
+            }
         };
+        state.setSubmitEnabled = setSubmitEnabled;
 
-        searchInput.addEventListener("input", applyFilter);
-        catSelect.addEventListener("change", applyFilter);
+        // build category list ("All" + sorted unique categories)
+        const categories = Array.from(new Set(state.addons.map((a) => a.category || "General"))).sort();
+        const allItem = this._createCatItem(webexpress.webui.I18N.translate("webexpress.webui:editor.addon.all.categories"), "all");
+        allItem.classList.add("active");
+        cats.appendChild(allItem);
+        categories.forEach((cat) => {
+            cats.appendChild(this._createCatItem(cat, cat));
+        });
 
-        // bind scoped change handler once and store reference for cleanup/reuse
-        if (!state.changeHandler) {
-            state.changeHandler = (e) => {
-                if (!e || !e.detail) {
-                    return;
-                }
-                if (e.detail.sender === tileHost || tileHost.contains(e.detail.sender)) {
-                    state.selectedId = e.detail.value;
-                    const modalRoot = container.closest(".modal") || container.closest(".modal-content") || document;
-                    const submitBtn = modalRoot.querySelector(".submit-btn");
-                    if (submitBtn) {
-                        submitBtn.disabled = !state.selectedId;
-                    }
-                }
-            };
-            document.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, state.changeHandler);
-        }
+        // build tiles
+        state.tiles = state.addons.map((addon) => {
+            const tile = document.createElement("button");
+            tile.type = "button";
+            tile.className = "wx-addon-tile";
+            tile.dataset.id = addon.id;
 
-        // double click shortcut to insert
-        tileHost.addEventListener("dblclick", (e) => {
-            const card = e.target.closest(".wx-tile-card");
-            if (card && state.selectedId) {
+            const icon = document.createElement("i");
+            icon.className = (addon.icon || "fas fa-puzzle-piece") + " wx-addon-tile-icon";
+            tile.appendChild(icon);
+
+            const bodyEl = document.createElement("div");
+            bodyEl.className = "wx-addon-tile-body";
+            const label = document.createElement("div");
+            label.className = "wx-addon-tile-label";
+            label.textContent = addon.label || addon.id;
+            bodyEl.appendChild(label);
+            if (addon.description) {
+                const desc = document.createElement("div");
+                desc.className = "wx-addon-tile-desc";
+                desc.textContent = addon.description;
+                bodyEl.appendChild(desc);
+            }
+            tile.appendChild(bodyEl);
+
+            tile.addEventListener("click", () => {
+                state.selectedId = addon.id;
+                grid.querySelectorAll(".wx-addon-tile.selected").forEach((t) => t.classList.remove("selected"));
+                tile.classList.add("selected");
+                setSubmitEnabled(true);
+            });
+            tile.addEventListener("dblclick", () => {
+                state.selectedId = addon.id;
                 const modalRoot = container.closest(".modal") || container.closest(".modal-content") || document;
                 const submitBtn = modalRoot.querySelector(".submit-btn");
                 if (submitBtn && !submitBtn.disabled) {
                     submitBtn.click();
                 }
-            }
+            });
+
+            grid.appendChild(tile);
+            return { el: tile, addon: addon };
         });
+
+        // filtering by category + search term
+        const applyFilter = () => {
+            const term = (searchInput.value || "").toLowerCase();
+            const cat = state.currentCat;
+            state.tiles.forEach(({ el, addon }) => {
+                const addonCat = addon.category || "General";
+                const isCatMatch = cat === "all" || addonCat === cat;
+                const text = ((addon.label || "") + " " + (addon.description || "")).toLowerCase();
+                const isTextMatch = !term || text.indexOf(term) !== -1;
+                el.classList.toggle("d-none", !(isCatMatch && isTextMatch));
+            });
+        };
+        state.applyFilter = applyFilter;
+
+        searchInput.addEventListener("input", applyFilter);
+
+        // category selection (event delegation on the list)
+        cats.addEventListener("click", (e) => {
+            const item = e.target.closest(".wx-addon-cat-item");
+            if (!item) {
+                return;
+            }
+            cats.querySelectorAll(".wx-addon-cat-item.active").forEach((c) => c.classList.remove("active"));
+            item.classList.add("active");
+            state.currentCat = item.dataset.cat || "all";
+            applyFilter();
+        });
+
+        applyFilter();
+    },
+
+    /**
+     * Creates a single category list entry for the side-pane.
+     * @param {string} label - Display label.
+     * @param {string} value - Category value ("all" or category name).
+     * @returns {HTMLElement}
+     */
+    _createCatItem: function (label, value) {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = "wx-addon-cat-item";
+        item.dataset.cat = value;
+        item.textContent = label;
+        return item;
     },
 
     /**
@@ -161,35 +176,36 @@ webexpress.webui.DialogPanels.register("editor-addon", {
         const state = modal._addonState;
 
         state.selectedId = null;
+        state.currentCat = "all";
+
         if (state.searchInput) {
             state.searchInput.value = "";
         }
-        if (state.catSelect) {
-            state.catSelect.value = "all";
+        if (state.grid) {
+            state.grid.querySelectorAll(".wx-addon-tile.selected").forEach((t) => t.classList.remove("selected"));
         }
-        if (state.tileCtrl && typeof state.tileCtrl.setValue === "function") {
-            state.tileCtrl.setValue(null);
+        if (state.catsHost) {
+            state.catsHost.querySelectorAll(".wx-addon-cat-item").forEach((c) => {
+                c.classList.toggle("active", (c.dataset.cat || "all") === "all");
+            });
+        }
+        if (typeof state.applyFilter === "function") {
+            state.applyFilter();
+        }
+        if (typeof state.setSubmitEnabled === "function") {
+            state.setSubmitEnabled(false);
         }
 
-        if (state.searchInput) {
-            state.searchInput.dispatchEvent(new Event("input"));
-        }
-
-        if (state.tileHost) {
-            const modalRoot = state.tileHost.closest(".modal") || state.tileHost.closest(".modal-content") || document;
+        // wire the submit button (avoid duplicate bindings)
+        const host = state.grid || state.searchInput;
+        if (host) {
+            const modalRoot = host.closest(".modal") || host.closest(".modal-content") || document;
             const submitBtn = modalRoot.querySelector(".submit-btn");
-
             if (submitBtn) {
                 submitBtn.disabled = true;
-
-                if (state.tileCtrl && state.tileCtrl.value) {
-                    state.selectedId = state.tileCtrl.value;
-                    submitBtn.disabled = false;
-                }
-
                 if (!state.submitHandler) {
                     state.submitHandler = () => {
-                        if (state.tileHost.offsetParent === null) {
+                        if (host.offsetParent === null) {
                             return;
                         }
                         const validationResult = this.validate(modal);
@@ -200,8 +216,6 @@ webexpress.webui.DialogPanels.register("editor-addon", {
                         }
                     };
                 }
-
-                // prevent duplicate bindings
                 submitBtn.removeEventListener("click", state.submitHandler);
                 submitBtn.addEventListener("click", state.submitHandler);
             }
@@ -250,7 +264,8 @@ webexpress.webui.DialogPanels.register("editor-addon", {
         } else if (modal.ctrl && typeof modal.ctrl.hide === "function") {
             modal.ctrl.hide();
         } else {
-            const modalWrapper = state.tileHost.closest(".modal");
+            const host = state.grid || state.searchInput;
+            const modalWrapper = host ? host.closest(".modal") : null;
             if (modalWrapper && typeof bootstrap !== "undefined") {
                 const bsModal = bootstrap.Modal.getInstance(modalWrapper);
                 if (bsModal) {

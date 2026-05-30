@@ -344,7 +344,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
             btn.addEventListener("click", () => {
                 editor.execCommand("formatBlock", opt.cmd);
                 buttonText.textContent = opt.lbl;
-                editor.getEditorElement().focus();
+                editor.getEditorElement().focus({ preventScroll: true });
                 this._updateButtonStates(editor);
             });
             li.appendChild(btn);

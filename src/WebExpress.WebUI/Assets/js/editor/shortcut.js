@@ -23,6 +23,9 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
     _mentionState: null,
     _mentionPopup: null,
     _docClickHandler: null,
+    _datePopup: null,
+    _dateKeyHandler: null,
+    _dateClickHandler: null,
 
     /**
      * Translation helper.
@@ -45,6 +48,16 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
 
         editorElem.addEventListener("keydown", (e) => this._onKeyDown(editor, e));
         editorElem.addEventListener("input", (e) => this._onInput(editor, e));
+
+        // clicking an inserted date re-opens the picker for editing
+        editorElem.addEventListener("click", (e) => {
+            const dateEl = e.target.closest ? e.target.closest(".wx-editor-date") : null;
+            if (dateEl && editorElem.contains(dateEl)) {
+                e.preventDefault();
+                this._editDate(editor, dateEl);
+            }
+        });
+
         editorElem.addEventListener("blur", () => {
             // close on blur, but allow clicks inside the popup to win
             setTimeout(() => {
@@ -466,7 +479,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
         this._closeSlashMenu();
 
         // make sure the editor regains focus and selection
-        editor.getEditorElement().focus();
+        editor.getEditorElement().focus({ preventScroll: true });
         editor._saveCurrentSelection?.();
 
         this._executeShortcut(editor, def);
@@ -653,13 +666,211 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
     },
 
     /**
-     * Inserts a date control or opens the date picker dialog.
+     * Opens a date picker (webexpress.webui.InputDateCtrl) anchored at the
+     * caret. When a date is chosen the editor receives a read-only display
+     * control (webexpress.webui.DateCtrl) at the saved caret position.
      * @param {object} editor
      */
     _triggerDateDialog: function(editor) {
-        // Insert a basic HTML date input inline
-        const id = "date_" + Math.random().toString(36).substr(2, 9);
-        editor.insertHtmlAtCursor(`<input type="date" class="form-control d-inline-block w-auto" id="${id}">`);
+        this._closeDatePopup();
+
+        const format = this._i18n("webexpress.webui:calendar.format", "DD.MM.YYYY");
+
+        const popup = document.createElement("div");
+        popup.className = "wx-editor-date-popup shadow";
+        popup.style.position = "fixed";
+        popup.style.zIndex = "2200";
+
+        // host element that the controller framework upgrades to an InputDateCtrl
+        const host = document.createElement("div");
+        host.className = "wx-webui-input-date";
+        host.setAttribute("data-format", format);
+        popup.appendChild(host);
+
+        document.body.appendChild(popup);
+        this._datePopup = { popup: popup, editor: editor, format: format, done: false };
+
+        // position at the saved caret (fall back to the live selection)
+        const range = editor._savedRange?.cloneRange?.() || this._currentSelectionRange(editor);
+        this._positionDatePopup(range);
+
+        // the framework instantiates the control asynchronously; the value
+        // change event bubbles up from the host, so we listen on the popup.
+        popup.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, (e) => {
+            const value = e?.detail?.value || "";
+            if (!value) {
+                return;
+            }
+            this._commitDate(editor, value, format);
+        });
+
+        // open the calendar right away for a smooth flow
+        setTimeout(() => {
+            const ctrl = webexpress.webui.Controller.getInstanceByElement(host) ||
+                webexpress.webui.Controller.getInstanceByElement(popup.firstElementChild);
+            if (ctrl && typeof ctrl._showCalendarPopup === "function") {
+                try { ctrl._showCalendarPopup(); } catch (_) { /* noop */ }
+            }
+        }, 0);
+
+        // dismiss handlers
+        this._dateKeyHandler = (ev) => {
+            if (ev.key === "Escape") {
+                this._closeDatePopup();
+            }
+        };
+        this._dateClickHandler = (ev) => {
+            if (!this._datePopup) {
+                return;
+            }
+            // keep open while interacting with the picker or its (possibly
+            // re-parented) calendar dropdown
+            if (this._datePopup.popup.contains(ev.target) ||
+                (ev.target.closest && ev.target.closest(".wx-editor-date-popup, .dropdown-menu, .wx-calendar, .wx-date"))) {
+                return;
+            }
+            this._closeDatePopup();
+        };
+        document.addEventListener("keydown", this._dateKeyHandler, true);
+        // defer so the triggering interaction does not immediately close it
+        setTimeout(() => document.addEventListener("mousedown", this._dateClickHandler, true), 0);
+    },
+
+    /**
+     * Inserts the chosen date as a read-only display control and closes the popup.
+     * @param {object} editor
+     * @param {string} value - The formatted date string.
+     * @param {string} format - The date format used for the display control.
+     */
+    _commitDate: function(editor, value, format) {
+        if (this._datePopup) {
+            this._datePopup.done = true;
+        }
+        this._closeDatePopup();
+
+        const escapeHtml = (text) => {
+            const div = document.createElement("div");
+            div.textContent = text;
+            return div.innerHTML;
+        };
+
+        const html =
+            `<span class="wx-webui-date wx-editor-date" contenteditable="false" data-format="${escapeHtml(format)}" data-value="${escapeHtml(value)}">${escapeHtml(value)}</span>&nbsp;`;
+
+        editor.insertHtmlAtCursor(html);
+    },
+
+    /**
+     * Returns the current selection range when it lies inside the editor.
+     * @param {object} editor
+     * @returns {Range|null}
+     */
+    _currentSelectionRange: function(editor) {
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0) {
+            return null;
+        }
+        const r = sel.getRangeAt(0);
+        return editor.getEditorElement().contains(r.startContainer) ? r.cloneRange() : null;
+    },
+
+    /**
+     * Positions the date popup near the given range (or centered as fallback).
+     * @param {Range|null} range
+     */
+    _positionDatePopup: function(range) {
+        if (!this._datePopup) {
+            return;
+        }
+        const popup = this._datePopup.popup;
+        const margin = 8;
+        let rect = null;
+        if (range) {
+            rect = range.getBoundingClientRect();
+        }
+        const pRect = popup.getBoundingClientRect();
+
+        let left = rect ? rect.left : (window.innerWidth - pRect.width) / 2;
+        left = Math.max(margin, Math.min(window.innerWidth - pRect.width - margin, left));
+
+        let top = rect ? rect.bottom + 4 : margin * 6;
+        if (top + pRect.height > window.innerHeight - margin) {
+            const alt = (rect ? rect.top : window.innerHeight) - pRect.height - 4;
+            top = alt > margin ? alt : Math.max(margin, window.innerHeight - pRect.height - margin);
+        }
+        popup.style.left = left + "px";
+        popup.style.top = top + "px";
+    },
+
+    /**
+     * Closes and removes the date picker popup and its dismiss handlers.
+     */
+    _closeDatePopup: function() {
+        if (this._dateKeyHandler) {
+            document.removeEventListener("keydown", this._dateKeyHandler, true);
+            this._dateKeyHandler = null;
+        }
+        if (this._dateClickHandler) {
+            document.removeEventListener("mousedown", this._dateClickHandler, true);
+            this._dateClickHandler = null;
+        }
+        if (this._datePopup && this._datePopup.popup && this._datePopup.popup.parentNode) {
+            this._datePopup.popup.parentNode.removeChild(this._datePopup.popup);
+        }
+        this._datePopup = null;
+    },
+
+    /**
+     * Provides context menu items for an inserted date element (edit / remove).
+     * @param {object} editor
+     * @param {HTMLElement} target
+     * @returns {Array<object>}
+     */
+    getContextMenuItems: function(editor, target) {
+        let element = target;
+        if (element && element.nodeType === 3) {
+            element = element.parentNode;
+        }
+        const dateEl = element && element.closest ? element.closest(".wx-editor-date") : null;
+        if (!dateEl || !editor.getEditorElement().contains(dateEl)) {
+            return [];
+        }
+
+        return [
+            {
+                label: this._i18n("webexpress.webui:editor.edit", "Edit"),
+                icon: "fas fa-edit",
+                action: () => this._editDate(editor, dateEl)
+            },
+            {
+                label: this._i18n("webexpress.webui:editor.remove", "Remove"),
+                icon: "fas fa-trash",
+                action: () => {
+                    dateEl.remove();
+                    editor._syncValue?.();
+                    editor._updateUndoRedoStates?.();
+                }
+            }
+        ];
+    },
+
+    /**
+     * Removes the given date element, restores the caret at its position and
+     * re-opens the date picker so the value can be changed.
+     * @param {object} editor
+     * @param {HTMLElement} dateEl - The .wx-editor-date element.
+     */
+    _editDate: function(editor, dateEl) {
+        const range = document.createRange();
+        range.setStartBefore(dateEl);
+        range.collapse(true);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        dateEl.remove();
+        editor._saveCurrentSelection?.();
+        editor._syncValue?.();
+        this._triggerDateDialog(editor);
     },
 
     // ------------------------------------------------------------------
@@ -927,7 +1138,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
         const html = `<a class="wx-mention" data-id="${entry.id || ""}" href="${href}" contenteditable="false">@${safeLabel}</a>&nbsp;`;
 
         this._closeMentionMenu();
-        state.editor.getEditorElement().focus();
+        state.editor.getEditorElement().focus({ preventScroll: true });
         state.editor.insertHtmlAtCursor(html);
     },
 

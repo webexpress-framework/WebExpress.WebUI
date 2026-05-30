@@ -27,6 +27,126 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
     },
 
     /**
+     * Handles the Enter key inside an editable add-on body so the line break is
+     * created within the add-on instead of escaping to the end of the document.
+     * @param {object} editor - The editor instance.
+     * @param {KeyboardEvent} e - The keydown event.
+     */
+    _handleBodyEnter: function(editor, e) {
+        if (e.key !== "Enter" || e.shiftKey || e.ctrlKey || e.metaKey || e.altKey || e.isComposing) {
+            return;
+        }
+        const sel = window.getSelection();
+        if (!sel || !sel.rangeCount) {
+            return;
+        }
+        let el = sel.anchorNode;
+        if (el && el.nodeType === 3) {
+            el = el.parentElement;
+        }
+        const body = el && el.closest ? el.closest(".wx-addon-body-container") : null;
+        if (!body || !editor.getEditorElement().contains(body)) {
+            return; // not inside an add-on body -> native behaviour
+        }
+        // only editable container bodies; the table frame reuses the same class
+        // but is contenteditable="false" (its table handles Enter natively)
+        if (body.getAttribute("contenteditable") !== "true") {
+            return;
+        }
+        // tables inside a container keep their native cell behaviour
+        if (el.closest("table") && body.contains(el.closest("table"))) {
+            return;
+        }
+
+        e.preventDefault();
+
+        const range = sel.getRangeAt(0);
+        range.deleteContents();
+
+        let startEl = range.startContainer;
+        if (startEl.nodeType === 3) {
+            startEl = startEl.parentElement;
+        }
+        const block = startEl && startEl.closest
+            ? startEl.closest("p, h1, h2, h3, h4, h5, h6, li, blockquote, pre")
+            : null;
+
+        if (block && body.contains(block) && block !== body) {
+            this._splitBlock(block, range, sel);
+        } else {
+            this._insertBreak(range, sel);
+        }
+
+        if (typeof editor._syncValue === "function") {
+            editor._syncValue();
+        }
+        if (typeof editor._updateUndoRedoStates === "function") {
+            editor._updateUndoRedoStates();
+        }
+    },
+
+    /**
+     * Splits a block element at the caret, moving the trailing content into a
+     * new sibling block of the same type and placing the caret at its start.
+     * @param {HTMLElement} block - The block to split.
+     * @param {Range} range - The collapsed caret range.
+     * @param {Selection} sel - The current selection.
+     */
+    _splitBlock: function(block, range, sel) {
+        const tail = document.createRange();
+        tail.setStart(range.startContainer, range.startOffset);
+        tail.setEnd(block, block.childNodes.length);
+        const frag = tail.extractContents();
+
+        const newBlock = document.createElement(block.tagName);
+        const style = block.getAttribute("style");
+        if (style) {
+            newBlock.setAttribute("style", style);
+        }
+        if (!frag.childNodes.length || ((frag.textContent || "").trim() === "" && !frag.querySelector("br, img"))) {
+            newBlock.innerHTML = "<br>";
+        } else {
+            newBlock.appendChild(frag);
+        }
+
+        if ((block.textContent || "").trim() === "" && !block.querySelector("br, img")) {
+            block.innerHTML = "<br>";
+        }
+
+        block.parentNode.insertBefore(newBlock, block.nextSibling);
+
+        const r = document.createRange();
+        r.setStart(newBlock, 0);
+        r.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(r);
+    },
+
+    /**
+     * Inserts a line break at the caret, adding a filler break when needed so
+     * the caret can move to the new visual line.
+     * @param {Range} range - The collapsed caret range.
+     * @param {Selection} sel - The current selection.
+     */
+    _insertBreak: function(range, sel) {
+        const br = document.createElement("br");
+        range.insertNode(br);
+
+        const next = br.nextSibling;
+        const needsFiller = !next || (next.nodeType === 3 && next.textContent === "");
+        if (needsFiller) {
+            const filler = document.createElement("br");
+            br.parentNode.insertBefore(filler, br.nextSibling);
+        }
+
+        const r = document.createRange();
+        r.setStartAfter(br);
+        r.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(r);
+    },
+
+    /**
      * Initializes the plugin.
      * Sets up event listeners for interactions (click, drag & drop) within the editor content.
      * @param {object} editor -The editor instance.
@@ -36,6 +156,11 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
         editor._addonPlugin = this;
 
         const editorElem = editor.getEditorElement();
+
+        // keep Enter inside an editable add-on body (a contenteditable="true"
+        // island nested in the contenteditable="false" frame). Native Enter
+        // there tends to escape the island and land at the document end.
+        editorElem.addEventListener("keydown", (e) => this._handleBodyEnter(editor, e));
 
         // handle clicks on settings buttons inside add-on frames
         editorElem.addEventListener("click", (e) => {
@@ -74,6 +199,13 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
 
             const frame = target.closest(".wx-addon-frame");
             if (!frame) {
+                return;
+            }
+
+            // never start an element drag from inside a table - the user is
+            // selecting cell text - regardless of where exactly the press lands
+            if (target.closest("table")) {
+                frame.setAttribute("draggable", "false");
                 return;
             }
 
@@ -603,6 +735,44 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
 
         const frameHtml = this._createFrameHtml(addon, innerHtml);
         this._currentEditor.insertHtmlAtCursor(frameHtml);
+
+        // drop the caret inside the new container body so the first edit happens
+        // inside the add-on, not in the document after it
+        if (addon.isContainer) {
+            this._focusNewContainerBody(this._currentEditor);
+        }
+    },
+
+    /**
+     * Places the caret inside a freshly inserted editable container body
+     * (marked with data-wx-focus-new) and clears the marker.
+     * @param {object} editor - The editor instance.
+     */
+    _focusNewContainerBody: function(editor) {
+        const root = editor.getEditorElement();
+        if (!root) {
+            return;
+        }
+        const body = root.querySelector('[data-wx-focus-new="1"]');
+        if (!body) {
+            return;
+        }
+        body.removeAttribute("data-wx-focus-new");
+
+        const target = body.querySelector("p, h1, h2, h3, h4, h5, h6, li, blockquote, pre, div") || body;
+        const range = document.createRange();
+        range.selectNodeContents(target);
+        range.collapse(true);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+
+        if (typeof editor._saveCurrentSelection === "function") {
+            editor._saveCurrentSelection();
+        }
+        if (typeof editor._syncValue === "function") {
+            editor._syncValue();
+        }
     },
 
     /**
@@ -671,6 +841,9 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
 
             const bodyEditable = isContainer ? "true" : "false";
             const bodyClass = isContainer ? "wx-addon-body-container" : "wx-addon-body-widget";
+            // marker so _insertAddon can drop the caret inside a freshly
+            // inserted editable container body
+            const focusAttr = isContainer ? ' data-wx-focus-new="1"' : "";
 
             return `
                 <div class="wx-addon-frame card my-3 shadow-sm"
@@ -688,7 +861,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
                     </div>
 
                     <div class="card-body p-2 ${bodyClass}"
-                         contenteditable="${bodyEditable}">
+                         contenteditable="${bodyEditable}"${focusAttr}>
                         ${contentHtml}
                     </div>
                 </div><p><br></p>`;

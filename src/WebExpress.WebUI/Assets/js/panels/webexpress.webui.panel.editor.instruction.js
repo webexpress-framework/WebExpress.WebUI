@@ -144,12 +144,11 @@ webexpress.webui.DialogPanels.register("editor-instruction", {
 
         const safeText = escapeHtml(textVal);
 
-        // insert as a block wrapper to avoid fragile leading line break behavior
-        const html = [
-            '<div class="wx-editor-instruction-frame" contenteditable="false">',
-            `<span class="wx-editor-instruction"><i class="fas fa-info-circle"></i> ${safeText}</span>`,
-            "</div>"
-        ].join("");
+        // insert as an inline, non-editable atomic so the instruction sits in
+        // the running text instead of forcing its own line/block. A trailing
+        // no-break space gives the caret a place to land after the element.
+        const html =
+            `<span class="wx-editor-instruction" contenteditable="false"><i class="fas fa-info-circle"></i> ${safeText}</span>&nbsp;`;
 
         // editor.insertHtmlAtCursor focuses editor and restores saved range internally
         editor.insertHtmlAtCursor(html);

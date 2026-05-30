@@ -89,7 +89,11 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                 frame = document.createElement("div");
                 frame.className = "wx-addon-frame card my-3 shadow-sm";
                 frame.setAttribute("contenteditable", "false");
-                frame.setAttribute("draggable", "true");
+                // draggable defaults to false so a click-drag inside the table
+                // performs a text selection instead of starting an element drag;
+                // the add-on plugin flips it to true only while the drag handle
+                // is grabbed.
+                frame.setAttribute("draggable", "false");
                 frame.setAttribute("data-addon-id", uniqueId);
                 frame.setAttribute("data-type", "table");
 
@@ -638,7 +642,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         const frameHtml = `
             <div class="wx-addon-frame card my-3 shadow-sm"
                  contenteditable="false"
-                 draggable="true"
+                 draggable="false"
                  data-addon-id="${uniqueId}"
                  data-type="table">
 

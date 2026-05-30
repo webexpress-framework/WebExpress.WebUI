@@ -11,6 +11,65 @@ webexpress.webui.EditorPlugins.register("instruction", 5000, {
     },
 
     /**
+     * Provides context menu items for an instruction text element. Surfaced via
+     * the bubble menu when the caret/selection sits on an instruction.
+     * @param {object} editor - The editor instance.
+     * @param {HTMLElement} target - The element that triggered the menu.
+     * @returns {Array<object>} Context menu descriptor array.
+     */
+    getContextMenuItems: function(editor, target) {
+        let element = target;
+        if (element && element.nodeType === 3) {
+            element = element.parentNode;
+        }
+        const instruction = element && element.closest ? element.closest(".wx-editor-instruction") : null;
+        if (!instruction || !editor.getEditorElement().contains(instruction)) {
+            return [];
+        }
+
+        return [
+            {
+                label: webexpress.webui.I18N.translate("webexpress.webui:editor.edit"),
+                icon: "fas fa-edit",
+                action: () => {
+                    // current text without the leading icon
+                    const text = (instruction.textContent || "").trim();
+                    // place the caret where the instruction was, then remove it,
+                    // so the dialog re-inserts the edited text in the same spot
+                    const range = document.createRange();
+                    range.setStartBefore(instruction);
+                    range.collapse(true);
+                    const sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    const activeRange = range.cloneRange();
+                    instruction.remove();
+                    if (typeof editor._saveCurrentSelection === "function") {
+                        editor._saveCurrentSelection();
+                    }
+                    if (typeof editor._syncValue === "function") {
+                        editor._syncValue();
+                    }
+                    this._openModal(editor, "instructionModal", "editor-instruction", "webexpress.webui:editor.instruction.title", { text: text }, activeRange);
+                }
+            },
+            {
+                label: webexpress.webui.I18N.translate("webexpress.webui:editor.remove"),
+                icon: "fas fa-trash",
+                action: () => {
+                    instruction.remove();
+                    if (typeof editor._syncValue === "function") {
+                        editor._syncValue();
+                    }
+                    if (typeof editor._updateUndoRedoStates === "function") {
+                        editor._updateUndoRedoStates();
+                    }
+                }
+            }
+        ];
+    },
+
+    /**
      * Creates toolbar controls for the plugin.
      * @param {object} editor - the editor instance
      * @returns {HTMLElement} toolbar group element
