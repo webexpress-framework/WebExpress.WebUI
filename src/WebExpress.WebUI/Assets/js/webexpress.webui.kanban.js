@@ -12,6 +12,13 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
     _dragCard = null;
 
+    // column header editing / reordering / deleting
+    _editableColumn = false;
+    _movableColumn = false;
+    _deletableColumn = false;
+    _dragColumnIndex = null;
+    _activeColumnEdit = null;
+
     /**
      * Initializes the kanban control.
      * @param {HTMLElement} element - The root element for the kanban board.
@@ -19,6 +26,13 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     constructor(element) {
         super(element);
         element.classList.add("wx-kanban");
+
+        // column capabilities (the REST host element carries these attributes,
+        // so they apply to both the dom-driven and the rest-driven path)
+        this._editableColumn = element.dataset.editableColumn === "true";
+        this._movableColumn = element.dataset.movableColumn === "true";
+        this._deletableColumn = element.dataset.deletableColumn === "true";
+
         this._parseStaticConfig();
         this.render();
     }
@@ -88,15 +102,9 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             });
         }
 
-        // apply board template constraints based on columns
-        if (columns.length > 0) {
-            el.style.setProperty("--wx-board-cols", columns.length);
-
-            const sizes = columns.map((col) => {
-                return col.size === "*" ? "1fr" : col.size;
-            });
-            el.style.setProperty("--wx-board-template", sizes.join(" "));
-        }
+        // note: the board column template (--wx-board-cols / --wx-board-template)
+        // is applied centrally in render(), so it is consistent for both the
+        // DOM-driven and the REST-driven paths.
 
         // extract card configurations from dom nodes
         const cardNodes = el.querySelectorAll(".wx-kanban-card, [data-card-id]");
@@ -142,6 +150,28 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         const el = this._element;
         el.innerHTML = "";
 
+        // pin a shared column template on the host element so the header row and
+        // every swimlane row use identical column tracks. without this each row
+        // is an independent grid that sizes its columns to its own content, so
+        // the columns of the swimlanes do not line up. this runs on every render
+        // and therefore also covers the REST path, which populates the columns
+        // directly (updateData) without going through setData.
+        if (this._columns.length > 0) {
+            el.style.setProperty("--wx-board-cols", String(this._columns.length));
+
+            const template = this._columns
+                .map((col) => {
+                    const size = (!col.size || col.size === "*") ? "1fr" : col.size;
+                    return "minmax(280px, " + size + ")";
+                })
+                .join(" ");
+
+            el.style.setProperty("--wx-board-template", template);
+        } else {
+            el.style.removeProperty("--wx-board-cols");
+            el.style.removeProperty("--wx-board-template");
+        }
+
         const hasSwimlanes = this._swimlanes.length > 0;
 
         // render global column headers at the top if swimlanes are active
@@ -153,6 +183,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 const header = document.createElement("div");
                 header.className = "wx-kanban-column-header";
                 header.textContent = this._columns[c].label;
+                this._decorateColumnHeader(header, c);
                 headerRow.appendChild(header);
             }
 
@@ -186,6 +217,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                     header.className = "wx-kanban-column-header";
                     header.style.marginBottom = "0.75rem";
                     header.textContent = col.label;
+                    this._decorateColumnHeader(header, c);
                     colWrapper.appendChild(header);
                 }
 
@@ -249,6 +281,222 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 });
             }
         }
+    }
+
+    /**
+     * Decorates a column header with the inline-rename, ⠿ reorder grip and
+     * delete affordances, depending on the enabled column flags.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index in this._columns.
+     */
+    _decorateColumnHeader(headerEl, index) {
+        if (!this._editableColumn && !this._movableColumn && !this._deletableColumn) {
+            return;
+        }
+
+        headerEl.classList.add("wx-board-col-header");
+
+        if (this._movableColumn) {
+            headerEl.classList.add("wx-board-col-movable");
+
+            const grip = document.createElement("span");
+            grip.className = "wx-board-col-grip";
+            grip.textContent = "⠿";
+            grip.title = this._i18n("webexpress.webapp:column.move", "Reorder column");
+            grip.setAttribute("aria-label", grip.title);
+            grip.draggable = true;
+            grip.addEventListener("click", (e) => e.stopPropagation());
+            grip.addEventListener("dragstart", (e) => {
+                this._dragColumnIndex = index;
+                headerEl.classList.add("wx-board-col-dragging");
+                if (e.dataTransfer) {
+                    e.dataTransfer.effectAllowed = "move";
+                    try { e.dataTransfer.setData("text/plain", String(index)); } catch (err) { /* noop */ }
+                }
+            });
+            grip.addEventListener("dragend", () => {
+                headerEl.classList.remove("wx-board-col-dragging");
+                this._dragColumnIndex = null;
+            });
+            headerEl.insertBefore(grip, headerEl.firstChild);
+
+            headerEl.addEventListener("dragover", (e) => {
+                if (this._dragColumnIndex === null) {
+                    return;
+                }
+                e.preventDefault();
+                if (e.dataTransfer) {
+                    e.dataTransfer.dropEffect = "move";
+                }
+            });
+            headerEl.addEventListener("drop", (e) => {
+                if (this._dragColumnIndex === null) {
+                    return;
+                }
+                e.preventDefault();
+                e.stopPropagation();
+                const rect = headerEl.getBoundingClientRect();
+                const after = e.clientX > rect.left + rect.width / 2;
+                this._moveColumn(this._dragColumnIndex, index, after);
+            });
+        }
+
+        if (this._deletableColumn) {
+            const del = document.createElement("button");
+            del.type = "button";
+            del.className = "wx-board-col-delete";
+            del.title = this._i18n("webexpress.webapp:column.delete", "Delete column");
+            del.setAttribute("aria-label", del.title);
+            del.innerHTML = `<i class="${this._iconClass("fas fa-xmark", "wx-icon-light-xmark")}"></i>`;
+            del.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this._deleteColumn(index);
+            });
+            headerEl.appendChild(del);
+        }
+
+        if (this._editableColumn) {
+            headerEl.classList.add("wx-board-col-editable");
+            headerEl.addEventListener("dblclick", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this._startColumnEdit(headerEl, index);
+            });
+            headerEl.addEventListener("mouseenter", () => {
+                if (this._activeColumnEdit || headerEl.querySelector(".wx-board-col-edit")) {
+                    return;
+                }
+                const pencil = document.createElement("button");
+                pencil.type = "button";
+                pencil.className = "wx-board-col-edit";
+                pencil.title = this._i18n("webexpress.webapp:column.edit", "Rename column");
+                pencil.setAttribute("aria-label", pencil.title);
+                pencil.innerHTML = `<i class="${this._iconClass("fas fa-pencil", "wx-icon-light-pen")}"></i>`;
+                pencil.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this._startColumnEdit(headerEl, index);
+                });
+                headerEl.appendChild(pencil);
+            });
+            headerEl.addEventListener("mouseleave", () => {
+                const pencil = headerEl.querySelector(".wx-board-col-edit");
+                if (pencil) {
+                    pencil.remove();
+                }
+            });
+        }
+    }
+
+    /**
+     * Starts inline editing of a column title.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index.
+     */
+    _startColumnEdit(headerEl, index) {
+        const col = this._columns[index];
+        if (!col || this._activeColumnEdit) {
+            return;
+        }
+
+        this._activeColumnEdit = headerEl;
+        const current = col.label ?? col.title ?? "";
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "wx-board-col-input";
+        input.value = current;
+
+        headerEl.innerHTML = "";
+        headerEl.appendChild(input);
+        input.focus();
+        input.select();
+
+        let done = false;
+        const finish = (save) => {
+            if (done) {
+                return;
+            }
+            done = true;
+            this._activeColumnEdit = null;
+
+            const value = input.value.trim();
+            if (save && value && value !== current) {
+                col.label = value;
+                col.title = value;
+                this.render();
+                this._dispatchColumnChange();
+            } else {
+                this.render();
+            }
+        };
+
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                finish(true);
+            } else if (e.key === "Escape") {
+                e.preventDefault();
+                finish(false);
+            }
+        });
+        input.addEventListener("blur", () => finish(true));
+    }
+
+    /**
+     * Deletes a column (and its cards) and persists the new column layout.
+     * @param {number} index - The column index.
+     */
+    _deleteColumn(index) {
+        if (index < 0 || index >= this._columns.length) {
+            return;
+        }
+
+        const removed = this._columns[index];
+        this._columns.splice(index, 1);
+        this._cards = this._cards.filter((card) => card.columnId !== removed.id);
+
+        this.render();
+        this._dispatchColumnChange();
+    }
+
+    /**
+     * Moves a column to a new position and persists the new column order.
+     * @param {number} from - The source column index.
+     * @param {number} to - The target column index.
+     * @param {boolean} after - Whether to insert after the target.
+     */
+    _moveColumn(from, to, after) {
+        if (from === to || from < 0 || from >= this._columns.length) {
+            return;
+        }
+
+        const [moved] = this._columns.splice(from, 1);
+        let target = from < to ? to - 1 : to;
+        if (after) {
+            target += 1;
+        }
+        target = Math.max(0, Math.min(target, this._columns.length));
+        this._columns.splice(target, 0, moved);
+
+        this.render();
+        this._dispatchColumnChange();
+    }
+
+    /**
+     * Dispatches a column-layout change so the REST layer can persist it.
+     */
+    _dispatchColumnChange() {
+        const columns = this._columns.map((c) => {
+            return { id: c.id, title: c.label ?? c.title ?? "", size: c.size };
+        });
+
+        this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
+            id: this._element ? this._element.id : null,
+            action: "columns",
+            columns: columns
+        });
     }
 
     /**

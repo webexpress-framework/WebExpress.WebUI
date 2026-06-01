@@ -20,8 +20,8 @@
     grid-auto-columns: minmax(280px, 1fr);
     gap: 0.5rem;
     align-items: stretch;
-    min-width: 100%;
-    width: max-content; /* grid fits content, enables horizontal scroll */
+    width: 100%;
+    min-width: calc(var(--wx-board-cols, 3) * 280px + (var(--wx-board-cols, 3) - 1) * 0.5rem);
 }
 
 /* Header row sits visually closer to first swimlane */
@@ -81,7 +81,8 @@
 
 [data-bs-theme="dark"] .wx-kanban-cell {
     background: var(--bs-gray-900, #393b40);
-    border-color: var(--bs-border-color, #495057);
+    /* keep the resting border transparent (as in light mode); the dashed
+       border is only shown on drag-hover via .wx-drag-over-empty below */
 }
 
 /* Visual feedback when hovering over an empty dropzone */
@@ -202,4 +203,62 @@
 .wx-kanban-card.wx-drag-over-bottom::before {
     bottom: -10px;
     opacity: 1;
+}
+
+/* ---- editable / movable / deletable column headers ----
+   shared affordance classes also used by the dashboard control. the grip,
+   pencil and delete icons stay hidden until the header is hovered (visibility,
+   not display, so the header does not jump). */
+.wx-board-col-grip {
+    cursor: grab;
+    user-select: none;
+    margin-right: 0.25rem;
+    vertical-align: middle;
+    line-height: 1;
+    color: var(--bs-secondary-color, #6c757d);
+    visibility: hidden;
+}
+
+.wx-board-col-grip:active {
+    cursor: grabbing;
+}
+
+.wx-board-col-edit,
+.wx-board-col-delete {
+    border: none;
+    background: transparent;
+    padding: 0 0.15rem;
+    margin-left: 0.15rem;
+    vertical-align: middle;
+    line-height: 1;
+    font-size: 0.85em;
+    cursor: pointer;
+    color: var(--bs-secondary-color, #6c757d);
+    visibility: hidden;
+}
+
+.wx-board-col-grip:hover,
+.wx-board-col-edit:hover,
+.wx-board-col-delete:hover {
+    color: var(--bs-body-color);
+}
+
+.wx-board-col-header:hover .wx-board-col-grip,
+.wx-board-col-header:hover .wx-board-col-edit,
+.wx-board-col-header:hover .wx-board-col-delete {
+    visibility: visible;
+}
+
+.wx-board-col-header.wx-board-col-dragging {
+    opacity: 0.5;
+}
+
+.wx-board-col-input {
+    font: inherit;
+    color: inherit;
+    max-width: 100%;
+    padding: 0.05rem 0.3rem;
+    border: 1px solid var(--bs-border-color, #ced4da);
+    border-radius: 0.2rem;
+    background: var(--bs-body-bg);
 }

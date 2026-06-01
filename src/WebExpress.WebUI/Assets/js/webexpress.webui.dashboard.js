@@ -9,6 +9,13 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
     _dragWidget = null;
     _dragColIndex = -1;
 
+    // column header editing / reordering / deleting
+    _editableColumn = false;
+    _movableColumn = false;
+    _deletableColumn = false;
+    _dragColumnIndex = null;
+    _activeColumnEdit = null;
+
     /**
      * Initializes the dashboard control.
      * @param {HTMLElement} element - The root element for the dashboard.
@@ -17,6 +24,12 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         element.classList.add("wx-dashboard");
+
+        // column capabilities (the REST host element carries these attributes,
+        // so they apply to both the dom-driven and the rest-driven path)
+        this._editableColumn = element.dataset.editableColumn === "true";
+        this._movableColumn = element.dataset.movableColumn === "true";
+        this._deletableColumn = element.dataset.deletableColumn === "true";
 
         this._parseStaticConfig();
         this.render();
@@ -184,10 +197,13 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             const wrapperEl = document.createElement("div");
             wrapperEl.className = "wx-dashboard-lane-wrapper";
 
-            if (colData.title) {
+            const colTitle = colData.title ?? colData.label ?? "";
+            const hasColTools = this._editableColumn || this._movableColumn || this._deletableColumn;
+            if (colTitle || hasColTools) {
                 const titleEl = document.createElement("h5");
                 titleEl.className = "wx-dashboard-lane-title";
-                titleEl.textContent = colData.title;
+                titleEl.textContent = colTitle;
+                this._decorateColumnHeader(titleEl, colIdx);
                 wrapperEl.appendChild(titleEl);
             }
 
@@ -233,6 +249,220 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         }
 
         el.appendChild(row);
+    }
+
+    /**
+     * Decorates a column header with the inline-rename, ⠿ reorder grip and
+     * delete affordances, depending on the enabled column flags.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index in this._columns.
+     */
+    _decorateColumnHeader(headerEl, index) {
+        if (!this._editableColumn && !this._movableColumn && !this._deletableColumn) {
+            return;
+        }
+
+        headerEl.classList.add("wx-board-col-header");
+
+        if (this._movableColumn) {
+            headerEl.classList.add("wx-board-col-movable");
+
+            const grip = document.createElement("span");
+            grip.className = "wx-board-col-grip";
+            grip.textContent = "⠿";
+            grip.title = this._i18n("webexpress.webapp:column.move", "Reorder column");
+            grip.setAttribute("aria-label", grip.title);
+            grip.draggable = true;
+            grip.addEventListener("click", (e) => e.stopPropagation());
+            grip.addEventListener("dragstart", (e) => {
+                this._dragColumnIndex = index;
+                headerEl.classList.add("wx-board-col-dragging");
+                if (e.dataTransfer) {
+                    e.dataTransfer.effectAllowed = "move";
+                    try { e.dataTransfer.setData("text/plain", String(index)); } catch (err) { /* noop */ }
+                }
+            });
+            grip.addEventListener("dragend", () => {
+                headerEl.classList.remove("wx-board-col-dragging");
+                this._dragColumnIndex = null;
+            });
+            headerEl.insertBefore(grip, headerEl.firstChild);
+
+            headerEl.addEventListener("dragover", (e) => {
+                if (this._dragColumnIndex === null) {
+                    return;
+                }
+                e.preventDefault();
+                if (e.dataTransfer) {
+                    e.dataTransfer.dropEffect = "move";
+                }
+            });
+            headerEl.addEventListener("drop", (e) => {
+                if (this._dragColumnIndex === null) {
+                    return;
+                }
+                e.preventDefault();
+                e.stopPropagation();
+                const rect = headerEl.getBoundingClientRect();
+                const after = e.clientX > rect.left + rect.width / 2;
+                this._moveColumn(this._dragColumnIndex, index, after);
+            });
+        }
+
+        if (this._deletableColumn) {
+            const del = document.createElement("button");
+            del.type = "button";
+            del.className = "wx-board-col-delete";
+            del.title = this._i18n("webexpress.webapp:column.delete", "Delete column");
+            del.setAttribute("aria-label", del.title);
+            del.innerHTML = `<i class="${this._iconClass("fas fa-xmark", "wx-icon-light-xmark")}"></i>`;
+            del.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this._deleteColumn(index);
+            });
+            headerEl.appendChild(del);
+        }
+
+        if (this._editableColumn) {
+            headerEl.classList.add("wx-board-col-editable");
+            headerEl.addEventListener("dblclick", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this._startColumnEdit(headerEl, index);
+            });
+            headerEl.addEventListener("mouseenter", () => {
+                if (this._activeColumnEdit || headerEl.querySelector(".wx-board-col-edit")) {
+                    return;
+                }
+                const pencil = document.createElement("button");
+                pencil.type = "button";
+                pencil.className = "wx-board-col-edit";
+                pencil.title = this._i18n("webexpress.webapp:column.edit", "Rename column");
+                pencil.setAttribute("aria-label", pencil.title);
+                pencil.innerHTML = `<i class="${this._iconClass("fas fa-pencil", "wx-icon-light-pen")}"></i>`;
+                pencil.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this._startColumnEdit(headerEl, index);
+                });
+                headerEl.appendChild(pencil);
+            });
+            headerEl.addEventListener("mouseleave", () => {
+                const pencil = headerEl.querySelector(".wx-board-col-edit");
+                if (pencil) {
+                    pencil.remove();
+                }
+            });
+        }
+    }
+
+    /**
+     * Starts inline editing of a column title.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index.
+     */
+    _startColumnEdit(headerEl, index) {
+        const col = this._columns[index];
+        if (!col || this._activeColumnEdit) {
+            return;
+        }
+
+        this._activeColumnEdit = headerEl;
+        const current = col.title ?? col.label ?? "";
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "wx-board-col-input";
+        input.value = current;
+
+        headerEl.innerHTML = "";
+        headerEl.appendChild(input);
+        input.focus();
+        input.select();
+
+        let done = false;
+        const finish = (save) => {
+            if (done) {
+                return;
+            }
+            done = true;
+            this._activeColumnEdit = null;
+
+            const value = input.value.trim();
+            if (save && value && value !== current) {
+                col.title = value;
+                col.label = value;
+                this.render();
+                this._dispatchColumnChange();
+            } else {
+                this.render();
+            }
+        };
+
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                finish(true);
+            } else if (e.key === "Escape") {
+                e.preventDefault();
+                finish(false);
+            }
+        });
+        input.addEventListener("blur", () => finish(true));
+    }
+
+    /**
+     * Deletes a column (and its widgets) and persists the new column layout.
+     * @param {number} index - The column index.
+     */
+    _deleteColumn(index) {
+        if (index < 0 || index >= this._columns.length) {
+            return;
+        }
+
+        this._columns.splice(index, 1);
+
+        this.render();
+        this._dispatchColumnChange();
+    }
+
+    /**
+     * Moves a column to a new position and persists the new column order.
+     * @param {number} from - The source column index.
+     * @param {number} to - The target column index.
+     * @param {boolean} after - Whether to insert after the target.
+     */
+    _moveColumn(from, to, after) {
+        if (from === to || from < 0 || from >= this._columns.length) {
+            return;
+        }
+
+        const [moved] = this._columns.splice(from, 1);
+        let target = from < to ? to - 1 : to;
+        if (after) {
+            target += 1;
+        }
+        target = Math.max(0, Math.min(target, this._columns.length));
+        this._columns.splice(target, 0, moved);
+
+        this.render();
+        this._dispatchColumnChange();
+    }
+
+    /**
+     * Dispatches a column-layout change so the REST layer can persist it.
+     */
+    _dispatchColumnChange() {
+        const columns = this._columns.map((c) => {
+            return { id: c.id, title: c.title ?? c.label ?? "", size: c.size };
+        });
+
+        this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
+            id: this._element ? this._element.id : null,
+            action: "columns",
+            columns: columns
+        });
     }
 
     /**
