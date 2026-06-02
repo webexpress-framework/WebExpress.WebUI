@@ -174,6 +174,21 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
         const hasSwimlanes = this._swimlanes.length > 0;
 
+        // bucket the cards once by column (and swimlane) so each cell is a map
+        // lookup instead of filtering the full card list once per cell
+        // (avoids the O(swimlanes × columns × cards) cost of the old approach).
+        const cardBuckets = new Map();
+        for (let i = 0; i < this._cards.length; i++) {
+            const card = this._cards[i];
+            const key = card.columnId + "|" + (hasSwimlanes ? (card.swimlaneId ?? "") : "");
+            let bucket = cardBuckets.get(key);
+            if (!bucket) {
+                bucket = [];
+                cardBuckets.set(key, bucket);
+            }
+            bucket.push(card);
+        }
+
         // render global column headers at the top if swimlanes are active
         if (hasSwimlanes) {
             const headerRow = document.createElement("div");
@@ -255,10 +270,9 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                     this._onDropCell(e, col.id, lane.id, cell);
                 });
 
-                // filter and render cards belonging to this cell
-                const cellCards = this._cards.filter((card) => {
-                    return card.columnId === col.id && (hasSwimlanes ? card.swimlaneId === lane.id : true);
-                });
+                // render cards belonging to this cell (from the prebuilt buckets)
+                const cellKey = col.id + "|" + (hasSwimlanes ? (lane.id ?? "") : "");
+                const cellCards = cardBuckets.get(cellKey) || [];
 
                 for (let k = 0; k < cellCards.length; k++) {
                     const cardEl = this._buildCardElement(cellCards[k], col.id, lane.id);
