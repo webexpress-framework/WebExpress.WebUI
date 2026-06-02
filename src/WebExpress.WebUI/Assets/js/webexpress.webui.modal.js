@@ -28,11 +28,14 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         this._closeLabel = element.getAttribute("data-close-label") || this._i18n("webexpress.webui:close");
         this._size = element.getAttribute("data-size") || "";
         this._autoShow = element.getAttribute("data-auto-show") === "true";
+        // scrollable by default
+        this._scrollable = element.getAttribute("data-scrollable") !== "false";
 
         // cleanup the dom element
         element.removeAttribute("data-close-label");
         element.removeAttribute("data-size");
         element.removeAttribute("data-auto-show");
+        element.removeAttribute("data-scrollable");
         element.classList.add("modal", "fade");
 
         // create modal elements
@@ -97,7 +100,7 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         this._footerDiv.appendChild(this._cancelButton);
 
         // create modal content structure
-        this._dialogDiv.className = `modal-dialog modal-dialog-scrollable ${this._size}`;
+        this._dialogDiv.className = `modal-dialog${this._scrollable ? " modal-dialog-scrollable" : ""} ${this._size}`;
 
         const modalContentDiv = document.createElement("div");
         modalContentDiv.className = "modal-content";

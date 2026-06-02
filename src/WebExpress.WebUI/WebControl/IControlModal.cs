@@ -35,6 +35,14 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         Func<IRenderControlContext, string> CloseLabel { get; }
 
+        /// <summary>
+        /// Gets or sets whether the modal body is scrollable (renders the bootstrap
+        /// "modal-dialog-scrollable" variant). Defaults to <c>true</c>. Set to <c>false</c>
+        /// when the modal hosts an overlay (e.g. an autocomplete dropdown) that must not be
+        /// clipped by the scrollable modal body's overflow.
+        /// </summary>
+        Func<IRenderControlContext, bool> Scrollable { get; }
+
         /// <summary> 
         /// Adds one or more controls to the content of the modal.
         /// </summary> 

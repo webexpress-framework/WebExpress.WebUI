@@ -29,6 +29,7 @@ The configuration and content of the modal are defined directly in the HTML mark
 | `data-size`       | Defines the size of the modal. Accepts standard Bootstrap classes like `modal-sm`, `modal-lg`, or `modal-xl`.
 | `data-close-label`| Sets the text for the automatically generated "Close" button in the footer.
 | `data-auto-show`  | If set to `"true"`, the modal will be displayed automatically when the page loads.
+| `data-scrollable` | Controls whether the modal body scrolls independently (the Bootstrap `modal-dialog-scrollable` variant). Defaults to `"true"`. Set it to `"false"` for modals that host an overlay — such as an autocomplete dropdown — which must extend beyond the modal body without being clipped by its `overflow`.
 
 To define the content, the following CSS classes are used within the host element:
 
@@ -42,6 +43,7 @@ The `ModalCtrl` is designed as a wrapper around the native Bootstrap modal funct
 
 - **Dynamic DOM Construction**: Upon initialization, the component reads the content marked with the `.wx-modal-*` classes, removes it from the original DOM, and inserts it into a newly created, Bootstrap-compliant modal structure.
 - **Automatic Controls**: A "Close" button (X) in the header and a "Close" button with text and an icon in the footer are automatically generated to ensure accessibility and consistent user guidance.
+- **Scrollable Body**: By default the modal renders the `modal-dialog-scrollable` variant, so a long body scrolls independently. Setting `data-scrollable="false"` opts out of this variant; the modal body then has no `overflow`, which lets an embedded overlay (e.g. an autocomplete dropdown) extend beyond the body instead of being clipped by it.
 - **Programmatic Control**: Through the `show()` and `hide()` methods, the visibility of the modal can be dynamically controlled via JavaScript.
 
 ## Programmatic Control

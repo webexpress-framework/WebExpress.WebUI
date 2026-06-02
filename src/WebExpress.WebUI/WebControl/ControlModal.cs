@@ -41,6 +41,14 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, string> CloseLabel { get; set; } = _ => "webexpress.webui:modal.close.label";
 
         /// <summary>
+        /// Gets or sets whether the modal body is scrollable (renders the bootstrap
+        /// "modal-dialog-scrollable" variant). Defaults to <c>true</c>. Set to <c>false</c>
+        /// when the modal hosts an overlay (e.g. an autocomplete dropdown) that must not be
+        /// clipped by the scrollable modal body's overflow.
+        /// </summary>
+        public Func<IRenderControlContext, bool> Scrollable { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         public ControlModal()
@@ -140,6 +148,7 @@ namespace WebExpress.WebUI.WebControl
             var title = Header?.Invoke(renderContext);
             var size = Size?.Invoke(renderContext) ?? TypeModalSize.Default;
             var closeLabel = CloseLabel?.Invoke(renderContext);
+            var scrollable = Scrollable?.Invoke(renderContext) ?? true;
 
             var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(title)))
             {
@@ -163,6 +172,12 @@ namespace WebExpress.WebUI.WebControl
             }
                 .AddUserAttribute("data-size", size.ToClass())
                 .AddUserAttribute("data-close-label", I18N.Translate(closeLabel));
+
+            // only emit the attribute when opting out; absent means scrollable (the js default)
+            if (!scrollable)
+            {
+                html = html.AddUserAttribute("data-scrollable", "false");
+            }
 
             return html;
         }

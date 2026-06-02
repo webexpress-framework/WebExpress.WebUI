@@ -81,5 +81,35 @@ namespace WebExpress.WebUI.Test.WebControl
 
             AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
         }
+
+        /// <summary>
+        /// Tests the scrollable property of the modal control. The data-scrollable
+        /// attribute is only emitted when scrolling is disabled; absent (the default)
+        /// means scrollable.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-webui-modal"" data-close-label=""Close"">*</div>")]
+        [InlineData(true, @"<div class=""wx-webui-modal"" data-close-label=""Close"">*</div>")]
+        [InlineData(false, @"<div class=""wx-webui-modal"" data-close-label=""Close"" data-scrollable=""false"">*</div>")]
+        public void Scrollable(bool? scrollable, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlModal(null)
+            {
+            };
+
+            if (scrollable.HasValue)
+            {
+                control.Scrollable = _ => scrollable.Value;
+            }
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
+        }
     }
 }
