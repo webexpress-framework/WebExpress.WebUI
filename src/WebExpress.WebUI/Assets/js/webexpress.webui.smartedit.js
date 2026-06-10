@@ -408,6 +408,8 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
      */
     _detachElement(el) {
         if (el && el.parentNode) {
+            // an intentional detach keeps its instances alive until reattached
+            el._wxDetached = true;
             el.parentNode.removeChild(el);
         }
         return el;

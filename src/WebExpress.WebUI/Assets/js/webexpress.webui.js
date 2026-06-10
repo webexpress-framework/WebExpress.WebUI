@@ -207,11 +207,18 @@ webexpress.webui.Controller = new class {
             // handle added nodes
             for (const node of mutation.addedNodes) {
                 if (node.nodeType === Node.ELEMENT_NODE) {
+                    delete node._wxDetached;
                     this.createInstances(node);
                     // quickfilter
                     node.querySelectorAll?.("[data-wx-primary-action='filter']").forEach(el => {
                         this._registerQuickfilterElement(el);
                     });
+                }
+            }
+            // handle removed nodes - destroy instances deterministically
+            for (const node of mutation.removedNodes) {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    this.removeInstances(node);
                 }
             }
         }
@@ -271,19 +278,46 @@ webexpress.webui.Controller = new class {
     }
 
     /**
-     * Removes instances for removed DOM elements.
+     * Removes instances for removed DOM elements. The instance of the element
+     * and of every descendant is destroyed and dropped from the instance map,
+     * which gives every subscription, timer and in-flight request a
+     * deterministic teardown. An element that is still connected at the time
+     * the mutation batch is processed was moved rather than removed, for
+     * example through a temporary detach, and is left untouched.
      * @param {Element} element - The DOM element whose instances should be removed.
      */
     removeInstances(element) {
-        if (this.instanceMap.has(element)) {
-            this.instanceMap.delete(element);
+        if (element.isConnected || element._wxDetached) {
+            return;
         }
-        // remove instances for all descendants
-        element.querySelectorAll('*').forEach((child) => {
-            if (this.instanceMap.has(child)) {
-                this.instanceMap.delete(child);
+
+        const destroyInstance = (el) => {
+            // run cleanups that binds registered on the element
+            if (Array.isArray(el._wxCleanup)) {
+                for (const cleanup of el._wxCleanup) {
+                    try {
+                        cleanup();
+                    } catch (error) {
+                        console.error("Error running element cleanup", el, error);
+                    }
+                }
+                delete el._wxCleanup;
             }
-        });
+
+            const instance = this.instanceMap.get(el);
+            if (instance) {
+                try {
+                    instance.destroy?.();
+                } catch (error) {
+                    console.error("Error destroying instance", el, error);
+                }
+                this.instanceMap.delete(el);
+            }
+        };
+
+        destroyInstance(element);
+        // destroy instances for all descendants
+        element.querySelectorAll('*').forEach(destroyInstance);
     }
 
     /**
@@ -1922,6 +1956,8 @@ webexpress.webui.Ctrl = class {
     _detachElement(element) {
         if (!element || !element.parentNode) return null;
 
+        // an intentional detach keeps its instances alive until reattached
+        element._wxDetached = true;
         element.parentNode.removeChild(element);
 
         return element;
