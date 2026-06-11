@@ -119,6 +119,140 @@ webexpress.webui.EditorSelection = class {
             }
         });
     }
+
+    /** Block elements a range marker may be sunk into. */
+    static _SINK_TAGS = new Set([
+        "P", "H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "PRE", "DIV",
+        "UL", "OL", "LI"
+    ]);
+
+    /**
+     * Marks the current range with a start and an end marker so the whole
+     * selection (not just the caret) can be restored after DOM restructuring
+     * via restoreRange. The end marker is inserted first so the start boundary
+     * stays valid. Markers that would land between block elements are sunk
+     * into the adjacent block, keeping sibling relationships between blocks
+     * intact (run grouping in the list engine relies on them).
+     * @param {Range} range - The selection range to preserve.
+     * @returns {boolean} True when the markers were inserted.
+     */
+    static markRange(range) {
+        if (!range) {
+            return false;
+        }
+        const collapsed = range.collapsed;
+
+        const endMarker = this.createMarker();
+        endMarker.setAttribute(this.MARKER_ATTR, "end");
+        const endRange = range.cloneRange();
+        endRange.collapse(false);
+        endRange.insertNode(endMarker);
+
+        const startMarker = this.createMarker();
+        startMarker.setAttribute(this.MARKER_ATTR, "start");
+        const startRange = range.cloneRange();
+        startRange.collapse(true);
+        startRange.insertNode(startMarker);
+
+        if (!collapsed) {
+            this._sinkStartMarker(startMarker);
+            this._sinkEndMarker(endMarker);
+        }
+        return true;
+    }
+
+    /**
+     * Restores the selection between the markers left by markRange and removes
+     * them. A collapsed marked range is restored as a collapsed caret.
+     * @param {HTMLElement} root - The editor root.
+     * @returns {boolean} True when the selection was restored.
+     */
+    static restoreRange(root) {
+        if (!root) {
+            return false;
+        }
+        const start = root.querySelector("[" + this.MARKER_ATTR + "='start']");
+        const end = root.querySelector("[" + this.MARKER_ATTR + "='end']");
+        if (!start || !end || !start.parentNode || !end.parentNode) {
+            this._removeAllMarkers(root);
+            return false;
+        }
+        if (!(start.compareDocumentPosition(end) & Node.DOCUMENT_POSITION_FOLLOWING)) {
+            // the restructuring reordered the markers - give up gracefully
+            this._removeAllMarkers(root);
+            return false;
+        }
+        const range = document.createRange();
+        range.setStartAfter(start);
+        range.setEndBefore(end);
+        // ranges are live: removing the markers adjusts the boundaries
+        start.parentNode.removeChild(start);
+        end.parentNode.removeChild(end);
+        this.apply(range);
+        this._removeAllMarkers(root);
+        return true;
+    }
+
+    /**
+     * Moves a start marker that sits before a block element into that block's
+     * first position, so the marker never separates sibling blocks.
+     * @param {HTMLElement} marker - The start marker.
+     * @returns {void}
+     */
+    static _sinkStartMarker(marker) {
+        let guard = 0;
+        while (guard++ < 50) {
+            let next = marker.nextSibling;
+            while (next && this._isIgnorableText(next)) {
+                next = next.nextSibling;
+            }
+            if (!this._isSinkTarget(next)) {
+                break;
+            }
+            next.insertBefore(marker, next.firstChild);
+        }
+    }
+
+    /**
+     * Moves an end marker that sits after a block element into that block's
+     * last position, so the marker never separates sibling blocks.
+     * @param {HTMLElement} marker - The end marker.
+     * @returns {void}
+     */
+    static _sinkEndMarker(marker) {
+        let guard = 0;
+        while (guard++ < 50) {
+            let prev = marker.previousSibling;
+            while (prev && this._isIgnorableText(prev)) {
+                prev = prev.previousSibling;
+            }
+            if (!this._isSinkTarget(prev)) {
+                break;
+            }
+            prev.appendChild(marker);
+        }
+    }
+
+    /**
+     * Returns true when node is an editable block a marker may be moved into.
+     * @param {Node|null} node - Candidate node.
+     * @returns {boolean}
+     */
+    static _isSinkTarget(node) {
+        return !!node &&
+            node.nodeType === Node.ELEMENT_NODE &&
+            this._SINK_TAGS.has(node.tagName) &&
+            node.getAttribute("contenteditable") !== "false";
+    }
+
+    /**
+     * Returns true when node is a whitespace-only text node.
+     * @param {Node} node - Candidate node.
+     * @returns {boolean}
+     */
+    static _isIgnorableText(node) {
+        return node.nodeType === Node.TEXT_NODE && (node.textContent || "").trim() === "";
+    }
 };
 
 /**
@@ -603,6 +737,10 @@ webexpress.webui.EditorFormat = class {
     static INLINE_FORMAT_SELECTOR =
         "b,strong,i,em,u,s,strike,del,sub,sup,mark,small,code,font,span";
 
+    /** Block units a multi-block transform is sliced by. */
+    static BLOCK_UNIT_SELECTOR =
+        "p,h1,h2,h3,h4,h5,h6,blockquote,pre,div,li,td,th";
+
     /**
      * Command table. Keys are lower-cased command names.
      * - type "toggle": tag to add / selector to detect / styleProps to clear /
@@ -757,6 +895,51 @@ webexpress.webui.EditorFormat = class {
     }
 
     /**
+     * Replaces the inline formatting of the selection with the given wrapper
+     * chain (captured by the format painter). The existing inline formatting
+     * is stripped first, then every text node is wrapped in clones of the
+     * chain, outermost first. An empty chain therefore acts like removeFormat.
+     * @param {webexpress.webui.EditorCtrl} editor - The editor instance.
+     * @param {Range} range - The (non-collapsed) selection range.
+     * @param {{tag:string, style:string}[]} chain - Wrapper descriptors.
+     * @returns {void}
+     */
+    static applyChain(editor, range, chain) {
+        const root = editor.getEditorElement();
+        if (!root) {
+            return;
+        }
+        this._transformRange(root, range, (frag) => {
+            this._stripAllInlineInFrag(frag);
+            if (!chain || !chain.length) {
+                return;
+            }
+            this._textNodesInScope(frag, false).forEach((t) => {
+                let outer = null;
+                let inner = null;
+                chain.forEach((d) => {
+                    const el = document.createElement(d.tag);
+                    if (d.style) {
+                        el.setAttribute("style", d.style);
+                    }
+                    if (inner) {
+                        inner.appendChild(el);
+                    } else {
+                        outer = el;
+                    }
+                    inner = el;
+                });
+                t.parentNode.insertBefore(outer, t);
+                inner.appendChild(t);
+            });
+        });
+        this._cleanupEmptyWrappers(root);
+        editor._saveCurrentSelection();
+        editor._syncValue();
+        editor._updateUndoRedoStates();
+    }
+
+    /**
      * Adds or removes a toggle format across the selection, depending on
      * whether the whole selection already carries it.
      * @param {HTMLElement} root - The editor content element.
@@ -904,40 +1087,104 @@ webexpress.webui.EditorFormat = class {
     }
 
     /**
-     * Extracts the selected content, lets transform() rewrite it, then
-     * reinserts it and reselects it. extractContents() handles the boundary
-     * splitting; the insertion point is normalized so leftover empty wrappers
-     * do not re-apply formatting.
+     * Transforms the selected content in place and reselects it. The range is
+     * sliced into per-block sub-ranges first, because extractContents() on a
+     * range that crosses block boundaries clones the block structure into the
+     * fragment: reinserting it would nest a copy of the list/table and leave
+     * empty shells (e.g. empty <li>s) at the selection boundaries. Each slice
+     * lies entirely within one block, so only inline wrappers are ever cloned;
+     * the insertion point of every slice is normalized so leftover empty
+     * wrappers do not re-apply formatting.
      * @param {HTMLElement} root - The editor content element.
      * @param {Range} range - The selection range.
      * @param {function(DocumentFragment):void} transform - Fragment rewriter.
      * @returns {void}
      */
     static _transformRange(root, range, transform) {
-        const frag = range.extractContents();
-        transform(frag);
-        this._normalizeInsertionPoint(range, root);
-        this._insertFragAndSelect(range, frag);
+        const slices = this._sliceRangeByBlock(root, range);
+        let first = null;
+        let last = null;
+
+        slices.forEach((slice) => {
+            const frag = slice.extractContents();
+            transform(frag);
+            this._normalizeInsertionPoint(slice, root);
+            const f = frag.firstChild;
+            if (!f) {
+                return; // nothing left to insert in this block
+            }
+            const l = frag.lastChild;
+            slice.insertNode(frag);
+            if (!first) {
+                first = f;
+            }
+            last = l;
+        });
+
+        if (first && last) {
+            const selRange = document.createRange();
+            selRange.setStartBefore(first);
+            selRange.setEndAfter(last);
+            webexpress.webui.EditorSelection.apply(selRange);
+        }
     }
 
     /**
-     * Inserts the (transformed) fragment at the collapsed range and selects the
-     * inserted nodes.
-     * @param {Range} range - Collapsed range at the extraction point.
-     * @param {DocumentFragment} frag - The fragment to insert.
-     * @returns {void}
+     * Splits a (possibly multi-block) range into sub-ranges that each lie
+     * entirely within one block unit. Consecutive text nodes sharing the same
+     * block form one slice; the slices containing the original boundaries are
+     * clamped to them. Slices are built up front, before any mutation, and
+     * stay valid while earlier slices are transformed because each one is
+     * confined to its own block.
+     * @param {HTMLElement} root - The editor content element.
+     * @param {Range} range - The selection range.
+     * @returns {Range[]} The per-block sub-ranges, in document order.
      */
-    static _insertFragAndSelect(range, frag) {
-        const first = frag.firstChild;
-        const last = frag.lastChild;
-        if (!first) {
-            return; // nothing left to insert -> keep the collapsed caret
+    static _sliceRangeByBlock(root, range) {
+        const texts = this._textNodesInRange(range, root, false);
+        const runs = [];
+        let cur = null;
+        texts.forEach((t) => {
+            const unit = this._blockOf(t, root);
+            if (cur && cur.unit === unit) {
+                cur.nodes.push(t);
+            } else {
+                cur = { unit: unit, nodes: [t] };
+                runs.push(cur);
+            }
+        });
+        return runs.map((run) => {
+            const r = document.createRange();
+            const firstNode = run.nodes[0];
+            const lastNode = run.nodes[run.nodes.length - 1];
+            r.setStart(firstNode, 0);
+            r.setEnd(lastNode, (lastNode.textContent || "").length);
+            if (range.compareBoundaryPoints(Range.START_TO_START, r) > 0) {
+                r.setStart(range.startContainer, range.startOffset);
+            }
+            if (range.compareBoundaryPoints(Range.END_TO_END, r) < 0) {
+                r.setEnd(range.endContainer, range.endOffset);
+            }
+            return r;
+        });
+    }
+
+    /**
+     * Returns the nearest block unit containing node, or root when the node
+     * lives directly under the editor root.
+     * @param {Node} node - Start node.
+     * @param {HTMLElement} root - Search boundary.
+     * @returns {HTMLElement}
+     */
+    static _blockOf(node, root) {
+        let el = node && node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
+        while (el && el !== root) {
+            if (el.matches && el.matches(this.BLOCK_UNIT_SELECTOR)) {
+                return el;
+            }
+            el = el.parentElement;
         }
-        range.insertNode(frag);
-        const selRange = document.createRange();
-        selRange.setStartBefore(first);
-        selRange.setEndAfter(last);
-        webexpress.webui.EditorSelection.apply(selRange);
+        return root;
     }
 
     /**
@@ -1827,6 +2074,191 @@ webexpress.webui.EditorPendingFormat = class {
 };
 
 /**
+ * Format painter ("apply formatting of a selection"). Captures the inline
+ * formatting at the current selection when armed and applies it to the next
+ * selection made in the editor. A plain source selection (no formatting)
+ * makes the painter act like removeFormat, mirroring Word's behaviour.
+ */
+webexpress.webui.EditorPainter = class {
+
+    /** Css class set on the content element while the painter is armed. */
+    static ACTIVE_CLASS = "wx-editor-painting";
+
+    /**
+     * @param {webexpress.webui.EditorCtrl} editor - The owning editor instance.
+     */
+    constructor(editor) {
+        this._editor = editor;
+        this._chain = null; // captured wrapper descriptors, outermost first
+        this._onMouseUp = (e) => this._handleMouseUp(e);
+        this._onKeyDown = (e) => this._handleKeyDown(e);
+    }
+
+    /**
+     * Returns whether the painter is armed.
+     * @returns {boolean}
+     */
+    isActive() {
+        return this._chain !== null;
+    }
+
+    /**
+     * Arms the painter with the formatting of the current selection, or
+     * disarms it when already armed.
+     * @returns {void}
+     */
+    toggle() {
+        if (this.isActive()) {
+            this.cancel();
+        } else {
+            this.capture();
+        }
+    }
+
+    /**
+     * Captures the inline formatting at the current selection and arms the
+     * painter.
+     * @returns {boolean} True when a selection was available.
+     */
+    capture() {
+        const root = this._editor.getEditorElement();
+        const range = webexpress.webui.EditorSelection.getRange(root);
+        if (!root || !range) {
+            return false;
+        }
+        const Format = webexpress.webui.EditorFormat;
+        let node = range.startContainer;
+        if (!range.collapsed) {
+            // prefer the first real text node so a boundary that starts just
+            // outside a wrapper still captures the visible formatting
+            const texts = Format._textNodesInRange(range, root, true);
+            if (texts.length) {
+                node = texts[0];
+            }
+        }
+        this._chain = this._collectChain(node, root);
+        this._setActive(true);
+        return true;
+    }
+
+    /**
+     * Disarms the painter and discards the captured formatting.
+     * @returns {void}
+     */
+    cancel() {
+        this._chain = null;
+        this._setActive(false);
+    }
+
+    /**
+     * Collects the inline format wrappers around node, outermost first,
+     * stopping at the surrounding block.
+     * @param {Node} node - The capture position.
+     * @param {HTMLElement} root - The editor content element.
+     * @returns {{tag:string, style:string}[]}
+     */
+    _collectChain(node, root) {
+        const Format = webexpress.webui.EditorFormat;
+        const chain = [];
+        let el = node && node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
+        while (el && el !== root) {
+            if (el.matches && el.matches(webexpress.webui.EditorBlocks.BLOCK_SELECTOR + ",li,td,th")) {
+                break;
+            }
+            if (Format._isInlineFormatEl(el)) {
+                chain.unshift({
+                    tag: el.tagName.toLowerCase(),
+                    style: el.getAttribute("style") || ""
+                });
+            }
+            el = el.parentElement;
+        }
+        return chain;
+    }
+
+    /**
+     * Toggles the armed state: visual feedback on the content element, the
+     * apply/cancel listeners and the toolbar button highlight.
+     * @param {boolean} active - The new state.
+     * @returns {void}
+     */
+    _setActive(active) {
+        const root = this._editor.getEditorElement();
+        if (root) {
+            root.classList.toggle(webexpress.webui.EditorPainter.ACTIVE_CLASS, active);
+        }
+        if (active) {
+            document.addEventListener("mouseup", this._onMouseUp, true);
+            document.addEventListener("keydown", this._onKeyDown, true);
+        } else {
+            document.removeEventListener("mouseup", this._onMouseUp, true);
+            document.removeEventListener("keydown", this._onKeyDown, true);
+        }
+        this._refreshButton(active);
+    }
+
+    /**
+     * Reflects the armed state on the toolbar button.
+     * @param {boolean} active - The armed state.
+     * @returns {void}
+     */
+    _refreshButton(active) {
+        const host = this._editor._uiContainer;
+        const btn = host && host.querySelector('button[data-command="formatpainter"]');
+        if (btn) {
+            btn.classList.toggle("active", active);
+        }
+    }
+
+    /**
+     * Applies the captured formatting once a selection is finished inside the
+     * editor content. Mouseups elsewhere (toolbar, dialogs) are ignored so the
+     * armed state survives them.
+     * @param {MouseEvent} e - The mouseup event.
+     * @returns {void}
+     */
+    _handleMouseUp(e) {
+        const root = this._editor.getEditorElement();
+        if (!root || !root.contains(e.target)) {
+            return;
+        }
+        // defer until the browser has finalized the selection for this mouseup
+        setTimeout(() => this._applyToCurrentSelection(), 0);
+    }
+
+    /**
+     * Disarms the painter on Escape.
+     * @param {KeyboardEvent} e - The keydown event.
+     * @returns {void}
+     */
+    _handleKeyDown(e) {
+        if (e.key === "Escape") {
+            this.cancel();
+        }
+    }
+
+    /**
+     * Applies the captured chain to the current selection and disarms the
+     * painter. A simple click (collapsed selection) consumes the painter
+     * without applying anything.
+     * @returns {void}
+     */
+    _applyToCurrentSelection() {
+        if (!this.isActive()) {
+            return;
+        }
+        const root = this._editor.getEditorElement();
+        const range = webexpress.webui.EditorSelection.getRange(root);
+        const chain = this._chain;
+        this.cancel();
+        if (!range || range.collapsed) {
+            return;
+        }
+        webexpress.webui.EditorFormat.applyChain(this._editor, range, chain);
+    }
+};
+
+/**
  * List and indentation command engine. Stateless: every method takes the
  * owning editor and reads the live selection itself.
  */
@@ -1931,7 +2363,7 @@ webexpress.webui.EditorList = class {
             return;
         }
 
-        const marker = this._markCaret(range);
+        const marked = webexpress.webui.EditorSelection.markRange(range);
 
         const allLi = units.every((u) => u.tagName === "LI");
         if (allLi) {
@@ -1946,8 +2378,8 @@ webexpress.webui.EditorList = class {
             this._makeList(units, listTag);
         }
 
-        if (marker) {
-            webexpress.webui.EditorSelection.placeCaretAtMarker(root);
+        if (marked) {
+            webexpress.webui.EditorSelection.restoreRange(root);
         }
     }
 
@@ -2130,15 +2562,15 @@ webexpress.webui.EditorList = class {
         if (!units.length) {
             return;
         }
-        const marker = this._markCaret(range);
+        const marked = webexpress.webui.EditorSelection.markRange(range);
 
         const items = units.filter((u) => u.tagName === "LI");
         const blocks = units.filter((u) => u.tagName !== "LI");
         this._groupConsecutive(items).forEach((run) => this._indentRun(run));
         blocks.forEach((b) => this._adjustIndent(b, 1));
 
-        if (marker) {
-            webexpress.webui.EditorSelection.placeCaretAtMarker(root);
+        if (marked) {
+            webexpress.webui.EditorSelection.restoreRange(root);
         }
     }
 
@@ -2154,15 +2586,15 @@ webexpress.webui.EditorList = class {
         if (!units.length) {
             return;
         }
-        const marker = this._markCaret(range);
+        const marked = webexpress.webui.EditorSelection.markRange(range);
 
         const items = units.filter((u) => u.tagName === "LI");
         const blocks = units.filter((u) => u.tagName !== "LI");
         this._groupConsecutive(items).forEach((run) => this._outdentRun(run));
         blocks.forEach((b) => this._adjustIndent(b, -1));
 
-        if (marker) {
-            webexpress.webui.EditorSelection.placeCaretAtMarker(root);
+        if (marked) {
+            webexpress.webui.EditorSelection.restoreRange(root);
         }
     }
 
@@ -2361,19 +2793,6 @@ webexpress.webui.EditorList = class {
         return out;
     }
 
-    /**
-     * Drops a caret marker at the start of the selection so the caret can be
-     * restored after the restructuring.
-     * @param {Range} range - The selection range.
-     * @returns {HTMLElement|null} The inserted marker, or null.
-     */
-    static _markCaret(range) {
-        const marker = webexpress.webui.EditorSelection.createMarker();
-        const r = range.cloneRange();
-        r.collapse(true);
-        r.insertNode(marker);
-        return marker;
-    }
 };
 
 /**
@@ -2818,6 +3237,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         this._attachEventHandlers();
         this._deletion = new webexpress.webui.EditorDeletion(this);
         this._pendingFormat = new webexpress.webui.EditorPendingFormat(this);
+        this._painter = new webexpress.webui.EditorPainter(this);
         this._history = new webexpress.webui.EditorHistory(this);
         this._initializePlugins();
         this._updateUndoRedoStates();
@@ -3375,6 +3795,12 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         this._editorElement.focus({ preventScroll: true });
         this.restoreSavedRange();
 
+        if (cmd === "formatpainter") {
+            if (this._painter) {
+                this._painter.toggle();
+            }
+            return;
+        }
         if (webexpress.webui.EditorFormat.handles(command)) {
             webexpress.webui.EditorFormat.exec(this, command, value);
             return;
@@ -3401,6 +3827,9 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      * @returns {boolean}
      */
     queryCommandState(command) {
+        if ((command || "").toLowerCase() === "formatpainter") {
+            return !!(this._painter && this._painter.isActive());
+        }
         if (webexpress.webui.EditorFormat.handles(command)) {
             return webexpress.webui.EditorFormat.queryState(this, command);
         }
@@ -3513,6 +3942,10 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      * Cleans up resources when the control is destroyed.
      */
     destroy() {
+        if (this._painter) {
+            this._painter.cancel();
+        }
+
         if (this._documentClickHandler) {
             document.removeEventListener("click", this._documentClickHandler);
         }

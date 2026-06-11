@@ -73,6 +73,11 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         fragment.appendChild(this._createSeparator());
         fragment.appendChild(this._createTextColorDropdown(editor));
         fragment.appendChild(this._createHighlightDropdown(editor));
+        fragment.appendChild(this._createBtn(editor, {
+            cmd: "formatpainter",
+            icon: "fas fa-paint-roller",
+            tip: webexpress.webui.I18N.translate("webexpress.webui:editor.formatpainter")
+        }));
 
         fragment.appendChild(this._createSeparator());
         fragment.appendChild(this._createListButtons(editor));

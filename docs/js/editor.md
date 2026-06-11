@@ -63,6 +63,10 @@ When text is selected, a floating mini-toolbar appears **below** the selection w
 
 The toolbar is always anchored below the selection. It repositions itself on scroll and on window resize, clamps against the viewport edges, and disappears when the selection collapses, the editor loses focus, or the user clicks outside.
 
+## Format Painter
+
+The toolbar provides a format painter that transfers the inline formatting of one selection to another. Clicking the paint-roller button arms the painter with the formatting at the current selection; the next selection made in the editor content receives that formatting, replacing its previous inline formatting. A source selection without any inline formatting makes the painter act like *Clear Format*. Pressing `Escape`, or clicking the button again, disarms the painter without applying anything.
+
 ## Instruction Text
 
 The editor provides a tool to insert instruction texts (Anweisungstexte) for authors via a toolbar button. Clicking the button opens a prompt asking for the text. The entered text is inserted into the editor as a highly visible, distinct block. This block is read-only (`contenteditable="false"`) to prevent accidental editing of the structure. Outside the editor context, the instruction text is hidden via CSS, making it completely invisible on the published page.

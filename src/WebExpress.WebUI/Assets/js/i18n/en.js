@@ -123,6 +123,7 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "editor.super": "Super",
     "editor.sub": "Sub",
     "editor.clearformat": "Clear Format",
+    "editor.formatpainter": "Format Painter",
     "editor.textcolor": "Text Color",
     "editor.highlightcolor": "Highlight Color",
     "editor.color.yellow": "Yellow",

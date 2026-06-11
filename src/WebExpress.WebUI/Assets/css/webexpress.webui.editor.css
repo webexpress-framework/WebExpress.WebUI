@@ -34,6 +34,12 @@
     outline: none;
 }
 
+/* format painter armed: signal that the next selection receives the format */
+.wx-editor-content.wx-editor-painting,
+.wx-editor-content.wx-editor-painting * {
+    cursor: copy;
+}
+
 /* guard / empty paragraphs (placed around non-editable blocks) must keep a
    caret-sized line height so the caret is visible when it lands inside them */
 .wx-editor-content p:empty {
