@@ -579,7 +579,9 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         const walk = (rows) => {
             for (const r of rows) {
                 out.push(r);
-                if (r.children?.length && r.expanded) {
+                // keyboard navigation must match the rendered rows, so the
+                // tree gate of the reorderable subclass applies here as well
+                if (this._treeEnabled !== false && r.children?.length && r.expanded) {
                     walk(r.children);
                 }
             }
@@ -623,52 +625,77 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
         queueMicrotask(() => {
             this._renderScheduled = false;
+            this._renderNow();
+        });
+    }
 
-            const currentStates = this._collectCurrentRowStates();
-            const changedIds = new Set();
-            const newIds = new Set();
+    /**
+     * Performs a full render pass. Subclasses extend the pass through the
+     * hooks (_buildLeadingHeaderCells, _buildLeadingCells, _renderActionsHeader,
+     * _afterRenderDom) instead of overriding the pipeline, so batching and the
+     * change-flash diff stay in one place.
+     */
+    _renderNow() {
+        const currentStates = this._collectCurrentRowStates();
+        const changedIds = new Set();
+        const newIds = new Set();
 
-            const shouldHighlight = this._initialized
-                && this._highlightChanges
-                && !this._suppressFlashOnce
-                && this._prevRowState.size > 0;
+        const shouldHighlight = this._initialized
+            && this._highlightChanges
+            && !this._suppressFlashOnce
+            && this._prevRowState.size > 0;
 
-            if (shouldHighlight) {
-                for (const entry of currentStates) {
-                    const oldSig = this._prevRowState.get(entry.key);
-                    if (oldSig === undefined) {
-                        newIds.add(entry.key);
-                    } else if (oldSig !== entry.signature) {
-                        changedIds.add(entry.key);
-                    }
+        if (shouldHighlight) {
+            for (const entry of currentStates) {
+                const oldSig = this._prevRowState.get(entry.key);
+                if (oldSig === undefined) {
+                    newIds.add(entry.key);
+                } else if (oldSig !== entry.signature) {
+                    changedIds.add(entry.key);
                 }
             }
+        }
 
-            this._isTree = this._detectTree(this._rows);
+        this._isTree = this._detectTree(this._rows);
 
-            this._rebuildColumnIndexCache();
-            this._syncColumnWidths();
+        this._rebuildColumnIndexCache();
+        this._syncColumnWidths();
 
-            this._renderColumns();
-            this._renderRows(changedIds, newIds);
-            this._renderFooter();
-            this._attachColumnResizers();
+        this._renderColumns();
+        this._renderRows(changedIds, newIds);
+        this._renderFooter();
+        this._attachColumnResizers();
+        this._afterRenderDom();
 
-            this._suppressFlashOnce = false;
-            this._updateSnapshot(currentStates);
-            this._initialized = true;
+        this._suppressFlashOnce = false;
+        this._updateSnapshot(currentStates);
+        this._initialized = true;
 
-            // auto-select the first row on the very first render when the
-            // table is selectable. The primary action of the row is triggered
-            // afterwards so a paired panel (e.g. preview / detail view) can
-            // populate itself without requiring an explicit user click.
-            if (this._selectable && !this._autoSelected && this._rows.length > 0 && this._selectedRow === null) {
-                this._autoSelected = true;
-                const firstRow = this._rows[0];
-                this._selectRowInternal(firstRow, null);
-                this._triggerPrimaryAction(firstRow);
-            }
-        });
+        this._autoSelectFirstRow();
+    }
+
+    /**
+     * Hook for subclasses to bind row-level interactions after the DOM was
+     * rebuilt, for example drag handles.
+     */
+    _afterRenderDom() { }
+
+    /**
+     * Auto-selects the first row on the very first render when the table is
+     * selectable. The primary action of the row is triggered afterwards so a
+     * paired panel (e.g. preview / detail view) can populate itself without
+     * requiring an explicit user click. Skipped while a data load is pending
+     * (_isLoading is owned by REST-backed subclasses), so placeholder rows
+     * are never auto-selected.
+     */
+    _autoSelectFirstRow() {
+        if (!this._selectable || this._autoSelected || this._isLoading || this._selectedRow !== null || this._rows.length === 0) {
+            return;
+        }
+        this._autoSelected = true;
+        const firstRow = this._rows[0];
+        this._selectRowInternal(firstRow, null);
+        this._triggerPrimaryAction(firstRow);
     }
 
     /**
@@ -707,6 +734,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         headFragment.appendChild(headRow);
 
         if (!this._suppressHeaders) {
+            this._buildLeadingHeaderCells(headRow);
+
             for (const col of this._columns) {
                 if (!col.visible) {
                     continue;
@@ -714,15 +743,40 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 headRow.appendChild(this._buildHeaderCell(col));
             }
 
-            if (this._hasOptions) {
-                const th = document.createElement("div");
-                th.className = "wx-grid-header-cell wx-table-actions";
-                th.setAttribute("role", "columnheader");
-                headRow.appendChild(th);
+            if (this._hasActionsColumn()) {
+                this._renderActionsHeader(headRow);
             }
         }
 
         this._head.replaceChildren(headFragment);
+    }
+
+    /**
+     * Hook for subclasses to prepend non-data header cells, for example a
+     * drag-handle column.
+     * @param {HTMLElement} headRow - Header row element.
+     */
+    _buildLeadingHeaderCells(headRow) { }
+
+    /**
+     * Renders the trailing actions header cell. The base control renders an
+     * empty cell; subclasses may add controls such as a column manager.
+     * @param {HTMLElement} headRow - Header row element.
+     */
+    _renderActionsHeader(headRow) {
+        const th = document.createElement("div");
+        th.className = "wx-grid-header-cell wx-table-actions";
+        th.setAttribute("role", "columnheader");
+        headRow.appendChild(th);
+    }
+
+    /**
+     * Determines whether the trailing actions column is rendered. Subclasses
+     * may widen the condition, for example when column management is enabled.
+     * @returns {boolean}
+     */
+    _hasActionsColumn() {
+        return this._hasOptions;
     }
 
     /**
@@ -772,7 +826,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         const renderList = (rows, depth) => {
             for (const r of rows) {
                 this._addRow(r, depth, fragment, changedIds, newIds);
-                if (r.children?.length && r.expanded) {
+                // _treeEnabled is owned by the reorderable subclass; undefined means enabled
+                if (this._treeEnabled !== false && r.children?.length && r.expanded) {
                     renderList(r.children, depth + 1);
                 }
             }
@@ -829,6 +884,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         row._anchorTr = tr;
         row._depth = depth;
 
+        this._buildLeadingCells(tr, row);
+
         let firstVisible = true;
 
         for (let i = 0; i < this._columns.length; i++) {
@@ -840,15 +897,24 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             firstVisible = false;
         }
 
-        if (this._hasOptions) {
+        if (this._hasActionsColumn()) {
             tr.appendChild(this._buildOptionsCell(row));
         }
 
-        if (this._isTree) {
+        if (this._isTree && this._treeEnabled !== false) {
             this._injectTreeToggle(tr, row, depth);
         }
         fragment.appendChild(tr);
     }
+
+    /**
+     * Hook for subclasses to prepend non-data cells to a row, for example a
+     * drag handle. Leading cells must be mirrored by _gridLeadingParts so the
+     * grid template stays aligned.
+     * @param {HTMLElement} tr - Row element.
+     * @param {Object} row - Row data object.
+     */
+    _buildLeadingCells(tr, row) { }
 
     /**
      * Applies primary/secondary action attributes from a structured object onto a row element.
