@@ -140,7 +140,17 @@ webexpress.webui.EditorSelection = class {
         if (!range) {
             return false;
         }
-        const collapsed = range.collapsed;
+
+        if (range.collapsed) {
+            // a single marker suffices for a caret; a marker pair would leave
+            // an empty text-split residue between the two markers and the
+            // restored range would no longer be collapsed
+            const caretMarker = this.createMarker();
+            caretMarker.setAttribute(this.MARKER_ATTR, "start");
+            const r = range.cloneRange();
+            r.insertNode(caretMarker);
+            return true;
+        }
 
         const endMarker = this.createMarker();
         endMarker.setAttribute(this.MARKER_ATTR, "end");
@@ -154,10 +164,8 @@ webexpress.webui.EditorSelection = class {
         startRange.collapse(true);
         startRange.insertNode(startMarker);
 
-        if (!collapsed) {
-            this._sinkStartMarker(startMarker);
-            this._sinkEndMarker(endMarker);
-        }
+        this._sinkStartMarker(startMarker);
+        this._sinkEndMarker(endMarker);
         return true;
     }
 
@@ -173,9 +181,19 @@ webexpress.webui.EditorSelection = class {
         }
         const start = root.querySelector("[" + this.MARKER_ATTR + "='start']");
         const end = root.querySelector("[" + this.MARKER_ATTR + "='end']");
-        if (!start || !end || !start.parentNode || !end.parentNode) {
+        if (!start || !start.parentNode) {
             this._removeAllMarkers(root);
             return false;
+        }
+        if (!end || !end.parentNode) {
+            // a single marker stands for a collapsed caret
+            const caret = document.createRange();
+            caret.setStartBefore(start);
+            caret.collapse(true);
+            start.parentNode.removeChild(start);
+            this.apply(caret);
+            this._removeAllMarkers(root);
+            return true;
         }
         if (!(start.compareDocumentPosition(end) & Node.DOCUMENT_POSITION_FOLLOWING)) {
             // the restructuring reordered the markers - give up gracefully
@@ -1165,8 +1183,42 @@ webexpress.webui.EditorFormat = class {
             if (range.compareBoundaryPoints(Range.END_TO_END, r) < 0) {
                 r.setEnd(range.endContainer, range.endOffset);
             }
+            this._widenToBlockEdge(r, run.unit);
             return r;
         });
+    }
+
+    /**
+     * Lifts the slice boundaries to position-equivalent points directly under
+     * the block unit. A boundary sitting at the very edge of an inline
+     * wrapper, e.g. (text, 0) inside <b>text</b>, marks the same position as
+     * the point before the wrapper, but extractContents behaves differently:
+     * with the inner representation it takes the same-text-node shortcut and
+     * never clones the wrapper into the fragment, so a strip transform could
+     * not remove it and the reinserted content would land back inside it.
+     * @param {Range} r - The slice range (mutated in place).
+     * @param {HTMLElement} unit - The block unit the slice belongs to.
+     * @returns {void}
+     */
+    static _widenToBlockEdge(r, unit) {
+        let sn = r.startContainer;
+        let so = r.startOffset;
+        while (sn !== unit && so === 0 && sn.parentNode) {
+            so = Array.prototype.indexOf.call(sn.parentNode.childNodes, sn);
+            sn = sn.parentNode;
+        }
+        r.setStart(sn, so);
+
+        let en = r.endContainer;
+        let eo = r.endOffset;
+        while (en !== unit && en.parentNode &&
+            eo === (en.nodeType === Node.TEXT_NODE
+                ? (en.textContent || "").length
+                : en.childNodes.length)) {
+            eo = Array.prototype.indexOf.call(en.parentNode.childNodes, en) + 1;
+            en = en.parentNode;
+        }
+        r.setEnd(en, eo);
     }
 
     /**

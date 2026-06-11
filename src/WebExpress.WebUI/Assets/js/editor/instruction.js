@@ -34,23 +34,9 @@ webexpress.webui.EditorPlugins.register("instruction", 5000, {
                 action: () => {
                     // current text without the leading icon
                     const text = (instruction.textContent || "").trim();
-                    // place the caret where the instruction was, then remove it,
-                    // so the dialog re-inserts the edited text in the same spot
-                    const range = document.createRange();
-                    range.setStartBefore(instruction);
-                    range.collapse(true);
-                    const sel = window.getSelection();
-                    sel.removeAllRanges();
-                    sel.addRange(range);
-                    const activeRange = range.cloneRange();
-                    instruction.remove();
-                    if (typeof editor._saveCurrentSelection === "function") {
-                        editor._saveCurrentSelection();
-                    }
-                    if (typeof editor._syncValue === "function") {
-                        editor._syncValue();
-                    }
-                    this._openModal(editor, "instructionModal", "editor-instruction", "webexpress.webui:editor.instruction.title", { text: text }, activeRange);
+                    // the instruction stays in the document; the dialog updates
+                    // it in place on submit, so cancelling keeps it untouched
+                    this._openModal(editor, "instructionModal", "editor-instruction", "webexpress.webui:editor.instruction.title", { text: text }, null, instruction);
                 }
             },
             {
@@ -117,9 +103,10 @@ webexpress.webui.EditorPlugins.register("instruction", 5000, {
      * @param {string} title - The title to display in the modal header.
      * @param {object|null} prefill - Optional data to prefill the modal form.
      * @param {Range|null} activeRange - The actively saved text range before focus loss.
+     * @param {HTMLElement|null} [target] - An existing instruction element to update in place (edit mode).
      * @returns {void}
      */
-    _openModal: function(editor, modalProperty, key, title, prefill, activeRange) {
+    _openModal: function(editor, modalProperty, key, title, prefill, activeRange, target) {
         if (!this[modalProperty]) {
             this[modalProperty] = this._createModal(key, title);
         }
@@ -129,6 +116,9 @@ webexpress.webui.EditorPlugins.register("instruction", 5000, {
             ctrl._editor = editor;
             ctrl._backupRange = activeRange ? activeRange.cloneRange() : null;
             ctrl._instructionPrefill = prefill || null;
+            // always (re)set the edit target so a previous edit cannot hijack
+            // a later insert through the toolbar button
+            ctrl._instructionTarget = target || null;
 
             if (typeof ctrl.show === "function") {
                 ctrl.show();

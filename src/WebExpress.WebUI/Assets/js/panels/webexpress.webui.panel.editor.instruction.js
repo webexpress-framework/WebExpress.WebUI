@@ -143,15 +143,32 @@ webexpress.webui.DialogPanels.register("editor-instruction", {
         };
 
         const safeText = escapeHtml(textVal);
+        const innerHtml = `<i class="${webexpress.webui.IconTheme.resolveFa("fas fa-info-circle")}"></i> ${safeText}`;
 
-        // insert as an inline, non-editable atomic so the instruction sits in
-        // the running text instead of forcing its own line/block. A trailing
-        // no-break space gives the caret a place to land after the element.
-        const html =
-            `<span class="wx-editor-instruction" contenteditable="false"><i class="${webexpress.webui.IconTheme.resolveFa("fas fa-info-circle")}"></i> ${safeText}</span>&nbsp;`;
+        const root = typeof editor.getEditorElement === "function" ? editor.getEditorElement() : null;
+        const target = modal._instructionTarget;
+        modal._instructionTarget = null;
 
-        // editor.insertHtmlAtCursor focuses editor and restores saved range internally
-        editor.insertHtmlAtCursor(html);
+        if (target && root && root.contains(target)) {
+            // edit mode: update the existing element in place so its position
+            // is kept and a cancelled dialog can never lose the instruction
+            target.innerHTML = innerHtml;
+            if (typeof editor._syncValue === "function") {
+                editor._syncValue();
+            }
+            if (typeof editor._updateUndoRedoStates === "function") {
+                editor._updateUndoRedoStates();
+            }
+        } else {
+            // insert as an inline, non-editable atomic so the instruction sits in
+            // the running text instead of forcing its own line/block. A trailing
+            // no-break space gives the caret a place to land after the element.
+            const html =
+                `<span class="wx-editor-instruction" contenteditable="false">${innerHtml}</span>&nbsp;`;
+
+            // editor.insertHtmlAtCursor focuses editor and restores saved range internally
+            editor.insertHtmlAtCursor(html);
+        }
 
         if (typeof modal.hide === "function") {
             modal.hide();

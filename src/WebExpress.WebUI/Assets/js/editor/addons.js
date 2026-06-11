@@ -147,6 +147,127 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
     },
 
     /**
+     * Brings persisted add-ons back to life after the content has been loaded
+     * or programmatically replaced. Instantiating a control consumes its
+     * marker class and replaces the widget markup with runtime DOM (e.g. the
+     * Game of Life canvas), so persisted content only carries a dead shell.
+     * Re-rendering the widget body from the definition restores the marker
+     * class, which lets the controller instantiate the control again.
+     * Containers (user content) and purely static add-ons are left untouched.
+     * @param {object} editor -The editor instance.
+     */
+    onContentChange: function(editor) {
+        const root = editor.getEditorElement();
+        if (!root) {
+            return;
+        }
+
+        root.querySelectorAll("[data-addon-id]").forEach((frame) => {
+            const def = webexpress.webui.EditorAddOns.get(frame.getAttribute("data-addon-id") || "");
+            if (!def || def.isContainer) {
+                return; // container bodies carry user content and must survive
+            }
+
+            const host = (def.type || "block") === "inline"
+                ? frame
+                : frame.querySelector(".card-body");
+            if (!host) {
+                return;
+            }
+
+            const data = this._readAddonData(def, frame, host.firstElementChild);
+            const html = typeof def.renderer === "function" ? def.renderer(data) : (def.content || "");
+            if (!this._containsRegisteredControl(html)) {
+                return; // static content persists on its own
+            }
+            if (this._hasLiveControl(host)) {
+                return; // already instantiated or about to be picked up
+            }
+
+            host.innerHTML = html;
+        });
+    },
+
+    /**
+     * Collects the persisted property values of an add-on. The widget element
+     * is preferred (settings dialog writes there); the frame serves as the
+     * fallback because new insertions persist the values on the frame, which
+     * survives even when a control replaces the widget markup at runtime.
+     * @param {object} def -Add-on definition.
+     * @param {HTMLElement} frame -The add-on frame element.
+     * @param {HTMLElement|null} widget -The widget element inside the body.
+     * @returns {object} The property values keyed by property name.
+     */
+    _readAddonData: function(def, frame, widget) {
+        const data = {};
+        (def.properties || []).forEach((prop) => {
+            const attr = this._propertyAttributeName(prop.name);
+            if (widget && widget.hasAttribute && widget.hasAttribute(attr)) {
+                data[prop.name] = widget.getAttribute(attr);
+            } else if (frame.hasAttribute(attr)) {
+                data[prop.name] = frame.getAttribute(attr);
+            }
+        });
+        return data;
+    },
+
+    /**
+     * Returns the data attribute name of a property (camelCase to kebab-case).
+     * @param {string} name -The property name.
+     * @returns {string} The data attribute name.
+     */
+    _propertyAttributeName: function(name) {
+        return "data-" + name.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+    },
+
+    /**
+     * Returns whether the rendered add-on markup contains the marker class of
+     * a registered control, i.e. whether the add-on hosts a JS control that
+     * needs instantiation (in contrast to purely static markup).
+     * @param {string} html -The freshly rendered add-on markup.
+     * @returns {boolean}
+     */
+    _containsRegisteredControl: function(html) {
+        const registry = webexpress.webui.Controller.classRegistry;
+        if (!registry) {
+            return false;
+        }
+        for (const selector of registry.keys()) {
+            const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            if (new RegExp("(^|[^-\\w])" + escaped + "($|[^-\\w])").test(html)) {
+                return true;
+            }
+        }
+        return false;
+    },
+
+    /**
+     * Returns whether the add-on body still hosts a living control: either an
+     * element with a registered instance, or one that still carries a marker
+     * class and is therefore about to be instantiated by the observer.
+     * @param {HTMLElement} host -The add-on body element.
+     * @returns {boolean}
+     */
+    _hasLiveControl: function(host) {
+        const controller = webexpress.webui.Controller;
+        const elements = [host, ...host.querySelectorAll("*")];
+        return elements.some((el) => {
+            if (controller.instanceMap && controller.instanceMap.has(el)) {
+                return true;
+            }
+            if (!el.classList || !controller.classRegistry) {
+                return false;
+            }
+            for (const selector of controller.classRegistry.keys()) {
+                if (el.classList.contains(selector)) {
+                    return true;
+                }
+            }
+            return false;
+        });
+    },
+
+    /**
      * Initializes the plugin.
      * Sets up event listeners for interactions (click, drag & drop) within the editor content.
      * @param {object} editor -The editor instance.
@@ -733,7 +854,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
             innerHtml = addon.content;
         }
 
-        const frameHtml = this._createFrameHtml(addon, innerHtml);
+        const frameHtml = this._createFrameHtml(addon, innerHtml, data);
         this._currentEditor.insertHtmlAtCursor(frameHtml);
 
         // drop the caret inside the new container body so the first edit happens
@@ -806,29 +927,62 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
             }
 
             Object.keys(data).forEach(key => {
-                const attr = "data-" + key.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+                const attr = this._propertyAttributeName(key);
                 widget.setAttribute(attr, data[key]);
             });
         }
+
+        // mirror the values onto the frame: it survives even when a control
+        // replaces the widget markup at runtime, so rehydration after a
+        // reload can re-render the add-on with the persisted configuration
+        Object.keys(data).forEach(key => {
+            frameNode.setAttribute(this._propertyAttributeName(key), data[key]);
+        });
+    },
+
+    /**
+     * Serializes property values as data attributes for the add-on frame so
+     * the configuration survives persistence independently of the widget
+     * markup, which a control may replace at runtime.
+     * @param {object} addonDef -Add-on definition.
+     * @param {object} data -Configuration data.
+     * @returns {string} The attribute string (with a leading space) or "".
+     */
+    _propertyDataAttributes: function(addonDef, data) {
+        const parts = [];
+        (addonDef.properties || []).forEach((prop) => {
+            const value = data && data[prop.name] != null ? String(data[prop.name]) : "";
+            if (value === "") {
+                return;
+            }
+            const escaped = value
+                .replace(/&/g, "&amp;")
+                .replace(/"/g, "&quot;")
+                .replace(/</g, "&lt;");
+            parts.push(`${this._propertyAttributeName(prop.name)}="${escaped}"`);
+        });
+        return parts.length ? " " + parts.join(" ") : "";
     },
 
     /**
      * Generates the HTML wrapper (Frame) for an add-on.
      * @param {object} addonDef -Add-on definition.
      * @param {string} contentHtml -Inner HTML content.
+     * @param {object} [data] -Configuration data persisted on the frame.
      * @returns {string} HTML string of the wrapped add-on.
      */
-    _createFrameHtml: function(addonDef, contentHtml) {
+    _createFrameHtml: function(addonDef, contentHtml, data) {
         const isContainer = !!addonDef.isContainer;
         const hasProps = addonDef.properties && addonDef.properties.length > 0;
         const type = addonDef.type || "block";
+        const dataAttrs = this._propertyDataAttributes(addonDef, data);
 
         if (type === "inline") {
             return `
                 <span class="wx-addon-inline-frame"
                       contenteditable="false"
                       draggable="true"
-                      data-addon-id="${addonDef.id}"
+                      data-addon-id="${addonDef.id}"${dataAttrs}
                       title="${addonDef.label}">
                     ${contentHtml}
                 </span>`;
@@ -849,7 +1003,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
                 <div class="wx-addon-frame card my-3 shadow-sm"
                      contenteditable="false"
                      draggable="false"
-                     data-addon-id="${addonDef.id}">
+                     data-addon-id="${addonDef.id}"${dataAttrs}>
 
                     <div class="card-header py-1 px-2 d-flex justify-content-between align-items-center">
                         <div class="small text-muted fw-bold d-flex align-items-center">
