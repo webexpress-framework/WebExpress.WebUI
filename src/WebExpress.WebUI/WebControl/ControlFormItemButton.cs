@@ -9,7 +9,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a button form item control.
+    /// A button placed inside a form.
     /// </summary>
     public class ControlFormItemButton : ControlFormItem, IControlFormItemButton
     {

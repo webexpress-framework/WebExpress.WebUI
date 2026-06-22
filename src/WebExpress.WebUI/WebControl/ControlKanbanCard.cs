@@ -9,7 +9,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents an card element in a kanban control.
+    /// A single card on a Kanban board, representing one item that can be moved between columns.
     /// </summary>
     public class ControlKanbanCard : IControlKanbanCard
     {

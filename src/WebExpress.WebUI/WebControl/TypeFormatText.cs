@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// The text formats
+    /// The text formatting options (such as bold or italic) that can be applied to text.
     /// </summary>
     public enum TypeFormatText
     {

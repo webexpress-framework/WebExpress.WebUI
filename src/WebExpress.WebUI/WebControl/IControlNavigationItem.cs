@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Interface for a navigation item control.
+    /// Contract for an entry that can appear in a navigation bar.
     /// </summary>
     public interface IControlNavigationItem : IControl
     {

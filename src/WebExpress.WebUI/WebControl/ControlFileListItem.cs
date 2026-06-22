@@ -9,7 +9,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents an item in a control file list.
+    /// A single file entry within a ControlFileList, showing one file and its actions.
     /// </summary>
     public class ControlFileListItem : IControlFileListItem
     {

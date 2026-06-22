@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a navigation control.
+    /// Renders a navigation bar that holds navigation items such as links, headings, and dropdowns.
     /// </summary>
     public class ControlNavigation : Control, IControlNavigation
     {

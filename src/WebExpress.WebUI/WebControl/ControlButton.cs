@@ -10,7 +10,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a button control.
+    /// Renders a clickable button the user presses to trigger an action or submit a form.
     /// </summary>
     public class ControlButton : Control, IControlButton
     {

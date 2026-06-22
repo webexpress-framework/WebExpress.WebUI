@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// The height options.
+    /// The predefined height options for sizing a control.
     /// </summary>
     public enum TypeHeight
     {

@@ -4,7 +4,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a divider item in a split button control.
+    /// A divider line within a split button's dropdown menu, separating groups of entries.
     /// </summary>
     public class ControlSplitButtonItemDivider : Control, IControlSplitButtonItem
     {

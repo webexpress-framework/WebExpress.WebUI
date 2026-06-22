@@ -4,7 +4,8 @@ using System.Linq;
 namespace WebExpress.WebUI.WebMarkdown.Element
 {
     /// <summary>
-    /// Represents a Markdown table element in the AST.
+    /// A table node in the parsed Markdown tree — a grid of rows and cells defined with pipe
+    /// (<c>|</c>) syntax, including its header row and column alignments.
     /// </summary>
     public class MarkdownBlockElementTable : MarkdownBlockElement
     {

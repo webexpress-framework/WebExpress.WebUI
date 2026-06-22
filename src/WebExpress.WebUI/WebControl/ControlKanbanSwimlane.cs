@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a swimlane in a kanban control.
+    /// A horizontal lane that groups related cards across the columns of a Kanban board.
     /// </summary>
     public sealed class ControlKanbanSwimlane : IControlKanbanSwimlane
     {

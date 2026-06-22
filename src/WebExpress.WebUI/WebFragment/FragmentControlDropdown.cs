@@ -6,7 +6,8 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebFragment
 {
     /// <summary>
-    /// Represents a dropdown control within a fragment context.
+    /// Base class for a dropdown control that is contributed as a fragment, so the framework can
+    /// insert it into a page section. Derive from it to add a dropdown to a page from a plugin.
     /// </summary>
     public abstract class FragmentControlDropdown : ControlDropdown, IFragmentControl<ControlDropdown>
     {

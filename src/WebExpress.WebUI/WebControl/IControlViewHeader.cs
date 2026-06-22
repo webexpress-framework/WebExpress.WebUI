@@ -5,7 +5,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a view header in a view control.
+    /// Contract for the header area of a view control.
     /// </summary>
     public interface IControlViewHeader : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {

@@ -11,7 +11,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a view item control.
+    /// A single item shown within a view control.
     /// </summary>
     public class ControlViewItem : IControlViewItem
     {

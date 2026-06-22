@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Specifies the horizontal alignment.
+    /// How content is aligned horizontally (left, center, or right) within its container.
     /// </summary>
     public enum TypeHorizontalAlignment
     {

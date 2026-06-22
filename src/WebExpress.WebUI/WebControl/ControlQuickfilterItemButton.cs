@@ -9,7 +9,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a button in a quickfilter control.
+    /// A single one-click filter button within a quick-filter bar.
     /// </summary>
     public class ControlQuickfilterItemButton : IControlQuickfilterItem
     {

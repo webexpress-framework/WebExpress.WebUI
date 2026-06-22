@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a property color for progress elements.
+    /// The predefined colors used for progress indicators.
     /// </summary>
     public class PropertyColorProgress : PropertyColor<TypeColorProgress>
     {

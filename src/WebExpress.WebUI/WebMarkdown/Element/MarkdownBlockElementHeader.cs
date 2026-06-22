@@ -4,7 +4,8 @@ using System.Linq;
 namespace WebExpress.WebUI.WebMarkdown.Element
 {
     /// <summary>
-    /// Represents a header element (e.g. # Header).
+    /// A heading node in the parsed Markdown tree, written with leading hashes (e.g. <c># Header</c>).
+    /// Its level (1–6) corresponds to the number of hashes.
     /// </summary>
     public class MarkdownBlockElementHeader : MarkdownBlockElement
     {

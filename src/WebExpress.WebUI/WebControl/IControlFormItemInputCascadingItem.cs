@@ -9,7 +9,8 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents an item in a control cascading.
+    /// Contract for a single entry in a cascading form input, whose availability depends on the
+    /// value chosen in another input.
     /// </summary>
     public interface IControlFormItemInputCascadingItem : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {

@@ -7,7 +7,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents an item in a selection input form.
+    /// Contract for a single selectable option in a selection form input.
     /// </summary>
     public interface IControlFormItemInputSelectionItem : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {

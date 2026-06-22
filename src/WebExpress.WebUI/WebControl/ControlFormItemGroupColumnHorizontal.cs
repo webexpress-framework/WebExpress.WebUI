@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a horizontal column group of form items.
+    /// Arranges a group of form items horizontally, with label and field side by side.
     /// </summary>
     public class ControlFormItemGroupColumnHorizontal : ControlFormItemGroupColumn
     {

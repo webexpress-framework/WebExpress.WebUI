@@ -10,7 +10,8 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a tree node for the <see cref="ControlTree"/>.
+    /// A single node within a <see cref="ControlTree"/>, which may itself contain child nodes to
+    /// form the tree hierarchy.
     /// </summary>
     public class ControlTreeItem : IControlTreeItem
     {

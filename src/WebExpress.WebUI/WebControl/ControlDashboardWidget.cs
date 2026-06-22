@@ -9,7 +9,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents an widget element in a dashboard control.
+    /// A single widget (panel) placed on a dashboard, wrapping a piece of content shown in the dashboard grid.
     /// </summary>
     public class ControlDashboardWidget : IControlDashboardWidget
     {

@@ -4,7 +4,7 @@ using System.Globalization;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a form input range of type <see cref="DateTime"/>.
+    /// Represents the value of a form input as a date range — a start and end <see cref="DateTime"/>.
     /// </summary>
     public class ControlFormInputValueDateRange : IControlFormInputValue
     {

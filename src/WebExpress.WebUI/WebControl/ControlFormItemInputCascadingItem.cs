@@ -12,7 +12,8 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a cascading node for the <see cref="ControlFormItemInputCascading"/>.
+    /// A single selectable entry in a <see cref="ControlFormItemInputCascading"/>, whose visibility
+    /// depends on the value chosen in the parent input.
     /// </summary>
     public class ControlFormItemInputCascadingItem : IControlFormItemInputCascadingItem
     {

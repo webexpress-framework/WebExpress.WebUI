@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a label for a form item control.
+    /// The caption shown next to or above a form field, describing what to enter.
     /// </summary>
     public class ControlFormItemLabel : ControlFormItem
     {

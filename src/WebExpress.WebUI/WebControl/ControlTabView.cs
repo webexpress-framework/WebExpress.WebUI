@@ -12,7 +12,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a view in a tab control.
+    /// A single tab and its content panel within a tab control.
     /// </summary>
     public class ControlTabView : IControlTabView
     {

@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a property for background color.
+    /// A color value used to set the background color of a control, with the predefined colors available for it.
     /// </summary>
     public class PropertyColorBackground : PropertyColor<TypeColorBackground>
     {

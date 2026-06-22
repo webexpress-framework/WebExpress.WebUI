@@ -4,7 +4,7 @@ using WebExpress.WebCore.WebMessage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a form input value of type file.
+    /// Represents the value of a form input field as an uploaded file.
     /// </summary>
     public class ControlFormInputValueFile : IControlFormInputValue
     {

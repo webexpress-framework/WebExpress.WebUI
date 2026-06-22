@@ -8,7 +8,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a form item input control for selection.
+    /// A form input that lets the user choose from a set of options.
     /// </summary>
     /// <remarks>
     /// This control allows users to select one or more options from a predefined list.

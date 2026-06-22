@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Specifies the type of action to be performed.
+    /// The kinds of action a control can trigger when activated (for example navigate or submit).
     /// </summary>
     public enum TypeAction
     {

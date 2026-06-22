@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a column group of form items.
+    /// Groups several form items into a single column so they are laid out together.
     /// </summary>
     public class ControlFormItemGroupColumn : ControlFormItemGroup
     {

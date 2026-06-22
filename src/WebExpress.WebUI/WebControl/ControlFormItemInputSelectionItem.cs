@@ -9,7 +9,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents an item in a selection input form.
+    /// A single selectable option within a selection input.
     /// </summary>
     public class ControlFormItemInputSelectionItem : IControlFormItemInputSelectionItem
     {

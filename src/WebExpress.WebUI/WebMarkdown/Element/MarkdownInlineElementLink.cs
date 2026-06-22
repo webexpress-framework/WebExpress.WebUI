@@ -1,7 +1,8 @@
 namespace WebExpress.WebUI.WebMarkdown.Element
 {
     /// <summary>
-    /// Represents a link element.
+    /// An inline hyperlink node in the parsed Markdown tree, written as <c>[text](url)</c>. It holds
+    /// the link text and its target URL.
     /// </summary>
     public class MarkdownInlineElementLink : MarkdownInlineElement
     {

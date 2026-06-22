@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a property for text color.
+    /// A color value used to set the text (foreground) color of a control, with the predefined colors available for it.
     /// </summary>
     public class PropertyColorText : PropertyColor<TypeColorText>
     {

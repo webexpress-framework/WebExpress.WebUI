@@ -6,7 +6,8 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebFragment
 {
     /// <summary>
-    /// Represents a sidebar item link control within a fragment context.
+    /// Base class for a sidebar link entry that is contributed as a fragment, so the framework can
+    /// add a navigation link into a page's sidebar from a plugin.
     /// </summary>
     public abstract class FragmentControlSidebarItemLink : ControlSidebarItemLink, IFragmentWebUIElement<IRenderControlContext, IVisualTreeControl>, IFragmentControlSidebarItem
     {

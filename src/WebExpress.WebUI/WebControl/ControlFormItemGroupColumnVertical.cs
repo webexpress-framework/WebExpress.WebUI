@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a vertical column group of form items.
+    /// Arranges a group of form items vertically, with the fields stacked top to bottom.
     /// </summary>
     public class ControlFormItemGroupColumnVertical : ControlFormItemGroupColumn
     {

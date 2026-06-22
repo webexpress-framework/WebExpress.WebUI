@@ -5,7 +5,9 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebFragment
 {
     /// <summary>
-    /// Represents a fragment control interface.
+    /// A control that is also a fragment: a reusable UI element a plugin contributes so the
+    /// framework can insert it into a designated section of a page (without the page having to know
+    /// about it in advance). It is both an <see cref="IControl"/> and a fragment WebUI element.
     /// </summary>
     public interface IFragmentControl : IFragmentWebUIElement<IRenderControlContext, IVisualTreeControl>, IControl
     {

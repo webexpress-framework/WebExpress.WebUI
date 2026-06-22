@@ -5,7 +5,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a kanban column.
+    /// Contract for a column on a Kanban board that holds the cards of one stage.
     /// </summary>
     public interface IControlKanbanColumn : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {

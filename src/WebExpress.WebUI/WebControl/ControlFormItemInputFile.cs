@@ -8,7 +8,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a form item input control for file uploads.
+    /// A form input that lets the user select one or more files to upload.
     /// </summary>
     public class ControlFormItemInputFile : ControlFormItemInput<ControlFormInputValueFile>
     {

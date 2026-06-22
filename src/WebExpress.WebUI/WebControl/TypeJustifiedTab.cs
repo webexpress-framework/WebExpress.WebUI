@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Specifies the type of justified tab.
+    /// Whether the tabs of a tab control stretch to fill the available width (justified) or not.
     /// </summary>
     public enum TypeJustifiedTab
     {

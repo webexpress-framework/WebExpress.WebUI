@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Specifies the type of toggle dropdown.
+    /// How a dropdown is opened (for example on click or on hover).
     /// </summary>
     public enum TypeToggleDropdown
     {

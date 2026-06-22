@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a static text form item control.
+    /// Read-only text shown within a form (not an editable field), such as an informational note.
     /// </summary>
     public class ControlFormItemStaticText : ControlFormItem, IControlFormLabel
     {

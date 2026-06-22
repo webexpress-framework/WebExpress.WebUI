@@ -10,7 +10,7 @@ using WebExpress.WebUI.WebSection;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a tab control.
+    /// Renders a tabbed control where only the selected tab's panel is shown at a time.
     /// </summary>
     public class ControlTab : Control, IControlTab
     {

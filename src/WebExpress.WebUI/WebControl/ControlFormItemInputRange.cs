@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a range input form item control.
+    /// A slider form input for choosing a numeric value within a range.
     /// </summary>
     public class ControlFormItemInputRange : ControlFormItemInput<ControlFormInputValueFloat>
     {

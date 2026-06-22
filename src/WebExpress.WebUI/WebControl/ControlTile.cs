@@ -7,7 +7,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a tile control.
+    /// Renders a tile, a rectangular content block used in tile and grid layouts.
     /// </summary>
     public class ControlTile : Control, IControlTile
     {

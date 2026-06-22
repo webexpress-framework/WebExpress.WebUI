@@ -11,7 +11,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a search control.
+    /// Renders a search box the user can type into to search.
     /// </summary>
     public class ControlSearch : Control
     {

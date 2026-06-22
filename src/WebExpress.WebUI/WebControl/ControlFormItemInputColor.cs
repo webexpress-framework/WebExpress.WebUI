@@ -5,7 +5,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a color input form item control.
+    /// A form input that lets the user pick a color.
     /// </summary>
     public class ControlFormItemInputColor : ControlFormItemInput<ControlFormInputValueString>
     {

@@ -11,7 +11,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a tile card control.
+    /// A card-style tile that presents its content inside a bordered card.
     /// </summary>
     public class ControlTileCard : IControlTileCard
     {

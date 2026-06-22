@@ -5,7 +5,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a dashboard column.
+    /// Contract for a column within a dashboard layout that holds a vertical stack of widgets.
     /// </summary>
     public interface IControlDashboardColumn : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {

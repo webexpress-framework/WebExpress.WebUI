@@ -10,7 +10,7 @@ using WebExpress.WebUI.WebSection;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a view control.
+    /// Renders a view, a composite container with a header, body, and footer for presenting an item's details.
     /// </summary>
     public class ControlView : Control, IControlView, IScope
     {

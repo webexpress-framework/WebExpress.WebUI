@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a quickfilter control.
+    /// Renders a quick-filter bar offering one-click buttons to filter a list.
     /// </summary>
     public class ControlQuickfilter : Control, IControlQuickfilter
     {

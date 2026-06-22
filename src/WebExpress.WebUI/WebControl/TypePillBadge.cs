@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents the type of a pill badge.
+    /// The visual style of a pill-shaped badge.
     /// </summary>
     public enum TypePillBadge
     {

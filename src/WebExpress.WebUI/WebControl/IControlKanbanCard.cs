@@ -7,7 +7,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a kanban card.
+    /// Contract for a single card on a Kanban board.
     /// </summary>
     public interface IControlKanbanCard : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {

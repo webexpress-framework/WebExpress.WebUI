@@ -4,7 +4,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a template control.
+    /// Contract for a template that defines how a table's rows and cells are rendered.
     /// </summary>
     public interface IControlTableTemplate : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {

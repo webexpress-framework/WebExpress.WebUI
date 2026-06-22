@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents the result of a validation process.
+    /// Holds the outcome of validating a form or input: whether it passed and any messages to show the user.
     /// </summary>
     public class ValidationResult
     {

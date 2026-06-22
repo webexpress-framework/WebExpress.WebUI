@@ -4,7 +4,7 @@ using WebExpress.WebCore.WebHtml;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a action element for a filter.
+    /// An action that clears all active filter criteria, so the full, unfiltered list is shown again.
     /// </summary>
     public class ActionFilterReset : ActionFilter
     {

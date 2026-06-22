@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Specifies the orientation of a tab.
+    /// Whether a tab control's tabs are arranged horizontally or vertically.
     /// </summary>
     public enum TypeOrientationTab
     {

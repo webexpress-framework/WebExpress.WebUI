@@ -8,7 +8,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a table control.
+    /// Renders a data table with rows and columns.
     /// </summary>
     public class ControlTable : Control, IControlTable
     {

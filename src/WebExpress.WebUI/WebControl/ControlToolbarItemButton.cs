@@ -9,7 +9,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a toolbar item button control.
+    /// A button placed on a toolbar.
     /// </summary>
     /// <remarks>
     /// This class is used to create a button within a toolbar.

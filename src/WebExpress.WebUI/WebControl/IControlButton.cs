@@ -5,9 +5,9 @@ using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
-    // <summary>
-    // Interface for a control button.
-    // </summary>
+    /// <summary>
+    /// Contract for a button control — a clickable element that triggers an action or submits a form.
+    /// </summary>
     public interface IControlButton : IControl
     {
         /// <summary>

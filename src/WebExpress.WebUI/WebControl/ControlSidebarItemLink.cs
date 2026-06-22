@@ -9,7 +9,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a sidebar item link control.
+    /// A clickable link entry within a sidebar.
     /// </summary>
     /// <remarks>
     /// This class is used to create a link within a sidebar.

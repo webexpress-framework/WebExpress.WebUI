@@ -1,7 +1,8 @@
 namespace WebExpress.WebUI.WebMarkdown.Element
 {
     /// <summary>
-    /// Represents a footnote element.
+    /// An inline footnote reference node in the parsed Markdown tree — points (via its id) to a
+    /// footnote definition whose text is shown at the bottom of the document.
     /// </summary>
     public class MarkdownInlineElementFootnote : MarkdownInlineElement
     {

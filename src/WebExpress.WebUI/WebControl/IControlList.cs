@@ -5,7 +5,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a list control that can manage a collection of list items.
+    /// Contract for a control that renders a vertical list, holding and arranging the entries shown to the user.
     /// </summary>
     public interface IControlList : IControl
     {

@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a card in a tile control.
+    /// Contract for a card-style tile.
     /// </summary>
     public interface IControlTileCard : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {

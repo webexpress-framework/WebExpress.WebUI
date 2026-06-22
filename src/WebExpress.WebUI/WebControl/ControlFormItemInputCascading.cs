@@ -8,7 +8,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a form item input control for cascading.
+    /// A form input whose available options depend on the value chosen in another input (for example country then state).
     /// </summary>
     /// <remarks>
     /// This control allows users to select cascading options from a predefined tree.

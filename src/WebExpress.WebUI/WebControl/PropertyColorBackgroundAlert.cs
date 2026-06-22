@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a property for background color alerts.
+    /// The predefined background colors used for alert (notification) controls.
     /// </summary>
     public class PropertyColorBackgroundAlert : PropertyColor<TypeColorBackgroundAlert>
     {

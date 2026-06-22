@@ -3,7 +3,7 @@
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a form input value of type float.
+    /// Represents the value of a form input field as a strongly typed floating-point number.
     /// </summary>
     public class ControlFormInputValueFloat : IControlFormInputValue
     {

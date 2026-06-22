@@ -1,7 +1,8 @@
 namespace WebExpress.WebUI.WebMarkdown.Element
 {
     /// <summary>
-    /// Represents a html element.
+    /// An inline raw-HTML node in the parsed Markdown tree — HTML written directly inside the
+    /// Markdown source that is passed through to the output as-is.
     /// </summary>
     public class MarkdownInlineElementHtml : MarkdownInlineElement
     {

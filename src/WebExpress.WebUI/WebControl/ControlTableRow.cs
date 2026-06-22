@@ -7,7 +7,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a table row control.
+    /// Represents a single row within a table control.
     /// </summary>
     public class ControlTableRow : IControlTableRow
     {

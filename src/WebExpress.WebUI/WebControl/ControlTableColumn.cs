@@ -9,7 +9,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a table column control.
+    /// Defines one column of a table control, including its header and how its cells are rendered.
     /// </summary>
     public class ControlTableColumn : IControlTableColumn
     {

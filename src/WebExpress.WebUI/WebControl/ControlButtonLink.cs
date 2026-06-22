@@ -8,7 +8,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a link button control.
+    /// Renders a hyperlink that is styled to look and behave like a button.
     /// </summary>
     public class ControlButtonLink : ControlButton
     {

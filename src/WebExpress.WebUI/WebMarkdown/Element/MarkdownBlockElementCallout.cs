@@ -4,7 +4,8 @@ using System.Linq;
 namespace WebExpress.WebUI.WebMarkdown.Element
 {
     /// <summary>
-    /// Represents a callout element.
+    /// A callout (admonition) node in the parsed Markdown tree — a highlighted box such as a note,
+    /// tip, or warning that sets its content apart from the surrounding text.
     /// </summary>
     public class MarkdownBlockElementCallout : MarkdownBlockElement
     {

@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a navigation item header control.
+    /// A non-clickable heading within a navigation bar, used to label a group of entries.
     /// </summary>
     public class ControlNavigationItemHeader : Control, IControlNavigationItem
     {

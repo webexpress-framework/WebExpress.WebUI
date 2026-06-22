@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Specifies the type of text decoration.
+    /// The decoration applied to text (for example underline or line-through).
     /// </summary>
     public enum TypeTextDecoration
     {

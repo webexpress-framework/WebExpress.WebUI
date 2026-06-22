@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a mix of form item group columns.
+    /// Arranges a group of form items in a mixed layout, combining horizontal and vertical arrangements.
     /// </summary>
     public class ControlFormItemGroupColumnMix : ControlFormItemGroupColumn
     {

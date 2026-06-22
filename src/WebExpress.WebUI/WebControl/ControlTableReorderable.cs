@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a table control.
+    /// A table control whose rows can be reordered by the user via drag and drop.
     /// </summary>
     public class ControlTableReorderable : ControlTable, IControlTableReorderable
     {

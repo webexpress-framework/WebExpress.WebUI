@@ -9,7 +9,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a dropdown item link control.
+    /// A clickable link entry inside a dropdown menu.
     /// </summary>
     public class ControlDropdownItemLink : IControlDropdownItem
     {

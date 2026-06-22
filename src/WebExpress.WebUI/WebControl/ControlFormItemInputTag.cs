@@ -8,7 +8,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a tag input control.
+    /// A form input for entering a set of tags (keywords), each shown as a removable chip.
     /// </summary>
     public class ControlFormItemInputTag : ControlFormItemInput<ControlFormInputValueStringList>
     {

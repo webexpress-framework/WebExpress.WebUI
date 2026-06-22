@@ -9,7 +9,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a search control.
+    /// The content area of a search control that shows its suggestions or results.
     /// </summary>
     public class ControlSearchContent : Control
     {

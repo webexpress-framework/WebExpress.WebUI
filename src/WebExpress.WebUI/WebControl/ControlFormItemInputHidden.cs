@@ -4,7 +4,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a hidden input form item control.
+    /// A hidden form field that carries a value with the form without being shown to the user.
     /// </summary>
     public class ControlFormItemInputHidden : ControlFormItemInput<ControlFormInputValueString>
     {

@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a control that manages a list of file items.
+    /// Renders a list of files (for example uploads or attachments), where each entry is a ControlFileListItem.
     /// </summary>
     public class ControlFileList : Control, IControlFileList
     {

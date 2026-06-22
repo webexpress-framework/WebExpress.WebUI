@@ -5,7 +5,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a date control.
+    /// Renders a date picker, an input field that lets the user choose a calendar date.
     /// </summary>
     public class ControlDate : Control, IControlTableTemplate
     {

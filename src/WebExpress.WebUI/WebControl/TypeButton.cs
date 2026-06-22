@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents the type of a button.
+    /// The visual style of a button (for example primary or secondary), controlling its appearance.
     /// </summary>
     public enum TypeButton
     {

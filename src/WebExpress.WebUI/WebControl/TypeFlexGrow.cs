@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Specifies the type of flex grow behavior.
+    /// How much a flexbox item grows to fill the available space, relative to its siblings.
     /// </summary>
     public enum TypeFlexGrow
     {

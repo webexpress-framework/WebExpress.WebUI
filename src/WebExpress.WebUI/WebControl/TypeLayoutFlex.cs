@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Specifies the type of layout for a flexbox.
+    /// The flexbox layout direction used to arrange a control's children.
     /// </summary>
     public enum TypeLayoutFlex
     {

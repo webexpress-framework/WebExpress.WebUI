@@ -10,7 +10,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents an item in a move input form.
+    /// A single entry in a move/transfer input, where items can be moved between two lists.
     /// </summary>
     public class ControlFormItemInputMoveItem : IControlFormItemInputMoveItem
     {

@@ -7,7 +7,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents an item in a file list control.
+    /// Contract for a single file entry within a file-list control.
     /// </summary>
     public interface IControlFileListItem : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
