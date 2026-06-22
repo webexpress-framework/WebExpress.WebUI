@@ -20,8 +20,8 @@ class TextNode {
 
 class ClassList {
     constructor(owner) { this._owner = owner; }
-    add(name) { this._owner._classes.add(name); }
-    remove(name) { this._owner._classes.delete(name); }
+    add(...names) { names.forEach((n) => this._owner._classes.add(n)); }
+    remove(...names) { names.forEach((n) => this._owner._classes.delete(n)); }
     contains(name) { return this._owner._classes.has(name); }
     toggle(name, force) {
         const has = this._owner._classes.has(name);
@@ -29,6 +29,81 @@ class ClassList {
         if (shouldHave) { this._owner._classes.add(name); } else { this._owner._classes.delete(name); }
         return shouldHave;
     }
+}
+
+/**
+ * Minimal CSSStyleDeclaration stub. Properties may be set both directly
+ * (style.width = "1px") and through setProperty, matching how controls mix
+ * the two; getPropertyValue/removeProperty operate on the same storage.
+ */
+class Style {
+    setProperty(name, value) { this[name] = value == null ? "" : String(value); }
+    removeProperty(name) { const value = this[name]; delete this[name]; return value; }
+    getPropertyValue(name) { return Object.prototype.hasOwnProperty.call(this, name) ? this[name] : ""; }
+}
+
+/**
+ * Splits a selector list into groups of compound selectors. "a .b, c" becomes
+ * [["a", ".b"], ["c"]]. Whitespace combinators are preserved as separate
+ * compounds so callers can match the rightmost one.
+ * @param {string} selector - The selector text.
+ * @returns {string[][]} The parsed groups.
+ */
+function selectorGroups(selector) {
+    return String(selector || "")
+        .split(",")
+        .map((part) => part.trim().split(/\s+/).filter(Boolean))
+        .filter((group) => group.length > 0);
+}
+
+/**
+ * Tests an element against a single compound selector such as
+ * "div.active#id[data-x='y']" or "*".
+ * @param {object} el - The candidate element.
+ * @param {string} compound - The compound selector.
+ * @returns {boolean} True when the element matches.
+ */
+function matchesCompound(el, compound) {
+    if (!el || el.nodeType !== 1 || !compound) { return false; }
+    if (compound === "*") { return true; }
+
+    const idMatch = compound.match(/#([\w-]+)/);
+    if (idMatch && el.id !== idMatch[1]) { return false; }
+
+    const classMatches = compound.match(/\.([\w-]+)/g) || [];
+    for (const cls of classMatches) {
+        if (!el.classList.contains(cls.slice(1))) { return false; }
+    }
+
+    const attrRegex = /\[([\w-]+)(?:([~|^$*]?=)(["']?)(.*?)\3)?\]/g;
+    let attr;
+    while ((attr = attrRegex.exec(compound)) !== null) {
+        const [, name, operator, , value] = attr;
+        if (!el.hasAttribute(name)) { return false; }
+        if (operator && el.getAttribute(name) !== value) { return false; }
+    }
+
+    const tagMatch = compound.match(/^[\w-]+/);
+    if (tagMatch && el.tagName !== tagMatch[0].toUpperCase()) { return false; }
+
+    return true;
+}
+
+/**
+ * Depth-first walk over the element descendants. The visitor may stop the walk
+ * early by returning true.
+ * @param {object} root - The subtree root (not visited itself).
+ * @param {Function} visit - The visitor, returning true to stop.
+ * @returns {boolean} True when the walk was stopped early.
+ */
+function descend(root, visit) {
+    for (const child of root.childNodes) {
+        if (child.nodeType === 1) {
+            if (visit(child)) { return true; }
+            if (descend(child, visit)) { return true; }
+        }
+    }
+    return false;
 }
 
 class Element {
@@ -42,7 +117,7 @@ class Element {
         this._listeners = {};
         this._id = null;
         this.dataset = {};
-        this.style = {};
+        this.style = new Style();
         this.value = "";
         this.checked = false;
     }
@@ -90,8 +165,11 @@ class Element {
         return node;
     }
 
-    prepend(node) {
-        this.insertBefore(node, this.childNodes[0] || null);
+    prepend(...nodes) {
+        const reference = this.childNodes[0] || null;
+        for (const node of nodes) {
+            this.insertBefore(typeof node === "string" ? new TextNode(node) : node, reference);
+        }
     }
 
     removeChild(node) {
@@ -119,25 +197,47 @@ class Element {
         this._attrs.delete(name);
     }
 
-    matches() { return false; }
-    closest() { return null; }
-    querySelector() { return null; }
-
     /**
-     * Returns all descendant elements; selector filtering is not implemented,
-     * which matches how the controller uses it (the '*' selector).
+     * Tests the element against a comma separated selector list. Only simple
+     * compound selectors are supported (tag, #id, .class, [attr], [attr=value]
+     * and *); combinators are matched loosely by their rightmost compound,
+     * which is sufficient for the lookups controls perform.
      */
-    querySelectorAll() {
-        const result = [];
-        const walk = (node) => {
-            for (const child of node.childNodes) {
-                if (child.nodeType === 1) {
-                    result.push(child);
-                    walk(child);
-                }
+    matches(selector) {
+        return selectorGroups(selector).some((group) => matchesCompound(this, group[group.length - 1]));
+    }
+
+    closest(selector) {
+        let current = this;
+        while (current && current.nodeType === 1) {
+            if (current.matches(selector)) { return current; }
+            current = current.parentNode;
+        }
+        return null;
+    }
+
+    querySelector(selector) {
+        const groups = selectorGroups(selector);
+        let found = null;
+        descend(this, (node) => {
+            if (groups.some((group) => matchesCompound(node, group[group.length - 1]))) {
+                found = node;
+                return true;
             }
-        };
-        walk(this);
+            return false;
+        });
+        return found;
+    }
+
+    querySelectorAll(selector) {
+        const groups = selectorGroups(selector);
+        const result = [];
+        descend(this, (node) => {
+            if (groups.some((group) => matchesCompound(node, group[group.length - 1]))) {
+                result.push(node);
+            }
+            return false;
+        });
         return result;
     }
 
@@ -150,6 +250,21 @@ class Element {
         if (value != null && value !== "") { this.appendChild(new TextNode(String(value))); }
     }
 
+    /**
+     * The stub does not parse or serialize markup; innerHTML exposes only the
+     * concatenated text of the descendants, which is enough for the emptiness
+     * checks controls run, and assigning clears the children. Tests that need
+     * real range/markup semantics use the richer dom-stub.editor.mjs instead.
+     */
+    get innerHTML() {
+        return this.childNodes.map((n) => (n.nodeType === 3 ? n._text : n.textContent)).join("");
+    }
+    set innerHTML(value) {
+        this.childNodes.forEach((n) => { n.parentNode = null; });
+        this.childNodes = [];
+        if (value != null && value !== "") { this.appendChild(new TextNode(String(value))); }
+    }
+
     addEventListener(type, handler) {
         (this._listeners[type] || (this._listeners[type] = new Set())).add(handler);
     }
@@ -157,9 +272,144 @@ class Element {
         if (this._listeners[type]) { this._listeners[type].delete(handler); }
     }
     dispatchEvent(event) {
+        if (event && event.target == null) { event.target = this; }
         const set = this._listeners[event.type];
         if (set) { Array.from(set).forEach((fn) => fn(event)); }
         return true;
+    }
+
+    /**
+     * The parent element, or null when the parent is the document or absent.
+     * The body stub marks itself as the root and has no element parent.
+     */
+    get parentElement() {
+        return this.parentNode && this.parentNode.nodeType === 1 ? this.parentNode : null;
+    }
+
+    get firstChild() { return this.childNodes[0] || null; }
+    get lastChild() { return this.childNodes[this.childNodes.length - 1] || null; }
+    get firstElementChild() { return this.children[0] || null; }
+    get lastElementChild() { const c = this.children; return c[c.length - 1] || null; }
+
+    get nextSibling() {
+        if (!this.parentNode) { return null; }
+        const siblings = this.parentNode.childNodes;
+        return siblings[siblings.indexOf(this) + 1] || null;
+    }
+    get previousSibling() {
+        if (!this.parentNode) { return null; }
+        const siblings = this.parentNode.childNodes;
+        return siblings[siblings.indexOf(this) - 1] || null;
+    }
+
+    /**
+     * An array-like, iterable view of the attributes, matching how controls
+     * spread or iterate element.attributes.
+     */
+    get attributes() {
+        const list = [];
+        if (this._id != null) { list.push({ name: "id", value: this._id }); }
+        if (this._classes.size) { list.push({ name: "class", value: this.className }); }
+        for (const [name, value] of this._attrs) { list.push({ name, value }); }
+        return list;
+    }
+
+    hasChildNodes() { return this.childNodes.length > 0; }
+
+    append(...nodes) {
+        for (const node of nodes) {
+            this.appendChild(typeof node === "string" ? new TextNode(node) : node);
+        }
+    }
+
+    replaceChildren(...nodes) {
+        this.childNodes.forEach((n) => { n.parentNode = null; });
+        this.childNodes = [];
+        this.append(...nodes);
+    }
+
+    replaceWith(...nodes) {
+        if (!this.parentNode) { return; }
+        for (const node of nodes) {
+            this.parentNode.insertBefore(typeof node === "string" ? new TextNode(node) : node, this);
+        }
+        this.parentNode.removeChild(this);
+    }
+
+    remove() {
+        if (this.parentNode) { this.parentNode.removeChild(this); }
+    }
+
+    insertAdjacentElement(position, element) {
+        if (position === "beforebegin" && this.parentNode) { this.parentNode.insertBefore(element, this); }
+        else if (position === "afterbegin") { this.insertBefore(element, this.childNodes[0] || null); }
+        else if (position === "beforeend") { this.appendChild(element); }
+        else if (position === "afterend" && this.parentNode) { this.parentNode.insertBefore(element, this.nextSibling); }
+        return element;
+    }
+    insertAdjacentHTML() { /* parsing markup is out of scope for the stub */ }
+
+    contains(node) {
+        let current = node;
+        while (current) {
+            if (current === this) { return true; }
+            current = current.parentNode;
+        }
+        return false;
+    }
+
+    cloneNode(deep) {
+        const copy = new Element(this.tagName);
+        copy._id = this._id;
+        copy._classes = new Set(this._classes);
+        copy._attrs = new Map(this._attrs);
+        copy.dataset = { ...this.dataset };
+        copy.value = this.value;
+        copy.checked = this.checked;
+        if (deep) {
+            for (const child of this.childNodes) {
+                copy.appendChild(child.nodeType === 3 ? new TextNode(child._text) : child.cloneNode(true));
+            }
+        }
+        return copy;
+    }
+
+    focus() { }
+    blur() { }
+    click() { this.dispatchEvent({ type: "click" }); }
+    scrollIntoView() { }
+    scroll() { }
+    scrollTo() { }
+
+    get offsetWidth() { return 0; }
+    get offsetHeight() { return 0; }
+    get clientWidth() { return 0; }
+    get clientHeight() { return 0; }
+    get scrollWidth() { return 0; }
+    get scrollHeight() { return 0; }
+    get offsetParent() { return this.parentElement; }
+
+    getBoundingClientRect() {
+        return { x: 0, y: 0, top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0 };
+    }
+
+    /**
+     * Returns a no-op 2D drawing context for canvas elements; every method is a
+     * no-op and measureText reports a zero width, which is enough to let canvas
+     * based controls initialize headlessly.
+     */
+    getContext() {
+        return new Proxy({}, {
+            get(_target, property) {
+                if (property === "measureText") { return () => ({ width: 0 }); }
+                if (property === "getImageData") { return () => ({ data: [], width: 0, height: 0 }); }
+                if (property === "createLinearGradient" || property === "createRadialGradient") {
+                    return () => ({ addColorStop() { } });
+                }
+                return () => { };
+            },
+            set() { return true; }
+        });
     }
 }
 
@@ -190,6 +440,10 @@ export function createDocument() {
     const body = new Element("body");
     body._isRoot = true;
     const documentElement = new Element("html");
+    const head = new Element("head");
+    documentElement._isRoot = true;
+    documentElement.appendChild(head);
+    documentElement.appendChild(body);
     const listeners = {};
 
     return {
@@ -197,14 +451,19 @@ export function createDocument() {
         readyState: "complete",
         cookie: "",
         body,
+        head,
         documentElement,
+        activeElement: body,
+        defaultView: null,
         createElement(tag) { return new Element(tag); },
         createElementNS(namespace, tag) { return new Element(tag); },
         createDocumentFragment() { return new Element("#document-fragment"); },
         createTextNode(text) { return new TextNode(text); },
         getElementById(id) { return findById(body, String(id)); },
-        querySelector() { return null; },
-        querySelectorAll() { return []; },
+        getElementsByClassName(name) { return documentElement.querySelectorAll("." + name); },
+        getElementsByTagName(tag) { return documentElement.querySelectorAll(String(tag)); },
+        querySelector(selector) { return documentElement.querySelector(selector); },
+        querySelectorAll(selector) { return documentElement.querySelectorAll(selector); },
         addEventListener(type, handler) {
             (listeners[type] || (listeners[type] = new Set())).add(handler);
         },

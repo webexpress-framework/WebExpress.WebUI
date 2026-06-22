@@ -31,8 +31,116 @@ export function webuiAsset(name) {
 }
 
 /**
+ * Detaches a timer handle from the event loop so a control that schedules a
+ * timeout or interval at construction time cannot keep the Node test runner
+ * alive after the synchronous tests finished. The callbacks still fire while
+ * the loop runs; they just no longer hold the process open.
+ * @param {*} handle - The handle returned by setTimeout/setInterval.
+ * @returns {*} The same handle.
+ */
+function detach(handle) {
+    if (handle && typeof handle.unref === "function") { handle.unref(); }
+    return handle;
+}
+
+const safeSetTimeout = (callback, delay, ...args) => detach(setTimeout(callback, delay, ...args));
+const safeSetInterval = (callback, delay, ...args) => detach(setInterval(callback, delay, ...args));
+
+/**
+ * Builds the browser-shaped globals that many controls touch at construction
+ * time (window, animation frames, observers, the Popper layout helper). They
+ * are deliberately inert stubs: timers resolve, observers never fire, and the
+ * layout helper reports an empty state. The set is opt-in through
+ * loadWebUi({ browser: true }) so the lean default runtime stays unchanged.
+ * @param {object} document - The document stub the window should expose.
+ * @returns {object} The browser globals.
+ */
+function createBrowserGlobals(document) {
+    const noopEvents = {
+        addEventListener() { },
+        removeEventListener() { },
+        dispatchEvent() { return true; }
+    };
+
+    const matchMedia = (query) => ({
+        matches: false,
+        media: query || "",
+        onchange: null,
+        addEventListener() { },
+        removeEventListener() { },
+        addListener() { },
+        removeListener() { }
+    });
+
+    const window = {
+        ...noopEvents,
+        document,
+        name: "",
+        innerWidth: 1024,
+        innerHeight: 768,
+        devicePixelRatio: 1,
+        scrollX: 0,
+        scrollY: 0,
+        pageXOffset: 0,
+        pageYOffset: 0,
+        location: { href: "http://localhost/", origin: "http://localhost", pathname: "/", search: "", hash: "" },
+        history: { pushState() { }, replaceState() { }, back() { }, forward() { } },
+        matchMedia,
+        getComputedStyle: () => new Proxy({}, { get: () => "", has: () => true }),
+        requestAnimationFrame: (callback) => safeSetTimeout(() => callback(Date.now()), 0),
+        cancelAnimationFrame: (handle) => clearTimeout(handle),
+        getSelection: () => ({ rangeCount: 0, isCollapsed: true, removeAllRanges() { }, addRange() { }, getRangeAt() { return null; } }),
+        scrollTo() { },
+        scrollBy() { },
+        setTimeout: safeSetTimeout,
+        clearTimeout,
+        setInterval: safeSetInterval,
+        clearInterval
+    };
+    window.window = window;
+    window.self = window;
+    document.defaultView = window;
+
+    const storage = () => {
+        const map = new Map();
+        return {
+            getItem: (key) => (map.has(key) ? map.get(key) : null),
+            setItem: (key, value) => { map.set(key, String(value)); },
+            removeItem: (key) => { map.delete(key); },
+            clear: () => { map.clear(); },
+            key: (index) => Array.from(map.keys())[index] ?? null,
+            get length() { return map.size; }
+        };
+    };
+
+    return {
+        window,
+        requestAnimationFrame: window.requestAnimationFrame,
+        cancelAnimationFrame: window.cancelAnimationFrame,
+        getComputedStyle: window.getComputedStyle,
+        getSelection: window.getSelection,
+        matchMedia,
+        localStorage: storage(),
+        sessionStorage: storage(),
+        ResizeObserver: class { observe() { } unobserve() { } disconnect() { } },
+        IntersectionObserver: class { constructor() { this.root = null; } observe() { } unobserve() { } disconnect() { } takeRecords() { return []; } },
+        Event: class { constructor(type, init) { init = init || {}; this.type = type; this.bubbles = !!init.bubbles; this.cancelable = !!init.cancelable; this.defaultPrevented = false; } preventDefault() { this.defaultPrevented = true; } stopPropagation() { } },
+        // a Popper that resolves immediately and reports an empty layout state
+        Popper: {
+            createPopper: () => ({
+                update: async () => { },
+                forceUpdate: () => { },
+                setOptions: async () => { },
+                destroy: () => { },
+                state: { elements: {}, modifiersData: {}, rects: {} }
+            })
+        }
+    };
+}
+
+/**
  * Loads a fresh, isolated WebUI runtime.
- * @param {object} [options] - Optional overrides: fetch, extraFiles.
+ * @param {object} [options] - Optional overrides: fetch, extraFiles, browser, globals.
  * @returns {object} An object with the webui namespace, the document and helpers.
  */
 export function loadWebUi(options = {}) {
@@ -41,14 +149,16 @@ export function loadWebUi(options = {}) {
     const sandbox = {
         console,
         queueMicrotask,
-        setTimeout,
+        setTimeout: safeSetTimeout,
         clearTimeout,
+        setInterval: safeSetInterval,
+        clearInterval,
         URL,
         URLSearchParams,
         AbortController,
         document,
-        navigator: { language: "en-US", languages: ["en-US"] },
-        Node: { ELEMENT_NODE: 1, TEXT_NODE: 3 },
+        navigator: { language: "en-US", languages: ["en-US"], userAgent: "node", platform: "node", clipboard: { writeText: async () => { }, readText: async () => "" } },
+        Node: { ELEMENT_NODE: 1, TEXT_NODE: 3, DOCUMENT_FRAGMENT_NODE: 11 },
         // the stub element doubles as HTMLElement, so the Ctrl base accepts it
         HTMLElement: Element,
         MutationObserver: class {
@@ -65,7 +175,9 @@ export function loadWebUi(options = {}) {
                 this.bubbles = !!init.bubbles;
             }
         },
-        fetch: options.fetch || (async () => { throw new Error("fetch is not stubbed for this test"); })
+        fetch: options.fetch || (async () => { throw new Error("fetch is not stubbed for this test"); }),
+        ...(options.browser ? createBrowserGlobals(document) : {}),
+        ...(options.globals || {})
     };
 
     vm.createContext(sandbox);
