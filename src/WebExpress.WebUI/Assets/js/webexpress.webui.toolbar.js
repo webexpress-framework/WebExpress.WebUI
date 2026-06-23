@@ -869,7 +869,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 if (child.classList.contains("wx-dropdown-header")) {
                     items.push({
                         type: "header",
-                        content: child.textContent,
+                        text: child.textContent,
                         icon: child.dataset.icon || null
                     });
                 } else if (child.classList.contains("wx-dropdown-divider")) {
@@ -880,7 +880,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                         uri: child.dataset.uri || "javascript:void(0);",
                         image: child.dataset.image || null,
                         icon: child.dataset.icon || null,
-                        content: child.textContent || null,
+                        text: child.textContent || null,
                         color: child.dataset.color || null,
                         disabled: child.hasAttribute("disabled")
                     });
