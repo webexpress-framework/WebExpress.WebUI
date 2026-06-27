@@ -28,6 +28,19 @@
     mask-repeat: no-repeat;
 }
 
+/*
+ * Image icon emitted by webexpress.webui.Icon.create for an image spec. It is
+ * sized to the surrounding text like a font glyph so an image can stand in for
+ * a FontAwesome icon anywhere a control places one.
+ */
+.wx-icon-img {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    object-fit: contain;
+    vertical-align: -0.125em;
+}
+
 .wx-icon-light-add-column-above {
     -webkit-mask-image: url("../icons/add-column-above.svg");
     mask-image: url("../icons/add-column-above.svg");

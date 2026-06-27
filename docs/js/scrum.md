@@ -6,11 +6,11 @@ The `ScrumBacklogCtrl` class is a specialized UI component for managing agile ba
 
 ```
    ┌───────────────────────────────────────────────────────────┐
-   │ Backlog                                     [+ Erstellen] │ // Toolbar
+   │ Backlog                                        [+ Create] │ // Toolbar
    ├───────────────────────────────────────────────────────────┤
    │ [ACTIVE] Sprint 24               4 items  21 pts  [...]   │ // Section Header
    ├───────────────────────────────────────────────────────────┤
-   │ [S] MVP-1   Login-Seite implementieren      [P1]  (8) [→] │ // Draggable Row
+   │ [S] MVP-1   Implement login screen      [P1] (8) (GT) [→] │ // Draggable Row (points · assignee)
    ├───────────────────────────────────────────────────────────┤
    │ [PLANNED] Sprint 25              0 items   0 pts  [...]   │
    ├───────────────────────────────────────────────────────────┤
@@ -24,6 +24,7 @@ The following core features define the structure, behavior, and flexibility of t
 - **REST integration:** Automatic loading and saving of sprints and backlog items through a defined API endpoint (`data-rest-uri`).
 - **Drag & Drop:** Tasks can be intuitively moved between backlog and planned sprints using standard `dataTransfer` mechanics.
 - **Sprint management:** An integrated dialog allows creating new sprints by specifying name, goal, timeframe, and capacity.
+- **Assignment & estimation:** Every item shows its story-point estimate and, when assigned, the assignee's avatar. A context-menu action opens a dialog to (re)assign a person and adjust the estimate.
 - **Static fallbacks:** If no backend is available, the component can be initialized using embedded JSON via `<script type="application/json">`.
 
 ## Structure & Configuration
@@ -51,7 +52,7 @@ The following events represent the primary interaction points for reacting to lo
 
 ## Example Markup
 
-Das folgende Beispiel illustriert ein minimales Setup, bei dem die Komponente ihre Daten selbstständig über die angegebene REST-URI bezieht.
+The following example illustrates a minimal setup in which the component fetches its data on its own through the given REST URI.
 
 
 ```html
@@ -62,10 +63,10 @@ Das folgende Beispiel illustriert ein minimales Setup, bei dem die Komponente ih
 
 ## Programmatic Control
 
-Die programmatische Steuerung erlaubt es, direkt über JavaScript-APIs mit dem Backlog zu interagieren. Dies ist besonders nützlich, um Daten dynamisch zu aktualisieren oder Aufgaben systemgesteuert zu verschieben.
+Programmatic control lets you interact with the backlog directly through JavaScript APIs. This is particularly useful for updating data dynamically or moving tasks programmatically.
 
 Accessing an Automatically Created Instance
-Wenn die Komponente bereits durch das Markup initialisiert wurde, kann der Controller abgerufen und modifiziert werden:
+When the component has already been initialized through the markup, the controller can be retrieved and modified:
 
 ```js
 const backlogCtrl = webexpress.webui.Controller.getInstanceByElement(document.getElementById('my-backlog'));
@@ -74,7 +75,7 @@ backlogCtrl.moveItemToSprint('item_123', 'sp_2');
 
 ## Manual Instantiation
 
-Neue Controller-Instanzen können dynamisch erzeugt werden, um die volle Kontrolle über den Initialisierungszeitpunkt zu behalten.
+New controller instances can be created dynamically to retain full control over the initialization timing.
 
 ```js
 const div = document.createElement('div');
@@ -86,6 +87,47 @@ ctrl.data = {
 document.body.appendChild(div);
 
 ```
+
+## Assignment & estimation
+
+Each backlog and sprint item carries a story-point estimate and an optional assignee. The estimate is rendered as a points badge; when the item is assigned, the assignee is shown as a small avatar (the initials on the person's color), otherwise an empty placeholder.
+
+### Item fields
+
+| Field              | Description |
+|--------------------|-------------|
+| `points`           | The story-point estimate, shown as the points badge. |
+| `assigneeId`       | Id of the assigned person, or omitted/empty when unassigned. |
+| `assigneeName`     | Display name of the assignee (used for the avatar tooltip). |
+| `assigneeInitials` | Short text shown inside the avatar. |
+| `assigneeColor`    | CSS color used as the avatar background. |
+
+### Assigning and estimating
+
+Right-clicking a single item adds an **“Assign & estimate…”** entry to the context menu. It opens a dialog with a searchable, avatar-based assignee picker and a story-point scale. The candidates are queried once from the optional **users service** — a second `wx-service` island named `users`, authored in C# with `.UsersService<TEndpoint>()` — via `GET {users}?q=…`, returning `[{ id, name, initials, color, team, image? }]`, and are then filtered client-side as you type. Each candidate is shown with an avatar (an `image` when supplied, otherwise the initials on the person's color), the name and the team.
+
+The story-point scale is the configurable set of chips offered for the estimate. It is authored in C# through the `EstimationScale` property (emitted as the comma-separated `data-estimation-scale` attribute) and defaults to a rounded Fibonacci sequence (`0, 1, 2, 3, 5, 8, 13, 20, 40, 100`) when left unset.
+
+Saving the dialog applies the change optimistically and persists it:
+
+| Method | URL                 | Body                                  | Purpose
+|--------|---------------------|---------------------------------------|----------------------------------
+| `PUT`  | `{base}/items/{id}` | `{ "assigneeId": "u3", "points": 8 }` | Update an item's assignment and estimate.
+
+An empty or omitted `assigneeId` unassigns the item; an omitted `points` leaves the existing estimate unchanged. On a failed request the board reloads to reconcile with the server state.
+
+Authored in C# with the fluent data surface, the data service backs the board and the users service backs the assignee picker:
+
+```csharp
+new ControlDataScrumBacklog("backlog")
+{
+    EstimationScale = _ => [1, 2, 3, 5, 8, 13, 20, 40]
+}
+    .DataService<BacklogRestApi>()
+    .UsersService<UsersRestApi>();
+```
+
+On the server, the backlog endpoint extends `RestApiScrumBacklog<TSprint, TItem>` and overrides `UpdateItem(item, payload, request)` to apply the new `assigneeId` and `points`.
 
 # ScrumSprintCtrl
 
@@ -102,31 +144,31 @@ The `ScrumSprintCtrl` class extends the agile toolset with a detailed dashboard 
 
 ## Extra Features
 
-Zusätzlich zur reinen Datendarstellung bietet das Sprint-Dashboard erweiterte visuelle Hilfsmittel zur Überwachung der Team-Performance.
+Beyond pure data presentation, the sprint dashboard offers advanced visual aids for monitoring team performance.
 
-Automatisches Burndown-Chart: Generiert ein responsives SVG-Liniendiagramm aus den übermittelten Ist- und Soll-Werten.
-Trend-Analyse: Berechnet automatisiert textuelle Trend-Indikatoren ("on track", "behind", "ahead") basierend auf der Abweichung zur Ideallinie.
-Kapazitäts-Warnungen: Färbt Fortschrittsbalken automatisch ein, wenn die zugesagten Story-Points die Teamkapazität überschreiten.
+Automatic burndown chart: Generates a responsive SVG line chart from the supplied actual and target values.
+Trend analysis: Automatically derives textual trend indicators ("on track", "behind", "ahead") based on the deviation from the ideal line.
+Capacity warnings: Automatically colors the progress bars when the committed story points exceed the team capacity.
 
 ## Additional Configuration
 
-Die Konfiguration der Sprint-Übersicht erfolgt analog zum Backlog primär über die Definition der Datenquelle.
+The sprint overview is configured analogously to the backlog, primarily through the definition of the data source.
 
 |Attribute     |Description
 |--------------|-----------------------------
-|data-rest-uri |Definiert den REST-API-Endpunkt für den Abruf der Metriken des aktiven Sprints
+|data-rest-uri |Defines the REST API endpoint for retrieving the metrics of the active sprint
 
 ## Events
 
-Die Sprint-Komponente emittiert Ereignisse bezüglich ihres Lebenszyklus und der Datenaktualisierung.
+The sprint component emits events regarding its lifecycle and data updates.
 
-webexpress.webui.Event.DATA_REQUESTED_EVENT (wird vor dem Laden der Sprint-Daten ausgelöst)
-webexpress.webui.Event.DATA_ARRIVED_EVENT (wird nach dem erfolgreichen Laden ausgelöst)
-webexpress.webui.Event.UPDATED_EVENT (wird nach jedem Render-Durchlauf ausgelöst)
+webexpress.webui.Event.DATA_REQUESTED_EVENT (fired before the sprint data is loaded)
+webexpress.webui.Event.DATA_ARRIVED_EVENT (fired after a successful load)
+webexpress.webui.Event.UPDATED_EVENT (fired after every render pass)
 
 ## Example Markup
 
-Das folgende Beispiel zeigt die Einbindung des Sprint-Dashboards über deklaratives Markup. Ein statisches Fallback kann optional über einen Skript-Block bereitgestellt werden.
+The following example shows how to embed the sprint dashboard through declarative markup. A static fallback can optionally be provided via a script block.
 
 ```HTML
 <div class="wx-webui-scrum-sprint" data-rest-uri="/api/scrum/sprint/active">
@@ -141,10 +183,10 @@ Das folgende Beispiel zeigt die Einbindung des Sprint-Dashboards über deklarati
 ```
 
 ## Programmatic Control
-Die direkte Interaktion via JavaScript ermöglicht es, das Dashboard in Echtzeit mit neuen Metriken zu versorgen, ohne auf zyklische REST-Abfragen angewiesen zu sein.
+Direct interaction via JavaScript makes it possible to feed the dashboard with new metrics in real time, without relying on cyclic REST polling.
 
 ## Accessing Instance
-Bestehende Instanzen können abgerufen und mit aktualisierten Objekten überschrieben werden, was ein sofortiges Re-Rendering auslöst.
+Existing instances can be retrieved and overwritten with updated objects, which triggers an immediate re-rendering.
 
 ```js
 const sprintCtrl = webexpress.webui.Controller.getInstanceByElement(document.getElementById('active-sprint'));
@@ -153,7 +195,7 @@ sprintCtrl.sprint = updatedSprintObjectFromWebsocket;
 
 ## Manual Instantiation
 
-Die manuelle Erzeugung eignet sich für Single-Page-Applications, in denen Ansichten dynamisch aufgebaut und verworfen werden.
+Manual creation is suited to single-page applications where views are built up and discarded dynamically.
 
 ```js
 const div = document.createElement('div');
@@ -170,6 +212,6 @@ document.body.appendChild(div);
 
 ## Best Practices & Advanced Integration
 
-Es wird empfohlen, `ScrumBacklogCtrl` als primäres Werkzeug für das Planning zu nutzen, während `ScrumSprintCtrl` auf dedizierten Dashboard- oder Daily-Scrum-Ansichten platziert werden sollte.
-Für Offline-Szenarien oder automatisierte Tests sollte die statische Dateninjektion via `<script type="application/json">` genutzt werden, um Netzwerkabhängigkeiten zu eliminieren.
-Eine Kombination beider Komponenten auf einer Übersichtsseite erfordert idealerweise eine synchronisierte Datenhaltung im Hintergrund, um Änderungen im Backlog sofort im Sprint-Dashboard zu reflektieren.
+It is recommended to use `ScrumBacklogCtrl` as the primary planning tool, while `ScrumSprintCtrl` should be placed on dedicated dashboard or daily-scrum views.
+For offline scenarios or automated tests, use the static data injection via `<script type="application/json">` to eliminate network dependencies.
+Combining both components on an overview page ideally requires synchronized data handling in the background so that changes in the backlog are reflected immediately in the sprint dashboard.

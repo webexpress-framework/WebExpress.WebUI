@@ -1432,6 +1432,63 @@ webexpress.webui.IconTheme = new class {
 };
 
 /**
+ * Single factory for assigning icons to controls built in JavaScript. It
+ * unifies the two icon kinds a control may use: a CSS/font icon (a class string
+ * such as "fas fa-plus", rendered as an <i>) and an image icon (a path, URL or
+ * data URI, rendered as an <img>). Controls should build every icon through
+ * this factory instead of writing raw markup or unicode glyphs, so an image can
+ * be substituted for a font glyph anywhere without touching the control.
+ *
+ * This concern is deliberately independent of webexpress.webui.IconTheme: the
+ * theme only switches between the FontAwesome and the light CSS variants, while
+ * this factory decides between a CSS icon and an image. A caller that wants the
+ * theme variant resolves the class first and passes the result here.
+ */
+webexpress.webui.Icon = new class {
+    /**
+     * Builds an icon element from a spec. A spec that points at an image (an
+     * absolute or relative path, a data URI, an http(s) URL or a value carrying
+     * an image file extension) yields an <img>; any other non-empty spec is
+     * treated as a CSS class string and yields an <i>. An empty spec yields
+     * null, so a caller can omit the icon without a branch of its own.
+     * @param {string|null|undefined} spec - The CSS class string or image source.
+     * @param {string|null} [extraClass] - Extra CSS class(es) for the element.
+     * @returns {HTMLElement|null} The icon element, or null.
+     */
+    create(spec, extraClass) {
+        const value = (spec || "").trim();
+        if (!value) {
+            return null;
+        }
+
+        const extra = (extraClass || "").trim();
+
+        if (this._isImage(value)) {
+            const img = document.createElement("img");
+            img.className = ("wx-icon-img " + extra).trim();
+            img.src = value;
+            // decorative by default; controls add a label on the host element
+            img.alt = "";
+            return img;
+        }
+
+        const i = document.createElement("i");
+        i.className = (value + " " + extra).trim();
+        return i;
+    }
+
+    /**
+     * Determines whether a spec denotes an image source rather than a CSS class.
+     * @param {string} value - The trimmed spec.
+     * @returns {boolean} True when the spec is an image source.
+     */
+    _isImage(value) {
+        return /^(https?:|data:|\.{0,2}\/)/i.test(value)
+            || /\.(svg|png|jpe?g|gif|webp|ico|bmp|avif)(\?.*)?$/i.test(value);
+    }
+};
+
+/**
  * Registry for editor plugins.
  * Allows decoupling of functionality into separate files.
  */
