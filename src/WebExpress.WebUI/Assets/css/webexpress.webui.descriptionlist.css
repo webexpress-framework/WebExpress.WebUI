@@ -1,0 +1,39 @@
+/* definition / description list, scoped to .wx-description-list */
+
+.wx-description-list {
+    margin: 0;
+}
+
+.wx-description-list-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed var(--bs-border-color-translucent, #e9ecef);
+}
+
+.wx-description-list-item:last-child {
+    border-bottom: 0;
+}
+
+.wx-description-list-term {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+.wx-description-list-description {
+    margin: 0;
+    color: var(--bs-body-color, #212529);
+}
+
+/* horizontal layout: term beside description */
+
+.wx-description-list-horizontal .wx-description-list-item {
+    display: grid;
+    grid-template-columns: minmax(120px, 30%) 1fr;
+    gap: 0.75rem;
+    align-items: baseline;
+}
+
+.wx-description-list-horizontal .wx-description-list-term {
+    font-size: 0.875rem;
+}

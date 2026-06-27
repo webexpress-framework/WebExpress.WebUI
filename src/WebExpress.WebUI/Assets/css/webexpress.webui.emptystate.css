@@ -1,0 +1,37 @@
+/* empty-state placeholder, scoped to .wx-empty-state */
+
+.wx-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.4rem;
+    padding: 2.5rem 1rem;
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+.wx-empty-state-icon {
+    margin-bottom: 0.25rem;
+    font-size: 2.5rem;
+    line-height: 1;
+    color: var(--bs-secondary, #adb5bd);
+}
+
+.wx-empty-state-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--bs-body-color, #212529);
+}
+
+.wx-empty-state-message {
+    font-size: 0.9rem;
+    max-width: 28rem;
+}
+
+.wx-empty-state-actions {
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}

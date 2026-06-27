@@ -1,0 +1,50 @@
+/* overlapping avatar stack, scoped to .wx-avatar-group */
+
+.wx-avatar-group {
+    display: inline-flex;
+    align-items: center;
+}
+
+.wx-avatar-group-avatar,
+.wx-avatar-group-more {
+    box-sizing: border-box;
+    width: 36px;
+    height: 36px;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #fff;
+    background: var(--bs-secondary, #6c757d);
+    border: 2px solid var(--bs-body-bg, #fff);
+    overflow: hidden;
+}
+
+.wx-avatar-group-avatar + .wx-avatar-group-avatar,
+.wx-avatar-group-avatar + .wx-avatar-group-more {
+    margin-left: -10px;
+}
+
+.wx-avatar-group-avatar {
+    position: relative;
+    transition: transform 0.1s;
+}
+
+.wx-avatar-group-avatar:hover {
+    transform: translateY(-2px);
+    z-index: 1;
+}
+
+.wx-avatar-group-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wx-avatar-group-more {
+    background: var(--bs-tertiary-bg, #e9ecef);
+    color: var(--bs-secondary-color, #6c757d);
+    font-size: 0.72rem;
+}

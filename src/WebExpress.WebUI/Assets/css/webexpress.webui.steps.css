@@ -1,0 +1,104 @@
+/* step / stepper indicator, scoped to .wx-steps */
+
+.wx-steps {
+    display: flex;
+    align-items: flex-start;
+}
+
+.wx-steps-item {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* connector line to the previous step */
+.wx-steps-item:not(:first-child)::before {
+    content: "";
+    position: absolute;
+    top: 13px;
+    left: -50%;
+    width: 100%;
+    height: 2px;
+    background: var(--bs-border-color, #dee2e6);
+    z-index: 0;
+}
+
+.wx-steps-item-active:not(:first-child)::before,
+.wx-steps-item-completed:not(:first-child)::before {
+    background: var(--bs-primary, #0d6efd);
+}
+
+.wx-steps-marker {
+    position: relative;
+    z-index: 1;
+    width: 28px;
+    height: 28px;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    background: var(--bs-secondary-bg, #e9ecef);
+    color: var(--bs-secondary-color, #6c757d);
+    border: 2px solid var(--bs-border-color, #dee2e6);
+}
+
+.wx-steps-item-active .wx-steps-marker,
+.wx-steps-item-completed .wx-steps-marker {
+    background: var(--bs-primary, #0d6efd);
+    color: #fff;
+    border-color: var(--bs-primary, #0d6efd);
+}
+
+.wx-steps-text {
+    margin-top: 0.35rem;
+}
+
+.wx-steps-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--bs-body-color, #212529);
+}
+
+.wx-steps-item-pending .wx-steps-label {
+    color: var(--bs-secondary-color, #6c757d);
+    font-weight: 500;
+}
+
+.wx-steps-description {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+/* vertical layout */
+
+.wx-steps-vertical {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.wx-steps-vertical .wx-steps-item {
+    flex-direction: row;
+    align-items: flex-start;
+    text-align: left;
+    gap: 0.6rem;
+    padding-bottom: 1rem;
+}
+
+.wx-steps-vertical .wx-steps-item:not(:first-child)::before {
+    top: -50%;
+    left: 13px;
+    width: 2px;
+    height: 100%;
+}
+
+.wx-steps-vertical .wx-steps-text {
+    margin-top: 0;
+}

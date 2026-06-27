@@ -1,0 +1,57 @@
+/* metric / KPI tile, scoped to .wx-stat */
+
+.wx-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.85rem 1rem;
+}
+
+.wx-stat-icon {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 0.6rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    background: var(--bs-secondary-bg, #e9ecef);
+    color: var(--bs-primary, #0d6efd);
+}
+
+.wx-stat-body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.wx-stat-label {
+    font-size: 0.8rem;
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+.wx-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--bs-body-color, #212529);
+}
+
+.wx-stat-delta {
+    margin-top: 0.1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.wx-stat-up {
+    color: var(--bs-success, #198754);
+}
+
+.wx-stat-down {
+    color: var(--bs-danger, #dc3545);
+}
+
+.wx-stat-neutral {
+    color: var(--bs-secondary-color, #6c757d);
+}

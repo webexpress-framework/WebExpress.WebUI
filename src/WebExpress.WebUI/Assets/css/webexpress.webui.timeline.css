@@ -1,0 +1,71 @@
+/* chronological timeline, scoped to .wx-timeline */
+
+.wx-timeline {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.wx-timeline-item {
+    position: relative;
+    display: flex;
+    gap: 0.85rem;
+}
+
+/* the rail running between markers */
+.wx-timeline-item::before {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 16px;
+    bottom: -1.1rem;
+    width: 2px;
+    background: var(--bs-border-color, #dee2e6);
+}
+
+.wx-timeline-item:last-child::before {
+    display: none;
+}
+
+.wx-timeline-marker {
+    position: relative;
+    z-index: 1;
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    margin-top: 4px;
+    border-radius: 9999px;
+    background: var(--bs-primary, #0d6efd);
+    box-shadow: 0 0 0 3px var(--bs-body-bg, #fff);
+}
+
+.wx-timeline-content {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.wx-timeline-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.wx-timeline-title {
+    font-weight: 600;
+    color: var(--bs-body-color, #212529);
+}
+
+.wx-timeline-time {
+    flex: 0 0 auto;
+    font-size: 0.8rem;
+    color: var(--bs-secondary-color, #6c757d);
+    white-space: nowrap;
+}
+
+.wx-timeline-body {
+    margin-top: 0.15rem;
+    font-size: 0.9rem;
+    color: var(--bs-secondary-color, #6c757d);
+}
