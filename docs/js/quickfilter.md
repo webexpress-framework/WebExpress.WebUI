@@ -18,14 +18,16 @@ Initialization is handled declaratively by adding the `wx-webui-quickfilter` cla
 
 Within the host element, you can define static filter buttons. These are elements with the class `wx-quickfilter-button` that carry standard WebExpress action attributes. When the control initializes, it parses these static configurations, removes the initial static DOM nodes, and dynamically re-renders them as fully functional `wx-webui-button` instances alongside any currently active filter chips.
 
-| Attribute               | Description
-|-------------------------|------------
-| `wx-webui-quickfilter`  | The controller class required on the host element to instantiate the Quickfilter control.
-| `wx-quickfilter-button` | Class used on child elements to define static filter buttons. These will be parsed and re-rendered dynamically.
-| `data-wx-primary-action`| Should be set to the corresponding registry action (e.g., `activate_quickfilter`).
-| `data-wx-primary-target`| The unique ID of the filter this button controls.
-| `data-wx-primary-group` | Optional. Assigns the filter to a specific group. Groups can be configured in the registry to be exclusive.
-| `data-wx-primary-reset` | Optional boolean (`true`). If set, the button acts as a reset trigger for its assigned group and will appear active when no other filters in that group are active.
+|Attribute                 |Description
+|--------------------------|-----------
+|`wx-webui-quickfilter`    |The controller class required on the host element to instantiate the Quickfilter control.
+|`wx-quickfilter-button`   |Class used on child elements to define static filter buttons. These will be parsed and re-rendered dynamically.
+|`wx-quickfilter-avatar`   |Class used on a child element to define an avatar filter toggle (filter by a person). Carries `data-name`, an optional `data-image`, `data-initials` and `data-color`.
+|`wx-quickfilter-dropdown` |Class used on a child container holding `wx-quickfilter-dropdown-option` children, re-rendered as a single-choice option dropdown.
+|`data-wx-primary-action`  |Should be set to the corresponding registry action (e.g., `activate_quickfilter`).
+|`data-wx-primary-target`  |The unique ID of the filter this button controls.
+|`data-wx-primary-group`   |Optional. Assigns the filter to a specific group. Groups can be configured in the registry to be exclusive.
+|`data-wx-primary-reset`   |Optional boolean (`true`). If set, the button acts as a reset trigger for its assigned group and will appear active when no other filters in that group are active.
 
 ### Data Binding
 
@@ -38,6 +40,53 @@ When a user interacts with a Quickfilter button, the action delegates the reques
 Once the state is updated, the registry dispatches a global `webexpress.webui.Event.CHANGE_FILTER_EVENT`. The `QuickFilterCtrl` listens to this event and completely re-renders its content. During the render cycle, it first recreates all predefined static buttons, automatically highlighting them as active if their corresponding filter is enabled (or if they serve as a reset button for a currently empty group). Afterwards, it generates removable chips for any active filters that are not already represented by a static button. These chips feature a close icon that directly triggers the deactivation of the respective filter.
 
 Because the component relies entirely on the central registry and events, you can place the Quickfilter UI anywhere on the page, and it will always remain perfectly synchronized with other filter controls and data views.
+
+## Filter item types
+
+Authored in C# through `ControlQuickfilter` and its items, a single bar can mix several item kinds, all backed by the same registry and the same `ActionFilter`:
+
+- **`ControlQuickfilterItemButton`** — a one-click chip that toggles a single filter.
+- **`ControlQuickfilterItemAvatar`** — an avatar chip used to filter by a person; the client renders the image when supplied, otherwise the `Icon`, otherwise the initials on the person's color. The avatar shows active while its filter is set.
+- **`ControlQuickfilterItemDropdown`** — a single-choice dropdown of related options (each a `ControlQuickfilterItemDropdownItem`). Group the options exclusively, and the toggle shows the active option's label and closes on select.
+- **`ControlQuickfilterItemMultiSelect`** — a multi-select dropdown (also built from `ControlQuickfilterItemDropdownItem`). Several options may be active at once, the menu stays open while values are picked, and the toggle shows the count of active options.
+- **`ControlDataQuickfilterItemDropdown`** *(WebExpress.WebApp)* — a dropdown (or multi-select, via `Multiple`) whose options are loaded from a REST endpoint (`Uri`) through the service layer rather than authored statically. Use it inside a `ControlDataQuickfilter`. Its menu carries a search box that re-queries the endpoint (`GET {uri}?q=…`), so huge option sets are filtered on the server instead of loaded in full.
+
+All items render as chips matching the one-click button, so a mixed bar looks consistent.
+
+```csharp
+new ControlQuickfilter()
+    .Add
+    (
+        new ControlQuickfilterItemButton("status")
+        {
+            Text = _ => "Status",
+            Icon = _ => new IconHome(),
+            PrimaryAction = _ => new ActionFilter()
+        },
+        new ControlQuickfilterItemDropdown("sprint")
+        {
+            Text = _ => "Sprint",
+            Icon = _ => new IconCalendar()
+        }
+            .Add(new ControlQuickfilterItemDropdownItem("sprint-current")
+            {
+                Text = _ => "Current",
+                PrimaryAction = _ => new ActionFilter() { Group = "sprint", Exclusive = true }
+            })
+            .Add(new ControlQuickfilterItemDropdownItem("sprint-next")
+            {
+                Text = _ => "Next",
+                PrimaryAction = _ => new ActionFilter() { Group = "sprint", Exclusive = true }
+            }),
+        new ControlQuickfilterItemAvatar("assignee-guybrush")
+        {
+            Text = _ => "Guybrush Threepwood",
+            Initials = _ => "GT",
+            Color = _ => "#1d4ed8",
+            PrimaryAction = _ => new ActionFilter() { Group = "assignee" }
+        }
+    );
+```
 
 ## Programmatic Control
 
