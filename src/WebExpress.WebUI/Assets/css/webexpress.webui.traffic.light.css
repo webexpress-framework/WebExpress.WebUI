@@ -1,0 +1,87 @@
+.wx-traffic-light {
+  display: inline-flex;
+  /* a single custom property drives every metric; the default is intentionally
+     compact and the size modifiers below only override this one value */
+  --wx-tl-size: 0.9rem;
+}
+
+/* size modifiers; declared after the base so they win at equal specificity */
+.wx-traffic-light-xs {
+  --wx-tl-size: 0.55rem;
+}
+.wx-traffic-light-sm {
+  --wx-tl-size: 0.72rem;
+}
+.wx-traffic-light-lg {
+  --wx-tl-size: 1.25rem;
+}
+.wx-traffic-light-xl {
+  --wx-tl-size: 1.6rem;
+}
+
+.wx-traffic-light-housing {
+  display: inline-flex;
+  flex-direction: column;
+  gap: calc(var(--wx-tl-size) * 0.34);
+  padding: calc(var(--wx-tl-size) * 0.4);
+  /* light mode shows a bright housing; the dark-mode override below restores the
+     classic dark casing */
+  background-color: #e9ecef;
+  border: 1px solid #ced4da;
+  border-radius: 0.5rem;
+}
+
+[data-bs-theme="dark"] .wx-traffic-light-housing {
+  background-color: #2b2f33;
+  border-color: #1c1f22;
+}
+
+/* horizontal lights line their lamps up left to right, e.g. inside a table cell */
+.wx-traffic-light-horizontal .wx-traffic-light-housing {
+  flex-direction: row;
+}
+
+.wx-traffic-light-lamp {
+  width: var(--wx-tl-size);
+  height: var(--wx-tl-size);
+  border-radius: 50%;
+  /* dimmed base colour; the lit lamp overrides background and glow via .active */
+  background-color: #ced4da;
+  box-shadow: inset 0 0 3px rgba(0, 0, 0, .25);
+  transition: background-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+[data-bs-theme="dark"] .wx-traffic-light-lamp {
+  background-color: #4a4f55;
+  box-shadow: inset 0 0 3px rgba(0, 0, 0, .6);
+}
+
+.wx-traffic-light .wx-traffic-light-lamp.active.wx-traffic-light-lamp-red {
+  background-color: #e53935;
+  box-shadow: 0 0 8px 2px rgba(229, 57, 53, .7);
+}
+
+.wx-traffic-light .wx-traffic-light-lamp.active.wx-traffic-light-lamp-yellow {
+  background-color: #fdd835;
+  box-shadow: 0 0 8px 2px rgba(253, 216, 53, .7);
+}
+
+.wx-traffic-light .wx-traffic-light-lamp.active.wx-traffic-light-lamp-green {
+  background-color: #43a047;
+  box-shadow: 0 0 8px 2px rgba(67, 160, 71, .7);
+}
+
+/* the input variant invites interaction; the read-only variant does not */
+.wx-webui-input-traffic-light .wx-traffic-light-lamp {
+  cursor: pointer;
+}
+
+.wx-webui-input-traffic-light.disabled .wx-traffic-light-lamp {
+  cursor: not-allowed;
+  opacity: .65;
+}
+
+.wx-traffic-light-lamp:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}

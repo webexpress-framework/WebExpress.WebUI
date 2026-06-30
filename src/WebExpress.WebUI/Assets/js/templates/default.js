@@ -454,6 +454,47 @@ webexpress.webui.TableTemplates.register("rating", (val, table, row, cell, name,
     return container;
 });
 
+// Traffic light renderer
+webexpress.webui.TableTemplates.register("traffic-light", (val, table, row, cell, name, opts) => {
+    opts = opts || {};
+
+    if ((val === null || val === undefined || val === "") && !opts.editable) {
+        return "";
+    }
+
+    const container = document.createElement("div");
+    const editable = opts.editable === true || opts.editable === "true";
+    const orientation = opts.orientation || "vertical";
+    const size = opts.size || "";
+
+    if (editable) {
+        const editor = document.createElement("div");
+        editor.id = "wx_" + Math.random().toString(36).slice(2, 7);
+        editor.dataset.orientation = orientation;
+        if (size) {
+            editor.classList.add("wx-traffic-light-" + size);
+        }
+        const inputCtrl = new webexpress.webui.InputTrafficLightCtrl(editor);
+        inputCtrl.value = val;
+        editor._wx_controller = inputCtrl;
+        container.appendChild(editor);
+        if (row.id) {
+            container.dataset.objectId = row.id;
+        }
+        new webexpress.webui.SmartEditCtrl(container);
+    } else {
+        // read-only
+        container.dataset.orientation = orientation;
+        if (size) {
+            container.classList.add("wx-traffic-light-" + size);
+        }
+        const ctrl = new webexpress.webui.TrafficLightCtrl(container);
+        ctrl.value = val;
+    }
+
+    return container;
+});
+
 // Editor renderer
 webexpress.webui.TableTemplates.register("editor", (val, table, row, cell, name, opts) => {
     opts = opts || {};

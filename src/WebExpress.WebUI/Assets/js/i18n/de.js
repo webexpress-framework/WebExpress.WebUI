@@ -13,6 +13,11 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "available": "Verfügbar",
     "search": "Suche",
     "rating": "Bewertung",
+    "trafficlight": "Ampel",
+    "trafficlight.off": "Aus",
+    "trafficlight.red": "Rot",
+    "trafficlight.yellow": "Gelb",
+    "trafficlight.green": "Grün",
     "estimate": "Schätzung",
     "fit": "Ansicht anpassen",
 

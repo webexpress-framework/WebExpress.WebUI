@@ -62,6 +62,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/css/webexpress.webui.timeline.css")]
     [Asset("/assets/css/webexpress.webui.avatargroup.css")]
     [Asset("/assets/css/webexpress.webui.toolbar.css")]
+    [Asset("/assets/css/webexpress.webui.traffic.light.css")]
     [Asset("/assets/css/webexpress.webui.tree.css")]
     [Asset("/assets/css/webexpress.webui.upload.css")]
     [Asset("/assets/css/webexpress.webui.view.css")]
