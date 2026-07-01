@@ -34,6 +34,8 @@
   href: frame.md
 - name: Graph
   href: graph.md
+- name: Heat Map
+  href: heatmap.md
 - name: List
   href: list.md
 - name: Modal

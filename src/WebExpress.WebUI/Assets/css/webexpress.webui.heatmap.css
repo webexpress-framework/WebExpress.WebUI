@@ -1,0 +1,44 @@
+.wx-heatmap {
+  display: inline-grid;
+  /* a single custom property drives the cell size; consumers can override it inline or per theme */
+  --wx-heatmap-cell: 1.5rem;
+  gap: 2px;
+  align-items: center;
+}
+
+.wx-heatmap-cell {
+  width: var(--wx-heatmap-cell);
+  height: var(--wx-heatmap-cell);
+  border-radius: 2px;
+  /* the background colour is set per cell by the client from the gradient */
+  background-color: #eceff1;
+}
+
+/* a cell without a value reads as a gap in the data rather than a low value */
+.wx-heatmap-cell-empty {
+  background-color: transparent;
+  border: 1px dashed #cfd8dc;
+}
+
+.wx-heatmap-row-label,
+.wx-heatmap-col-label {
+  font-size: 0.72rem;
+  color: #607d8b;
+  white-space: nowrap;
+}
+
+.wx-heatmap-row-label {
+  padding-right: 0.4rem;
+  text-align: right;
+}
+
+.wx-heatmap-col-label {
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wx-heatmap-corner {
+  /* the empty cell where the row and column label axes meet */
+  background-color: transparent;
+}

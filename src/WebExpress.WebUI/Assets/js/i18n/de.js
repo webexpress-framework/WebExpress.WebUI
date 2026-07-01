@@ -13,6 +13,7 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "available": "Verfügbar",
     "search": "Suche",
     "rating": "Bewertung",
+    "heatmap": "Wärmekarte",
     "trafficlight": "Ampel",
     "trafficlight.off": "Aus",
     "trafficlight.red": "Rot",

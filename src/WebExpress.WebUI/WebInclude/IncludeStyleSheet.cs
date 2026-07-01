@@ -32,6 +32,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/css/webexpress.webui.filelist.css")]
     [Asset("/assets/css/webexpress.webui.form.css")]
     [Asset("/assets/css/webexpress.webui.graph.css")]
+    [Asset("/assets/css/webexpress.webui.heatmap.css")]
     [Asset("/assets/css/webexpress.webui.icon.css")]
     [Asset("/assets/css/webexpress.webui.kanban.css")]
     [Asset("/assets/css/webexpress.webui.list.css")]
