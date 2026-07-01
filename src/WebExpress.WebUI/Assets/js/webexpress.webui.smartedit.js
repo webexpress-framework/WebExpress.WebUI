@@ -380,6 +380,22 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             const color = new webexpress.webui.ColorCtrl(container);
             color.value = value;
             return container;
+        } else if (ctrl instanceof webexpress.webui.InputTrafficLightCtrl) {
+            // without this case the display state falls through to the raw token
+            // text; mirror the read-only representation of the traffic-light table
+            // template so the value shows as a dimmed signal instead
+            const container = document.createElement("div");
+            if (this._editor.dataset.orientation) {
+                container.dataset.orientation = this._editor.dataset.orientation;
+            }
+            const sizeClass = (this._editor.className || "").split(/\s+/)
+                .find((c) => c.indexOf("wx-traffic-light-") === 0 && c !== "wx-traffic-light-horizontal");
+            if (sizeClass) {
+                container.classList.add(sizeClass);
+            }
+            const light = new webexpress.webui.TrafficLightCtrl(container);
+            light.value = value;
+            return container;
         } else if (ctrl instanceof webexpress.webui.EditorCtrl) {
             const span = document.createElement("span");
             span.innerHTML = value ?? "";
