@@ -43,6 +43,20 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             this._startEditing(element);
         });
 
+        // a rest-backed editor (e.g. the REST selection input) loads its options
+        // asynchronously, after this read view was first built; rebuild the view
+        // when the editor reports its data arrived, so the display is not frozen as
+        // a snapshot taken before the options existed. skipped while editing, where
+        // the live editor is shown instead of the view.
+        if (this._editor && typeof this._editor.addEventListener === "function") {
+            this._editor.addEventListener(webexpress.webui.Event.DATA_ARRIVED_EVENT, () => {
+                if (!this._activeEdit) {
+                    this._element.innerHTML = "";
+                    this._element.appendChild(this._getView(this.value));
+                }
+            });
+        }
+
         const view = this._getView(this.value);
         this._element.appendChild(view);
     }
