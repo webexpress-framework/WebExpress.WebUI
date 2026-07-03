@@ -42,7 +42,7 @@ function loadInstruction() {
                 DialogPanels: { register(key, definition) { panels.set(key, definition); } },
                 I18N: { translate: (key) => key },
                 IconTheme: { resolveFa: (cls) => cls },
-                ModalSidebarPanel: class {
+                ModalSidebarPanelCtrl: class {
                     constructor(element) { this.element = element; }
                     show() { this.shown = true; }
                 }

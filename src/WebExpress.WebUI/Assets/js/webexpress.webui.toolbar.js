@@ -802,7 +802,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Creates and opens a ModalSidebarPanel for the given key.
+     * Creates and opens a ModalSidebarPanelCtrl for the given key.
      * Reuses existing instances.
      * @param {string} key - The registration key for DialogPanels.
      * @param {string} title - Title for the modal.
@@ -848,7 +848,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
 
             document.body.appendChild(el);
 
-            modalInstance = new webexpress.webui.ModalSidebarPanel(el);
+            modalInstance = new webexpress.webui.ModalSidebarPanelCtrl(el);
             modalInstance._toolbar = this; // link back reference
             this._modalInstances[key] = modalInstance;
         }

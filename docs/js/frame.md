@@ -26,8 +26,8 @@ During construction, `data-uri`, `data-selector`, and `data-autoload` are read a
 The `load()` method first inserts a placeholder and emits `webexpress.webui.Event.DATA_REQUESTED_EVENT`. The resource is loaded using `fetch(this._uri, { credentials: "same-origin" })`. Upon a successful response, the HTML text is parsed, the desired area is determined via `this._selector` (fallback: `document.body`), and its `innerHTML` is transferred to the host element. Afterwards, `webexpress.webui.Event.DATA_ARRIVED_EVENT` is emitted.
 
 If an error occurs (network error or `!response.ok`), the container is cleared and a collapsible error alert with headline, details, and stacktrace is shown. The alert uses i18n keys:
-- `webexpress.webui:frame.contentNotLoaded.label` (default: "Content could not be loaded.")
-- `webexpress.webui:frame.contentNotLoaded.details` (default: empty)
+- `webexpress.webui:page.contentNotLoaded.label` (default: "Content could not be loaded.")
+- `webexpress.webui:page.contentNotLoaded.details` (default: "An error occurred while loading external content.")
 
 The class is registered under the key `"wx-webui-frame"` and can be automatically instantiated via `data-controller`.
 

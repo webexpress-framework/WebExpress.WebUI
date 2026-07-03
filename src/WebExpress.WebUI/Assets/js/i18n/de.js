@@ -67,6 +67,7 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "page.contentNotLoaded.details": "Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie die Seite erneut zu laden. Falls das Problem weiterhin besteht, könnte die angeforderte Ressource momentan nicht verfügbar sein oder ein technischer Fehler vorliegen. Sie können auch versuchen, die Seite zu aktualisieren oder sich an den technischen Support wenden, falls Unterstützung benötigt wird.",
 
     "table.columns.manage": "Spalten verwalten",
+    "table.moving.item": "Element wird verschoben",
     "table.columns.title": "Spalten",
     "page.table.columns.desc": "Sichtbarkeit umschalten und Reihenfolge per Ziehen ändern.",
     "page.table.columns.search": "Suche Spalten…",
@@ -81,6 +82,7 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "editor.insert.addon.tooltip": "AddOn einfügen",
 
     "delete": "Löschen",
+    "confirm": "Bestätigen",
     "apply": "Anwenden",
     "filter": "Filter",
     "properties": "Eigenschaften",
@@ -88,6 +90,9 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "dashboard.widget.unavailable": "Widget-Inhalt nicht verfügbar.",
 
     "list.renderer.error": "Renderer-Fehler",
+    "list.delete.confirm": "Dieses Element löschen?",
+    "list.sort.title": "Sortieren",
+    "list.handle.title": "Verschieben",
 
     "overflow.submenu": "Untermenü",
 
@@ -203,7 +208,9 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     // instruction
     "editor.instruction.title": "Anweisungstext",
     "editor.instruction.text.label": "Geben Sie hier einen Anweisungstext ein.",
-    "editor.instruction.text.placeholder": "Anweisungstext eingeben …", 
+    "editor.instruction.text.placeholder": "Anweisungstext eingeben …",
+    "editor.instruction.error.internal": "Interner Fehler: Editor oder Feld nicht verfügbar.",
+    "editor.instruction.error.text": "Bitte geben Sie einen Anweisungstext ein.",
 
     // slash menu chrome
     "editor.slash.search": "Befehl suchen…",
@@ -315,6 +322,7 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
 
     "modal.form.error": "Ein Fehler ist aufgetreten.",
     "modal.form.correct": "Bitte korrigieren Sie Folgendes:",
+    "modal.form.notfound": "Es konnte kein Formular oder Inhalt geladen werden.",
     "modal.validation.error": "Bitte korrigieren Sie die markierten Fehler.",
     "modal.submit.failed": "Übermittlung fehlgeschlagen.",
 

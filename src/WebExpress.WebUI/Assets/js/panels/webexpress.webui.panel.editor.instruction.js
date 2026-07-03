@@ -10,7 +10,7 @@ webexpress.webui.DialogPanels.register("editor-instruction", {
     /**
      * Renders the page ui.
      * @param {HTMLElement} container - Host container for the page.
-     * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
+     * @param {webexpress.webui.ModalSidebarPanelCtrl} modal - Modal instance.
      */
     render: function (container, modal) {
         const wrapper = document.createElement("div");
@@ -56,7 +56,7 @@ webexpress.webui.DialogPanels.register("editor-instruction", {
     /**
      * Called when the page becomes active.
      * Resets or prefills inputs and attaches the explicit click handler.
-     * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
+     * @param {webexpress.webui.ModalSidebarPanelCtrl} modal - Modal instance.
      */
     onShow: function (modal) {
         if (!(modal && modal._instruction && modal._instruction.textInput)) {
@@ -99,7 +99,7 @@ webexpress.webui.DialogPanels.register("editor-instruction", {
 
     /**
      * Validates current page data.
-     * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
+     * @param {webexpress.webui.ModalSidebarPanelCtrl} modal - Modal instance.
      * @returns {true|{valid:false,message:string}}
      */
     validate: function (modal) {
@@ -120,7 +120,7 @@ webexpress.webui.DialogPanels.register("editor-instruction", {
 
     /**
      * Handles submit and inserts the instruction text into the editor.
-     * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
+     * @param {webexpress.webui.ModalSidebarPanelCtrl} modal - Modal instance.
      * @returns {void}
      */
     onSubmit: function (modal) {

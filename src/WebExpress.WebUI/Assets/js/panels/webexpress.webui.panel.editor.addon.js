@@ -10,7 +10,7 @@ webexpress.webui.DialogPanels.register("editor-addon", {
     /**
      * Renders the unified page ui for add-on selection.
      * @param {HTMLElement} container - Host container for the page.
-     * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
+     * @param {webexpress.webui.ModalSidebarPanelCtrl} modal - Modal instance.
      */
     render: function (container, modal) {
         if (!modal._addonState) {
@@ -166,7 +166,7 @@ webexpress.webui.DialogPanels.register("editor-addon", {
     /**
      * Called when the page becomes active.
      * Resets inputs and selection states.
-     * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
+     * @param {webexpress.webui.ModalSidebarPanelCtrl} modal - Modal instance.
      */
     onShow: function (modal) {
         if (!modal._addonState) {
@@ -224,7 +224,7 @@ webexpress.webui.DialogPanels.register("editor-addon", {
 
     /**
      * Validates current page data.
-     * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
+     * @param {webexpress.webui.ModalSidebarPanelCtrl} modal - Modal instance.
      * @returns {true|{valid:false,message:string}}
      */
     validate: function (modal) {
@@ -243,7 +243,7 @@ webexpress.webui.DialogPanels.register("editor-addon", {
 
     /**
      * Handles submit and delegates the final insertion or property opening to the plugin.
-     * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
+     * @param {webexpress.webui.ModalSidebarPanelCtrl} modal - Modal instance.
      */
     onSubmit: function (modal) {
         const state = modal._addonState;

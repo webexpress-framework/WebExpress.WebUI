@@ -179,7 +179,7 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
         previewElement.appendChild(text);
 
         const removeBtn = document.createElement("button");
-        removeBtn.className = "fas fa-times";
+        removeBtn.className = this._iconClass("fas fa-times", "xmark");
         removeBtn.title = this._i18n("webexpress.webui:upload.remove.file", "Remove file");
         removeBtn.onclick = (e) => {
             e.stopPropagation();
@@ -307,6 +307,8 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Returns a Font Awesome icon class based on the file extension.
+     * The light icon set has no file-type glyphs, so the map stays on
+     * FontAwesome in both themes instead of resolving through IconTheme.
      * @param {string} filename The name of the file (e.g., "report.pdf").
      * @returns {string} The corresponding Font Awesome icon class (e.g., "fas fa-file-pdf").
      */

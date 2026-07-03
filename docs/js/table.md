@@ -120,9 +120,9 @@ ctrl.insertRow({ id: 'p01', cells: [{ text: 'Sample' }, { text: '2025-05-01' }] 
 document.body.appendChild(div);
 ```
 
-# TableCtrlReorderable
+# TableReorderableCtrl
 
-`TableCtrlReorderable` extends `TableCtrl` with interactive manipulation abilities and persistence. It enables users to reorder columns and rows, hide columns, manage view state, and move rows within hierarchical structures (trees). It is ideal for UIs where table structure needs to be configurable and persistent across sessions.
+`TableReorderableCtrl` extends `TableCtrl` with interactive manipulation abilities and persistence. It enables users to reorder columns and rows, hide columns, manage view state, and move rows within hierarchical structures (trees). It is ideal for UIs where table structure needs to be configurable and persistent across sessions.
 
 ```
    ┌─┬──────────────────┬──────────────────┬─────┐
@@ -200,7 +200,7 @@ The following example demonstrates a minimal yet fully functional table control 
 
 Programmatic control allows you to interact with the table and customize its structure, data, and behavior directly via JavaScript APIs. This is especially useful for building dynamic applications, updating data on the fly, or integrating with other JavaScript modules.
 
-You can access automatically created instances or instantiate a new TableCtrlReorderable explicitly.
+You can access automatically created instances or instantiate a new TableReorderableCtrl explicitly.
 
 ### Accessing Instance
 
@@ -219,7 +219,7 @@ Dynamically creating new table controller instances gives you full control over 
 const div = document.createElement('div');
 div.dataset.movableRow = "true";
 div.dataset.persistKey = "demo-table";
-const reorderCtrl = new webexpress.webui.TableCtrlReorderable(div);
+const reorderCtrl = new webexpress.webui.TableReorderableCtrl(div);
 reorderCtrl.setColumns([
     { id: 'name', label: 'Name' },
     { id: 'date', label: 'Date', rendererType: 'date', rendererOptions: { format: 'yyyy-MM-dd' } }
@@ -234,5 +234,5 @@ document.body.appendChild(div);
 # Best Practices & Advanced Integration
 
 - Use `TableCtrl` for pure data presentation with custom rendering and trees.
-- Use `TableCtrlReorderable` for interactive, user-configurable layout with drag & drop, persistent views, and hierarchical editing.
+- Use `TableReorderableCtrl` for interactive, user-configurable layout with drag & drop, persistent views, and hierarchical editing.
 - Integrate external modal panels via `table-columns` for advanced workflows.

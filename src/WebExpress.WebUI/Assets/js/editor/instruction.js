@@ -127,7 +127,7 @@ webexpress.webui.EditorPlugins.register("instruction", 5000, {
     },
 
     /**
-     * Creates a minimal ModalSidebarPanel instance and returns a wrapper object.
+     * Creates a minimal ModalSidebarPanelCtrl instance and returns a wrapper object.
      * @param {string} key - Registry key or identifier used by dialog panels.
      * @param {string} title - Modal header title.
      * @returns {{ element: HTMLElement, ctrl: object }} Wrapper containing element and controller.
@@ -151,7 +151,7 @@ webexpress.webui.EditorPlugins.register("instruction", 5000, {
             </div>`;
 
         document.body.appendChild(el);
-        const ctrl = new webexpress.webui.ModalSidebarPanel(el);
+        const ctrl = new webexpress.webui.ModalSidebarPanelCtrl(el);
 
         return { element: el, ctrl: ctrl };
     }

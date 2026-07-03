@@ -1,6 +1,6 @@
 /**
  * Registers a dynamic columns management panel under the key "table-columns".
- * This panel integrates with ModalSidebarPanel and TableCtrlReorderable.
+ * This panel integrates with ModalSidebarPanelCtrl and TableReorderableCtrl.
  */
 webexpress.webui.DialogPanels.register("table-columns", {
     id: "table-columns-pane",
@@ -99,7 +99,7 @@ webexpress.webui.DialogPanels.register("table-columns", {
             });
 
             const lbl = document.createElement("span");
-            lbl.textContent = column.label || column.id || modal._i18n("webexpress.webui:page.table.column.default");
+            lbl.textContent = column.label || column.id || modal._i18n("webexpress.webui:page.table.columns.default", "Column");
 
             labelWrap.appendChild(cb);
             labelWrap.appendChild(lbl);

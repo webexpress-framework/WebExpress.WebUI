@@ -148,7 +148,7 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
 
         // create the expandable error container using ExpandableCtrl
         const expandableDiv = document.createElement("div");
-        expandableDiv.setAttribute("data-header", this._i18n("webexpress.webui:frame.contentNotLoaded.label", "Content could not be loaded."));
+        expandableDiv.setAttribute("data-header", this._i18n("webexpress.webui:page.contentNotLoaded.label", "Content could not be loaded."));
         expandableDiv.setAttribute("data-headercss", "fw-bold text-danger");
         expandableDiv.setAttribute("data-icon", "fa-solid fa-triangle-exclamation text-warning me-2");
         expandableDiv.setAttribute("data-expanded", "false");
@@ -157,7 +157,7 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
         // prepare error message
         const messageDiv = document.createElement("div");
         messageDiv.className = "mb-2";
-        messageDiv.textContent = this._i18n("webexpress.webui:frame.contentNotLoaded.details", "An error occurred while loading external content.");
+        messageDiv.textContent = this._i18n("webexpress.webui:page.contentNotLoaded.details", "An error occurred while loading external content.");
 
         // prepare stacktrace if available
         const stackDiv = document.createElement("pre");

@@ -54,7 +54,7 @@ function loadAddonsPlugin() {
                 Controller: controller,
                 I18N: { translate: (key) => key },
                 IconTheme: { resolveFa: (cls) => cls },
-                ModalSidebarPanel: class { },
+                ModalSidebarPanelCtrl: class { },
                 ModalCtrl: class { }
             }
         }

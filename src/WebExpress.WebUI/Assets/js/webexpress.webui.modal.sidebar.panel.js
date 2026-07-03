@@ -14,7 +14,7 @@
  * - data-submit-id: id of the submit button managed by the base class inside the modal footer
  * - data-validate-active-only: when "true", validate only the currently active pane and ignore hidden panes (default false = validate all pages)
  */
-webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
+webexpress.webui.ModalSidebarPanelCtrl = class extends webexpress.webui.ModalCtrl {
     /**
      * Constructor.
      * @param {HTMLElement} element - Host element with optional modal shell children.
@@ -901,4 +901,4 @@ webexpress.webui.ModalSidebarPanel = class extends webexpress.webui.ModalCtrl {
 };
 
 // register control in controller
-webexpress.webui.Controller.registerClass("wx-webui-modal-sidebar-panel", webexpress.webui.ModalSidebarPanel);
+webexpress.webui.Controller.registerClass("wx-webui-modal-sidebar-panel", webexpress.webui.ModalSidebarPanelCtrl);

@@ -67,6 +67,7 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "page.contentNotLoaded.details": "Please check your internet connection or try reloading the page. If the problem persists, the requested resource may be temporarily unavailable or a technical error may have occurred. You may also try refreshing the page or contact technical support if you need assistance.",
 
     "table.columns.manage": "Manage columns",
+    "table.moving.item": "Moving item",
     "table.columns.title": "Columns",
     "page.table.columns.desc": "Toggle visibility and drag to reorder columns.",
     "page.table.columns.search": "Search columns…",
@@ -81,6 +82,7 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "editor.insert.addon.tooltip" : "Insert AddOn",
 
     "delete": "Delete",
+    "confirm": "Confirm",
     "apply": "Apply",
     "filter": "Filter",
     "properties": "Properties",
@@ -88,6 +90,9 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "dashboard.widget.unavailable": "Widget content not available.",
 
     "list.renderer.error": "Renderer Error",
+    "list.delete.confirm": "Delete this item?",
+    "list.sort.title": "Sort",
+    "list.handle.title": "Move",
 
     "overflow.submenu": "Submenu",
 
@@ -204,6 +209,8 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "editor.instruction.title": "Instruction Text",
     "editor.instruction.text.label": "Enter an instruction text here.",
     "editor.instruction.text.placeholder": "Enter instruction text …",
+    "editor.instruction.error.internal": "Internal error: editor or field not available.",
+    "editor.instruction.error.text": "Please enter an instruction text.",
 
     // slash menu chrome
     "editor.slash.search": "Search commands…",
@@ -315,6 +322,7 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
 
     "modal.form.error": "An error occurred.",
     "modal.form.correct": "Please correct the following:",
+    "modal.form.notfound": "No form or content could be loaded.",
     "modal.validation.error": "Please correct the highlighted errors.",
     "modal.submit.failed": "Submit failed.",
 

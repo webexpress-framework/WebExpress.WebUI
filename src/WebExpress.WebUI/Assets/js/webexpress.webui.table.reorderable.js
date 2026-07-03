@@ -8,7 +8,7 @@
  * - webexpress.webui.Event.ROW_REORDER_EVENT
  * - webexpress.webui.Event.CHANGE_VISIBILITY_EVENT
  */
-webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl {
+webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl {
 
     // config properties
     _movableRow = false;
@@ -209,7 +209,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "btn btn-sm";
-        btn.title = this._i18n("webexpress.webui:table.manage.columns", "Manage Columns");
+        btn.title = this._i18n("webexpress.webui:table.columns.manage", "Manage columns");
         btn.textContent = "≡";
         btn.addEventListener("click", (e) => {
             e.preventDefault();
@@ -222,7 +222,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
     }
 
     /**
-     * Create dynamic modal host for columns, backed by ModalSidebarPanel.
+     * Create dynamic modal host for columns, backed by ModalSidebarPanelCtrl.
      */
     _createColumnsModal() {
         const id = `wx-table-columns-msp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -249,7 +249,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
         el.append(header, content, footer);
         document.body.appendChild(el);
 
-        const modalCtrl = new webexpress.webui.ModalSidebarPanel(el);
+        const modalCtrl = new webexpress.webui.ModalSidebarPanelCtrl(el);
         modalCtrl._tableCtrl = this;
 
         // bridge modal actions to table control methods
@@ -827,7 +827,7 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
             font-size: 12px;
             z-index: 2147483647;
         `;
-        ghost.textContent = row.id ? `Row: ${row.id}` : this._i18n("webexpress.webui:table.moving_item", "Moving Item");
+        ghost.textContent = row.id ? `Row: ${row.id}` : this._i18n("webexpress.webui:table.moving.item", "Moving item");
         document.body.appendChild(ghost);
         this._rowMoveGhost = ghost;
 
@@ -1212,4 +1212,4 @@ webexpress.webui.TableCtrlReorderable = class extends webexpress.webui.TableCtrl
 };
 
 // register the class in the controller
-webexpress.webui.Controller.registerClass("wx-webui-table-reorderable", webexpress.webui.TableCtrlReorderable);
+webexpress.webui.Controller.registerClass("wx-webui-table-reorderable", webexpress.webui.TableReorderableCtrl);

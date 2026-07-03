@@ -45,6 +45,8 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Returns a Font Awesome icon class based on the file extension.
+     * The light icon set has no file-type glyphs, so the map stays on
+     * FontAwesome in both themes instead of resolving through IconTheme.
      * @param {string} filename - The name of the file (e.g., "report.pdf").
      * @returns {string} - The corresponding Font Awesome icon class (e.g., "fas fa-file-pdf").
      */
@@ -118,7 +120,7 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
 
             if (file.description) {
                 const descIcon = document.createElement("i");
-                descIcon.className = "fas fa-info-circle text-muted";
+                descIcon.className = `${this._iconClass("fas fa-info-circle", "circle-info")} text-muted`;
                 divMiddle.appendChild(descIcon);
                 divMiddle.appendChild(document.createTextNode(file.description));
             }
@@ -132,7 +134,7 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
             if (file.size) {
                 const size = document.createElement("span");
                 const sizeIcon = document.createElement("i");
-                sizeIcon.className = "fas fa-database text-muted";
+                sizeIcon.className = `${this._iconClass("fas fa-database", "database")} text-muted`;
                 size.appendChild(sizeIcon);
                 size.appendChild(document.createTextNode(file.size));
                 divRight.appendChild(size);
@@ -141,7 +143,7 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
             if (file.date) {
                 const date = document.createElement("span");
                 const dateIcon = document.createElement("i");
-                dateIcon.className = "fas fa-calendar-alt text-muted";
+                dateIcon.className = `${this._iconClass("fas fa-calendar-alt", "calendar")} text-muted`;
                 date.appendChild(dateIcon);
                 date.appendChild(document.createTextNode(file.date));
                 divRight.appendChild(date);

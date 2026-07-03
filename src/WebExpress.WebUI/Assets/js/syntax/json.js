@@ -14,7 +14,6 @@ webexpress.webui.Syntax.register("json", null, (code) => {
         return `<span class="constant">${key}</span>`;
       }
       if (boolNull) {
-        const type = /true|false/.test(boolNull) ? "boolean" : "null";
         return `<span class="keyword">${boolNull}</span>`;
       }
       if (number) {

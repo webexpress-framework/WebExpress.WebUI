@@ -358,10 +358,10 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
             this._toolbarContainer.appendChild(sep);
         };
 
-        this._btnUndo = createBtn("btn-undo", "fas fa-undo", this._i18n("webexpress.webui:graph.undo", "Undo"), () => {
+        this._btnUndo = createBtn("btn-undo", this._iconClass("fas fa-undo", "undo"), this._i18n("webexpress.webui:graph.undo", "Undo"), () => {
             this._undo();
         });
-        this._btnRedo = createBtn("btn-redo", "fas fa-redo", this._i18n("webexpress.webui:graph.redo", "Redo"), () => {
+        this._btnRedo = createBtn("btn-redo", this._iconClass("fas fa-redo", "redo"), this._i18n("webexpress.webui:graph.redo", "Redo"), () => {
             this._redo();
         });
 
@@ -374,26 +374,26 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
             }
         });
 
-        this._btnEdgeMode = createBtn("btn-add-edge", "fas fa-share-alt", this._i18n("webexpress.webui:graph.add.edge", "Add Edge (Toggle)"), () => {
+        this._btnEdgeMode = createBtn("btn-add-edge", this._iconClass("fas fa-share-alt", "share"), this._i18n("webexpress.webui:graph.add.edge", "Add Edge (Toggle)"), () => {
             const isActive = !this._isAddEdgeMode;
             this._toggleAddEdgeMode(isActive);
         }, true);
 
         createSep();
 
-        this._btnEdit = createBtn("btn-edit", "fas fa-pen", this._i18n("webexpress.webui:graph.edit.properties", "Edit Properties"), () => {
+        this._btnEdit = createBtn("btn-edit", this._iconClass("fas fa-pen", "pen"), this._i18n("webexpress.webui:graph.edit.properties", "Edit Properties"), () => {
             this._openPropertiesModal();
         });
         this._btnEdit.disabled = true;
 
-        this._btnDelete = createBtn("btn-delete", "fas fa-trash", this._i18n("webexpress.webui:graph.delete.selected", "Delete Selected"), () => {
+        this._btnDelete = createBtn("btn-delete", this._iconClass("fas fa-trash", "trash"), this._i18n("webexpress.webui:graph.delete.selected", "Delete Selected"), () => {
             this._requestDelete();
         });
         this._btnDelete.disabled = true;
 
         createSep();
 
-        createBtn("btn-fit", "fas fa-expand", this._i18n("webexpress.webui:graph.fit.view", "Fit View"), () => {
+        createBtn("btn-fit", this._iconClass("fas fa-expand", "expand"), this._i18n("webexpress.webui:graph.fit.view", "Fit View"), () => {
             this._fitToView();
         });
         createBtn("btn-export", "fas fa-file-export", this._i18n("webexpress.webui:graph.export.svg", "Export SVG"), () => {
