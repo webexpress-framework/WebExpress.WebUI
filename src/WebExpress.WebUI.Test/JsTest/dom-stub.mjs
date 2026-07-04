@@ -23,6 +23,9 @@ class ClassList {
     add(...names) { names.forEach((n) => this._owner._classes.add(n)); }
     remove(...names) { names.forEach((n) => this._owner._classes.delete(n)); }
     contains(name) { return this._owner._classes.has(name); }
+    // the browser DOMTokenList is iterable, which controls rely on to read the
+    // current classes with a spread ([...el.classList])
+    [Symbol.iterator]() { return this._owner._classes.values(); }
     toggle(name, force) {
         const has = this._owner._classes.has(name);
         const shouldHave = force === undefined ? !has : !!force;

@@ -52,6 +52,15 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
             const buttons = Array.from(form.querySelectorAll("button[type='submit'], button[type='reset']"))
                 .map(btn => this._detachElement(btn));
 
+            // hidden metadata elements the server emits as direct children of
+            // the form (for example the wx-state / wx-service islands a data
+            // bound form carries) are not visible content and must stay direct
+            // children of the form: a form controller that hydrates the form
+            // after it is injected reads them from the form's direct children,
+            // so relocating them into the modal body would leave the form
+            // without its endpoint and the fields empty.
+            const islands = [...form.children].filter(el => el.hasAttribute("hidden"));
+
             const method = form.getAttribute("method") || "POST";
             const action = form.getAttribute("action") || this._uri;
 
@@ -74,8 +83,8 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
 
             this._form.addEventListener("submit", this._submitHandler);
 
-            // extract all content except <footer>
-            const formContent = [...form.children].filter(el => !el.matches("footer"));
+            // extract all visible content except <footer> and the metadata islands
+            const formContent = [...form.children].filter(el => !el.matches("footer") && !el.hasAttribute("hidden"));
 
             form.innerHTML = "";
             this._footerDiv.innerHTML = "";
@@ -88,6 +97,9 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
             formContent.forEach(el => this._bodyDiv.appendChild(el));
 
             this._form.innerHTML = "";
+            // keep the metadata islands as direct children of the form, ahead of
+            // the dialog, so the injected form hydrates from them
+            islands.forEach(el => this._form.appendChild(el));
             this._form.appendChild(this._dialogDiv);
 
             this._element.innerHTML = "";
