@@ -241,6 +241,60 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the background color property of the sidebar item link control,
+        /// covering the css class emitted for a predefined color.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeColorBackground.Default, @"<div class=""wx-sidebar-link""></div>")]
+        [InlineData(TypeColorBackground.Primary, @"<div class=""wx-sidebar-link"" data-background-color-css=""bg-primary""></div>")]
+        [InlineData(TypeColorBackground.Secondary, @"<div class=""wx-sidebar-link"" data-background-color-css=""bg-secondary""></div>")]
+        [InlineData(TypeColorBackground.Danger, @"<div class=""wx-sidebar-link"" data-background-color-css=""bg-danger""></div>")]
+        public void BackgroundColor(TypeColorBackground color, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlSidebarItemLink()
+            {
+                BackgroundColor = _ => new PropertyColorBackground(color)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that user-defined text and background colors are emitted as
+        /// inline styles rather than framework classes, covering the style side
+        /// of the color pair.
+        /// </summary>
+        [Fact]
+        public void ColorStyle()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlSidebarItemLink()
+            {
+                Color = _ => new PropertyColorText("#111111"),
+                BackgroundColor = _ => new PropertyColorBackground("#222222")
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(
+                @"<div class=""wx-sidebar-link"" data-color-style=""color:#111111;"" data-background-color-style=""background:#222222;""></div>",
+                html);
+        }
+
+        /// <summary>
         /// Tests the target property of the sidebar item link control.
         /// </summary>
         [Theory]
@@ -313,6 +367,163 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the badge property of the sidebar item link control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-sidebar-link""></div>")]
+        [InlineData("5", @"<div class=""wx-sidebar-link"" data-badge=""5""></div>")]
+        [InlineData("webexpress.WebUI:plugin.name", @"<div class=""wx-sidebar-link"" data-badge=""WebExpress.WebUI""></div>")]
+        public void Badge(string badge, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlSidebarItemLink()
+            {
+                Badge = _ => badge
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the badge color property of the sidebar item link control.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeColorBackgroundBadge.Default, @"<div class=""wx-sidebar-link"" data-badge=""1""></div>")]
+        [InlineData(TypeColorBackgroundBadge.Primary, @"<div class=""wx-sidebar-link"" data-badge=""1"" data-badge-color=""text-bg-primary""></div>")]
+        [InlineData(TypeColorBackgroundBadge.Danger, @"<div class=""wx-sidebar-link"" data-badge=""1"" data-badge-color=""text-bg-danger""></div>")]
+        public void BadgeColor(TypeColorBackgroundBadge color, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlSidebarItemLink()
+            {
+                Badge = _ => "1",
+                BadgeColor = _ => new PropertyColorBackgroundBadge(color)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that nested child items render as a collapsible subtree.
+        /// </summary>
+        [Fact]
+        public void Children()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlSidebarItemLink()
+            {
+                Text = _ => "Parent"
+            };
+            control.Add(new ControlSidebarItemLink() { Text = _ => "Child" });
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(
+                @"<div class=""wx-sidebar-link"" data-label=""Parent""><div class=""wx-sidebar-children""><div class=""wx-sidebar-link"" data-label=""Child""></div></div></div>",
+                html);
+        }
+
+        /// <summary>
+        /// Tests that a group starts expanded when the expanded flag is set,
+        /// while a leaf link never carries the flag.
+        /// </summary>
+        [Fact]
+        public void Expanded()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlSidebarItemLink()
+            {
+                Text = _ => "Parent",
+                Expanded = _ => true
+            };
+            control.Add(new ControlSidebarItemLink() { Text = _ => "Child" });
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(
+                @"<div class=""wx-sidebar-link"" data-label=""Parent"" data-expanded=""true""><div class=""wx-sidebar-children""><div class=""wx-sidebar-link"" data-label=""Child""></div></div></div>",
+                html);
+        }
+
+        /// <summary>
+        /// Tests that added options render into a dedicated container the client
+        /// turns into the trailing "..." menu, and that a link without options
+        /// stays unchanged.
+        /// </summary>
+        [Fact]
+        public void Options()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlSidebarItemLink()
+            {
+                Text = _ => "Parent"
+            };
+            control.AddOption(new ControlDropdownItemLink() { Text = _ => "Edit" });
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(
+                @"<div class=""wx-sidebar-link"" data-label=""Parent""><div class=""wx-sidebar-options""><div class=""wx-dropdown-item"">Edit</div></div></div>",
+                html);
+        }
+
+        /// <summary>
+        /// Tests that a group renders its own options ahead of the children
+        /// subtree, so a tree node can both expand and expose its actions.
+        /// </summary>
+        [Fact]
+        public void OptionsWithChildren()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlSidebarItemLink()
+            {
+                Text = _ => "Parent"
+            };
+            control.AddOption(new ControlDropdownItemLink() { Text = _ => "Edit" });
+            control.Add(new ControlSidebarItemLink() { Text = _ => "Child" });
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(
+                @"<div class=""wx-sidebar-link"" data-label=""Parent""><div class=""wx-sidebar-options""><div class=""wx-dropdown-item"">Edit</div></div><div class=""wx-sidebar-children""><div class=""wx-sidebar-link"" data-label=""Child""></div></div></div>",
+                html);
         }
     }
 }

@@ -104,15 +104,39 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                 const isActive = dataset.active === "active";
                 const isDisabled = dataset.active === "disabled";
 
+                // a nested container holds the child links of a hierarchical
+                // group; parsing it recursively turns a subtree of any depth
+                // into nested item descriptors
+                const childrenContainer = Array.from(el.children)
+                    .find(child => child.classList && child.classList.contains("wx-sidebar-children"));
+                const children = childrenContainer ? this._parseItems(childrenContainer.children) : [];
+
+                // an optional container carries the entries of the trailing
+                // "..." menu; it is a sibling of the children container so a
+                // group can own both a subtree and its own options
+                const optionsContainer = Array.from(el.children)
+                    .find(child => child.classList && child.classList.contains("wx-sidebar-options"));
+                const options = optionsContainer ? this._parseOptions(optionsContainer) : [];
+
                 items.push({
                     ...commonProps,
                     type: "item",
                     link: dataset.uri || null,
-                    tooltip: dataset.tooltip || null,
+                    tooltip: dataset.tooltip || dataset.title || null,
                     target: dataset.target || null,
                     isRemoveable: dataset.removeable === "true",
                     active: isActive,
                     disabled: isDisabled,
+                    badge: dataset.badge != null ? dataset.badge : null,
+                    badgeColor: dataset.badgeColor || null,
+                    badgeStyle: dataset.badgeStyle || null,
+                    colorCss: dataset.colorCss || null,
+                    colorStyle: dataset.colorStyle || null,
+                    backgroundColorCss: dataset.backgroundColorCss || null,
+                    backgroundColorStyle: dataset.backgroundColorStyle || null,
+                    expanded: dataset.expanded === "true",
+                    children: children,
+                    options: options,
                     element: null // created in _buildItemElement
                 });
             } else if (el.classList.contains("wx-sidebar-control")) {
@@ -157,6 +181,61 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
+     * Parses a "..." options container into dropdown descriptors, mirroring the
+     * table and list option format so the shared DropdownCtrl can render them.
+     * Both label fields are filled: the menu reads "text", while the sibling
+     * controls use "content", so neither path renders an empty entry.
+     * @param {HTMLElement} optionsContainer - The .wx-sidebar-options element.
+     * @returns {Array} The parsed option descriptors.
+     */
+    _parseOptions(optionsContainer) {
+        const options = [];
+        for (const el of optionsContainer.children) {
+            const cls = el.classList;
+            if (cls.contains("wx-dropdown-divider") || cls.contains("wx-dropdownbutton-divider")) {
+                options.push({ type: "divider" });
+                continue;
+            }
+            if (cls.contains("wx-dropdown-header") || cls.contains("wx-dropdownbutton-header")) {
+                const label = el.textContent.trim();
+                options.push({ type: "header", text: label, content: label, icon: el.dataset.icon || null });
+                continue;
+            }
+
+            const ds = el.dataset;
+            const label = el.textContent.trim() || null;
+            options.push({
+                id: el.id || null,
+                text: label,
+                content: label,
+                icon: ds.icon || null,
+                image: ds.image || null,
+                uri: ds.uri || ds.url || null,
+                target: ds.target || null,
+                tooltip: ds.tooltip || null,
+                color: ds.color || null,
+                disabled: el.hasAttribute("disabled"),
+                primaryAction: Object.fromEntries(Object.entries(ds)
+                    .filter(([k]) => k.startsWith("wxPrimary"))
+                    .map(([k, v]) => [
+                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                ),
+                secondaryAction: Object.fromEntries(Object.entries(ds)
+                    .filter(([k]) => k.startsWith("wxSecondary"))
+                    .map(([k, v]) => [
+                        k.slice(11).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                ),
+                bind: { source: ds.wxSource || null }
+            });
+        }
+        return options;
+    }
+
+    /**
      * Creates a header DOM element.
      * @param {string} text - The header text.
      * @returns {HTMLElement} The created header element.
@@ -187,12 +266,11 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                 continue;
             }
 
-            if (item.type === "item") {
-                item.element = this._buildItemElement(item);
-            } else if (item.type === "panel") {
-                item.element = this._buildPanelElement(item);
-            } else if (item.type === "icon") {
-                item.element = this._buildIconElement(item);
+            // a descriptor without a pre-built element (the REST path, or a
+            // rebuild through setItems) is materialised here; header and divider
+            // elements already parsed from the dom carry their element and stay
+            if (item.type === "item" || item.type === "panel" || item.type === "icon" || !item.element) {
+                item.element = this._buildItem(item);
             }
 
             if (item.element) {
@@ -202,11 +280,46 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
+     * Builds the DOM element for an item descriptor by dispatching on its type,
+     * so the constructor path, the setItems path and the nested-children path
+     * all share a single build routine.
+     * @param {Object} item - The item descriptor.
+     * @param {boolean} [nested] - Whether the item is a child within a group tree.
+     * @returns {HTMLElement|null} The built element, or null for an unknown type.
+     */
+    _buildItem(item, nested = false) {
+        switch (item.type) {
+            case "header": return this._createHeaderElement(item.label);
+            case "divider": return this._createDividerElement();
+            case "item": return this._buildItemElement(item, nested);
+            case "panel": return this._buildPanelElement(item);
+            case "icon": return this._buildIconElement(item);
+            default: return null;
+        }
+    }
+
+    /**
+     * Replaces the sidebar items with a new set of descriptors and rebuilds the
+     * item area, keeping the footer and the responsive machinery intact. An
+     * async control (for example the REST sidebar) calls this once its data
+     * arrives; the shape of a descriptor matches what _parseItems produces.
+     * @param {Array<Object>} descriptors - The new item descriptors.
+     */
+    setItems(descriptors) {
+        this._items = Array.isArray(descriptors) ? descriptors : [];
+        this._sidebarWrapper.innerHTML = "";
+        this._buildSidebar();
+        this._isReduced = this._element.offsetWidth < this._breakpoint;
+        this._updateView();
+    }
+
+    /**
      * Constructs the DOM for a navigation item (link).
      * @param {Object} item - The item descriptor.
+     * @param {boolean} [nested] - Whether the item is a child within a group tree.
      * @returns {HTMLElement} The constructed item element.
      */
-    _buildItemElement(item) {
+    _buildItemElement(item, nested = false) {
         const wrapper = document.createElement("div");
         if (item.id) {
             wrapper.id = item.id;
@@ -218,6 +331,20 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
 
         if (item.disabled) {
             wrapper.classList.add("disabled");
+        }
+
+        // apply the optional text and background colors; each arrives either as
+        // a framework css class or as an inline style, mirroring the server-side
+        // color pair, so a row can be tinted without extra css
+        const colorClasses = [item.colorCss, item.backgroundColorCss]
+            .filter(Boolean)
+            .flatMap(value => value.split(/\s+/).filter(Boolean));
+        if (colorClasses.length) {
+            wrapper.classList.add(...colorClasses);
+        }
+        const colorStyle = [item.colorStyle, item.backgroundColorStyle].filter(Boolean).join(" ");
+        if (colorStyle) {
+            wrapper.style.cssText = colorStyle;
         }
 
         // apply action attributes
@@ -276,6 +403,20 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
 
         wrapper.appendChild(link);
 
+        // badge sits at the trailing edge of the row, ahead of the remove button
+        if (item.badge != null && item.badge !== "") {
+            const badge = document.createElement("span");
+            badge.className = "wx-sidebar-badge badge";
+            if (item.badgeColor) {
+                badge.classList.add(...String(item.badgeColor).split(/\s+/).filter(Boolean));
+            }
+            if (item.badgeStyle) {
+                badge.style.cssText = item.badgeStyle;
+            }
+            badge.textContent = String(item.badge);
+            wrapper.appendChild(badge);
+        }
+
         // remove button
         if (item.isRemoveable) {
             const removeBtn = document.createElement("button");
@@ -293,7 +434,78 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             wrapper.appendChild(removeBtn);
         }
 
-        return wrapper;
+        // trailing "..." menu; reuses the shared dropdown control and is
+        // revealed on hover through css, like the removable button. it applies
+        // to leaves and groups alike, so a tree node can expand and still offer
+        // its own actions
+        if (item.options && item.options.length) {
+            const options = document.createElement("div");
+            options.className = "wx-sidebar-options";
+            options.dataset.icon = this._iconClass("fas fa-ellipsis-h", "wx-icon-light-more");
+            options.dataset.size = "btn-sm";
+            options.dataset.border = "false";
+            wrapper.appendChild(options);
+            new webexpress.webui.DropdownCtrl(options).items = item.options;
+        }
+
+        // a leaf inside a group gets a bullet in the caret's slot so it aligns
+        // with sibling rows and reads as a terminal tree node; a top-level leaf
+        // is a normal flat item and stays unmarked. a group instead nests its
+        // children under the row so the subtree collapses as a unit
+        if (!item.children || item.children.length === 0) {
+            if (nested) {
+                const bullet = document.createElement("span");
+                bullet.className = "wx-sidebar-bullet";
+                bullet.setAttribute("aria-hidden", "true");
+                wrapper.prepend(bullet);
+            }
+            return wrapper;
+        }
+
+        return this._wrapAsGroup(item, wrapper);
+    }
+
+    /**
+     * Wraps a link row that owns children into a collapsible group: a caret in
+     * the row toggles a children container built recursively from the item's
+     * descriptors. The caret stops the click from following the link, so a
+     * parent can both navigate and expand.
+     * @param {Object} item - The item descriptor carrying the children.
+     * @param {HTMLElement} row - The already built link row.
+     * @returns {HTMLElement} The group element.
+     */
+    _wrapAsGroup(item, row) {
+        const group = document.createElement("div");
+        group.className = "wx-sidebar-group";
+        if (item.expanded) {
+            group.classList.add("wx-expanded");
+        }
+
+        const caret = document.createElement("button");
+        caret.type = "button";
+        caret.className = "wx-sidebar-caret btn";
+        caret.setAttribute("aria-label", this._i18n ? this._i18n("webexpress.webui:sidebar.toggle", "Toggle") : "Toggle");
+        caret.innerHTML = `<i class="${this._iconClass("fas fa-chevron-right", "wx-icon-light-chevron-right")}"></i>`;
+        caret.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            group.classList.toggle("wx-expanded");
+        });
+        row.prepend(caret);
+
+        const childrenWrap = document.createElement("div");
+        childrenWrap.className = "wx-sidebar-children";
+        for (const child of item.children) {
+            const childElement = this._buildItem(child, true);
+            if (childElement) {
+                childrenWrap.appendChild(childElement);
+            }
+        }
+
+        group.appendChild(row);
+        group.appendChild(childrenWrap);
+
+        return group;
     }
 
     /**

@@ -96,6 +96,8 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
 
     "overflow.submenu": "Submenu",
 
+    "sidebar.toggle": "Toggle sidebar",
+
     "upload.button": "Upload Files",
     "upload.remove.file": "Remove file",
 

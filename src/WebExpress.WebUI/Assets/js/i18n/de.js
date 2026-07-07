@@ -96,6 +96,8 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
 
     "overflow.submenu": "Untermenü",
 
+    "sidebar.toggle": "Seitenleiste umschalten",
+
     "upload.button": "Dateien hochladen",
     "upload.remove.file": "Datei entfernen",
 

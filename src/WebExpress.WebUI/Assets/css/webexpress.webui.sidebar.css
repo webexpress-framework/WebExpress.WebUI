@@ -96,6 +96,27 @@
     color: var(--bs-body-color);
 }
 
+/* trailing "..." options menu; the dropdown host is not a direct .btn child of
+   the row, so it needs its own reveal. it stays hidden until the row is hovered
+   and, once opened, while the menu holds focus or is shown */
+.wx-sidebar .wx-sidebar-link > .wx-sidebar-options {
+    flex: 0 0 auto;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.wx-sidebar .wx-sidebar-link:hover > .wx-sidebar-options,
+.wx-sidebar .wx-sidebar-link > .wx-sidebar-options:focus-within,
+.wx-sidebar .wx-sidebar-link > .wx-sidebar-options:has(.dropdown-menu.show) {
+    opacity: 1;
+}
+
+/* the row clips its label with overflow:hidden; lift the clip while the menu is
+   open so the dropdown can extend past the row bounds */
+.wx-sidebar .wx-sidebar-link:has(.wx-sidebar-options .dropdown-menu.show) {
+    overflow: visible;
+}
+
 /* sidebar panel */
 .wx-sidebar .wx-sidebar-panel {
     display: flex;
@@ -193,4 +214,97 @@
 .wx-sidebar-icon:not(.wx-sidebar-icon-small):hover .wx-sidebar-icon-edit,
 .wx-sidebar-icon:not(.wx-sidebar-icon-small):focus .wx-sidebar-icon-edit {
     display: inline-block;
+}
+
+/* trailing badge on a link (for example an unread count) */
+.wx-sidebar .wx-sidebar-badge {
+    flex: 0 0 auto;
+    margin-left: auto;
+    font-size: 0.7em;
+    line-height: 1;
+    padding: 0.35em 0.6em;
+    border-radius: 999px;
+    background-color: var(--bs-secondary-bg);
+    color: var(--bs-secondary-color);
+}
+
+.wx-sidebar .wx-sidebar-link.active .wx-sidebar-badge {
+    background-color: rgba(255, 255, 255, 0.25);
+    color: #fff;
+}
+
+/* hierarchical group holding a link row and its collapsible children */
+.wx-sidebar .wx-sidebar-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.wx-sidebar .wx-sidebar-group > .wx-sidebar-children {
+    display: none;
+    flex-direction: column;
+    /* indent the nested level so the hierarchy stays legible */
+    padding-left: clamp(0.75em, 1vw, 1.25em);
+}
+
+.wx-sidebar .wx-sidebar-group.wx-expanded > .wx-sidebar-children {
+    display: flex;
+}
+
+/* caret that toggles a group; it rotates a quarter turn when expanded */
+.wx-sidebar .wx-sidebar-caret {
+    flex: 0 0 auto;
+    border: 0;
+    background: none;
+    color: var(--bs-secondary);
+    padding: 0 clamp(0.2em, 0.3vw, 0.5em);
+    transition: transform 0.15s ease;
+}
+
+/* the caret stays visible without hover so collapsible groups are always
+   discoverable; it must override the hover-reveal fade the removable link
+   buttons share via .wx-sidebar-link > .btn */
+.wx-sidebar .wx-sidebar-link > .wx-sidebar-caret {
+    opacity: 1;
+}
+
+.wx-sidebar .wx-sidebar-caret:hover,
+.wx-sidebar .wx-sidebar-caret:focus {
+    color: var(--bs-body-color);
+}
+
+.wx-sidebar .wx-sidebar-group.wx-expanded > .wx-sidebar-link > .wx-sidebar-caret {
+    transform: rotate(90deg);
+}
+
+/* leaf marker that fills the group caret's slot so leaf and group rows line
+   up; the box mirrors the chevron's advance width to keep the labels aligned,
+   while the dot marks a terminal node rather than an expandable group */
+.wx-sidebar .wx-sidebar-bullet {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: content-box;
+    width: 0.625em;
+    padding: 0 clamp(0.2em, 0.3vw, 0.5em);
+    color: var(--bs-secondary);
+}
+
+.wx-sidebar .wx-sidebar-bullet::before {
+    content: "";
+    width: 0.3em;
+    height: 0.3em;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* placeholder rows shown while the REST sidebar loads its items */
+.wx-sidebar .wx-sidebar-placeholder {
+    pointer-events: none;
+}
+
+.wx-sidebar .wx-sidebar-placeholder > .wx-label {
+    display: inline-block;
+    min-width: 40%;
+    border-radius: 0.25rem;
 }

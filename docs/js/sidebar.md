@@ -39,6 +39,8 @@ The sidebar is initialized at the host element using child elements and attribut
 | `.wx-sidebar-separator` | Visual separator for structuring
 | `.wx-sidebar-header`    | Section header within the sidebar
 | `.wx-sidebar-panel`     | Panel with overlay functionality for additional content
+| `.wx-sidebar-children`  | Nested container inside a link that turns it into a collapsible group
+| `.wx-sidebar-options`   | Nested container inside a link holding the entries of its "..." options menu
 
 Supported attributes:
 
@@ -51,6 +53,10 @@ Supported attributes:
 | `data-uri`          | Target URI for links
 | `data-tooltip`      | Tooltip text for the element
 | `data-removeable`   | Indicates whether the element can be removed
+| `data-color-css`              | Framework css class for the link text color (e.g. `text-danger`)
+| `data-color-style`            | Inline style for a custom link text color (e.g. `color:#ffffff;`)
+| `data-background-color-css`   | Framework css class for the link background (e.g. `bg-primary`)
+| `data-background-color-style` | Inline style for a custom link background (e.g. `background:#6f42c1;`)
 | `data-breakpoint`   | Pixel value for switching between compact and normal view
 
 ## Functionality
@@ -61,6 +67,8 @@ The SidebarCtrl component parses the child elements, handles rendering and manag
 - **Overlay Panel:** Panels in overlay mode open an overlay window when clicked, positioned using Popper.js. The overlay can be closed by clicking outside or pressing the Escape key.
 - **Toolbar:** A toolbar at the bottom of the sidebar is automatically detected and integrated.
 - **Removable Elements:** Elements with `data-removeable="true"` receive a button for removal from the sidebar.
+- **Options Menu:** A link may carry a trailing "..." menu built from a nested `.wx-sidebar-options` container of dropdown items (`.wx-dropdown-item`, `.wx-dropdown-divider`, `.wx-dropdown-header`). The menu is revealed only on hover and is omitted entirely when the link declares no options; it applies to flat links and nested tree items alike.
+- **Item Colors:** A link row can be tinted through the `data-color-*` (text) and `data-background-color-*` (background) attributes, using either a framework css class or an inline style for a custom value.
 - **Event Handling:** The following events are triggered:
   - `webexpress.webui.Event.REMOVE_EVENT` (when an element is removed)
   - `webexpress.webui.Event.SHOW_EVENT` (when the sidebar or an overlay is shown)
@@ -102,6 +110,17 @@ The following example shows the declaration of a sidebar with various element ty
     <div class="wx-sidebar-header" data-label="Navigation"></div>
     <div class="wx-sidebar-link" data-icon="fas fa-home" data-label="Home" data-uri="/"></div>
     <div class="wx-sidebar-link" data-icon="fas fa-user" data-label="Profile" data-uri="/profile" data-removeable="true"></div>
+
+    <!-- a link tinted with a background color and carrying a hover-revealed "..." menu -->
+    <div class="wx-sidebar-link" data-icon="fas fa-inbox" data-label="Inbox" data-uri="/inbox"
+         data-background-color-css="bg-primary">
+        <div class="wx-sidebar-options">
+            <div class="wx-dropdown-item" data-icon="fas fa-pen" data-uri="/inbox/edit">Edit</div>
+            <div class="wx-dropdown-divider"></div>
+            <div class="wx-dropdown-item" data-icon="fas fa-trash" data-uri="/inbox/delete">Delete</div>
+        </div>
+    </div>
+
     <div class="wx-sidebar-separator"></div>
     <div class="wx-sidebar-panel" data-icon="fas fa-cog" data-label="Settings" data-mode="overlay">
         <div>
