@@ -167,6 +167,23 @@
     color: var(--bs-heading-color, #fff);
 }
 
+/* assignee avatar, same look as the scrum backlog rows: an initials badge or,
+   when the card carries an image, a round photo */
+.wx-kanban-card .card-header .card-assignee {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 9999px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #fff;
+    background: var(--bs-secondary, #6c757d);
+    object-fit: cover;
+}
+
 .wx-kanban-card .card-text {
     font-size: 0.9em;
     color: #6c757d;
@@ -176,6 +193,41 @@
 
 [data-bs-theme="dark"] .wx-kanban-card .card-text {
     color: var(--bs-gray-300, #abb4be);
+}
+
+/* optional footer: application-defined chips (priority, story points, …) */
+.wx-kanban-card .card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+    padding: 0;
+    background: transparent;
+    border: none;
+}
+
+.wx-kanban-card .card-footer-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    background: var(--bs-tertiary-bg, #eef0f2);
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+[data-bs-theme="dark"] .wx-kanban-card .card-footer-chip {
+    background: var(--bs-gray-700, #33373d);
+    color: var(--bs-gray-300, #abb4be);
+}
+
+.wx-kanban-card .card-footer-chip .wx-icon-img {
+    width: 0.9em;
+    height: 0.9em;
 }
 
 /* Visual Drop Indicator (blue line for insert) */
@@ -251,6 +303,32 @@
 
 .wx-board-col-header.wx-board-col-dragging {
     opacity: 0.5;
+}
+
+/* insertion indicator while a column is dragged over a header: a primary line
+   on the edge where the column would land */
+.wx-board-col-header.wx-board-col-drop-before {
+    box-shadow: inset 3px 0 0 var(--bs-primary, #0d6efd);
+}
+
+.wx-board-col-header.wx-board-col-drop-after {
+    box-shadow: inset -3px 0 0 var(--bs-primary, #0d6efd);
+}
+
+/* short landing flash after a column reorder so the user sees where it went */
+.wx-kanban-column-header.wx-board-col-moved {
+    animation: wx-board-col-moved 0.8s ease-out;
+}
+
+@keyframes wx-board-col-moved {
+    0% { background-color: rgba(13, 110, 253, 0.18); }
+    100% { background-color: transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wx-kanban-column-header.wx-board-col-moved {
+        animation: none;
+    }
 }
 
 .wx-board-col-input {

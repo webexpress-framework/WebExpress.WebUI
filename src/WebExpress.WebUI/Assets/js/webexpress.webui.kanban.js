@@ -119,6 +119,16 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 icon: cardEl.dataset.icon || null,
                 image: cardEl.dataset.image || null,
 
+                // assignee avatar (initials badge or image like the scrum backlog rows)
+                assigneeId: cardEl.dataset.assigneeId || null,
+                assigneeName: cardEl.dataset.assigneeName || null,
+                assigneeInitials: cardEl.dataset.assigneeInitials || null,
+                assigneeColor: cardEl.dataset.assigneeColor || null,
+                assigneeImage: cardEl.dataset.assigneeImage || null,
+
+                // optional application-defined info chips (priority, story points, …)
+                footer: this._parseFooterSpec(cardEl.dataset.footer),
+
                 // primary actions
                 primaryAction: {
                     action: cardEl.dataset.wxPrimaryAction || null,
@@ -141,6 +151,35 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         this._columns = columns;
         this._swimlanes = swimlanes;
         this._cards = cards;
+    }
+
+    /**
+     * Parses the optional footer spec of a card node. The attribute carries a
+     * JSON array so a card can transport an arbitrary, application-defined set
+     * of chips (priority, story points, …); a malformed spec degrades to an
+     * empty footer instead of breaking the board. A chip color arrives either
+     * as a CSS class (system color) or an inline style (user-defined color).
+     * @param {string} raw - The raw data-footer attribute value.
+     * @returns {Array<object>} The normalized footer chips.
+     */
+    _parseFooterSpec(raw) {
+        if (!raw) {
+            return [];
+        }
+        try {
+            const list = JSON.parse(raw);
+            return (Array.isArray(list) ? list : [])
+                .map((chip) => ({
+                    label: (chip && chip.label) || "",
+                    icon: (chip && chip.icon) || null,
+                    colorCss: (chip && chip.colorCss) || "",
+                    colorStyle: (chip && chip.colorStyle) || "",
+                    title: (chip && chip.title) || ""
+                }))
+                .filter((chip) => chip.label || chip.icon);
+        } catch (err) {
+            return [];
+        }
     }
 
     /**
@@ -331,6 +370,8 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             grip.addEventListener("dragend", () => {
                 headerEl.classList.remove("wx-board-col-dragging");
                 this._dragColumnIndex = null;
+                // a cancelled drag leaves no indicator behind
+                this._clearColumnDropIndicators();
             });
             headerEl.insertBefore(grip, headerEl.firstChild);
 
@@ -342,6 +383,14 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 if (e.dataTransfer) {
                     e.dataTransfer.dropEffect = "move";
                 }
+                // show on which side of the header the column would land
+                const rect = headerEl.getBoundingClientRect();
+                const after = e.clientX > rect.left + rect.width / 2;
+                headerEl.classList.toggle("wx-board-col-drop-after", after);
+                headerEl.classList.toggle("wx-board-col-drop-before", !after);
+            });
+            headerEl.addEventListener("dragleave", () => {
+                headerEl.classList.remove("wx-board-col-drop-before", "wx-board-col-drop-after");
             });
             headerEl.addEventListener("drop", (e) => {
                 if (this._dragColumnIndex === null) {
@@ -349,6 +398,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 }
                 e.preventDefault();
                 e.stopPropagation();
+                this._clearColumnDropIndicators();
                 const rect = headerEl.getBoundingClientRect();
                 const after = e.clientX > rect.left + rect.width / 2;
                 this._moveColumn(this._dragColumnIndex, index, after);
@@ -495,7 +545,33 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         this._columns.splice(target, 0, moved);
 
         this.render();
+        this._flashMovedColumn(target);
         this._dispatchColumnChange();
+    }
+
+    /**
+     * Removes the column insertion indicators from every header, used when a
+     * drag ends, is cancelled or a drop is handled.
+     */
+    _clearColumnDropIndicators() {
+        this._element.querySelectorAll(".wx-board-col-drop-before, .wx-board-col-drop-after").forEach((el) => {
+            el.classList.remove("wx-board-col-drop-before", "wx-board-col-drop-after");
+        });
+    }
+
+    /**
+     * Briefly highlights a column header after a reorder so the user sees where
+     * the column landed. The headers are re-created by render(), so the flash
+     * targets the header at the new index.
+     * @param {number} index - The new column index.
+     */
+    _flashMovedColumn(index) {
+        const header = this._element.querySelectorAll(".wx-kanban-column-header")[index];
+        if (!header) {
+            return;
+        }
+        header.classList.add("wx-board-col-moved");
+        setTimeout(() => header.classList.remove("wx-board-col-moved"), 800);
     }
 
     /**
@@ -549,6 +625,26 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         title.className = "card-title";
         title.textContent = card.label;
         header.appendChild(title);
+
+        // assignee avatar at the header end, matching the backlog row look:
+        // a photo when available, otherwise a colored initials badge; unassigned
+        // cards render no badge so plain boards stay unchanged
+        if (card.assigneeId || card.assigneeName || card.assigneeInitials || card.assigneeImage) {
+            let assignee;
+            if (card.assigneeImage) {
+                assignee = document.createElement("img");
+                assignee.src = card.assigneeImage;
+                assignee.alt = card.assigneeName || "";
+            } else {
+                assignee = document.createElement("span");
+                assignee.style.background = card.assigneeColor || "#6c757d";
+                assignee.textContent = card.assigneeInitials || (card.assigneeName || "?").slice(0, 2).toUpperCase();
+            }
+            assignee.className = "card-assignee";
+            assignee.title = card.assigneeName || "";
+            header.appendChild(assignee);
+        }
+
         cardEl.appendChild(header);
 
         // build card content
@@ -557,6 +653,33 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             content.className = "card-text";
             content.innerHTML = card.html;
             cardEl.appendChild(content);
+        }
+
+        // optional footer: application-defined chips such as the priority or
+        // the story points; cards without a footer keep their compact layout
+        if (Array.isArray(card.footer) && card.footer.length > 0) {
+            const footer = document.createElement("div");
+            footer.className = "card-footer";
+            for (const info of card.footer) {
+                const chip = document.createElement("span");
+                chip.className = "card-footer-chip" + (info.colorCss ? " " + info.colorCss : "");
+                // a user-defined color arrives as an inline style declaration
+                if (!info.colorCss && info.colorStyle) {
+                    chip.style.cssText += ";" + info.colorStyle;
+                }
+                if (info.title) {
+                    chip.title = info.title;
+                }
+                const icon = webexpress.webui.Icon.create(info.icon);
+                if (icon) {
+                    chip.appendChild(icon);
+                }
+                if (info.label) {
+                    chip.appendChild(document.createTextNode(info.label));
+                }
+                footer.appendChild(chip);
+            }
+            cardEl.appendChild(footer);
         }
 
         // drag events

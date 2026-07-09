@@ -90,7 +90,7 @@ document.body.appendChild(div);
 
 ## Assignment & estimation
 
-Each backlog and sprint item carries a story-point estimate and an optional assignee. The estimate is rendered as a points badge; when the item is assigned, the assignee is shown as a small avatar (the initials on the person's color), otherwise an empty placeholder.
+Each backlog and sprint item carries a story-point estimate and an optional assignee. The estimate is rendered as a points badge; when the item is assigned, the assignee is shown as a small avatar (an `assigneeImage` when supplied, otherwise the initials on the person's color), otherwise an empty placeholder.
 
 ### Item fields
 
@@ -101,6 +101,7 @@ Each backlog and sprint item carries a story-point estimate and an optional assi
 | `assigneeName`     | Display name of the assignee (used for the avatar tooltip). |
 | `assigneeInitials` | Short text shown inside the avatar. |
 | `assigneeColor`    | CSS color used as the avatar background. |
+| `assigneeImage`    | Uri of the avatar image; when present, it replaces the initials badge. |
 
 ### Assigning and estimating
 
