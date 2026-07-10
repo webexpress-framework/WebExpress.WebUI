@@ -1,6 +1,8 @@
 /**
  * Styles for the QuickFilter control.
- * Uses only Bootstrap color variables for theme compatibility.
+ * Uses only adaptive Bootstrap color variables (body, secondary, tertiary
+ * tokens) for theme compatibility; --bs-light and --bs-dark are static and
+ * would not follow data-bs-theme="dark".
  */
 
 .wx-quickfilter {
@@ -41,7 +43,7 @@
 
 /* chip button hover (not active) */
 .wx-quickfilter-btn-chip:hover {
-    background: var(--bs-light);
+    background: var(--bs-tertiary-bg);
     color: var(--bs-primary);
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
@@ -78,7 +80,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--bs-light);
+    background-color: var(--bs-tertiary-bg);
     color: var(--bs-primary);
 }
 
@@ -86,14 +88,14 @@
 .wx-quickfilter .dropdown-menu {
     border-radius: 0.5rem;
     padding: 0.5rem 0;
-    background-color: var(--bs-light);
+    background-color: var(--bs-tertiary-bg);
 }
 
 /* dropdown item style */
 .wx-quickfilter .dropdown-item {
     font-size: 0.9rem;
     padding: 0.4rem 1rem;
-    color: var(--bs-dark);
+    color: var(--bs-body-color);
     transition: background-color 0.15s ease-in-out;
 }
 
@@ -133,7 +135,7 @@
    when unchecked, primary when checked, and white on the hover background */
 .wx-quickfilter .dropdown-item .wx-quickfilter-multiselect-check {
     margin-right: 0.5em;
-    color: var(--bs-secondary, #6c757d);
+    color: var(--bs-secondary-color, #6c757d);
 }
 
 .wx-quickfilter .dropdown-item .wx-quickfilter-multiselect-check.wx-checked {
