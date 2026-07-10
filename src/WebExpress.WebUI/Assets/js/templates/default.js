@@ -567,3 +567,84 @@ webexpress.webui.TableTemplates.register("color", (val, table, row, cell, name, 
 
     return container;
 });
+
+// Markdown renderer - renders a markdown subset (headings, emphasis, code,
+// links and lists) as rich text. The raw value is escaped before the markup
+// is rewritten, so markdown data cannot inject HTML. Read-only.
+webexpress.webui.TableTemplates.register("markdown", (val, table, row, cell, name, opts) => {
+    if (val === null || val === undefined || val === "") {
+        return "";
+    }
+
+    const escape = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]));
+
+    const inline = (s) => s
+        .replace(/`([^`]+)`/g, "<code>$1</code>")
+        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+        .replace(/__([^_]+)__/g, "<strong>$1</strong>")
+        .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+        .replace(/_([^_]+)_/g, "<em>$1</em>")
+        .replace(/~~([^~]+)~~/g, "<del>$1</del>")
+        .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, "<a href=\"$2\" target=\"_blank\" rel=\"noopener\">$1</a>");
+
+    const out = [];
+    // null while outside a list, otherwise the pending closing tag
+    let listClose = null;
+    let listOrdered = false;
+
+    for (const line of escape(val).split(/\r?\n/)) {
+        const item = line.match(/^\s*([-*+]|\d+\.)\s+(.*)$/);
+        if (item) {
+            const ordered = /\d/.test(item[1]);
+            if (!listClose || listOrdered !== ordered) {
+                if (listClose) {
+                    out.push(listClose);
+                }
+                listOrdered = ordered;
+                listClose = ordered ? "</ol>" : "</ul>";
+                out.push(ordered ? "<ol>" : "<ul>");
+            }
+            out.push("<li>" + inline(item[2]) + "</li>");
+            continue;
+        }
+        if (listClose) {
+            out.push(listClose);
+            listClose = null;
+        }
+
+        const heading = line.match(/^(#{1,6})\s+(.*)$/);
+        if (heading) {
+            const level = heading[1].length;
+            out.push("<h" + level + ">" + inline(heading[2]) + "</h" + level + ">");
+            continue;
+        }
+        if (line.trim() === "") {
+            continue;
+        }
+        out.push("<p>" + inline(line) + "</p>");
+    }
+    if (listClose) {
+        out.push(listClose);
+    }
+
+    const container = document.createElement("div");
+    container.className = "wx-table-markdown";
+    container.innerHTML = out.join("");
+
+    return container;
+});
+
+// Html renderer - renders the cell value as raw HTML. The content must come
+// from a trusted source such as the server; data that may contain user input
+// belongs in the text or markdown template, which escape the value. Read-only.
+webexpress.webui.TableTemplates.register("html", (val, table, row, cell, name, opts) => {
+    if (val === null || val === undefined || val === "") {
+        return "";
+    }
+
+    const container = document.createElement("div");
+    container.className = "wx-table-html";
+    container.innerHTML = val;
+
+    return container;
+});
