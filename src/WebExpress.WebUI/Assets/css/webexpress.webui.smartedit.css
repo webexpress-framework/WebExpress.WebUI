@@ -6,7 +6,7 @@
     margin-bottom: 0.2em;
     min-height: 1.6em;
     box-sizing: border-box;
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
     flex: 1;
 }
 
@@ -30,7 +30,7 @@
     vertical-align: middle;
     user-select: none;
     transition: color 0.2s;
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
 }
 
 .wx-smart-edit > ul {
@@ -65,7 +65,7 @@
 }
 
 .wx-smart-edit button:hover {
-    background-color: var(--bs-secondary-bg);
+    background-color: var(--wx-secondary-bg);
 }
 
 .wx-smart-edit button:focus {
@@ -99,6 +99,6 @@
     gap: 0.5em;
     margin-top: 1px;
     display: flex;
-    background-color: var(--bs-body-bg);
+    background-color: var(--wx-body-bg);
     right: 1em;
 }

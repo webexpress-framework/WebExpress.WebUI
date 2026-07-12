@@ -12,9 +12,9 @@
 
 .wx-estimate-chip {
     min-width: 34px;
-    border: 1px solid var(--bs-border-color, #dee2e6);
-    background: var(--bs-body-bg, #fff);
-    color: var(--bs-body-color, #212529);
+    border: 1px solid var(--wx-border-color, #dee2e6);
+    background: var(--wx-body-bg, #fff);
+    color: var(--wx-body-color, #212529);
     font-weight: 600;
     font-size: 0.85rem;
     border-radius: 9999px;
@@ -24,25 +24,25 @@
 
 .wx-estimate-chip:hover,
 .wx-estimate-chip:focus-visible {
-    border-color: var(--bs-primary, #0d6efd);
+    border-color: var(--wx-primary, #0d6efd);
     background: rgba(13, 110, 253, 0.08);
 }
 
 /* selection accent for an uncolored scale: the active chip is filled */
 .wx-estimate-container:not(.wx-estimate-colored) .wx-estimate-chip.active {
-    border-color: var(--bs-primary, #0d6efd);
-    background: var(--bs-primary, #0d6efd);
+    border-color: var(--wx-primary, #0d6efd);
+    background: var(--wx-primary, #0d6efd);
     color: #fff;
 }
 
 /* selection accent for a colored scale: a ring keeps the chip's own color visible */
 .wx-estimate-colored .wx-estimate-chip.active {
-    border-color: var(--bs-primary, #0d6efd);
+    border-color: var(--wx-primary, #0d6efd);
     font-weight: 700;
-    box-shadow: 0 0 0 2px var(--bs-body-bg, #fff), 0 0 0 4px var(--bs-primary, #0d6efd);
+    box-shadow: 0 0 0 2px var(--wx-body-bg, #fff), 0 0 0 4px var(--wx-primary, #0d6efd);
 }
 
 [data-bs-theme="dark"] .wx-estimate-chip {
-    background: var(--bs-tertiary-bg, #2b3035);
-    color: var(--bs-body-color, #dee2e6);
+    background: var(--wx-tertiary-bg, #2b3035);
+    color: var(--wx-body-color, #dee2e6);
 }

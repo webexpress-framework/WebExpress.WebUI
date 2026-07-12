@@ -10,8 +10,8 @@
 
 .wx-date > span {
     font-weight: bold;
-    color: var(--bs-body-color);
-    background-color: var(--bs-secondary-bg);
+    color: var(--wx-body-color);
+    background-color: var(--wx-secondary-bg);
     padding: 0.2em 0.5em;
     border-radius: 0.2em;
     display: inline-flex;
@@ -20,7 +20,7 @@
 }
 
 .wx-date > span > i {
-    color: var(--bs-secondary-color, #6c757d);
+    color: var(--wx-secondary-color, #6c757d);
     transparent: 50%;
 }
 
@@ -28,9 +28,9 @@
 .wx-date .form-control {
     cursor: pointer;
     user-select: none;
-    background-color: var(--bs-body-bg, #fff);
-    color: var(--bs-body-color, #212529);
-    border: 1px solid var(--bs-border-color, #ced4da);
+    background-color: var(--wx-body-bg, #fff);
+    color: var(--wx-body-color, #212529);
+    border: 1px solid var(--wx-border-color, #ced4da);
     border-radius: var(--bs-border-radius, 0.375rem);
     min-height: 38px;
     display: flex;
@@ -46,15 +46,15 @@
 .wx-date .form-control:focus,
 .wx-date .form-control:active {
     outline: none;
-    box-shadow: 0 0 0 0.15rem var(--bs-primary-bg-subtle, rgba(13,110,253,.25));
-    border-color: var(--bs-primary, #0d6efd);
+    box-shadow: 0 0 0 0.15rem var(--wx-primary-bg-subtle, rgba(13,110,253,.25));
+    border-color: var(--wx-primary, #0d6efd);
 }
 
 /* Calendar icon at the end of the input */
 .wx-date .form-control .wx-date-calendar-icon {
     font-weight: 900;
     font-size: 1.15em;
-    color: var(--bs-secondary-color, #6c757d);
+    color: var(--wx-secondary-color, #6c757d);
     margin-left: auto;
     margin-right: 0.1em;
     pointer-events: none;
@@ -73,9 +73,9 @@
     max-width: 420px;
     width: max(270px, min(420px, 100%));
     padding: 0.5rem;
-    background: var(--bs-body-bg, #fff);
+    background: var(--wx-body-bg, #fff);
     box-shadow: var(--wx-dropdown-shadow);
-    border: 1px solid var(--bs-border-color, #ced4da);
+    border: 1px solid var(--wx-border-color, #ced4da);
     border-radius: var(--bs-border-radius, 0.375rem);
     display: none;
     flex-direction: column;
@@ -102,16 +102,16 @@
 /* Dark theme support */
 [data-bs-theme="dark"] .wx-date .form-control,
 [data-bs-theme="dark"] .wx-date .dropdown-menu {
-    background: var(--bs-dark, #1a1d21);
-    color: var(--bs-light, #fff);
-    border-color: var(--bs-secondary, #2c3035);
+    background: var(--wx-dark, #1a1d21);
+    color: var(--wx-light, #fff);
+    border-color: var(--wx-secondary, #2c3035);
 }
 
 [data-bs-theme="dark"] .wx-date-today-btn {
-    background: var(--bs-dark, #1a1d21);
-    color: var(--bs-light, #fff);
+    background: var(--wx-dark, #1a1d21);
+    color: var(--wx-light, #fff);
     border: none;
 }
 [data-bs-theme="dark"] .wx-date-today-btn:hover {
-    background: var(--bs-primary, #0d6efd);
+    background: var(--wx-primary, #0d6efd);
 }

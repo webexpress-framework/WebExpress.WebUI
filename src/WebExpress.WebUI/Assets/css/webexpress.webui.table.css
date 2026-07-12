@@ -9,22 +9,22 @@
 
     /* Forms.html-style card wrapper. The Bootstrap variant classes (.table-*)
        still override --bs-table-* tokens so themed tables keep working. */
-    background-color: var(--bs-body-bg);
-    border: 1px solid var(--bs-border-color);
+    background-color: var(--wx-body-bg);
+    border: 1px solid var(--wx-border-color);
     border-radius: var(--bs-border-radius, 10px);
 
     --wx-grid-template: none;
     --bs-table-bg: transparent;
     --bs-table-accent-bg: transparent;
-    --bs-table-striped-color: var(--bs-body-color);
+    --bs-table-striped-color: var(--wx-body-color);
     --bs-table-striped-bg: rgba(0, 0, 0, 0.05);
-    --bs-table-active-color: var(--bs-body-color);
-    --bs-table-active-bg: var(--bs-primary-bg-subtle, rgba(var(--bs-primary-rgb), 0.08));
-    --bs-table-hover-color: var(--bs-body-color);
-    --bs-table-hover-bg: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.04));
-    --bs-table-head-bg: var(--bs-tertiary-bg, var(--bs-secondary-bg, #f5f7fa));
-    --bs-table-head-color: var(--bs-secondary-color);
-    --bs-table-border-color: var(--bs-border-color);
+    --bs-table-active-color: var(--wx-body-color);
+    --bs-table-active-bg: var(--wx-primary-bg-subtle, rgba(var(--wx-primary-rgb), 0.08));
+    --bs-table-hover-color: var(--wx-body-color);
+    --bs-table-hover-bg: var(--wx-tertiary-bg, rgba(0, 0, 0, 0.04));
+    --bs-table-head-bg: var(--wx-tertiary-bg, var(--wx-secondary-bg, #f5f7fa));
+    --bs-table-head-color: var(--wx-secondary-color);
+    --bs-table-border-color: var(--wx-border-color);
 }
 
 /* --- Row Structure (Grid) --- */
@@ -44,8 +44,8 @@
     display: block;
     width: 100%;
     min-width: fit-content;
-    background-color: var(--bs-table-head-bg, var(--bs-body-bg));
-    box-shadow: 0 1px 0 var(--bs-table-border-color, var(--bs-border-color));
+    background-color: var(--bs-table-head-bg, var(--wx-body-bg));
+    box-shadow: 0 1px 0 var(--bs-table-border-color, var(--wx-border-color));
     flex-shrink: 0;
 }
 
@@ -57,8 +57,8 @@
 }
 
 .wx-table-footer-group {
-    border-top: 2px solid var(--bs-table-border-color, var(--bs-border-color));
-    background-color: var(--bs-body-bg);
+    border-top: 2px solid var(--bs-table-border-color, var(--wx-border-color));
+    background-color: var(--wx-body-bg);
     min-width: fit-content;
     flex-shrink: 0;
 }
@@ -72,7 +72,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    border-bottom: 1px solid var(--bs-table-border-color, var(--bs-border-color));
+    border-bottom: 1px solid var(--bs-table-border-color, var(--wx-border-color));
     display: flex;
     align-items: center;
     min-width: 0;
@@ -88,11 +88,11 @@
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    background-color: var(--bs-table-head-bg, var(--bs-tertiary-bg));
+    background-color: var(--bs-table-head-bg, var(--wx-tertiary-bg));
     position: relative;
     user-select: none;
     border-bottom: none;
-    color: var(--bs-table-head-color, var(--bs-secondary-color));
+    color: var(--bs-table-head-color, var(--wx-secondary-color));
     transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
@@ -196,7 +196,7 @@
 .wx-table[class*="table-"] .wx-table-header-group .wx-col-header,
 .wx-table[class*="table-"] .wx-table-header-group .wx-grid-header-cell {
     background-color: var(--bs-table-bg);
-    color: var(--bs-table-color);
+    color: var(--wx-table-color);
     border-color: var(--bs-table-border-color);
 }
 
@@ -265,7 +265,7 @@
     text-decoration: none;
 }
 a.wx-cell-content { font-weight: 600; }
-a.wx-cell-content:hover { text-decoration: underline; color: var(--bs-link-hover-color, currentColor); }
+a.wx-cell-content:hover { text-decoration: underline; color: var(--wx-link-hover-color, currentColor); }
 
 .wx-table .wx-icon {
     max-height: 1.2em;
@@ -283,7 +283,7 @@ a.wx-cell-content:hover { text-decoration: underline; color: var(--bs-link-hover
 /* --- Row Drag & Drop --- */
 .wx-table-drag-handle {
     cursor: grab;
-    color: var(--bs-secondary);
+    color: var(--wx-secondary);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -291,7 +291,7 @@ a.wx-cell-content:hover { text-decoration: underline; color: var(--bs-link-hover
 .wx-table-drag-handle:active { cursor: grabbing; }
 
 .wx-table .wx-drag-over {
-    border-top: 2px solid var(--bs-primary);
+    border-top: 2px solid var(--wx-primary);
 }
 
 /* --- Column Resizing --- */
@@ -315,7 +315,7 @@ a.wx-cell-content:hover { text-decoration: underline; color: var(--bs-link-hover
 .wx-col-resizer:hover,
 .wx-col-resizer:active {
     opacity: 1;
-    background-color: var(--bs-primary);
+    background-color: var(--wx-primary);
 }
 
 /* --- Tree / Hierarchy --- */
@@ -364,7 +364,7 @@ a.wx-cell-content:hover { text-decoration: underline; color: var(--bs-link-hover
 
 /* --- Flash Animations --- */
 @keyframes wx-change-flash {
-    0% { background-color: rgba(var(--bs-warning-rgb), 0.4); }
+    0% { background-color: rgba(var(--wx-warning-rgb), 0.4); }
     100% { background-color: transparent; }
 }
 .wx-change-flash > .wx-table-cell,
@@ -415,7 +415,7 @@ a.wx-cell-content:hover { text-decoration: underline; color: var(--bs-link-hover
     bottom: 0;
     left: 0;
     width: 3px;
-    background-color: var(--bs-primary);
+    background-color: var(--wx-primary);
     pointer-events: none;
     z-index: 2;
 }

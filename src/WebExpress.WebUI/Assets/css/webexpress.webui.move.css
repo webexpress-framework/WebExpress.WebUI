@@ -15,8 +15,8 @@
 .wx-move > ul > li {
     float: left;
     display: flex;
-    color: var(--bs-body-color);
-    background-color: var(--bs-secondary-bg);
+    color: var(--wx-body-color);
+    background-color: var(--wx-secondary-bg);
     align-items: center;
     margin-top: 0.2em;
     margin-bottom: 0.2em;
@@ -30,7 +30,7 @@
 }
 
 .wx-move > ul > li > span {
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
 }
 
 .wx-move > ul > li > img {

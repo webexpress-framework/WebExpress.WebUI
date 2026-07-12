@@ -1,10 +1,10 @@
 .wx-form {
     padding: 0.5em;
-    background-color: var(--bs-light);
+    background-color: var(--wx-light);
 }
 
 [data-bs-theme="dark"] .wx-form {
-    background-color: var(--bs-body-bg);
+    background-color: var(--wx-body-bg);
 }
 
 .wx-form-label {
@@ -14,11 +14,11 @@
 }
 
 .wx-form-required {
-    color: var(--bs-danger);
+    color: var(--wx-danger);
 }
 
 .wx-input-success {
-    border-color: var(--bs-success);
+    border-color: var(--wx-success);
 }
 
 .wx-input-success:focus {
@@ -26,7 +26,7 @@
 }
 
 .wx-input-warning {
-    border-color: var(--bs-warning);
+    border-color: var(--wx-warning);
 }
 
 .wx-input-warning:focus {
@@ -34,7 +34,7 @@
 }
 
 .wx-input-error {
-    border-color: var(--bs-danger) !important;
+    border-color: var(--wx-danger) !important;
 }
 
 .wx-input-error:focus {
@@ -145,8 +145,8 @@
 }
 
 .wx-validation-alert {
-    border-left: 4px solid var(--bs-danger);
-    background-color: var(--bs-danger-bg-subtle);
+    border-left: 4px solid var(--wx-danger);
+    background-color: var(--wx-danger-bg-subtle);
     color: var(--bs-danger-text);
     padding: 0.75rem 1rem;
     border-radius: 0.375rem;

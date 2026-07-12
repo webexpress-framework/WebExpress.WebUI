@@ -6,10 +6,10 @@
 .wx-code {
     position: relative; /* container for the copy button */
     border-radius: 6px;
-    background-color: var(--bs-light, #f8f9fa);
+    background-color: var(--wx-light, #f8f9fa);
     margin-bottom: 1.5rem;
     overflow: hidden;
-    color: var(--bs-body-color, #282828);
+    color: var(--wx-body-color, #282828);
     display: flex;
     flex-direction: column;
     gap: 0.2rem 0;
@@ -23,10 +23,10 @@
     font-size: 1rem;
     font-weight: bold;
     padding: 0.55em 1em 0.25em 1em;
-    color: var(--bs-body-color, #212529);
+    color: var(--wx-body-color, #212529);
     background-color: transparent;
     letter-spacing: 0.03em;
-    border-bottom: 1px solid var(--bs-border-color, #e2e2e2);
+    border-bottom: 1px solid var(--wx-border-color, #e2e2e2);
     margin-bottom: 0;
     user-select: text;
 }
@@ -36,7 +36,7 @@
     display: block;
     overflow-x: auto;
     padding: 1.2em 1em 1em 1em;
-    color: var(--bs-body-color, #212529);
+    color: var(--wx-body-color, #212529);
     background: none;
     font-size: inherit;
     font-family: inherit;
@@ -46,13 +46,13 @@
 
 /* dark mode support */
 [data-bs-theme="dark"] .wx-code {
-    background-color: var(--bs-gray-900, #212529);
-    color: var(--bs-gray-100, #f8f9fa);
+    background-color: var(--wx-gray-900, #212529);
+    color: var(--wx-gray-100, #f8f9fa);
 }
 
 [data-bs-theme="dark"] .wx-code-header {
-    border-bottom: 1px solid var(--bs-gray-800, #343a40);
-    color: var(--bs-gray-100, #f8f9fa);
+    border-bottom: 1px solid var(--wx-gray-800, #343a40);
+    color: var(--wx-gray-100, #f8f9fa);
 }
 
 /* copy button */
@@ -63,8 +63,8 @@
     z-index: 2;
     opacity: 0.7;
     transition: opacity 0.2s;
-    background: var(--bs-white, #fff);
-    border: 1px solid var(--bs-gray-300, #dee2e6);
+    background: var(--wx-white, #fff);
+    border: 1px solid var(--wx-gray-300, #dee2e6);
     border-radius: 4px;
 }
 
@@ -73,16 +73,16 @@
 }
 
 [data-bs-theme="dark"] .wx-code button.btn {
-    background: var(--bs-gray-900, #212529);
-    border: 1px solid var(--bs-gray-700, #495057);
-    color: var(--bs-gray-100, #f8f9fa);
+    background: var(--wx-gray-900, #212529);
+    border: 1px solid var(--wx-gray-700, #495057);
+    color: var(--wx-gray-100, #f8f9fa);
 }
 
 [data-bs-theme="dark"] .wx-code button.btn:hover,
 [data-bs-theme="dark"] .wx-code button.btn:focus {
-    background: var(--bs-gray-800, #343a40);
-    border-color: var(--bs-gray-600, #6c757d);
-    color: var(--bs-white, #fff);
+    background: var(--wx-gray-800, #343a40);
+    border-color: var(--wx-gray-600, #6c757d);
+    color: var(--wx-white, #fff);
 }
 
 .wx-code .wx-code-line,
@@ -118,7 +118,7 @@
             top: 0;
             width: 2rem;
             text-align: right;
-            color: var(--bs-secondary, #adb5bd);
+            color: var(--wx-secondary, #adb5bd);
             opacity: 0.7;
             font-size: 0.99em;
             user-select: none;
@@ -131,7 +131,7 @@
 .wx-code .type,
 .wx-code .tag,
 .wx-code .heading {
-    color: var(--bs-primary, #006cff);
+    color: var(--wx-primary, #006cff);
     font-weight: bold;
 }
 
@@ -139,7 +139,7 @@
 .wx-code .string,
 .wx-code .value,
 .wx-code .image {
-    color: var(--bs-danger, #d63384);
+    color: var(--wx-danger, #d63384);
 }
 
 /* comments */
@@ -149,18 +149,18 @@
 .wx-code .doctype,
 .wx-code .pi,
 .wx-code .cdata {
-    color: var(--bs-success, #198754);
+    color: var(--wx-success, #198754);
     font-style: italic;
 }
 
 .wx-code .number {
-    color: var(--bs-warning, #f3c73a);
+    color: var(--wx-warning, #f3c73a);
 }
 
 .wx-code .operator,
 .wx-code .constant,
 .wx-code .separator {
-    color: var(--bs-info, #75b2f5);
+    color: var(--wx-info, #75b2f5);
 }
 
 .wx-code .bracket,

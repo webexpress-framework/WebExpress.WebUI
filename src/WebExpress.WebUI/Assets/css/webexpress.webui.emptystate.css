@@ -7,20 +7,20 @@
     text-align: center;
     gap: 0.4rem;
     padding: 2.5rem 1rem;
-    color: var(--bs-secondary-color, #6c757d);
+    color: var(--wx-secondary-color, #6c757d);
 }
 
 .wx-empty-state-icon {
     margin-bottom: 0.25rem;
     font-size: 2.5rem;
     line-height: 1;
-    color: var(--bs-secondary, #adb5bd);
+    color: var(--wx-secondary, #adb5bd);
 }
 
 .wx-empty-state-title {
     font-size: 1.05rem;
     font-weight: 600;
-    color: var(--bs-body-color, #212529);
+    color: var(--wx-body-color, #212529);
 }
 
 .wx-empty-state-message {

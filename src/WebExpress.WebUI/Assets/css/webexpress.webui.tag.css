@@ -34,7 +34,7 @@
 }
 
 .wx-tag > ul > li > a:hover {
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
 }
 
 .wx-tag input {
@@ -49,41 +49,41 @@
 }
 
 .wx-tag-primary {
-    color: var(--bs-white);
-    background-color: var(--bs-primary);
+    color: var(--wx-white);
+    background-color: var(--wx-primary);
 }
 
 .wx-tag-secondary {
-    color: var(--bs-light);
-    background-color: var(--bs-secondary);
+    color: var(--wx-light);
+    background-color: var(--wx-secondary);
 }
 
 .wx-tag-success {
-    color: var(--bs-light);
-    background-color: var(--bs-success);
+    color: var(--wx-light);
+    background-color: var(--wx-success);
 }
 
 .wx-tag-info {
-    color: var(--bs-dark);
-    background-color: var(--bs-info);
+    color: var(--wx-dark);
+    background-color: var(--wx-info);
 }
 
 .wx-tag-warning {
-    color: var(--bs-dark);
-    background-color: var(--bs-warning);
+    color: var(--wx-dark);
+    background-color: var(--wx-warning);
 }
 
 .wx-tag-danger {
-    color: var(--bs-light);
-    background-color: var(--bs-danger);
+    color: var(--wx-light);
+    background-color: var(--wx-danger);
 }
 
 .wx-tag-light {
-    color: var(--bs-dark);
-    background-color: var(--bs-light);
+    color: var(--wx-dark);
+    background-color: var(--wx-light);
 }
 
 .wx-tag-dark {
-    color: var(--bs-light);
-    background-color: var(--bs-dark);
+    color: var(--wx-light);
+    background-color: var(--wx-dark);
 }

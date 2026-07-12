@@ -28,7 +28,7 @@
 }
 
 .wx-selection > ul > span {
-    color: var(--bs-secondary);
+    color: var(--wx-secondary);
 }
 
 .wx-selection > ul > li > span {
@@ -72,7 +72,7 @@
 }
 
 .wx-selection > div:nth-child(2) > ul > span {
-    color: var(--bs-secondary);
+    color: var(--wx-secondary);
 }
 
 .wx-selection > div:nth-child(2) > ul > li > span {
@@ -91,16 +91,16 @@
     margin-right: 0.2em;
     text-decoration: none;
     font-size: 0.8em;
-    color: var(--bs-secondary);
+    color: var(--wx-secondary);
 }
 
 .wx-selection > div:nth-child(2) > ul > li > a:hover {
-    color: var(--bs-danger);
+    color: var(--wx-danger);
 }
 
 .wx-selection > div:nth-child(2) > a {
     text-decoration: none;
-    color: var(--bs-secondary);
+    color: var(--wx-secondary);
     float: right;
     margin: 0;
     padding-right: 0.3em;
@@ -116,8 +116,8 @@
     position: absolute;
     top: 100%;
     left: 0;
-    background-color: var(--bs-body-bg);
-    border: var(--bs-border-width) solid var(--bs-border-color);
+    background-color: var(--wx-body-bg);
+    border: var(--bs-border-width) solid var(--wx-border-color);
     border-radius: var(--bs-border-radius);
     box-shadow: var(--wx-dropdown-shadow);
     list-style: none;
@@ -132,8 +132,8 @@
     display: flex;
     align-items: center;
     margin: 0.5em;
-    background-color: var(--bs-body-bg);
-    border: var(--bs-border-width) solid var(--bs-border-color);
+    background-color: var(--wx-body-bg);
+    border: var(--bs-border-width) solid var(--wx-border-color);
 }
 
 .wx-selection div:nth-child(3) > div:nth-child(1) > input {
@@ -142,8 +142,8 @@
     outline: none;
     flex: 1;
     border: 0px;
-    background-color: var(--bs-body-bg);
-    color: var(--bs-body-color);
+    background-color: var(--wx-body-bg);
+    color: var(--wx-body-color);
 }
 
 [data-bs-theme="dark"] .wx-selection div:nth-child(3) > div:nth-child(1) > input {
@@ -152,14 +152,14 @@
 
 .wx-selection div:nth-child(3) > div:nth-child(1) > a {
     cursor: pointer;
-    color: var(--bs-border-color);
+    color: var(--wx-border-color);
     font-size: 1em;
     text-decoration: none;
     margin-right: 0.2em;
 }
 
 .wx-selection > div:nth-child(3) > div:nth-child(1) > a:hover {
-    color: var(--bs-secondary);
+    color: var(--wx-secondary);
 }
 
 .wx-selection div:nth-child(3) > ul {
@@ -185,11 +185,11 @@
 }
 
 .wx-selection div:nth-child(3) > ul > li > button:not(:disabled) {
-    color: var(--bs-link-color);
+    color: var(--wx-link-color);
 }
 
 .wx-selection div:nth-child(3) > ul > li > button:not(:disabled):hover {
-    color: var(--bs-link-hover-color);
+    color: var(--wx-link-hover-color);
 }
 
 .wx-selection div:nth-child(3) > ul > li > button > img {
@@ -208,124 +208,124 @@
 }
 
 .wx-selection > div:nth-child(3) > footer {
-    color: var(--bs-gray);
-    background-color: var(--bs-light);
+    color: var(--wx-gray);
+    background-color: var(--wx-light);
     flex-direction: row;
     padding: 0.2em;
 }
 
 [data-bs-theme=dark] .wx-selection > div:nth-child(3) > footer {
-    background-color: var(--bs-secondary-bg);
+    background-color: var(--wx-secondary-bg);
 }
 
 .wx-selection-primary {
-    color: var(--bs-white);
-    background-color: var(--bs-primary);
-    border: 1px solid var(--bs-primary);
+    color: var(--wx-white);
+    background-color: var(--wx-primary);
+    border: 1px solid var(--wx-primary);
 }
 
 .wx-selection-primary > a {
-    color: var(--bs-white)!important;
+    color: var(--wx-white)!important;
 }
 
 .wx-selection-primary > a:hover {
-    color: var(--bs-danger) !important;
+    color: var(--wx-danger) !important;
 }
 
 .wx-selection-secondary {
-    color: var(--bs-light);
-    background-color: var(--bs-secondary);
-    border: 1px solid var(--bs-secondary);
+    color: var(--wx-light);
+    background-color: var(--wx-secondary);
+    border: 1px solid var(--wx-secondary);
 }
 
 .wx-selection-secondary > a {
-    color: var(--bs-white)!important;
+    color: var(--wx-white)!important;
 }
 
 .wx-selection-secondary > a:hover {
-    color: var(--bs-danger) !important;
+    color: var(--wx-danger) !important;
 }
 
 .wx-selection-success {
-    color: var(--bs-light);
-    background-color: var(--bs-success);
-    border: 1px solid var(--bs-success);
+    color: var(--wx-light);
+    background-color: var(--wx-success);
+    border: 1px solid var(--wx-success);
 }
 
 .wx-selection-success > a {
-    color: var(--bs-white) !important;
+    color: var(--wx-white) !important;
 }
 
 .wx-selection-success > a:hover {
-    color: var(--bs-danger) !important;
+    color: var(--wx-danger) !important;
 }
 
 .wx-selection-info {
-    color: var(--bs-dark);
-    background-color: var(--bs-info);
-    border: 1px solid var(--bs-info);
+    color: var(--wx-dark);
+    background-color: var(--wx-info);
+    border: 1px solid var(--wx-info);
 }
 
 .wx-selection-info > a {
-    color: var(--bs-dark) !important;
+    color: var(--wx-dark) !important;
 }
 
 .wx-selection-info > a:hover {
-    color: var(--bs-danger) !important;
+    color: var(--wx-danger) !important;
 }
 
 .wx-selection-warning {
-    color: var(--bs-dark);
-    background-color: var(--bs-warning);
-    border: 1px solid var(--bs-warning);
+    color: var(--wx-dark);
+    background-color: var(--wx-warning);
+    border: 1px solid var(--wx-warning);
 }
 
 .wx-selection-warning > a {
-    color: var(--bs-dark) !important;
+    color: var(--wx-dark) !important;
 }
 
 .wx-selection-warning > a:hover {
-    color: var(--bs-danger) !important;
+    color: var(--wx-danger) !important;
 }
 
 .wx-selection-danger {
-    color: var(--bs-light);
-    background-color: var(--bs-danger);
-    border: 1px solid var(--bs-danger);
+    color: var(--wx-light);
+    background-color: var(--wx-danger);
+    border: 1px solid var(--wx-danger);
 }
 
 .wx-selection-danger > a {
-    color: var(--bs-white) !important;
+    color: var(--wx-white) !important;
 }
 
 .wx-selection-danger > a:hover {
-    color: var(--bs-dark) !important;
+    color: var(--wx-dark) !important;
 }
 
 .wx-selection-light {
-    color: var(--bs-dark);
-    background-color: var(--bs-light);
-    border: 1px solid var(--bs-light);
+    color: var(--wx-dark);
+    background-color: var(--wx-light);
+    border: 1px solid var(--wx-light);
 }
 
 .wx-selection-light > a {
-    color: var(--bs-dark) !important;
+    color: var(--wx-dark) !important;
 }
 
 .wx-selection-light > a:hover {
-    color: var(--bs-danger) !important;
+    color: var(--wx-danger) !important;
 }
 
 .wx-selection-dark {
-    color: var(--bs-light);
-    background-color: var(--bs-dark);
-    border: 1px solid var(--bs-dark);
+    color: var(--wx-light);
+    background-color: var(--wx-dark);
+    border: 1px solid var(--wx-dark);
 }
 
 .wx-selection-dark > a {
-    color: var(--bs-white) !important;
+    color: var(--wx-white) !important;
 }
 
 .wx-selection-dark > a:hover {
-    color: var(--bs-danger) !important;
+    color: var(--wx-danger) !important;
 }

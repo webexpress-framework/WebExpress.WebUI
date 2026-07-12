@@ -1,11 +1,246 @@
+/* =====================================================================
+   WebExpress unified color model
+   ---------------------------------------------------------------------
+   The --wx-* custom properties below are the single source of truth for
+   every color in the framework. They hold real values (never references
+   to Bootstrap), so the palette is self-contained and can be swapped
+   wholesale by a theme without reaching into Bootstrap internals.
+
+   Two layers make the model apply to every control:
+     1. Semantic tokens (this :root block) define the light palette; the
+        [data-bs-theme="dark"] block below overrides them for dark mode.
+     2. The Bootstrap bridge remaps each --bs-* color variable onto its
+        matching --wx-* token. Because this file loads after
+        bootstrap.min.css and :root shares Bootstrap's specificity, these
+        assignments win by source order — so the many controls that already
+        consume --bs-* semantic variables adopt the wx palette unchanged.
+
+   To re-skin the framework, redefine the --wx-* tokens in a theme
+   stylesheet (e.g. webexpress.webapp.theme.css, which loads last); the
+   change cascades through the bridge to every control and every theme.
+   ===================================================================== */
 :root {
-    /* Unified dropdown shadow: subtle elevation for dropdown menus against white backgrounds */
-    --wx-dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-    
-    /* Central highlight color */
+    /* neutrals — surfaces and text */
+    --wx-body-bg: #fff;
+    --wx-body-bg-rgb: 255, 255, 255;
+    --wx-body-color: #212529;
+    --wx-body-color-rgb: 33, 37, 41;
+    --wx-secondary-bg: #e9ecef;                   /* raised surface: cards, wells */
+    --wx-tertiary-bg: #f8f9fa;                    /* recessed surface: stripes, tracks */
+    --wx-secondary-color: rgba(33, 37, 41, 0.75); /* muted text */
+    --wx-secondary-color-rgb: 33, 37, 41;
+    --wx-tertiary-color: rgba(33, 37, 41, 0.5);   /* subtle text */
+    --wx-emphasis-color: #000;
+    --wx-heading-color: inherit;
+    --wx-border-color: #dee2e6;
+    --wx-border-color-translucent: rgba(0, 0, 0, 0.175);
+
+    /* brand and status colors — base + rgb triplet for alpha compositing */
+    --wx-primary: #0d6efd;
+    --wx-primary-rgb: 13, 110, 253;
+    --wx-secondary: #6c757d;
+    --wx-secondary-rgb: 108, 117, 125;
+    --wx-success: #198754;
+    --wx-success-rgb: 25, 135, 84;
+    --wx-info: #0dcaf0;
+    --wx-info-rgb: 13, 202, 240;
+    --wx-warning: #ffc107;
+    --wx-warning-rgb: 255, 193, 7;
+    --wx-danger: #dc3545;
+    --wx-danger-rgb: 220, 53, 69;
+    --wx-light: #f8f9fa;
+    --wx-light-rgb: 248, 249, 250;
+    --wx-dark: #212529;
+    --wx-dark-rgb: 33, 37, 41;
+    --wx-white: #fff;
+
+    /* on-colors — legible text/icon color placed on top of a filled brand
+       color (buttons, badges, tiles); theme-independent, they track the
+       brand hue, not the surface. */
+    --wx-primary-contrast: #fff;
+    --wx-secondary-contrast: #fff;
+    --wx-success-contrast: #fff;
+    --wx-info-contrast: #000;
+    --wx-warning-contrast: #000;
+    --wx-danger-contrast: #fff;
+    --wx-light-contrast: #000;
+    --wx-dark-contrast: #fff;
+
+    /* subtle families — low-emphasis fills, borders and text for callouts,
+       tags, alerts and status surfaces */
+    --wx-primary-bg-subtle: #cfe2ff;
+    --wx-primary-border-subtle: #9ec5fe;
+    --wx-primary-text-emphasis: #052c65;
+    --wx-secondary-bg-subtle: #e2e3e5;
+    --wx-secondary-border-subtle: #c4c8cb;
+    --wx-secondary-text-emphasis: #2b2f32;
+    --wx-success-bg-subtle: #d1e7dd;
+    --wx-success-border-subtle: #a3cfbb;
+    --wx-success-text-emphasis: #0a3622;
+    --wx-info-bg-subtle: #cff4fc;
+    --wx-info-border-subtle: #9eeaf9;
+    --wx-info-text-emphasis: #055160;
+    --wx-warning-bg-subtle: #fff3cd;
+    --wx-warning-border-subtle: #ffe69c;
+    --wx-warning-text-emphasis: #664d03;
+    --wx-danger-bg-subtle: #f8d7da;
+    --wx-danger-border-subtle: #f1aeb5;
+    --wx-danger-text-emphasis: #58151c;
+    --wx-light-bg-subtle: #fcfcfd;
+    --wx-light-border-subtle: #e9ecef;
+    --wx-dark-bg-subtle: #ced4da;
+    --wx-dark-border-subtle: #adb5bd;
+
+    /* gray scale */
+    --wx-gray: #6c757d;
+    --wx-gray-100: #f8f9fa;
+    --wx-gray-200: #e9ecef;
+    --wx-gray-300: #dee2e6;
+    --wx-gray-400: #ced4da;
+    --wx-gray-500: #adb5bd;
+    --wx-gray-600: #6c757d;
+    --wx-gray-700: #495057;
+    --wx-gray-800: #343a40;
+    --wx-gray-900: #212529;
+
+    /* links and code */
+    --wx-link-color: #0d6efd;
+    --wx-link-color-rgb: 13, 110, 253;
+    --wx-link-hover-color: #0a58ca;
+    --wx-code-color: #d63384;
+
+    /* central highlight/accent — consumed by the *-highlight utilities below */
     --wx-highlight: #ff8c00;
     --wx-highlight-rgb: 255, 140, 0;
     --wx-highlight-contrast: #212529;
+
+    /* unified dropdown shadow: subtle elevation against light surfaces */
+    --wx-dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+
+    /* ---- Bootstrap bridge ---------------------------------------------
+       Feed Bootstrap's semantic variables from the wx palette so existing
+       controls inherit the model. Values resolve per element, so the dark
+       overrides in the block below flow through without repeating here. */
+    --bs-body-bg: var(--wx-body-bg);
+    --bs-body-bg-rgb: var(--wx-body-bg-rgb);
+    --bs-body-color: var(--wx-body-color);
+    --bs-body-color-rgb: var(--wx-body-color-rgb);
+    --bs-secondary-bg: var(--wx-secondary-bg);
+    --bs-tertiary-bg: var(--wx-tertiary-bg);
+    --bs-secondary-color: var(--wx-secondary-color);
+    --bs-secondary-color-rgb: var(--wx-secondary-color-rgb);
+    --bs-tertiary-color: var(--wx-tertiary-color);
+    --bs-emphasis-color: var(--wx-emphasis-color);
+    --bs-heading-color: var(--wx-heading-color);
+    --bs-border-color: var(--wx-border-color);
+    --bs-border-color-translucent: var(--wx-border-color-translucent);
+
+    --bs-primary: var(--wx-primary);
+    --bs-primary-rgb: var(--wx-primary-rgb);
+    --bs-secondary: var(--wx-secondary);
+    --bs-secondary-rgb: var(--wx-secondary-rgb);
+    --bs-success: var(--wx-success);
+    --bs-success-rgb: var(--wx-success-rgb);
+    --bs-info: var(--wx-info);
+    --bs-info-rgb: var(--wx-info-rgb);
+    --bs-warning: var(--wx-warning);
+    --bs-warning-rgb: var(--wx-warning-rgb);
+    --bs-danger: var(--wx-danger);
+    --bs-danger-rgb: var(--wx-danger-rgb);
+    --bs-light: var(--wx-light);
+    --bs-light-rgb: var(--wx-light-rgb);
+    --bs-dark: var(--wx-dark);
+    --bs-dark-rgb: var(--wx-dark-rgb);
+    --bs-white: var(--wx-white);
+
+    --bs-primary-bg-subtle: var(--wx-primary-bg-subtle);
+    --bs-primary-border-subtle: var(--wx-primary-border-subtle);
+    --bs-primary-text-emphasis: var(--wx-primary-text-emphasis);
+    --bs-secondary-bg-subtle: var(--wx-secondary-bg-subtle);
+    --bs-secondary-border-subtle: var(--wx-secondary-border-subtle);
+    --bs-secondary-text-emphasis: var(--wx-secondary-text-emphasis);
+    --bs-success-bg-subtle: var(--wx-success-bg-subtle);
+    --bs-success-border-subtle: var(--wx-success-border-subtle);
+    --bs-success-text-emphasis: var(--wx-success-text-emphasis);
+    --bs-info-bg-subtle: var(--wx-info-bg-subtle);
+    --bs-info-border-subtle: var(--wx-info-border-subtle);
+    --bs-info-text-emphasis: var(--wx-info-text-emphasis);
+    --bs-warning-bg-subtle: var(--wx-warning-bg-subtle);
+    --bs-warning-border-subtle: var(--wx-warning-border-subtle);
+    --bs-warning-text-emphasis: var(--wx-warning-text-emphasis);
+    --bs-danger-bg-subtle: var(--wx-danger-bg-subtle);
+    --bs-danger-border-subtle: var(--wx-danger-border-subtle);
+    --bs-danger-text-emphasis: var(--wx-danger-text-emphasis);
+    --bs-light-bg-subtle: var(--wx-light-bg-subtle);
+    --bs-light-border-subtle: var(--wx-light-border-subtle);
+    --bs-dark-bg-subtle: var(--wx-dark-bg-subtle);
+    --bs-dark-border-subtle: var(--wx-dark-border-subtle);
+
+    --bs-gray: var(--wx-gray);
+    --bs-gray-100: var(--wx-gray-100);
+    --bs-gray-200: var(--wx-gray-200);
+    --bs-gray-300: var(--wx-gray-300);
+    --bs-gray-400: var(--wx-gray-400);
+    --bs-gray-500: var(--wx-gray-500);
+    --bs-gray-600: var(--wx-gray-600);
+    --bs-gray-700: var(--wx-gray-700);
+    --bs-gray-800: var(--wx-gray-800);
+    --bs-gray-900: var(--wx-gray-900);
+
+    --bs-link-color: var(--wx-link-color);
+    --bs-link-color-rgb: var(--wx-link-color-rgb);
+    --bs-link-hover-color: var(--wx-link-hover-color);
+    --bs-code-color: var(--wx-code-color);
+}
+
+/* Dark theme: override only the wx tokens. The Bootstrap bridge above
+   resolves var(--wx-*) against these values automatically, so it is never
+   repeated here. Brand base colors (primary, success, …) intentionally do
+   not flip — only surfaces, text, borders, subtle families and links do. */
+[data-bs-theme="dark"] {
+    --wx-body-bg: #212529;
+    --wx-body-bg-rgb: 33, 37, 41;
+    --wx-body-color: #dee2e6;
+    --wx-body-color-rgb: 222, 226, 230;
+    --wx-secondary-bg: #343a40;
+    --wx-tertiary-bg: #2b3035;
+    --wx-secondary-color: rgba(222, 226, 230, 0.75);
+    --wx-secondary-color-rgb: 222, 226, 230;
+    --wx-tertiary-color: rgba(222, 226, 230, 0.5);
+    --wx-emphasis-color: #fff;
+    --wx-border-color: #495057;
+    --wx-border-color-translucent: rgba(255, 255, 255, 0.15);
+
+    --wx-primary-bg-subtle: #031633;
+    --wx-primary-border-subtle: #084298;
+    --wx-primary-text-emphasis: #6ea8fe;
+    --wx-secondary-bg-subtle: #161719;
+    --wx-secondary-border-subtle: #41464b;
+    --wx-secondary-text-emphasis: #a7acb1;
+    --wx-success-bg-subtle: #051b11;
+    --wx-success-border-subtle: #0f5132;
+    --wx-success-text-emphasis: #75b798;
+    --wx-info-bg-subtle: #032830;
+    --wx-info-border-subtle: #087990;
+    --wx-info-text-emphasis: #6edff6;
+    --wx-warning-bg-subtle: #332701;
+    --wx-warning-border-subtle: #997404;
+    --wx-warning-text-emphasis: #ffda6a;
+    --wx-danger-bg-subtle: #2c0b0e;
+    --wx-danger-border-subtle: #842029;
+    --wx-danger-text-emphasis: #ea868f;
+    --wx-light-bg-subtle: #343a40;
+    --wx-light-border-subtle: #495057;
+    --wx-dark-bg-subtle: #1a1d20;
+    --wx-dark-border-subtle: #343a40;
+
+    --wx-link-color: #6ea8fe;
+    --wx-link-color-rgb: 110, 168, 254;
+    --wx-link-hover-color: #8bb9fe;
+    --wx-code-color: #e685b5;
+
+    /* deepen dropdown elevation so it reads against dark surfaces */
+    --wx-dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
 }
 
 /* Global dropdown menu shadow for consistent elevation across all dropdown variants */
@@ -19,7 +254,7 @@ body, html {
 
 pre {
     font-family: var(--bs-font-monospace);
-    color: var(--bs-code-color);
+    color: var(--wx-code-color);
 }
 
 .hide {
@@ -34,7 +269,7 @@ pre {
 }
 
 .wx-link {
-    color: rgba(var(--bs-link-color-rgb), var(--bs-link-opacity, 1));
+    color: rgba(var(--wx-link-color-rgb), var(--bs-link-opacity, 1));
     text-decoration: none;
     cursor: pointer;
     display: inline-flex;
@@ -79,7 +314,7 @@ img.wx-icon-large {
     border-radius: 0;
     display: flex;
     flex-direction: column;
-    background-color: var(--bs-body-bg);
+    background-color: var(--wx-body-bg);
 }
 
 .wx-breadcrumb {
@@ -101,7 +336,7 @@ img.wx-icon-large {
 .wx-breadcrumb > li > a {
     text-decoration: none;
     cursor: pointer;
-    color: var(--bs-link-color);
+    color: var(--wx-link-color);
 }
 
 .wx-breadcrumb > li > img {
@@ -109,7 +344,7 @@ img.wx-icon-large {
 }
 
 .wx-breadcrumb > li > i {
-    color: var(--bs-primary);
+    color: var(--wx-primary);
 }
 
 .wx-breadcrumb-prefix {
@@ -120,57 +355,57 @@ img.wx-icon-large {
 .wx-breadcrumb > li:not(.wx-breadcrumb-prefix):not(:last-child)::after {
     content: "/";
     margin-left: 0.5em;
-    color: var(--bs-secondary-color);
+    color: var(--wx-secondary-color);
 }
 
 .wx-breadcrumb.text-primary > li > a,
 .wx-breadcrumb.text-primary > li > i {
-    color: var(--bs-primary);
+    color: var(--wx-primary);
 }
 
 .wx-breadcrumb.text-secondary > li > a,
 .wx-breadcrumb.text-secondary > li > i {
-    color: var(--bs-secondary);
+    color: var(--wx-secondary);
 }
 
 .wx-breadcrumb.text-success > li > a,
 .wx-breadcrumb.text-success > li > i{
-    color: var(--bs-success);
+    color: var(--wx-success);
 }
 
 .wx-breadcrumb.text-info > li > a,
 .wx-breadcrumb.text-info > li > i {
-    color: var(--bs-info);
+    color: var(--wx-info);
 }
 
 .wx-breadcrumb.text-warning > li > a,
 .wx-breadcrumb.text-warning > li > i {
-    color: var(--bs-warning);
+    color: var(--wx-warning);
 }
 
 .wx-breadcrumb.text-danger > li > a,
 .wx-breadcrumb.text-danger > li > i {
-    color: var(--bs-danger);
+    color: var(--wx-danger);
 }
 
 .wx-breadcrumb.text-light > li > a,
 .wx-breadcrumb.text-light > li > i {
-    color: var(--bs-light);
+    color: var(--wx-light);
 }
 
 .wx-breadcrumb.text-dark > li > a,
 .wx-breadcrumb.text-dark > li > i {
-    color: var(--bs-dark);
+    color: var(--wx-dark);
 }
 
 .wx-breadcrumb.text-white > li > a,
 .wx-breadcrumb.text-white > li > i {
-    color: var(--bs-white);
+    color: var(--wx-white);
 }
 
 .wx-breadcrumb.text-muted > li > a,
 .wx-breadcrumb.text-muted > li > i {
-    color: var(--bs-secondary);
+    color: var(--wx-secondary);
 }
 
 .wx-profile {
@@ -226,11 +461,11 @@ img.wx-icon-large {
     min-width: 0;
     word-wrap: break-word;
     background-clip: border-box;
-    border: 1px solid var(--bs-border-color);
+    border: 1px solid var(--wx-border-color);
     border-left-width: 0.25rem;
     border-radius: var(--bs-border-radius);
-    background-color: var(--bs-body-bg);
-    color: var(--bs-body-color);
+    background-color: var(--wx-body-bg);
+    color: var(--wx-body-color);
 }
 
 .wx-callout-body {
@@ -248,43 +483,43 @@ img.wx-icon-large {
 }
 
 .wx-callout-info {
-    border-left-color: var(--bs-info);
-    background-color: var(--bs-body-bg);
+    border-left-color: var(--wx-info);
+    background-color: var(--wx-body-bg);
 }
 
 .wx-callout-success {
-    border-left-color: var(--bs-success);
-    background-color: var(--bs-body-bg);
+    border-left-color: var(--wx-success);
+    background-color: var(--wx-body-bg);
 }
 
 .wx-callout-warning {
-    border-left-color: var(--bs-warning);
-    background-color: var(--bs-body-bg);
+    border-left-color: var(--wx-warning);
+    background-color: var(--wx-body-bg);
 }
 
 .wx-callout-danger {
-    border-left-color: var(--bs-danger);
-    background-color: var(--bs-body-bg);
+    border-left-color: var(--wx-danger);
+    background-color: var(--wx-body-bg);
 }
 
 .wx-callout-primary {
-    border-left-color: var(--bs-primary);
-    background-color: var(--bs-body-bg);
+    border-left-color: var(--wx-primary);
+    background-color: var(--wx-body-bg);
 }
 
 .wx-callout-secondary {
-    border-left-color: var(--bs-secondary);
-    background-color: var(--bs-body-bg);
+    border-left-color: var(--wx-secondary);
+    background-color: var(--wx-body-bg);
 }
 
 .wx-callout-dark {
-    border-left-color: var(--bs-dark);
-    background-color: var(--bs-body-bg);
+    border-left-color: var(--wx-dark);
+    background-color: var(--wx-body-bg);
 }
 
 .wx-callout-light {
-    border-left-color: var(--bs-light);
-    background-color: var(--bs-body-bg);
+    border-left-color: var(--wx-light);
+    background-color: var(--wx-body-bg);
 }
 
 .wx-dragging {
@@ -294,12 +529,12 @@ img.wx-icon-large {
 .wx-drag-over {
     background: repeating-linear-gradient(
         45deg,
-        var(--bs-secondary-bg),
-        var(--bs-secondary-bg) 6px,
-        var(--bs-tertiary-bg) 6px,
-        var(--bs-tertiary-bg) 12px
+        var(--wx-secondary-bg),
+        var(--wx-secondary-bg) 6px,
+        var(--wx-tertiary-bg) 6px,
+        var(--wx-tertiary-bg) 12px
     );
-    outline: 2px dashed var(--bs-success); /* Adds a dashed border for visual emphasis */
+    outline: 2px dashed var(--wx-success); /* Adds a dashed border for visual emphasis */
     border-radius: 0.5rem;
     z-index: 1000;
 }
@@ -316,15 +551,15 @@ img.wx-icon-large {
 }
 
 [data-bs-theme=dark] .wx-drag-over {
-    background: repeating-linear-gradient( 45deg, var(--bs-secondary-bg), var(--bs-secondary-bg) 6px, var(--bs-secondary) 6px, var(--bs-secondary) 12px );
+    background: repeating-linear-gradient( 45deg, var(--wx-secondary-bg), var(--wx-secondary-bg) 6px, var(--wx-secondary) 6px, var(--wx-secondary) 12px );
 }
 
 .list-group-item.active a {
-    color: var(--bs-light);
+    color: var(--wx-light);
 }
 
 .list-group-item.active a:hover {
-    color: var(--bs-light);
+    color: var(--wx-light);
 }
 
 /* Highlight color utilities  */
@@ -396,7 +631,7 @@ img.wx-icon-large {
 
 .wx-callout-highlight {
     border-left-color: var(--wx-highlight);
-    background-color: var(--bs-body-bg);
+    background-color: var(--wx-body-bg);
 }
 
 .wx-tag-highlight {
@@ -426,4 +661,290 @@ img.wx-icon-large {
 .wx-breadcrumb.text-highlight > li > a,
 .wx-breadcrumb.text-highlight > li > i {
     color: var(--wx-highlight);
+}
+
+/* =====================================================================
+   Native Bootstrap components — themed from the wx palette
+   ---------------------------------------------------------------------
+   Bootstrap's .btn-* variants hardcode literal colors in their
+   --bs-btn-* variables, so overriding a palette token alone would not
+   re-skin them. These rules re-point every variant at the wx tokens;
+   hover/active shades are derived from the base hue with color-mix so a
+   theme only has to redefine one --wx-<color> token. Loaded after
+   bootstrap.min.css with equal specificity, so they win by source order.
+   (.bg-*, .text-* and .border-* already read --bs-*-rgb and are themed
+   through the bridge; only .text-bg-* needs its literal text color fixed.)
+   ===================================================================== */
+.btn-primary {
+    --bs-btn-color: var(--wx-primary-contrast);
+    --bs-btn-bg: var(--wx-primary);
+    --bs-btn-border-color: var(--wx-primary);
+    --bs-btn-hover-color: var(--wx-primary-contrast);
+    --bs-btn-hover-bg: color-mix(in srgb, var(--wx-primary) 85%, #000);
+    --bs-btn-hover-border-color: color-mix(in srgb, var(--wx-primary) 80%, #000);
+    --bs-btn-active-color: var(--wx-primary-contrast);
+    --bs-btn-active-bg: color-mix(in srgb, var(--wx-primary) 80%, #000);
+    --bs-btn-active-border-color: color-mix(in srgb, var(--wx-primary) 75%, #000);
+    --bs-btn-focus-shadow-rgb: var(--wx-primary-rgb);
+    --bs-btn-disabled-color: var(--wx-primary-contrast);
+    --bs-btn-disabled-bg: var(--wx-primary);
+    --bs-btn-disabled-border-color: var(--wx-primary);
+}
+
+.btn-secondary {
+    --bs-btn-color: var(--wx-secondary-contrast);
+    --bs-btn-bg: var(--wx-secondary);
+    --bs-btn-border-color: var(--wx-secondary);
+    --bs-btn-hover-color: var(--wx-secondary-contrast);
+    --bs-btn-hover-bg: color-mix(in srgb, var(--wx-secondary) 85%, #000);
+    --bs-btn-hover-border-color: color-mix(in srgb, var(--wx-secondary) 80%, #000);
+    --bs-btn-active-color: var(--wx-secondary-contrast);
+    --bs-btn-active-bg: color-mix(in srgb, var(--wx-secondary) 80%, #000);
+    --bs-btn-active-border-color: color-mix(in srgb, var(--wx-secondary) 75%, #000);
+    --bs-btn-focus-shadow-rgb: var(--wx-secondary-rgb);
+    --bs-btn-disabled-color: var(--wx-secondary-contrast);
+    --bs-btn-disabled-bg: var(--wx-secondary);
+    --bs-btn-disabled-border-color: var(--wx-secondary);
+}
+
+.btn-success {
+    --bs-btn-color: var(--wx-success-contrast);
+    --bs-btn-bg: var(--wx-success);
+    --bs-btn-border-color: var(--wx-success);
+    --bs-btn-hover-color: var(--wx-success-contrast);
+    --bs-btn-hover-bg: color-mix(in srgb, var(--wx-success) 85%, #000);
+    --bs-btn-hover-border-color: color-mix(in srgb, var(--wx-success) 80%, #000);
+    --bs-btn-active-color: var(--wx-success-contrast);
+    --bs-btn-active-bg: color-mix(in srgb, var(--wx-success) 80%, #000);
+    --bs-btn-active-border-color: color-mix(in srgb, var(--wx-success) 75%, #000);
+    --bs-btn-focus-shadow-rgb: var(--wx-success-rgb);
+    --bs-btn-disabled-color: var(--wx-success-contrast);
+    --bs-btn-disabled-bg: var(--wx-success);
+    --bs-btn-disabled-border-color: var(--wx-success);
+}
+
+.btn-info {
+    --bs-btn-color: var(--wx-info-contrast);
+    --bs-btn-bg: var(--wx-info);
+    --bs-btn-border-color: var(--wx-info);
+    --bs-btn-hover-color: var(--wx-info-contrast);
+    --bs-btn-hover-bg: color-mix(in srgb, var(--wx-info) 85%, #000);
+    --bs-btn-hover-border-color: color-mix(in srgb, var(--wx-info) 80%, #000);
+    --bs-btn-active-color: var(--wx-info-contrast);
+    --bs-btn-active-bg: color-mix(in srgb, var(--wx-info) 80%, #000);
+    --bs-btn-active-border-color: color-mix(in srgb, var(--wx-info) 75%, #000);
+    --bs-btn-focus-shadow-rgb: var(--wx-info-rgb);
+    --bs-btn-disabled-color: var(--wx-info-contrast);
+    --bs-btn-disabled-bg: var(--wx-info);
+    --bs-btn-disabled-border-color: var(--wx-info);
+}
+
+.btn-warning {
+    --bs-btn-color: var(--wx-warning-contrast);
+    --bs-btn-bg: var(--wx-warning);
+    --bs-btn-border-color: var(--wx-warning);
+    --bs-btn-hover-color: var(--wx-warning-contrast);
+    --bs-btn-hover-bg: color-mix(in srgb, var(--wx-warning) 85%, #000);
+    --bs-btn-hover-border-color: color-mix(in srgb, var(--wx-warning) 80%, #000);
+    --bs-btn-active-color: var(--wx-warning-contrast);
+    --bs-btn-active-bg: color-mix(in srgb, var(--wx-warning) 80%, #000);
+    --bs-btn-active-border-color: color-mix(in srgb, var(--wx-warning) 75%, #000);
+    --bs-btn-focus-shadow-rgb: var(--wx-warning-rgb);
+    --bs-btn-disabled-color: var(--wx-warning-contrast);
+    --bs-btn-disabled-bg: var(--wx-warning);
+    --bs-btn-disabled-border-color: var(--wx-warning);
+}
+
+.btn-danger {
+    --bs-btn-color: var(--wx-danger-contrast);
+    --bs-btn-bg: var(--wx-danger);
+    --bs-btn-border-color: var(--wx-danger);
+    --bs-btn-hover-color: var(--wx-danger-contrast);
+    --bs-btn-hover-bg: color-mix(in srgb, var(--wx-danger) 85%, #000);
+    --bs-btn-hover-border-color: color-mix(in srgb, var(--wx-danger) 80%, #000);
+    --bs-btn-active-color: var(--wx-danger-contrast);
+    --bs-btn-active-bg: color-mix(in srgb, var(--wx-danger) 80%, #000);
+    --bs-btn-active-border-color: color-mix(in srgb, var(--wx-danger) 75%, #000);
+    --bs-btn-focus-shadow-rgb: var(--wx-danger-rgb);
+    --bs-btn-disabled-color: var(--wx-danger-contrast);
+    --bs-btn-disabled-bg: var(--wx-danger);
+    --bs-btn-disabled-border-color: var(--wx-danger);
+}
+
+.btn-light {
+    --bs-btn-color: var(--wx-light-contrast);
+    --bs-btn-bg: var(--wx-light);
+    --bs-btn-border-color: var(--wx-light);
+    --bs-btn-hover-color: var(--wx-light-contrast);
+    --bs-btn-hover-bg: color-mix(in srgb, var(--wx-light) 85%, #000);
+    --bs-btn-hover-border-color: color-mix(in srgb, var(--wx-light) 80%, #000);
+    --bs-btn-active-color: var(--wx-light-contrast);
+    --bs-btn-active-bg: color-mix(in srgb, var(--wx-light) 80%, #000);
+    --bs-btn-active-border-color: color-mix(in srgb, var(--wx-light) 75%, #000);
+    --bs-btn-focus-shadow-rgb: var(--wx-light-rgb);
+    --bs-btn-disabled-color: var(--wx-light-contrast);
+    --bs-btn-disabled-bg: var(--wx-light);
+    --bs-btn-disabled-border-color: var(--wx-light);
+}
+
+.btn-dark {
+    --bs-btn-color: var(--wx-dark-contrast);
+    --bs-btn-bg: var(--wx-dark);
+    --bs-btn-border-color: var(--wx-dark);
+    --bs-btn-hover-color: var(--wx-dark-contrast);
+    --bs-btn-hover-bg: color-mix(in srgb, var(--wx-dark) 85%, #000);
+    --bs-btn-hover-border-color: color-mix(in srgb, var(--wx-dark) 80%, #000);
+    --bs-btn-active-color: var(--wx-dark-contrast);
+    --bs-btn-active-bg: color-mix(in srgb, var(--wx-dark) 80%, #000);
+    --bs-btn-active-border-color: color-mix(in srgb, var(--wx-dark) 75%, #000);
+    --bs-btn-focus-shadow-rgb: var(--wx-dark-rgb);
+    --bs-btn-disabled-color: var(--wx-dark-contrast);
+    --bs-btn-disabled-bg: var(--wx-dark);
+    --bs-btn-disabled-border-color: var(--wx-dark);
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--wx-primary);
+    --bs-btn-border-color: var(--wx-primary);
+    --bs-btn-hover-color: var(--wx-primary-contrast);
+    --bs-btn-hover-bg: var(--wx-primary);
+    --bs-btn-hover-border-color: var(--wx-primary);
+    --bs-btn-active-color: var(--wx-primary-contrast);
+    --bs-btn-active-bg: var(--wx-primary);
+    --bs-btn-active-border-color: var(--wx-primary);
+    --bs-btn-focus-shadow-rgb: var(--wx-primary-rgb);
+    --bs-btn-disabled-color: var(--wx-primary);
+    --bs-btn-disabled-border-color: var(--wx-primary);
+}
+
+.btn-outline-secondary {
+    --bs-btn-color: var(--wx-secondary);
+    --bs-btn-border-color: var(--wx-secondary);
+    --bs-btn-hover-color: var(--wx-secondary-contrast);
+    --bs-btn-hover-bg: var(--wx-secondary);
+    --bs-btn-hover-border-color: var(--wx-secondary);
+    --bs-btn-active-color: var(--wx-secondary-contrast);
+    --bs-btn-active-bg: var(--wx-secondary);
+    --bs-btn-active-border-color: var(--wx-secondary);
+    --bs-btn-focus-shadow-rgb: var(--wx-secondary-rgb);
+    --bs-btn-disabled-color: var(--wx-secondary);
+    --bs-btn-disabled-border-color: var(--wx-secondary);
+}
+
+.btn-outline-success {
+    --bs-btn-color: var(--wx-success);
+    --bs-btn-border-color: var(--wx-success);
+    --bs-btn-hover-color: var(--wx-success-contrast);
+    --bs-btn-hover-bg: var(--wx-success);
+    --bs-btn-hover-border-color: var(--wx-success);
+    --bs-btn-active-color: var(--wx-success-contrast);
+    --bs-btn-active-bg: var(--wx-success);
+    --bs-btn-active-border-color: var(--wx-success);
+    --bs-btn-focus-shadow-rgb: var(--wx-success-rgb);
+    --bs-btn-disabled-color: var(--wx-success);
+    --bs-btn-disabled-border-color: var(--wx-success);
+}
+
+.btn-outline-info {
+    --bs-btn-color: var(--wx-info);
+    --bs-btn-border-color: var(--wx-info);
+    --bs-btn-hover-color: var(--wx-info-contrast);
+    --bs-btn-hover-bg: var(--wx-info);
+    --bs-btn-hover-border-color: var(--wx-info);
+    --bs-btn-active-color: var(--wx-info-contrast);
+    --bs-btn-active-bg: var(--wx-info);
+    --bs-btn-active-border-color: var(--wx-info);
+    --bs-btn-focus-shadow-rgb: var(--wx-info-rgb);
+    --bs-btn-disabled-color: var(--wx-info);
+    --bs-btn-disabled-border-color: var(--wx-info);
+}
+
+.btn-outline-warning {
+    --bs-btn-color: var(--wx-warning);
+    --bs-btn-border-color: var(--wx-warning);
+    --bs-btn-hover-color: var(--wx-warning-contrast);
+    --bs-btn-hover-bg: var(--wx-warning);
+    --bs-btn-hover-border-color: var(--wx-warning);
+    --bs-btn-active-color: var(--wx-warning-contrast);
+    --bs-btn-active-bg: var(--wx-warning);
+    --bs-btn-active-border-color: var(--wx-warning);
+    --bs-btn-focus-shadow-rgb: var(--wx-warning-rgb);
+    --bs-btn-disabled-color: var(--wx-warning);
+    --bs-btn-disabled-border-color: var(--wx-warning);
+}
+
+.btn-outline-danger {
+    --bs-btn-color: var(--wx-danger);
+    --bs-btn-border-color: var(--wx-danger);
+    --bs-btn-hover-color: var(--wx-danger-contrast);
+    --bs-btn-hover-bg: var(--wx-danger);
+    --bs-btn-hover-border-color: var(--wx-danger);
+    --bs-btn-active-color: var(--wx-danger-contrast);
+    --bs-btn-active-bg: var(--wx-danger);
+    --bs-btn-active-border-color: var(--wx-danger);
+    --bs-btn-focus-shadow-rgb: var(--wx-danger-rgb);
+    --bs-btn-disabled-color: var(--wx-danger);
+    --bs-btn-disabled-border-color: var(--wx-danger);
+}
+
+.btn-outline-light {
+    --bs-btn-color: var(--wx-light);
+    --bs-btn-border-color: var(--wx-light);
+    --bs-btn-hover-color: var(--wx-light-contrast);
+    --bs-btn-hover-bg: var(--wx-light);
+    --bs-btn-hover-border-color: var(--wx-light);
+    --bs-btn-active-color: var(--wx-light-contrast);
+    --bs-btn-active-bg: var(--wx-light);
+    --bs-btn-active-border-color: var(--wx-light);
+    --bs-btn-focus-shadow-rgb: var(--wx-light-rgb);
+    --bs-btn-disabled-color: var(--wx-light);
+    --bs-btn-disabled-border-color: var(--wx-light);
+}
+
+.btn-outline-dark {
+    --bs-btn-color: var(--wx-dark);
+    --bs-btn-border-color: var(--wx-dark);
+    --bs-btn-hover-color: var(--wx-dark-contrast);
+    --bs-btn-hover-bg: var(--wx-dark);
+    --bs-btn-hover-border-color: var(--wx-dark);
+    --bs-btn-active-color: var(--wx-dark-contrast);
+    --bs-btn-active-bg: var(--wx-dark);
+    --bs-btn-active-border-color: var(--wx-dark);
+    --bs-btn-focus-shadow-rgb: var(--wx-dark-rgb);
+    --bs-btn-disabled-color: var(--wx-dark);
+    --bs-btn-disabled-border-color: var(--wx-dark);
+}
+
+/* .text-bg-* backgrounds already resolve through --wx-*-rgb; only the
+   literal text color needs to follow the themed on-color. */
+.text-bg-primary {
+    color: var(--wx-primary-contrast) !important;
+}
+
+.text-bg-secondary {
+    color: var(--wx-secondary-contrast) !important;
+}
+
+.text-bg-success {
+    color: var(--wx-success-contrast) !important;
+}
+
+.text-bg-info {
+    color: var(--wx-info-contrast) !important;
+}
+
+.text-bg-warning {
+    color: var(--wx-warning-contrast) !important;
+}
+
+.text-bg-danger {
+    color: var(--wx-danger-contrast) !important;
+}
+
+.text-bg-light {
+    color: var(--wx-light-contrast) !important;
+}
+
+.text-bg-dark {
+    color: var(--wx-dark-contrast) !important;
 }

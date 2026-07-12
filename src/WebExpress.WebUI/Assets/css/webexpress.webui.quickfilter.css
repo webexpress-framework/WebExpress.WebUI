@@ -23,11 +23,11 @@
 .wx-quickfilter-btn-chip {
     outline: none;
     background: transparent;
-    color: var(--bs-primary);
+    color: var(--wx-primary);
     font-size: 0.85em;
     font-weight: 500;
     border-radius: 20px;
-    border: 1px solid var(--bs-primary);
+    border: 1px solid var(--wx-primary);
     transition: box-shadow 0.2s, background 0.15s, color 0.2s;
     cursor: pointer;
     gap: 0;
@@ -36,23 +36,23 @@
 /* chip button active state */
 .wx-quickfilter-btn-chip.active,
 .wx-quickfilter-btn-chip[aria-pressed="true"] {
-    background: var(--bs-primary);
-    color: var(--bs-white);
-    border-color: var(--bs-primary);
+    background: var(--wx-primary);
+    color: var(--wx-white);
+    border-color: var(--wx-primary);
 }
 
 /* chip button hover (not active) */
 .wx-quickfilter-btn-chip:hover {
-    background: var(--bs-tertiary-bg);
-    color: var(--bs-primary);
+    background: var(--wx-tertiary-bg);
+    color: var(--wx-primary);
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 /* chip button: active + hover = darker */
 .wx-quickfilter-btn-chip.active:hover,
 .wx-quickfilter-btn-chip[aria-pressed="true"]:hover {
-    background: var(--bs-primary);
-    color: var(--bs-white);
+    background: var(--wx-primary);
+    color: var(--wx-white);
 }
 
 .wx-quickfilter-btn-chip i {
@@ -80,28 +80,28 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--bs-tertiary-bg);
-    color: var(--bs-primary);
+    background-color: var(--wx-tertiary-bg);
+    color: var(--wx-primary);
 }
 
 /* dropdown menu style */
 .wx-quickfilter .dropdown-menu {
     border-radius: 0.5rem;
     padding: 0.5rem 0;
-    background-color: var(--bs-tertiary-bg);
+    background-color: var(--wx-tertiary-bg);
 }
 
 /* dropdown item style */
 .wx-quickfilter .dropdown-item {
     font-size: 0.9rem;
     padding: 0.4rem 1rem;
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
     transition: background-color 0.15s ease-in-out;
 }
 
 .wx-quickfilter .dropdown-item:hover {
-    background-color: var(--bs-primary);
-    color: var(--bs-white);
+    background-color: var(--wx-primary);
+    color: var(--wx-white);
 }
 
 /* the dropdown wrapper positions the menu beneath the toggle */
@@ -135,15 +135,15 @@
    when unchecked, primary when checked, and white on the hover background */
 .wx-quickfilter .dropdown-item .wx-quickfilter-multiselect-check {
     margin-right: 0.5em;
-    color: var(--bs-secondary-color, #6c757d);
+    color: var(--wx-secondary-color, #6c757d);
 }
 
 .wx-quickfilter .dropdown-item .wx-quickfilter-multiselect-check.wx-checked {
-    color: var(--bs-primary, #0d6efd);
+    color: var(--wx-primary, #0d6efd);
 }
 
 .wx-quickfilter .dropdown-item:hover .wx-quickfilter-multiselect-check {
-    color: var(--bs-white, #fff);
+    color: var(--wx-white, #fff);
 }
 
 /* the search box of a REST dropdown, with a scrollable result list for large
@@ -178,8 +178,8 @@
     overflow: hidden;
     font-size: 0.72em;
     font-weight: 700;
-    color: var(--bs-white, #fff);
-    background: var(--bs-secondary, #6c757d);
+    color: var(--wx-white, #fff);
+    background: var(--wx-secondary, #6c757d);
 }
 
 .wx-quickfilter-avatar-bubble img {

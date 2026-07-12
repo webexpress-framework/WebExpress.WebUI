@@ -14,7 +14,7 @@
 /* Styling for the search icon */
 .wx-search > div:nth-child(1) > label {
     margin-right: 0.5em;
-    color: var(--bs-gray-500); /* Use theme-aware gray color variable */
+    color: var(--wx-gray-500); /* Use theme-aware gray color variable */
 }
 
 /* Styling for the input field */
@@ -22,7 +22,7 @@
     border: 0px;
     outline: none;
     flex-grow: 1 !important;
-    color: var(--bs-body-color); /* Use theme-aware text color */
+    color: var(--wx-body-color); /* Use theme-aware text color */
     background-color: inherit; /* Use theme-aware background color */
 }
 
@@ -30,12 +30,12 @@
 .wx-search > div:nth-child(1) > span {
     margin-left: 0.5em;
     cursor: pointer;
-    color: var(--bs-gray-500); /* Use theme-aware gray color */
+    color: var(--wx-gray-500); /* Use theme-aware gray color */
 }
 
 /* Hover effect for the clear button */
 .wx-search > div:nth-child(1) > span:hover {
-    color: var(--bs-secondary); /* Use theme-aware secondary color */
+    color: var(--wx-secondary); /* Use theme-aware secondary color */
 }
 
 /* Styling for the suggestion container */
@@ -46,8 +46,8 @@
     width: 100%;
     max-height: 200px;
     overflow-y: auto;
-    background-color: var(--bs-body-bg); /* Use theme-aware background color */
-    border: var(--bs-border-width) solid var(--bs-border-color); /* Use theme-aware border color */
+    background-color: var(--wx-body-bg); /* Use theme-aware background color */
+    border: var(--bs-border-width) solid var(--wx-border-color); /* Use theme-aware border color */
     border-radius: var(--bs-border-radius); /* Use theme-aware border radius */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Slight shadow for better visibility */
     list-style: none;
@@ -102,16 +102,16 @@
 
 /* Styling for suggestion label */
 .wx-search > div:nth-child(2) > ul > li > a > span {
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
 }
 
 .wx-search > div:nth-child(2) > footer {
-    color: var(--bs-gray);
-    background-color: var(--bs-light);
+    color: var(--wx-gray);
+    background-color: var(--wx-light);
     flex-direction: row;
     padding: 0.2em;
 }
 
 [data-bs-theme=dark] .wx-search > div:nth-child(2) > footer {
-    background-color: var(--bs-secondary-bg);
+    background-color: var(--wx-secondary-bg);
 }

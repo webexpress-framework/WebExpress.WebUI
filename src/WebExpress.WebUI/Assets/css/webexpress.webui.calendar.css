@@ -20,7 +20,7 @@
 }
 
 .wx-calendar-display {
-    color: var(--bs-body-color, #dee2e6);
+    color: var(--wx-body-color, #dee2e6);
 }
 
 /* Month and year label */
@@ -29,7 +29,7 @@
     text-align: center;
     font-weight: bold;
     font-size: 1rem;
-    color: var(--bs-body-color, #212529);
+    color: var(--wx-body-color, #212529);
     letter-spacing: .06em;
 }
 
@@ -37,7 +37,7 @@
 .wx-calendar-nav {
     background: none;
     border: none;
-    color: var(--bs-body-color, #212529);
+    color: var(--wx-body-color, #212529);
     font-size: 1.15em;
     cursor: pointer;
     padding: 0.15em 0.55em;
@@ -48,8 +48,8 @@
 
 .wx-calendar-nav:hover,
 .wx-calendar-nav:focus {
-    background: var(--bs-secondary-bg, #f8f9fa);
-    color: var(--bs-primary, #0d6efd);
+    background: var(--wx-secondary-bg, #f8f9fa);
+    color: var(--wx-primary, #0d6efd);
 }
 
 /* Gap between calendar cells */
@@ -72,7 +72,7 @@
 }
 
 .wx-calendar-table th {
-    color: var(--bs-secondary-color, #6c757d);
+    color: var(--wx-secondary-color, #6c757d);
     font-weight: bold;
     font-size: 0.96em;
     background: none;
@@ -81,7 +81,7 @@
 /* Calendar week column */
 .wx-calendar-table th:first-child,
 .wx-calendar-table td:first-child {
-    color: var(--bs-info, #0dcaf0);
+    color: var(--wx-info, #0dcaf0);
     background: none;
     min-width: 2em;
     width: 2.4em;
@@ -90,7 +90,7 @@
 }
 
 .wx-calendar-table td:first-child {
-    background: var(--bs-light, #f8f9fa);
+    background: var(--wx-light, #f8f9fa);
 }
 
 .wx-calendar-table button {
@@ -102,18 +102,18 @@
 }
 
 .wx-calendar-day:hover {
-    background: var(--bs-secondary-bg, #f8f9fa);
+    background: var(--wx-secondary-bg, #f8f9fa);
 }
 
 /* Selected day */
 .wx-calendar-day.selected {
-    background: var(--bs-primary, #0d6efd);
-    color: var(--bs-light, #fff);
+    background: var(--wx-primary, #0d6efd);
+    color: var(--wx-light, #fff);
     font-weight: bold;
 }
 
 .wx-calendar-day.selected:hover {
-    background: var(--bs-secondary, #87929d);
+    background: var(--wx-secondary, #87929d);
 }
 
 .wx-calendar-day {
@@ -123,13 +123,13 @@
 
 /* Days from other months */
 .wx-calendar-out {
-    color: var(--bs-tertiary-color, #adb5bd);
+    color: var(--wx-tertiary-color, #adb5bd);
     background: none;
     cursor: default;
 }
 
 .wx-calendar-red {
-    color: var(--bs-danger, #dc3545) !important;
+    color: var(--wx-danger, #dc3545) !important;
 }
 
 /* Preview range (hover) highlighting with underline */
@@ -181,39 +181,39 @@
 
 /* Dark mode styles */
 [data-bs-theme="dark"] .wx-calendar-monthyear {
-    color: var(--bs-light, #fff);
+    color: var(--wx-light, #fff);
 }
 [data-bs-theme="dark"] .wx-calendar-nav {
-    color: var(--bs-light, #fff);
+    color: var(--wx-light, #fff);
 }
 [data-bs-theme="dark"] .wx-calendar-nav:hover,
 [data-bs-theme="dark"] .wx-calendar-nav:focus {
-    background: var(--bs-secondary-bg, #23262b);
-    color: var(--bs-primary, #0d6efd);
+    background: var(--wx-secondary-bg, #23262b);
+    color: var(--wx-primary, #0d6efd);
 }
 [data-bs-theme="dark"] .wx-calendar-table th,
 [data-bs-theme="dark"] .wx-calendar-table td {
-    color: var(--bs-light, #d3d7dc);
+    color: var(--wx-light, #d3d7dc);
 }
 [data-bs-theme="dark"] .wx-calendar-table td.wx-calendar-out {
-    color: var(--bs-tertiary-color, #7a7e85);
+    color: var(--wx-tertiary-color, #7a7e85);
 }
 [data-bs-theme="dark"] .wx-calendar-table td.selected,
 [data-bs-theme="dark"] .wx-calendar-table td.wx-calendar-day:hover:not(.wx-calendar-out):not(.selected) {
-    background: var(--bs-primary, #0d6efd);
-    color: var(--bs-light, #fff);
+    background: var(--wx-primary, #0d6efd);
+    color: var(--wx-light, #fff);
 }
 [data-bs-theme="dark"] .wx-calendar-table td:first-child {
-    background: var(--bs-secondary-bg, #23262b);
-    color: var(--bs-info, #0dcaf0);
+    background: var(--wx-secondary-bg, #23262b);
+    color: var(--wx-info, #0dcaf0);
 }
 
 [data-bs-theme="dark"] .wx-calendar-toolbar .btn {
-    background: var(--bs-body, var(--bs-dark, #212529));
-    color: var(--bs-body-color, var(--bs-white, #fff));
+    background: var(--bs-body, var(--wx-dark, #212529));
+    color: var(--wx-body-color, var(--wx-white, #fff));
 }
 
 [data-bs-theme="dark"] .wx-calendar-toolbar .btn:hover,
 [data-bs-theme="dark"] .wx-calendar-toolbar .btn:focus {
-    background: var(--bs-secondary-bg, #424649);
+    background: var(--wx-secondary-bg, #424649);
 }

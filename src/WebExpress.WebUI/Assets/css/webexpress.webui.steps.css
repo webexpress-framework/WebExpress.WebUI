@@ -23,13 +23,13 @@
     left: -50%;
     width: 100%;
     height: 2px;
-    background: var(--bs-border-color, #dee2e6);
+    background: var(--wx-border-color, #dee2e6);
     z-index: 0;
 }
 
 .wx-steps-item-active:not(:first-child)::before,
 .wx-steps-item-completed:not(:first-child)::before {
-    background: var(--bs-primary, #0d6efd);
+    background: var(--wx-primary, #0d6efd);
 }
 
 .wx-steps-marker {
@@ -43,16 +43,16 @@
     justify-content: center;
     font-size: 0.8rem;
     font-weight: 700;
-    background: var(--bs-secondary-bg, #e9ecef);
-    color: var(--bs-secondary-color, #6c757d);
-    border: 2px solid var(--bs-border-color, #dee2e6);
+    background: var(--wx-secondary-bg, #e9ecef);
+    color: var(--wx-secondary-color, #6c757d);
+    border: 2px solid var(--wx-border-color, #dee2e6);
 }
 
 .wx-steps-item-active .wx-steps-marker,
 .wx-steps-item-completed .wx-steps-marker {
-    background: var(--bs-primary, #0d6efd);
+    background: var(--wx-primary, #0d6efd);
     color: #fff;
-    border-color: var(--bs-primary, #0d6efd);
+    border-color: var(--wx-primary, #0d6efd);
 }
 
 .wx-steps-text {
@@ -63,18 +63,18 @@
     display: block;
     font-size: 0.85rem;
     font-weight: 600;
-    color: var(--bs-body-color, #212529);
+    color: var(--wx-body-color, #212529);
 }
 
 .wx-steps-item-pending .wx-steps-label {
-    color: var(--bs-secondary-color, #6c757d);
+    color: var(--wx-secondary-color, #6c757d);
     font-weight: 500;
 }
 
 .wx-steps-description {
     display: block;
     font-size: 0.75rem;
-    color: var(--bs-secondary-color, #6c757d);
+    color: var(--wx-secondary-color, #6c757d);
 }
 
 /* vertical layout */

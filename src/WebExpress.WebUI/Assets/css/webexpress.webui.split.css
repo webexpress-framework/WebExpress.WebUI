@@ -43,7 +43,7 @@
 
 .wx-split .wx-splitter:active,
 .wx-split .wx-splitter:focus {
-    background: var(--bs-secondary-color);
+    background: var(--wx-secondary-color);
 }
 
 .wx-split .wx-splitter-horizontal {
@@ -59,7 +59,7 @@
 /* Splitter indicator */
 .wx-split .wx-splitter-indicator {
     display: block;
-    background-color: var(--bs-secondary);
+    background-color: var(--wx-secondary);
     border-radius: 3px;
     opacity: 0.4;
 }

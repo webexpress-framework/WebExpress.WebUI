@@ -35,16 +35,16 @@
     font-weight: 600;
     margin: 0;
     padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--bs-border-color, #dee2e6);
-    color: var(--bs-heading-color, #495057);
+    border-bottom: 2px solid var(--wx-border-color, #dee2e6);
+    color: var(--wx-heading-color, #495057);
     background: transparent;
     /* dark theme adaptation */
     transition: background 0.15s, color 0.15s;
 }
 
 [data-bs-theme="dark"] .wx-kanban-column-header {
-    color: var(--bs-heading-color, #e7eaf0);
-    border-bottom-color: var(--bs-border-color, #495057);
+    color: var(--wx-heading-color, #e7eaf0);
+    border-bottom-color: var(--wx-border-color, #495057);
 }
 
 /* Swimlane title style */
@@ -52,7 +52,7 @@
     font-size: 1.15rem;
     font-weight: bold;
     margin: 0.5em 0 0.75em 0;
-    color: var(--bs-primary, #0d6efd);
+    color: var(--wx-primary, #0d6efd);
     border-bottom: 1px solid rgba(0,0,0,0.05);
     padding-bottom: 0.25rem;
     background: transparent;
@@ -60,7 +60,7 @@
 }
 
 [data-bs-theme="dark"] .wx-kanban-swimlane-title {
-    color: var(--bs-primary, #6ea8fe);
+    color: var(--wx-primary, #6ea8fe);
     border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 
@@ -72,7 +72,7 @@
     min-height: 150px;
     padding: 0.25rem;
     padding-bottom: 2rem;
-    background-color: var(--bs-gray-100, #f8f9fa);
+    background-color: var(--wx-gray-100, #f8f9fa);
     border-radius: 0.25rem;
     border: 2px dashed transparent;
     transition: background-color 0.2s, border 0.2s;
@@ -80,7 +80,7 @@
 }
 
 [data-bs-theme="dark"] .wx-kanban-cell {
-    background: var(--bs-gray-900, #393b40);
+    background: var(--wx-gray-900, #393b40);
     /* keep the resting border transparent (as in light mode); the dashed
        border is only shown on drag-hover via .wx-drag-over-empty below */
 }
@@ -108,12 +108,12 @@
     padding: 0.75rem 1rem;
     border-top: 4px solid var(--kanban-color, transparent);
     user-select: none;
-    color: var(--bs-body-color, #333);
+    color: var(--wx-body-color, #333);
 }
 
 [data-bs-theme="dark"] .wx-kanban-card {
-    background: var(--bs-gray-800, #23272b);
-    color: var(--bs-gray-100, #f8f9fa);
+    background: var(--wx-gray-800, #23272b);
+    color: var(--wx-gray-100, #f8f9fa);
     box-shadow: 0 2px 10px rgba(0,0,0,0.21);
 }
 
@@ -139,13 +139,13 @@
 
 .wx-kanban-card .card-header .card-icon {
     font-size: 1.1rem;
-    color: var(--bs-secondary, #6c757d);
+    color: var(--wx-secondary, #6c757d);
     display: flex;
     align-items: center;
 }
 
 [data-bs-theme="dark"] .wx-kanban-card .card-header .card-icon {
-    color: var(--bs-gray-400, #bdc8d6);
+    color: var(--wx-gray-400, #bdc8d6);
 }
 
 .wx-kanban-card .card-header .card-image {
@@ -158,13 +158,13 @@
     font-size: 1rem;
     font-weight: 600;
     margin: 0;
-    color: var(--bs-heading-color, #212529);
+    color: var(--wx-heading-color, #212529);
     flex-grow: 1;
     background: transparent;
 }
 
 [data-bs-theme="dark"] .wx-kanban-card .card-header .card-title {
-    color: var(--bs-heading-color, #fff);
+    color: var(--wx-heading-color, #fff);
 }
 
 /* assignee avatar, same look as the scrum backlog rows: an initials badge or,
@@ -180,7 +180,7 @@
     font-size: 0.62rem;
     font-weight: 700;
     color: #fff;
-    background: var(--bs-secondary, #6c757d);
+    background: var(--wx-secondary, #6c757d);
     object-fit: cover;
 }
 
@@ -192,7 +192,7 @@
 }
 
 [data-bs-theme="dark"] .wx-kanban-card .card-text {
-    color: var(--bs-gray-300, #abb4be);
+    color: var(--wx-gray-300, #abb4be);
 }
 
 /* optional footer: application-defined chips (priority, story points, …) */
@@ -216,13 +216,13 @@
     line-height: 1;
     padding: 0.2rem 0.5rem;
     border-radius: 999px;
-    background: var(--bs-tertiary-bg, #eef0f2);
-    color: var(--bs-secondary-color, #6c757d);
+    background: var(--wx-tertiary-bg, #eef0f2);
+    color: var(--wx-secondary-color, #6c757d);
 }
 
 [data-bs-theme="dark"] .wx-kanban-card .card-footer-chip {
-    background: var(--bs-gray-700, #33373d);
-    color: var(--bs-gray-300, #abb4be);
+    background: var(--wx-gray-700, #33373d);
+    color: var(--wx-gray-300, #abb4be);
 }
 
 .wx-kanban-card .card-footer-chip .wx-icon-img {
@@ -267,7 +267,7 @@
     margin-right: 0.25rem;
     vertical-align: middle;
     line-height: 1;
-    color: var(--bs-secondary-color, #6c757d);
+    color: var(--wx-secondary-color, #6c757d);
     visibility: hidden;
 }
 
@@ -285,14 +285,14 @@
     line-height: 1;
     font-size: 0.85em;
     cursor: pointer;
-    color: var(--bs-secondary-color, #6c757d);
+    color: var(--wx-secondary-color, #6c757d);
     visibility: hidden;
 }
 
 .wx-board-col-grip:hover,
 .wx-board-col-edit:hover,
 .wx-board-col-delete:hover {
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
 }
 
 .wx-board-col-header:hover .wx-board-col-grip,
@@ -308,11 +308,11 @@
 /* insertion indicator while a column is dragged over a header: a primary line
    on the edge where the column would land */
 .wx-board-col-header.wx-board-col-drop-before {
-    box-shadow: inset 3px 0 0 var(--bs-primary, #0d6efd);
+    box-shadow: inset 3px 0 0 var(--wx-primary, #0d6efd);
 }
 
 .wx-board-col-header.wx-board-col-drop-after {
-    box-shadow: inset -3px 0 0 var(--bs-primary, #0d6efd);
+    box-shadow: inset -3px 0 0 var(--wx-primary, #0d6efd);
 }
 
 /* short landing flash after a column reorder so the user sees where it went */
@@ -336,7 +336,7 @@
     color: inherit;
     max-width: 100%;
     padding: 0.05rem 0.3rem;
-    border: 1px solid var(--bs-border-color, #ced4da);
+    border: 1px solid var(--wx-border-color, #ced4da);
     border-radius: 0.2rem;
-    background: var(--bs-body-bg);
+    background: var(--wx-body-bg);
 }

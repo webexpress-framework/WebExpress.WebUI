@@ -21,7 +21,7 @@
     top: 16px;
     bottom: -1.1rem;
     width: 2px;
-    background: var(--bs-border-color, #dee2e6);
+    background: var(--wx-border-color, #dee2e6);
 }
 
 .wx-timeline-item:last-child::before {
@@ -36,8 +36,8 @@
     height: 14px;
     margin-top: 4px;
     border-radius: 9999px;
-    background: var(--bs-primary, #0d6efd);
-    box-shadow: 0 0 0 3px var(--bs-body-bg, #fff);
+    background: var(--wx-primary, #0d6efd);
+    box-shadow: 0 0 0 3px var(--wx-body-bg, #fff);
 }
 
 .wx-timeline-content {
@@ -54,18 +54,18 @@
 
 .wx-timeline-title {
     font-weight: 600;
-    color: var(--bs-body-color, #212529);
+    color: var(--wx-body-color, #212529);
 }
 
 .wx-timeline-time {
     flex: 0 0 auto;
     font-size: 0.8rem;
-    color: var(--bs-secondary-color, #6c757d);
+    color: var(--wx-secondary-color, #6c757d);
     white-space: nowrap;
 }
 
 .wx-timeline-body {
     margin-top: 0.15rem;
     font-size: 0.9rem;
-    color: var(--bs-secondary-color, #6c757d);
+    color: var(--wx-secondary-color, #6c757d);
 }

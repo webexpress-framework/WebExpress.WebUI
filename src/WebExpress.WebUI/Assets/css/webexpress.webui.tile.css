@@ -4,7 +4,7 @@
     flex-wrap: wrap;
     flex-direction: column;
     align-items: stretch;
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
     font-family: var(--bs-body-font-family);
     font-size: var(--bs-body-font-size);
     line-height: var(--bs-body-line-height);
@@ -21,7 +21,7 @@
 
 /* Tile card */
 .wx-tile-container > .wx-tile-card {
-    border: 1px solid var(--bs-border-color);
+    border: 1px solid var(--wx-border-color);
     border-radius: var(--bs-border-radius);
     box-shadow: 0 2px 6px rgba(0,0,0,.05);
     width: 200px;
@@ -37,7 +37,7 @@
 }
 
 .wx-tile-card:hover {
-    border-color: var(--bs-border-color-translucent, var(--bs-border-color));
+    border-color: var(--wx-border-color-translucent, var(--wx-border-color));
 }
 
 .wx-tile-card:active {
@@ -59,7 +59,7 @@
     line-height: 1;
     cursor: pointer;
     padding: 2px 6px;
-    color: var(--bs-secondary);
+    color: var(--wx-secondary);
 }
 
 .wx-tile-card:hover .wx-tile-remove-btn,
@@ -70,12 +70,12 @@
 
 .wx-tile-card .wx-tile-remove-btn:hover,
 .wx-tile-card .wx-tile-remove-btn:focus {
-    color: var(--bs-danger);
+    color: var(--wx-danger);
     outline: none;
 }
 
 .wx-tile-card .wx-tile-remove-btn:focus-visible {
-    outline: 2px solid var(--bs-danger);
+    outline: 2px solid var(--wx-danger);
     outline-offset: 2px;
     border-radius: 4px;
 }
@@ -109,7 +109,7 @@
 
 .wx-tile-card.wx-dragging {
     opacity: .55;
-    border-color: var(--bs-secondary);
+    border-color: var(--wx-secondary);
     cursor: grabbing;
 }
 
@@ -141,10 +141,10 @@
     opacity: 50%;
     background: repeating-linear-gradient(
         45deg,
-        var(--bs-secondary-bg),
-        var(--bs-secondary-bg) 6px,
-        var(--bs-tertiary-bg) 6px,
-        var(--bs-tertiary-bg) 12px
+        var(--wx-secondary-bg),
+        var(--wx-secondary-bg) 6px,
+        var(--wx-tertiary-bg) 6px,
+        var(--wx-tertiary-bg) 12px
     );
 }
 
@@ -156,10 +156,10 @@
     opacity: 50%;
     background: repeating-linear-gradient(
         45deg,
-        var(--bs-secondary-bg),
-        var(--bs-secondary-bg) 6px,
-        var(--bs-tertiary-bg) 6px,
-        var(--bs-tertiary-bg) 12px
+        var(--wx-secondary-bg),
+        var(--wx-secondary-bg) 6px,
+        var(--wx-tertiary-bg) 6px,
+        var(--wx-tertiary-bg) 12px
     );
 }
 
@@ -179,12 +179,12 @@
 
 /* start/end drop zones */
 .wx-drop-target {
-    outline: 2px dashed var(--bs-success);
+    outline: 2px dashed var(--wx-success);
 }
 
 /* Focus accessibility */
 .wx-tile-card:focus-visible {
-    outline: 2px solid var(--bs-primary);
+    outline: 2px solid var(--wx-primary);
     outline-offset: 2px;
     z-index: 4;
 }
@@ -201,7 +201,7 @@
 
 .wx-tile-picker {
     display: block;
-    background: var(--bs-body-bg);
+    background: var(--wx-body-bg);
     padding: 1.2rem 1.5rem;
     min-height: 180px;
 }
@@ -218,55 +218,55 @@
 }
 
 @keyframes wx-tile-flash {
-    0% { box-shadow: 0 0 0 0 var(--bs-warning); }
-    50% { box-shadow: 0 0 10px 5px var(--bs-warning); }
-    100% { box-shadow: 0 0 0 0 var(--bs-warning); }
+    0% { box-shadow: 0 0 0 0 var(--wx-warning); }
+    50% { box-shadow: 0 0 10px 5px var(--wx-warning); }
+    100% { box-shadow: 0 0 0 0 var(--wx-warning); }
 }
 
 /* Color variants (applied to .wx-tile-card) */
 .wx-tile-primary {
-    background: var(--bs-primary);
-    color: var(--bs-light);
+    background: var(--wx-primary);
+    color: var(--wx-light);
 }
 
 .wx-tile-secondary {
-    background: var(--bs-secondary);
-    color: var(--bs-light);
+    background: var(--wx-secondary);
+    color: var(--wx-light);
 }
 
 .wx-tile-success {
-    background: var(--bs-success);
-    color: var(--bs-light);
+    background: var(--wx-success);
+    color: var(--wx-light);
 }
 
 .wx-tile-info {
-    background: var(--bs-info);
-    color: var(--bs-dark);
+    background: var(--wx-info);
+    color: var(--wx-dark);
 }
 
 .wx-tile-warning {
-    background: var(--bs-warning);
-    color: var(--bs-dark);
+    background: var(--wx-warning);
+    color: var(--wx-dark);
 }
 
 .wx-tile-danger {
-    background: var(--bs-danger);
-    color: var(--bs-light);
+    background: var(--wx-danger);
+    color: var(--wx-light);
 }
 
 .wx-tile-light {
-    background: var(--bs-light);
-    color: var(--bs-body-color);
+    background: var(--wx-light);
+    color: var(--wx-body-color);
 }
 
 .wx-tile-dark {
-    background: var(--bs-dark);
-    color: var(--bs-light);
+    background: var(--wx-dark);
+    color: var(--wx-light);
 }
 
 .wx-tile-white {
-    background: var(--bs-white);
-    color: var(--bs-body-color);
+    background: var(--wx-white);
+    color: var(--wx-body-color);
 }
 
 .wx-tile-transparent {

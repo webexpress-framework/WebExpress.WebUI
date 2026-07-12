@@ -11,7 +11,7 @@
 .wx-tree {
     list-style-type: none;
     padding-left: 0;
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
 }
 
     .wx-tree > ul {
@@ -74,17 +74,17 @@
     padding-bottom: 0.2em;
     background: 0 0;
     border: 0;
-    color: var(--bs-link-color);
+    color: var(--wx-link-color);
     text-decoration: none;
 }
 
 .wx-tree-label-container > div:hover {
-    color: var(--bs-link-hover-color);
+    color: var(--wx-link-hover-color);
 }
 
 .wx-tree-label-container.active {
-    color: var(--bs-light);
-    background-color: var(--bs-primary);
+    color: var(--wx-light);
+    background-color: var(--wx-primary);
     border-radius: var(--bs-border-radius);
 }
 
@@ -101,7 +101,7 @@
 .wx-tree-drag-indicator {
     position: absolute;
     height: 2px;
-    border-bottom: 2px dashed var(--bs-success);
+    border-bottom: 2px dashed var(--wx-success);
     z-index: 1000;
     pointer-events: none; /* prevent interaction with the indicator */
 }

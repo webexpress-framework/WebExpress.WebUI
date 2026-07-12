@@ -1,6 +1,6 @@
 /* Base Upload Control Styling */
 .wx-upload {
-    border: 2px dashed var(--bs-border-color);
+    border: 2px dashed var(--wx-border-color);
     border-radius: 0.5rem;
     padding: 1.5rem;
     text-align: center;
@@ -23,18 +23,18 @@
     padding-left: 0.3em;
     padding-right: 0.3em;
     padding-bottom: 0.1em;
-    background-color: var(--bs-secondary);
-    color: var(--bs-body-bg);
+    background-color: var(--wx-secondary);
+    color: var(--wx-body-bg);
 }
 
 .wx-upload-file-preview > button {
     border: 0;
     background: none;
-    color: var(--bs-body-bg);
+    color: var(--wx-body-bg);
 }
 
 .wx-upload-file-preview > button:hover {
-    color: var(--bs-secondary-color);
+    color: var(--wx-secondary-color);
 }
 
 /* Dropzone Styling */
@@ -42,14 +42,14 @@
     cursor: pointer;
     padding: 1rem;
     font-size: 1rem;
-    color: var(--bs-secondary-color);
+    color: var(--wx-secondary-color);
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .wx-upload-dropzone.hover {
-    background-color: var(--bs-primary-bg-subtle);
-    color: var(--bs-primary);
-    border-color: var(--bs-primary);
+    background-color: var(--wx-primary-bg-subtle);
+    color: var(--wx-primary);
+    border-color: var(--wx-primary);
 }
 
 /* Progress Bar Container */
@@ -57,11 +57,11 @@
     margin-bottom: 0.75rem;
     text-align: left;
     font-size: 0.875rem;
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
 }
 
 .wx-upload-progress .bar {
-    background-color: var(--bs-secondary-bg);
+    background-color: var(--wx-secondary-bg);
     border-radius: 0.25rem;
     overflow: hidden;
     height: 0.5rem;
@@ -69,7 +69,7 @@
 }
 
 .wx-upload-progress .fill {
-    background-color: var(--bs-primary);
+    background-color: var(--wx-primary);
     height: 100%;
     width: 0%;
     transition: width 0.4s ease;
@@ -77,33 +77,33 @@
 
 /* Success/Error States */
 .wx-upload-progress.success .fill {
-    background-color: var(--bs-success);
+    background-color: var(--wx-success);
 }
 
 .wx-upload-progress.error .fill {
-    background-color: var(--bs-danger);
+    background-color: var(--wx-danger);
 }
 
 /* Dark Mode Support */
 [data-bs-theme="dark"] .wx-upload {
-    background-color: var(--bs-dark-bg-subtle);
-    color: var(--bs-light);
-    border-color: var(--bs-gray-700);
+    background-color: var(--wx-dark-bg-subtle);
+    color: var(--wx-light);
+    border-color: var(--wx-gray-700);
 }
 
 [data-bs-theme="dark"] .wx-upload-dropzone {
-    color: var(--bs-light);
+    color: var(--wx-light);
 }
 
 [data-bs-theme="dark"] .wx-upload-dropzone.hover {
-    background-color: var(--bs-primary-bg-subtle);
-    color: var(--bs-primary);
+    background-color: var(--wx-primary-bg-subtle);
+    color: var(--wx-primary);
 }
 
 [data-bs-theme="dark"] .wx-upload-progress .bar {
-    background-color: var(--bs-gray-700);
+    background-color: var(--wx-gray-700);
 }
 
 [data-bs-theme="dark"] .wx-upload-progress .fill {
-    background-color: var(--bs-primary);
+    background-color: var(--wx-primary);
 }

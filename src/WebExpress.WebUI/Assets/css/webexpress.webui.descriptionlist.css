@@ -6,7 +6,7 @@
 
 .wx-description-list-item {
     padding: 0.5rem 0;
-    border-bottom: 1px dashed var(--bs-border-color-translucent, #e9ecef);
+    border-bottom: 1px dashed var(--wx-border-color-translucent, #e9ecef);
 }
 
 .wx-description-list-item:last-child {
@@ -17,12 +17,12 @@
     margin: 0;
     font-size: 0.8rem;
     font-weight: 600;
-    color: var(--bs-secondary-color, #6c757d);
+    color: var(--wx-secondary-color, #6c757d);
 }
 
 .wx-description-list-description {
     margin: 0;
-    color: var(--bs-body-color, #212529);
+    color: var(--wx-body-color, #212529);
 }
 
 /* horizontal layout: term beside description */

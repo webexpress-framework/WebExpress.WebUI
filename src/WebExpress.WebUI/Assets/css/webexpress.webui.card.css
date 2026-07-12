@@ -15,13 +15,13 @@
     --wx-card-title-spacer-y: 0.5rem;
     --wx-card-cap-padding-y: 0.5rem;
     --wx-card-cap-padding-x: 1rem;
-    --wx-card-cap-bg: rgba(var(--bs-body-color-rgb), 0.03);
+    --wx-card-cap-bg: rgba(var(--wx-body-color-rgb), 0.03);
     --wx-card-border-width: var(--bs-border-width);
-    --wx-card-border-color: var(--bs-border-color-translucent);
+    --wx-card-border-color: var(--wx-border-color-translucent);
     --wx-card-border-radius: var(--bs-border-radius);
     --wx-card-inner-radius: calc(var(--bs-border-radius) - var(--bs-border-width));
-    --wx-card-bg: var(--bs-body-bg);
-    --wx-card-color: var(--bs-body-color);
+    --wx-card-bg: var(--wx-body-bg);
+    --wx-card-color: var(--wx-body-color);
 
     position: relative;
     display: flex;
@@ -95,6 +95,6 @@
 
 /* dark theme: keep cap and body backgrounds in sync with the body palette */
 [data-bs-theme="dark"] .wx-card {
-    --wx-card-bg: var(--bs-dark);
+    --wx-card-bg: var(--wx-dark);
     --wx-card-cap-bg: rgba(255, 255, 255, 0.05);
 }

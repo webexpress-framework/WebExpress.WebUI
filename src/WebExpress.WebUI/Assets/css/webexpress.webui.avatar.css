@@ -12,7 +12,7 @@
 }
 
 .wx-avatar:focus {
-    outline: 2px solid var(--bs-primary, #0d6efd);
+    outline: 2px solid var(--wx-primary, #0d6efd);
     outline-offset: 2px;
 }
 
@@ -63,7 +63,7 @@
     position: absolute;
     bottom: 2px;
     right: 2px;
-    background: var(--bs-success, #198754);
+    background: var(--wx-success, #198754);
     color: #fff;
     border-radius: 9999px;
     font-size: 0.65rem;
@@ -81,7 +81,7 @@
 
 .wx-avatar .wx-avatar-name {
     font-weight: 600;
-    color: var(--bs-body-color, #212529);
+    color: var(--wx-body-color, #212529);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -89,7 +89,7 @@
 
 .wx-avatar .wx-avatar-subtitle {
     font-size: 0.875rem;
-    color: var(--bs-secondary-color, #6c757d);
+    color: var(--wx-secondary-color, #6c757d);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -103,7 +103,7 @@
     min-width: 220px;
     max-width: 320px;
     background: #fff;
-    color: var(--bs-body-color, #212529);
+    color: var(--wx-body-color, #212529);
     border: 1px solid rgba(0,0,0,0.08);
     border-radius: 0.5rem;
     box-shadow: 0 10px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
@@ -133,7 +133,7 @@
 
 /* default fallback text styling when no info child is provided */
 .wx-avatar .wx-avatar-card-empty {
-    color: var(--bs-secondary-color, #6c757d);
+    color: var(--wx-secondary-color, #6c757d);
 }
 
 /* developer-provided info content container hint (optional) */
@@ -156,7 +156,7 @@
     user-select: none;
 }
 .wx-upload-avatar .wx-upload-avatar-dropzone.hover {
-    outline: 2px dashed var(--bs-success, #198754);
+    outline: 2px dashed var(--wx-success, #198754);
     border-radius: 0.5rem;
     background: repeating-linear-gradient(
         45deg,
@@ -191,7 +191,7 @@
 
 .wx-upload-avatar .wx-upload-avatar-zoom-label {
     font-size: 0.875rem;
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
 }
 
 .wx-upload-avatar .wx-upload-avatar-zoom {

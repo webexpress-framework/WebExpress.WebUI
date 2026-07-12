@@ -16,7 +16,7 @@
 
 /* styling for the content area to match bootstrap border radiuses */
 .wx-tab-content {
-    background-color: var(--bs-body-bg);
+    background-color: var(--wx-body-bg);
     border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
 }
 
@@ -33,11 +33,11 @@
 
 /* hover effect for the close button to indicate destructiveness */
 .wx-form-designer-tabs .nav-link span:hover {
-    color: var(--bs-danger) !important;
+    color: var(--wx-danger) !important;
 }
 
 /* dark theme adjustments if necessary, mostly handled by standard bootstrap variables */
 [data-bs-theme="dark"] .wx-tab-content {
-    background-color: var(--bs-dark);
-    border-color: var(--bs-border-color);
+    background-color: var(--wx-dark);
+    border-color: var(--wx-border-color);
 }

@@ -27,7 +27,7 @@
     font-weight: bold;
     font-size: clamp(0.75em, 0.9vw, 1em);
     padding: 0em clamp(0.75em, 0.9vw, 1em) clamp(0.25em, 0.3vw, 0.5em) clamp(0.75em, 0.9vw, 1em);
-    color: var(--bs-secondary);
+    color: var(--wx-secondary);
     letter-spacing: 0.03em;
     text-transform: uppercase;
 }
@@ -59,11 +59,11 @@
 }
 
 .wx-sidebar .wx-sidebar-link:hover {
-    background: var(--bs-secondary-bg);
+    background: var(--wx-secondary-bg);
 }
 
 .wx-sidebar .wx-sidebar-link.active {
-    background-color: var(--bs-primary);
+    background-color: var(--wx-primary);
     color: white;
 }
 
@@ -79,7 +79,7 @@
 }
 
 .wx-sidebar .wx-sidebar-link > .btn {
-    color: var(--bs-secondary);
+    color: var(--wx-secondary);
     padding: 0 clamp(0.2em, 0.3vw, 0.5em);
     border: 0;
     opacity: 0;
@@ -93,7 +93,7 @@
 /* removable button for links */
 .wx-sidebar .wx-sidebar-link > .btn:hover,
 .wx-sidebar .wx-sidebar-link > .btn:focus {
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
 }
 
 /* trailing "..." options menu; the dropdown host is not a direct .btn child of
@@ -131,7 +131,7 @@
 }
 
 .wx-sidebar .wx-sidebar-panel.overlay:hover {
-    background: var(--bs-secondary-bg);
+    background: var(--wx-secondary-bg);
 }
 
 /* panel content inside sidebar */
@@ -142,8 +142,8 @@
     min-width: clamp(10em, 15vw, 20em);
     max-width: clamp(20em, 22vw, 25em);
     max-height: clamp(50%, 50vh, 75%);
-    background: var(--bs-body-bg);
-    color: var(--bs-body-color);
+    background: var(--wx-body-bg);
+    color: var(--wx-body-color);
     box-shadow: 0 2px 12px rgba(0,0,0,0.18);
     border-radius: 4px;
     z-index: 1000;
@@ -198,7 +198,7 @@
     top: 0.25em;
     right: 0.25em;
     background: transparent;
-    color: var(--bs-secondary);
+    color: var(--wx-secondary);
     border: none;
     cursor: pointer;
     display: none;
@@ -224,8 +224,8 @@
     line-height: 1;
     padding: 0.35em 0.6em;
     border-radius: 999px;
-    background-color: var(--bs-secondary-bg);
-    color: var(--bs-secondary-color);
+    background-color: var(--wx-secondary-bg);
+    color: var(--wx-secondary-color);
 }
 
 .wx-sidebar .wx-sidebar-link.active .wx-sidebar-badge {
@@ -255,7 +255,7 @@
     flex: 0 0 auto;
     border: 0;
     background: none;
-    color: var(--bs-secondary);
+    color: var(--wx-secondary);
     padding: 0 clamp(0.2em, 0.3vw, 0.5em);
     transition: transform 0.15s ease;
 }
@@ -269,7 +269,7 @@
 
 .wx-sidebar .wx-sidebar-caret:hover,
 .wx-sidebar .wx-sidebar-caret:focus {
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
 }
 
 .wx-sidebar .wx-sidebar-group.wx-expanded > .wx-sidebar-link > .wx-sidebar-caret {
@@ -287,7 +287,7 @@
     box-sizing: content-box;
     width: 0.625em;
     padding: 0 clamp(0.2em, 0.3vw, 0.5em);
-    color: var(--bs-secondary);
+    color: var(--wx-secondary);
 }
 
 .wx-sidebar .wx-sidebar-bullet::before {

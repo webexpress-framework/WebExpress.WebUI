@@ -27,19 +27,19 @@
     padding: 4px 8px;
     border: 1px solid #ced4da;
     border-radius: 4px;
-    color: var(--bs-secondary);
+    color: var(--wx-secondary);
     background: #fff;
     cursor: pointer;
 }
 
 [data-bs-theme="dark"] .wx-graph-fit-button {
-    background: var(--bs-dark);
-    border: 1px solid var(--bs-dark-border-subtle);
+    background: var(--wx-dark);
+    border: 1px solid var(--wx-dark-border-subtle);
 }
 
 .wx-graph-svg {
-    background: var(--bs-light);
-    border: 1px solid var(--bs-light-border-subtle);
+    background: var(--wx-light);
+    border: 1px solid var(--wx-light-border-subtle);
     border-radius: 4px;
     touch-action: none;
     width: 100%;
@@ -49,8 +49,8 @@
 }
 
 [data-bs-theme="dark"] .wx-graph-svg {
-    background: var(--bs-dark);
-    border: 1px solid var(--bs-dark-border-subtle);
+    background: var(--wx-dark);
+    border: 1px solid var(--wx-dark-border-subtle);
 }
 
 /* --- Graph Elements: Edges --- */
@@ -62,7 +62,7 @@
 }
 
 .wx-graph-edge:hover {
-    stroke: var(--bs-primary);
+    stroke: var(--wx-primary);
     cursor: pointer;
 }
 
@@ -71,64 +71,64 @@
 }
 
 .wx-graph-edge-label {
-    fill: var(--bs-body-color);
+    fill: var(--wx-body-color);
     stroke-width: 0;
     pointer-events: none;
 }
 
 .wx-graph-edge-arrow path {
-    fill: var(--bs-secondary);
+    fill: var(--wx-secondary);
 }
 
 /* --- Graph Elements: Nodes --- */
 .wx-graph-node-rect {
-    stroke: var(--bs-secondary);
+    stroke: var(--wx-secondary);
     stroke-width: 1;
     filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
     transition: stroke-width 0.1s ease, filter 0.1s ease;
 }
 
 [data-bs-theme="dark"] .wx-graph-node-rect {
-    stroke: var(--bs-light);
+    stroke: var(--wx-light);
 }
 
 .wx-graph-node-rect:hover {
-    stroke: var(--bs-primary);
+    stroke: var(--wx-primary);
     stroke-width: 3;
     cursor: grab;
 }
 
 .wx-graph-node-rect:active {
-    stroke: var(--bs-success);
+    stroke: var(--wx-success);
     stroke-width: 3;
     cursor: grabbing;
 }
 
 .wx-graph-node-circle {
-    stroke: var(--bs-secondary);
+    stroke: var(--wx-secondary);
     stroke-width: 1;
     filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
     transition: stroke-width 0.1s ease, filter 0.1s ease;
 }
 
 [data-bs-theme="dark"] .wx-graph-node-circle {
-    stroke: var(--bs-light);
+    stroke: var(--wx-light);
 }
 
 .wx-graph-node-circle:hover {
-    stroke: var(--bs-primary);
+    stroke: var(--wx-primary);
     stroke-width: 3;
     cursor: grab;
 }
 
 .wx-graph-node-circle:active {
-    stroke: var(--bs-success);
+    stroke: var(--wx-success);
     stroke-width: 3;
     cursor: grabbing;
 }
 
 .wx-graph-node-label {
-    fill: var(--bs-body-color);
+    fill: var(--wx-body-color);
     stroke-width: 0;
     pointer-events: none;
 }
@@ -182,60 +182,60 @@
 }
 
 /* Fill colors */
-.wx-graph-viewer .bg-primary { fill: var(--bs-primary); }
-.wx-graph-viewer .bg-secondary { fill: var(--bs-secondary); }
-.wx-graph-viewer .bg-success { fill: var(--bs-success); }
-.wx-graph-viewer .bg-info { fill: var(--bs-info); }
-.wx-graph-viewer .bg-warning { fill: var(--bs-warning); }
-.wx-graph-viewer .bg-danger { fill: var(--bs-danger); }
-.wx-graph-viewer .bg-light { fill: var(--bs-light); }
-.wx-graph-viewer .bg-dark { fill: var(--bs-dark); }
-.wx-graph-viewer .bg-body { fill: var(--bs-body-bg); }
-.wx-graph-viewer .bg-white { fill: var(--bs-white); }
+.wx-graph-viewer .bg-primary { fill: var(--wx-primary); }
+.wx-graph-viewer .bg-secondary { fill: var(--wx-secondary); }
+.wx-graph-viewer .bg-success { fill: var(--wx-success); }
+.wx-graph-viewer .bg-info { fill: var(--wx-info); }
+.wx-graph-viewer .bg-warning { fill: var(--wx-warning); }
+.wx-graph-viewer .bg-danger { fill: var(--wx-danger); }
+.wx-graph-viewer .bg-light { fill: var(--wx-light); }
+.wx-graph-viewer .bg-dark { fill: var(--wx-dark); }
+.wx-graph-viewer .bg-body { fill: var(--wx-body-bg); }
+.wx-graph-viewer .bg-white { fill: var(--wx-white); }
 
 .wx-graph-viewer .primary {
-    stroke:var(--bs-primary);
-    fill: var(--bs-primary);
+    stroke:var(--wx-primary);
+    fill: var(--wx-primary);
 }
 
 .wx-graph-viewer .secondary {
-    stroke: var(--bs-secondary);
-    fill: var(--bs-secondary);
+    stroke: var(--wx-secondary);
+    fill: var(--wx-secondary);
 }
 
 .wx-graph-viewer .success {
-    stroke: var(--bs-success);
-    fill: var(--bs-success);
+    stroke: var(--wx-success);
+    fill: var(--wx-success);
 }
 
 .wx-graph-viewer .info {
-    stroke: var(--bs-info);
-    fill: var(--bs-info);
+    stroke: var(--wx-info);
+    fill: var(--wx-info);
 }
 
 .wx-graph-viewer .warning {
-    stroke: var(--bs-warning);
-    fill: var(--bs-warning);
+    stroke: var(--wx-warning);
+    fill: var(--wx-warning);
 }
 
 .wx-graph-viewer .danger {
-    stroke: var(--bs-danger);
-    fill: var(--bs-danger);
+    stroke: var(--wx-danger);
+    fill: var(--wx-danger);
 }
 
 .wx-graph-viewer .light {
-    stroke: var(--bs-light);
-    fill: var(--bs-light);
+    stroke: var(--wx-light);
+    fill: var(--wx-light);
 }
 
 .wx-graph-viewer .dark {
-    stroke: var(--bs-dark);
-    fill: var(--bs-dark);
+    stroke: var(--wx-dark);
+    fill: var(--wx-dark);
 }
 
 .wx-graph-viewer .white {
-    stroke: var(--bs-white);
-    fill: var(--bs-white);
+    stroke: var(--wx-white);
+    fill: var(--wx-white);
 }
 
 .wx-graph-editor {

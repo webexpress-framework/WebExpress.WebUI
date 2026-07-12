@@ -33,8 +33,8 @@
     font-weight: 600;
     margin: 0;
     padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--bs-border-color, #dee2e6);
-    color: var(--bs-heading-color, #495057);
+    border-bottom: 2px solid var(--wx-border-color, #dee2e6);
+    color: var(--wx-heading-color, #495057);
 }
 
 /* A vertical column (lane) that holds the widgets */
@@ -123,13 +123,13 @@
 }
 
 .wx-remove-widget i {
-    color: var(--bs-secondary, #adb5bd);
+    color: var(--wx-secondary, #adb5bd);
     transition: color 0.2s;
 }
 
 .wx-remove-widget:hover i,
 .wx-remove-widget:focus i {
-    color: var(--bs-danger, #dc3545);
+    color: var(--wx-danger, #dc3545);
 }
 
 /* ---- editable / movable / deletable column headers ----
@@ -142,7 +142,7 @@
     margin-right: 0.25rem;
     vertical-align: middle;
     line-height: 1;
-    color: var(--bs-secondary-color, #6c757d);
+    color: var(--wx-secondary-color, #6c757d);
     visibility: hidden;
 }
 
@@ -160,14 +160,14 @@
     line-height: 1;
     font-size: 0.85em;
     cursor: pointer;
-    color: var(--bs-secondary-color, #6c757d);
+    color: var(--wx-secondary-color, #6c757d);
     visibility: hidden;
 }
 
 .wx-board-col-grip:hover,
 .wx-board-col-edit:hover,
 .wx-board-col-delete:hover {
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
 }
 
 .wx-board-col-header:hover .wx-board-col-grip,
@@ -185,7 +185,7 @@
     color: inherit;
     max-width: 100%;
     padding: 0.05rem 0.3rem;
-    border: 1px solid var(--bs-border-color, #ced4da);
+    border: 1px solid var(--wx-border-color, #ced4da);
     border-radius: 0.2rem;
-    background: var(--bs-body-bg);
+    background: var(--wx-body-bg);
 }
