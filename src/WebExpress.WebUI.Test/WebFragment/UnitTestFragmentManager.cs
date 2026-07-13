@@ -1,4 +1,4 @@
-using WebExpress.WebCore.WebScope;
+﻿using WebExpress.WebCore.WebScope;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebPage;
 
@@ -835,6 +835,204 @@ namespace WebExpress.WebUI.Test.WebFragment
 
             // act
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlTab));
+
+            // validation
+            Assert.NotNull(html);
+            Assert.NotEmpty(html);
+            AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
+        }
+
+        /// <summary>
+        /// Test the render function of the fragment manager for empty-state control items.
+        /// </summary>
+        [Fact]
+        public void Render_TestSectionFragmentControlEmptyState()
+        {
+            // arrange
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolemptystate"" class=""wx-empty-state""><span class=""wx-empty-state-title"">TestFragmentControlEmptyState</span></div>";
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+
+            // act
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlEmptyState));
+
+            // validation
+            Assert.NotNull(html);
+            Assert.NotEmpty(html);
+            AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
+        }
+
+        /// <summary>
+        /// Test the render function of the fragment manager for carousel control items.
+        /// </summary>
+        [Fact]
+        public void Render_TestSectionFragmentControlCarousel()
+        {
+            // arrange
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolcarousel"" class=""carousel slide""*>*</div>";
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+
+            // act
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlCarousel));
+
+            // validation
+            Assert.NotNull(html);
+            Assert.NotEmpty(html);
+            AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
+        }
+
+        /// <summary>
+        /// Test the render function of the fragment manager for chart control items.
+        /// </summary>
+        [Fact]
+        public void Render_TestSectionFragmentControlChart()
+        {
+            // arrange
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolchart"" class=""wx-webui-chart""*></div>";
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+
+            // act
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlChart));
+
+            // validation
+            Assert.NotNull(html);
+            Assert.NotEmpty(html);
+            AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
+        }
+
+        /// <summary>
+        /// Test the render function of the fragment manager for code control items.
+        /// </summary>
+        [Fact]
+        public void Render_TestSectionFragmentControlCode()
+        {
+            // arrange
+            var expected = @"<pre id=""webexpress-webui-test-testfragmentcontrolcode"" class=""wx-webui-code""*>*</pre>";
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+
+            // act
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlCode));
+
+            // validation
+            Assert.NotNull(html);
+            Assert.NotEmpty(html);
+            AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
+        }
+
+        /// <summary>
+        /// Test the render function of the fragment manager for raw html control items.
+        /// </summary>
+        [Fact]
+        public void Render_TestSectionFragmentControlHtml()
+        {
+            // arrange
+            var expected = @"<b>TestFragmentControlHtml</b>";
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+
+            // act
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlHtml));
+
+            // validation
+            Assert.NotNull(html);
+            Assert.NotEmpty(html);
+            AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
+        }
+
+        /// <summary>
+        /// Test the render function of the fragment manager for accordion control items.
+        /// </summary>
+        [Fact]
+        public void Render_TestSectionFragmentControlAccordion()
+        {
+            // arrange
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolaccordion"" class=""accordion""></div>";
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+
+            // act
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlAccordion));
+
+            // validation
+            Assert.NotNull(html);
+            Assert.NotEmpty(html);
+            AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
+        }
+
+        /// <summary>
+        /// Test the render function of the fragment manager for stat control items.
+        /// </summary>
+        [Fact]
+        public void Render_TestSectionFragmentControlStat()
+        {
+            // arrange
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolstat"" class=""wx-stat""><div class=""wx-stat-body""><span class=""wx-stat-label"">TestFragmentControlStat</span><span class=""wx-stat-value"">42</span></div></div>";
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+
+            // act
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlStat));
+
+            // validation
+            Assert.NotNull(html);
+            Assert.NotEmpty(html);
+            AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
+        }
+
+        /// <summary>
+        /// Test the render function of the fragment manager for skeleton control items.
+        /// </summary>
+        [Fact]
+        public void Render_TestSectionFragmentControlSkeleton()
+        {
+            // arrange
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolskeleton"" *><span class=""wx-skeleton-line""></span><span class=""wx-skeleton-line""></span><span class=""wx-skeleton-line""></span></div>";
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+
+            // act
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlSkeleton));
+
+            // validation
+            Assert.NotNull(html);
+            Assert.NotEmpty(html);
+            AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
+        }
+
+        /// <summary>
+        /// Test the render function of the fragment manager for heat map control items.
+        /// </summary>
+        [Fact]
+        public void Render_TestSectionFragmentControlHeatMap()
+        {
+            // arrange
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolheatmap"" class=""wx-webui-heatmap"" data-values=""1,2;3,4""></div>";
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+
+            // act
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlHeatMap));
 
             // validation
             Assert.NotNull(html);
