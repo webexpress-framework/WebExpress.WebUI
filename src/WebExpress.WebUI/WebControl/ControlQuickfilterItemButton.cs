@@ -2,7 +2,6 @@ using System;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
-using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
@@ -19,7 +18,9 @@ namespace WebExpress.WebUI.WebControl
         public string Id { get; private set; }
 
         /// <summary>
-        /// Gets or sets the color.
+        /// Gets or sets the chip color. A system color is emitted as its button
+        /// css class, a user-defined color as a raw css color value; the client
+        /// keeps the outline-to-filled chip behavior in that hue.
         /// </summary>
         public Func<IRenderControlContext, PropertyColorButton> BackgroundColor { get; set; }
 
@@ -46,9 +47,19 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
-        /// Gets or sets the image uri.
+        /// Gets or sets the badge text shown at the trailing edge of the button,
+        /// for example the number of matching entries. When null or empty no
+        /// badge is rendered, so a filter without a count stays visually
+        /// unchanged.
         /// </summary>
-        public Func<IRenderControlContext, IUri> Image { get; set; }
+        public Func<IRenderControlContext, string> Badge { get; set; }
+
+        /// <summary>
+        /// Gets or sets the badge background color. The resolved css class and
+        /// inline style are emitted alongside the badge text so the client can
+        /// style the badge consistently with the framework badge colors.
+        /// </summary>
+        public Func<IRenderControlContext, PropertyColorBackgroundBadge> BadgeColor { get; set; }
 
         /// <summary>
         /// Gets or sets the activation status of the button.
@@ -71,7 +82,8 @@ namespace WebExpress.WebUI.WebControl
         {
             var text = Text?.Invoke(renderContext);
             var icon = Icon?.Invoke(renderContext);
-            var image = Image?.Invoke(renderContext);
+            var badge = Badge?.Invoke(renderContext);
+            var badgeColor = BadgeColor?.Invoke(renderContext);
             var backgroundColor = BackgroundColor?.Invoke(renderContext);
             var active = Active?.Invoke(renderContext) ?? TypeActive.None;
             var primaryAction = PrimaryAction?.Invoke(renderContext);
@@ -85,8 +97,12 @@ namespace WebExpress.WebUI.WebControl
                 Disabled = active == TypeActive.Disabled
             }
                 .AddUserAttribute("data-icon", (icon as Icon)?.Class)
-                .AddUserAttribute("data-image", image?.ToString() ?? (icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-color", backgroundColor?.SystemColor.ToString());
+                .AddUserAttribute("data-image", (icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-color", backgroundColor?.ToClass())
+                .AddUserAttribute("data-color-value", backgroundColor?.UserColor)
+                .AddUserAttribute("data-badge", I18N.Translate(renderContext, badge))
+                .AddUserAttribute("data-badge-color", badgeColor?.ToClass())
+                .AddUserAttribute("data-badge-style", badgeColor?.ToStyle());
 
             primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
             secondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);

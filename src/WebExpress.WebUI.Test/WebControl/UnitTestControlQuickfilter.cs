@@ -1,5 +1,6 @@
 ﻿using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
+using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.Test.WebControl
@@ -50,6 +51,101 @@ namespace WebExpress.WebUI.Test.WebControl
             // validation
             var html = control.Render(context, visualTree);
             var expected = @"<div class=""wx-webui-quickfilter"" role=""filter""><button type=""button"" class=""wx-quickfilter-button""></button></div>";
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests adding a button with an icon and a badge, whose visuals are
+        /// emitted as data attributes the client picks up when rebuilding the
+        /// chip.
+        /// </summary>
+        [Fact]
+        public void AddButtonWithIconAndBadge()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlQuickfilter(null);
+
+            // act
+            control.Add(new ControlQuickfilterItemButton("status")
+            {
+                Text = _ => "Status",
+                Icon = _ => new IconHome(),
+                Badge = _ => "42",
+                BadgeColor = _ => new PropertyColorBackgroundBadge(TypeColorBackgroundBadge.Danger),
+                PrimaryAction = _ => new ActionFilter()
+            });
+
+            // validation
+            var html = control.Render(context, visualTree);
+            var expected = @"*<button id=""status"" type=""button"" class=""wx-quickfilter-button"" data-icon=""fas fa-home"" data-badge=""42"" data-badge-color=""text-bg-danger"" data-wx-primary-action=""filter"">Status</button>*";
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests adding a button with a user-defined badge color, which is
+        /// emitted as an inline style instead of a css class.
+        /// </summary>
+        [Fact]
+        public void AddButtonWithUserBadgeColor()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlQuickfilter(null);
+
+            // act
+            control.Add(new ControlQuickfilterItemButton("status")
+            {
+                Text = _ => "Status",
+                Badge = _ => "7",
+                BadgeColor = _ => new PropertyColorBackgroundBadge("#7c3aed"),
+                PrimaryAction = _ => new ActionFilter()
+            });
+
+            // validation
+            var html = control.Render(context, visualTree);
+            var expected = @"*<button id=""status"" type=""button"" class=""wx-quickfilter-button"" data-badge=""7"" data-badge-style=""background:#7c3aed;"" data-wx-primary-action=""filter"">Status</button>*";
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests adding buttons with a background color: a system color is
+        /// emitted as its button css class, a user-defined color as a raw css
+        /// color value.
+        /// </summary>
+        [Fact]
+        public void AddButtonWithBackgroundColor()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlQuickfilter(null);
+
+            // act
+            control.Add(new ControlQuickfilterItemButton("system")
+            {
+                Text = _ => "System",
+                BackgroundColor = _ => new PropertyColorButton(TypeColorButton.Success),
+                PrimaryAction = _ => new ActionFilter()
+            },
+            new ControlQuickfilterItemButton("user")
+            {
+                Text = _ => "User",
+                BackgroundColor = _ => new PropertyColorButton("#7c3aed"),
+                PrimaryAction = _ => new ActionFilter()
+            });
+
+            // validation
+            var html = control.Render(context, visualTree);
+            var expected = @"*<button id=""system"" type=""button"" class=""wx-quickfilter-button"" data-color=""btn-success"" data-wx-primary-action=""filter"">System</button><button id=""user"" type=""button"" class=""wx-quickfilter-button"" data-color-value=""#7c3aed"" data-wx-primary-action=""filter"">User</button>*";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
@@ -108,6 +204,39 @@ namespace WebExpress.WebUI.Test.WebControl
             // validation
             var html = control.Render(context, visualTree);
             var expected = @"*<div id=""d1"" class=""wx-quickfilter-dropdown"" data-text=""Sprint""><button id=""o1"" type=""button"" class=""wx-quickfilter-dropdown-option"" data-text=""Current"" data-wx-primary-action=""filter"" data-wx-primary-group=""sprint"" data-wx-primary-exclusive=""true"">Current</button></div>*";
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests adding a dropdown option carrying a badge, whose text and color
+        /// are emitted as data attributes on the option.
+        /// </summary>
+        [Fact]
+        public void AddDropdownItemWithBadge()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlQuickfilter(null);
+
+            // act
+            control.Add(new ControlQuickfilterItemDropdown("d1")
+            {
+                Text = _ => "Sprint"
+            }
+                .Add(new ControlQuickfilterItemDropdownItem("o1")
+                {
+                    Text = _ => "Current",
+                    Badge = _ => "14",
+                    BadgeColor = _ => new PropertyColorBackgroundBadge(TypeColorBackgroundBadge.Danger),
+                    PrimaryAction = _ => new ActionFilter() { Group = "sprint", Exclusive = true }
+                }));
+
+            // validation
+            var html = control.Render(context, visualTree);
+            var expected = @"*<button id=""o1"" type=""button"" class=""wx-quickfilter-dropdown-option"" data-text=""Current"" data-badge=""14"" data-badge-color=""text-bg-danger"" data-wx-primary-action=""filter"" data-wx-primary-group=""sprint"" data-wx-primary-exclusive=""true"">Current</button>*";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }

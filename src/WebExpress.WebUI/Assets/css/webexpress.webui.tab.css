@@ -26,6 +26,16 @@
     cursor: pointer;
 }
 
+/* the trailing count badge of a tab header; a text-bg-* color class or an
+   inline style overrides the neutral default */
+.wx-tab-nav .wx-tab-badge {
+    margin-left: 0.45em;
+    font-size: 0.72em;
+    vertical-align: baseline;
+    background-color: var(--wx-secondary-bg);
+    color: var(--wx-secondary-color);
+}
+
 /* specific transition for the close button inside the tab header */
 .wx-form-designer-tabs .nav-link span {
     transition: color 0.2s ease-in-out;

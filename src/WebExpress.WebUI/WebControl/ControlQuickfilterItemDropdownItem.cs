@@ -31,6 +31,20 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
+        /// Gets or sets the badge text shown at the trailing edge of the option,
+        /// for example the number of matching entries. When null or empty no
+        /// badge is rendered.
+        /// </summary>
+        public Func<IRenderControlContext, string> Badge { get; set; }
+
+        /// <summary>
+        /// Gets or sets the badge background color. The resolved css class and
+        /// inline style are emitted alongside the badge text so the client can
+        /// style the badge consistently with the framework badge colors.
+        /// </summary>
+        public Func<IRenderControlContext, PropertyColorBackgroundBadge> BadgeColor { get; set; }
+
+        /// <summary>
         /// Gets or sets the primary action, typically the filter activated when the
         /// option is selected.
         /// </summary>
@@ -60,6 +74,8 @@ namespace WebExpress.WebUI.WebControl
         {
             var text = I18N.Translate(renderContext, Text?.Invoke(renderContext));
             var icon = Icon?.Invoke(renderContext);
+            var badge = I18N.Translate(renderContext, Badge?.Invoke(renderContext));
+            var badgeColor = BadgeColor?.Invoke(renderContext);
             var primaryAction = PrimaryAction?.Invoke(renderContext);
             var secondaryAction = SecondaryAction?.Invoke(renderContext);
 
@@ -71,7 +87,10 @@ namespace WebExpress.WebUI.WebControl
             }
                 .AddUserAttribute("data-text", text)
                 .AddUserAttribute("data-icon", (icon as Icon)?.Class)
-                .AddUserAttribute("data-image", (icon as ImageIcon)?.Uri?.ToString());
+                .AddUserAttribute("data-image", (icon as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-badge", badge)
+                .AddUserAttribute("data-badge-color", badgeColor?.ToClass())
+                .AddUserAttribute("data-badge-style", badgeColor?.ToStyle());
 
             primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);
             secondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);

@@ -28,6 +28,13 @@ Within the host element, you can define static filter buttons. These are element
 |`data-wx-primary-target`  |The unique ID of the filter this button controls.
 |`data-wx-primary-group`   |Optional. Assigns the filter to a specific group. Groups can be configured in the registry to be exclusive.
 |`data-wx-primary-reset`   |Optional boolean (`true`). If set, the button acts as a reset trigger for its assigned group and will appear active when no other filters in that group are active.
+|`data-icon`               |Optional. The icon rendered ahead of the label of a button or dropdown option, as a CSS class (e.g., `fas fa-star`). Authored in C# through the `Icon` property (`IIcon`); an image icon is emitted as `data-image` instead.
+|`data-image`              |Optional. An image uri rendered in place of a CSS icon.
+|`data-color`              |Optional. The chip color as a button css class (e.g., `btn-danger`), derived from the C# `BackgroundColor` property for a system color. The chip keeps its outline-to-filled behavior in that hue.
+|`data-color-value`        |Optional. A raw css color (e.g., `#7c3aed`), derived from the C# `BackgroundColor` property for a user-defined color; the client feeds it into the chip accent.
+|`data-badge`              |Optional. The badge text rendered at the trailing edge of a button or dropdown option, typically a result count. Authored in C# through the `Badge` property.
+|`data-badge-color`        |Optional. The badge color css class (e.g., `text-bg-danger`), derived from the C# `BadgeColor` property for a system color.
+|`data-badge-style`        |Optional. An inline badge style (e.g., `background:#7c3aed;`), derived from the C# `BadgeColor` property for a user-defined color.
 
 ### Data Binding
 
@@ -45,13 +52,15 @@ Because the component relies entirely on the central registry and events, you ca
 
 Authored in C# through `ControlQuickfilter` and its items, a single bar can mix several item kinds, all backed by the same registry and the same `ActionFilter`:
 
-- **`ControlQuickfilterItemButton`** — a one-click chip that toggles a single filter.
+- **`ControlQuickfilterItemButton`** — a one-click chip that toggles a single filter. Carries an optional `Icon` (an `IIcon`, rendered as a css icon or an image) ahead of the label, an optional `Badge` (for example a result count) with an optional `BadgeColor` at the trailing edge, and an optional `BackgroundColor` that colors the chip while keeping its outline-to-filled behavior.
 - **`ControlQuickfilterItemAvatar`** — an avatar chip used to filter by a person; the client renders the image when supplied, otherwise the `Icon`, otherwise the initials on the person's color. The avatar shows active while its filter is set.
-- **`ControlQuickfilterItemDropdown`** — a single-choice dropdown of related options (each a `ControlQuickfilterItemDropdownItem`). Group the options exclusively, and the toggle shows the active option's label and closes on select.
-- **`ControlQuickfilterItemMultiSelect`** — a multi-select dropdown (also built from `ControlQuickfilterItemDropdownItem`). Several options may be active at once, the menu stays open while values are picked, and the toggle shows the count of active options.
-- **`ControlDataQuickfilterItemDropdown`** *(WebExpress.WebApp)* — a dropdown (or multi-select, via `Multiple`) whose options are loaded from a REST endpoint (`Uri`) through the service layer rather than authored statically. Use it inside a `ControlDataQuickfilter`. Its menu carries a search box that re-queries the endpoint (`GET {uri}?q=…`), so huge option sets are filtered on the server instead of loaded in full.
+- **`ControlQuickfilterItemDropdown`** — a single-choice dropdown of related options (each a `ControlQuickfilterItemDropdownItem`, with an optional `Icon`, `Badge` and `BadgeColor` per option). Group the options exclusively, and the toggle shows the active option's label and closes on select.
+- **`ControlQuickfilterItemMultiSelect`** — a multi-select dropdown (also built from `ControlQuickfilterItemDropdownItem`). Several options may be active at once, the menu stays open while values are picked, and the toggle shows the count of active options as a badge next to the label.
+- **`ControlDataQuickfilterItemDropdown`** *(WebExpress.WebApp)* — a dropdown (or multi-select, via `Multiple`) whose options are loaded from a REST endpoint (`RestEndpoint`) through the service layer rather than authored statically. Use it inside a `ControlDataQuickfilter`. Its menu carries a search box that re-queries the endpoint (`GET {uri}?q=…`), so huge option sets are filtered on the server instead of loaded in full.
 
 All items render as chips matching the one-click button, so a mixed bar looks consistent.
+
+The filters a `ControlDataQuickfilter` loads through its own service are described by `RestApiQuickfilterItem` objects. Besides `Id` and `Name` an item carries an optional `Icon` (an `IIcon`, serialized into a CSS class or image uri), an optional `Color` (a `PropertyColorButton`, serialized into the `color` css class or the raw `colorValue`), an optional `Badge` text and an optional `BadgeColor` (serialized into the `badgeColor` css class or the `badgeStyle` inline style), so REST-loaded chips and dropdown options show the same visuals as their statically authored counterparts.
 
 ```csharp
 new ControlQuickfilter()
@@ -61,6 +70,9 @@ new ControlQuickfilter()
         {
             Text = _ => "Status",
             Icon = _ => new IconHome(),
+            Badge = _ => "3",
+            BadgeColor = _ => new PropertyColorBackgroundBadge(TypeColorBackgroundBadge.Danger),
+            BackgroundColor = _ => new PropertyColorButton(TypeColorButton.Success),
             PrimaryAction = _ => new ActionFilter()
         },
         new ControlQuickfilterItemDropdown("sprint")
@@ -71,6 +83,7 @@ new ControlQuickfilter()
             .Add(new ControlQuickfilterItemDropdownItem("sprint-current")
             {
                 Text = _ => "Current",
+                Badge = _ => "14",
                 PrimaryAction = _ => new ActionFilter() { Group = "sprint", Exclusive = true }
             })
             .Add(new ControlQuickfilterItemDropdownItem("sprint-next")

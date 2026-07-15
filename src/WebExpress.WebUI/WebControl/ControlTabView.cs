@@ -39,6 +39,21 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
+        /// Gets or sets the badge text shown at the trailing edge of the tab
+        /// header, for example the number of entries in the view. When null or
+        /// empty no badge is rendered, so a tab without a count stays visually
+        /// unchanged.
+        /// </summary>
+        public Func<IRenderControlContext, string> Badge { get; set; }
+
+        /// <summary>
+        /// Gets or sets the badge background color. The resolved css class and
+        /// inline style are emitted alongside the badge text so the client can
+        /// style the badge consistently with the framework badge colors.
+        /// </summary>
+        public Func<IRenderControlContext, PropertyColorBackgroundBadge> BadgeColor { get; set; }
+
+        /// <summary>
         /// Gets the items of the view control.
         /// </summary>
         public IEnumerable<IControl> Items => _items;
@@ -96,6 +111,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            var badgeColor = BadgeColor?.Invoke(renderContext);
+
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
@@ -104,6 +121,9 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, Title?.Invoke(renderContext)))
                 .AddUserAttribute("data-icon", (Icon?.Invoke(renderContext) as Icon)?.Class)
                 .AddUserAttribute("data-image", Image?.Invoke(renderContext)?.ToString() ?? (Icon?.Invoke(renderContext) as ImageIcon)?.Uri?.ToString())
+                .AddUserAttribute("data-badge", I18N.Translate(renderContext, Badge?.Invoke(renderContext)))
+                .AddUserAttribute("data-badge-color", badgeColor?.ToClass())
+                .AddUserAttribute("data-badge-style", badgeColor?.ToStyle())
                 .Add(_items.Select(x => x.Render(renderContext, visualTree)));
 
             return html;

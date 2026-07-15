@@ -57,6 +57,9 @@ Supported attributes:
 | `data-color-style`            | Inline style for a custom link text color (e.g. `color:#ffffff;`)
 | `data-background-color-css`   | Framework css class for the link background (e.g. `bg-primary`)
 | `data-background-color-style` | Inline style for a custom link background (e.g. `background:#6f42c1;`)
+| `data-badge`                  | Badge text at the trailing edge of the link (e.g. an unread count)
+| `data-badge-color`            | Badge color css class, derived from the C# `BadgeColor` property for a system color (e.g. `text-bg-danger`)
+| `data-badge-style`            | Inline badge style, derived from the C# `BadgeColor` property for a user-defined color (e.g. `background:#7c3aed;`)
 | `data-breakpoint`   | Pixel value for switching between compact and normal view
 
 ## Functionality

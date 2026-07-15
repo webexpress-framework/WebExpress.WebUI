@@ -36,6 +36,9 @@ Each child element representing a tab view can also use `data-` attributes to co
 | `data-label`              | Text label displayed in the tab navigation.                          | `data-label="Settings"`
 | `data-icon`               | CSS class for an icon displayed next to the label.                   | `data-icon="fas fa-cog"`
 | `data-color`              | CSS class for the icon color.                                        | `data-color="text-primary"`
+| `data-badge`              | Badge text at the trailing edge of the tab header, typically a count. Authored in C# through the `Badge` property of `ControlTabView`. | `data-badge="12"`
+| `data-badge-color`        | Badge color css class, derived from the C# `BadgeColor` property for a system color. | `data-badge-color="text-bg-danger"`
+| `data-badge-style`        | Inline badge style, derived from the C# `BadgeColor` property for a user-defined color. | `data-badge-style="background:#7c3aed;"`
 | `data-wx-primary-action`  | Optional action identifier for the tab.                              | `data-wx-primary-action="save"`
 | `data-wx-primary-target`  | Optional target identifier for the tab action.                       | `data-wx-primary-target="form1"`
 
@@ -121,8 +124,9 @@ The following example illustrates a complete declarative setup for a tab control
         <p>This is the content for the home tab.</p>
     </div>
     
-    <!-- Tab 2 -->
-    <div id="profile-tab" class="wx-tab-view" data-label="Profile" data-icon="fas fa-user">
+    <!-- Tab 2, showing an unread count as a badge -->
+    <div id="profile-tab" class="wx-tab-view" data-label="Profile" data-icon="fas fa-user"
+         data-badge="12" data-badge-color="text-bg-danger">
         <h3>Profile Content</h3>
         <p>This is the content for the user profile tab.</p>
     </div>

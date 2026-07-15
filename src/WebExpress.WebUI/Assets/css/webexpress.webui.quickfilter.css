@@ -19,44 +19,79 @@
     padding: 0.2em;
 }
 
-/* chip-like filter button: default (not active) */
+/* chip-like filter button: default (not active). The accent carries the chip
+   hue - primary by default, swapped by a color class or an inline value - so
+   every state rule below follows a colored chip automatically */
 .wx-quickfilter-btn-chip {
     outline: none;
     background: transparent;
-    color: var(--wx-primary);
+    color: var(--wx-quickfilter-accent, var(--wx-primary));
     font-size: 0.85em;
     font-weight: 500;
     border-radius: 20px;
-    border: 1px solid var(--wx-primary);
+    border: 1px solid var(--wx-quickfilter-accent, var(--wx-primary));
     transition: box-shadow 0.2s, background 0.15s, color 0.2s;
     cursor: pointer;
     gap: 0;
 }
 
+/* a colored chip (btn-primary, btn-danger, ...) draws its accent from the
+   bootstrap button props its color class defines, keeping the outline-to-
+   filled chip behavior in that hue */
+.wx-quickfilter-btn-chip:is(.btn-primary, .btn-secondary, .btn-success, .btn-info, .btn-warning, .btn-danger, .btn-light, .btn-dark, .btn-highlight) {
+    --wx-quickfilter-accent: var(--bs-btn-bg);
+    --wx-quickfilter-contrast: var(--bs-btn-color);
+}
+
 /* chip button active state */
 .wx-quickfilter-btn-chip.active,
 .wx-quickfilter-btn-chip[aria-pressed="true"] {
-    background: var(--wx-primary);
-    color: var(--wx-white);
-    border-color: var(--wx-primary);
+    background: var(--wx-quickfilter-accent, var(--wx-primary));
+    color: var(--wx-quickfilter-contrast, var(--wx-white));
+    border-color: var(--wx-quickfilter-accent, var(--wx-primary));
 }
 
 /* chip button hover (not active) */
 .wx-quickfilter-btn-chip:hover {
     background: var(--wx-tertiary-bg);
-    color: var(--wx-primary);
+    color: var(--wx-quickfilter-accent, var(--wx-primary));
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 /* chip button: active + hover = darker */
 .wx-quickfilter-btn-chip.active:hover,
 .wx-quickfilter-btn-chip[aria-pressed="true"]:hover {
-    background: var(--wx-primary);
-    color: var(--wx-white);
+    background: var(--wx-quickfilter-accent, var(--wx-primary));
+    color: var(--wx-quickfilter-contrast, var(--wx-white));
 }
 
 .wx-quickfilter-btn-chip i {
     margin-right: 0.3em;
+}
+
+/* the trailing count badge of a chip or option; it follows the chip accent
+   and inverts wherever the accent becomes the background (an active chip, a
+   hovered option) so the count stays readable in both states */
+.wx-quickfilter-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5em;
+    padding: 0 0.4em;
+    margin-left: 0.35em;
+    border-radius: 9999px;
+    font-size: 0.78em;
+    font-weight: 600;
+    line-height: 1.5;
+    background: var(--wx-quickfilter-accent, var(--wx-primary));
+    color: var(--wx-quickfilter-contrast, var(--wx-white));
+}
+
+.wx-quickfilter-btn-chip.active .wx-quickfilter-badge,
+.wx-quickfilter-btn-chip[aria-pressed="true"] .wx-quickfilter-badge,
+.wx-quickfilter .dropdown-item:hover .wx-quickfilter-badge {
+    background: var(--wx-quickfilter-contrast, var(--wx-white));
+    color: var(--wx-quickfilter-accent, var(--wx-primary));
 }
 
 /* close button for chips */

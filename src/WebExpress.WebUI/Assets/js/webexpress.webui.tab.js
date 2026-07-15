@@ -79,6 +79,9 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
                 label: pane.dataset.label || "",
                 icon: pane.dataset.icon || null,
                 color: pane.dataset.color || null,
+                badge: pane.dataset.badge || null,
+                badgeColor: pane.dataset.badgeColor || null,
+                badgeStyle: pane.dataset.badgeStyle || null,
                 primaryAction: pane.dataset.wxPrimaryAction || null,
                 primaryTarget: pane.dataset.wxPrimaryTarget || null,
                 paneElement: pane
@@ -154,6 +157,21 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
         if (tab.label !== "") {
             const textNode = document.createTextNode(tab.label);
             btn.appendChild(textNode);
+        }
+
+        // append the trailing badge if configured; a color class or an inline
+        // style overrides the neutral default
+        if (tab.badge !== null && tab.badge !== "") {
+            const badgeEl = document.createElement("span");
+            badgeEl.className = "wx-tab-badge badge";
+            if (tab.badgeColor !== null) {
+                badgeEl.classList.add(...String(tab.badgeColor).split(/\s+/).filter(Boolean));
+            }
+            if (tab.badgeStyle !== null) {
+                badgeEl.style.cssText = tab.badgeStyle;
+            }
+            badgeEl.textContent = tab.badge;
+            btn.appendChild(badgeEl);
         }
 
         // attach event listener for tab switching

@@ -74,10 +74,14 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
             label: btn.textContent,
             icon: btn.dataset.icon,
             color: btn.dataset.color,
+            colorValue: btn.dataset.colorValue || null,
             action: btn.dataset.wxPrimaryAction,
             class: btn.className,
             size: btn.dataset.size || null,
             image: btn.dataset.image || null,
+            badge: btn.dataset.badge || null,
+            badgeColor: btn.dataset.badgeColor || null,
+            badgeStyle: btn.dataset.badgeStyle || null,
             primaryAction: Object.fromEntries(Object.entries(btn.dataset)
                 .filter(([k]) => k.startsWith("wxPrimary"))
                 .map(([k, v]) => [k.slice(9).replace(/^./, (c) => c.toLowerCase()), v === "true" ? true : v === "false" ? false : v])),
@@ -229,9 +233,57 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
 
         // instantiate buttonctrl for consistent webexpress behaviour
         webexpress.webui.Controller.createInstanceByClassType("wx-webui-button", btnElem);
+
+        // a user-defined color feeds the chip accent directly; a system color
+        // arrived as a btn-<color> class through data-color and swaps the
+        // accent in css
+        if (btnCfg.colorValue) {
+            btnElem.style.setProperty("--wx-quickfilter-accent", btnCfg.colorValue);
+        }
+
+        // appended after the button controller ran, because it rebuilds the
+        // chip content and would drop an earlier badge
+        this._appendBadge(btnElem, btnCfg.badge, btnCfg.badgeColor, btnCfg.badgeStyle);
         container.appendChild(btnElem);
 
         return filterId;
+    }
+
+    /**
+     * Builds the small trailing badge of a chip or option, showing a count or
+     * similar short fact next to the label. The color class targets a framework
+     * badge color, the style carries a bespoke background.
+     * @param {string} badge - the badge text.
+     * @param {string|null} [colorCss] - the badge color css class(es).
+     * @param {string|null} [colorStyle] - the inline badge style.
+     * @returns {HTMLElement} the badge element.
+     */
+    _createBadge(badge, colorCss, colorStyle) {
+        const span = document.createElement("span");
+        span.className = "wx-quickfilter-badge";
+        if (colorCss) {
+            span.classList.add(...String(colorCss).split(/\s+/).filter(Boolean));
+        }
+        if (colorStyle) {
+            span.style.cssText = colorStyle;
+        }
+        span.textContent = badge;
+        return span;
+    }
+
+    /**
+     * Appends the badge to a chip or option element. Nothing is appended when
+     * no badge text is given, so an item without a count stays unchanged.
+     * @param {HTMLElement} element - the chip or option element.
+     * @param {string|null} badge - the badge text.
+     * @param {string|null} [colorCss] - the badge color css class(es).
+     * @param {string|null} [colorStyle] - the inline badge style.
+     */
+    _appendBadge(element, badge, colorCss, colorStyle) {
+        if (!badge) {
+            return;
+        }
+        element.appendChild(this._createBadge(badge, colorCss, colorStyle));
     }
 
     /**
@@ -317,7 +369,8 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
         }
         const label = document.createElement("span");
         toggle.appendChild(label);
-        toggle.appendChild(webexpress.webui.Icon.create("fas fa-caret-down", "wx-quickfilter-dropdown-caret"));
+        const caret = webexpress.webui.Icon.create("fas fa-caret-down", "wx-quickfilter-dropdown-caret");
+        toggle.appendChild(caret);
 
         const menu = document.createElement("div");
         menu.className = "wx-quickfilter-dropdown-menu dropdown-menu";
@@ -391,6 +444,7 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
                     item.appendChild(webexpress.webui.Icon.create(option.icon));
                 }
                 item.appendChild(document.createTextNode(" " + (option.name || "")));
+                this._appendBadge(item, option.badge, option.badgeColor, option.badgeStyle);
 
                 item.addEventListener("click", (e) => {
                     e.stopPropagation();
@@ -406,8 +460,19 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
 
             const baseText = template.dataset.text || "";
             label.textContent = multi
-                ? (template.dataset.icon ? " " : "") + baseText + (activeCount > 0 ? " (" + activeCount + ")" : "")
+                ? (template.dataset.icon ? " " : "") + baseText
                 : (template.dataset.icon ? " " : "") + (activeLabel || baseText);
+
+            // the multi-select shows its selection count as a badge between the
+            // label and the caret; populate re-runs on each search result, so a
+            // stale badge is dropped before the fresh count is applied
+            const staleBadge = toggle.querySelector(".wx-quickfilter-badge");
+            if (staleBadge) {
+                staleBadge.remove();
+            }
+            if (multi && activeCount > 0) {
+                toggle.insertBefore(this._createBadge(String(activeCount)), caret);
+            }
 
             toggle.classList.toggle("active", activeCount > 0);
             if (activeCount > 0) {
@@ -467,6 +532,9 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
             id: opt.id,
             name: opt.dataset.text || opt.textContent || opt.id,
             icon: opt.dataset.icon || opt.dataset.image || null,
+            badge: opt.dataset.badge || null,
+            badgeColor: opt.dataset.badgeColor || null,
+            badgeStyle: opt.dataset.badgeStyle || null,
             group: opt.dataset.wxPrimaryGroup || null,
             exclusive: opt.dataset.wxPrimaryExclusive === "true",
             reset: opt.dataset.wxPrimaryReset === "true"
@@ -481,6 +549,9 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
             id: o.id,
             name: o.name || o.id,
             icon: o.icon || null,
+            badge: o.badge != null ? String(o.badge) : null,
+            badgeColor: o.badgeColor || null,
+            badgeStyle: o.badgeStyle || null,
             group: o.group || group,
             exclusive: o.exclusive === true || !multi,
             reset: o.reset === true
