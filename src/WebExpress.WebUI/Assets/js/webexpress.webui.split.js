@@ -81,16 +81,19 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         this._paneOrder = element.getAttribute("data-order") || "side-main";
         this._unit = element.getAttribute("data-unit") || "px";
 
-        // parse initial size
+        // parse initial size; the unit may be written inline on the value
+        // (e.g. "25%") or come from the separate data-unit attribute
+        // (e.g. data-size="25" data-unit="%"). a percentage makes the side pane
+        // track a ratio of the container instead of a fixed extent.
         const sizeAttr = element.getAttribute("data-size");
-        if (typeof sizeAttr === "string" && sizeAttr.trim().endsWith("%")) {
+        this._initialSideAttr = sizeAttr; // stored for deferred/fallback parsing
+        if (this._sideUnit(sizeAttr) === "%") {
             const p = parseFloat(sizeAttr);
             if (!isNaN(p)) {
                 this._sideRatioMode = true;
                 this._initialRatio = Math.max(0, p) / 100;
             }
         }
-        this._initialSideAttr = sizeAttr; // Store raw for fallback parsing
 
         // determine cookie name
         this._cookieName = element.id ? `wx-split-${element.id}` : null;
@@ -170,7 +173,16 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         // default fallback: 50%
         if (initialSide == null) {
             const dim = this._orientation === "vertical" ? element.clientHeight : element.clientWidth;
-            initialSide = Math.floor(dim / 2);
+            if (dim > 0) {
+                initialSide = Math.floor(dim / 2);
+            } else {
+                // container not laid out yet (hidden tab); express the fallback
+                // as a ratio so the first real resize resolves it against the
+                // true container extent instead of pinning a zero size.
+                this._sideRatioMode = true;
+                this._initialRatio = 0.5;
+                initialSide = 0;
+            }
         }
 
         // apply constraints immediately
@@ -353,6 +365,16 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         const total = isVert ? this._element.clientHeight : this._element.clientWidth;
         const splitterSize = this._getSplitterSize();
 
+        // the container is not laid out yet (e.g. the split was rendered inside
+        // a display:none tab). clamping against a zero total would collapse both
+        // panes and overwrite the desired side size with 0, leaving the pane
+        // stuck once the tab is shown. keep the requested size and let the
+        // ResizeObserver re-run the real sizing when a usable width appears.
+        if (total <= 0) {
+            this._sideSize = sideSize;
+            return;
+        }
+
         // safety clamp
         const maxSide = Math.max(0, total - splitterSize);
         sideSize = Math.min(Math.max(0, sideSize), maxSide);
@@ -444,6 +466,49 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Sizes the side pane to fit the intrinsic extent of its content (width for
+     * horizontal splits, height for vertical) and then applies the configured
+     * min/max and container constraints. Callers invoke this after the side
+     * content changes - e.g. a navigation tree is populated - so the pane is
+     * neither clipped nor padded with dead space. No-ops while collapsed or
+     * while the content has no measurable extent (e.g. inside a hidden modal),
+     * so callers safely defer it to the next frame after the pane is shown.
+     */
+    fitSidePaneToContent() {
+        if (!this._sidePane || this._sidePaneCollapsed) return;
+
+        const isVert = this._orientation === "vertical";
+        const prop = isVert ? "height" : "width";
+        const pane = this._sidePane;
+
+        // measure the content's preferred (max-content) extent while neutralizing
+        // flex so the surrounding layout can neither grow nor shrink the pane
+        // during the read. a width:0 + scrollWidth reading would instead report
+        // the *minimum* content width - flowing text wrapped down to its longest
+        // word - and collapse the pane; only content that never wraps (e.g. a
+        // tree) survives that. reading offset* forces the reflow, and the
+        // previous styles are restored before the browser paints, so there is no
+        // visible flicker.
+        const previousSize = pane.style[prop];
+        const previousFlex = pane.style.flex;
+        pane.style.flex = "0 0 auto";
+        pane.style[prop] = "max-content";
+        const content = isVert ? pane.offsetHeight : pane.offsetWidth;
+        pane.style[prop] = previousSize;
+        pane.style.flex = previousFlex;
+
+        if (content <= 0) return;
+
+        let target = content;
+        if (this._minSide !== null) target = Math.max(this._minSide, target);
+        if (this._maxSide !== null) target = Math.min(this._maxSide, target);
+
+        // an explicit fit pins the size the same way a manual drag does
+        this._sideRatioMode = false;
+        this._setPaneSizes(target, true);
+    }
+
+    /**
      * Utility: Parse integer attribute safely.
      */
     _parseAttrInt(el, attr) {
@@ -464,23 +529,42 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Parses CSS size units to pixels.
+     * Resolves the effective size unit for the side pane. A unit written inline
+     * on the raw size value (e.g. "25%", "10em") wins; otherwise the separate
+     * data-unit configuration applies. Returns one of "px", "%", "em", "rem".
+     * @param {string} attr Raw data-size value.
+     */
+    _sideUnit(attr) {
+        const clean = String(attr ?? "").trim();
+        // rem is checked before em because it also ends with "em"
+        if (clean.endsWith("%")) return "%";
+        if (clean.endsWith("rem")) return "rem";
+        if (clean.endsWith("em")) return "em";
+        if (clean.endsWith("px")) return "px";
+        return (this._unit === "%" || this._unit === "em" || this._unit === "rem") ? this._unit : "px";
+    }
+
+    /**
+     * Parses the configured side size to pixels, honouring both an inline unit
+     * and the data-unit fallback. Percentages resolve against the current
+     * container extent; ratio mode keeps them in sync on later resizes.
      */
     _parseInitialSideSize(attr) {
         if (!attr) return null;
-        const clean = attr.trim();
-        const val = parseFloat(clean);
+        const val = parseFloat(String(attr).trim());
         if (isNaN(val)) return null;
 
-        if (clean.endsWith("px")) return Math.round(val);
-        if (clean.endsWith("em") || clean.endsWith("rem")) return Math.round(val * 16);
-        if (clean.endsWith("%")) {
-            const total = this._orientation === "vertical" ? this._element.clientHeight : this._element.clientWidth;
-            return Math.round((val / 100) * total);
+        switch (this._sideUnit(attr)) {
+            case "%": {
+                const total = this._orientation === "vertical" ? this._element.clientHeight : this._element.clientWidth;
+                return Math.round((val / 100) * total);
+            }
+            case "em":
+            case "rem":
+                return Math.round(val * 16);
+            default:
+                return Math.round(val);
         }
-
-        // fallback using unit
-        return this._unit === "px" ? Math.round(val) : Math.round(val * 16);
     }
 
     /**

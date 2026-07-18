@@ -84,6 +84,18 @@
         }
     });
 
+    // split fit-to-content action: sizes the target split's side pane to its
+    // content, mirroring how the "split" action toggles the same target
+    webexpress.webui.Actions.register("split-fit", {
+        execute: function (element, prefix, controller) {
+            const target = getActionAttribute(element, prefix, "target");
+            const instance = controller.getInstance(target);
+            if (instance && typeof instance.fitSidePaneToContent === "function") {
+                instance.fitSidePaneToContent();
+            }
+        }
+    });
+
     // css fullscreen toggle
     webexpress.webui.Actions.register("fullscreen", {
         execute: function (element, prefix, controller, e) {
