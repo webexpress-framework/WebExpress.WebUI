@@ -15,6 +15,29 @@
     overflow-x: hidden;
 }
 
+/* offcanvas flyout: while the sidebar is reduced to its rail, hovering reveals
+   the full content as an overlay. the controller lifts the element into a fixed
+   box pinned over the rail (top/left/height set inline), so the rail keeps its
+   slot in the layout and the surrounding content never reflows; the panel
+   collapses again on mouse-leave. the z-index clears sticky content sub-headers
+   (~99) yet stays below dropdown menus (~1000) so a row's "..." menu still opens
+   above the flyout. min-height/max-height are neutralised because a fixed box
+   resolves their percentage bases against the viewport (100vh), which would
+   otherwise force the panel taller than the rail and push the footer toolbar and
+   the lower items off the bottom of the screen; the inline pixel height (the
+   rail's measured extent) must win, and the item area scrolls within it */
+.wx-sidebar.wx-sidebar-flyout {
+    position: fixed;
+    z-index: 100;
+    width: clamp(14em, 18vw, 22em);
+    min-height: 0;
+    max-height: 100vh;
+    overflow-x: hidden;
+    background: var(--wx-body-bg);
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
+    transition: width 0.15s ease;
+}
+
 .wx-sidebar > div:not(.wx-toolbar) {
     display: flex;
     flex-direction: column;

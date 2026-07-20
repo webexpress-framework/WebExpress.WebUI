@@ -3,6 +3,10 @@
  * Element types: .wx-sidebar-link, .wx-sidebar-separator, .wx-sidebar-header, .wx-sidebar-panel, .wx-sidebar-icon.
  * Compact mode is controlled via data-mode: "hide" or "overlay".
  *
+ * When collapsed to its rail, hovering the sidebar reveals the full content as
+ * an offcanvas flyout until the pointer leaves. The first active item is scrolled
+ * into view (expanding its ancestor groups) so the current location stays visible.
+ *
  * The following events are triggered:
  * - webexpress.webui.Event.REMOVE_EVENT
  * - webexpress.webui.Event.SHOW_EVENT
@@ -13,6 +17,7 @@
 webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
     _items = [];
     _resizeObserver = null;
+    _hoverExpanded = false;
 
     /**
      * Initializes the sidebar control, parses content, and sets up layout.
@@ -27,6 +32,11 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
 
         // set breakpoint to a sensible default if not present
         this._breakpoint = parseInt(element.getAttribute("data-breakpoint"), 10) || 100;
+
+        // both behaviors are opt-out: the server emits the attribute only to
+        // disable them, so an absent attribute keeps the default enabled
+        this._hoverExpandEnabled = element.getAttribute("data-hover-expanded") !== "false";
+        this._scrollActiveEnabled = element.getAttribute("data-scroll-active") !== "false";
 
         // parse structure before clearing html
         this._items = this._parseItems(element.children);
@@ -46,10 +56,12 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
         this._buildSidebar();
         this._buildFooter();
         this._setupResizeHandling();
+        this._setupHoverFlyout();
 
         // set initial reduced state depending on window size
         this._isReduced = this._element.offsetWidth < this._breakpoint;
         this._updateView();
+        this._scrollActiveIntoView();
     }
 
     /**
@@ -309,8 +321,14 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
         this._items = Array.isArray(descriptors) ? descriptors : [];
         this._sidebarWrapper.innerHTML = "";
         this._buildSidebar();
-        this._isReduced = this._element.offsetWidth < this._breakpoint;
+
+        // an open flyout has widened the element, so its offsetWidth no longer
+        // reflects the collapsed rail; leave the reduced state untouched then
+        if (!this._hoverExpanded) {
+            this._isReduced = this._element.offsetWidth < this._breakpoint;
+        }
         this._updateView();
+        this._scrollActiveIntoView();
     }
 
     /**
@@ -654,8 +672,10 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
     _setupResizeHandling() {
         // resize callback
         const onResize = () => {
-            // only trigger resize logic if no manual override active
-            if (!this._manualOverride) {
+            // only trigger resize logic if no manual override and no open flyout;
+            // a flyout temporarily widens the element and would otherwise be
+            // measured as "expanded" and flip the reduced state
+            if (!this._manualOverride && !this._hoverExpanded) {
                 const reduced = this._element.offsetWidth < this._breakpoint;
                 if (reduced !== this._isReduced) {
                     this._isReduced = reduced;
@@ -697,6 +717,19 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             this._dispatch(webexpress.webui.Event.SHOW_EVENT, { sidebarId: this._element.id });
         }
 
+        // a hover flyout keeps the reduced rail but paints the items expanded,
+        // so per-item visibility follows the flyout state, not the rail state
+        this._applyItemVisibility(this._isReduced && !this._hoverExpanded);
+    }
+
+    /**
+     * Applies the per-item show/hide and sizing rules for either the compact
+     * (rail) layout or the expanded layout. Split out from _updateView so the
+     * hover flyout can render the items expanded while the element itself stays
+     * in its reduced state.
+     * @param {boolean} reduced - Whether to render the compact rail layout.
+     */
+    _applyItemVisibility(reduced) {
         for (const item of this._items) {
             if (item.type === "toolbar") {
                 continue;
@@ -709,21 +742,18 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                 const trigger = el.querySelector(".wx-sidebar-panel-trigger");
                 const content = el.querySelector(".wx-sidebar-panel-content");
 
-                if (this._isReduced) {
-                    // reduced mode logic
+                if (reduced) {
                     if (mode === "hide") {
                         el.style.display = "none";
                     } else {
                         el.style.display = "";
                         if (mode === "overlay") {
                             el.classList.add("wx-mode-overlay");
-                            // show icon, hide content
                             if (trigger) { trigger.style.display = ""; }
                             if (content) { content.style.display = "none"; }
                         }
                     }
                 } else {
-                    // expanded mode logic: always show content, hide icon trigger
                     el.style.display = "";
                     el.classList.remove("wx-mode-overlay");
 
@@ -731,9 +761,8 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                     if (content) { content.style.display = ""; }
                 }
             } else if (item.type === "icon") {
-                // icon: adjust size for reduced/expanded mode
                 if (el) {
-                    if (this._isReduced) {
+                    if (reduced) {
                         el.classList.add("wx-sidebar-icon-small");
                         el.classList.remove("wx-sidebar-icon-large");
                     } else {
@@ -743,17 +772,151 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                     el.style.display = "";
                 }
             } else {
-                // standard item logic
-                if (this._isReduced) {
-                    if (mode === "hide") {
-                        el.style.display = "none";
-                    } else {
-                        el.style.display = "";
-                    }
+                if (reduced && mode === "hide") {
+                    el.style.display = "none";
                 } else {
                     el.style.display = "";
                 }
             }
+        }
+    }
+
+    /**
+     * Wires the hover flyout: while the sidebar is reduced to its rail, entering
+     * the item area with the pointer reveals the full content as an overlay, and
+     * leaving the sidebar collapses it back to the rail. Opening is bound to the
+     * item area alone so hovering the footer toolbar (a sibling of the wrapper)
+     * never triggers the flyout; closing stays on the whole element so moving
+     * between the items and the toolbar within an open flyout keeps it open
+     * until the pointer leaves the sidebar entirely. The listeners live for the
+     * controller's whole lifetime and consult the reduced state at event time,
+     * so they stay correct across breakpoint changes. The whole flyout is
+     * opt-out through data-hover-expanded, so no listeners are wired when it is
+     * disabled.
+     */
+    _setupHoverFlyout() {
+        if (!this._hoverExpandEnabled) {
+            return;
+        }
+
+        this._sidebarWrapper.addEventListener("mouseenter", () => {
+            if (this._isReduced) {
+                this._openFlyout();
+            }
+        });
+        this._element.addEventListener("mouseleave", () => {
+            this._closeFlyout();
+        });
+
+        // choosing a navigation entry dismisses the flyout so it does not linger
+        // over the content after the user has picked a destination; the caret,
+        // the "..." menu and the remove button sit outside the link and so keep
+        // the flyout open for continued interaction
+        this._element.addEventListener("click", (e) => {
+            if (this._hoverExpanded && e.target.closest(".wx-link")) {
+                this._closeFlyout();
+            }
+        });
+    }
+
+    /**
+     * Opens the hover flyout: the reduced rail is lifted into a fixed overlay
+     * pinned over its current position and its items are painted expanded. Fixed
+     * positioning keeps the surrounding layout untouched (the rail's slot in the
+     * flow is unchanged) and works regardless of how the sidebar is embedded.
+     */
+    _openFlyout() {
+        if (this._hoverExpanded) {
+            return;
+        }
+        this._hoverExpanded = true;
+
+        // pin to the rail's current viewport box before the class widens it, so
+        // the overlay starts exactly where the rail sits
+        const rect = this._element.getBoundingClientRect();
+        this._element.style.top = `${rect.top}px`;
+        this._element.style.left = `${rect.left}px`;
+        this._element.style.height = `${rect.height}px`;
+
+        this._element.classList.add("wx-sidebar-flyout");
+        this._applyItemVisibility(false);
+    }
+
+    /**
+     * Closes the hover flyout and returns the sidebar to its reduced rail,
+     * clearing the pinned position so it flows back into its layout slot.
+     */
+    _closeFlyout() {
+        if (!this._hoverExpanded) {
+            return;
+        }
+        this._hoverExpanded = false;
+
+        this._element.classList.remove("wx-sidebar-flyout");
+        this._element.style.top = "";
+        this._element.style.left = "";
+        this._element.style.height = "";
+
+        this._applyItemVisibility(this._isReduced);
+    }
+
+    /**
+     * Brings the first active item into view so the current location is visible
+     * without manual scrolling. Ancestor groups of a nested active row are
+     * expanded first, otherwise a collapsed branch would leave it unrendered,
+     * and the scroll is confined to the sidebar's own container so the
+     * surrounding page never moves.
+     */
+    _scrollActiveIntoView() {
+        if (!this._scrollActiveEnabled) {
+            return;
+        }
+
+        const wrapper = this._sidebarWrapper;
+        if (!wrapper) {
+            return;
+        }
+
+        const active = wrapper.querySelector(".wx-sidebar-link.active");
+        if (!active) {
+            return;
+        }
+
+        // expand the ancestor groups synchronously so a nested active row is
+        // rendered right away, independent of the deferred scroll below
+        for (let ancestor = active.parentElement; ancestor && ancestor !== wrapper; ancestor = ancestor.parentElement) {
+            if (ancestor.classList.contains("wx-sidebar-group")) {
+                ancestor.classList.add("wx-expanded");
+            }
+        }
+
+        // defer the scroll to the next frame: on the first pass the sidebar can
+        // still be laid out by an ancestor split whose panes are not sized yet
+        // (controllers initialise depth-first, so this sidebar builds before its
+        // enclosing split), leaving the item area non-scrollable so an immediate
+        // scrollTop write would be lost. running after layout guarantees a
+        // scrollable container.
+        const scroll = () => {
+            // re-query inside the frame: a rebuild (for example a REST setItems)
+            // between scheduling and firing may have replaced the active row
+            const target = wrapper.querySelector(".wx-sidebar-link.active");
+            if (!target) {
+                return;
+            }
+
+            const containerRect = wrapper.getBoundingClientRect();
+            const activeRect = target.getBoundingClientRect();
+            if (activeRect.top < containerRect.top) {
+                wrapper.scrollTop -= containerRect.top - activeRect.top;
+            } else if (activeRect.bottom > containerRect.bottom) {
+                wrapper.scrollTop += activeRect.bottom - containerRect.bottom;
+            }
+        };
+
+        if (typeof requestAnimationFrame === "function") {
+            requestAnimationFrame(scroll);
+        } else {
+            scroll();
         }
     }
 
@@ -832,6 +995,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
      * Expands sidebar to full view.
      */
     expand() {
+        this._closeFlyout();
         this._isReduced = false;
         this._manualOverride = true;
         this._updateView();
@@ -841,6 +1005,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
      * Reduces sidebar to compact view.
      */
     reduce() {
+        this._closeFlyout();
         this._isReduced = true;
         this._manualOverride = true;
         this._updateView();

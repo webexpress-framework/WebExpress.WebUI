@@ -95,6 +95,60 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the hover-expanded property of the sidebar control. The client enables the
+        /// flyout by default, so only the opt-out (false) is expected to emit an attribute.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-webui-sidebar""></div>")]
+        [InlineData(true, @"<div class=""wx-webui-sidebar""></div>")]
+        [InlineData(false, @"<div class=""wx-webui-sidebar"" data-hover-expanded=""false""></div>")]
+        public void HoverExpanded(bool? hoverExpanded, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = hoverExpanded.HasValue
+                ? new ControlSidebar()
+                {
+                    HoverExpanded = _ => hoverExpanded.Value
+                }
+                : new ControlSidebar();
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the scroll-active property of the sidebar control. The client scrolls the first
+        /// active item into view by default, so only the opt-out (false) emits an attribute.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-webui-sidebar""></div>")]
+        [InlineData(true, @"<div class=""wx-webui-sidebar""></div>")]
+        [InlineData(false, @"<div class=""wx-webui-sidebar"" data-scroll-active=""false""></div>")]
+        public void ScrollActiveIntoView(bool? scrollActiveIntoView, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = scrollActiveIntoView.HasValue
+                ? new ControlSidebar()
+                {
+                    ScrollActiveIntoView = _ => scrollActiveIntoView.Value
+                }
+                : new ControlSidebar();
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests the add function of the sidebar control.
         /// </summary>
         [Fact]

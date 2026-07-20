@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -19,6 +21,18 @@ namespace WebExpress.WebUI.WebControl
         /// Gets the collection of toolbar items associated with the control.
         /// </summary>
         IEnumerable<IControlToolbarItem> ToolbarItems { get; }
+
+        /// <summary>
+        /// Gets or sets whether hovering the collapsed rail reveals the full sidebar as an
+        /// offcanvas flyout until the pointer leaves.
+        /// </summary>
+        Func<IRenderControlContext, bool> HoverExpanded { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the first active item is scrolled into view once the sidebar is
+        /// built, expanding its ancestor groups so the current location stays visible.
+        /// </summary>
+        Func<IRenderControlContext, bool> ScrollActiveIntoView { get; set; }
 
         /// <summary>
         /// Adds one or more sidebar items to the sidebar.

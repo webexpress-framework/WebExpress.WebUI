@@ -88,6 +88,137 @@ test("wx-webui-sidebar builds a '...' menu for a nested tree item", () => {
     assert.equal(menus.length, 1, "the nested child's options produce a menu");
 });
 
+/**
+ * Builds an active .wx-sidebar-link, optionally nested inside a parent group so
+ * the active row lives under a collapsible branch.
+ * @param {object} rt - The loaded runtime.
+ * @param {boolean} nested - Whether to wrap the active row in a parent group.
+ * @returns {object} The top-level element to hand to the controller.
+ */
+function activeItem(rt, nested) {
+    const active = link(rt, "current", null);
+    active.dataset.active = "active";
+
+    if (!nested) {
+        return active;
+    }
+
+    const children = rt.document.createElement("div");
+    children.classList.add("wx-sidebar-children");
+    children.appendChild(active);
+
+    const parent = link(rt, "parent", null);
+    parent.appendChild(children);
+    return parent;
+}
+
+test("wx-webui-sidebar reveals a flyout while reduced and hides it on mouse-leave", () => {
+    const rt = loadSidebar();
+    const host = rt.document.createElement("div");
+    host.appendChild(link(rt, "home", null));
+    rt.document.body.appendChild(host);
+
+    // the stubbed element reports offsetWidth 0, so the sidebar starts reduced
+    new rt.wx.SidebarCtrl(host);
+    assert.ok(host.classList.contains("wx-sidebar-reduced"), "the sidebar starts reduced");
+
+    const wrapper = host.querySelector(".wx-sidebar-wrapper");
+    wrapper.dispatchEvent(new rt.sandbox.Event("mouseenter"));
+    assert.ok(host.classList.contains("wx-sidebar-flyout"), "hovering the item area opens the flyout");
+
+    host.dispatchEvent(new rt.sandbox.Event("mouseleave"));
+    assert.ok(!host.classList.contains("wx-sidebar-flyout"), "leaving closes the flyout");
+});
+
+test("wx-webui-sidebar does not open a flyout when the footer toolbar is hovered", () => {
+    const rt = loadSidebar();
+    const host = rt.document.createElement("div");
+    host.appendChild(link(rt, "home", null));
+    rt.document.body.appendChild(host);
+
+    new rt.wx.SidebarCtrl(host);
+
+    // the footer toolbar is a sibling of the item area, so entering the sidebar
+    // element outside the wrapper must not reveal the flyout
+    host.dispatchEvent(new rt.sandbox.Event("mouseenter"));
+    assert.ok(!host.classList.contains("wx-sidebar-flyout"), "hovering the sidebar chrome does not open the flyout");
+});
+
+test("wx-webui-sidebar does not open a flyout when expanded", () => {
+    const rt = loadSidebar();
+    const host = rt.document.createElement("div");
+    host.appendChild(link(rt, "home", null));
+    rt.document.body.appendChild(host);
+
+    const ctrl = new rt.wx.SidebarCtrl(host);
+    ctrl.expand();
+
+    const wrapper = host.querySelector(".wx-sidebar-wrapper");
+    wrapper.dispatchEvent(new rt.sandbox.Event("mouseenter"));
+    assert.ok(!host.classList.contains("wx-sidebar-flyout"), "an expanded sidebar has no hover flyout");
+});
+
+test("wx-webui-sidebar closes the flyout when a navigation link inside it is clicked", () => {
+    const rt = loadSidebar();
+    const host = rt.document.createElement("div");
+    host.appendChild(link(rt, "home", null));
+    rt.document.body.appendChild(host);
+
+    new rt.wx.SidebarCtrl(host);
+
+    const wrapper = host.querySelector(".wx-sidebar-wrapper");
+    wrapper.dispatchEvent(new rt.sandbox.Event("mouseenter"));
+    assert.ok(host.classList.contains("wx-sidebar-flyout"), "the flyout is open");
+
+    // simulate the click bubbling from the anchor up to the sidebar listener
+    const anchor = host.querySelector("a.wx-link");
+    const clickEvent = new rt.sandbox.Event("click");
+    clickEvent.target = anchor;
+    host.dispatchEvent(clickEvent);
+    assert.ok(!host.classList.contains("wx-sidebar-flyout"), "choosing a link dismisses the flyout");
+});
+
+test("wx-webui-sidebar honors data-hover-expanded=false by suppressing the flyout", () => {
+    const rt = loadSidebar();
+    const host = rt.document.createElement("div");
+    host.setAttribute("data-hover-expanded", "false");
+    host.appendChild(link(rt, "home", null));
+    rt.document.body.appendChild(host);
+
+    new rt.wx.SidebarCtrl(host);
+
+    const wrapper = host.querySelector(".wx-sidebar-wrapper");
+    wrapper.dispatchEvent(new rt.sandbox.Event("mouseenter"));
+    assert.ok(!host.classList.contains("wx-sidebar-flyout"), "the flyout stays closed when hover-expand is disabled");
+});
+
+test("wx-webui-sidebar honors data-scroll-active=false by leaving groups collapsed", () => {
+    const rt = loadSidebar();
+    const host = rt.document.createElement("div");
+    host.setAttribute("data-scroll-active", "false");
+    host.appendChild(activeItem(rt, true));
+    rt.document.body.appendChild(host);
+
+    new rt.wx.SidebarCtrl(host);
+
+    const group = host.querySelector(".wx-sidebar-group");
+    assert.ok(group, "the parent link is wrapped into a group");
+    assert.ok(!group.classList.contains("wx-expanded"), "the branch is not auto-expanded when scroll-active is disabled");
+});
+
+test("wx-webui-sidebar expands the ancestor group of a nested active item", () => {
+    const rt = loadSidebar();
+    const host = rt.document.createElement("div");
+    host.appendChild(activeItem(rt, true));
+    rt.document.body.appendChild(host);
+
+    new rt.wx.SidebarCtrl(host);
+
+    const group = host.querySelector(".wx-sidebar-group");
+    assert.ok(group, "the parent link is wrapped into a group");
+    assert.ok(group.classList.contains("wx-expanded"), "the active item's branch is expanded so it is visible");
+});
+
 test("wx-webui-sidebar applies text and background colors to the row", () => {
     const rt = loadSidebar();
 

@@ -100,6 +100,25 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
         // ensure more button and menu are at the end
         this._element.appendChild(this._moreButton);
         this._element.appendChild(this._menu);
+        // restoring empties the menu (only force items stay), so keep the trigger
+        // in sync: a leftover more button over an empty menu must be hidden
+        this._syncMoreButtonVisibility();
+    }
+
+    /**
+     * Keeps the more button in sync with the overflow menu: it is shown only
+     * while at least one item is represented in overflow, and hidden together
+     * with the (then empty) menu otherwise. Centralised so every distribution
+     * path - reflow, restore, initial build - upholds the same invariant.
+     */
+    _syncMoreButtonVisibility() {
+        const hasOverflowItems = this._items.some((i) => { return this._isRepresentedInOverflow(i); });
+        if (hasOverflowItems) {
+            this._moreButton.style.display = "inline-flex";
+        } else {
+            this._moreButton.style.display = "none";
+            this._hideMenu(true);
+        }
     }
 
     /**
@@ -350,15 +369,9 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
         }
         this._shrinkUntilFit();
         this._growIfSpace();
-        const hasOverflowItems = this._items.some((i) => { return this._isRepresentedInOverflow(i); });
-        if (!hasOverflowItems) {
-            this._moreButton.style.display = "none";
-            this._hideMenu(true);
-        } else {
-            this._moreButton.style.display = "inline-flex";
-        }
         this._element.appendChild(this._moreButton);
         this._element.appendChild(this._menu);
+        this._syncMoreButtonVisibility();
     }
 
     /**

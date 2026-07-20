@@ -61,12 +61,16 @@ Supported attributes:
 | `data-badge-color`            | Badge color css class, derived from the C# `BadgeColor` property for a system color (e.g. `text-bg-danger`)
 | `data-badge-style`            | Inline badge style, derived from the C# `BadgeColor` property for a user-defined color (e.g. `background:#7c3aed;`)
 | `data-breakpoint`   | Pixel value for switching between compact and normal view
+| `data-hover-expanded` | Set to `"false"` to disable the hover flyout in compact mode (enabled by default)
+| `data-scroll-active`  | Set to `"false"` to disable scrolling the first active item into view (enabled by default)
 
 ## Functionality
 
 The SidebarCtrl component parses the child elements, handles rendering and manages event handling. It reacts dynamically to window size changes and automatically adjusts the display:
 
 - **Responsive Display:** The sidebar checks whether the window is smaller than the specified breakpoint and then switches to compact mode. In compact mode, elements with `data-mode="hide"` are hidden, panels with `data-mode="overlay"` can be displayed as overlays when clicked.
+- **Hover Flyout:** While the sidebar is reduced to its rail, moving the pointer over its item area reveals the full content as an offcanvas flyout that floats above the adjacent content and collapses again on mouse-leave. Hovering the footer toolbar does not trigger the flyout; once it is open, moving between the items and the toolbar keeps it open until the pointer leaves the sidebar. Choosing a navigation entry inside the flyout dismisses it. The rail keeps its place in the layout (the element is lifted into a fixed overlay pinned over the rail), so the surrounding content never reflows. The behavior can be disabled via `data-hover-expanded="false"` (`HoverExpanded` in C#).
+- **Active Item Visibility:** After the items are built, the first active item is scrolled into the sidebar's visible area so the current location stays visible. If the active item sits inside a collapsed group, its ancestor groups are expanded first; the scroll is confined to the sidebar so the surrounding page does not move. The behavior can be disabled via `data-scroll-active="false"` (`ScrollActiveIntoView` in C#).
 - **Overlay Panel:** Panels in overlay mode open an overlay window when clicked, positioned using Popper.js. The overlay can be closed by clicking outside or pressing the Escape key.
 - **Toolbar:** A toolbar at the bottom of the sidebar is automatically detected and integrated.
 - **Removable Elements:** Elements with `data-removeable="true"` receive a button for removal from the sidebar.
