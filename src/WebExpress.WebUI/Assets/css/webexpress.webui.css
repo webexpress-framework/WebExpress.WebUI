@@ -241,11 +241,69 @@
 
     /* deepen dropdown elevation so it reads against dark surfaces */
     --wx-dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+
+    /* open/close motion shared by every .show-toggled dropdown menu */
+    --wx-dropdown-motion-duration: 0.18s;
+    --wx-dropdown-motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Global dropdown menu shadow for consistent elevation across all dropdown variants */
 .dropdown-menu {
     box-shadow: var(--wx-dropdown-shadow);
+}
+
+/* Open/close animation for dropdown menus and their entries.
+   The menu fades while its entries settle down into place on open and lift
+   back out on close. Bootstrap flips display:none the instant .show is
+   removed, so transition-behavior:allow-discrete defers that flip until the
+   fade finishes, and @starting-style supplies the pre-open state the enter
+   transition animates away from.
+   The :not([style*="display"]) guard skips the typeahead and selection menus,
+   which reuse .dropdown-menu but toggle visibility through an inline display
+   value rather than .show; Popper only writes position/transform inline, so
+   real button-dropdowns still match and animate. */
+.dropdown-menu:not([style*="display"]) {
+    opacity: 0;
+    transition: opacity var(--wx-dropdown-motion-duration) var(--wx-dropdown-motion-ease),
+                display var(--wx-dropdown-motion-duration) var(--wx-dropdown-motion-ease);
+    transition-behavior: allow-discrete;
+}
+
+.dropdown-menu.show {
+    opacity: 1;
+}
+
+@starting-style {
+    .dropdown-menu.show {
+        opacity: 0;
+    }
+}
+
+.dropdown-menu:not([style*="display"]) > li,
+.dropdown-menu:not([style*="display"]) > .dropdown-item {
+    transform: translateY(-0.5rem);
+    transition: transform var(--wx-dropdown-motion-duration) var(--wx-dropdown-motion-ease);
+}
+
+.dropdown-menu.show > li,
+.dropdown-menu.show > .dropdown-item {
+    transform: translateY(0);
+}
+
+@starting-style {
+    .dropdown-menu.show > li,
+    .dropdown-menu.show > .dropdown-item {
+        transform: translateY(-0.5rem);
+    }
+}
+
+/* honour users who ask the OS to minimise animation */
+@media (prefers-reduced-motion: reduce) {
+    .dropdown-menu:not([style*="display"]),
+    .dropdown-menu:not([style*="display"]) > li,
+    .dropdown-menu:not([style*="display"]) > .dropdown-item {
+        transition: none;
+    }
 }
 
 body, html {
