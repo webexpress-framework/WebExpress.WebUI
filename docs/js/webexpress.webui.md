@@ -536,7 +536,7 @@ The `DialogPanels` singleton stores panel definitions by a modal key. Multiple p
 
 ## DashboardWidgets
 
-The `DashboardWidgets` singleton manages dashboard widget definitions.
+The `DashboardWidgets` singleton manages dashboard widget definitions. The `DashboardCtrl` looks a widget up by id to render its card and, when the board is configurable, to build its settings form. Which widget types a board may *add* is decided by the server (`availableWidgets` in the REST payload), not by the registry.
 
 ### Methods
 
@@ -545,6 +545,35 @@ The `DashboardWidgets` singleton manages dashboard widget definitions.
 |`register(id, definition)` |Registers a widget with a unique ID and definition.
 |`get(id)`                  |Returns the widget definition, or `null`.
 |`getAll()`                 |Returns all registered widget definitions.
+
+### Definition
+
+|Field          |Description
+|---------------|--------------------------------------------------------------
+|`title`        |Display title (usually an i18n string).
+|`icon`         |FontAwesome class shown in the header and the add menu.
+|`description`  |Optional line shown under the add-menu entry.
+|`removable`    |`false` hides the **Delete** entry for this type (default `true`).
+|`configurable` |`false` hides the **Settings** entry for this type (default `true`).
+|`settings`     |Optional array of settings fields appended to the settings dialog after the shared name and color.
+|`render`       |`function(container, data)` that builds the widget body. `data.title` / `data.color` carry the name and accent, `data.params` the persisted settings.
+
+Each `settings` field is `{ key, label, type, default? }` with `type` one of `text`, `number` (`min` / `max` / `step`), `select` (`options: [{ value, label }]`), `checkbox` or `color`. Edited values are written back into the widget's `params` as strings.
+
+```javascript
+webexpress.webui.DashboardWidgets.register("widget_scrum_velocity", {
+    title: webexpress.webui.I18N.translate("webexpress.webapp:dashboard.widget.scrum_velocity.title"),
+    icon: "fas fa-chart-column",
+    settings: [
+        { key: "maxSprints", label: "Number of sprints", type: "number", min: 1, max: 20, default: "6" }
+    ],
+    render: function (container, data) {
+        // data.params.maxSprints, data.title, data.color …
+    }
+});
+```
+
+See the [DashboardCtrl](../../../WebExpress.WebApp/docs/js/dashboard.md) documentation for the board menus, the column and widget "…" menus and the REST contract.
 
 ## TableTemplates
 

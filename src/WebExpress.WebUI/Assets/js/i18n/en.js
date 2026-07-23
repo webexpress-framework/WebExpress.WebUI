@@ -88,6 +88,10 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "properties": "Properties",
 
     "dashboard.widget.unavailable": "Widget content not available.",
+    "dashboard.settings.title": "Settings",
+    "dashboard.settings.name": "Name",
+    "dashboard.settings.color": "Color",
+    "dashboard.settings.color.enable": "Use color",
 
     "list.renderer.error": "Renderer Error",
     "list.delete.confirm": "Delete this item?",

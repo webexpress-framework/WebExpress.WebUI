@@ -4,6 +4,49 @@
 .wx-dashboard {
 }
 
+/* board "…" menu bar, right aligned above the columns, sharing the tab-add feel */
+.wx-dashboard-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+/* the "…" menu container anchors its own dropdown */
+.wx-dashboard-menu {
+    display: inline-flex;
+}
+
+/* the board and per-widget "…" trigger buttons */
+.wx-dashboard-menu-btn {
+    border: none;
+    background: transparent;
+    padding: 0.15rem 0.4rem;
+    line-height: 1;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    color: var(--wx-secondary-color, #6c757d);
+    transition: color 0.15s, background-color 0.15s;
+}
+
+.wx-dashboard-menu-btn:hover,
+.wx-dashboard-menu-btn:focus {
+    color: var(--wx-body-color);
+    background-color: var(--wx-tertiary-bg, rgba(0, 0, 0, 0.05));
+}
+
+/* the per-widget trigger stays subtle until the card is hovered */
+.wx-dashboard-widget-menu-btn {
+    font-size: 0.9em;
+}
+
+/* the framework color control in the widget settings dialog keeps a compact,
+   fixed width beside the enable checkbox */
+.wx-dashboard-settings-color {
+    flex: 0 0 auto;
+    width: 6rem;
+}
+
 /* dashboard lane layout */
 .wx-dashboard-row {
     display: grid;
@@ -27,14 +70,77 @@
     gap: 0.75rem;
 }
 
-/* Lane title styling */
+/* Lane title styling; a flex row so the grip, title and "…" menu align and the
+   title can truncate between them */
 .wx-dashboard-lane-title {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
     font-size: 1.1rem;
     font-weight: 600;
     margin: 0;
     padding-bottom: 0.5rem;
     border-bottom: 2px solid var(--wx-border-color, #dee2e6);
     color: var(--wx-heading-color, #495057);
+}
+
+.wx-board-col-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* the column "…" menu sits at the far end of the header */
+.wx-board-col-menu {
+    margin-left: auto;
+}
+
+/* the per-column and per-widget "…" triggers and the widget move handle stay
+   hidden until the header or card is hovered; an open menu keeps its trigger
+   visible even once the pointer leaves. the board (add) menu is unaffected. */
+.wx-dashboard-lane-title .wx-dashboard-menu-btn,
+.wx-dashboard-widget-card .wx-dashboard-menu-btn,
+.wx-dashboard-widget-card .wx-drag-handle {
+    visibility: hidden;
+}
+
+.wx-dashboard-lane-title:hover .wx-dashboard-menu-btn,
+.wx-dashboard-widget-card:hover .wx-dashboard-menu-btn,
+.wx-dashboard-widget-card:hover .wx-drag-handle,
+.wx-dashboard-menu.wx-menu-open .wx-dashboard-menu-btn {
+    visibility: visible;
+}
+
+/* column drag: dim the dragged header and mark the side the column would land
+   on, mirroring the tab reorder affordance */
+.wx-board-col-header.wx-board-col-drop-before {
+    box-shadow: inset 3px 0 0 0 var(--wx-primary, #0d6efd);
+}
+
+.wx-board-col-header.wx-board-col-drop-after {
+    box-shadow: inset -3px 0 0 0 var(--wx-primary, #0d6efd);
+}
+
+/* the color palette shown in the column menu */
+.wx-board-col-color-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+    padding: 0.25rem 1rem 0.5rem;
+}
+
+.wx-board-col-swatch {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.wx-board-col-swatch.active {
+    outline: 2px solid var(--wx-body-color, #212529);
+    outline-offset: 1px;
 }
 
 /* A vertical column (lane) that holds the widgets */

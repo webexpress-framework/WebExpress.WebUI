@@ -16,6 +16,17 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
     _dragColumnIndex = null;
     _activeColumnEdit = null;
 
+    // board "…" menu (add column / add widget) and per-widget settings
+    _addableColumn = false;
+    _addableWidget = false;
+    _configurableWidget = false;
+    _settingsDialog = null;
+    _onDocClick = null;
+
+    // the widget types offered in the add menu, supplied by the REST layer; the
+    // base leaves it empty so a standalone board offers nothing until told
+    _availableWidgets = [];
+
     /**
      * Initializes the dashboard control.
      * @param {HTMLElement} element - The root element for the dashboard.
@@ -31,8 +42,47 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         this._movableColumn = element.dataset.movableColumn === "true";
         this._deletableColumn = element.dataset.deletableColumn === "true";
 
+        // board menu capabilities; the offered widget types are derived from the
+        // client widget registry, so no server-authored list is needed
+        this._addableColumn = element.dataset.addableColumn === "true";
+        this._addableWidget = element.dataset.addableWidget === "true";
+        this._configurableWidget = element.dataset.configurableWidget === "true";
+
+        // a single document listener closes any open board/widget dropdown when
+        // the click lands outside its own menu container
+        this._onDocClick = (e) => this._closeMenusOnOutsideClick(e);
+        document.addEventListener("click", this._onDocClick);
+
         this._parseStaticConfig();
         this.render();
+    }
+
+    /**
+     * Removes the document-level menu listener when the control is torn down.
+     */
+    destroy() {
+        if (this._onDocClick) {
+            document.removeEventListener("click", this._onDocClick);
+            this._onDocClick = null;
+        }
+        super.destroy();
+    }
+
+    /**
+     * Closes every open board or widget dropdown whose container does not
+     * contain the click target, so only a menu the user is interacting with
+     * stays open.
+     * @param {MouseEvent} e - The document click event.
+     */
+    _closeMenusOnOutsideClick(e) {
+        const menus = this._element.querySelectorAll(".wx-dashboard-menu > .dropdown-menu.show");
+        for (let i = 0; i < menus.length; i++) {
+            const container = menus[i].closest(".wx-dashboard-menu");
+            if (container && !container.contains(e.target)) {
+                menus[i].classList.remove("show");
+                container.classList.remove("wx-menu-open");
+            }
+        }
     }
 
     /**
@@ -181,6 +231,13 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         const el = this._element;
         el.innerHTML = "";
 
+        // the board "…" menu shares the tab-add look and feel and gathers the
+        // add-column and add-widget affordances above the columns
+        const menuBar = this._buildBoardMenu();
+        if (menuBar) {
+            el.appendChild(menuBar);
+        }
+
         const row = document.createElement("div");
         row.className = "wx-dashboard-row";
 
@@ -202,7 +259,19 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             if (colTitle || hasColTools) {
                 const titleEl = document.createElement("h5");
                 titleEl.className = "wx-dashboard-lane-title";
-                titleEl.textContent = colTitle;
+
+                const titleText = document.createElement("span");
+                titleText.className = "wx-board-col-title";
+                titleText.textContent = colTitle;
+                titleEl.appendChild(titleText);
+
+                // the column color tints the header underline so the column reads
+                // as a labelled, colored lane
+                if (colData.color) {
+                    titleEl.style.borderBottomColor = colData.color;
+                    titleEl.classList.add("wx-board-col-has-color");
+                }
+
                 this._decorateColumnHeader(titleEl, colIdx);
                 wrapperEl.appendChild(titleEl);
             }
@@ -212,30 +281,31 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             laneEl.dataset.columnIndex = colIdx;
             laneEl.dataset.columnId = colData.id;
 
-            if (colData.movable) {
-                laneEl.addEventListener("dragover", (e) => {
-                    e.preventDefault();
-                    if (laneEl.children.length === 0) {
-                        laneEl.classList.add("wx-drag-over-empty");
-                    } else {
-                        // highlight the bottom of the last widget when dragging in empty space below
-                        const lastChild = laneEl.lastElementChild;
-                        if (lastChild && !lastChild.classList.contains("wx-drag-over-top")) {
-                            lastChild.classList.add("wx-drag-over-bottom");
-                        }
-                    }
-                });
-                laneEl.addEventListener("dragleave", (e) => {
-                    laneEl.classList.remove("wx-drag-over-empty");
+            // the lane is always a drop target: a drop only acts while a movable
+            // widget is being dragged, and gating this on a per-column flag left
+            // empty columns (including freshly added ones) unable to receive widgets
+            laneEl.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                if (laneEl.children.length === 0) {
+                    laneEl.classList.add("wx-drag-over-empty");
+                } else {
+                    // highlight the bottom of the last widget when dragging in empty space below
                     const lastChild = laneEl.lastElementChild;
-                    if (lastChild) {
-                        lastChild.classList.remove("wx-drag-over-bottom");
+                    if (lastChild && !lastChild.classList.contains("wx-drag-over-top")) {
+                        lastChild.classList.add("wx-drag-over-bottom");
                     }
-                });
-                laneEl.addEventListener("drop", (e) => {
-                    this._onDropLane(e, colIdx, laneEl);
-                });
-            }
+                }
+            });
+            laneEl.addEventListener("dragleave", (e) => {
+                laneEl.classList.remove("wx-drag-over-empty");
+                const lastChild = laneEl.lastElementChild;
+                if (lastChild) {
+                    lastChild.classList.remove("wx-drag-over-bottom");
+                }
+            });
+            laneEl.addEventListener("drop", (e) => {
+                this._onDropLane(e, colIdx, laneEl);
+            });
 
             const columnWidgets = colData.widgets;
             for (let i = 0; i < columnWidgets.length; i++) {
@@ -252,13 +322,251 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Decorates a column header with the inline-rename, ⠿ reorder grip and
-     * delete affordances, depending on the enabled column flags.
+     * Builds the board "…" menu bar carrying the add-column entry and the
+     * add-widget entries. Returns null when neither affordance is enabled, so
+     * the board stays unchanged for read-only dashboards. The button toggles a
+     * dropdown that mirrors the tab add (+) control.
+     * @returns {HTMLElement|null} The menu bar, or null when no menu is offered.
+     */
+    _buildBoardMenu() {
+        if (!this._addableColumn && !this._addableWidget) {
+            return null;
+        }
+
+        const bar = document.createElement("div");
+        bar.className = "wx-dashboard-toolbar";
+
+        const container = document.createElement("div");
+        container.className = "wx-dashboard-menu position-relative";
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "wx-dashboard-menu-btn";
+        button.title = this._i18n("webexpress.webapp:dashboard.menu", "Options");
+        button.setAttribute("aria-label", button.title);
+        button.innerHTML = `<i class="${this._iconClass("fas fa-ellipsis-vertical", "more")}"></i>`;
+
+        const menu = document.createElement("ul");
+        menu.className = "dropdown-menu dropdown-menu-end";
+
+        if (this._addableColumn) {
+            menu.appendChild(this._buildMenuEntry(
+                this._iconClass("fas fa-table-columns", "table-columns"),
+                this._i18n("webexpress.webapp:column.add", "New column"),
+                null,
+                () => this._addColumn()
+            ));
+        }
+
+        if (this._addableWidget) {
+            const widgets = this._availableWidgets || [];
+
+            if (widgets.length > 0) {
+                if (this._addableColumn) {
+                    const divider = document.createElement("li");
+                    divider.innerHTML = "<hr class=\"dropdown-divider\">";
+                    menu.appendChild(divider);
+                }
+
+                const heading = document.createElement("li");
+                heading.className = "dropdown-header";
+                heading.textContent = this._i18n("webexpress.webapp:dashboard.widget.add", "Add item");
+                menu.appendChild(heading);
+
+                for (let i = 0; i < widgets.length; i++) {
+                    const widget = widgets[i];
+                    // the REST entry defines availability; its display falls back
+                    // to the registered widget definition when not overridden
+                    const definition = webexpress.webui.DashboardWidgets.get(widget.id) || {};
+                    const iconClass = widget.icon || definition.icon;
+                    const icon = iconClass ? webexpress.webui.IconTheme.resolveFa(iconClass) : null;
+                    menu.appendChild(this._buildMenuEntry(
+                        icon,
+                        widget.title || definition.title || widget.id,
+                        widget.description || definition.description || null,
+                        () => this._addWidget(widget.id)
+                    ));
+                }
+            }
+        }
+
+        // an enabled add-widget menu with no registered items would render an
+        // empty dropdown, so drop the whole bar when nothing can be added
+        if (menu.children.length === 0) {
+            return null;
+        }
+
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this._toggleMenu(menu);
+        });
+
+        container.appendChild(button);
+        container.appendChild(menu);
+        bar.appendChild(container);
+
+        return bar;
+    }
+
+    /**
+     * Builds a single dropdown entry with an optional icon, a title and an
+     * optional description line, mirroring the tab template chooser.
+     * @param {string|null} iconClass - The resolved icon class, or null.
+     * @param {string} title - The entry title.
+     * @param {string|null} description - The optional description line.
+     * @param {Function} onClick - The click handler.
+     * @returns {HTMLElement} The list item element.
+     */
+    _buildMenuEntry(iconClass, title, description, onClick) {
+        const li = document.createElement("li");
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "dropdown-item";
+
+        const titleLine = document.createElement("div");
+        titleLine.className = "fw-semibold";
+        if (iconClass) {
+            const icon = document.createElement("i");
+            icon.className = iconClass + " me-2";
+            titleLine.appendChild(icon);
+        }
+        titleLine.appendChild(document.createTextNode(title));
+        button.appendChild(titleLine);
+
+        if (description) {
+            const descLine = document.createElement("small");
+            descLine.className = "d-block text-muted";
+            descLine.textContent = description;
+            button.appendChild(descLine);
+        }
+
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this._closeAllMenus();
+            onClick();
+        });
+
+        li.appendChild(button);
+
+        return li;
+    }
+
+    /**
+     * Toggles a dropdown menu, closing any other open dashboard menu first so
+     * only one stays open at a time.
+     * @param {HTMLElement} menu - The dropdown menu element.
+     */
+    _toggleMenu(menu) {
+        const willShow = !menu.classList.contains("show");
+        this._closeAllMenus();
+        if (willShow) {
+            menu.classList.add("show");
+            // the open class keeps the hover-only trigger visible while the menu
+            // is open, even once the pointer leaves the header or card
+            const container = menu.closest(".wx-dashboard-menu");
+            if (container) {
+                container.classList.add("wx-menu-open");
+            }
+        }
+    }
+
+    /**
+     * Closes every open board, column or widget dropdown of this dashboard.
+     */
+    _closeAllMenus() {
+        const menus = this._element.querySelectorAll(".wx-dashboard-menu > .dropdown-menu.show");
+        for (let i = 0; i < menus.length; i++) {
+            menus[i].classList.remove("show");
+        }
+        const open = this._element.querySelectorAll(".wx-dashboard-menu.wx-menu-open");
+        for (let i = 0; i < open.length; i++) {
+            open[i].classList.remove("wx-menu-open");
+        }
+    }
+
+    /**
+     * Appends a new empty column and persists the new column layout. When the
+     * headers are editable the new column is named from a translated default so
+     * it is visible immediately and can be renamed inline afterwards.
+     */
+    _addColumn() {
+        const label = this._i18n("webexpress.webapp:column.new", "New column");
+        this._columns.push({
+            id: "col_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+            title: label,
+            label: label,
+            size: "1fr",
+            color: null,
+            widgets: []
+        });
+
+        // fixed sizes (e.g. 33%) keep the existing columns from making room for
+        // the new one, so rebalance every column to an equal fraction
+        for (let i = 0; i < this._columns.length; i++) {
+            this._columns[i].size = "1fr";
+        }
+
+        this.render();
+        this._dispatchColumnChange();
+    }
+
+    /**
+     * Adds a widget of the given type to the board and persists the change. The
+     * widget lands in the first column; when the board has no column yet and
+     * columns may be added, one is created first so the widget has a home.
+     * @param {string} widgetId - The registered widget type id.
+     */
+    _addWidget(widgetId) {
+        if (!widgetId) {
+            return;
+        }
+
+        // only widgets the REST layer marks available may be used on the board
+        const available = this._availableWidgets || [];
+        if (!available.some((w) => w.id === widgetId)) {
+            return;
+        }
+
+        if (this._columns.length === 0) {
+            if (!this._addableColumn) {
+                return;
+            }
+            this._addColumn();
+        }
+
+        const definition = webexpress.webui.DashboardWidgets.get(widgetId) || {};
+
+        this._columns[0].widgets.push({
+            instanceId: "wx_inst_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+            id: widgetId,
+            title: definition.title || null,
+            icon: definition.icon || null,
+            image: null,
+            color: null,
+            removable: definition.removable !== false,
+            movable: definition.movable !== false,
+            html: "",
+            params: {}
+        });
+
+        this.render();
+        this._dispatchChangeEvent("add");
+    }
+
+    /**
+     * Decorates a column header with the ⠿ reorder grip and the "…" menu
+     * (rename, size, color, delete), depending on the enabled column flags. The
+     * grip and menu trigger reveal on hover; an inline rename is started from the
+     * menu rather than a pencil or double-click.
      * @param {HTMLElement} headerEl - The column header element.
      * @param {number} index - The column index in this._columns.
      */
     _decorateColumnHeader(headerEl, index) {
-        if (!this._editableColumn && !this._movableColumn && !this._deletableColumn) {
+        const hasMenu = this._editableColumn || this._deletableColumn;
+        if (!this._movableColumn && !hasMenu) {
             return;
         }
 
@@ -266,95 +574,374 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
 
         if (this._movableColumn) {
             headerEl.classList.add("wx-board-col-movable");
+            this._addColumnGrip(headerEl, index);
+        }
 
-            const grip = document.createElement("span");
-            grip.className = "wx-board-col-grip";
-            grip.textContent = "⠿";
-            grip.title = this._i18n("webexpress.webapp:column.move", "Reorder column");
-            grip.setAttribute("aria-label", grip.title);
-            grip.draggable = true;
-            grip.addEventListener("click", (e) => e.stopPropagation());
-            grip.addEventListener("dragstart", (e) => {
-                this._dragColumnIndex = index;
-                headerEl.classList.add("wx-board-col-dragging");
-                if (e.dataTransfer) {
-                    e.dataTransfer.effectAllowed = "move";
-                    try { e.dataTransfer.setData("text/plain", String(index)); } catch (err) { /* noop */ }
-                }
-            });
-            grip.addEventListener("dragend", () => {
-                headerEl.classList.remove("wx-board-col-dragging");
-                this._dragColumnIndex = null;
-            });
-            headerEl.insertBefore(grip, headerEl.firstChild);
+        if (hasMenu) {
+            headerEl.appendChild(this._buildColumnMenu(headerEl, index));
+        }
+    }
 
-            headerEl.addEventListener("dragover", (e) => {
-                if (this._dragColumnIndex === null) {
-                    return;
-                }
-                e.preventDefault();
-                if (e.dataTransfer) {
-                    e.dataTransfer.dropEffect = "move";
-                }
-            });
-            headerEl.addEventListener("drop", (e) => {
-                if (this._dragColumnIndex === null) {
-                    return;
-                }
-                e.preventDefault();
-                e.stopPropagation();
-                const rect = headerEl.getBoundingClientRect();
-                const after = e.clientX > rect.left + rect.width / 2;
-                this._moveColumn(this._dragColumnIndex, index, after);
-            });
+    /**
+     * Adds the ⠿ reorder grip and wires the column drag and drop, including the
+     * before/after drop indicators that visualise where the dragged column would
+     * land - the same affordance the tabs use.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index.
+     */
+    _addColumnGrip(headerEl, index) {
+        const grip = document.createElement("span");
+        grip.className = "wx-board-col-grip";
+        grip.textContent = "⠿";
+        grip.title = this._i18n("webexpress.webapp:column.move", "Reorder column");
+        grip.setAttribute("aria-label", grip.title);
+        grip.draggable = true;
+        grip.addEventListener("click", (e) => e.stopPropagation());
+        grip.addEventListener("dragstart", (e) => {
+            this._dragColumnIndex = index;
+            headerEl.classList.add("wx-board-col-dragging");
+            if (e.dataTransfer) {
+                e.dataTransfer.effectAllowed = "move";
+                try { e.dataTransfer.setData("text/plain", String(index)); } catch (err) { /* noop */ }
+            }
+        });
+        grip.addEventListener("dragend", () => {
+            headerEl.classList.remove("wx-board-col-dragging");
+            this._clearColumnDropIndicators();
+            this._dragColumnIndex = null;
+        });
+        headerEl.insertBefore(grip, headerEl.firstChild);
+
+        headerEl.addEventListener("dragover", (e) => {
+            if (this._dragColumnIndex === null) {
+                return;
+            }
+            e.preventDefault();
+            if (e.dataTransfer) {
+                e.dataTransfer.dropEffect = "move";
+            }
+            const rect = headerEl.getBoundingClientRect();
+            const after = e.clientX > rect.left + rect.width / 2;
+            this._clearColumnDropIndicators();
+            headerEl.classList.add(after ? "wx-board-col-drop-after" : "wx-board-col-drop-before");
+        });
+        headerEl.addEventListener("dragleave", () => {
+            headerEl.classList.remove("wx-board-col-drop-before", "wx-board-col-drop-after");
+        });
+        headerEl.addEventListener("drop", (e) => {
+            if (this._dragColumnIndex === null) {
+                return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            const rect = headerEl.getBoundingClientRect();
+            const after = e.clientX > rect.left + rect.width / 2;
+            this._clearColumnDropIndicators();
+            this._moveColumn(this._dragColumnIndex, index, after);
+        });
+    }
+
+    /**
+     * Clears the column drop indicators from every column header.
+     */
+    _clearColumnDropIndicators() {
+        const marked = this._element.querySelectorAll(".wx-board-col-drop-before, .wx-board-col-drop-after");
+        for (let i = 0; i < marked.length; i++) {
+            marked[i].classList.remove("wx-board-col-drop-before", "wx-board-col-drop-after");
+        }
+    }
+
+    /**
+     * Builds the column "…" menu offering rename, size, color and delete. The
+     * size and color entries drill down into the same dropdown so no nested
+     * flyout positioning is needed.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index.
+     * @returns {HTMLElement} The menu container element.
+     */
+    _buildColumnMenu(headerEl, index) {
+        const container = document.createElement("span");
+        container.className = "wx-dashboard-menu wx-board-col-menu position-relative";
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "wx-dashboard-menu-btn";
+        button.title = this._i18n("webexpress.webapp:column.menu", "Column options");
+        button.setAttribute("aria-label", button.title);
+        button.innerHTML = `<i class="${this._iconClass("fas fa-ellipsis-vertical", "more")}"></i>`;
+
+        const menu = document.createElement("ul");
+        menu.className = "dropdown-menu dropdown-menu-end";
+
+        this._populateColumnMenuRoot(menu, headerEl, index);
+
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            // a re-opened menu always starts at the top level
+            this._populateColumnMenuRoot(menu, headerEl, index);
+            this._toggleMenu(menu);
+        });
+
+        container.appendChild(button);
+        container.appendChild(menu);
+
+        return container;
+    }
+
+    /**
+     * Populates the column menu with its top-level entries.
+     * @param {HTMLElement} menu - The dropdown menu element.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index.
+     */
+    _populateColumnMenuRoot(menu, headerEl, index) {
+        menu.replaceChildren();
+
+        if (this._editableColumn) {
+            menu.appendChild(this._buildMenuEntry(
+                this._iconClass("fas fa-pencil", "pen"),
+                this._i18n("webexpress.webapp:column.edit", "Rename column"),
+                null,
+                () => this._startColumnEdit(headerEl, index)
+            ));
+            menu.appendChild(this._buildColumnSubmenuEntry(
+                this._iconClass("fas fa-ruler", "expand"),
+                this._i18n("webexpress.webapp:column.size", "Size"),
+                (m) => this._populateColumnMenuSizes(m, headerEl, index)
+            ));
+            menu.appendChild(this._buildColumnSubmenuEntry(
+                this._iconClass("fas fa-palette", "palette"),
+                this._i18n("webexpress.webapp:column.color", "Color"),
+                (m) => this._populateColumnMenuColors(m, headerEl, index)
+            ));
         }
 
         if (this._deletableColumn) {
-            const del = document.createElement("button");
-            del.type = "button";
-            del.className = "wx-board-col-delete";
-            del.title = this._i18n("webexpress.webapp:column.delete", "Delete column");
-            del.setAttribute("aria-label", del.title);
-            del.innerHTML = `<i class="${this._iconClass("fas fa-xmark", "wx-icon-light-xmark")}"></i>`;
-            del.addEventListener("click", (e) => {
+            if (this._editableColumn) {
+                const divider = document.createElement("li");
+                divider.innerHTML = "<hr class=\"dropdown-divider\">";
+                menu.appendChild(divider);
+            }
+            menu.appendChild(this._buildMenuEntry(
+                this._iconClass("fas fa-trash", "trash"),
+                this._i18n("webexpress.webapp:column.delete", "Delete column"),
+                null,
+                () => this._deleteColumn(index)
+            ));
+        }
+    }
+
+    /**
+     * Builds a drill-down entry that repopulates the menu in place with a
+     * sub-level, keeping the dropdown open.
+     * @param {string|null} iconClass - The resolved icon class.
+     * @param {string} label - The entry label.
+     * @param {Function} populate - Repopulates the menu; receives the menu element.
+     * @returns {HTMLElement} The list item element.
+     */
+    _buildColumnSubmenuEntry(iconClass, label, populate) {
+        const li = document.createElement("li");
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "dropdown-item d-flex align-items-center";
+
+        if (iconClass) {
+            const icon = document.createElement("i");
+            icon.className = iconClass + " me-2";
+            button.appendChild(icon);
+        }
+        button.appendChild(document.createTextNode(label));
+
+        const chevron = document.createElement("i");
+        chevron.className = this._iconClass("fas fa-chevron-right", "chevron-right") + " ms-auto ps-3";
+        button.appendChild(chevron);
+
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            populate(li.closest(".dropdown-menu"));
+        });
+
+        li.appendChild(button);
+
+        return li;
+    }
+
+    /**
+     * Prepends the "back" entry that returns a drilled-down menu to its root.
+     * @param {HTMLElement} menu - The dropdown menu element.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index.
+     */
+    _buildColumnMenuBack(menu, headerEl, index) {
+        const li = document.createElement("li");
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "dropdown-item text-muted d-flex align-items-center";
+        button.innerHTML = `<i class="${this._iconClass("fas fa-chevron-left", "chevron-left")} me-2"></i>`;
+        button.appendChild(document.createTextNode(this._i18n("webexpress.webapp:back", "Back")));
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this._populateColumnMenuRoot(menu, headerEl, index);
+        });
+
+        li.appendChild(button);
+
+        return li;
+    }
+
+    /**
+     * Populates the column menu with the size presets.
+     * @param {HTMLElement} menu - The dropdown menu element.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index.
+     */
+    _populateColumnMenuSizes(menu, headerEl, index) {
+        menu.replaceChildren();
+        menu.appendChild(this._buildColumnMenuBack(menu, headerEl, index));
+
+        const col = this._columns[index];
+        const presets = [
+            { label: this._i18n("webexpress.webapp:column.size.auto", "Auto"), value: "1fr" },
+            { label: "25 %", value: "25%" },
+            { label: "33 %", value: "33%" },
+            { label: "50 %", value: "50%" },
+            { label: "66 %", value: "66%" },
+            { label: "75 %", value: "75%" }
+        ];
+
+        for (let i = 0; i < presets.length; i++) {
+            const preset = presets[i];
+            const active = col && (col.size === preset.value
+                || (preset.value === "1fr" && (!col.size || col.size === "*")));
+            menu.appendChild(this._buildMenuCheckEntry(preset.label, active, () => this._setColumnSize(index, preset.value)));
+        }
+    }
+
+    /**
+     * Populates the column menu with the color palette and a "none" option.
+     * @param {HTMLElement} menu - The dropdown menu element.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index.
+     */
+    _populateColumnMenuColors(menu, headerEl, index) {
+        menu.replaceChildren();
+        menu.appendChild(this._buildColumnMenuBack(menu, headerEl, index));
+
+        const col = this._columns[index];
+
+        menu.appendChild(this._buildMenuCheckEntry(
+            this._i18n("webexpress.webapp:column.color.none", "None"),
+            col && !col.color,
+            () => this._setColumnColor(index, null)
+        ));
+
+        const li = document.createElement("li");
+        const grid = document.createElement("div");
+        grid.className = "wx-board-col-color-grid";
+
+        const palette = this._colorPalette();
+        for (let i = 0; i < palette.length; i++) {
+            const color = palette[i];
+            const swatch = document.createElement("button");
+            swatch.type = "button";
+            swatch.className = "wx-board-col-swatch";
+            swatch.style.backgroundColor = color;
+            swatch.title = color;
+            if (col && col.color && col.color.toLowerCase() === color.toLowerCase()) {
+                swatch.classList.add("active");
+            }
+            swatch.addEventListener("click", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                this._deleteColumn(index);
+                this._closeAllMenus();
+                this._setColumnColor(index, color);
             });
-            headerEl.appendChild(del);
+            grid.appendChild(swatch);
         }
 
-        if (this._editableColumn) {
-            headerEl.classList.add("wx-board-col-editable");
-            headerEl.addEventListener("dblclick", (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this._startColumnEdit(headerEl, index);
-            });
-            headerEl.addEventListener("mouseenter", () => {
-                if (this._activeColumnEdit || headerEl.querySelector(".wx-board-col-edit")) {
-                    return;
-                }
-                const pencil = document.createElement("button");
-                pencil.type = "button";
-                pencil.className = "wx-board-col-edit";
-                pencil.title = this._i18n("webexpress.webapp:column.edit", "Rename column");
-                pencil.setAttribute("aria-label", pencil.title);
-                pencil.innerHTML = `<i class="${this._iconClass("fas fa-pencil", "wx-icon-light-pen")}"></i>`;
-                pencil.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    this._startColumnEdit(headerEl, index);
-                });
-                headerEl.appendChild(pencil);
-            });
-            headerEl.addEventListener("mouseleave", () => {
-                const pencil = headerEl.querySelector(".wx-board-col-edit");
-                if (pencil) {
-                    pencil.remove();
-                }
-            });
+        li.appendChild(grid);
+        menu.appendChild(li);
+    }
+
+    /**
+     * Builds a menu entry with a leading check mark reflecting the active state.
+     * @param {string} label - The entry label.
+     * @param {boolean} active - Whether the entry is the current selection.
+     * @param {Function} onClick - The click handler.
+     * @returns {HTMLElement} The list item element.
+     */
+    _buildMenuCheckEntry(label, active, onClick) {
+        const li = document.createElement("li");
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "dropdown-item d-flex align-items-center";
+        if (active) {
+            button.classList.add("active");
         }
+
+        const check = document.createElement("i");
+        check.className = active ? this._iconClass("fas fa-check", "check") : "";
+        check.style.width = "1.25em";
+        button.appendChild(check);
+        button.appendChild(document.createTextNode(label));
+
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this._closeAllMenus();
+            onClick();
+        });
+
+        li.appendChild(button);
+
+        return li;
+    }
+
+    /**
+     * The column color palette offered in the column menu.
+     * @returns {Array<string>} The hex colors.
+     */
+    _colorPalette() {
+        return [
+            "#0d6efd", "#6610f2", "#6f42c1", "#d63384", "#dc3545", "#fd7e14",
+            "#ffc107", "#198754", "#20c997", "#0dcaf0", "#6c757d", "#343a40"
+        ];
+    }
+
+    /**
+     * Sets a column size and persists the new column layout.
+     * @param {number} index - The column index.
+     * @param {string} value - The CSS grid size (e.g. "1fr", "33%").
+     */
+    _setColumnSize(index, value) {
+        const col = this._columns[index];
+        if (!col) {
+            return;
+        }
+        col.size = value;
+        this.render();
+        this._dispatchColumnChange();
+    }
+
+    /**
+     * Sets a column color and persists the new column layout.
+     * @param {number} index - The column index.
+     * @param {string|null} color - The color, or null to clear it.
+     */
+    _setColumnColor(index, color) {
+        const col = this._columns[index];
+        if (!col) {
+            return;
+        }
+        col.color = color;
+        this.render();
+        this._dispatchColumnChange();
     }
 
     /**
@@ -455,7 +1042,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
      */
     _dispatchColumnChange() {
         const columns = this._columns.map((c) => {
-            return { id: c.id, title: c.title ?? c.label ?? "", size: c.size };
+            return { id: c.id, title: c.title ?? c.label ?? "", size: c.size, color: c.color ?? null };
         });
 
         this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
@@ -527,7 +1114,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             titleArea.appendChild(icon);
         }
 
-        const widgetTitle = widgetData.title || registeredWidget.title || "";
+        const widgetTitle = widgetData.title || widgetData.label || registeredWidget.title || "";
         const titleText = document.createElement("span");
         titleText.textContent = widgetTitle;
         titleArea.appendChild(titleText);
@@ -538,16 +1125,14 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         const rightArea = document.createElement("div");
         rightArea.className = "d-flex gap-2";
 
-        if (widgetData.removable !== false && registeredWidget.removable !== false) {
-            const removeBtn = document.createElement("button");
-            removeBtn.type = "button";
-            removeBtn.className = "btn wx-button-close";
-            removeBtn.setAttribute("aria-label", this._i18n("webexpress.webui:remove", "Remove"));
-            removeBtn.innerHTML = `<i class="${this._iconClass("fas fa-times", "wx-icon-light-xmark")}"></i>`;
-            removeBtn.addEventListener("click", () => {
-                this._removeWidget(colIdx, widgetData.instanceId);
-            });
-            rightArea.appendChild(removeBtn);
+        // the widget "…" menu offers the type-dependent settings (name and color
+        // plus any declared fields) and the delete entry; either affordance can
+        // be absent, so the menu is skipped when it would be empty
+        const canConfigure = this._configurableWidget && registeredWidget.configurable !== false;
+        const canRemove = widgetData.removable !== false && registeredWidget.removable !== false;
+
+        if (canConfigure || canRemove) {
+            rightArea.appendChild(this._buildWidgetMenu(colIdx, widgetData, canConfigure, canRemove));
         }
 
         header.appendChild(rightArea);
@@ -602,6 +1187,86 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         }
 
         return cardEl;
+    }
+
+    /**
+     * Builds the per-widget "…" kebab menu carrying the settings and delete
+     * entries. The dropdown mirrors the board menu look and feel.
+     * @param {number} colIdx - Index of the column the widget belongs to.
+     * @param {Object} widgetData - The widget configuration object.
+     * @param {boolean} canConfigure - Whether the settings entry is offered.
+     * @param {boolean} canRemove - Whether the delete entry is offered.
+     * @returns {HTMLElement} The menu container element.
+     */
+    _buildWidgetMenu(colIdx, widgetData, canConfigure, canRemove) {
+        const container = document.createElement("div");
+        container.className = "wx-dashboard-menu position-relative";
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "wx-dashboard-menu-btn wx-dashboard-widget-menu-btn";
+        button.title = this._i18n("webexpress.webapp:dashboard.widget.menu", "Options");
+        button.setAttribute("aria-label", button.title);
+        button.innerHTML = `<i class="${this._iconClass("fas fa-ellipsis-vertical", "more")}"></i>`;
+
+        const menu = document.createElement("ul");
+        menu.className = "dropdown-menu dropdown-menu-end";
+
+        if (canConfigure) {
+            menu.appendChild(this._buildMenuEntry(
+                this._iconClass("fas fa-gear", "gear"),
+                this._i18n("webexpress.webapp:dashboard.widget.settings", "Settings"),
+                null,
+                () => this._openWidgetSettings(colIdx, widgetData.instanceId)
+            ));
+        }
+
+        if (canRemove) {
+            menu.appendChild(this._buildMenuEntry(
+                this._iconClass("fas fa-trash", "trash"),
+                this._i18n("webexpress.webui:remove", "Remove"),
+                null,
+                () => this._removeWidget(colIdx, widgetData.instanceId)
+            ));
+        }
+
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this._toggleMenu(menu);
+        });
+
+        container.appendChild(button);
+        container.appendChild(menu);
+
+        return container;
+    }
+
+    /**
+     * Opens the settings dialog for a widget. The dialog always carries the
+     * name and color and appends any type-specific fields the widget declares
+     * through its settings schema. On save the widget re-renders and the change
+     * is persisted.
+     * @param {number} colIdx - Index of the column the widget belongs to.
+     * @param {string} instanceId - Unique instance identifier of the widget.
+     */
+    _openWidgetSettings(colIdx, instanceId) {
+        const column = this._columns[colIdx];
+        const widget = column && column.widgets.find((w) => w.instanceId === instanceId);
+        if (!widget) {
+            return;
+        }
+
+        const definition = webexpress.webui.DashboardWidgets.get(widget.id) || {};
+
+        if (!this._settingsDialog) {
+            this._settingsDialog = new webexpress.webui.DashboardWidgetSettings();
+        }
+
+        this._settingsDialog.open(widget, definition, () => {
+            this.render();
+            this._dispatchChangeEvent("settings");
+        });
     }
 
     /**
@@ -744,7 +1409,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Dispatches a change event containing the updated dashboard layout.
      * Used to persist layout changes on the server.
-     * @param {string} action - The type of change (e.g., "remove", "reorder").
+     * @param {string} action - The type of change (e.g. "remove", "reorder", "add", "settings").
      */
     _dispatchChangeEvent(action) {
         // map the columns array to layout structure for server persistence
@@ -757,9 +1422,37 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             };
         });
 
+        // the board serialization carries the per-widget settings (name, color,
+        // params) the legacy layout drops, so add and settings changes persist
         this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
             action: action,
-            layout: structure
+            layout: structure,
+            board: this._serializeBoard()
+        });
+    }
+
+    /**
+     * Serializes the full board - columns with their widgets including the
+     * per-widget name, color and params - so the server can persist widget
+     * additions, deletions and settings, not just the arrangement by type.
+     * @returns {Array<object>} The board columns with their widgets.
+     */
+    _serializeBoard() {
+        return this._columns.map((col) => {
+            return {
+                id: col.id,
+                title: col.title ?? col.label ?? "",
+                size: col.size,
+                color: col.color ?? null,
+                widgets: col.widgets.map((w) => {
+                    return {
+                        id: w.id,
+                        title: w.title ?? w.label ?? null,
+                        color: w.color ?? null,
+                        params: w.params || {}
+                    };
+                })
+            };
         });
     }
 };

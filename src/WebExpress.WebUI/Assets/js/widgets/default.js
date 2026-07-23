@@ -4,7 +4,6 @@
 webexpress.webui.DashboardWidgets.register("widget_stats", {
     title: webexpress.webui.I18N.translate("webexpress.webui:widget.stats.title"),
     icon: "fas fa-server",
-    removable: false,
 
     /**
      * Renders the widget content.
