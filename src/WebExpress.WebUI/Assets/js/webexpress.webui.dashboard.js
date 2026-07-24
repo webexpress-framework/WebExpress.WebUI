@@ -100,6 +100,9 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
                     id: node.id || node.dataset.id,
                     title: node.dataset.title || node.id || "column",
                     size: node.dataset.size || "1fr",
+                    badge: node.dataset.badge || null,
+                    badgeColor: node.dataset.badgeColor || null,
+                    badgeStyle: node.dataset.badgeStyle || null,
                     widgets: []
                 });
             });
@@ -171,7 +174,8 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
 
                 const reservedKeys = [
                     "widget", "color", "closeable", "movable",
-                    "label", "icon", "image", "column", "columnId"
+                    "label", "icon", "image", "column", "columnId",
+                    "badge", "badgeColor", "badgeStyle"
                 ];
 
                 for (const key in dataset) {
@@ -189,6 +193,9 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
                     icon: dataset.icon || null,
                     image: dataset.image || null,
                     color: dataset.color || null,
+                    badge: dataset.badge || null,
+                    badgeColor: dataset.badgeColor || null,
+                    badgeStyle: dataset.badgeStyle || null,
                     removable: dataset.closeable !== "false",
                     movable: dataset.movable !== "false",
                     html: htmlContent,
@@ -265,6 +272,13 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
                 titleText.textContent = colTitle;
                 titleEl.appendChild(titleText);
 
+                // optional trailing badge (e.g. the widget count), coloured by a
+                // css class (system color) or an inline style, like the tab badge
+                const colBadge = this._makeBadge(colData, "wx-board-col-badge");
+                if (colBadge) {
+                    titleEl.appendChild(colBadge);
+                }
+
                 // the column color tints the header underline so the column reads
                 // as a labelled, colored lane
                 if (colData.color) {
@@ -319,6 +333,32 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         }
 
         el.appendChild(row);
+    }
+
+    /**
+     * Builds an optional trailing badge from a data object carrying badge,
+     * badgeColor and badgeStyle (columns and widgets both share it). The color
+     * arrives either as a css class (system color) or an inline style
+     * (user-defined color). Returns null when the data carries no badge.
+     * @param {object} data - The data object with badge fields.
+     * @param {string} className - The element class distinguishing the badge kind.
+     * @returns {HTMLElement|null} The badge element, or null.
+     */
+    _makeBadge(data, className) {
+        if (!data || data.badge == null || data.badge === "") {
+            return null;
+        }
+
+        const badge = document.createElement("span");
+        badge.className = className + " badge";
+        if (data.badgeColor) {
+            badge.classList.add(...String(data.badgeColor).split(/\s+/).filter(Boolean));
+        }
+        if (data.badgeStyle) {
+            badge.style.cssText = data.badgeStyle;
+        }
+        badge.textContent = data.badge;
+        return badge;
     }
 
     /**
@@ -1034,7 +1074,23 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         this._columns.splice(target, 0, moved);
 
         this.render();
+        this._flashMovedColumn(target);
         this._dispatchColumnChange();
+    }
+
+    /**
+     * Briefly highlights a column header after a reorder so the user sees where
+     * the column landed. The headers are re-created by render(), so the flash
+     * targets the header at the new index. Mirrors the kanban landing feedback.
+     * @param {number} index - The new column index.
+     */
+    _flashMovedColumn(index) {
+        const header = this._element.querySelectorAll(".wx-dashboard-lane-title")[index];
+        if (!header) {
+            return;
+        }
+        header.classList.add("wx-board-col-moved");
+        setTimeout(() => header.classList.remove("wx-board-col-moved"), 800);
     }
 
     /**
@@ -1118,6 +1174,13 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         const titleText = document.createElement("span");
         titleText.textContent = widgetTitle;
         titleArea.appendChild(titleText);
+
+        // optional trailing badge in the widget header (e.g. an item count),
+        // coloured by a css class or an inline style
+        const widgetBadge = this._makeBadge(widgetData, "wx-dashboard-widget-badge");
+        if (widgetBadge) {
+            titleArea.appendChild(widgetBadge);
+        }
 
         leftArea.appendChild(titleArea);
         header.appendChild(leftArea);

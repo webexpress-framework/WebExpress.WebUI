@@ -93,6 +93,12 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "dashboard.settings.color": "Farbe",
     "dashboard.settings.color.enable": "Farbe verwenden",
 
+    "kanban.settings.title": "Board-Einstellungen",
+    "kanban.settings.swimlane.title": "Swimlane-Einstellungen",
+    "kanban.settings.filter": "Filter (WQL)",
+    "kanban.settings.filter.placeholder": "z. B. priority = 'high'",
+    "kanban.settings.filter.help": "Es werden nur Karten angezeigt, die diesem WQL-Ausdruck entsprechen.",
+
     "list.renderer.error": "Renderer-Fehler",
     "list.delete.confirm": "Dieses Element löschen?",
     "list.sort.title": "Sortieren",

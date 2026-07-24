@@ -18,6 +18,49 @@ function load() {
 }
 
 /**
+ * Loads a runtime with the kanban control and its swimlane dependency, needed
+ * once a board renders swimlanes (each becomes an ExpandableCtrl).
+ * @returns {object} The loaded runtime.
+ */
+function loadFull() {
+    return loadWebUi({ extraFiles: [webuiAsset("webexpress.webui.expandable.js"), webuiAsset("webexpress.webui.kanban.js")] });
+}
+
+/**
+ * Builds a board host carrying the given data attributes and constructs the
+ * control on it.
+ * @param {object} runtime - The loaded runtime.
+ * @param {object} hostData - The data attributes for the host node.
+ * @returns {{ctrl: object, host: object}} The control and its host.
+ */
+function buildBoard(runtime, hostData) {
+    const host = runtime.document.createElement("div");
+    Object.assign(host.dataset, hostData);
+    const ctrl = new runtime.wx.KanbanCtrl(host);
+    return { ctrl, host };
+}
+
+/**
+ * Fires a click event carrying the guards the menu handlers expect.
+ * @param {object} el - The element to click.
+ */
+function clickEntry(el) {
+    el.dispatchEvent({ type: "click", preventDefault() { }, stopPropagation() { } });
+}
+
+/**
+ * Finds a dropdown entry by its exact label. The headless runtime loads no
+ * webapp i18n, so an unresolved key resolves to the key itself; the tests match
+ * that stable key.
+ * @param {object} root - The subtree to search.
+ * @param {string} label - The entry label (an i18n key).
+ * @returns {object|undefined} The matching button, or undefined.
+ */
+function entry(root, label) {
+    return root.querySelectorAll(".dropdown-item").find((b) => b.textContent === label);
+}
+
+/**
  * Builds a single-column board carrying one card with the given data
  * attributes and constructs the control on it.
  * @param {object} runtime - The loaded runtime.
@@ -179,4 +222,164 @@ test("a cancelled column drag leaves no indicator behind", () => {
     headers[0].querySelector(".wx-board-col-grip").dispatchEvent({ type: "dragend" });
 
     assert.equal(host.querySelectorAll(".wx-board-col-drop-before, .wx-board-col-drop-after").length, 0);
+});
+
+test("the board menu offers settings, add column and add swimlane", () => {
+    const runtime = load();
+    const { host } = buildBoard(runtime, {
+        columns: "todo,done", columnTitles: "To Do,Done",
+        configurableBoard: "true", addableColumn: "true", addableSwimlane: "true"
+    });
+
+    const toolbar = host.querySelector(".wx-kanban-toolbar");
+    assert.ok(toolbar, "the board toolbar exists");
+
+    assert.ok(entry(toolbar, "webexpress.webapp:board.settings"), "the settings entry exists");
+    assert.ok(entry(toolbar, "webexpress.webapp:column.add"), "the add-column entry exists");
+    assert.ok(entry(toolbar, "webexpress.webapp:swimlane.add"), "the add-swimlane entry exists");
+});
+
+test("a read-only board offers no board menu", () => {
+    const runtime = load();
+    const { host } = buildBoard(runtime, { columns: "todo,done" });
+
+    assert.equal(host.querySelectorAll(".wx-kanban-toolbar").length, 0);
+});
+
+test("adding a column from the board menu grows the board", () => {
+    const runtime = load();
+    const { ctrl, host } = buildBoard(runtime, { columns: "todo", addableColumn: "true" });
+
+    assert.equal(ctrl._columns.length, 1);
+    clickEntry(entry(host.querySelector(".wx-kanban-toolbar"), "webexpress.webapp:column.add"));
+    assert.equal(ctrl._columns.length, 2);
+});
+
+test("adding a swimlane from the board menu switches the board into swimlane mode", () => {
+    const runtime = loadFull();
+    const { ctrl, host } = buildBoard(runtime, { columns: "todo", addableSwimlane: "true" });
+
+    assert.equal(ctrl._swimlanes.length, 0);
+    clickEntry(entry(host.querySelector(".wx-kanban-toolbar"), "webexpress.webapp:swimlane.add"));
+    assert.equal(ctrl._swimlanes.length, 1);
+});
+
+test("the column menu deletes the column", () => {
+    const runtime = load();
+    const { ctrl, host } = buildBoard(runtime, {
+        columns: "todo,done", columnTitles: "To Do,Done",
+        editableColumn: "true", deletableColumn: "true"
+    });
+
+    assert.equal(ctrl._columns.length, 2);
+    const firstMenu = host.querySelectorAll(".wx-board-col-menu")[0];
+    clickEntry(entry(firstMenu, "webexpress.webapp:column.delete"));
+
+    assert.equal(ctrl._columns.length, 1);
+    assert.equal(ctrl._columns[0].id, "done");
+});
+
+test("the column menu starts an inline rename", () => {
+    const runtime = load();
+    const { host } = buildBoard(runtime, { columns: "todo", editableColumn: "true" });
+
+    clickEntry(entry(host.querySelector(".wx-board-col-menu"), "webexpress.webapp:column.edit"));
+    assert.ok(host.querySelector(".wx-board-col-input"), "the rename input appears");
+});
+
+test("the column menu applies a size preset and a color", () => {
+    const runtime = load();
+    const { ctrl, host } = buildBoard(runtime, { columns: "todo", editableColumn: "true" });
+
+    const menu = host.querySelector(".wx-board-col-menu").querySelector(".dropdown-menu");
+
+    // drill into Size, then pick a preset
+    clickEntry(entry(menu, "webexpress.webapp:column.size"));
+    clickEntry(entry(menu, "50 %"));
+    assert.equal(ctrl._columns[0].size, "50%");
+
+    // the menu was re-rendered by the size change; reacquire it and drill into Color
+    const menu2 = host.querySelector(".wx-board-col-menu").querySelector(".dropdown-menu");
+    clickEntry(entry(menu2, "webexpress.webapp:column.color"));
+    clickEntry(menu2.querySelector(".wx-board-col-swatch"));
+    assert.ok(ctrl._columns[0].color, "a column color is set");
+});
+
+test("the swimlane menu deletes the swimlane", () => {
+    const runtime = loadFull();
+    const { ctrl, host } = buildBoard(runtime, {
+        columns: "todo", swimlanes: "a,b",
+        editableSwimlane: "true", deletableSwimlane: "true"
+    });
+
+    assert.equal(ctrl._swimlanes.length, 2);
+    const firstMenu = host.querySelectorAll(".wx-kanban-swimlane-menu")[0];
+    assert.ok(firstMenu, "the swimlane menu exists");
+    clickEntry(entry(firstMenu, "webexpress.webapp:swimlane.delete"));
+
+    assert.equal(ctrl._swimlanes.length, 1);
+    assert.equal(ctrl._swimlanes[0].id, "b");
+});
+
+test("the swimlane menu starts an inline rename", () => {
+    const runtime = loadFull();
+    const { host } = buildBoard(runtime, { columns: "todo", swimlanes: "a", editableSwimlane: "true" });
+
+    const menu = host.querySelector(".wx-kanban-swimlane-menu");
+    assert.ok(menu, "the swimlane menu exists");
+    clickEntry(entry(menu, "webexpress.webapp:swimlane.edit"));
+    assert.ok(host.querySelector(".wx-board-col-input"), "the rename input appears");
+});
+
+test("a card badge renders with its color", () => {
+    const runtime = load();
+    const { host } = build(runtime, { badge: "#42", badgeColor: "text-bg-primary" });
+
+    const badge = host.querySelector(".wx-kanban-card-badge");
+    assert.ok(badge, "the card badge exists");
+    assert.equal(badge.textContent, "#42");
+    assert.ok(badge.classList.contains("badge"));
+    assert.ok(badge.classList.contains("text-bg-primary"));
+});
+
+test("a swimlane badge renders in the header", () => {
+    const runtime = loadFull();
+    const host = runtime.document.createElement("div");
+    host.dataset.columns = "todo";
+    const lane = runtime.document.createElement("div");
+    lane.className = "wx-swimlane";
+    Object.assign(lane.dataset, { id: "a", label: "Lane A", badge: "5", badgeColor: "text-bg-info" });
+    host.appendChild(lane);
+    new runtime.wx.KanbanCtrl(host);
+
+    const badge = host.querySelector(".wx-kanban-swimlane-badge");
+    assert.ok(badge, "the swimlane badge exists");
+    assert.equal(badge.textContent, "5");
+    assert.ok(badge.classList.contains("text-bg-info"));
+});
+
+test("the swimlane move entries are bounded by the lane position", () => {
+    const runtime = loadFull();
+    const { host } = buildBoard(runtime, { columns: "todo", swimlanes: "a,b,c", movableSwimlane: "true" });
+    const menus = host.querySelectorAll(".wx-kanban-swimlane-menu");
+
+    const labels = (m) => m.querySelectorAll(".dropdown-item").map((b) => b.textContent);
+
+    // first lane: only move down; middle: both; last: only move up
+    assert.equal(labels(menus[0]).includes("webexpress.webapp:swimlane.moveup"), false);
+    assert.ok(labels(menus[0]).includes("webexpress.webapp:swimlane.movedown"));
+    assert.ok(labels(menus[1]).includes("webexpress.webapp:swimlane.moveup"));
+    assert.ok(labels(menus[1]).includes("webexpress.webapp:swimlane.movedown"));
+    assert.ok(labels(menus[2]).includes("webexpress.webapp:swimlane.moveup"));
+    assert.equal(labels(menus[2]).includes("webexpress.webapp:swimlane.movedown"), false);
+});
+
+test("moving a swimlane down reorders the lanes", () => {
+    const runtime = loadFull();
+    const { ctrl, host } = buildBoard(runtime, { columns: "todo", swimlanes: "a,b,c", movableSwimlane: "true" });
+
+    assert.deepEqual(ctrl._swimlanes.map((s) => s.id), ["a", "b", "c"]);
+    const firstMenu = host.querySelectorAll(".wx-kanban-swimlane-menu")[0];
+    clickEntry(entry(firstMenu, "webexpress.webapp:swimlane.movedown"));
+    assert.deepEqual(ctrl._swimlanes.map((s) => s.id), ["b", "a", "c"]);
 });

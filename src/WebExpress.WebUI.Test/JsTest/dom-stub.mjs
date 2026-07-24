@@ -379,6 +379,7 @@ class Element {
 
     focus() { }
     blur() { }
+    select() { }
     click() { this.dispatchEvent({ type: "click" }); }
     scrollIntoView() { }
     scroll() { }

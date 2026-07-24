@@ -3,6 +3,7 @@
  * Supports optional swimlanes, pixel-perfect drag & drop, icons, images, and wx-actions.
  * The following events are triggered:
  * - webexpress.webui.Event.MOVE_EVENT
+ * - webexpress.webui.Event.CHANGE_VALUE_EVENT
  */
 webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
@@ -19,6 +20,22 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     _dragColumnIndex = null;
     _activeColumnEdit = null;
 
+    // board "…" menu (settings / add column / add swimlane) and swimlane menu
+    _addableColumn = false;
+    _addableSwimlane = false;
+    _editableSwimlane = false;
+    _deletableSwimlane = false;
+    _movableSwimlane = false;
+    _configurableBoard = false;
+    _configurableSwimlane = false;
+
+    // the wql filter of the board settings; edited through the settings dialog and
+    // seeded from the loaded board (REST) or the static data-filter attribute
+    _filter = "";
+    _settingsDialog = null;
+    _activeSwimlaneEdit = null;
+    _onDocClick = null;
+
     /**
      * Initializes the kanban control.
      * @param {HTMLElement} element - The root element for the kanban board.
@@ -33,8 +50,35 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         this._movableColumn = element.dataset.movableColumn === "true";
         this._deletableColumn = element.dataset.deletableColumn === "true";
 
+        // board and swimlane capabilities
+        this._addableColumn = element.dataset.addableColumn === "true";
+        this._addableSwimlane = element.dataset.addableSwimlane === "true";
+        this._editableSwimlane = element.dataset.editableSwimlane === "true";
+        this._deletableSwimlane = element.dataset.deletableSwimlane === "true";
+        this._movableSwimlane = element.dataset.movableSwimlane === "true";
+        this._configurableBoard = element.dataset.configurableBoard === "true";
+        this._configurableSwimlane = element.dataset.configurableSwimlane === "true";
+
+        this._filter = element.dataset.filter || "";
+
+        // a single document listener closes any open board / column / swimlane
+        // dropdown when the click lands outside its own menu container
+        this._onDocClick = (e) => this._closeMenusOnOutsideClick(e);
+        document.addEventListener("click", this._onDocClick);
+
         this._parseStaticConfig();
         this.render();
+    }
+
+    /**
+     * Removes the document-level menu listener when the control is torn down.
+     */
+    destroy() {
+        if (this._onDocClick) {
+            document.removeEventListener("click", this._onDocClick);
+            this._onDocClick = null;
+        }
+        super.destroy();
     }
 
     /**
@@ -53,7 +97,11 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 columns.push({
                     id: node.id || node.dataset.id,
                     label: node.dataset.label || node.id || "column",
-                    size: node.dataset.size || "1fr"
+                    size: node.dataset.size || "1fr",
+                    color: node.dataset.color || null,
+                    badge: node.dataset.badge || null,
+                    badgeColor: node.dataset.badgeColor || null,
+                    badgeStyle: node.dataset.badgeStyle || null
                 });
             });
         } else {
@@ -77,7 +125,8 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 columns.push({
                     id: colIds[i] || `col_${i}`,
                     label: colTitles[i] || colIds[i] || `column ${i + 1}`,
-                    size: "1fr"
+                    size: "1fr",
+                    color: null
                 });
             }
         }
@@ -89,7 +138,11 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 swimlanes.push({
                     id: node.id || node.dataset.id,
                     label: node.dataset.label || node.id,
-                    expanded: node.dataset.expanded !== "false"
+                    expanded: node.dataset.expanded !== "false",
+                    filter: node.dataset.filter || "",
+                    badge: node.dataset.badge || null,
+                    badgeColor: node.dataset.badgeColor || null,
+                    badgeStyle: node.dataset.badgeStyle || null
                 });
             });
         } else if (el.dataset.swimlanes) {
@@ -97,7 +150,8 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 return {
                     id: s.trim(),
                     label: s.trim(),
-                    expanded: true
+                    expanded: true,
+                    filter: ""
                 };
             });
         }
@@ -125,6 +179,11 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 assigneeInitials: cardEl.dataset.assigneeInitials || null,
                 assigneeColor: cardEl.dataset.assigneeColor || null,
                 assigneeImage: cardEl.dataset.assigneeImage || null,
+
+                // optional trailing badge in the card header
+                badge: cardEl.dataset.badge || null,
+                badgeColor: cardEl.dataset.badgeColor || null,
+                badgeStyle: cardEl.dataset.badgeStyle || null,
 
                 // optional application-defined info chips (priority, story points, …)
                 footer: this._parseFooterSpec(cardEl.dataset.footer),
@@ -189,6 +248,13 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         const el = this._element;
         el.innerHTML = "";
 
+        // the board "…" menu (settings / add column / add swimlane) sits above the
+        // columns; it is skipped for boards that offer none of these affordances
+        const menuBar = this._buildBoardMenu();
+        if (menuBar) {
+            el.appendChild(menuBar);
+        }
+
         // pin a shared column template on the host element so the header row and
         // every swimlane row use identical column tracks. without this each row
         // is an independent grid that sizes its columns to its own content, so
@@ -234,11 +300,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             headerRow.className = "wx-kanban-row wx-kanban-headers";
 
             for (let c = 0; c < this._columns.length; c++) {
-                const header = document.createElement("div");
-                header.className = "wx-kanban-column-header";
-                header.textContent = this._columns[c].label;
-                this._decorateColumnHeader(header, c);
-                headerRow.appendChild(header);
+                headerRow.appendChild(this._createColumnHeader(this._columns[c], c));
             }
 
             el.appendChild(headerRow);
@@ -267,11 +329,8 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
                 // integrate header directly into the column if no swimlanes are active
                 if (!hasSwimlanes) {
-                    const header = document.createElement("div");
-                    header.className = "wx-kanban-column-header";
+                    const header = this._createColumnHeader(col, c);
                     header.style.marginBottom = "0.75rem";
-                    header.textContent = col.label;
-                    this._decorateColumnHeader(header, c);
                     colWrapper.appendChild(header);
                 }
 
@@ -326,7 +385,9 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
             // convert lane wrapper into an expandable component and sync state
             if (hasSwimlanes) {
-                new webexpress.webui.ExpandableCtrl(laneWrapper);
+                const laneCtrl = new webexpress.webui.ExpandableCtrl(laneWrapper);
+                this._appendSwimlaneBadge(laneCtrl, lane);
+                this._decorateSwimlaneHeader(laneCtrl, s);
                 laneWrapper.addEventListener(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, (e) => {
                     if (e && e.detail !== undefined) {
                         lane.expanded = e.detail.value;
@@ -337,13 +398,369 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Decorates a column header with the inline-rename, ⠿ reorder grip and
-     * delete affordances, depending on the enabled column flags.
+     * Builds a column header carrying the label, the optional accent color and
+     * the reorder / "…" affordances. Shared by the swimlane header row and the
+     * per-column header of a board without swimlanes.
+     * @param {object} col - The column data object.
+     * @param {number} index - The column index in this._columns.
+     * @returns {HTMLElement} The header element.
+     */
+    _createColumnHeader(col, index) {
+        const header = document.createElement("div");
+        header.className = "wx-kanban-column-header";
+
+        const titleText = document.createElement("span");
+        titleText.className = "wx-board-col-title";
+        titleText.textContent = col.label ?? col.title ?? "";
+        header.appendChild(titleText);
+
+        // optional trailing badge (e.g. the card count), coloured by a css class
+        // (system color) or an inline style, mirroring the tab header badge
+        const colBadge = this._makeBadge(col, "wx-board-col-badge");
+        if (colBadge) {
+            header.appendChild(colBadge);
+        }
+
+        // the column color tints the header underline so the column reads as a
+        // labelled, colored lane, mirroring the dashboard
+        if (col.color) {
+            header.style.borderBottomColor = col.color;
+            header.classList.add("wx-board-col-has-color");
+        }
+
+        this._decorateColumnHeader(header, index);
+
+        return header;
+    }
+
+    /**
+     * Builds an optional trailing badge from a data object carrying badge,
+     * badgeColor and badgeStyle (columns, swimlanes and cards all share it). The
+     * color arrives either as a css class (system color) or an inline style
+     * (user-defined color). Returns null when the data carries no badge.
+     * @param {object} data - The data object with badge fields.
+     * @param {string} className - The element class distinguishing the badge kind.
+     * @returns {HTMLElement|null} The badge element, or null.
+     */
+    _makeBadge(data, className) {
+        if (!data || data.badge == null || data.badge === "") {
+            return null;
+        }
+
+        const badge = document.createElement("span");
+        badge.className = className + " badge";
+        if (data.badgeColor) {
+            badge.classList.add(...String(data.badgeColor).split(/\s+/).filter(Boolean));
+        }
+        if (data.badgeStyle) {
+            badge.style.cssText = data.badgeStyle;
+        }
+        badge.textContent = data.badge;
+        return badge;
+    }
+
+    // ---- board "…" menu -------------------------------------------------------
+
+    /**
+     * Builds the board "…" menu bar carrying the settings (wql filter), the
+     * add-column and the add-swimlane entries. Returns null when none of these
+     * affordances is enabled, so read-only boards stay unchanged.
+     * @returns {HTMLElement|null} The menu bar, or null when no menu is offered.
+     */
+    _buildBoardMenu() {
+        if (!this._configurableBoard && !this._addableColumn && !this._addableSwimlane) {
+            return null;
+        }
+
+        const bar = document.createElement("div");
+        bar.className = "wx-kanban-toolbar";
+
+        const container = document.createElement("div");
+        container.className = "wx-kanban-menu position-relative";
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "wx-kanban-menu-btn";
+        button.title = this._i18n("webexpress.webapp:kanban.menu", "Options");
+        button.setAttribute("aria-label", button.title);
+        button.innerHTML = `<i class="${this._iconClass("fas fa-ellipsis-vertical", "more")}"></i>`;
+
+        const menu = document.createElement("ul");
+        menu.className = "dropdown-menu dropdown-menu-end";
+
+        if (this._configurableBoard) {
+            menu.appendChild(this._buildMenuEntry(
+                this._iconClass("fas fa-gear", "gear"),
+                this._i18n("webexpress.webapp:board.settings", "Settings"),
+                null,
+                () => this._openBoardSettings()
+            ));
+        }
+
+        if (this._addableColumn || this._addableSwimlane) {
+            if (this._configurableBoard) {
+                const divider = document.createElement("li");
+                divider.innerHTML = "<hr class=\"dropdown-divider\">";
+                menu.appendChild(divider);
+            }
+
+            if (this._addableColumn) {
+                menu.appendChild(this._buildMenuEntry(
+                    this._iconClass("fas fa-table-columns", "table-columns"),
+                    this._i18n("webexpress.webapp:column.add", "New column"),
+                    null,
+                    () => this._addColumn()
+                ));
+            }
+
+            if (this._addableSwimlane) {
+                menu.appendChild(this._buildMenuEntry(
+                    this._iconClass("fas fa-bars", "bars"),
+                    this._i18n("webexpress.webapp:swimlane.add", "New swimlane"),
+                    null,
+                    () => this._addSwimlane()
+                ));
+            }
+        }
+
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this._toggleMenu(menu);
+        });
+
+        container.appendChild(button);
+        container.appendChild(menu);
+        bar.appendChild(container);
+
+        return bar;
+    }
+
+    /**
+     * Builds a single dropdown entry with an optional icon, a title and an
+     * optional description line.
+     * @param {string|null} iconClass - The resolved icon class, or null.
+     * @param {string} title - The entry title.
+     * @param {string|null} description - The optional description line.
+     * @param {Function} onClick - The click handler.
+     * @returns {HTMLElement} The list item element.
+     */
+    _buildMenuEntry(iconClass, title, description, onClick) {
+        const li = document.createElement("li");
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "dropdown-item";
+
+        const titleLine = document.createElement("div");
+        titleLine.className = "fw-semibold";
+        if (iconClass) {
+            const icon = document.createElement("i");
+            icon.className = iconClass + " me-2";
+            titleLine.appendChild(icon);
+        }
+        titleLine.appendChild(document.createTextNode(title));
+        button.appendChild(titleLine);
+
+        if (description) {
+            const descLine = document.createElement("small");
+            descLine.className = "d-block text-muted";
+            descLine.textContent = description;
+            button.appendChild(descLine);
+        }
+
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this._closeAllMenus();
+            onClick();
+        });
+
+        li.appendChild(button);
+
+        return li;
+    }
+
+    /**
+     * Builds a menu entry with a leading check mark reflecting the active state.
+     * @param {string} label - The entry label.
+     * @param {boolean} active - Whether the entry is the current selection.
+     * @param {Function} onClick - The click handler.
+     * @returns {HTMLElement} The list item element.
+     */
+    _buildMenuCheckEntry(label, active, onClick) {
+        const li = document.createElement("li");
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "dropdown-item d-flex align-items-center";
+        if (active) {
+            button.classList.add("active");
+        }
+
+        const check = document.createElement("i");
+        check.className = active ? this._iconClass("fas fa-check", "check") : "";
+        check.style.width = "1.25em";
+        button.appendChild(check);
+        button.appendChild(document.createTextNode(label));
+
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this._closeAllMenus();
+            onClick();
+        });
+
+        li.appendChild(button);
+
+        return li;
+    }
+
+    /**
+     * Toggles a dropdown menu, closing any other open kanban menu first so only
+     * one stays open at a time.
+     * @param {HTMLElement} menu - The dropdown menu element.
+     */
+    _toggleMenu(menu) {
+        const willShow = !menu.classList.contains("show");
+        this._closeAllMenus();
+        if (willShow) {
+            menu.classList.add("show");
+            // the open class keeps the hover-only trigger visible while the menu
+            // is open, even once the pointer leaves the header
+            const container = menu.closest(".wx-kanban-menu");
+            if (container) {
+                container.classList.add("wx-menu-open");
+                const button = container.querySelector(".wx-kanban-menu-btn");
+                if (button) {
+                    this._positionMenu(button, menu);
+                }
+            }
+        }
+    }
+
+    /**
+     * Pins an open dropdown to the viewport with a fixed position anchored under
+     * the trigger. The board scroller (.wx-kanban) clips overflow on both axes,
+     * so an absolutely positioned menu would be cut off; a fixed position
+     * escapes the clip, mirroring the framework's fixed dropdown strategy.
+     * @param {HTMLElement} button - The trigger button.
+     * @param {HTMLElement} menu - The dropdown menu element.
+     */
+    _positionMenu(button, menu) {
+        const rect = button.getBoundingClientRect();
+        const viewportWidth = (typeof window !== "undefined" && window.innerWidth)
+            || (document.documentElement && document.documentElement.clientWidth) || 0;
+
+        menu.style.position = "fixed";
+        menu.style.top = rect.bottom + "px";
+        // anchor by the right edge so the menu stays under a dropdown-menu-end trigger
+        menu.style.left = "auto";
+        menu.style.right = Math.max(0, viewportWidth - rect.right) + "px";
+        menu.style.bottom = "auto";
+    }
+
+    /**
+     * Closes every open board, column or swimlane dropdown of this board and
+     * drops the fixed positioning applied on open.
+     */
+    _closeAllMenus() {
+        const menus = this._element.querySelectorAll(".wx-kanban-menu > .dropdown-menu.show");
+        for (let i = 0; i < menus.length; i++) {
+            menus[i].classList.remove("show");
+            this._resetMenuPosition(menus[i]);
+        }
+        const open = this._element.querySelectorAll(".wx-kanban-menu.wx-menu-open");
+        for (let i = 0; i < open.length; i++) {
+            open[i].classList.remove("wx-menu-open");
+        }
+    }
+
+    /**
+     * Clears the inline fixed-position styles a menu carries while open.
+     * @param {HTMLElement} menu - The dropdown menu element.
+     */
+    _resetMenuPosition(menu) {
+        menu.style.removeProperty("position");
+        menu.style.removeProperty("top");
+        menu.style.removeProperty("left");
+        menu.style.removeProperty("right");
+        menu.style.removeProperty("bottom");
+    }
+
+    /**
+     * Closes every open menu whose container does not contain the click target,
+     * so only a menu the user is interacting with stays open.
+     * @param {MouseEvent} e - The document click event.
+     */
+    _closeMenusOnOutsideClick(e) {
+        const menus = this._element.querySelectorAll(".wx-kanban-menu > .dropdown-menu.show");
+        for (let i = 0; i < menus.length; i++) {
+            const container = menus[i].closest(".wx-kanban-menu");
+            if (container && !container.contains(e.target)) {
+                menus[i].classList.remove("show");
+                this._resetMenuPosition(menus[i]);
+                container.classList.remove("wx-menu-open");
+            }
+        }
+    }
+
+    /**
+     * Appends a new empty column and persists the new column layout.
+     */
+    _addColumn() {
+        const label = this._i18n("webexpress.webapp:column.new", "New column");
+        this._columns.push({
+            id: "col_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+            label: label,
+            title: label,
+            size: "1fr",
+            color: null
+        });
+
+        this.render();
+        this._dispatchColumnChange();
+    }
+
+    /**
+     * Appends a new swimlane and persists the new swimlane layout. When the
+     * board had no swimlane yet, the existing cards (which carry no swimlane) are
+     * moved into the new lane so they stay visible after the board switches into
+     * the swimlane layout.
+     */
+    _addSwimlane() {
+        const label = this._i18n("webexpress.webapp:swimlane.new", "New swimlane");
+        const id = "lane_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+        const wasEmpty = this._swimlanes.length === 0;
+
+        this._swimlanes.push({ id: id, label: label, expanded: true, filter: "" });
+
+        if (wasEmpty) {
+            for (let i = 0; i < this._cards.length; i++) {
+                if (!this._cards[i].swimlaneId) {
+                    this._cards[i].swimlaneId = id;
+                }
+            }
+        }
+
+        this.render();
+        this._dispatchSwimlaneChange();
+    }
+
+    // ---- column "…" menu ------------------------------------------------------
+
+    /**
+     * Decorates a column header with the ⠿ reorder grip and the "…" menu
+     * (rename, size, color, delete), depending on the enabled column flags. The
+     * grip and menu trigger reveal on hover; an inline rename is started from the
+     * menu rather than a pencil or double-click.
      * @param {HTMLElement} headerEl - The column header element.
      * @param {number} index - The column index in this._columns.
      */
     _decorateColumnHeader(headerEl, index) {
-        if (!this._editableColumn && !this._movableColumn && !this._deletableColumn) {
+        const hasMenu = this._editableColumn || this._deletableColumn;
+        if (!this._movableColumn && !hasMenu) {
             return;
         }
 
@@ -351,106 +768,329 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
         if (this._movableColumn) {
             headerEl.classList.add("wx-board-col-movable");
+            this._addColumnGrip(headerEl, index);
+        }
 
-            const grip = document.createElement("span");
-            grip.className = "wx-board-col-grip";
-            grip.textContent = "⠿";
-            grip.title = this._i18n("webexpress.webapp:column.move", "Reorder column");
-            grip.setAttribute("aria-label", grip.title);
-            grip.draggable = true;
-            grip.addEventListener("click", (e) => e.stopPropagation());
-            grip.addEventListener("dragstart", (e) => {
-                this._dragColumnIndex = index;
-                headerEl.classList.add("wx-board-col-dragging");
-                if (e.dataTransfer) {
-                    e.dataTransfer.effectAllowed = "move";
-                    try { e.dataTransfer.setData("text/plain", String(index)); } catch (err) { /* noop */ }
-                }
-            });
-            grip.addEventListener("dragend", () => {
-                headerEl.classList.remove("wx-board-col-dragging");
-                this._dragColumnIndex = null;
-                // a cancelled drag leaves no indicator behind
-                this._clearColumnDropIndicators();
-            });
-            headerEl.insertBefore(grip, headerEl.firstChild);
+        if (hasMenu) {
+            headerEl.appendChild(this._buildColumnMenu(headerEl, index));
+        }
+    }
 
-            headerEl.addEventListener("dragover", (e) => {
-                if (this._dragColumnIndex === null) {
-                    return;
-                }
-                e.preventDefault();
-                if (e.dataTransfer) {
-                    e.dataTransfer.dropEffect = "move";
-                }
-                // show on which side of the header the column would land
-                const rect = headerEl.getBoundingClientRect();
-                const after = e.clientX > rect.left + rect.width / 2;
-                headerEl.classList.toggle("wx-board-col-drop-after", after);
-                headerEl.classList.toggle("wx-board-col-drop-before", !after);
-            });
-            headerEl.addEventListener("dragleave", () => {
-                headerEl.classList.remove("wx-board-col-drop-before", "wx-board-col-drop-after");
-            });
-            headerEl.addEventListener("drop", (e) => {
-                if (this._dragColumnIndex === null) {
-                    return;
-                }
-                e.preventDefault();
-                e.stopPropagation();
-                this._clearColumnDropIndicators();
-                const rect = headerEl.getBoundingClientRect();
-                const after = e.clientX > rect.left + rect.width / 2;
-                this._moveColumn(this._dragColumnIndex, index, after);
-            });
+    /**
+     * Adds the ⠿ reorder grip and wires the column drag and drop, including the
+     * before/after drop indicators that visualise where the dragged column would
+     * land - the same affordance the tabs use.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index.
+     */
+    _addColumnGrip(headerEl, index) {
+        const grip = document.createElement("span");
+        grip.className = "wx-board-col-grip";
+        grip.textContent = "⠿";
+        grip.title = this._i18n("webexpress.webapp:column.move", "Reorder column");
+        grip.setAttribute("aria-label", grip.title);
+        grip.draggable = true;
+        grip.addEventListener("click", (e) => e.stopPropagation());
+        grip.addEventListener("dragstart", (e) => {
+            this._dragColumnIndex = index;
+            headerEl.classList.add("wx-board-col-dragging");
+            if (e.dataTransfer) {
+                e.dataTransfer.effectAllowed = "move";
+                try { e.dataTransfer.setData("text/plain", String(index)); } catch (err) { /* noop */ }
+            }
+        });
+        grip.addEventListener("dragend", () => {
+            headerEl.classList.remove("wx-board-col-dragging");
+            this._clearColumnDropIndicators();
+            this._dragColumnIndex = null;
+        });
+        headerEl.insertBefore(grip, headerEl.firstChild);
+
+        headerEl.addEventListener("dragover", (e) => {
+            if (this._dragColumnIndex === null) {
+                return;
+            }
+            e.preventDefault();
+            if (e.dataTransfer) {
+                e.dataTransfer.dropEffect = "move";
+            }
+            const rect = headerEl.getBoundingClientRect();
+            const after = e.clientX > rect.left + rect.width / 2;
+            this._clearColumnDropIndicators();
+            headerEl.classList.add(after ? "wx-board-col-drop-after" : "wx-board-col-drop-before");
+        });
+        headerEl.addEventListener("dragleave", () => {
+            headerEl.classList.remove("wx-board-col-drop-before", "wx-board-col-drop-after");
+        });
+        headerEl.addEventListener("drop", (e) => {
+            if (this._dragColumnIndex === null) {
+                return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            const rect = headerEl.getBoundingClientRect();
+            const after = e.clientX > rect.left + rect.width / 2;
+            this._clearColumnDropIndicators();
+            this._moveColumn(this._dragColumnIndex, index, after);
+        });
+    }
+
+    /**
+     * Builds the column "…" menu offering rename, size, color and delete. The
+     * size and color entries drill down into the same dropdown so no nested
+     * flyout positioning is needed.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index.
+     * @returns {HTMLElement} The menu container element.
+     */
+    _buildColumnMenu(headerEl, index) {
+        const container = document.createElement("span");
+        container.className = "wx-kanban-menu wx-board-col-menu position-relative";
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "wx-kanban-menu-btn";
+        button.title = this._i18n("webexpress.webapp:column.menu", "Column options");
+        button.setAttribute("aria-label", button.title);
+        button.innerHTML = `<i class="${this._iconClass("fas fa-ellipsis-vertical", "more")}"></i>`;
+
+        const menu = document.createElement("ul");
+        menu.className = "dropdown-menu dropdown-menu-end";
+
+        this._populateColumnMenuRoot(menu, headerEl, index);
+
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            // a re-opened menu always starts at the top level
+            this._populateColumnMenuRoot(menu, headerEl, index);
+            this._toggleMenu(menu);
+        });
+
+        container.appendChild(button);
+        container.appendChild(menu);
+
+        return container;
+    }
+
+    /**
+     * Populates the column menu with its top-level entries.
+     * @param {HTMLElement} menu - The dropdown menu element.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index.
+     */
+    _populateColumnMenuRoot(menu, headerEl, index) {
+        menu.replaceChildren();
+
+        if (this._editableColumn) {
+            menu.appendChild(this._buildMenuEntry(
+                this._iconClass("fas fa-pencil", "pen"),
+                this._i18n("webexpress.webapp:column.edit", "Rename column"),
+                null,
+                () => this._startColumnEdit(headerEl, index)
+            ));
+            menu.appendChild(this._buildColumnSubmenuEntry(
+                this._iconClass("fas fa-ruler", "expand"),
+                this._i18n("webexpress.webapp:column.size", "Size"),
+                (m) => this._populateColumnMenuSizes(m, headerEl, index)
+            ));
+            menu.appendChild(this._buildColumnSubmenuEntry(
+                this._iconClass("fas fa-palette", "palette"),
+                this._i18n("webexpress.webapp:column.color", "Color"),
+                (m) => this._populateColumnMenuColors(m, headerEl, index)
+            ));
         }
 
         if (this._deletableColumn) {
-            const del = document.createElement("button");
-            del.type = "button";
-            del.className = "wx-board-col-delete";
-            del.title = this._i18n("webexpress.webapp:column.delete", "Delete column");
-            del.setAttribute("aria-label", del.title);
-            del.innerHTML = `<i class="${this._iconClass("fas fa-xmark", "wx-icon-light-xmark")}"></i>`;
-            del.addEventListener("click", (e) => {
+            if (this._editableColumn) {
+                const divider = document.createElement("li");
+                divider.innerHTML = "<hr class=\"dropdown-divider\">";
+                menu.appendChild(divider);
+            }
+            menu.appendChild(this._buildMenuEntry(
+                this._iconClass("fas fa-trash", "trash"),
+                this._i18n("webexpress.webapp:column.delete", "Delete column"),
+                null,
+                () => this._deleteColumn(index)
+            ));
+        }
+    }
+
+    /**
+     * Builds a drill-down entry that repopulates the menu in place with a
+     * sub-level, keeping the dropdown open.
+     * @param {string|null} iconClass - The resolved icon class.
+     * @param {string} label - The entry label.
+     * @param {Function} populate - Repopulates the menu; receives the menu element.
+     * @returns {HTMLElement} The list item element.
+     */
+    _buildColumnSubmenuEntry(iconClass, label, populate) {
+        const li = document.createElement("li");
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "dropdown-item d-flex align-items-center";
+
+        if (iconClass) {
+            const icon = document.createElement("i");
+            icon.className = iconClass + " me-2";
+            button.appendChild(icon);
+        }
+        button.appendChild(document.createTextNode(label));
+
+        const chevron = document.createElement("i");
+        chevron.className = this._iconClass("fas fa-chevron-right", "chevron-right") + " ms-auto ps-3";
+        button.appendChild(chevron);
+
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            populate(li.closest(".dropdown-menu"));
+        });
+
+        li.appendChild(button);
+
+        return li;
+    }
+
+    /**
+     * Prepends the "back" entry that returns a drilled-down menu to its root.
+     * @param {HTMLElement} menu - The dropdown menu element.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index.
+     */
+    _buildColumnMenuBack(menu, headerEl, index) {
+        const li = document.createElement("li");
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "dropdown-item text-muted d-flex align-items-center";
+        button.innerHTML = `<i class="${this._iconClass("fas fa-chevron-left", "chevron-left")} me-2"></i>`;
+        button.appendChild(document.createTextNode(this._i18n("webexpress.webapp:back", "Back")));
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this._populateColumnMenuRoot(menu, headerEl, index);
+        });
+
+        li.appendChild(button);
+
+        return li;
+    }
+
+    /**
+     * Populates the column menu with the size presets.
+     * @param {HTMLElement} menu - The dropdown menu element.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index.
+     */
+    _populateColumnMenuSizes(menu, headerEl, index) {
+        menu.replaceChildren();
+        menu.appendChild(this._buildColumnMenuBack(menu, headerEl, index));
+
+        const col = this._columns[index];
+        const presets = [
+            { label: this._i18n("webexpress.webapp:column.size.auto", "Auto"), value: "1fr" },
+            { label: "25 %", value: "25%" },
+            { label: "33 %", value: "33%" },
+            { label: "50 %", value: "50%" },
+            { label: "66 %", value: "66%" },
+            { label: "75 %", value: "75%" }
+        ];
+
+        for (let i = 0; i < presets.length; i++) {
+            const preset = presets[i];
+            const active = col && (col.size === preset.value
+                || (preset.value === "1fr" && (!col.size || col.size === "*")));
+            menu.appendChild(this._buildMenuCheckEntry(preset.label, active, () => this._setColumnSize(index, preset.value)));
+        }
+    }
+
+    /**
+     * Populates the column menu with the color palette and a "none" option.
+     * @param {HTMLElement} menu - The dropdown menu element.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index.
+     */
+    _populateColumnMenuColors(menu, headerEl, index) {
+        menu.replaceChildren();
+        menu.appendChild(this._buildColumnMenuBack(menu, headerEl, index));
+
+        const col = this._columns[index];
+
+        menu.appendChild(this._buildMenuCheckEntry(
+            this._i18n("webexpress.webapp:column.color.none", "None"),
+            col && !col.color,
+            () => this._setColumnColor(index, null)
+        ));
+
+        const li = document.createElement("li");
+        const grid = document.createElement("div");
+        grid.className = "wx-board-col-color-grid";
+
+        const palette = this._colorPalette();
+        for (let i = 0; i < palette.length; i++) {
+            const color = palette[i];
+            const swatch = document.createElement("button");
+            swatch.type = "button";
+            swatch.className = "wx-board-col-swatch";
+            swatch.style.backgroundColor = color;
+            swatch.title = color;
+            if (col && col.color && col.color.toLowerCase() === color.toLowerCase()) {
+                swatch.classList.add("active");
+            }
+            swatch.addEventListener("click", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                this._deleteColumn(index);
+                this._closeAllMenus();
+                this._setColumnColor(index, color);
             });
-            headerEl.appendChild(del);
+            grid.appendChild(swatch);
         }
 
-        if (this._editableColumn) {
-            headerEl.classList.add("wx-board-col-editable");
-            headerEl.addEventListener("dblclick", (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this._startColumnEdit(headerEl, index);
-            });
-            headerEl.addEventListener("mouseenter", () => {
-                if (this._activeColumnEdit || headerEl.querySelector(".wx-board-col-edit")) {
-                    return;
-                }
-                const pencil = document.createElement("button");
-                pencil.type = "button";
-                pencil.className = "wx-board-col-edit";
-                pencil.title = this._i18n("webexpress.webapp:column.edit", "Rename column");
-                pencil.setAttribute("aria-label", pencil.title);
-                pencil.innerHTML = `<i class="${this._iconClass("fas fa-pencil", "wx-icon-light-pen")}"></i>`;
-                pencil.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    this._startColumnEdit(headerEl, index);
-                });
-                headerEl.appendChild(pencil);
-            });
-            headerEl.addEventListener("mouseleave", () => {
-                const pencil = headerEl.querySelector(".wx-board-col-edit");
-                if (pencil) {
-                    pencil.remove();
-                }
-            });
+        li.appendChild(grid);
+        menu.appendChild(li);
+    }
+
+    /**
+     * The column color palette offered in the column menu.
+     * @returns {Array<string>} The hex colors.
+     */
+    _colorPalette() {
+        return [
+            "#0d6efd", "#6610f2", "#6f42c1", "#d63384", "#dc3545", "#fd7e14",
+            "#ffc107", "#198754", "#20c997", "#0dcaf0", "#6c757d", "#343a40"
+        ];
+    }
+
+    /**
+     * Sets a column size and persists the new column layout.
+     * @param {number} index - The column index.
+     * @param {string} value - The CSS grid size (e.g. "1fr", "33%").
+     */
+    _setColumnSize(index, value) {
+        const col = this._columns[index];
+        if (!col) {
+            return;
         }
+        col.size = value;
+        this.render();
+        this._dispatchColumnChange();
+    }
+
+    /**
+     * Sets a column color and persists the new column layout.
+     * @param {number} index - The column index.
+     * @param {string|null} color - The color, or null to clear it.
+     */
+    _setColumnColor(index, color) {
+        const col = this._columns[index];
+        if (!col) {
+            return;
+        }
+        col.color = color;
+        this.render();
+        this._dispatchColumnChange();
     }
 
     /**
@@ -579,13 +1219,298 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
      */
     _dispatchColumnChange() {
         const columns = this._columns.map((c) => {
-            return { id: c.id, title: c.label ?? c.title ?? "", size: c.size };
+            return { id: c.id, title: c.label ?? c.title ?? "", size: c.size, color: c.color ?? null };
         });
 
         this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
             id: this._element ? this._element.id : null,
             action: "columns",
             columns: columns
+        });
+    }
+
+    // ---- swimlane "…" menu ----------------------------------------------------
+
+    /**
+     * Decorates a swimlane header (built by the ExpandableCtrl) with a "…" menu
+     * offering rename and delete, depending on the enabled swimlane flags. The
+     * menu is inserted next to the header label so it flows in the header row.
+     * @param {object} laneCtrl - The ExpandableCtrl of the swimlane.
+     * @param {number} index - The swimlane index in this._swimlanes.
+     */
+    /**
+     * Inserts the optional trailing badge into a swimlane header (built by the
+     * ExpandableCtrl), placed just before the lane content so it reads at the end
+     * of the header row.
+     * @param {object} laneCtrl - The ExpandableCtrl of the swimlane.
+     * @param {object} lane - The swimlane data object.
+     */
+    _appendSwimlaneBadge(laneCtrl, lane) {
+        const badge = this._makeBadge(lane, "wx-kanban-swimlane-badge");
+        if (!badge) {
+            return;
+        }
+
+        const headerSpan = laneCtrl && laneCtrl._header;
+        if (headerSpan && headerSpan.parentNode) {
+            headerSpan.parentNode.insertBefore(badge, laneCtrl._content || null);
+        }
+    }
+
+    _decorateSwimlaneHeader(laneCtrl, index) {
+        if (!this._editableSwimlane && !this._deletableSwimlane && !this._movableSwimlane && !this._configurableSwimlane) {
+            return;
+        }
+
+        const headerSpan = laneCtrl && laneCtrl._header;
+        if (!headerSpan || !headerSpan.parentNode) {
+            return;
+        }
+
+        headerSpan.parentNode.classList.add("wx-kanban-swimlane-configurable");
+
+        const container = document.createElement("span");
+        container.className = "wx-kanban-menu wx-kanban-swimlane-menu position-relative";
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "wx-kanban-menu-btn";
+        button.title = this._i18n("webexpress.webapp:swimlane.menu", "Swimlane options");
+        button.setAttribute("aria-label", button.title);
+        button.innerHTML = `<i class="${this._iconClass("fas fa-ellipsis-vertical", "more")}"></i>`;
+
+        const menu = document.createElement("ul");
+        menu.className = "dropdown-menu dropdown-menu-end";
+
+        if (this._editableSwimlane) {
+            menu.appendChild(this._buildMenuEntry(
+                this._iconClass("fas fa-pencil", "pen"),
+                this._i18n("webexpress.webapp:swimlane.edit", "Rename swimlane"),
+                null,
+                () => this._startSwimlaneEdit(headerSpan, index)
+            ));
+        }
+
+        if (this._configurableSwimlane) {
+            menu.appendChild(this._buildMenuEntry(
+                this._iconClass("fas fa-gear", "gear"),
+                this._i18n("webexpress.webapp:swimlane.settings", "Settings"),
+                null,
+                () => this._openSwimlaneSettings(index)
+            ));
+        }
+
+        if (this._movableSwimlane) {
+            // only offer the direction that has room, so the menu never carries a
+            // dead entry at the first or last lane
+            if (index > 0) {
+                menu.appendChild(this._buildMenuEntry(
+                    this._iconClass("fas fa-arrow-up", "arrow-up"),
+                    this._i18n("webexpress.webapp:swimlane.moveup", "Move up"),
+                    null,
+                    () => this._moveSwimlane(index, -1)
+                ));
+            }
+            if (index < this._swimlanes.length - 1) {
+                menu.appendChild(this._buildMenuEntry(
+                    this._iconClass("fas fa-arrow-down", "arrow-down"),
+                    this._i18n("webexpress.webapp:swimlane.movedown", "Move down"),
+                    null,
+                    () => this._moveSwimlane(index, 1)
+                ));
+            }
+        }
+
+        if (this._deletableSwimlane) {
+            if (this._editableSwimlane || this._configurableSwimlane || this._movableSwimlane) {
+                const divider = document.createElement("li");
+                divider.innerHTML = "<hr class=\"dropdown-divider\">";
+                menu.appendChild(divider);
+            }
+            menu.appendChild(this._buildMenuEntry(
+                this._iconClass("fas fa-trash", "trash"),
+                this._i18n("webexpress.webapp:swimlane.delete", "Delete swimlane"),
+                null,
+                () => this._deleteSwimlane(index)
+            ));
+        }
+
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this._toggleMenu(menu);
+        });
+
+        container.appendChild(button);
+        container.appendChild(menu);
+
+        // place the menu at the end of the header row (after the label and any
+        // badge), just before the lane content
+        headerSpan.parentNode.insertBefore(container, laneCtrl._content || null);
+    }
+
+    /**
+     * Starts inline editing of a swimlane title in place of the header label.
+     * @param {HTMLElement} headerSpan - The swimlane header label element.
+     * @param {number} index - The swimlane index.
+     */
+    _startSwimlaneEdit(headerSpan, index) {
+        const lane = this._swimlanes[index];
+        if (!lane || this._activeSwimlaneEdit) {
+            return;
+        }
+
+        this._activeSwimlaneEdit = headerSpan;
+        const current = lane.label ?? "";
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "wx-board-col-input";
+        input.value = current;
+        // the header label toggles the lane on click; stop the input from doing so
+        input.addEventListener("click", (e) => e.stopPropagation());
+
+        headerSpan.innerHTML = "";
+        headerSpan.appendChild(input);
+        input.focus();
+        input.select();
+
+        let done = false;
+        const finish = (save) => {
+            if (done) {
+                return;
+            }
+            done = true;
+            this._activeSwimlaneEdit = null;
+
+            const value = input.value.trim();
+            if (save && value && value !== current) {
+                lane.label = value;
+                this.render();
+                this._dispatchSwimlaneChange();
+            } else {
+                this.render();
+            }
+        };
+
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                finish(true);
+            } else if (e.key === "Escape") {
+                e.preventDefault();
+                finish(false);
+            }
+        });
+        input.addEventListener("blur", () => finish(true));
+    }
+
+    /**
+     * Moves a swimlane one position up or down and persists the new order.
+     * @param {number} index - The swimlane index.
+     * @param {number} delta - The move direction: -1 for up, 1 for down.
+     */
+    _moveSwimlane(index, delta) {
+        const target = index + delta;
+        if (index < 0 || index >= this._swimlanes.length || target < 0 || target >= this._swimlanes.length) {
+            return;
+        }
+
+        const [moved] = this._swimlanes.splice(index, 1);
+        this._swimlanes.splice(target, 0, moved);
+
+        this.render();
+        this._dispatchSwimlaneChange();
+    }
+
+    /**
+     * Deletes a swimlane (and its cards) and persists the new swimlane layout.
+     * @param {number} index - The swimlane index.
+     */
+    _deleteSwimlane(index) {
+        if (index < 0 || index >= this._swimlanes.length) {
+            return;
+        }
+
+        const removed = this._swimlanes[index];
+        this._swimlanes.splice(index, 1);
+        this._cards = this._cards.filter((card) => card.swimlaneId !== removed.id);
+
+        this.render();
+        this._dispatchSwimlaneChange();
+    }
+
+    /**
+     * Opens the swimlane settings dialog seeded with the lane's current wql
+     * filter. On save the filter is stored on the lane and the swimlane change is
+     * persisted.
+     * @param {number} index - The swimlane index.
+     */
+    _openSwimlaneSettings(index) {
+        const lane = this._swimlanes[index];
+        if (!lane) {
+            return;
+        }
+
+        if (!this._settingsDialog) {
+            this._settingsDialog = new webexpress.webui.KanbanBoardSettings();
+        }
+
+        const settings = { filter: lane.filter || "" };
+        this._settingsDialog.open(
+            settings,
+            () => {
+                lane.filter = settings.filter;
+                this._dispatchSwimlaneChange();
+            },
+            this._i18n("webexpress.webui:kanban.settings.swimlane.title", "Swimlane settings")
+        );
+    }
+
+    /**
+     * Dispatches a swimlane-layout change so the REST layer can persist it. Each
+     * swimlane carries its title and its wql filter.
+     */
+    _dispatchSwimlaneChange() {
+        const swimlanes = this._swimlanes.map((s) => {
+            return { id: s.id, title: s.label ?? "", filter: s.filter ?? "" };
+        });
+
+        this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
+            id: this._element ? this._element.id : null,
+            action: "swimlanes",
+            swimlanes: swimlanes
+        });
+    }
+
+    // ---- board settings (wql filter) ------------------------------------------
+
+    /**
+     * Opens the board settings dialog seeded with the current wql filter. On
+     * save the filter is stored and the change is persisted so the next load
+     * applies it.
+     */
+    _openBoardSettings() {
+        if (!this._settingsDialog) {
+            this._settingsDialog = new webexpress.webui.KanbanBoardSettings();
+        }
+
+        const settings = { filter: this._filter || "" };
+        this._settingsDialog.open(settings, () => {
+            this._filter = settings.filter;
+            this._dispatchBoardSettings();
+        });
+    }
+
+    /**
+     * Dispatches a board-settings change so the REST layer can persist the wql
+     * filter and re-query the board.
+     */
+    _dispatchBoardSettings() {
+        this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
+            id: this._element ? this._element.id : null,
+            action: "settings",
+            filter: this._filter || ""
         });
     }
 
@@ -625,6 +1550,13 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         title.className = "card-title";
         title.textContent = card.label;
         header.appendChild(title);
+
+        // optional trailing badge in the card header (e.g. a ticket number or an
+        // age), coloured by a css class or an inline style
+        const cardBadge = this._makeBadge(card, "wx-kanban-card-badge");
+        if (cardBadge) {
+            header.appendChild(cardBadge);
+        }
 
         // assignee avatar at the header end, matching the backlog row look:
         // a photo when available, otherwise a colored initials badge; unassigned

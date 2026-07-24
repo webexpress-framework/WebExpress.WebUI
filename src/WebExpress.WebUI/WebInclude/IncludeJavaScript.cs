@@ -56,6 +56,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/webexpress.webui.modal.confirm.js")]
     [Asset("/assets/js/webexpress.webui.modal.sidebar.panel.js")]
     [Asset("/assets/js/webexpress.webui.dashboard.settings.js")]
+    [Asset("/assets/js/webexpress.webui.kanban.settings.js")]
     [Asset("/assets/js/webexpress.webui.move.js")]
     [Asset("/assets/js/webexpress.webui.overflow.js")]
     [Asset("/assets/js/webexpress.webui.pagination.js")]

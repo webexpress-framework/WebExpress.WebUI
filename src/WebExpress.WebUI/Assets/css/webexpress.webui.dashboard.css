@@ -90,6 +90,24 @@
     white-space: nowrap;
 }
 
+/* trailing badges (column widget count, widget-header count) share the same
+   look as the tab badge */
+.wx-board-col-badge,
+.wx-dashboard-widget-badge {
+    margin-left: 0.4rem;
+    font-size: 0.7em;
+    font-weight: 600;
+    line-height: 1;
+    flex: 0 0 auto;
+}
+
+/* neutral fallback when no color utility class is supplied */
+.wx-board-col-badge:not([class*="text-bg-"]):not([class*="bg-"]),
+.wx-dashboard-widget-badge:not([class*="text-bg-"]):not([class*="bg-"]) {
+    color: var(--wx-secondary-color, #6c757d);
+    background-color: var(--wx-tertiary-bg, #eef0f2);
+}
+
 /* the column "…" menu sits at the far end of the header */
 .wx-board-col-menu {
     margin-left: auto;
@@ -119,6 +137,23 @@
 
 .wx-board-col-header.wx-board-col-drop-after {
     box-shadow: inset -3px 0 0 0 var(--wx-primary, #0d6efd);
+}
+
+/* short landing flash after a column reorder so the user sees where it went,
+   mirroring the kanban feedback */
+.wx-dashboard-lane-title.wx-board-col-moved {
+    animation: wx-board-col-moved 0.8s ease-out;
+}
+
+@keyframes wx-board-col-moved {
+    0% { background-color: rgba(13, 110, 253, 0.18); }
+    100% { background-color: transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wx-dashboard-lane-title.wx-board-col-moved {
+        animation: none;
+    }
 }
 
 /* the color palette shown in the column menu */
