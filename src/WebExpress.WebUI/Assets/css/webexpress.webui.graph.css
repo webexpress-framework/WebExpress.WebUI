@@ -20,26 +20,41 @@
     align-self: center;
 }
 
-.wx-graph-fit-button {
+/* view controls sit in the lower left corner of the canvas, out of the way of
+   the content, which grows from the top left */
+.wx-graph-view-controls {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    padding: 4px 8px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    color: var(--wx-secondary);
-    background: #fff;
-    cursor: pointer;
+    left: 8px;
+    bottom: 8px;
+    display: flex;
+    gap: 4px;
+    z-index: 10;
 }
 
-[data-bs-theme="dark"] .wx-graph-fit-button {
-    background: var(--wx-dark);
-    border: 1px solid var(--wx-dark-border-subtle);
+.wx-graph-fit-button {
+    padding: 4px 8px;
+    border: 1px solid var(--wx-border-color);
+    border-radius: 4px;
+    color: var(--wx-body-color);
+    background: var(--wx-body-bg);
+    cursor: pointer;
+    line-height: 1;
+    opacity: 0.85;
+}
+
+.wx-graph-fit-button:hover {
+    opacity: 1;
+    background: var(--wx-secondary-bg);
+}
+
+.wx-graph-fit-button:focus-visible {
+    outline: 2px solid var(--wx-primary);
+    outline-offset: 1px;
 }
 
 .wx-graph-svg {
-    background: var(--wx-light);
-    border: 1px solid var(--wx-light-border-subtle);
+    background: var(--wx-tertiary-bg);
+    border: 1px solid var(--wx-border-color);
     border-radius: 4px;
     touch-action: none;
     width: 100%;
@@ -48,10 +63,10 @@
     will-change: transform;
 }
 
-[data-bs-theme="dark"] .wx-graph-svg {
-    background: var(--wx-dark);
-    border: 1px solid var(--wx-dark-border-subtle);
-}
+/* the optional background grid; the minor lines stay faint so they read as a
+   backdrop rather than as content */
+.wx-graph-grid-line { stroke: var(--wx-border-color); opacity: 0.45; }
+.wx-graph-grid-line-major { stroke: var(--wx-border-color); opacity: 0.8; }
 
 /* --- Graph Elements: Edges --- */
 .wx-graph-edge {
@@ -238,24 +253,32 @@
     fill: var(--wx-white);
 }
 
+/* the editor chrome draws from the theme variables rather than from fixed
+   greys, so light and dark are one rule set instead of two that drift apart */
 .wx-graph-editor {
-    overflow: hidden; font-family: sans-serif; display: flex; flex-direction: column; background: #fff;
+    overflow: hidden; font-family: inherit; display: flex; flex-direction: column;
+    background: var(--wx-body-bg); color: var(--wx-body-color);
+    position: relative; width: 100%;
     min-height: 400px; height: 100%;
 }
 .wx-graph-simple-toolbar {
-    flex: 0 0 auto; background: #f0f2f5; border-bottom: 1px solid #ccc;
+    flex: 0 0 auto; background: var(--wx-tertiary-bg); border-bottom: 1px solid var(--wx-border-color);
     padding: 4px 8px; display: flex; gap: 4px; align-items: center; z-index: 20; min-height: 40px;
 }
 .wx-simple-btn {
     background: transparent; border: 1px solid transparent; border-radius: 4px; cursor: pointer;
-    padding: 6px 10px; color: #444; font-size: 14px;
+    padding: 6px 10px; color: var(--wx-body-color); font-size: 14px;
 }
-.wx-simple-btn:hover:not(:disabled) { background: #e4e6eb; border-color: #d0d2d6; }
+.wx-simple-btn:hover:not(:disabled) {
+    background: var(--wx-secondary-bg); border-color: var(--wx-border-color);
+}
 .wx-simple-btn:active:not(:disabled), .wx-simple-btn.active {
-    background: #d0d7de; border-color: #b0b8be; color: #000; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+    background: var(--wx-secondary-bg); border-color: var(--wx-border-color);
+    color: var(--wx-emphasis-color); box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
 }
-.wx-simple-btn:disabled { color: #aaa; cursor: default; }
-.wx-simple-sep { width: 1px; height: 24px; background: #ccc; margin: 0 4px; }
+.wx-simple-btn:disabled { color: var(--wx-secondary-color); cursor: default; }
+.wx-simple-btn:focus-visible { outline: 2px solid var(--wx-primary); outline-offset: 1px; }
+.wx-simple-sep { width: 1px; height: 24px; background: var(--wx-border-color); margin: 0 4px; }
 .wx-graph-svg {
     flex: 1 1 auto; width: 100%; height: 100%; min-height: 300px; display: block; position: relative; z-index: 1;
 }
@@ -264,29 +287,110 @@
     display: flex; align-items: center; justify-content: center;
 }
 .wx-graph-modal-dialog {
-    background: #fff; width: 380px; max-width: 90%; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-    display: flex; flex-direction: column; border: 1px solid #ccc;
+    background: var(--wx-body-bg); color: var(--wx-body-color);
+    width: 380px; max-width: 90%; border-radius: 6px; box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    display: flex; flex-direction: column; border: 1px solid var(--wx-border-color);
 }
 .wx-graph-modal-header {
-    padding: 12px 16px; border-bottom: 1px solid #eee; font-weight: bold; font-size: 15px;
-    display: flex; justify-content: space-between; align-items: center; background: #f9f9f9; border-radius: 6px 6px 0 0;
+    padding: 12px 16px; border-bottom: 1px solid var(--wx-border-color); font-weight: bold; font-size: 15px;
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--wx-tertiary-bg); border-radius: 6px 6px 0 0;
 }
 .wx-graph-modal-body { padding: 16px; overflow-y: auto; max-height: 70vh; }
 .wx-graph-modal-footer {
-    padding: 12px 16px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 8px;
-    background: #f9f9f9; border-radius: 0 0 6px 6px;
+    padding: 12px 16px; border-top: 1px solid var(--wx-border-color); display: flex; justify-content: flex-end; gap: 8px;
+    background: var(--wx-tertiary-bg); border-radius: 0 0 6px 6px;
 }
 .wx-graph-form-group { margin-bottom: 12px; }
-.wx-graph-form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; color: #555; }
-.wx-graph-form-group input, .wx-graph-form-group select {
-    width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; box-sizing: border-box;
+.wx-graph-form-group label {
+    display: block; margin-bottom: 5px; font-weight: 600; font-size: 13px; color: var(--wx-secondary-color);
 }
-.wx-graph-node-selected rect, .wx-graph-node-selected circle { stroke: #0d6efd; stroke-width: 2px; }
+.wx-graph-form-group input, .wx-graph-form-group select {
+    width: 100%; padding: 8px; border: 1px solid var(--wx-border-color); border-radius: 4px;
+    font-size: 13px; box-sizing: border-box;
+    background: var(--wx-body-bg); color: var(--wx-body-color);
+}
+/* modal buttons; the accents come from the theme so the dialog is legible in
+   both schemes instead of painting fixed brand colours over a dark surface */
+.wx-graph-modal-btn { border: 1px solid var(--wx-border-color); }
+.wx-graph-modal-btn--primary {
+    background: var(--wx-primary); border-color: var(--wx-primary); color: #fff;
+}
+.wx-graph-modal-btn--primary:hover:not(:disabled) {
+    background: color-mix(in oklab, var(--wx-primary) 85%, #000); color: #fff;
+}
+.wx-graph-modal-btn--danger {
+    background: var(--wx-danger); border-color: var(--wx-danger); color: #fff;
+}
+.wx-graph-modal-btn--danger:hover:not(:disabled) {
+    background: color-mix(in oklab, var(--wx-danger) 85%, #000); color: #fff;
+}
+
+/* graphical stroke-pattern picker: the samples are drawn, because a dasharray
+   value says nothing about what the line will look like */
+.wx-graph-dash-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.wx-graph-dash-option {
+    padding: 3px 4px;
+    border: 1px solid var(--wx-border-color);
+    border-radius: 4px;
+    background: var(--wx-body-bg);
+    color: var(--wx-body-color);
+    cursor: pointer;
+    line-height: 0;
+}
+.wx-graph-dash-option:hover { border-color: var(--wx-primary); }
+.wx-graph-dash-option.is-active {
+    border-color: var(--wx-primary);
+    box-shadow: 0 0 0 2px color-mix(in oklab, var(--wx-primary) 25%, transparent);
+}
+.wx-graph-dash-option:focus-visible { outline: 2px solid var(--wx-primary); outline-offset: 1px; }
+.wx-graph-dash-sample { width: 56px; height: 8px; display: block; }
+
+.wx-graph-node-selected rect, .wx-graph-node-selected circle {
+    stroke: var(--wx-primary); stroke-width: 2px;
+}
 .wx-workflow-edge { stroke-width: 2px; cursor: pointer; }
 .wx-workflow-edge:hover { stroke-width: 3px; }
-.wx-workflow-edge[data-selected="true"] { stroke: #0d6efd; stroke-width: 2px; }
-.wx-graph-node-hover rect, .wx-graph-node-hover circle { stroke: #28a745 !important; stroke-width: 3px !important; fill: rgba(40, 167, 69, 0.1); }
-.wx-graph-node-source rect, .wx-graph-node-source circle { stroke: #ffc107 !important; stroke-width: 3px !important; stroke-dasharray: 5 3; }
-.wx-workflow-handle { fill: #fff; stroke: #0d6efd; cursor: move; }
-.wx-workflow-waypoint { fill: #fff; stroke: #666; cursor: move; }
+/* the selected edge keeps its own colour and is marked by weight and a halo,
+   so the colour a user chose stays readable while it is selected */
+.wx-workflow-edge[data-selected="true"] {
+    stroke-width: 3px;
+    filter: drop-shadow(0 0 3px var(--wx-primary));
+}
+.wx-graph-node-hover rect, .wx-graph-node-hover circle {
+    stroke: var(--wx-success) !important; stroke-width: 3px !important;
+}
+.wx-graph-node-source rect, .wx-graph-node-source circle {
+    stroke: var(--wx-warning) !important; stroke-width: 3px !important; stroke-dasharray: 5 3;
+}
+/* an edge without an explicit colour would fall back to the SVG default of
+   black, which disappears on a dark canvas */
+.wx-graph-viewer-edge { stroke: var(--wx-body-color); }
+.wx-workflow-handle { fill: var(--wx-body-bg); stroke: var(--wx-primary); cursor: move; }
+.wx-workflow-waypoint { fill: var(--wx-body-bg); stroke: var(--wx-secondary-color); cursor: move; }
+.wx-workflow-waypoint:hover { stroke: var(--wx-primary); }
+.wx-workflow-waypoint-selected { fill: var(--wx-primary); stroke: var(--wx-primary); }
 .wx-graph-preview-edge { stroke: #ffc107; stroke-width: 2px; stroke-dasharray: 5 5; pointer-events: none; }
+
+/* the canvas is a tab stop, so the focus has to be visible; the outline is
+   drawn inside because an svg fills its host edge to edge */
+.wx-graph-svg:focus-visible { outline: 2px solid #0d6efd; outline-offset: -2px; }
+
+/* the live region carries the spoken selection state and must stay reachable
+   for assistive technology, which display:none would prevent */
+.wx-graph-live-region {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}

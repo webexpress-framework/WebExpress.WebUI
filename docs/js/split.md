@@ -43,6 +43,7 @@ The initialization and behavior of the `SplitCtrl` are controlled entirely via `
 | `data-unit`           | The default unit for `data-size` if no unit is specified there. Possible values: `px`, `em`, `rem`, `%`. Default is `px`.
 | `data-min-side`       | The minimum size of the side pane in pixels, which cannot be undercut when dragging.
 | `data-max-side`       | The maximum size of the side pane in pixels, which cannot be exceeded when dragging.
+| `data-collapse-to`    | The size in pixels a collapse leaves behind. Defaults to `0`, which hides the side pane and the splitter entirely; a positive value leaves a rail. This is deliberately separate from `data-min-side`: that bounds a *drag*, and using it as the collapse target would mean a pane with a sensible drag minimum could never actually be hidden.
 | `data-splitter-class` | One or more CSS classes that are added to the splitter element.
 | `data-splitter-style` | Inline CSS styles that are applied to the splitter element.
 | `data-splitter-size`  | The width (for horizontal orientation) or height (for vertical orientation) of the splitter in pixels.

@@ -8,6 +8,25 @@
 webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
     static ICON_SIZE = 28;
 
+    // the simulation is considered at rest once no free node moves faster than
+    // this many units per frame; below that the positions no longer change
+    // visibly, so continuing to integrate only burns cpu
+    static SETTLE_VELOCITY = 0.05;
+
+    // hard ceiling on the frames a single simulation run may consume. A layout
+    // that cannot reach equilibrium (coincident nodes producing extreme
+    // repulsion, for example) must still give the frame loop back rather than
+    // spin for the lifetime of the page
+    static MAX_SIMULATION_FRAMES = 1800;
+
+    // the cell size a data-grid="true" selects, and how many cells apart the
+    // emphasised lines sit
+    static DEFAULT_GRID_SIZE = 20;
+    static GRID_MAJOR_EVERY = 5;
+
+    // how far a rounded corner reaches into the two segments meeting at a waypoint
+    static CORNER_RADIUS = 12;
+
     /**
      * Creates a new GraphViewer instance.
      * @param {HTMLElement} element - The host element.
@@ -15,13 +34,28 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
     constructor(element) {
         super(element);
 
+        // every listener the control installs outside its own subtree is
+        // recorded here, so the teardown can release them all - including the
+        // transient ones a pan or drag gesture installs and that a teardown in
+        // mid-gesture would otherwise strand on the window
+        this._windowListeners = [];
+        this._elementListeners = [];
+
         this._nodeStyle = (element.dataset.nodeStyle || "").toLowerCase();
-        // read edge style configuration, default is 'smooth'
-        this._edgeStyle = (element.dataset.edgeStyle || "smooth").toLowerCase();
+        // read edge style configuration; the default routes straight segments
+        // with rounded corners, "straight" keeps the corners sharp and
+        // "smooth" / "curve" select the bezier routing
+        this._edgeStyle = (element.dataset.edgeStyle || "rounded").toLowerCase();
 
         // read physics configuration. true by default unless explicitly set to "false"
         const physicsAttr = element.dataset.physicsEnabled;
         this._configPhysics = physicsAttr !== "false";
+
+        // optional background grid; the attribute carries the cell size, and
+        // "true" selects the default size. It is off unless asked for, because a
+        // grid is a modelling aid rather than a property of the graph
+        this._gridSize = this._readGridSize(element.dataset.grid);
+        this._gridSnap = element.dataset.gridSnap === "true";
 
         this._scale = 1;
         this._pan = { x: 0, y: 0 };
@@ -32,6 +66,8 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
         this._edges = [];
         this._drag = null;
         this._anim = null;
+        this._animFrames = 0;
+        this._destroyed = false;
         this._physicsEnabled = false;
         this._dissolving = false;
         this._dissolveProgress = 0;
@@ -44,7 +80,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
         element.innerHTML = "";
         element.classList.add("wx-graph-viewer");
         element.style.userSelect = "none";
-        element.addEventListener("contextmenu", (e) => {
+        this._addElementListener(element, "contextmenu", (e) => {
             e.preventDefault();
         });
 
@@ -53,6 +89,11 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
         this._svg.appendChild(this._viewport);
         element.appendChild(this._svg);
 
+        // the grid is the bottom layer of the viewport, so it pans and zooms
+        // with the content and the cells stay aligned to model coordinates
+        this._gridLayer = this._createGroup("grid");
+        this._viewport.appendChild(this._gridLayer);
+
         this._nodeLayer = this._createGroup("nodes");
         this._edgeLayer = this._createGroup("edges");
         this._viewport.appendChild(this._edgeLayer);
@@ -60,12 +101,96 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
 
         const autoPhysics = this._buildPhysics();
         this.render();
-        this._createFitButton();
+        this._createViewControls();
+        this._createLiveRegion();
         this._fitToView();
 
         if (autoPhysics) {
             this._startAnimation();
         }
+    }
+
+    /**
+     * Applies an author-chosen paint value, or clears it again.
+     *
+     * The value goes on the inline style rather than on the fill/stroke
+     * presentation attribute. A presentation attribute loses against every
+     * stylesheet rule, and the theme defaults for labels and edges are exactly
+     * such rules - so a colour chosen for a node or an edge was silently
+     * overruled by the default. An inline style outranks both, which restores
+     * the intended precedence: explicit colour beats css class beats theme.
+     * @param {Element} element - The element to paint.
+     * @param {string} property - "fill" or "stroke".
+     * @param {string} value - The colour, or an empty value to clear it.
+     */
+    _applyPaint(element, property, value) {
+        if (!element) {
+            return;
+        }
+        if (value) {
+            element.style[property] = value;
+        } else {
+            element.style[property] = "";
+            // an earlier render may have left the attribute behind
+            element.removeAttribute(property);
+        }
+    }
+
+    /**
+     * Registers a listener outside the control's own subtree and records it so
+     * the teardown can release it again.
+     * @param {EventTarget} target - The target to listen on.
+     * @param {string} type - The event type.
+     * @param {Function} handler - The handler.
+     * @param {object|boolean} [options] - The listener options.
+     */
+    _addElementListener(target, type, handler, options) {
+        target.addEventListener(type, handler, options);
+        this._elementListeners.push({ target, type, handler, options });
+    }
+
+    /**
+     * Registers a window listener and records it for the teardown.
+     * @param {string} type - The event type.
+     * @param {Function} handler - The handler.
+     */
+    _addWindowListener(type, handler) {
+        window.addEventListener(type, handler);
+        this._windowListeners.push({ type, handler });
+    }
+
+    /**
+     * Releases a single recorded window listener. Gestures use this to drop
+     * their transient handlers as soon as they end, so a long-lived viewer does
+     * not accumulate one entry per pan or drag.
+     * @param {string} type - The event type.
+     * @param {Function} handler - The handler.
+     */
+    _removeWindowListener(type, handler) {
+        window.removeEventListener(type, handler);
+        const index = this._windowListeners.findIndex(entry => {
+            return entry.type === type && entry.handler === handler;
+        });
+        if (index !== -1) {
+            this._windowListeners.splice(index, 1);
+        }
+    }
+
+    /**
+     * Releases every recorded listener. Only the listeners on long-lived
+     * targets are recorded; the per-node and per-edge handlers live on elements
+     * that every render replaces wholesale and that cannot outlive the SVG.
+     */
+    _releaseListeners() {
+        for (const entry of this._windowListeners) {
+            window.removeEventListener(entry.type, entry.handler);
+        }
+        this._windowListeners = [];
+
+        for (const entry of this._elementListeners) {
+            entry.target.removeEventListener(entry.type, entry.handler, entry.options);
+        }
+        this._elementListeners = [];
     }
 
     /**
@@ -76,17 +201,30 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         svg.setAttribute("class", "wx-graph-svg");
 
-        svg.addEventListener("pointerdown", (e) => {
+        // the canvas is a single tab stop that owns its arrow keys, which is
+        // what role=application expresses; without a tabindex the graph could
+        // not be reached by keyboard at all, and a global key handler could not
+        // tell whether a key press was meant for it
+        svg.setAttribute("tabindex", "0");
+        svg.setAttribute("role", "application");
+        svg.setAttribute("aria-roledescription", this._i18n("webexpress.webui:graph.a11y.roledescription", "graph"));
+        svg.setAttribute("aria-label", this._element.dataset.label
+            || this._i18n("webexpress.webui:graph.a11y.canvas", "Graph canvas"));
+
+        this._addElementListener(svg, "pointerdown", (e) => {
+            e.preventDefault();
+            // a pointer interaction moves the keyboard focus onto the canvas so
+            // the two input paths stay on the same element
+            this._focusCanvas();
+        });
+        this._addElementListener(svg, "contextmenu", (e) => {
             e.preventDefault();
         });
-        svg.addEventListener("contextmenu", (e) => {
-            e.preventDefault();
-        });
-        svg.addEventListener("wheel", (e) => {
+        this._addElementListener(svg, "wheel", (e) => {
             e.preventDefault();
             this._onWheel(e);
         }, { passive: false });
-        svg.addEventListener("pointerdown", (e) => {
+        this._addElementListener(svg, "pointerdown", (e) => {
             if (e.button === 0 && !this._viewDrag && e.target === svg) {
                 this._beginPan(svg, e);
             }
@@ -95,42 +233,248 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Creates the fit-to-view button.
+     * Reads the grid cell size from its data attribute. "true" selects the
+     * default size, a number selects that size, anything else turns the grid off.
+     * @param {string|undefined} value - The attribute value.
+     * @returns {number} The cell size, or 0 when the grid is off.
      */
-    _createFitButton() {
-        if (this._fitBtn) {
+    _readGridSize(value) {
+        if (value === undefined || value === null || value === "" || value === "false") {
+            return 0;
+        }
+        if (value === "true") {
+            return webexpress.webui.GraphViewerCtrl.DEFAULT_GRID_SIZE;
+        }
+        const size = parseFloat(value);
+        return Number.isFinite(size) && size > 0 ? size : 0;
+    }
+
+    /**
+     * Draws the background grid across the area the content occupies, padded so
+     * it keeps covering the canvas while the view is panned.
+     */
+    _renderGrid() {
+        if (!this._gridLayer) {
             return;
         }
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "wx-graph-fit-button";
-        btn.title = this._i18n("webexpress.webui:fit", "Fit to view");
-        const icon = document.createElement("i");
-        icon.className = "fa-solid fa-expand";
-        btn.appendChild(icon);
+        this._gridLayer.innerHTML = "";
 
-        btn.addEventListener("click", () => {
-            this._fitToView();
-        });
-        this._fitBtn = btn;
-        this._svg.parentElement.appendChild(btn);
+        if (this._gridSize <= 0) {
+            return;
+        }
+
+        const rect = this._svg.getBoundingClientRect();
+        const scale = this._scale || 1;
+        const size = this._gridSize;
+
+        // the visible area in local coordinates, generously padded so a pan does
+        // not immediately run past the drawn cells
+        const padding = Math.max(rect.width, rect.height) / scale;
+        const left = Math.floor(((-this._pan.x / scale) - padding) / size) * size;
+        const top = Math.floor(((-this._pan.y / scale) - padding) / size) * size;
+        const right = left + (rect.width / scale) + padding * 2 + size;
+        const bottom = top + (rect.height / scale) + padding * 2 + size;
+
+        // a single path per direction keeps the node count low even on a wide
+        // canvas, which matters because this redraws on every pan and zoom
+        let minor = "";
+        let major = "";
+
+        for (let x = left; x <= right; x += size) {
+            const line = `M ${x},${top} L ${x},${bottom} `;
+            if (Math.round(x / size) % webexpress.webui.GraphViewerCtrl.GRID_MAJOR_EVERY === 0) {
+                major += line;
+            } else {
+                minor += line;
+            }
+        }
+        for (let y = top; y <= bottom; y += size) {
+            const line = `M ${left},${y} L ${right},${y} `;
+            if (Math.round(y / size) % webexpress.webui.GraphViewerCtrl.GRID_MAJOR_EVERY === 0) {
+                major += line;
+            } else {
+                minor += line;
+            }
+        }
+
+        const append = (d, className, width) => {
+            if (!d) {
+                return;
+            }
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("class", className);
+            path.setAttribute("d", d.trim());
+            path.setAttribute("fill", "none");
+            // the stroke is specified in screen pixels, so the grid stays a hair
+            // line rather than thickening as the user zooms in
+            path.setAttribute("stroke-width", width / scale);
+            path.setAttribute("pointer-events", "none");
+            this._gridLayer.appendChild(path);
+        };
+
+        append(minor, "wx-graph-grid-line", 0.5);
+        append(major, "wx-graph-grid-line-major", 1);
+    }
+
+    /**
+     * Snaps a coordinate to the grid when snapping is enabled.
+     * @param {number} value - The coordinate.
+     * @returns {number} The snapped coordinate.
+     */
+    _snapToGrid(value) {
+        if (!this._gridSnap || this._gridSize <= 0) {
+            return value;
+        }
+        return Math.round(value / this._gridSize) * this._gridSize;
+    }
+
+    /**
+     * Moves the keyboard focus onto the canvas without scrolling the page,
+     * which a focus() on a large SVG would otherwise trigger.
+     */
+    _focusCanvas() {
+        if (this._svg && typeof this._svg.focus === "function") {
+            this._svg.focus({ preventScroll: true });
+        }
+    }
+
+    /**
+     * Announces a message to assistive technology through the live region that
+     * accompanies the canvas. Selection and structural changes are invisible to
+     * a screen reader otherwise, because they only manifest as SVG geometry.
+     * @param {string} message - The message to announce.
+     */
+    _announce(message) {
+        if (!this._liveRegion) {
+            return;
+        }
+        this._liveRegion.textContent = message || "";
+    }
+
+    /**
+     * Creates the off-screen live region used for the spoken selection state.
+     */
+    _createLiveRegion() {
+        if (this._liveRegion) {
+            return;
+        }
+        const region = document.createElement("div");
+        region.className = "wx-graph-live-region";
+        region.setAttribute("role", "status");
+        region.setAttribute("aria-live", "polite");
+        this._liveRegion = region;
+        this._element.appendChild(region);
+    }
+
+    /**
+     * Creates the view controls that sit in the lower left corner of the canvas.
+     *
+     * They live on the canvas rather than in the editor toolbar because they act
+     * on the view, not on the model: they change nothing that could be saved or
+     * undone, and they are equally useful to the read-only viewer, which has no
+     * toolbar at all.
+     */
+    _createViewControls() {
+        if (this._viewControls) {
+            return;
+        }
+
+        const controls = document.createElement("div");
+        controls.className = "wx-graph-view-controls";
+
+        /**
+         * Adds one control button.
+         * @param {string} faClass - The FontAwesome icon class.
+         * @param {string} lightClass - The light-theme icon name.
+         * @param {string} title - The tooltip and accessible name.
+         * @param {Function} action - The click handler.
+         * @returns {HTMLButtonElement} The button.
+         */
+        const add = (faClass, lightClass, title, action) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "wx-graph-fit-button";
+            btn.title = title;
+            btn.setAttribute("aria-label", title);
+
+            const icon = document.createElement("i");
+            icon.className = this._iconClass(faClass, lightClass);
+            icon.setAttribute("aria-hidden", "true");
+            btn.appendChild(icon);
+
+            this._addElementListener(btn, "click", (e) => {
+                e.stopPropagation();
+                action();
+            });
+            controls.appendChild(btn);
+            return btn;
+        };
+
+        this._fitBtn = add("fas fa-expand", "expand",
+            this._i18n("webexpress.webui:graph.fit.view", "Fit to view"),
+            () => this._fitToView());
+
+        add("fas fa-crosshairs", "crosshairs",
+            this._i18n("webexpress.webui:graph.center.view", "Centre the view"),
+            () => this._centerView());
+
+        add("fas fa-magnifying-glass-plus", "zoom-in",
+            this._i18n("webexpress.webui:graph.zoom.in", "Zoom in"),
+            () => this._zoomAt(1.2));
+
+        add("fas fa-magnifying-glass-minus", "zoom-out",
+            this._i18n("webexpress.webui:graph.zoom.out", "Zoom out"),
+            () => this._zoomAt(1 / 1.2));
+
+        this._viewControls = controls;
+        this._element.appendChild(controls);
+    }
+
+    /**
+     * Pans the view so the graph content sits in the middle of the canvas,
+     * leaving the zoom level untouched. Fitting changes the scale as well, which
+     * is not always wanted - a user who zoomed in deliberately only wants to
+     * find the content again.
+     */
+    _centerView() {
+        const bbox = this._computeContentBBox();
+        if (!bbox) {
+            return;
+        }
+        const rect = this._svg.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) {
+            return;
+        }
+
+        const cx = (bbox.minX + bbox.maxX) / 2;
+        const cy = (bbox.minY + bbox.maxY) / 2;
+
+        this._pan.x = rect.width / 2 - cx * this._scale;
+        this._pan.y = rect.height / 2 - cy * this._scale;
+        this._applyViewTransform();
     }
 
     /**
      * Ensures the arrow marker exists and returns its URL reference.
      * @returns {string} The marker URL reference.
      */
-    _ensureArrowMarker() {
+    _ensureArrowMarker(color) {
         let defs = this._svg.querySelector("defs");
         if (!defs) {
             defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
             this._svg.insertBefore(defs, this._svg.firstChild);
         }
-        let marker = defs.querySelector("#wx-graph-viewer-arrow");
+
+        // a marker cannot inherit the stroke of the path that references it, so
+        // an arrowhead that is to match its edge needs its own marker per colour
+        const safeColor = String(color || "").replace(/[^a-zA-Z0-9]/g, "");
+        const markerId = safeColor ? `wx-graph-viewer-arrow-${safeColor}` : "wx-graph-viewer-arrow";
+
+        let marker = defs.querySelector("#" + markerId);
         if (!marker) {
             marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
             marker.classList.add("wx-graph-edge-arrow");
-            marker.setAttribute("id", "wx-graph-viewer-arrow");
+            marker.setAttribute("id", markerId);
             marker.setAttribute("viewBox", "0 0 12 12");
             marker.setAttribute("refX", "10");
             marker.setAttribute("refY", "7");
@@ -141,10 +485,13 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
 
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
             path.setAttribute("d", "M 0 2 L 12 7 L 0 12 Z");
+            if (color) {
+                path.setAttribute("fill", color);
+            }
             marker.appendChild(path);
             defs.appendChild(marker);
         }
-        return "url(#wx-graph-viewer-arrow)";
+        return `url(#${markerId})`;
     }
 
     /**
@@ -191,11 +538,11 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             }
             svg.style.cursor = "default";
             this._viewDrag = null;
-            window.removeEventListener("pointermove", move);
-            window.removeEventListener("pointerup", up);
+            this._removeWindowListener("pointermove", move);
+            this._removeWindowListener("pointerup", up);
         };
-        window.addEventListener("pointermove", move);
-        window.addEventListener("pointerup", up);
+        this._addWindowListener("pointermove", move);
+        this._addWindowListener("pointerup", up);
     }
 
     /**
@@ -228,6 +575,8 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
      */
     _applyViewTransform() {
         this._viewport.setAttribute("transform", `translate(${this._pan.x} ${this._pan.y}) scale(${this._scale})`);
+        // the grid is drawn for the visible area, so it has to follow the view
+        this._renderGrid();
     }
 
     /**
@@ -235,15 +584,42 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
      * @param {WheelEvent} e - The wheel event.
      */
     _onWheel(e) {
-        const factor = e.deltaY < 0 ? 1.1 : 0.9;
-        const newScale = Math.min(3, Math.max(0.3, this._scale * factor));
-        const before = this._toLocal(e);
-        const oldScale = this._scale;
+        this._zoomAt(e.deltaY < 0 ? 1.1 : 0.9, this._toLocal(e));
+    }
 
+    /**
+     * Scales the view around a fixed point in local coordinates, so the content
+     * under that point stays put. Zooming from the keyboard passes the viewport
+     * centre, zooming with the wheel passes the pointer position.
+     * @param {number} factor - The relative scale change.
+     * @param {{x: number, y: number}} [anchor] - The local point to keep fixed.
+     */
+    _zoomAt(factor, anchor) {
+        const oldScale = this._scale;
+        const newScale = Math.min(3, Math.max(0.3, oldScale * factor));
+
+        if (newScale === oldScale) {
+            return;
+        }
+
+        const point = anchor || this._viewportCenter();
         this._scale = newScale;
-        this._pan.x += before.x * (oldScale - newScale);
-        this._pan.y += before.y * (oldScale - newScale);
+        this._pan.x += point.x * (oldScale - newScale);
+        this._pan.y += point.y * (oldScale - newScale);
         this._applyViewTransform();
+    }
+
+    /**
+     * The centre of the visible area in local coordinates.
+     * @returns {{x: number, y: number}} The centre point.
+     */
+    _viewportCenter() {
+        const rect = this._svg.getBoundingClientRect();
+        const scale = this._scale || 1;
+        return {
+            x: (rect.width / 2 - this._pan.x) / scale,
+            y: (rect.height / 2 - this._pan.y) / scale
+        };
     }
 
     /**
@@ -469,6 +845,40 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Writes a simulated node position back into the model.
+     *
+     * The two live in different coordinate spaces: the model stores the top
+     * left corner (that is how _buildPhysics reads it back), while the
+     * simulation works with centres. Writing a centre into the model would
+     * therefore shift the node by half its size on every round trip - once per
+     * undo, and once per save-and-reload.
+     * @param {object} node - The simulated node.
+     * @returns {object|null} The model node that was updated.
+     */
+    _syncModelPosition(node) {
+        const modelNode = this._model.nodes.find(m => {
+            return m.id === node.id;
+        });
+        if (modelNode) {
+            // rounded on the way out: the canvas works in continuous space, but a
+            // stored layout has no use for sub-pixel precision and a consumer may
+            // well model a position as a whole number
+            modelNode.x = Math.round(node.x - node.width / 2);
+            modelNode.y = Math.round(node.y - node.height / 2);
+        }
+        return modelNode || null;
+    }
+
+    /**
+     * Writes every simulated node position back into the model.
+     */
+    _syncModelPositions() {
+        (this._nodes || []).forEach(node => {
+            this._syncModelPosition(node);
+        });
+    }
+
+    /**
      * Distributes nodes with missing positions.
      * @returns {boolean} True if positions were assigned.
      */
@@ -533,8 +943,8 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
      * Renders all edges.
      */
     _renderEdges() {
-        const marker = this._ensureArrowMarker();
         this._model.edges.forEach((t) => {
+            const marker = this._ensureArrowMarker(t.color);
             const a = this._nodes.find(n => {
                 return n.id === t.from;
             });
@@ -562,11 +972,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             path.setAttribute("stroke-linecap", "round");
             path.setAttribute("stroke-linejoin", "round");
             path.setAttribute("marker-end", marker);
-            if (t.color) {
-                path.setAttribute("stroke", t.color);
-            } else {
-                path.removeAttribute("stroke");
-            }
+            this._applyPaint(path, "stroke", t.color);
             if (t.dasharray) {
                 path.setAttribute("stroke-dasharray", t.dasharray);
             }
@@ -598,8 +1004,63 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                 return (i === 0 ? "M " : "L ") + `${p.x},${p.y}`;
             }).join(" ");
         }
-        // default to smooth curve
-        return this._generateSmoothPath(points);
+        if (this._edgeStyle === "curve" || this._edgeStyle === "smooth") {
+            return this._generateSmoothPath(points);
+        }
+        // default: straight segments with the corners rounded off, which keeps a
+        // waypoint readable as the deliberate routing decision it is - a bezier
+        // bends the whole run and no longer passes through the point the user set
+        return this._generateRoundedPath(points);
+    }
+
+    /**
+     * Generates a path of straight segments whose corners are rounded with a
+     * short arc. The radius shrinks for short segments so two close waypoints
+     * cannot produce overlapping arcs.
+     * @param {Array<{x:number, y:number}>} points - The points to connect.
+     * @returns {string} The path d attribute string.
+     */
+    _generateRoundedPath(points) {
+        if (!points || points.length === 0) {
+            return "";
+        }
+        if (points.length < 3) {
+            return points.map((p, i) => {
+                return (i === 0 ? "M " : "L ") + `${p.x},${p.y}`;
+            }).join(" ");
+        }
+
+        const maxRadius = webexpress.webui.GraphViewerCtrl.CORNER_RADIUS;
+        let d = `M ${points[0].x},${points[0].y}`;
+
+        for (let i = 1; i < points.length - 1; i++) {
+            const prev = points[i - 1];
+            const corner = points[i];
+            const next = points[i + 1];
+
+            const inLen = Math.hypot(corner.x - prev.x, corner.y - prev.y) || 1;
+            const outLen = Math.hypot(next.x - corner.x, next.y - corner.y) || 1;
+            // never eat more than half of either adjoining segment
+            const radius = Math.min(maxRadius, inLen / 2, outLen / 2);
+
+            const start = {
+                x: corner.x - ((corner.x - prev.x) / inLen) * radius,
+                y: corner.y - ((corner.y - prev.y) / inLen) * radius
+            };
+            const end = {
+                x: corner.x + ((next.x - corner.x) / outLen) * radius,
+                y: corner.y + ((next.y - corner.y) / outLen) * radius
+            };
+
+            d += ` L ${start.x},${start.y}`;
+            // the corner itself is the control point, which rounds the turn
+            // without moving the path away from the waypoint
+            d += ` Q ${corner.x},${corner.y} ${end.x},${end.y}`;
+        }
+
+        const last = points[points.length - 1];
+        d += ` L ${last.x},${last.y}`;
+        return d;
     }
 
     /**
@@ -799,6 +1260,11 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
             g.setAttribute("class", "wx-graph-node");
             g.setAttribute("data-id", n.id);
+            // the shape carries no accessible name of its own, so the group
+            // supplies one; keyboard reachability stays with the canvas, which
+            // owns the roving selection
+            g.setAttribute("role", "img");
+            g.setAttribute("aria-label", n.data.label || n.id);
 
             const layout = (n.data.layout || "").toLowerCase();
             const iconBoxSize = webexpress.webui.GraphViewerCtrl.ICON_SIZE;
@@ -826,11 +1292,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             if (n.data.backgroundCss) {
                 shapeEl.classList.add(n.data.backgroundCss);
             }
-            if (n.data.backgroundColor) {
-                shapeEl.setAttribute("fill", n.data.backgroundColor);
-            } else {
-                shapeEl.removeAttribute("fill");
-            }
+            this._applyPaint(shapeEl, "fill", n.data.backgroundColor);
 
             const hasIcon = Boolean(n.data.image) || Boolean(n.data.icon);
             let iconEl = null;
@@ -873,9 +1335,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                 text.classList.add(n.data.foregroundCss);
             }
             text.textContent = n.data.label || n.id;
-            if (n.data.foregroundColor) {
-                text.setAttribute("fill", n.data.foregroundColor);
-            }
+            this._applyPaint(text, "fill", n.data.foregroundColor);
 
             // if uri is present, add underline style class
             if (n.data.uri) {
@@ -943,10 +1403,14 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                 e.stopPropagation();
                 const p = this._toLocal(e);
                 // check config before enabling physics
-                if (!this._physicsEnabled && this._configPhysics) {
-                    this._physicsEnabled = true;
-                    this._dissolving = true;
-                    this._dissolveProgress = 0;
+                if (this._configPhysics) {
+                    if (!this._physicsEnabled) {
+                        this._physicsEnabled = true;
+                        this._dissolving = true;
+                        this._dissolveProgress = 0;
+                    }
+                    // the loop stops itself once the layout settles, so a drag
+                    // has to be able to wake it again rather than assume it runs
                     this._startAnimation();
                 }
                 n.fixed = true;
@@ -1047,15 +1511,20 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                 this._drag.node.fixed = false;
             }
             this._drag = null;
-            window.removeEventListener("pointermove", move);
-            window.removeEventListener("pointerup", up);
+            this._removeWindowListener("pointermove", move);
+            this._removeWindowListener("pointerup", up);
+
+            // releasing a node hands it back to the simulation, which has to
+            // run again to let it and its neighbours settle
+            this._startAnimation();
         };
-        window.addEventListener("pointermove", move);
-        window.addEventListener("pointerup", up);
+        this._addWindowListener("pointermove", move);
+        this._addWindowListener("pointerup", up);
     }
 
     /**
-     * Physics simulation tick.
+     * Advances the simulation by one frame.
+     * @returns {boolean} True while another frame is still needed.
      */
     _tick() {
         const dt = 0.016;
@@ -1069,8 +1538,15 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
         }
 
         if (!this._physicsEnabled) {
+            // a dissolve still moves the waypoints, so geometry has to follow;
+            // once it is done nothing changes on its own any more and the frame
+            // loop has no reason to continue
+            if (this._dissolving) {
+                this._updateGeometry();
+                return true;
+            }
             this._updateGeometry();
-            return;
+            return false;
         }
 
         const k = 0.05;
@@ -1128,6 +1604,8 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             }
         }
 
+        let peakVelocity = 0;
+
         this._nodes.forEach(n => {
             if (n.fixed) {
                 return;
@@ -1136,9 +1614,16 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             n.vy *= damping;
             n.x += n.vx;
             n.y += n.vy;
+            peakVelocity = Math.max(peakVelocity, Math.abs(n.vx), Math.abs(n.vy));
         });
 
         this._updateGeometry();
+
+        // a node held by the pointer keeps feeding energy into the system, so
+        // the simulation stays live for as long as the gesture lasts
+        return this._dissolving
+            || this._drag !== null
+            || peakVelocity > webexpress.webui.GraphViewerCtrl.SETTLE_VELOCITY;
     }
 
     /**
@@ -1239,11 +1724,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             // reset base class but keep dynamic ones
             shapeEl.setAttribute("class", rectClasses.join(" "));
 
-            if (n.data.backgroundColor) {
-                shapeEl.setAttribute("fill", n.data.backgroundColor);
-            } else {
-                shapeEl.removeAttribute("fill");
-            }
+            this._applyPaint(shapeEl, "fill", n.data.backgroundColor);
 
             if (imgIcon) {
                 imgIcon.setAttribute("width", imgSize);
@@ -1313,11 +1794,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                 text.classList.remove("wx-graph-node-link");
             }
 
-            if (n.data.foregroundColor) {
-                text.setAttribute("fill", n.data.foregroundColor);
-            } else {
-                text.removeAttribute("fill");
-            }
+            this._applyPaint(text, "fill", n.data.foregroundColor);
         });
 
         Array.from(this._edgeLayer.children).forEach(el => {
@@ -1346,11 +1823,10 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
 
                 el.setAttribute("data-label", t.label || "");
                 el.className.baseVal = ["wx-graph-viewer-edge", t.colorCss || ""].filter(Boolean).join(" ");
-                if (t.color) {
-                    el.setAttribute("stroke", t.color);
-                } else {
-                    el.removeAttribute("stroke");
-                }
+                this._applyPaint(el, "stroke", t.color);
+                // the arrowhead is a separate element, so a recoloured edge needs
+                // to be pointed at the marker matching its new colour
+                el.setAttribute("marker-end", this._ensureArrowMarker(t.color));
                 if (t.dasharray) {
                     el.setAttribute("stroke-dasharray", t.dasharray);
                 } else {
@@ -1377,13 +1853,28 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Starts the animation loop.
+     * Starts the animation loop, or restarts it when a settled simulation has
+     * been disturbed again. The loop ends itself as soon as the simulation
+     * comes to rest, so an idle graph costs nothing.
      */
     _startAnimation() {
+        if (this._destroyed || (!this._physicsEnabled && !this._dissolving)) {
+            return;
+        }
+
+        this._animFrames = 0;
+
         const step = () => {
-            this._tick();
+            this._animFrames += 1;
+            const running = this._tick();
+
+            if (this._destroyed || !running || this._animFrames >= webexpress.webui.GraphViewerCtrl.MAX_SIMULATION_FRAMES) {
+                this._anim = null;
+                return;
+            }
             this._anim = window.requestAnimationFrame(step);
         };
+
         if (!this._anim) {
             this._anim = window.requestAnimationFrame(step);
         }
@@ -1398,6 +1889,38 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             window.cancelAnimationFrame(this._anim);
             this._anim = null;
         }
+    }
+
+    /**
+     * Releases the frame loop, every listener the control installed outside its
+     * own subtree and the DOM it added to the host. Without this the frame loop
+     * keeps the whole control graph reachable and running long after the host
+     * has left the document.
+     */
+    destroy() {
+        this._destroyed = true;
+        this._stopAnimation();
+        this._releaseListeners();
+
+        this._drag = null;
+        this._viewDrag = null;
+
+        if (this._viewControls && this._viewControls.parentNode) {
+            this._viewControls.parentNode.removeChild(this._viewControls);
+        }
+        this._viewControls = null;
+        this._fitBtn = null;
+
+        if (this._liveRegion && this._liveRegion.parentNode) {
+            this._liveRegion.parentNode.removeChild(this._liveRegion);
+        }
+        this._liveRegion = null;
+
+        if (this._svg && this._svg.parentNode) {
+            this._svg.parentNode.removeChild(this._svg);
+        }
+
+        super.destroy();
     }
 
     /**
@@ -1479,9 +2002,15 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
      */
     set model(val) {
         this._model = this._normalizeModel(val);
-        this._buildPhysics();
+        const autoPhysics = this._buildPhysics();
         this.render();
         this._fitToView();
+
+        // a replaced model may bring nodes without a position, which only the
+        // simulation can place
+        if (autoPhysics) {
+            this._startAnimation();
+        }
     }
 };
 

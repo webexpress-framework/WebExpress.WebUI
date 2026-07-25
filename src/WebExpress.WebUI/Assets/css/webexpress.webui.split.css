@@ -39,11 +39,26 @@
     align-items: center;
     justify-content: center;
     position: relative;
+    background: var(--wx-tertiary-bg);
+    color: var(--wx-secondary-color);
+    border-inline: 1px solid var(--wx-border-color);
+}
+
+.wx-split .wx-splitter-vertical {
+    border-inline: 0;
+    border-block: 1px solid var(--wx-border-color);
+}
+
+.wx-split .wx-splitter:hover {
+    background: var(--wx-secondary-bg);
+    color: var(--wx-primary);
 }
 
 .wx-split .wx-splitter:active,
 .wx-split .wx-splitter:focus {
-    background: var(--wx-secondary-color);
+    background: var(--wx-secondary-bg);
+    color: var(--wx-primary);
+    outline: none;
 }
 
 .wx-split .wx-splitter-horizontal {
@@ -56,27 +71,31 @@
     cursor: row-resize;
 }
 
-/* Splitter indicator */
+/* Splitter indicator
+   The grip is painted from currentColor rather than from a baked bitmap, so it
+   follows the theme instead of staying dark on a dark surface. */
 .wx-split .wx-splitter-indicator {
     display: block;
-    background-color: var(--wx-secondary);
     border-radius: 3px;
-    opacity: 0.4;
+    opacity: 0.65;
+    background-repeat: repeat;
 }
 
 .wx-split .wx-splitter-indicator-horizontal {
     height: 36px;
-    width: 2px;
+    width: 3px;
     min-height: 24px;
     max-height: 60px;
-    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAkSURBVChTYzxz5kw/AxCYmJgUwthMIIJ8MGomEIyaidNMBgYANc83sUCD+ssAAAAASUVORK5CYII');
+    background-image: radial-gradient(currentColor 1px, transparent 1px);
+    background-size: 3px 5px;
 }
 .wx-split .wx-splitter-indicator-vertical {
-    height: 2px;
+    height: 3px;
     width: 36px;
     min-width: 24px;
     max-width: 60px;
-    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFCAYAAABSIVz6AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAhSURBVChTYzxz5kw/AxCYmJgUgmh68ZlAxIgCIy2oGRgAUTM97WZuFTcAAAAASUVORK5CYII');
+    background-image: radial-gradient(currentColor 1px, transparent 1px);
+    background-size: 5px 3px;
 }
 
 /* Prevent text selection during drag */

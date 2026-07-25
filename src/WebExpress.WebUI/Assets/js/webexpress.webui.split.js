@@ -25,6 +25,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     _orientation = "horizontal";
     _minSide = null;
     _maxSide = null;
+    _collapseTo = 0;
     _paneOrder = "side-main";
     _unit = "px";
 
@@ -78,6 +79,13 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         this._orientation = element.getAttribute("data-orientation") === "vertical" ? "vertical" : "horizontal";
         this._minSide = this._parseAttrInt(element, "data-min-side");
         this._maxSide = this._parseAttrInt(element, "data-max-side");
+
+        // the extent a collapse leaves behind. It is deliberately separate from
+        // data-min-side: that is the smallest size a *drag* may reach, and using
+        // it as the collapse target means a pane with a sensible drag minimum
+        // can never actually be hidden. Zero (the default) hides the pane; a
+        // positive value leaves a rail behind.
+        this._collapseTo = this._parseAttrInt(element, "data-collapse-to") || 0;
         this._paneOrder = element.getAttribute("data-order") || "side-main";
         this._unit = element.getAttribute("data-unit") || "px";
 
@@ -100,7 +108,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
 
         // cleanup attributes
         const attrs = [
-            "data-orientation", "data-min-side", "data-max-side", "data-size",
+            "data-orientation", "data-min-side", "data-max-side", "data-collapse-to", "data-size",
             "data-splitter-class", "data-splitter-style", "data-splitter-size",
             "data-order", "data-unit"
         ];
@@ -413,12 +421,16 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         this._sidePanePrevSize = this._sidePane[isVert ? "offsetHeight" : "offsetWidth"];
         this._sidePaneCollapsed = true;
 
-        const collapseTo = this._minSide || 0;
+        const collapseTo = this._collapseTo;
         const prop = isVert ? "height" : "width";
         const minProp = isVert ? "minHeight" : "minWidth";
 
         if (collapseTo === 0) {
+            // a fully collapsed pane leaves no rail to grab, so the splitter goes
+            // with it; a visible divider against nothing reads as a rendering
+            // fault, and the pane is brought back through the toolbar toggle
             this._sidePane.style.display = "none";
+            this._splitter.style.display = "none";
         } else {
             this._sidePane.style[prop] = `${collapseTo}px`;
             this._sidePane.style[minProp] = `${collapseTo}px`;
@@ -426,7 +438,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         }
 
         // main pane takes remaining
-        const splitSize = this._getSplitterSize();
+        const splitSize = collapseTo === 0 ? 0 : this._getSplitterSize();
         if (this._mainPane) {
             this._mainPane.style[prop] = `calc(100% - ${splitSize}px - ${collapseTo}px)`;
         }
@@ -447,9 +459,11 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
 
         let targetSize = size || this._sidePanePrevSize || Math.floor(total / 2);
 
-        // reset min constraints that might have been set during collapse
+        // reset the constraints a collapse may have set
         const minProp = isVert ? "minHeight" : "minWidth";
         this._sidePane.style[minProp] = "";
+        this._sidePane.style.display = "";
+        this._splitter.style.display = "";
 
         this._sidePaneCollapsed = false;
         this._setPaneSizes(targetSize, true);
@@ -689,15 +703,16 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
                 const prop = this._orientation === "vertical" ? "height" : "width";
                 const minProp = this._orientation === "vertical" ? "minHeight" : "minWidth";
                 const splitSize = this._getSplitterSize();
-                const collapseTo = this._minSide || 0;
+                const collapseTo = this._collapseTo;
                 if (collapseTo === 0) {
                     this._sidePane.style.display = "none";
+                    this._splitter.style.display = "none";
                 } else {
                     this._sidePane.style[prop] = `${collapseTo}px`;
                     this._sidePane.style[minProp] = `${collapseTo}px`;
                 }
                 if (this._mainPane) {
-                    this._mainPane.style[prop] = `calc(100% - ${splitSize}px - ${collapseTo}px)`;
+                    this._mainPane.style[prop] = `calc(100% - ${collapseTo === 0 ? 0 : splitSize}px - ${collapseTo}px)`;
                 }
             } else {
                 this._setPaneSizes(this._sideSize);

@@ -14,7 +14,7 @@ import vm from "node:vm";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { createDocument, Element } from "./dom-stub.mjs";
+import { createDocument, Element, SvgElement } from "./dom-stub.mjs";
 
 // the harness lives in WebExpress.WebUI/src/WebExpress.WebUI.Test/JsTest and
 // loads the shipped sources from the sibling WebExpress.WebUI project
@@ -47,6 +47,22 @@ const safeSetTimeout = (callback, delay, ...args) => detach(setTimeout(callback,
 const safeSetInterval = (callback, delay, ...args) => detach(setInterval(callback, delay, ...args));
 
 /**
+ * Builds a stand-in for one of the per-tag SVG interfaces. The stub models
+ * every SVG tag with a single class, so the interface identity a control tests
+ * with instanceof is reconstructed from the tag name.
+ * @param {string} tagName - The upper case tag name the interface stands for.
+ * @returns {Function} The constructor usable on the right-hand side of instanceof.
+ */
+function svgTagClass(tagName) {
+    const constructor = function () { };
+    Object.defineProperty(constructor, "name", { value: `SVG${tagName}Element` });
+    Object.defineProperty(constructor, Symbol.hasInstance, {
+        value: (value) => value instanceof SvgElement && String(value.tagName).toUpperCase() === tagName
+    });
+    return constructor;
+}
+
+/**
  * Builds the browser-shaped globals that many controls touch at construction
  * time (window, animation frames, observers, the Popper layout helper). They
  * are deliberately inert stubs: timers resolve, observers never fire, and the
@@ -56,10 +72,23 @@ const safeSetInterval = (callback, delay, ...args) => detach(setInterval(callbac
  * @returns {object} The browser globals.
  */
 function createBrowserGlobals(document) {
-    const noopEvents = {
-        addEventListener() { },
-        removeEventListener() { },
-        dispatchEvent() { return true; }
+    // window listeners are tracked rather than dropped: a control that registers
+    // a global key or pointer handler has to be able to prove, in a test, both
+    // that the handler runs and that its teardown removed it again
+    const listeners = {};
+    const windowEvents = {
+        _listeners: listeners,
+        addEventListener(type, handler) {
+            (listeners[type] || (listeners[type] = new Set())).add(handler);
+        },
+        removeEventListener(type, handler) {
+            if (listeners[type]) { listeners[type].delete(handler); }
+        },
+        dispatchEvent(event) {
+            const set = listeners[event.type];
+            if (set) { Array.from(set).forEach((handler) => handler(event)); }
+            return !event.defaultPrevented;
+        }
     };
 
     const matchMedia = (query) => ({
@@ -73,7 +102,7 @@ function createBrowserGlobals(document) {
     });
 
     const window = {
-        ...noopEvents,
+        ...windowEvents,
         document,
         name: "",
         innerWidth: 1024,
@@ -122,6 +151,17 @@ function createBrowserGlobals(document) {
         matchMedia,
         localStorage: storage(),
         sessionStorage: storage(),
+        // the graph editor narrows a drag target with an instanceof check, so
+        // the SVG constructors have to exist and have to accept the stub's SVG
+        // elements; the stub has one element class for every SVG tag, so the
+        // distinction is drawn on the tag name
+        SVGElement: SvgElement,
+        SVGSVGElement: svgTagClass("SVG"),
+        SVGGElement: svgTagClass("G"),
+        SVGCircleElement: svgTagClass("CIRCLE"),
+        SVGPathElement: svgTagClass("PATH"),
+        SVGRectElement: svgTagClass("RECT"),
+        SVGTextElement: svgTagClass("TEXT"),
         ResizeObserver: class { observe() { } unobserve() { } disconnect() { } },
         IntersectionObserver: class { constructor() { this.root = null; } observe() { } unobserve() { } disconnect() { } takeRecords() { return []; } },
         Event: class { constructor(type, init) { init = init || {}; this.type = type; this.bubbles = !!init.bubbles; this.cancelable = !!init.cancelable; this.defaultPrevented = false; } preventDefault() { this.defaultPrevented = true; } stopPropagation() { } },
@@ -195,6 +235,75 @@ export function loadWebUi(options = {}) {
         document,
         sandbox,
         createElement(tag) { return document.createElement(tag); }
+    };
+}
+
+/**
+ * Counts the handlers currently registered on the window for an event type.
+ * A teardown test asserts against this rather than against the control's own
+ * bookkeeping, so a handler that is dropped without being unregistered still
+ * shows up as a leak.
+ * @param {object} rt - The loaded runtime.
+ * @param {string} type - The event type, for example "keydown".
+ * @returns {number} The handler count.
+ */
+export function windowListenerCount(rt, type) {
+    const set = rt.sandbox.window._listeners[type];
+    return set ? set.size : 0;
+}
+
+/**
+ * Counts the handlers a stub element carries for an event type.
+ * @param {object} element - The stub element.
+ * @param {string} type - The event type.
+ * @returns {number} The handler count.
+ */
+export function elementListenerCount(element, type) {
+    const set = element._listeners[type];
+    return set ? set.size : 0;
+}
+
+/**
+ * Builds a synthetic pointer event carrying the fields the graph controls read.
+ * @param {object} [init] - Overrides for the event fields.
+ * @returns {object} The event.
+ */
+export function pointerEvent(init = {}) {
+    return {
+        type: init.type || "pointerdown",
+        button: init.button === undefined ? 0 : init.button,
+        pointerId: init.pointerId === undefined ? 1 : init.pointerId,
+        clientX: init.clientX || 0,
+        clientY: init.clientY || 0,
+        ctrlKey: !!init.ctrlKey,
+        metaKey: !!init.metaKey,
+        shiftKey: !!init.shiftKey,
+        altKey: !!init.altKey,
+        target: init.target || null,
+        defaultPrevented: false,
+        preventDefault() { this.defaultPrevented = true; },
+        stopPropagation() { this.propagationStopped = true; }
+    };
+}
+
+/**
+ * Builds a synthetic keyboard event carrying the fields the graph controls read.
+ * @param {string} key - The key value, for example "Delete".
+ * @param {object} [init] - Overrides for the remaining event fields.
+ * @returns {object} The event.
+ */
+export function keyEvent(key, init = {}) {
+    return {
+        type: init.type || "keydown",
+        key,
+        ctrlKey: !!init.ctrlKey,
+        metaKey: !!init.metaKey,
+        shiftKey: !!init.shiftKey,
+        altKey: !!init.altKey,
+        target: init.target || null,
+        defaultPrevented: false,
+        preventDefault() { this.defaultPrevented = true; },
+        stopPropagation() { this.propagationStopped = true; }
     };
 }
 

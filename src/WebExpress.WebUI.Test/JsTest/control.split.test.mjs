@@ -27,15 +27,16 @@ contract({
  * (zero-width) tab and later shown. The container starts at the given width
  * (0 = hidden); call show(width) to reveal it.
  * @param {object} rt - The loaded runtime.
- * @param {object} options - { size, minSide, unit, width }.
+ * @param {object} options - { size, minSide, collapseTo, unit, width }.
  * @returns {object} The controller plus element handles and a show() helper.
  */
-function makeSplit(rt, { size, minSide, unit, width = 0 } = {}) {
+function makeSplit(rt, { size, minSide, collapseTo, unit, width = 0 } = {}) {
     const el = rt.createElement("div");
     el.classList.add("wx-webui-split");
     el.setAttribute("data-orientation", "horizontal");
     if (size != null) { el.setAttribute("data-size", String(size)); }
     if (minSide != null) { el.setAttribute("data-min-side", String(minSide)); }
+    if (collapseTo != null) { el.setAttribute("data-collapse-to", String(collapseTo)); }
     if (unit != null) { el.setAttribute("data-unit", String(unit)); }
 
     const side = rt.createElement("div");
@@ -147,4 +148,35 @@ test("the split-fit action fits the side pane of its target split", () => {
 
     action.execute(button, "primary", controller, { preventDefault() { } });
     assert.equal(fitted, 1, "fitSidePaneToContent is invoked on the resolved target");
+});
+
+
+test("collapsing hides the side pane and the splitter with it", () => {
+    const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.split.js"] });
+    // a drag minimum is not a collapse target: a pane with a sensible minimum
+    // has to remain fully hideable
+    const s = makeSplit(rt, { size: 300, minSide: 260, width: 800 });
+
+    s.ctrl.collapseSidePane();
+
+    assert.equal(s.ctrl._sidePaneCollapsed, true, "the pane is collapsed");
+    assert.equal(s.side.style.display, "none", "nothing of the side pane is left");
+    assert.equal(s.ctrl._splitter.style.display, "none", "the divider goes with it");
+
+    s.ctrl.expandSidePane();
+
+    assert.equal(s.ctrl._sidePaneCollapsed, false, "the pane comes back");
+    assert.notEqual(s.side.style.display, "none", "the side pane is visible again");
+    assert.notEqual(s.ctrl._splitter.style.display, "none", "the divider is visible again");
+});
+
+test("a collapse target leaves the configured rail behind", () => {
+    const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.split.js"] });
+    const s = makeSplit(rt, { size: 300, minSide: 260, collapseTo: 48, width: 800 });
+
+    s.ctrl.collapseSidePane();
+
+    assert.equal(s.side.style.width, "48px", "the rail keeps its configured width");
+    assert.notEqual(s.side.style.display, "none", "the rail stays visible");
+    assert.notEqual(s.ctrl._splitter.style.display, "none", "the divider stays grabbable");
 });
