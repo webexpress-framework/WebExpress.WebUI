@@ -28,7 +28,7 @@ The board is parsed from the static DOM. The host carries the column and board f
 | `data-deletable-column` | When `"true"`, the column `…` menu offers **Delete** (removes the column and its cards).  | `data-deletable-column="true"`
 | `data-addable-column`   | When `"true"`, the board `…` menu offers **New column**.                                  | `data-addable-column="true"`
 | `data-addable-swimlane` | When `"true"`, the board `…` menu offers **New swimlane**.                                | `data-addable-swimlane="true"`
-| `data-editable-swimlane`| When `"true"`, the swimlane `…` menu offers **Rename**.                                   | `data-editable-swimlane="true"`
+| `data-editable-swimlane`| When `"true"`, the swimlane `…` menu offers **Rename** and **Color**.                     | `data-editable-swimlane="true"`
 | `data-deletable-swimlane`| When `"true"`, the swimlane `…` menu offers **Delete** (removes the lane and its cards). | `data-deletable-swimlane="true"`
 | `data-movable-swimlane` | When `"true"`, the swimlane `…` menu offers **Move up** / **Move down**.                  | `data-movable-swimlane="true"`
 | `data-configurable-board`| When `"true"`, the board `…` menu offers **Settings** (the WQL filter).                  | `data-configurable-board="true"`
@@ -81,7 +81,7 @@ Three `…` menus mirror the dashboard control; the per-column and per-swimlane 
 
 - **Board `…` menu** — **Settings** (`data-configurable-board`, opens the board settings dialog with the WQL filter), **New column** (`data-addable-column`) and **New swimlane** (`data-addable-swimlane`). Adding the first swimlane moves the existing (lane-less) cards into it so they stay visible.
 - **Column `…` menu** — **Rename** (inline edit), **Size** (drill-down: Auto / 25 % / 33 % / 50 % / 66 % / 75 %), **Color** (drill-down palette + None), **Delete**. Rename, size and color require `data-editable-column`; delete requires `data-deletable-column`.
-- **Swimlane `…` menu** — **Rename** (`data-editable-swimlane`), **Settings** (`data-configurable-swimlane`, the per-swimlane WQL filter), **Move up** / **Move down** (`data-movable-swimlane`) and **Delete** (`data-deletable-swimlane`, removes the lane and its cards). Only the direction with room is offered, so the first and last lanes never carry a dead move entry.
+- **Swimlane `…` menu** — **Rename** and **Color** (drill-down palette + None, both behind `data-editable-swimlane`), **Settings** (`data-configurable-swimlane`, the per-swimlane WQL filter), **Move up** / **Move down** (`data-movable-swimlane`) and **Delete** (`data-deletable-swimlane`, removes the lane and its cards). Only the direction with room is offered, so the first and last lanes never carry a dead move entry.
 
 Each change re-renders the board and dispatches a `CHANGE_VALUE_EVENT` (see below) so the REST layer can persist it. The board scroller clips its overflow, so an open menu is pinned to the viewport with a fixed position to escape the clip.
 
@@ -124,7 +124,7 @@ var kanban = new ControlKanban("board")
 {
     "filter":    "priority = 'high'",
     "columns":   [{ "id": "todo", "label": "To Do", "size": "1fr", "color": "#0d6efd", "badge": "3", "badgeColor": "text-bg-secondary" }],
-    "swimlanes": [{ "id": "melee", "label": "Mêlée Island", "expanded": true, "filter": "team = 'a'", "badge": "3", "badgeColor": "text-bg-secondary" }],
+    "swimlanes": [{ "id": "melee", "label": "Mêlée Island", "expanded": true, "filter": "team = 'a'", "color": "#198754", "badge": "3", "badgeColor": "text-bg-secondary" }],
     "items": [{
         "id": "k1", "columnId": "todo", "swimlaneId": "melee",
         "label": "Steal the Idol", "html": "…", "colorCss": "border-danger",
@@ -163,7 +163,7 @@ On the server, the endpoint extends `RestApiKanban<TIndexItem>` and returns `Res
 | `action`     | Body                                                              | Hook                                    |
 |--------------|-------------------------------------------------------------------|-----------------------------------------|
 | `"columns"`  | `{ "columns": [{ id, title, size, color }] }`                     | `UpdtaeColumns(layout, request)`        |
-| `"swimlanes"`| `{ "swimlanes": [{ id, title, filter }] }`                        | `UpdateSwimlanes(layout, request)`      |
+| `"swimlanes"`| `{ "swimlanes": [{ id, title, filter, color }] }`                 | `UpdateSwimlanes(layout, request)`      |
 | `"settings"` | `{ "filter": "…" }`                                               | `UpdateSettings(layout, request)`       |
 
 The full ordered list is sent for columns and swimlanes: an absent entry is deleted, an unknown id is created, and the swimlane order defines the new lane order (Move up / Move down). The `settings` filter narrows the card query on the next load; override `ApplyWql(wql, query, request)` to apply it and `RetrieveFilter(wql, request)` to seed a persisted filter across full page reloads. A card move is a `PUT` without an `action` and carries `{ cardId, columnId, swimlaneId }`.

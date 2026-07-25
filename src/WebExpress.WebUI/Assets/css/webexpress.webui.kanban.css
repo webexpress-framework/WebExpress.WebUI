@@ -160,6 +160,13 @@
     border-bottom-color: var(--wx-border-color, #495057);
 }
 
+/* the swimlane header label. it carries the primary tint the bootstrap
+   text-primary utility used to supply, but without the !important that would
+   beat the inline accent color a colored lane sets */
+.wx-kanban-swimlane-header {
+    color: var(--wx-primary, #0d6efd);
+}
+
 /* Swimlane title style */
 .wx-kanban-swimlane-title {
     font-size: 1.15rem;

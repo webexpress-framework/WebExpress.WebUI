@@ -305,6 +305,46 @@ test("the column menu applies a size preset and a color", () => {
     assert.ok(ctrl._columns[0].color, "a column color is set");
 });
 
+test("the swimlane menu applies a color", () => {
+    const runtime = loadFull();
+    const { ctrl, host } = buildBoard(runtime, {
+        columns: "todo", swimlanes: "a", editableSwimlane: "true"
+    });
+
+    const menu = host.querySelector(".wx-kanban-swimlane-menu").querySelector(".dropdown-menu");
+
+    // drill into Color and pick a swatch
+    clickEntry(entry(menu, "webexpress.webapp:swimlane.color"));
+    clickEntry(menu.querySelector(".wx-board-col-swatch"));
+    assert.ok(ctrl._swimlanes[0].color, "a swimlane color is set");
+
+    // the header label is tinted with the chosen color
+    const header = host.querySelector(".wx-kanban-swimlane-configurable");
+    const label = header.querySelector("span");
+    assert.equal(label.style.color, ctrl._swimlanes[0].color);
+
+    // the label must not carry the bootstrap text-primary utility: its
+    // !important would beat the inline color and silently drop the accent
+    assert.equal(label.classList.contains("text-primary"), false);
+});
+
+test("the swimlane color menu clears the color via None", () => {
+    const runtime = loadFull();
+    const { ctrl, host } = buildBoard(runtime, {
+        columns: "todo", swimlanes: "a", editableSwimlane: "true"
+    });
+
+    let menu = host.querySelector(".wx-kanban-swimlane-menu").querySelector(".dropdown-menu");
+    clickEntry(entry(menu, "webexpress.webapp:swimlane.color"));
+    clickEntry(menu.querySelector(".wx-board-col-swatch"));
+    assert.ok(ctrl._swimlanes[0].color);
+
+    menu = host.querySelector(".wx-kanban-swimlane-menu").querySelector(".dropdown-menu");
+    clickEntry(entry(menu, "webexpress.webapp:swimlane.color"));
+    clickEntry(entry(menu, "webexpress.webapp:swimlane.color.none"));
+    assert.equal(ctrl._swimlanes[0].color, null);
+});
+
 test("the swimlane menu deletes the swimlane", () => {
     const runtime = loadFull();
     const { ctrl, host } = buildBoard(runtime, {

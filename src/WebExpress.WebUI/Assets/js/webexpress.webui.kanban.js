@@ -140,6 +140,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                     label: node.dataset.label || node.id,
                     expanded: node.dataset.expanded !== "false",
                     filter: node.dataset.filter || "",
+                    color: node.dataset.color || null,
                     badge: node.dataset.badge || null,
                     badgeColor: node.dataset.badgeColor || null,
                     badgeStyle: node.dataset.badgeStyle || null
@@ -313,9 +314,12 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             const laneWrapper = document.createElement("div");
             laneWrapper.className = "wx-kanban-swimlane";
 
-            // setup expandable parameters if swimlanes are configured
+            // setup expandable parameters if swimlanes are configured. the header
+            // label deliberately opts out of the bootstrap text-primary default,
+            // whose !important would beat the inline accent color of a colored lane
             if (hasSwimlanes) {
                 laneWrapper.dataset.header = lane.label;
+                laneWrapper.dataset.headercss = "wx-kanban-swimlane-header";
                 laneWrapper.dataset.expanded = lane.expanded ? "true" : "false";
             }
 
@@ -387,6 +391,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             if (hasSwimlanes) {
                 const laneCtrl = new webexpress.webui.ExpandableCtrl(laneWrapper);
                 this._appendSwimlaneBadge(laneCtrl, lane);
+                this._applySwimlaneColor(laneCtrl, lane);
                 this._decorateSwimlaneHeader(laneCtrl, s);
                 laneWrapper.addEventListener(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, (e) => {
                     if (e && e.detail !== undefined) {
@@ -734,7 +739,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
         const wasEmpty = this._swimlanes.length === 0;
 
-        this._swimlanes.push({ id: id, label: label, expanded: true, filter: "" });
+        this._swimlanes.push({ id: id, label: label, expanded: true, filter: "", color: null });
 
         if (wasEmpty) {
             for (let i = 0; i < this._cards.length; i++) {
@@ -889,12 +894,12 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 null,
                 () => this._startColumnEdit(headerEl, index)
             ));
-            menu.appendChild(this._buildColumnSubmenuEntry(
+            menu.appendChild(this._buildSubmenuEntry(
                 this._iconClass("fas fa-ruler", "expand"),
                 this._i18n("webexpress.webapp:column.size", "Size"),
                 (m) => this._populateColumnMenuSizes(m, headerEl, index)
             ));
-            menu.appendChild(this._buildColumnSubmenuEntry(
+            menu.appendChild(this._buildSubmenuEntry(
                 this._iconClass("fas fa-palette", "palette"),
                 this._i18n("webexpress.webapp:column.color", "Color"),
                 (m) => this._populateColumnMenuColors(m, headerEl, index)
@@ -918,13 +923,14 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Builds a drill-down entry that repopulates the menu in place with a
-     * sub-level, keeping the dropdown open.
+     * sub-level, keeping the dropdown open. Shared by the column and swimlane
+     * menus.
      * @param {string|null} iconClass - The resolved icon class.
      * @param {string} label - The entry label.
      * @param {Function} populate - Repopulates the menu; receives the menu element.
      * @returns {HTMLElement} The list item element.
      */
-    _buildColumnSubmenuEntry(iconClass, label, populate) {
+    _buildSubmenuEntry(iconClass, label, populate) {
         const li = document.createElement("li");
 
         const button = document.createElement("button");
@@ -954,12 +960,12 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Prepends the "back" entry that returns a drilled-down menu to its root.
-     * @param {HTMLElement} menu - The dropdown menu element.
-     * @param {HTMLElement} headerEl - The column header element.
-     * @param {number} index - The column index.
+     * Builds the "back" entry that returns a drilled-down menu to its root.
+     * Shared by the column and swimlane menus.
+     * @param {Function} onBack - Repopulates the menu with its root entries.
+     * @returns {HTMLElement} The list item element.
      */
-    _buildColumnMenuBack(menu, headerEl, index) {
+    _buildMenuBackEntry(onBack) {
         const li = document.createElement("li");
 
         const button = document.createElement("button");
@@ -970,7 +976,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         button.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
-            this._populateColumnMenuRoot(menu, headerEl, index);
+            onBack();
         });
 
         li.appendChild(button);
@@ -986,7 +992,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
      */
     _populateColumnMenuSizes(menu, headerEl, index) {
         menu.replaceChildren();
-        menu.appendChild(this._buildColumnMenuBack(menu, headerEl, index));
+        menu.appendChild(this._buildMenuBackEntry(() => this._populateColumnMenuRoot(menu, headerEl, index)));
 
         const col = this._columns[index];
         const presets = [
@@ -1014,7 +1020,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
      */
     _populateColumnMenuColors(menu, headerEl, index) {
         menu.replaceChildren();
-        menu.appendChild(this._buildColumnMenuBack(menu, headerEl, index));
+        menu.appendChild(this._buildMenuBackEntry(() => this._populateColumnMenuRoot(menu, headerEl, index)));
 
         const col = this._columns[index];
 
@@ -1232,13 +1238,6 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     // ---- swimlane "…" menu ----------------------------------------------------
 
     /**
-     * Decorates a swimlane header (built by the ExpandableCtrl) with a "…" menu
-     * offering rename and delete, depending on the enabled swimlane flags. The
-     * menu is inserted next to the header label so it flows in the header row.
-     * @param {object} laneCtrl - The ExpandableCtrl of the swimlane.
-     * @param {number} index - The swimlane index in this._swimlanes.
-     */
-    /**
      * Inserts the optional trailing badge into a swimlane header (built by the
      * ExpandableCtrl), placed just before the lane content so it reads at the end
      * of the header row.
@@ -1257,6 +1256,33 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         }
     }
 
+    /**
+     * Tints a swimlane header with its optional accent color, so a colored lane
+     * reads as a labelled group the same way a colored column reads as a
+     * labelled stage.
+     * @param {object} laneCtrl - The ExpandableCtrl of the swimlane.
+     * @param {object} lane - The swimlane data object.
+     */
+    _applySwimlaneColor(laneCtrl, lane) {
+        const headerSpan = laneCtrl && laneCtrl._header;
+        if (!headerSpan || !lane.color) {
+            return;
+        }
+        headerSpan.style.color = lane.color;
+        if (headerSpan.parentNode) {
+            headerSpan.parentNode.classList.add("wx-kanban-swimlane-has-color");
+        }
+    }
+
+    /**
+     * Decorates a swimlane header (built by the ExpandableCtrl) with a "…" menu
+     * offering rename, color, settings, move and delete, depending on the
+     * enabled swimlane flags. The menu is inserted next to the header label so
+     * it flows in the header row; color drills into the same dropdown so no
+     * nested flyout positioning is needed.
+     * @param {object} laneCtrl - The ExpandableCtrl of the swimlane.
+     * @param {number} index - The swimlane index in this._swimlanes.
+     */
     _decorateSwimlaneHeader(laneCtrl, index) {
         if (!this._editableSwimlane && !this._deletableSwimlane && !this._movableSwimlane && !this._configurableSwimlane) {
             return;
@@ -1282,12 +1308,44 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu dropdown-menu-end";
 
+        this._populateSwimlaneMenuRoot(menu, headerSpan, index);
+
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            // a re-opened menu always starts at the top level
+            this._populateSwimlaneMenuRoot(menu, headerSpan, index);
+            this._toggleMenu(menu);
+        });
+
+        container.appendChild(button);
+        container.appendChild(menu);
+
+        // place the menu at the end of the header row (after the label and any
+        // badge), just before the lane content
+        headerSpan.parentNode.insertBefore(container, laneCtrl._content || null);
+    }
+
+    /**
+     * Populates the swimlane menu with its top-level entries.
+     * @param {HTMLElement} menu - The dropdown menu element.
+     * @param {HTMLElement} headerSpan - The swimlane header label element.
+     * @param {number} index - The swimlane index.
+     */
+    _populateSwimlaneMenuRoot(menu, headerSpan, index) {
+        menu.replaceChildren();
+
         if (this._editableSwimlane) {
             menu.appendChild(this._buildMenuEntry(
                 this._iconClass("fas fa-pencil", "pen"),
                 this._i18n("webexpress.webapp:swimlane.edit", "Rename swimlane"),
                 null,
                 () => this._startSwimlaneEdit(headerSpan, index)
+            ));
+            menu.appendChild(this._buildSubmenuEntry(
+                this._iconClass("fas fa-palette", "palette"),
+                this._i18n("webexpress.webapp:swimlane.color", "Color"),
+                (m) => this._populateSwimlaneMenuColors(m, headerSpan, index)
             ));
         }
 
@@ -1334,19 +1392,67 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 () => this._deleteSwimlane(index)
             ));
         }
+    }
 
-        button.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this._toggleMenu(menu);
-        });
+    /**
+     * Populates the swimlane menu with the color palette and a "none" option.
+     * @param {HTMLElement} menu - The dropdown menu element.
+     * @param {HTMLElement} headerSpan - The swimlane header label element.
+     * @param {number} index - The swimlane index.
+     */
+    _populateSwimlaneMenuColors(menu, headerSpan, index) {
+        menu.replaceChildren();
+        menu.appendChild(this._buildMenuBackEntry(() => this._populateSwimlaneMenuRoot(menu, headerSpan, index)));
 
-        container.appendChild(button);
-        container.appendChild(menu);
+        const lane = this._swimlanes[index];
 
-        // place the menu at the end of the header row (after the label and any
-        // badge), just before the lane content
-        headerSpan.parentNode.insertBefore(container, laneCtrl._content || null);
+        menu.appendChild(this._buildMenuCheckEntry(
+            this._i18n("webexpress.webapp:swimlane.color.none", "None"),
+            lane && !lane.color,
+            () => this._setSwimlaneColor(index, null)
+        ));
+
+        const li = document.createElement("li");
+        const grid = document.createElement("div");
+        grid.className = "wx-board-col-color-grid";
+
+        const palette = this._colorPalette();
+        for (let i = 0; i < palette.length; i++) {
+            const color = palette[i];
+            const swatch = document.createElement("button");
+            swatch.type = "button";
+            swatch.className = "wx-board-col-swatch";
+            swatch.style.backgroundColor = color;
+            swatch.title = color;
+            if (lane && lane.color && lane.color.toLowerCase() === color.toLowerCase()) {
+                swatch.classList.add("active");
+            }
+            swatch.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this._closeAllMenus();
+                this._setSwimlaneColor(index, color);
+            });
+            grid.appendChild(swatch);
+        }
+
+        li.appendChild(grid);
+        menu.appendChild(li);
+    }
+
+    /**
+     * Sets a swimlane accent color and persists the new swimlane layout.
+     * @param {number} index - The swimlane index.
+     * @param {string|null} color - The color, or null to clear it.
+     */
+    _setSwimlaneColor(index, color) {
+        const lane = this._swimlanes[index];
+        if (!lane) {
+            return;
+        }
+        lane.color = color;
+        this.render();
+        this._dispatchSwimlaneChange();
     }
 
     /**
@@ -1469,11 +1575,11 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Dispatches a swimlane-layout change so the REST layer can persist it. Each
-     * swimlane carries its title and its wql filter.
+     * swimlane carries its title, its wql filter and its accent color.
      */
     _dispatchSwimlaneChange() {
         const swimlanes = this._swimlanes.map((s) => {
-            return { id: s.id, title: s.label ?? "", filter: s.filter ?? "" };
+            return { id: s.id, title: s.label ?? "", filter: s.filter ?? "", color: s.color ?? null };
         });
 
         this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
