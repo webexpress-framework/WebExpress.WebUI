@@ -45,6 +45,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/css/webexpress.webui.password.css")]
     [Asset("/assets/css/webexpress.webui.quickfilter.css")]
     [Asset("/assets/css/webexpress.webui.rating.css")]
+    [Asset("/assets/css/webexpress.webui.schedule.css")]
     [Asset("/assets/css/webexpress.webui.search.css")]
     [Asset("/assets/css/webexpress.webui.selection.css")]
     [Asset("/assets/css/webexpress.webui.sidebar.css")]

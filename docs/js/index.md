@@ -39,6 +39,7 @@ This section documents the JavaScript UI controllers and components of `WebExpre
 - [Rating](rating.md)
 - [Responsive](responsive.md)
 - [Scrum](scrum.md)
+- [Schedule](schedule.md)
 - [Search](search.md)
 - [Selection](selection.md)
 - [Sidebar](sidebar.md)

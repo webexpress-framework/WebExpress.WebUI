@@ -2243,6 +2243,8 @@ webexpress.webui.Event = class {
     static DATA_REQUESTED_EVENT = "webexpress.webui.data.requested";
     // Event triggered when data has arrived.
     static DATA_ARRIVED_EVENT = "webexpress.webui.data.arrived";
+    // Event triggered when data could not be loaded or persisted.
+    static DATA_ERROR_EVENT = "webexpress.webui.data.error";
     // Event triggered when a task starts.
     static TASK_START_EVENT = "webexpress.webui.task.start";
     // Event triggered when a task is updated.

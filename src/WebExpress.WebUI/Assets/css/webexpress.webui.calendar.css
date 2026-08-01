@@ -3,6 +3,11 @@
  */
 .wx-calendar {
     width: 25em;
+    /* the calendar hangs in a popup whose width is shrink-to-fit against the
+       field below it. Without the cap a narrow field leaves the popup at its
+       minimum while the calendar keeps its 25em, and the surplus columns are
+       painted over the page behind it instead of inside the popup. */
+    max-width: 100%;
 }
 
 /* Calendar header (navigation) */

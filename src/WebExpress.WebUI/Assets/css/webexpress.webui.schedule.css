@@ -1,0 +1,460 @@
+/* The schedule draws from the theme variables rather than from fixed colours,
+   so light and dark are one rule set instead of two that drift apart. The
+   layout metrics are custom properties, so a host can compact or enlarge the
+   calendar without overriding the rules themselves. */
+.wx-schedule {
+    --wx-schedule-gap: 1px;
+    --wx-schedule-lane: 1.25rem;
+    --wx-schedule-hour: 2.75rem;
+    --wx-schedule-axis: 3.5rem;
+    --wx-schedule-weeknumber: 2rem;
+    --wx-schedule-daymin: 6rem;
+    --wx-schedule-mini: 10rem;
+
+    display: flex;
+    flex-direction: column;
+    background: var(--wx-body-bg);
+    color: var(--wx-body-color);
+    border: 1px solid var(--wx-border-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* toolbar ---------------------------------------------------------------- */
+
+.wx-schedule-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    background: var(--wx-tertiary-bg);
+    border-bottom: 1px solid var(--wx-border-color);
+}
+
+.wx-schedule-nav {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.wx-schedule-title {
+    flex: 1 1 auto;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wx-schedule-views {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.wx-schedule-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 0.25rem 0.6rem;
+    color: var(--wx-body-color);
+    font-size: 0.875rem;
+    cursor: pointer;
+    line-height: 1.4;
+}
+
+.wx-schedule-btn:hover:not(:disabled) {
+    background: var(--wx-secondary-bg);
+    border-color: var(--wx-border-color);
+}
+
+.wx-schedule-btn:focus-visible {
+    outline: 2px solid var(--wx-primary);
+    outline-offset: 1px;
+}
+
+.wx-schedule-view-active {
+    background: var(--wx-secondary-bg);
+    border-color: var(--wx-border-color);
+    font-weight: 600;
+}
+
+/* the mini calendar is the framework date control; it brings its own field
+   chrome, so only its footprint in the toolbar is set here */
+.wx-schedule-mini {
+    flex: 0 0 auto;
+    width: var(--wx-schedule-mini, 10rem);
+    min-width: 0;
+}
+
+/* the native picker of the degraded row, used where the date control is not
+   part of the bundle */
+.wx-schedule-mini-input {
+    width: 100%;
+    background: var(--wx-body-bg);
+    color: var(--wx-body-color);
+    border: 1px solid var(--wx-border-color);
+    border-radius: 4px;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.8125rem;
+}
+
+/* shared grid ------------------------------------------------------------ */
+
+.wx-schedule-body {
+    flex: 1 1 auto;
+    overflow: auto;
+}
+
+.wx-schedule-daygrid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: var(--wx-schedule-gap);
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.wx-schedule-head,
+.wx-schedule-week,
+.wx-schedule-allday {
+    display: flex;
+    gap: var(--wx-schedule-gap);
+}
+
+.wx-schedule-head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--wx-tertiary-bg);
+    border-bottom: 1px solid var(--wx-border-color);
+}
+
+.wx-schedule-weekday {
+    padding: 0.3rem 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: var(--wx-secondary-color);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1rem;
+}
+
+.wx-schedule-weekday-date {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--wx-body-color);
+    text-transform: none;
+}
+
+.wx-schedule-corner,
+.wx-schedule-weeknumber,
+.wx-schedule-allday-label {
+    flex: 0 0 var(--wx-schedule-weeknumber);
+    width: var(--wx-schedule-weeknumber);
+    font-size: 0.6875rem;
+    color: var(--wx-secondary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wx-schedule-allday-label {
+    flex-basis: var(--wx-schedule-axis);
+    width: var(--wx-schedule-axis);
+    justify-content: flex-end;
+    padding-right: 0.4rem;
+}
+
+/* day cells -------------------------------------------------------------- */
+
+.wx-schedule-day,
+.wx-schedule-allday-cell,
+.wx-schedule-daycolumn {
+    background: var(--wx-body-bg);
+    outline: 1px solid var(--wx-border-color);
+    min-width: 0;
+}
+
+.wx-schedule-day {
+    min-height: var(--wx-schedule-daymin);
+    display: flex;
+    flex-direction: column;
+    padding: 0.15rem;
+    gap: 0.1rem;
+}
+
+.wx-schedule-day-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.3rem;
+    min-width: 0;
+}
+
+.wx-schedule-day-number {
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.wx-schedule-day-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+}
+
+/* the day states are additive: a holiday on a weekend keeps both marks */
+.wx-schedule-othermonth {
+    background: var(--wx-secondary-bg);
+    color: var(--wx-secondary-color);
+}
+
+.wx-schedule-weekend {
+    background: var(--wx-tertiary-bg);
+}
+
+/* the current day, in every view. The rule is scoped to the cells rather than
+   left global, so a toolbar button can never pick the ring up by name. */
+.wx-schedule-day.wx-schedule-today,
+.wx-schedule-allday-cell.wx-schedule-today,
+.wx-schedule-daycolumn.wx-schedule-today,
+.wx-schedule-weekday.wx-schedule-today {
+    box-shadow: inset 0 0 0 2px var(--wx-primary);
+}
+
+.wx-schedule-isholiday {
+    background: color-mix(in srgb, var(--wx-danger) 8%, var(--wx-body-bg));
+}
+
+.wx-schedule-isholiday-observance,
+.wx-schedule-isholiday-school {
+    background: color-mix(in srgb, var(--wx-info) 8%, var(--wx-body-bg));
+}
+
+.wx-schedule-holiday-name {
+    font-size: 0.6875rem;
+    color: var(--wx-danger);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.wx-schedule-holiday-name[data-type="observance"],
+.wx-schedule-holiday-name[data-type="school"] {
+    color: var(--wx-info);
+}
+
+/* entries ---------------------------------------------------------------- */
+
+.wx-schedule-entry {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    border-radius: 3px;
+    padding: 0.05rem 0.25rem;
+    background: var(--wx-primary);
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.wx-schedule-entry:hover {
+    filter: brightness(1.08);
+}
+
+.wx-schedule-entry-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.wx-schedule-entry-time {
+    font-variant-numeric: tabular-nums;
+    opacity: 0.85;
+    flex: 0 0 auto;
+}
+
+.wx-schedule-entry[draggable="true"] {
+    cursor: grab;
+}
+
+/* lanes carry the multi-day bars; every day reserves the same lanes so the
+   chips below them stay aligned across the week */
+.wx-schedule-lanes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+}
+
+.wx-schedule-lane-spacer {
+    height: var(--wx-schedule-lane);
+}
+
+.wx-schedule-entry-bar {
+    height: var(--wx-schedule-lane);
+    position: relative;
+    z-index: 1;
+}
+
+/* a bar that leaves the week is cut square on that side, so the run reads as
+   continuing rather than as ending there */
+.wx-schedule-bar-continues-left {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.wx-schedule-bar-continues-right {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.wx-schedule-more {
+    background: transparent;
+    border: none;
+    padding: 0.05rem 0.25rem;
+    font-size: 0.6875rem;
+    color: var(--wx-secondary-color);
+    text-align: left;
+    cursor: pointer;
+}
+
+.wx-schedule-more:hover {
+    color: var(--wx-body-color);
+    text-decoration: underline;
+}
+
+/* week view -------------------------------------------------------------- */
+
+.wx-schedule-week-view {
+    display: flex;
+    flex-direction: column;
+}
+
+.wx-schedule-allday {
+    border-bottom: 1px solid var(--wx-border-color);
+}
+
+.wx-schedule-allday-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 0.15rem;
+    min-height: var(--wx-schedule-lane);
+}
+
+.wx-schedule-timegrid {
+    display: flex;
+    gap: var(--wx-schedule-gap);
+}
+
+.wx-schedule-hours {
+    flex: 0 0 var(--wx-schedule-axis);
+    width: var(--wx-schedule-axis);
+}
+
+.wx-schedule-hour {
+    height: var(--wx-schedule-hour);
+    font-size: 0.6875rem;
+    color: var(--wx-secondary-color);
+    text-align: right;
+    padding-right: 0.4rem;
+    /* the label names the line it sits on, so it is lifted onto the boundary */
+    transform: translateY(-0.5em);
+}
+
+.wx-schedule-daycolumn {
+    position: relative;
+    min-width: 0;
+}
+
+.wx-schedule-slot {
+    height: var(--wx-schedule-hour);
+    border-top: 1px solid var(--wx-border-color);
+}
+
+.wx-schedule-slot:hover {
+    background: var(--wx-secondary-bg);
+}
+
+.wx-schedule-entry-event {
+    position: absolute;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0;
+    padding: 0.1rem 0.25rem;
+    /* the inset keeps two side-by-side events visually separate */
+    box-shadow: inset 0 0 0 1px var(--wx-body-bg);
+}
+
+/* agenda ----------------------------------------------------------------- */
+
+.wx-schedule-agenda {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem;
+    gap: 0.75rem;
+}
+
+.wx-schedule-agenda-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.wx-schedule-agenda-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-weight: 600;
+    font-size: 0.8125rem;
+    padding-bottom: 0.2rem;
+    border-bottom: 1px solid var(--wx-border-color);
+}
+
+.wx-schedule-entry-agenda {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8125rem;
+}
+
+.wx-schedule-empty {
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--wx-secondary-color);
+}
+
+/* responsive ------------------------------------------------------------- */
+
+@media (max-width: 48em) {
+    .wx-schedule {
+        --wx-schedule-daymin: 4rem;
+        --wx-schedule-hour: 2.25rem;
+        --wx-schedule-axis: 2.75rem;
+    }
+
+    .wx-schedule-weekday {
+        font-size: 0.625rem;
+        padding: 0.2rem;
+    }
+
+    /* the day number alone stays legible where a chip no longer would */
+    .wx-schedule-month .wx-schedule-entry-title {
+        font-size: 0.6875rem;
+    }
+
+    .wx-schedule-toolbar {
+        gap: 0.3rem;
+    }
+
+    .wx-schedule-title {
+        order: -1;
+        flex-basis: 100%;
+    }
+}

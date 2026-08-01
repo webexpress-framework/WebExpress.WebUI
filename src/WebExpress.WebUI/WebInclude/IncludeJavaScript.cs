@@ -65,6 +65,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/webexpress.webui.quickfilter.js")]
     [Asset("/assets/js/webexpress.webui.rating.js")]
     [Asset("/assets/js/webexpress.webui.responsive.js")]
+    [Asset("/assets/js/webexpress.webui.schedule.js")]
     [Asset("/assets/js/webexpress.webui.search.js")]
     [Asset("/assets/js/webexpress.webui.search.content.js")]
     [Asset("/assets/js/webexpress.webui.selection.js")]

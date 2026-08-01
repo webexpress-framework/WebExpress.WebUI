@@ -74,6 +74,11 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         this._input.className = "wx-date-input";
         Object.assign(this._input.style, {
             flex: "1 1 auto",
+            // a flex item refuses to shrink below its intrinsic width, and a
+            // text input brings a wide one (its default size). In a field
+            // narrower than that the input keeps its width and pushes the
+            // calendar icon out of the box, onto whatever sits beside it.
+            minWidth: "0",
             border: "none",
             outline: "none",
             background: "transparent",
@@ -104,6 +109,8 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         icon.className = "wx-date-calendar-icon fa-solid fa-calendar-days";
         icon.setAttribute("aria-hidden", "true");
         icon.style.marginLeft = "0.5em";
+        // the icon is the fixed part of the field; the text gives way, not it
+        icon.style.flex = "0 0 auto";
         dropdown.appendChild(icon);
 
         icon.addEventListener("click", (e) => {
@@ -193,6 +200,15 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         const dropdownMenu = document.createElement("div");
         dropdownMenu.classList.add("dropdown-menu");
         dropdownMenu.style.minWidth = "280px";
+        // the popup is positioned absolutely, so its width is shrink-to-fit
+        // against the containing block - the field it hangs under. In a narrow
+        // field that box stays at the minimum while the calendar table needs
+        // more, and the surplus columns are painted over the page behind it.
+        // Sizing the box by its content instead keeps the table inside it.
+        dropdownMenu.style.width = "max-content";
+        // room for the 25em calendar plus the padding of the menu; below that
+        // the calendar gives way rather than spilling out
+        dropdownMenu.style.maxWidth = "min(92vw, 28rem)";
         dropdownMenu.style.display = "none";
 
         // header with navigation

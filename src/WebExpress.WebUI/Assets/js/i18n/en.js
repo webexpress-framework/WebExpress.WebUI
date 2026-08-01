@@ -399,5 +399,17 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
 
     "slider.invalid": "Invalid range.",
     "slider.out-of-bounds": "Range is out of bounds.",
-    "slider.inverted": "Lower bound must not exceed upper bound."
+    "slider.inverted": "Lower bound must not exceed upper bound.",
+
+    "schedule.previous": "Previous",
+    "schedule.next": "Next",
+    "schedule.today": "Today",
+    "schedule.goto": "Go to date",
+    "schedule.view.agenda": "Agenda",
+    "schedule.view.week": "Week",
+    "schedule.view.month": "Month",
+    "schedule.week_short": "W",
+    "schedule.allday": "All day",
+    "schedule.more": "+{0} more",
+    "schedule.empty": "No entries."
 });

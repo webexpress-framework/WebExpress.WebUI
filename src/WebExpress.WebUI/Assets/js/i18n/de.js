@@ -399,5 +399,17 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
 
     "slider.invalid": "Ungültiger Wertebereich.",
     "slider.out-of-bounds": "Wertebereich liegt außerhalb der zulässigen Grenzen.",
-    "slider.inverted": "Der untere Wert darf den oberen Wert nicht überschreiten."
+    "slider.inverted": "Der untere Wert darf den oberen Wert nicht überschreiten.",
+
+    "schedule.previous": "Zurück",
+    "schedule.next": "Weiter",
+    "schedule.today": "Heute",
+    "schedule.goto": "Zu Datum springen",
+    "schedule.view.agenda": "Agenda",
+    "schedule.view.week": "Woche",
+    "schedule.view.month": "Monat",
+    "schedule.week_short": "KW",
+    "schedule.allday": "Ganztägig",
+    "schedule.more": "+{0} weitere",
+    "schedule.empty": "Keine Einträge."
 });
