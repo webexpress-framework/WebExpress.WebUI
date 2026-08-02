@@ -2299,4 +2299,10 @@ webexpress.webui.Event = class {
     static SELECTED_TAB_EVENT = "webexpress.webui.tab.selected";
     // Event triggered when dark mode is toggled.
     static CHANGE_DARKMODE_EVENT = "webexpress.webui.change.darkmode";
+    // Event triggered when a service level agreement changes its status.
+    static SLA_STATUS_CHANGE_EVENT = "webexpress.webui.sla.status.change";
+    // Event triggered when a service level agreement is paused, resumed or settled.
+    static SLA_ACTION_EVENT = "webexpress.webui.sla.action";
+    // Event triggered when a periodic service level agreement starts its next cycle.
+    static SLA_CYCLE_EVENT = "webexpress.webui.sla.cycle";
 }

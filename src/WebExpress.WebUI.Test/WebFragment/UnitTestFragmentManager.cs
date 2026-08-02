@@ -1,4 +1,4 @@
-﻿using WebExpress.WebCore.WebScope;
+using WebExpress.WebCore.WebScope;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebPage;
 
@@ -967,6 +967,29 @@ namespace WebExpress.WebUI.Test.WebFragment
 
             // act
             var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlAccordion));
+
+            // validation
+            Assert.NotNull(html);
+            Assert.NotEmpty(html);
+            AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
+        }
+
+        /// <summary>
+        /// Test the render function of the fragment manager for service level
+        /// agreement control items.
+        /// </summary>
+        [Fact]
+        public void Render_TestSectionFragmentControlSla()
+        {
+            // arrange
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolsla"" class=""wx-sla wx-webui-sla wx-sla-fulfilled"" role=""group"" aria-label=""TestFragmentControlSla"" data-status=""fulfilled"" data-now=""2026-08-01T09:00:00"" data-target=""14400"" data-elapsed=""3600"" data-remaining=""10800"" data-progress=""0.25"" data-warning-threshold=""0.8"" data-cycle=""1"" data-cycles=""1"" data-deadline=""2026-08-01T12:00:00""><div class=""wx-sla-header""><span class=""wx-sla-label"">TestFragmentControlSla</span><span class=""wx-sla-status"" role=""status"" aria-live=""polite"">Fulfilled</span></div><div class=""wx-sla-meter"" role=""progressbar"" aria-valuemin=""0"" aria-valuemax=""100"" aria-valuenow=""25"" aria-valuetext=""25% - 3 h""><div class=""wx-sla-meter-track""><div class=""wx-sla-meter-value"" style=""width: 25%;""></div></div></div><div class=""wx-sla-footer""><time class=""wx-sla-remaining"" datetime=""PT3H0M0S"">3 h</time></div></div>";
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+
+            // act
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlSla));
 
             // validation
             Assert.NotNull(html);

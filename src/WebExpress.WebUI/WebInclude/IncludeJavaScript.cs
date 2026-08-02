@@ -70,6 +70,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/webexpress.webui.search.content.js")]
     [Asset("/assets/js/webexpress.webui.selection.js")]
     [Asset("/assets/js/webexpress.webui.sidebar.js")]
+    [Asset("/assets/js/webexpress.webui.sla.js")]
     [Asset("/assets/js/webexpress.webui.smartedit.js")]
     [Asset("/assets/js/webexpress.webui.smartview.js")]
     [Asset("/assets/js/webexpress.webui.split.js")]

@@ -411,5 +411,25 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "schedule.week_short": "W",
     "schedule.allday": "All day",
     "schedule.more": "+{0} more",
-    "schedule.empty": "No entries."
+    "schedule.empty": "No entries.",
+
+    "sla.fulfilled": "Fulfilled",
+    "sla.at-risk": "At risk",
+    "sla.violated": "Violated",
+    "sla.paused": "Paused",
+    "sla.pause": "Pause the agreement",
+    "sla.resume": "Resume the agreement",
+    "sla.fulfill": "Mark the agreement as fulfilled",
+    "sla.cycle": "Cycle {0} of {1}",
+    "sla.cycle.open": "Cycle {0}",
+    "sla.overrun": "{0} overdue",
+    "sla.unit.day": "d",
+    "sla.unit.hour": "h",
+    "sla.unit.minute": "min",
+    "sla.unit.second": "s",
+    "sla.summary.fulfilled": "{0} fulfilled",
+    "sla.summary.at-risk": "{0} at risk",
+    "sla.summary.violated": "{0} violated",
+    "sla.summary.paused": "{0} paused",
+    "sla.summary.empty": "No agreements"
 });

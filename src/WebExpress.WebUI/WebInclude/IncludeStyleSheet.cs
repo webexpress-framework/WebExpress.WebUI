@@ -50,6 +50,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/css/webexpress.webui.selection.css")]
     [Asset("/assets/css/webexpress.webui.sidebar.css")]
     [Asset("/assets/css/webexpress.webui.skeleton.css")]
+    [Asset("/assets/css/webexpress.webui.sla.css")]
     [Asset("/assets/css/webexpress.webui.input.estimate.css")]
     [Asset("/assets/css/webexpress.webui.slider.css")]
     [Asset("/assets/css/webexpress.webui.stat.css")]

@@ -43,6 +43,7 @@ This section documents the JavaScript UI controllers and components of `WebExpre
 - [Search](search.md)
 - [Selection](selection.md)
 - [Sidebar](sidebar.md)
+- [Sla](sla.md)
 - [SmartEdit](smartedit.md)
 - [SmartView](smartview.md)
 - [Split](split.md)
