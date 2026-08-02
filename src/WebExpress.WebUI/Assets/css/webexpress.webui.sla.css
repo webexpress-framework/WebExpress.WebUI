@@ -10,12 +10,12 @@
   flex-direction: column;
   gap: 0.5rem;
   padding: 0.85rem 1rem;
-  border: 1px solid var(--wx-border-color, #dee2e6);
-  /* the status is carried by the left edge as well as by the badge, so the tile
-     stays readable for a visitor who cannot separate the badge colours */
+  /* the widget draws no box of its own: whatever hosts it - a card, a dashboard
+     tile, the panel below - already owns one, and a second, nested frame reads
+     as a widget inside a widget. the one edge that stays repeats the status the
+     badge shows, so the tile is readable for a visitor who cannot separate the
+     badge colours */
   border-left: 4px solid var(--wx-sla-color);
-  border-radius: 0.5rem;
-  background: var(--wx-body-bg, #fff);
   container-type: inline-size;
 }
 
@@ -33,9 +33,6 @@
 
 [data-bs-theme="dark"] .wx-sla {
   --wx-sla-track: #343a40;
-
-  border-color: #343a40;
-  background: var(--wx-body-bg, #212529);
 }
 
 .wx-sla-header {
@@ -168,25 +165,20 @@
 }
 
 /* ---------------------------------------------------------------------------
-   group - several agreements framed as one panel
+   group - several agreements read as one panel
    --------------------------------------------------------------------------- */
 
 .wx-sla-group {
+  /* the aggregated status is read by the summary rather than by an edge of its
+     own: every tile already carries the colour of its own agreement, and a
+     second accent spanning all of them repeats the worst one without saying
+     which agreement it belongs to */
   --wx-sla-color: var(--wx-success, #198754);
 
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   padding: 0.85rem 1rem;
-  border: 1px solid var(--wx-border-color, #dee2e6);
-  border-left: 4px solid var(--wx-sla-color);
-  border-radius: 0.5rem;
-  background: var(--wx-body-bg, #fff);
-}
-
-[data-bs-theme="dark"] .wx-sla-group {
-  border-color: #343a40;
-  background: var(--wx-body-bg, #212529);
 }
 
 .wx-sla-group-header {
@@ -219,14 +211,12 @@
   flex-direction: column;
 }
 
-/* inside a group the tiles give up their own frame: the panel carries it, and
-   five framed tiles read as five unrelated widgets instead of one panel */
+/* inside a panel a tile is an entry of it rather than a widget that happens to
+   sit in it, so it gives up the air a standalone tile needs and thins its
+   status accent down to the weight of a list marker */
 .wx-sla-group-items > .wx-sla {
   padding: 0.6rem 0 0.6rem 0.75rem;
-  border: none;
-  border-left: 3px solid var(--wx-sla-color);
-  border-radius: 0;
-  background: transparent;
+  border-left-width: 3px;
 }
 
 .wx-sla-group-items > .wx-sla + .wx-sla {

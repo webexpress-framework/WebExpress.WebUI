@@ -29,11 +29,14 @@ namespace WebExpress.WebUI.WebControl
     /// The control has two readings, and which one it takes is decided by
     /// whether agreements were added to it. Empty, it is one agreement,
     /// configured through its own properties. Filled, it is the panel that
-    /// frames them: a heading, a summary of how they are doing, and the tiles
+    /// gathers them: a heading, a summary of how they are doing, and the tiles
     /// below it. A dashboard that shows more than one agreement should show
-    /// them as one thing - rendered on their own, every tile brings its own
-    /// frame, and five of them read as five unrelated widgets that happen to
-    /// sit next to each other.
+    /// them as one thing - rendered on their own, five of them read as five
+    /// unrelated widgets that happen to sit next to each other.
+    ///
+    /// Neither reading draws a box of its own; the frame belongs to whatever
+    /// hosts the widget, because a widget that brought its own would nest a
+    /// second frame inside the host's.
     ///
     /// The control holds no data of its own. Where the state lives - in memory,
     /// in a database, behind a REST endpoint - is the business of whoever owns

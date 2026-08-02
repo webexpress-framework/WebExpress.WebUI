@@ -516,7 +516,7 @@ webexpress.webui.SlaCtrl = class extends webexpress.webui.Ctrl {
  * Keeps the summary of a panel of service level agreements current.
  *
  * The panel is the second rendering of the same control: filled with
- * agreements, ControlSla frames them instead of being one. The two renderings
+ * agreements, ControlSla gathers them instead of being one. The two renderings
  * are different enough in the DOM to warrant their own client - one counts a
  * budget down, the other condenses what the first ones report - but they ship
  * as one control and one asset.

@@ -104,7 +104,9 @@ new ControlSla
 };
 ```
 
-A dashboard that shows more than one agreement should show them as one thing. Rendered on their own, every tile brings its own frame, and five of them read as five unrelated widgets that happen to sit next to each other; inside the panel they share the frame and are separated by a hairline, so the eye reads one panel and the summary answers the only question a wall display is really asked - **is anything wrong**.
+A dashboard that shows more than one agreement should show them as one thing. Rendered on their own, five tiles read as five unrelated widgets that happen to sit next to each other; inside the panel they sit under a shared heading, indented and separated by a hairline, so the eye reads one panel and the summary answers the only question a wall display is really asked - **is anything wrong**.
+
+Neither rendering draws a box of its own. The frame belongs to whatever hosts the widget - a card, a dashboard tile - because a widget that brought its own would nest a second frame inside the host's. The **tile** does carry a coloured left edge: it repeats the status the badge shows, so it stays readable for a visitor who cannot separate the badge colours. The **panel** carries none. Every tile already marks its own agreement, and a second accent spanning all of them would repeat the worst status without saying which agreement it belongs to - which is the summary's job, and the summary says it in words.
 
 The panel takes the colour of its **worst** agreement, because one that showed the best of them would hide what it exists to surface. `paused` only wins when *every* agreement is paused: a single stopped clock among running ones says nothing about the set.
 
@@ -113,7 +115,7 @@ The panel takes the colour of its **worst** agreement, because one that showed t
 | `.wx-sla-group`        | The panel. Carries the aggregated status class and the `wx-webui-sla-group` marker.
 | `.wx-sla-group-header` | The heading and the summary.
 | `.wx-sla-summary`      | The count per status, with the empty ones left out and the ones that need attention first. Kept current by the client.
-| `.wx-sla-group-items`  | The tiles, which give up their own frame inside the panel.
+| `.wx-sla-group-items`  | The tiles, indented under the panel's edge and separated by a hairline.
 
 Both the summary and the colour are computed on the server from the same evaluation the tiles render, and the client recomputes them whenever a tile reports a status change or a cycle rollover - so the panel can never disagree with what is shown underneath it.
 
