@@ -2038,6 +2038,33 @@ webexpress.webui.Ctrl = class {
     }
 
     /**
+     * Writes the entries of an action map back onto an element as
+     * data-wx-{prefix}-* attributes, so the Actions registry finds the same
+     * payload it would find on a server-rendered element.
+     *
+     * The keys arrive camel-cased because they were read through the dataset
+     * api; they are hyphenated again rather than lower-cased, otherwise a
+     * multi-word attribute such as data-wx-primary-require-file would come
+     * back as data-wx-primary-requirefile and the action would not see it.
+     *
+     * @param {HTMLElement} el - Target element.
+     * @param {"primary"|"secondary"} prefix - Attribute prefix.
+     * @param {Object|null} actionMap - The action map (key→value).
+     */
+    _applyActionAttrs(el, prefix, actionMap) {
+        if (!actionMap) {
+            return;
+        }
+        for (const [key, value] of Object.entries(actionMap)) {
+            if (value === null || value === undefined || value === false || value === "") {
+                continue;
+            }
+            const name = key.replace(/[A-Z]/g, (c) => "-" + c.toLowerCase());
+            el.setAttribute(`data-wx-${prefix}-${name}`, value);
+        }
+    }
+
+    /**
      * Returns the translated text for the specified i18n key.
      * If no translation is configured or the I18N module is unavailable,
      * the fallback text is returned.

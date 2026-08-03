@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebIcon;
+using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -29,6 +31,12 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the expand state of the type, indicating whether it is expanded or collapsed.
         /// </summary>
         public Func<IRenderControlContext, TypeExpandState> ExpandState { get; set; } = _ => TypeExpandState.None;
+
+        /// <summary>
+        /// Gets or sets the icon that identifies the row as a whole. It is rendered ahead of
+        /// the first cell, which keeps a purely decorative marker out of the column layout.
+        /// </summary>
+        public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
         /// Returns the cells.
@@ -208,6 +216,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var expandState = ExpandState?.Invoke(renderContext) ?? TypeExpandState.None;
+            var icon = Icon?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
@@ -216,6 +225,8 @@ namespace WebExpress.WebUI.WebControl
             }
                 .AddUserAttribute("data-color", (Color?.Invoke(renderContext) ?? TypeColorTable.Default).ToClass())
                 .AddUserAttribute("data-collapsed", expandState == TypeExpandState.Collapsed ? "true" : null)
+                .AddUserAttribute("data-icon", (icon as Icon)?.Class)
+                .AddUserAttribute("data-image", (icon as ImageIcon)?.Uri?.ToString())
                 .Add
                 (
                     Cells.Select

@@ -917,24 +917,6 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     _buildLeadingCells(tr, row) { }
 
     /**
-     * Applies primary/secondary action attributes from a structured object onto a row element.
-     * @param {HTMLElement} el - Target row element.
-     * @param {"primary"|"secondary"} prefix - Attribute prefix.
-     * @param {Object|null} actionMap - The action map (key→value).
-     */
-    _applyActionAttrs(el, prefix, actionMap) {
-        if (!actionMap) {
-            return;
-        }
-        for (const [key, value] of Object.entries(actionMap)) {
-            if (value === null || value === undefined) {
-                continue;
-            }
-            el.setAttribute(`data-wx-${prefix}-${key.toLowerCase()}`, value);
-        }
-    }
-
-    /**
      * Builds a single body cell.
      * @param {Object} row
      * @param {Object} colDef
@@ -964,6 +946,14 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
         let content = this._renderCell(row, colDef, cell, firstVisible);
 
+        // markup has to become nodes before the row anchor wraps it, otherwise the anchor
+        // would take it as a text node and the tags would show up verbatim
+        if (cell.html === true && !(content instanceof Node)) {
+            const parser = document.createElement("template");
+            parser.innerHTML = String(content ?? "");
+            content = parser.content;
+        }
+
         // enhance first visible column with row-level icon/link
         if (firstVisible && (row.uri || row.icon || row.image)) {
             content = this._wrapWithRowAnchor(row, content);
@@ -971,8 +961,6 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
         if (content instanceof Node) {
             td.appendChild(content);
-        } else if (cell.html === true) {
-            td.innerHTML = String(content ?? "");
         } else {
             td.textContent = String(content ?? "");
         }
@@ -1144,7 +1132,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         const decorated = this._rows.map((row, i) => ({
             row,
             i,
-            key: row.cells[idx]?.content || ""
+            // rich cells hold markup in content, so the flattened text is the sortable value
+            key: row.cells[idx]?.text ?? row.cells[idx]?.content ?? ""
         }));
         decorated.sort((a, b) => {
             const cmp = collator.compare(a.key, b.key);
@@ -1244,10 +1233,19 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 } else if (child.classList.contains("wx-table-options")) {
                     row.options = this._parseOptions(child);
                 } else if (!child.classList.contains("wx-table-footer")) {
+                    // a cell panel carries controls instead of a value, so its markup is kept
+                    // verbatim; the flattened text is retained alongside it because sorting
+                    // needs a comparable value rather than markup
+                    const rich = child.classList.contains("wx-table-cell-panel");
+                    const text = child.textContent.trim();
                     row.cells.push({
-                        content: child.textContent.trim(),
+                        content: rich ? child.innerHTML : text,
+                        text: text,
+                        html: rich,
                         id: child.id,
-                        class: child.className,
+                        // a rich cell keeps its classes on the panel element inside the markup;
+                        // copying them onto the grid cell too would apply the panel layout twice
+                        class: rich ? null : child.className,
                         style: child.getAttribute("style"),
                         color: child.dataset.color,
                         icon: child.dataset.icon,
@@ -1289,6 +1287,11 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Parse dropdown options.
+     * Both label fields are filled: the dropdown menu reads "text", while the
+     * sibling controls read "content", so neither path renders an empty entry.
+     * Action attributes are taken over as a whole rather than by a fixed key
+     * list, because an action defines its own payload (confirm text, method,
+     * ...) that the registry reads back off the rendered element.
      * @param {HTMLElement} div - Options container.
      * @returns {Array<Object>} - Parsed options.
      */
@@ -1302,32 +1305,27 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 return { type: "divider" };
             }
             if (cls.contains("wx-dropdown-header")) {
-                return { type: "header", content: el.textContent.trim(), icon: el.dataset.icon };
+                const label = el.textContent.trim();
+                return { type: "header", text: label, content: label, icon: el.dataset.icon };
             }
 
             const ds = el.dataset;
+            const label = el.textContent.trim();
             return {
-                content: el.textContent.trim(),
+                text: label,
+                content: label,
                 id: el.id,
                 icon: ds.icon,
                 image: ds.image,
                 uri: ds.uri || ds.url,
                 target: ds.target,
+                tooltip: ds.tooltip,
+                color: ds.color,
                 modal: ds.modal,
                 disabled: el.hasAttribute("disabled"),
 
-                primaryAction: {
-                    action: ds.wxPrimaryAction || null,
-                    target: ds.wxPrimaryTarget || null,
-                    uri: ds.wxPrimaryUri || null,
-                    size: ds.wxPrimarySize || null
-                },
-                secondaryAction: {
-                    action: ds.wxSecondaryAction || null,
-                    target: ds.wxSecondaryTarget || null,
-                    uri: ds.wxSecondaryUri || null,
-                    size: ds.wxSecondarySize || null
-                },
+                primaryAction: this._extractDatasetPrefix(ds, "wxPrimary"),
+                secondaryAction: this._extractDatasetPrefix(ds, "wxSecondary"),
                 bind: {
                     source: div.dataset.wxSource || null
                 }

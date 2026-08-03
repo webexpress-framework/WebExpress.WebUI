@@ -47,6 +47,21 @@ const safeSetTimeout = (callback, delay, ...args) => detach(setTimeout(callback,
 const safeSetInterval = (callback, delay, ...args) => detach(setInterval(callback, delay, ...args));
 
 /**
+ * Builds the Node stand-in. Controls branch on `value instanceof Node` to tell
+ * a built node from a plain string, so Node has to be usable on the right-hand
+ * side of instanceof and not just carry the node type constants.
+ * @returns {Function} The constructor usable on the right-hand side of instanceof.
+ */
+function nodeInterface() {
+    const constructor = function () { };
+    Object.defineProperty(constructor, "name", { value: "Node" });
+    Object.defineProperty(constructor, Symbol.hasInstance, {
+        value: (value) => value != null && typeof value.nodeType === "number"
+    });
+    return Object.assign(constructor, { ELEMENT_NODE: 1, TEXT_NODE: 3, DOCUMENT_FRAGMENT_NODE: 11 });
+}
+
+/**
  * Builds a stand-in for one of the per-tag SVG interfaces. The stub models
  * every SVG tag with a single class, so the interface identity a control tests
  * with instanceof is reconstructed from the tag name.
@@ -198,7 +213,7 @@ export function loadWebUi(options = {}) {
         AbortController,
         document,
         navigator: { language: "en-US", languages: ["en-US"], userAgent: "node", platform: "node", clipboard: { writeText: async () => { }, readText: async () => "" } },
-        Node: { ELEMENT_NODE: 1, TEXT_NODE: 3, DOCUMENT_FRAGMENT_NODE: 11 },
+        Node: nodeInterface(),
         // the stub element doubles as HTMLElement, so the Ctrl base accepts it
         HTMLElement: Element,
         MutationObserver: class {

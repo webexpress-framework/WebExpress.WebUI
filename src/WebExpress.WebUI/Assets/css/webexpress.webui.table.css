@@ -267,6 +267,31 @@
 a.wx-cell-content { font-weight: 600; }
 a.wx-cell-content:hover { text-decoration: underline; color: var(--wx-link-hover-color, currentColor); }
 
+/* A cell panel holds controls rather than a value. It lays them out in a row by
+   default so it matches the flex cell it sits in; add wx-table-cell-stack when a
+   cell needs a secondary line, for example a description under a name. The cell
+   stays nowrap either way, so each line is ellipsized instead of reflowing. */
+.wx-table-cell-panel {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+.wx-table-cell-panel.wx-table-cell-stack {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.1em;
+}
+.wx-table-cell-panel > * {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .wx-table .wx-icon {
     max-height: 1.2em;
     width: auto;

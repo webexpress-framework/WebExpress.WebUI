@@ -145,27 +145,12 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                 if (item.color) link.classList.add(item.color);
 
                 // apply action attributes
-                if (item.primaryAction) {
-                    for (const [key, value] of Object.entries(item.primaryAction)) {
-                        if (value) {
-                            const htmlName = `data-wx-primary-${key.toLowerCase()}`;
-                            link.setAttribute(htmlName, value);
-                        }
-                    }
-                }
+                this._applyActionAttrs(link, "primary", item.primaryAction);
+                this._applyActionAttrs(link, "secondary", item.secondaryAction);
 
-                if (item.secondaryAction) {
-                    for (const [key, value] of Object.entries(item.secondaryAction)) {
-                        if (value) {
-                            const htmlName = `data-wx-secondary-${key.toLowerCase()}`;
-                            link.setAttribute(htmlName, value);
-                        }
-                    }
-                }
-
-                if (item.uri) {
-                    link.href = item.uri;
-                }
+                // an entry that only carries an action has no target of its own, but it still
+                // has to look and behave like a menu link, which an anchor without href does not
+                link.href = item.uri || "javascript:void(0);";
                 if (item.image) {
                     const img = document.createElement("img");
                     img.src = item.image;

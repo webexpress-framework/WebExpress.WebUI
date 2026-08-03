@@ -290,9 +290,12 @@ class Element {
         return this.childNodes.map((n) => (n.nodeType === 3 ? n._text : n.textContent)).join("");
     }
     set innerHTML(value) {
-        this.childNodes.forEach((n) => { n.parentNode = null; });
-        this.childNodes = [];
-        if (value != null && value !== "") { this.appendChild(new TextNode(String(value))); }
+        // a template parks its children in the inert content holder, as the
+        // browser does, so a control that parses markup through one finds them
+        const target = this.content || this;
+        target.childNodes.forEach((n) => { n.parentNode = null; });
+        target.childNodes = [];
+        if (value != null && value !== "") { target.appendChild(new TextNode(String(value))); }
     }
 
     addEventListener(type, handler) {
@@ -508,7 +511,17 @@ export function createDocument() {
         documentElement,
         activeElement: body,
         defaultView: null,
-        createElement(tag) { return new Element(tag); },
+        createElement(tag) {
+            const element = new Element(tag);
+            // a template is the parser controls reach for when they turn a markup
+            // string into nodes; the stub models the inert content holder so that
+            // path resolves to a node, not undefined - it still does not parse,
+            // so the markup lands there as text
+            if (element.tagName === "TEMPLATE") {
+                element.content = new Element("#document-fragment");
+            }
+            return element;
+        },
         createElementNS(namespace, tag) {
             return namespace === SVG_NAMESPACE ? new SvgElement(tag) : new Element(tag);
         },

@@ -113,10 +113,12 @@ namespace WebExpress.WebUI.WebControl
             var style = Style?.Invoke(renderContext);
             var color = Color?.Invoke(renderContext) ?? TypeColorTable.Default;
 
+            // the marker tells the table control that this cell carries controls rather than
+            // a value, so its markup is kept instead of being flattened into cell text
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = @class,
+                Class = Css.Concatenate("wx-table-cell-panel", @class),
                 Style = style
             }
                 .AddUserAttribute("data-color", color.ToClass())
