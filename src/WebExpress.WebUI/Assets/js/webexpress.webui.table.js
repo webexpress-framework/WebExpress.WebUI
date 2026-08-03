@@ -954,9 +954,12 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             content = parser.content;
         }
 
-        // enhance first visible column with row-level icon/link
+        // the row decorates its first visible cell; every other cell may carry a link or an
+        // icon of its own. Only one of the two wraps a given cell, so the anchors never nest
         if (firstVisible && (row.uri || row.icon || row.image)) {
-            content = this._wrapWithRowAnchor(row, content);
+            content = this._wrapWithAnchor(row, content);
+        } else if (cell.uri || cell.icon || cell.image) {
+            content = this._wrapWithAnchor(cell, content);
         }
 
         if (content instanceof Node) {
@@ -968,32 +971,32 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Wraps cell content with a row-level anchor or span carrying icon/image.
-     * @param {Object} row
+     * Wraps cell content in an anchor or span carrying the decoration of its source.
+     * @param {Object} source - The row or the cell that declares uri, target, icon or image.
      * @param {string|Node} content
      * @returns {HTMLElement}
      */
-    _wrapWithRowAnchor(row, content) {
-        const wrap = row.uri ? document.createElement("a") : document.createElement("span");
+    _wrapWithAnchor(source, content) {
+        const wrap = source.uri ? document.createElement("a") : document.createElement("span");
         wrap.className = "wx-cell-content";
-        if (row.uri) {
-            wrap.href = row.uri;
-            if (row.target) {
-                wrap.target = row.target;
+        if (source.uri) {
+            wrap.href = source.uri;
+            if (source.target) {
+                wrap.target = source.target;
             }
             wrap.rel = "noopener noreferrer";
         }
-        if (row.image) {
+        if (source.image) {
             const img = document.createElement("img");
             img.className = "wx-icon wx-icon-large";
-            img.src = row.image;
+            img.src = source.image;
             img.alt = "";
             img.loading = "lazy";
             wrap.appendChild(img);
         }
-        if (row.icon) {
+        if (source.icon) {
             const icon = document.createElement("i");
-            icon.className = row.icon + " wx-icon-large";
+            icon.className = source.icon + " wx-icon-large";
             wrap.appendChild(icon);
         }
         if (content instanceof Node) {

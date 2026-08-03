@@ -139,6 +139,40 @@ test("wx-webui-table passes a row option on with its label and full action paylo
     assert.equal(option.primaryAction.confirm, "Update package?");
 });
 
+test("wx-webui-table links a cell that carries a uri of its own", async () => {
+    const rt = loadTable();
+    const element = rt.document.createElement("div");
+
+    const columns = rt.document.createElement("div");
+    columns.classList.add("wx-table-columns");
+    for (const label of ["Name", "Path"]) {
+        const column = rt.document.createElement("div");
+        column.dataset.label = label;
+        columns.appendChild(column);
+    }
+    element.appendChild(columns);
+
+    const row = rt.document.createElement("div");
+    row.classList.add("wx-table-row");
+    row.appendChild(cell(rt, "HelloWorld", false));
+    const path = cell(rt, "/helloworld", false);
+    path.dataset.uri = "/helloworld";
+    row.appendChild(path);
+    element.appendChild(row);
+    rt.document.body.appendChild(element);
+
+    new rt.wx.TableCtrl(element);
+    // the render is batched into a microtask
+    await Promise.resolve();
+
+    const link = element.querySelector("a");
+    assert.ok(link, "the cell uri produces an anchor");
+    // the dom stub models href as a property, as the browser does
+    assert.equal(link.href, "/helloworld");
+    assert.equal(link.textContent, "/helloworld");
+    assert.equal(element.querySelectorAll("a").length, 1, "the cell without a uri stays plain");
+});
+
 test("wx-webui-dropdown writes a multi-word action attribute back hyphenated", () => {
     const rt = loadTable();
     const element = rt.document.createElement("div");
