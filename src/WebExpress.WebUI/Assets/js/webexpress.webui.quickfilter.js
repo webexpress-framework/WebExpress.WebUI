@@ -44,6 +44,8 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
                 const config = this._captureButtonConfig(child);
                 this._staticButtonConfigs.push(config);
                 this._items.push({ kind: "button", config: config });
+            } else if (classes.contains("wx-quickfilter-add")) {
+                this._items.push({ kind: "add", config: this._captureButtonConfig(child) });
             } else if (classes.contains("wx-quickfilter-avatar")) {
                 this._items.push({ kind: "avatar", template: child.cloneNode(true) });
             } else if (classes.contains("wx-quickfilter-multiselect")) {
@@ -71,7 +73,8 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
     _captureButtonConfig(btn) {
         return {
             id: btn.id,
-            label: btn.textContent,
+            label: btn.dataset.text || btn.textContent,
+            title: btn.title || null,
             icon: btn.dataset.icon,
             color: btn.dataset.color,
             colorValue: btn.dataset.colorValue || null,
@@ -135,6 +138,8 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
             }
         }
 
+        this._renderAddChips(container);
+
         el.appendChild(container);
     }
 
@@ -148,6 +153,11 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
     _renderItems(activeIds, container) {
         const itemFilterIds = [];
         for (const item of this._items) {
+            // an add chip is not a filter and trails the whole bar, so it is
+            // rendered separately once everything else is placed
+            if (item.kind === "add") {
+                continue;
+            }
             if (item.kind === "button") {
                 const id = this._renderButtonChip(item.config, activeIds, container);
                 if (id) {
@@ -176,17 +186,7 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
         btnElem.className = "wx-quickfilter-btn-chip";
         btnElem.textContent = btnCfg.label;
 
-        // copy primary and secondary action attributes from config to the button
-        for (const [k, v] of Object.entries(btnCfg.primaryAction)) {
-            if (v !== null && v !== undefined) {
-                btnElem.dataset["wxPrimary" + k.charAt(0).toUpperCase() + k.slice(1)] = v;
-            }
-        }
-        for (const [k, v] of Object.entries(btnCfg.secondaryAction)) {
-            if (v !== null && v !== undefined) {
-                btnElem.dataset["wxSecondary" + k.charAt(0).toUpperCase() + k.slice(1)] = v;
-            }
-        }
+        this._applyActionAttributes(btnElem, btnCfg);
 
         // map icon, color, size, image as required
         if (btnCfg.icon) {
@@ -247,6 +247,77 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
         container.appendChild(btnElem);
 
         return filterId;
+    }
+
+    /**
+     * Copies the captured primary and secondary action attributes onto a rebuilt
+     * element, so the framework action mechanism wires the click exactly as it
+     * would have on the authored element.
+     * @param {HTMLElement} element - the rebuilt element.
+     * @param {Object} config - the captured configuration.
+     */
+    _applyActionAttributes(element, config) {
+        for (const [k, v] of Object.entries(config.primaryAction)) {
+            if (v !== null && v !== undefined) {
+                element.dataset["wxPrimary" + k.charAt(0).toUpperCase() + k.slice(1)] = v;
+            }
+        }
+        for (const [k, v] of Object.entries(config.secondaryAction)) {
+            if (v !== null && v !== undefined) {
+                element.dataset["wxSecondary" + k.charAt(0).toUpperCase() + k.slice(1)] = v;
+            }
+        }
+    }
+
+    /**
+     * Rebuilds the chips that create a new filter and appends them to the end of
+     * the bar. Unlike every other item they carry no filter, so nothing is
+     * registered and they never show active; the authored action alone decides
+     * what creating a filter means.
+     * @param {HTMLElement} container - the container receiving the chips.
+     */
+    _renderAddChips(container) {
+        for (const item of this._items) {
+            if (item.kind === "add") {
+                container.appendChild(this._createAddChip(item.config));
+            }
+        }
+    }
+
+    /**
+     * Builds a single chip that creates a new filter.
+     * @param {Object} config - the captured chip configuration.
+     * @returns {HTMLElement} the chip element.
+     */
+    _createAddChip(config) {
+        const btnElem = document.createElement("button");
+        btnElem.type = "button";
+        btnElem.id = config.id;
+        btnElem.className = "wx-quickfilter-btn-chip wx-quickfilter-add";
+        btnElem.textContent = config.label || "";
+
+        this._applyActionAttributes(btnElem, config);
+
+        // the chip is recognized by its plus sign rather than by a label, so one
+        // is drawn even when the author supplied no icon; an authored icon already
+        // arrives resolved for the active theme, this fallback does not
+        btnElem.dataset.icon = config.icon || webexpress.webui.IconTheme.resolveFa("fas fa-plus");
+        if (config.image) {
+            btnElem.dataset.image = config.image;
+        }
+        if (config.title) {
+            btnElem.title = config.title;
+        }
+
+        // an icon-only chip has no text to announce, so the tooltip - or the
+        // translated default - names the action for assistive technology
+        if (!config.label) {
+            btnElem.setAttribute("aria-label", config.title || this._i18n("webexpress.webui:quickfilter.add", "Add filter"));
+        }
+
+        webexpress.webui.Controller.createInstanceByClassType("wx-webui-button", btnElem);
+
+        return btnElem;
     }
 
     /**

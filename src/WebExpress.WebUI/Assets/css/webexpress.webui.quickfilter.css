@@ -227,3 +227,31 @@
     font-size: 0.85em;
     font-weight: 500;
 }
+
+/* the chip that creates a new filter: a muted dashed outline sets it apart
+   from the filter chips, and the auto margin keeps it at the trailing edge so
+   its position stays put while filters come and go. Once the bar overflows the
+   free space is gone and the chip simply trails the last one */
+.wx-quickfilter-add {
+    margin-left: auto;
+    border-style: dashed;
+    color: var(--wx-secondary-color, #6c757d);
+    border-color: var(--wx-secondary-color, #6c757d);
+}
+
+/* only the leading add chip absorbs the free space; further ones trail it */
+.wx-quickfilter-add ~ .wx-quickfilter-add {
+    margin-left: 0;
+}
+
+.wx-quickfilter-add:hover {
+    background: var(--wx-tertiary-bg);
+    border-style: solid;
+    color: var(--wx-primary);
+    border-color: var(--wx-primary);
+}
+
+/* an icon-only chip has no label to separate the icon from */
+.wx-quickfilter-add i:only-child {
+    margin-right: 0;
+}

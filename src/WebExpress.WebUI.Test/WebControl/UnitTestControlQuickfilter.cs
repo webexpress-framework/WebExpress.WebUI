@@ -151,6 +151,60 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests adding the item that creates a new filter. It carries no filter
+        /// action of its own, but the plus icon the client draws it with.
+        /// </summary>
+        [Fact]
+        public void AddAddItem()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlQuickfilter(null);
+
+            // act
+            control.Add(new ControlQuickfilterItemAdd("add")
+            {
+                Text = _ => "New filter",
+                Tooltip = _ => "Create a new filter",
+                PrimaryAction = _ => new ActionModal("filtermodal")
+            });
+
+            // validation
+            var html = control.Render(context, visualTree);
+            var expected = @"*<button id=""add"" type=""button"" class=""wx-quickfilter-add"" title=""Create a new filter"" data-text=""New filter"" data-icon=""fas fa-plus""*>New filter</button>*";
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that the item creating a new filter keeps an authored icon
+        /// instead of the plus default.
+        /// </summary>
+        [Fact]
+        public void AddAddItemWithIcon()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlQuickfilter(null);
+
+            // act
+            control.Add(new ControlQuickfilterItemAdd("add")
+            {
+                Icon = _ => new IconHome()
+            });
+
+            // validation
+            var html = control.Render(context, visualTree);
+            var expected = @"*<button id=""add"" type=""button"" class=""wx-quickfilter-add"" data-icon=""fas fa-home""></button>*";
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests adding an avatar filter item to the quickfilter control.
         /// </summary>
         [Fact]

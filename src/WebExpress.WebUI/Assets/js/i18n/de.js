@@ -118,6 +118,8 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "selection.filter": "Filter",
     "selection.filter.clear": "Filter löschen",
 
+    "quickfilter.add": "Filter hinzufügen",
+
     "tag.add": "Tag hinzufügen",
 
     "avatar.of": "Avatar von",

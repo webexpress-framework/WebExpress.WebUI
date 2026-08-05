@@ -24,6 +24,7 @@ Within the host element, you can define static filter buttons. These are element
 |`wx-quickfilter-button`   |Class used on child elements to define static filter buttons. These will be parsed and re-rendered dynamically.
 |`wx-quickfilter-avatar`   |Class used on a child element to define an avatar filter toggle (filter by a person). Carries `data-name`, an optional `data-image`, `data-initials` and `data-color`.
 |`wx-quickfilter-dropdown` |Class used on a child container holding `wx-quickfilter-dropdown-option` children, re-rendered as a single-choice option dropdown.
+|`wx-quickfilter-add`      |Class used on a child element that creates a new filter rather than applying one. It carries no filter target, is never shown active, and is re-rendered at the trailing edge of the bar after every filter chip.
 |`data-wx-primary-action`  |Should be set to the corresponding registry action (e.g., `activate_quickfilter`).
 |`data-wx-primary-target`  |The unique ID of the filter this button controls.
 |`data-wx-primary-group`   |Optional. Assigns the filter to a specific group. Groups can be configured in the registry to be exclusive.
@@ -56,6 +57,7 @@ Authored in C# through `ControlQuickfilter` and its items, a single bar can mix 
 - **`ControlQuickfilterItemAvatar`** — an avatar chip used to filter by a person; the client renders the image when supplied, otherwise the `Icon`, otherwise the initials on the person's color. The avatar shows active while its filter is set.
 - **`ControlQuickfilterItemDropdown`** — a single-choice dropdown of related options (each a `ControlQuickfilterItemDropdownItem`, with an optional `Icon`, `Badge` and `BadgeColor` per option). Group the options exclusively, and the toggle shows the active option's label and closes on select.
 - **`ControlQuickfilterItemMultiSelect`** — a multi-select dropdown (also built from `ControlQuickfilterItemDropdownItem`). Several options may be active at once, the menu stays open while values are picked, and the toggle shows the count of active options as a badge next to the label.
+- **`ControlQuickfilterItemAdd`** — a chip that creates a new filter instead of applying one. It carries no filter id, never shows active and always trails the bar, so the affordance keeps its position while filters come and go. Its `PrimaryAction` — typically an `ActionModal` opening the dialog in which the criteria are picked — is what defines the new filter. Without an `Icon` a plus is drawn, and without a `Text` the chip stays icon-only, announcing itself through its `Tooltip` (or the translated default).
 - **`ControlDataQuickfilterItemDropdown`** *(WebExpress.WebApp)* — a dropdown (or multi-select, via `Multiple`) whose options are loaded from a REST endpoint (`RestEndpoint`) through the service layer rather than authored statically. Use it inside a `ControlDataQuickfilter`. Its menu carries a search box that re-queries the endpoint (`GET {uri}?q=…`), so huge option sets are filtered on the server instead of loaded in full.
 
 All items render as chips matching the one-click button, so a mixed bar looks consistent.
@@ -97,6 +99,11 @@ new ControlQuickfilter()
             Initials = _ => "GT",
             Color = _ => "#1d4ed8",
             PrimaryAction = _ => new ActionFilter() { Group = "assignee" }
+        },
+        new ControlQuickfilterItemAdd("newfilter")
+        {
+            Tooltip = _ => "Create a new filter",
+            PrimaryAction = _ => new ActionModal("filtermodal")
         }
     );
 ```
@@ -151,6 +158,13 @@ The following example demonstrates how to set up a Quickfilter container with a 
             data-wx-primary-target="status_active"
             data-wx-primary-group="status">
         Active Only
+    </button>
+
+    <!-- A chip opening a dialog in which a new filter is defined -->
+    <button class="wx-quickfilter-add"
+            title="Create a new filter"
+            data-wx-primary-action="modal"
+            data-wx-primary-target="#filtermodal">
     </button>
     
 </div>

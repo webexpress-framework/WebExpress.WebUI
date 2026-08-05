@@ -134,6 +134,85 @@ test("wx-webui-quickfilter renders the badge of a dropdown option", () => {
     assert.ok(badge.classList.contains("text-bg-danger"), "the badge carries the color class");
 });
 
+/**
+ * Builds a chip that creates a new filter, carrying the given data attributes.
+ * @param {object} rt - The loaded runtime.
+ * @param {string} id - The chip id.
+ * @param {object} data - The dataset entries (text, icon, ...).
+ * @returns {object} The chip element.
+ */
+function addChip(rt, id, data = {}) {
+    const chip = rt.document.createElement("button");
+    chip.id = id;
+    chip.classList.add("wx-quickfilter-add");
+    chip.dataset.wxPrimaryAction = "modal";
+    chip.dataset.wxPrimaryTarget = "#newfilter";
+    for (const [key, value] of Object.entries(data)) {
+        chip.dataset[key] = value;
+    }
+    return chip;
+}
+
+test("wx-webui-quickfilter renders the add chip with its action and the plus default", () => {
+    const rt = loadQuickfilter();
+    const host = rt.document.createElement("div");
+    host.appendChild(addChip(rt, "newfilter", { text: "New filter" }));
+    rt.document.body.appendChild(host);
+
+    new rt.wx.QuickFilterCtrl(host);
+
+    const chip = host.querySelector("#newfilter");
+    assert.ok(chip, "the add chip is rebuilt");
+    assert.ok(chip.classList.contains("wx-quickfilter-add"), "the chip keeps its add class");
+    assert.ok(chip.classList.contains("wx-quickfilter-btn-chip"), "the chip looks like the other chips");
+    assert.ok(chip.textContent.includes("New filter"), "the chip carries the authored label");
+    assert.ok(chip.querySelector("i.fa-plus"), "the chip falls back to the plus icon");
+    assert.equal(chip.dataset.wxPrimaryTarget, "#newfilter", "the authored action survives the rebuild");
+});
+
+test("wx-webui-quickfilter labels an icon-only add chip for assistive technology", () => {
+    const rt = loadQuickfilter();
+    const host = rt.document.createElement("div");
+    host.appendChild(addChip(rt, "newfilter"));
+    rt.document.body.appendChild(host);
+
+    new rt.wx.QuickFilterCtrl(host);
+
+    const chip = host.querySelector("#newfilter");
+    assert.ok(chip.getAttribute("aria-label"), "an icon-only chip announces its action");
+});
+
+test("wx-webui-quickfilter keeps the add chip trailing the active filter chips", () => {
+    const rt = loadQuickfilter();
+    const host = rt.document.createElement("div");
+    host.appendChild(addChip(rt, "newfilter"));
+    host.appendChild(filterButton(rt, "status", "Status"));
+    rt.document.body.appendChild(host);
+
+    new rt.wx.QuickFilterCtrl(host);
+
+    rt.wx.FilterRegistry.registerFilters([{ id: "loose", name: "Loose" }]);
+    rt.wx.FilterRegistry.activate("loose");
+
+    const row = host.querySelector("div");
+    const last = row.children[row.children.length - 1];
+    assert.equal(last.id, "newfilter", "the add chip stays at the end of the bar");
+});
+
+test("wx-webui-quickfilter does not treat the add chip as a filter", () => {
+    const rt = loadQuickfilter();
+    const host = rt.document.createElement("div");
+    host.appendChild(addChip(rt, "newfilter"));
+    rt.document.body.appendChild(host);
+
+    new rt.wx.QuickFilterCtrl(host);
+
+    assert.ok(!rt.wx.FilterRegistry.getFilterConfig("newfilter"), "the add chip is not registered as a filter");
+
+    const chip = host.querySelector("#newfilter");
+    assert.ok(!chip.classList.contains("active"), "the add chip never shows active");
+});
+
 test("wx-webui-quickfilter shows the multi-select selection count as a badge", () => {
     const rt = loadQuickfilter();
     const host = rt.document.createElement("div");
