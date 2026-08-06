@@ -39,8 +39,9 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
-        /// Gets or sets the primary action, typically opening the dialog in which
-        /// the new filter is defined.
+        /// Gets or sets the primary action, typically an <see cref="ActionModal"/>
+        /// opening the application's filter dialog. What a filter selects is the
+        /// application's business, so the framework ships no editor for it.
         /// </summary>
         public Func<IRenderControlContext, IAction> PrimaryAction { get; set; }
 

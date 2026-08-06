@@ -25,6 +25,7 @@ Within the host element, you can define static filter buttons. These are element
 |`wx-quickfilter-avatar`   |Class used on a child element to define an avatar filter toggle (filter by a person). Carries `data-name`, an optional `data-image`, `data-initials` and `data-color`.
 |`wx-quickfilter-dropdown` |Class used on a child container holding `wx-quickfilter-dropdown-option` children, re-rendered as a single-choice option dropdown.
 |`wx-quickfilter-add`      |Class used on a child element that creates a new filter rather than applying one. It carries no filter target, is never shown active, and is re-rendered at the trailing edge of the bar after every filter chip.
+|`wx-quickfilter-edit-action`|Class of a hidden prototype element carrying the authored `EditAction`. The client copies its action attributes onto the edit entry of every user-defined chip.
 |`data-wx-primary-action`  |Should be set to the corresponding registry action (e.g., `activate_quickfilter`).
 |`data-wx-primary-target`  |The unique ID of the filter this button controls.
 |`data-wx-primary-group`   |Optional. Assigns the filter to a specific group. Groups can be configured in the registry to be exclusive.
@@ -57,10 +58,80 @@ Authored in C# through `ControlQuickfilter` and its items, a single bar can mix 
 - **`ControlQuickfilterItemAvatar`** — an avatar chip used to filter by a person; the client renders the image when supplied, otherwise the `Icon`, otherwise the initials on the person's color. The avatar shows active while its filter is set.
 - **`ControlQuickfilterItemDropdown`** — a single-choice dropdown of related options (each a `ControlQuickfilterItemDropdownItem`, with an optional `Icon`, `Badge` and `BadgeColor` per option). Group the options exclusively, and the toggle shows the active option's label and closes on select.
 - **`ControlQuickfilterItemMultiSelect`** — a multi-select dropdown (also built from `ControlQuickfilterItemDropdownItem`). Several options may be active at once, the menu stays open while values are picked, and the toggle shows the count of active options as a badge next to the label.
-- **`ControlQuickfilterItemAdd`** — a chip that creates a new filter instead of applying one. It carries no filter id, never shows active and always trails the bar, so the affordance keeps its position while filters come and go. Its `PrimaryAction` — typically an `ActionModal` opening the dialog in which the criteria are picked — is what defines the new filter. Without an `Icon` a plus is drawn, and without a `Text` the chip stays icon-only, announcing itself through its `Tooltip` (or the translated default).
+- **`ControlQuickfilterItemAdd`** — a chip that creates a new filter instead of applying one. It carries no filter id, never shows active and always trails the bar, so the affordance keeps its position while filters come and go. Give it a `PrimaryAction` — typically an `ActionModal` — to open the application's filter dialog. Without an `Icon` a plus is drawn, and without a `Text` the chip stays icon-only, announcing itself through its `Tooltip` (or the translated default).
 - **`ControlDataQuickfilterItemDropdown`** *(WebExpress.WebApp)* — a dropdown (or multi-select, via `Multiple`) whose options are loaded from a REST endpoint (`RestEndpoint`) through the service layer rather than authored statically. Use it inside a `ControlDataQuickfilter`. Its menu carries a search box that re-queries the endpoint (`GET {uri}?q=…`), so huge option sets are filtered on the server instead of loaded in full.
 
 All items render as chips matching the one-click button, so a mixed bar looks consistent.
+
+## User-defined filters
+
+Besides the filters an application defines, a bar may carry filters its users define themselves. A filter the endpoint marks with `custom` renders an options menu on its chip, offering to change and to delete it; a filter of the application carries no menu, because only the user's own filters are hers to manage.
+
+### The editor belongs to the application
+
+What a filter selects is the application's business, so **WebExpress ships no editor for it**. Both creating and editing run through an ordinary action, so the dialog behind them is the application's own modal:
+
+- **Creating** — the add chip carries the authored `PrimaryAction`, typically an `ActionModal` pointing at the application's dialog.
+- **Editing** — the quickfilter carries an `EditAction`. The client copies it onto the *Edit* entry in the options menu of every user-defined chip, appending `?id=<filter>` to the action uri and repeating the id in `data-wx-filter`, so the dialog knows which filter it opens on. Without an `EditAction` the menu offers the removal alone.
+
+Point the `EditAction` uri at the quickfilter endpoint and the dialog can load the filter straight from it: a `GET` carrying an `id` is answered with **that single filter** in the record shape a form binds to — `{ "data": { "id", "name", "icon", "color", "criteria" } }` — instead of the whole bar. It is the same shape a write takes back, so the dialog reads exactly what it will send. An unknown id is answered with `404`, and a read without an id returns the bar as before. The default picks the filter out of `RetrieveItems`, so an endpoint needs no extra code; one that keeps more about a filter overrides `RetrieveItem`.
+
+```csharp
+var quickfilter = new ControlDataQuickfilter("myQuickfilter")
+{
+    EditAction = _ => new ActionModal("filtereditor", pageContext.Route.ToUri())
+}
+    .DataService<MyFilterEndpoint>();
+
+quickfilter.Add(new ControlQuickfilterItemAdd("newfilter")
+{
+    Tooltip = _ => "Create a new filter",
+    PrimaryAction = _ => new ActionModal("filtereditor")
+});
+```
+
+The dialog hands its values back by calling `saveFilter(values)` on the quickfilter, which persists them through the service and refreshes every bound control at once. The values are the display of the filter - `name`, `icon`, `color` - and its **criteria**. The criteria are opaque to the framework: the text travels unchanged between the application's dialog and its endpoint, so it is free to store a query, an expression or a serialized object of its own in it.
+
+```javascript
+// inside the application's modal
+const bar = document.querySelector(".wx-webapp-quickfilter");
+webexpress.webui.Controller.getInstanceByElement(bar).saveFilter({
+    id: filterId,            // null creates a filter
+    name: "My filter",
+    color: "#7c3aed",
+    criteria: "author:me"    // whatever the application makes of it
+});
+```
+
+An application that would rather do the persisting itself can skip that and call `removeFilter(id)`, write to `webexpress.webui.FilterRegistry` directly, or reload the bar through `update()`.
+
+Creating, changing and deleting go through the service of the `ControlDataQuickfilter`, which extends the read endpoint by three verbs:
+
+|Verb    |Meaning
+|--------|-------
+|`GET`   |Returns the whole bar, or - when the request carries an `id` - that single filter as `{data:{…}}` for the edit dialog to load.
+|`POST`  |Creates a filter from the payload. The endpoint owns the id and returns the created filter, which the client adopts.
+|`PUT`   |Changes the filter named by the payload's `id` and returns it in its updated shape.
+|`DELETE`|Removes the filter named by the `id` query parameter, falling back to the payload.
+
+An endpoint opts into user-defined filters by overriding `CreateItem`, `UpdateItem` and `DeleteItem` on `RestApiQuickfilter<TIndexItem>`. The defaults accept nothing and answer `501`, so every existing read-only endpoint stays as it was.
+
+```csharp
+protected override RestApiQuickfilterItem CreateItem(IQueryContext context, IRequest request, RestApiQuickfilterPayload payload)
+{
+    var filter = _store.Add(request.GetUser(), payload.Name, payload.Criteria);
+
+    return new RestApiQuickfilterItem()
+    {
+        Id = filter.Id,
+        Name = filter.Name,
+        Criteria = filter.Criteria,
+        Custom = true
+    };
+}
+```
+
+Every change takes effect at once, without a reload. The client writes the result of the call into its own configurations and into the filter registry, which announces the change through `webexpress.webui.Event.CHANGE_FILTER_DEFINITION_EVENT`. A second bar on the page - or any other surface bound to the registry - adopts the change from that event; the control that caused it recognises its own origin and does not reload. A newly created filter is also activated straight away, because defining it is what the user asked for.
 
 The filters a `ControlDataQuickfilter` loads through its own service are described by `RestApiQuickfilterItem` objects. Besides `Id` and `Name` an item carries an optional `Icon` (an `IIcon`, serialized into a CSS class or image uri), an optional `Color` (a `PropertyColorButton`, serialized into the `color` css class or the raw `colorValue`), an optional `Badge` text and an optional `BadgeColor` (serialized into the `badgeColor` css class or the `badgeStyle` inline style), so REST-loaded chips and dropdown options show the same visuals as their statically authored counterparts.
 

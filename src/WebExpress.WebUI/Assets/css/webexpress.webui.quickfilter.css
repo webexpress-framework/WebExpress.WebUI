@@ -255,3 +255,51 @@
 .wx-quickfilter-add i:only-child {
     margin-right: 0;
 }
+
+/* the options menu of a user-defined filter. A button holds no buttons, so the
+   chip and its menu share a wrapper, which is also the positioning context that
+   drops the menu beneath the chip it belongs to */
+.wx-quickfilter-chip-wrap {
+    position: relative;
+    display: inline-flex;
+}
+
+.wx-quickfilter-menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.4em;
+    padding: 0 0.15em;
+    border-radius: 0.25em;
+    opacity: 0.65;
+    cursor: pointer;
+}
+
+.wx-quickfilter-menu-toggle:hover,
+.wx-quickfilter-menu-toggle:focus-visible {
+    opacity: 1;
+}
+
+.wx-quickfilter-menu-toggle i {
+    margin-right: 0;
+    font-size: 0.9em;
+}
+
+/* the menu carries the chip's own text color, which would be the accent of an
+   inactive chip and the contrast of an active one - neither is readable on the
+   menu surface, so it resets to the body color */
+.wx-quickfilter-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 1000;
+    margin-top: 0.25rem;
+    padding: 0.25rem 0;
+    border-radius: 0.5rem;
+    background-color: var(--wx-tertiary-bg);
+    color: var(--wx-body-color);
+    font-weight: 400;
+}
+
+.wx-quickfilter-menu.show {
+    display: block;
+}

@@ -119,6 +119,10 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "selection.filter.clear": "Filter löschen",
 
     "quickfilter.add": "Filter hinzufügen",
+    "quickfilter.edit": "Filter bearbeiten",
+    "quickfilter.options": "Filteroptionen",
+    "quickfilter.remove.title": "Filter löschen",
+    "quickfilter.remove.message": "Diesen Filter löschen?",
 
     "tag.add": "Tag hinzufügen",
 

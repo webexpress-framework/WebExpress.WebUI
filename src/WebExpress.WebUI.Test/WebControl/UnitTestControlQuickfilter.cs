@@ -205,6 +205,74 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests that the add item can be pointed at the application editor
+        /// instead of an authored action.
+        /// </summary>
+        [Fact]
+        public void AddAddItemWithAction()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlQuickfilter(null);
+
+            // act
+            control.Add(new ControlQuickfilterItemAdd("add")
+            {
+                PrimaryAction = _ => new ActionModal("filtereditor")
+            });
+
+            // validation
+            var html = control.Render(context, visualTree);
+            var expected = @"*<button id=""add"" type=""button"" class=""wx-quickfilter-add"" data-icon=""fas fa-plus"" data-wx-primary-action=""modal"" data-wx-primary-target=""#filtereditor""></button>*";
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that the edit action is emitted as a hidden prototype, which the
+        /// client copies onto the options menu of every user-defined chip.
+        /// </summary>
+        [Fact]
+        public void EditAction()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlQuickfilter(null)
+            {
+                EditAction = _ => new ActionModal("filtereditor")
+            };
+
+            // validation
+            var html = control.Render(context, visualTree);
+            var expected = @"*<div class=""wx-quickfilter-edit-action"" style=""display:none"" data-wx-primary-action=""modal"" data-wx-primary-target=""#filtereditor""></div>*";
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that a quickfilter without an edit action stays as it was, so a
+        /// bar of application filters carries no prototype.
+        /// </summary>
+        [Fact]
+        public void WithoutEditAction()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlQuickfilter(null);
+
+            // validation
+            var html = control.Render(context, visualTree);
+
+            Assert.DoesNotContain("wx-quickfilter-edit-action", html.ToString());
+        }
+
+        /// <summary>
         /// Tests adding an avatar filter item to the quickfilter control.
         /// </summary>
         [Fact]

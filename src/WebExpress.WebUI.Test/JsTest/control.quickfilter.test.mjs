@@ -252,3 +252,94 @@ test("wx-webui-quickfilter shows the multi-select selection count as a badge", (
     const label = toggle.querySelector("span");
     assert.ok(!label.textContent.includes("(1)"), "the count no longer piggybacks on the label text");
 });
+
+test("wx-webui-quickfilter announces a definition change so bound controls refresh", () => {
+    const rt = loadQuickfilter();
+    const seen = [];
+    rt.document.addEventListener(rt.wx.Event.CHANGE_FILTER_DEFINITION_EVENT, (e) => seen.push(e.detail));
+
+    rt.wx.FilterRegistry.defineFilter({ id: "mine", name: "Mine", custom: true, criteria: "author:me" }, "bar");
+    assert.equal(seen.length, 1, "defining a filter is announced");
+    assert.equal(seen[0].origin, "bar", "the origin travels along so the causing control skips its own event");
+
+    const config = rt.wx.FilterRegistry.getFilterConfig("mine");
+    assert.equal(config.custom, true, "the registry keeps the user-defined flag");
+    assert.equal(config.criteria, "author:me", "the registry keeps the opaque criteria");
+
+    rt.wx.FilterRegistry.activate("mine");
+    rt.wx.FilterRegistry.undefineFilter("mine", "bar");
+
+    assert.equal(seen.length, 2, "removing a filter is announced");
+    assert.equal(rt.wx.FilterRegistry.getFilterConfig("mine"), null, "the definition is gone");
+    assert.ok(!rt.wx.FilterRegistry.getActiveFilters().includes("mine"), "a removed filter is no longer active");
+});
+
+test("wx-webui-quickfilter leaves an application filter without an options menu", () => {
+    const rt = loadQuickfilter();
+    const host = rt.document.createElement("div");
+    host.appendChild(filterButton(rt, "status", "Status"));
+    rt.document.body.appendChild(host);
+
+    new rt.wx.QuickFilterCtrl(host);
+
+    assert.equal(host.querySelectorAll(".wx-quickfilter-menu-toggle").length, 0, "an authored filter carries no menu");
+});
+
+test("wx-webui-quickfilter keeps the authored action on a rebuilt add chip", () => {
+    const rt = loadQuickfilter();
+    const host = rt.document.createElement("div");
+    host.appendChild(addChip(rt, "newfilter"));
+    rt.document.body.appendChild(host);
+
+    new rt.wx.QuickFilterCtrl(host);
+
+    // the framework ships no editor; the chip carries the modal action the
+    // application authored, so the framework's action mechanism opens its dialog
+    const chip = host.querySelector("#newfilter");
+    assert.equal(chip.dataset.wxPrimaryAction, "modal", "the chip keeps the authored action");
+    assert.equal(chip.dataset.wxPrimaryTarget, "#newfilter", "the chip keeps the authored target");
+});
+
+test("wx-webui-quickfilter puts the authored edit action on a user-defined chip", () => {
+    const rt = loadQuickfilter();
+    const host = rt.document.createElement("div");
+
+    const prototype = rt.document.createElement("div");
+    prototype.classList.add("wx-quickfilter-edit-action");
+    prototype.dataset.wxPrimaryAction = "modal";
+    prototype.dataset.wxPrimaryTarget = "#filtereditor";
+    prototype.dataset.wxPrimaryUri = "/games";
+    host.appendChild(prototype);
+    rt.document.body.appendChild(host);
+
+    const ctrl = new rt.wx.QuickFilterCtrl(host);
+
+    rt.wx.FilterRegistry.defineFilter({ id: "mine", name: "Mine", custom: true });
+    ctrl._staticButtonConfigs = [];
+    const container = rt.document.createElement("div");
+    const chip = rt.document.createElement("button");
+    chip.id = "mine";
+    container.appendChild(ctrl._withCustomMenu(chip, { id: "mine", custom: true }));
+
+    const edit = container.querySelectorAll(".dropdown-item")[0];
+    assert.equal(edit.dataset.wxPrimaryAction, "modal", "the entry carries the authored action");
+    assert.equal(edit.dataset.wxPrimaryTarget, "#filtereditor", "the entry carries the authored target");
+    assert.equal(edit.dataset.wxPrimaryUri, "/games?id=mine", "the uri names the filter being edited");
+    assert.equal(edit.dataset.wxFilter, "mine", "the entry names the filter it edits");
+});
+
+test("wx-webui-quickfilter offers no edit entry without an authored edit action", () => {
+    const rt = loadQuickfilter();
+    const host = rt.document.createElement("div");
+    rt.document.body.appendChild(host);
+
+    const ctrl = new rt.wx.QuickFilterCtrl(host);
+
+    const container = rt.document.createElement("div");
+    const chip = rt.document.createElement("button");
+    chip.id = "mine";
+    container.appendChild(ctrl._withCustomMenu(chip, { id: "mine", custom: true }));
+
+    const items = container.querySelectorAll(".dropdown-item");
+    assert.equal(items.length, 1, "only the removal is offered");
+});

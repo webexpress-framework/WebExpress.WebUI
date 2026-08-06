@@ -593,16 +593,72 @@ webexpress.webui.FilterRegistry = new class {
             for (let i = 0; i < filters.length; i++) {
                 const f = filters[i];
                 if (f && f.id) {
-                    this._knownFilters.set(f.id, {
-                        id: f.id,
-                        name: f.name || f.id,
-                        group: f.group || null,
-                        exclusive: f.exclusive === true,
-                        reset: f.reset === true
-                    });
+                    this._knownFilters.set(f.id, this._normalize(f));
                 }
             }
         }
+    }
+
+    /**
+     * Adds or replaces a single filter definition and announces the change, so
+     * every bound control shows a new or changed filter at once instead of on
+     * the next reload. Unlike registerFilters this is meant for the rare
+     * definition change, not for the bulk registration that runs on each render.
+     * @param {Object} filter - the filter definition.
+     * @param {string} [origin] - the id of the control that caused the change.
+     */
+    defineFilter(filter, origin) {
+        if (!filter || !filter.id) {
+            return;
+        }
+
+        this._knownFilters.set(filter.id, this._normalize(filter));
+        this._notifyDefinitionListeners(filter.id, origin);
+        this._notifyListeners();
+    }
+
+    /**
+     * Removes a filter definition, deactivating it first so no control keeps
+     * showing a chip for a filter that no longer exists.
+     * @param {string} id - the id of the filter.
+     * @param {string} [origin] - the id of the control that caused the change.
+     */
+    undefineFilter(id, origin) {
+        if (!this._knownFilters.has(id)) {
+            return;
+        }
+
+        this._activeFilters.delete(id);
+        this._knownFilters.delete(id);
+        this._updateResetStates();
+        this._scheduleCookieSave();
+        this._notifyDefinitionListeners(id, origin);
+        this._notifyListeners();
+    }
+
+    /**
+     * Normalizes a filter definition. Beyond the fields the registry evaluates
+     * itself it keeps the display properties and the opaque criteria, so a
+     * control can rebuild a chip from the registry alone.
+     * @param {Object} filter - the filter definition.
+     * @returns {Object} the normalized definition.
+     */
+    _normalize(filter) {
+        return {
+            id: filter.id,
+            name: filter.name || filter.id,
+            group: filter.group || null,
+            exclusive: filter.exclusive === true,
+            reset: filter.reset === true,
+            custom: filter.custom === true,
+            criteria: filter.criteria ?? null,
+            icon: filter.icon || null,
+            color: filter.color || null,
+            colorValue: filter.colorValue || null,
+            badge: filter.badge != null ? String(filter.badge) : null,
+            badgeColor: filter.badgeColor || null,
+            badgeStyle: filter.badgeStyle || null
+        };
     }
 
     /**
@@ -812,6 +868,21 @@ webexpress.webui.FilterRegistry = new class {
 
         const event = new CustomEvent(eventName, {
             detail: payload,
+            bubbles: true
+        });
+        document.dispatchEvent(event);
+    }
+
+    /**
+     * Announces that a filter definition was added, changed or removed. The
+     * origin lets the control that performed the change ignore its own event,
+     * because it has already updated itself and would otherwise reload.
+     * @param {string} id - the id of the affected filter.
+     * @param {string} [origin] - the id of the control that caused the change.
+     */
+    _notifyDefinitionListeners(id, origin) {
+        const event = new CustomEvent(webexpress.webui.Event.CHANGE_FILTER_DEFINITION_EVENT, {
+            detail: { id: id, origin: origin || null },
             bubbles: true
         });
         document.dispatchEvent(event);
@@ -2240,6 +2311,8 @@ webexpress.webui.Event = class {
     static DOUBLE_CLICK_EVENT = "webexpress.webui.dbclick";
     // Event triggered when a filter changes, typically in search or filter controls.
     static CHANGE_FILTER_EVENT = "webexpress.webui.change.filter";
+    // Event triggered when a filter definition is added, changed or removed.
+    static CHANGE_FILTER_DEFINITION_EVENT = "webexpress.webui.change.filter.definition";
     // Event triggered when a dropdown menu is shown.
     static DROPDOWN_SHOW_EVENT = "webexpress.webui.dropdown.show";
     // Event triggered when a dropdown menu is hidden.

@@ -40,7 +40,11 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
             if (!classes) {
                 continue;
             }
-            if (classes.contains("wx-quickfilter-button")) {
+            if (classes.contains("wx-quickfilter-edit-action")) {
+                // the authored edit action belongs to every user-defined chip,
+                // which only exists on the client, so it is captured once here
+                this._editAction = { ...child.dataset };
+            } else if (classes.contains("wx-quickfilter-button")) {
                 const config = this._captureButtonConfig(child);
                 this._staticButtonConfigs.push(config);
                 this._items.push({ kind: "button", config: config });
@@ -104,7 +108,7 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
         });
         document.addEventListener("click", () => {
             this._openMenuId = null;
-            this._element.querySelectorAll(".wx-quickfilter-dropdown-menu.show")
+            this._element.querySelectorAll(".wx-quickfilter-dropdown-menu.show, .wx-quickfilter-menu.show")
                 .forEach((menu) => menu.classList.remove("show"));
         });
     }
@@ -244,9 +248,170 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
         // appended after the button controller ran, because it rebuilds the
         // chip content and would drop an earlier badge
         this._appendBadge(btnElem, btnCfg.badge, btnCfg.badgeColor, btnCfg.badgeStyle);
-        container.appendChild(btnElem);
+        container.appendChild(this._withCustomMenu(btnElem, btnCfg));
 
         return filterId;
+    }
+
+    /**
+     * Gives a user-defined chip its options menu, offering to change and to
+     * delete the filter. A filter the application defined carries no menu,
+     * because only the user's own filters are hers to manage. The menu cannot
+     * live inside the chip - a button holds no buttons - so the chip moves into
+     * a wrapper that carries both and positions the menu.
+     * @param {HTMLElement} element - the chip element.
+     * @param {Object} config - the chip configuration.
+     * @returns {HTMLElement} the node to place in the bar: the chip, or its wrapper.
+     */
+    _withCustomMenu(element, config) {
+        if (!config || config.custom !== true) {
+            return element;
+        }
+
+        const toggle = document.createElement("span");
+        toggle.className = "wx-quickfilter-menu-toggle";
+        toggle.setAttribute("role", "button");
+        toggle.setAttribute("tabindex", "0");
+        toggle.setAttribute("aria-haspopup", "true");
+        toggle.setAttribute("aria-label", this._i18n("webexpress.webui:quickfilter.options", "Filter options"));
+        toggle.appendChild(webexpress.webui.Icon.create(webexpress.webui.IconTheme.resolveFa("fas fa-ellipsis-v")));
+
+        const menu = document.createElement("div");
+        menu.className = "wx-quickfilter-menu dropdown-menu";
+
+        // the edit entry runs the authored action, so the dialog behind it is the
+        // application's; without an authored action there is nothing to edit with
+        if (this._editAction) {
+            menu.appendChild(this._editMenuItem(config));
+        }
+        menu.appendChild(this._menuItem("fas fa-trash", "webexpress.webui:remove", "Remove", () => this._confirmDeleteFilter(config)));
+
+        // the toggle sits inside the chip, whose click toggles the filter; the
+        // menu must not do that, so every interaction stops here
+        toggle.addEventListener("click", (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            const willOpen = !menu.classList.contains("show");
+            this._element.querySelectorAll(".wx-quickfilter-menu.show")
+                .forEach((m) => m.classList.remove("show"));
+            menu.classList.toggle("show", willOpen);
+        });
+        toggle.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                toggle.click();
+            }
+        });
+
+        const wrapper = document.createElement("span");
+        wrapper.className = "wx-quickfilter-chip-wrap";
+
+        element.appendChild(toggle);
+        wrapper.appendChild(element);
+        wrapper.appendChild(menu);
+
+        return wrapper;
+    }
+
+    /**
+     * Builds a single entry of the options menu.
+     * @param {string} icon - the FontAwesome class of the entry.
+     * @param {string} key - the i18n key of the label.
+     * @param {string} fallback - the label used when no translation exists.
+     * @param {Function} action - the action invoked on click.
+     * @returns {HTMLElement} the menu entry.
+     */
+    _menuItem(icon, key, fallback, action) {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = "dropdown-item";
+        item.appendChild(webexpress.webui.Icon.create(webexpress.webui.IconTheme.resolveFa(icon)));
+        item.appendChild(document.createTextNode(" " + this._i18n(key, fallback)));
+        item.addEventListener("click", (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            item.closest(".wx-quickfilter-menu")?.classList.remove("show");
+            action();
+        });
+        return item;
+    }
+
+    /**
+     * Builds the entry that edits a user-defined filter. It carries the authored
+     * edit action, so the framework's action mechanism opens the application's
+     * dialog; the id of the filter is appended to the action uri and repeated as
+     * an attribute, so the dialog knows which filter it edits.
+     * @param {Object} config - the filter the chip stands for.
+     * @returns {HTMLElement} the menu entry.
+     */
+    _editMenuItem(config) {
+        const item = this._menuItem("fas fa-pen", "webexpress.webui:edit", "Edit", () => { });
+
+        for (const [key, value] of Object.entries(this._editAction)) {
+            item.dataset[key] = value;
+        }
+
+        if (this._editAction.wxPrimaryUri) {
+            const separator = this._editAction.wxPrimaryUri.indexOf("?") >= 0 ? "&" : "?";
+            item.dataset.wxPrimaryUri = `${this._editAction.wxPrimaryUri}${separator}id=${encodeURIComponent(config.id)}`;
+        }
+
+        item.dataset.wxFilter = config.id;
+
+        // the entry is built after the initial binding pass, so its action is
+        // wired explicitly rather than waiting for a mutation
+        webexpress.webui.Controller._registerWxEvents(item);
+
+        return item;
+    }
+
+    /**
+     * Persists a created or changed user-defined filter and shows it at once.
+     * The application calls this from its own editor.
+     * @param {Object} values - the values of the filter: id, name, icon, color, criteria.
+     */
+    saveFilter(values) {
+        this._saveFilter(values);
+    }
+
+    /**
+     * Removes a user-defined filter and drops it from the bar at once. The
+     * application may call this instead of using the chip's options menu.
+     * @param {string} id - the id of the filter.
+     */
+    removeFilter(id) {
+        this._removeFilter({ id: id });
+    }
+
+    /**
+     * Asks before removing a user-defined filter, because the deletion cannot be
+     * undone from the bar.
+     * @param {Object} config - the filter to remove.
+     */
+    _confirmDeleteFilter(config) {
+        this._confirm = this._confirm || new webexpress.webui.ModalConfirm();
+        this._confirm.confirmation(
+            "webexpress.webui:quickfilter.remove.title",
+            this._i18n("webexpress.webui:quickfilter.remove.message", "Remove this filter?"),
+            () => this._removeFilter(config)
+        );
+        this._confirm.show();
+    }
+
+    /**
+     * Persists a created or changed user-defined filter. The base control has no
+     * data service and does nothing; a REST-enabled subclass overrides this.
+     * @param {Object} values - the values entered in the dialog.
+     */
+    _saveFilter(values) {
+    }
+
+    /**
+     * Removes a user-defined filter. The base control has no data service and
+     * does nothing; a REST-enabled subclass overrides this.
+     * @param {Object} config - the filter to remove.
+     */
+    _removeFilter(config) {
     }
 
     /**
@@ -316,6 +481,10 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
         }
 
         webexpress.webui.Controller.createInstanceByClassType("wx-webui-button", btnElem);
+
+        // the chip is rebuilt on every render, so its authored action - the
+        // application's filter dialog - is wired explicitly each time
+        webexpress.webui.Controller._registerWxEvents(btnElem);
 
         return btnElem;
     }
