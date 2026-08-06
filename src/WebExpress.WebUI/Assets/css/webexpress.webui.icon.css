@@ -2332,3 +2332,5213 @@
     -webkit-mask-image: url("../icons/control-table.svg");
     mask-image: url("../icons/control-table.svg");
 }
+
+/*
+ * Light variants added for icon classes that are used in the framework, the
+ * tutorial or an application but had none.
+ */
+
+.wx-icon-light-blog {
+    -webkit-mask-image: url("../icons/blog.svg");
+    mask-image: url("../icons/blog.svg");
+}
+
+.wx-icon-light-boxes-stacked {
+    -webkit-mask-image: url("../icons/boxes-stacked.svg");
+    mask-image: url("../icons/boxes-stacked.svg");
+}
+
+.wx-icon-light-calendar-plus {
+    -webkit-mask-image: url("../icons/calendar-plus.svg");
+    mask-image: url("../icons/calendar-plus.svg");
+}
+
+.wx-icon-light-circle-user {
+    -webkit-mask-image: url("../icons/circle-user.svg");
+    mask-image: url("../icons/circle-user.svg");
+}
+
+.wx-icon-light-clipboard-list {
+    -webkit-mask-image: url("../icons/clipboard-list.svg");
+    mask-image: url("../icons/clipboard-list.svg");
+}
+
+.wx-icon-light-clock-rotate-left {
+    -webkit-mask-image: url("../icons/clock-rotate-left.svg");
+    mask-image: url("../icons/clock-rotate-left.svg");
+}
+
+.wx-icon-light-cubes {
+    -webkit-mask-image: url("../icons/cubes.svg");
+    mask-image: url("../icons/cubes.svg");
+}
+
+.wx-icon-light-file-excel {
+    -webkit-mask-image: url("../icons/file-excel.svg");
+    mask-image: url("../icons/file-excel.svg");
+}
+
+.wx-icon-light-file-export {
+    -webkit-mask-image: url("../icons/file-export.svg");
+    mask-image: url("../icons/file-export.svg");
+}
+
+.wx-icon-light-file-image {
+    -webkit-mask-image: url("../icons/file-image.svg");
+    mask-image: url("../icons/file-image.svg");
+}
+
+.wx-icon-light-file-pdf {
+    -webkit-mask-image: url("../icons/file-pdf.svg");
+    mask-image: url("../icons/file-pdf.svg");
+}
+
+.wx-icon-light-file-word {
+    -webkit-mask-image: url("../icons/file-word.svg");
+    mask-image: url("../icons/file-word.svg");
+}
+
+.wx-icon-light-file-zipper {
+    -webkit-mask-image: url("../icons/file-zipper.svg");
+    mask-image: url("../icons/file-zipper.svg");
+}
+
+.wx-icon-light-list-check {
+    -webkit-mask-image: url("../icons/list-check.svg");
+    mask-image: url("../icons/list-check.svg");
+}
+
+.wx-icon-light-location-pin-lock {
+    -webkit-mask-image: url("../icons/location-pin-lock.svg");
+    mask-image: url("../icons/location-pin-lock.svg");
+}
+
+.wx-icon-light-right-to-bracket {
+    -webkit-mask-image: url("../icons/right-to-bracket.svg");
+    mask-image: url("../icons/right-to-bracket.svg");
+}
+
+.wx-icon-light-scale-balanced {
+    -webkit-mask-image: url("../icons/scale-balanced.svg");
+    mask-image: url("../icons/scale-balanced.svg");
+}
+
+.wx-icon-light-shapes {
+    -webkit-mask-image: url("../icons/shapes.svg");
+    mask-image: url("../icons/shapes.svg");
+}
+
+.wx-icon-light-shield-halved {
+    -webkit-mask-image: url("../icons/shield-halved.svg");
+    mask-image: url("../icons/shield-halved.svg");
+}
+
+.wx-icon-light-sitemap {
+    -webkit-mask-image: url("../icons/sitemap.svg");
+    mask-image: url("../icons/sitemap.svg");
+}
+
+.wx-icon-light-traffic-light {
+    -webkit-mask-image: url("../icons/traffic-light.svg");
+    mask-image: url("../icons/traffic-light.svg");
+}
+
+.wx-icon-light-user-check {
+    -webkit-mask-image: url("../icons/user-check.svg");
+    mask-image: url("../icons/user-check.svg");
+}
+
+.wx-icon-light-user-pen {
+    -webkit-mask-image: url("../icons/user-pen.svg");
+    mask-image: url("../icons/user-pen.svg");
+}
+
+.wx-icon-light-user-plus {
+    -webkit-mask-image: url("../icons/user-plus.svg");
+    mask-image: url("../icons/user-plus.svg");
+}
+
+.wx-icon-light-user-xmark {
+    -webkit-mask-image: url("../icons/user-xmark.svg");
+    mask-image: url("../icons/user-xmark.svg");
+}
+
+/*
+ * Light variants added for icon classes that are used in the framework, the
+ * tutorial or an application but had none.
+ */
+
+.wx-icon-light-book-atlas {
+    -webkit-mask-image: url("../icons/book-atlas.svg");
+    mask-image: url("../icons/book-atlas.svg");
+}
+
+.wx-icon-light-book-bookmark {
+    -webkit-mask-image: url("../icons/book-bookmark.svg");
+    mask-image: url("../icons/book-bookmark.svg");
+}
+
+.wx-icon-light-book-journal-whills {
+    -webkit-mask-image: url("../icons/book-journal-whills.svg");
+    mask-image: url("../icons/book-journal-whills.svg");
+}
+
+.wx-icon-light-book-medical {
+    -webkit-mask-image: url("../icons/book-medical.svg");
+    mask-image: url("../icons/book-medical.svg");
+}
+
+.wx-icon-light-book-open {
+    -webkit-mask-image: url("../icons/book-open.svg");
+    mask-image: url("../icons/book-open.svg");
+}
+
+.wx-icon-light-book-open-reader {
+    -webkit-mask-image: url("../icons/book-open-reader.svg");
+    mask-image: url("../icons/book-open-reader.svg");
+}
+
+.wx-icon-light-book-skull {
+    -webkit-mask-image: url("../icons/book-skull.svg");
+    mask-image: url("../icons/book-skull.svg");
+}
+
+.wx-icon-light-clipboard-check {
+    -webkit-mask-image: url("../icons/clipboard-check.svg");
+    mask-image: url("../icons/clipboard-check.svg");
+}
+
+.wx-icon-light-clipboard-question {
+    -webkit-mask-image: url("../icons/clipboard-question.svg");
+    mask-image: url("../icons/clipboard-question.svg");
+}
+
+.wx-icon-light-clipboard-user {
+    -webkit-mask-image: url("../icons/clipboard-user.svg");
+    mask-image: url("../icons/clipboard-user.svg");
+}
+
+.wx-icon-light-copyright {
+    -webkit-mask-image: url("../icons/copyright.svg");
+    mask-image: url("../icons/copyright.svg");
+}
+
+.wx-icon-light-file-arrow-down {
+    -webkit-mask-image: url("../icons/file-arrow-down.svg");
+    mask-image: url("../icons/file-arrow-down.svg");
+}
+
+.wx-icon-light-file-arrow-up {
+    -webkit-mask-image: url("../icons/file-arrow-up.svg");
+    mask-image: url("../icons/file-arrow-up.svg");
+}
+
+.wx-icon-light-file-audio {
+    -webkit-mask-image: url("../icons/file-audio.svg");
+    mask-image: url("../icons/file-audio.svg");
+}
+
+.wx-icon-light-file-circle-check {
+    -webkit-mask-image: url("../icons/file-circle-check.svg");
+    mask-image: url("../icons/file-circle-check.svg");
+}
+
+.wx-icon-light-file-circle-exclamation {
+    -webkit-mask-image: url("../icons/file-circle-exclamation.svg");
+    mask-image: url("../icons/file-circle-exclamation.svg");
+}
+
+.wx-icon-light-file-circle-minus {
+    -webkit-mask-image: url("../icons/file-circle-minus.svg");
+    mask-image: url("../icons/file-circle-minus.svg");
+}
+
+.wx-icon-light-file-circle-plus {
+    -webkit-mask-image: url("../icons/file-circle-plus.svg");
+    mask-image: url("../icons/file-circle-plus.svg");
+}
+
+.wx-icon-light-file-circle-question {
+    -webkit-mask-image: url("../icons/file-circle-question.svg");
+    mask-image: url("../icons/file-circle-question.svg");
+}
+
+.wx-icon-light-file-circle-xmark {
+    -webkit-mask-image: url("../icons/file-circle-xmark.svg");
+    mask-image: url("../icons/file-circle-xmark.svg");
+}
+
+.wx-icon-light-file-contract {
+    -webkit-mask-image: url("../icons/file-contract.svg");
+    mask-image: url("../icons/file-contract.svg");
+}
+
+.wx-icon-light-file-csv {
+    -webkit-mask-image: url("../icons/file-csv.svg");
+    mask-image: url("../icons/file-csv.svg");
+}
+
+.wx-icon-light-file-fragment {
+    -webkit-mask-image: url("../icons/file-fragment.svg");
+    mask-image: url("../icons/file-fragment.svg");
+}
+
+.wx-icon-light-file-half-dashed {
+    -webkit-mask-image: url("../icons/file-half-dashed.svg");
+    mask-image: url("../icons/file-half-dashed.svg");
+}
+
+.wx-icon-light-file-import {
+    -webkit-mask-image: url("../icons/file-import.svg");
+    mask-image: url("../icons/file-import.svg");
+}
+
+.wx-icon-light-file-invoice {
+    -webkit-mask-image: url("../icons/file-invoice.svg");
+    mask-image: url("../icons/file-invoice.svg");
+}
+
+.wx-icon-light-file-invoice-dollar {
+    -webkit-mask-image: url("../icons/file-invoice-dollar.svg");
+    mask-image: url("../icons/file-invoice-dollar.svg");
+}
+
+.wx-icon-light-file-medical {
+    -webkit-mask-image: url("../icons/file-medical.svg");
+    mask-image: url("../icons/file-medical.svg");
+}
+
+.wx-icon-light-file-medical-alt {
+    -webkit-mask-image: url("../icons/file-medical-alt.svg");
+    mask-image: url("../icons/file-medical-alt.svg");
+}
+
+.wx-icon-light-file-pen {
+    -webkit-mask-image: url("../icons/file-pen.svg");
+    mask-image: url("../icons/file-pen.svg");
+}
+
+.wx-icon-light-file-powerpoint {
+    -webkit-mask-image: url("../icons/file-powerpoint.svg");
+    mask-image: url("../icons/file-powerpoint.svg");
+}
+
+.wx-icon-light-file-prescription {
+    -webkit-mask-image: url("../icons/file-prescription.svg");
+    mask-image: url("../icons/file-prescription.svg");
+}
+
+.wx-icon-light-file-shield {
+    -webkit-mask-image: url("../icons/file-shield.svg");
+    mask-image: url("../icons/file-shield.svg");
+}
+
+.wx-icon-light-file-signature {
+    -webkit-mask-image: url("../icons/file-signature.svg");
+    mask-image: url("../icons/file-signature.svg");
+}
+
+.wx-icon-light-file-video {
+    -webkit-mask-image: url("../icons/file-video.svg");
+    mask-image: url("../icons/file-video.svg");
+}
+
+.wx-icon-light-file-waveform {
+    -webkit-mask-image: url("../icons/file-waveform.svg");
+    mask-image: url("../icons/file-waveform.svg");
+}
+
+.wx-icon-light-folder-closed {
+    -webkit-mask-image: url("../icons/folder-closed.svg");
+    mask-image: url("../icons/folder-closed.svg");
+}
+
+.wx-icon-light-folder-minus {
+    -webkit-mask-image: url("../icons/folder-minus.svg");
+    mask-image: url("../icons/folder-minus.svg");
+}
+
+.wx-icon-light-folder-plus {
+    -webkit-mask-image: url("../icons/folder-plus.svg");
+    mask-image: url("../icons/folder-plus.svg");
+}
+
+.wx-icon-light-folder-tree {
+    -webkit-mask-image: url("../icons/folder-tree.svg");
+    mask-image: url("../icons/folder-tree.svg");
+}
+
+.wx-icon-light-image-portrait {
+    -webkit-mask-image: url("../icons/image-portrait.svg");
+    mask-image: url("../icons/image-portrait.svg");
+}
+
+.wx-icon-light-images {
+    -webkit-mask-image: url("../icons/images.svg");
+    mask-image: url("../icons/images.svg");
+}
+
+.wx-icon-light-newspaper {
+    -webkit-mask-image: url("../icons/newspaper.svg");
+    mask-image: url("../icons/newspaper.svg");
+}
+
+.wx-icon-light-notes-medical {
+    -webkit-mask-image: url("../icons/notes-medical.svg");
+    mask-image: url("../icons/notes-medical.svg");
+}
+
+.wx-icon-light-note-sticky {
+    -webkit-mask-image: url("../icons/note-sticky.svg");
+    mask-image: url("../icons/note-sticky.svg");
+}
+
+.wx-icon-light-photo-film {
+    -webkit-mask-image: url("../icons/photo-film.svg");
+    mask-image: url("../icons/photo-film.svg");
+}
+
+.wx-icon-light-receipt {
+    -webkit-mask-image: url("../icons/receipt.svg");
+    mask-image: url("../icons/receipt.svg");
+}
+
+.wx-icon-light-scroll {
+    -webkit-mask-image: url("../icons/scroll.svg");
+    mask-image: url("../icons/scroll.svg");
+}
+
+.wx-icon-light-angle-down {
+    -webkit-mask-image: url("../icons/angle-down.svg");
+    mask-image: url("../icons/angle-down.svg");
+}
+
+.wx-icon-light-angle-up {
+    -webkit-mask-image: url("../icons/angle-up.svg");
+    mask-image: url("../icons/angle-up.svg");
+}
+
+.wx-icon-light-angle-left {
+    -webkit-mask-image: url("../icons/angle-left.svg");
+    mask-image: url("../icons/angle-left.svg");
+}
+
+.wx-icon-light-angle-right {
+    -webkit-mask-image: url("../icons/angle-right.svg");
+    mask-image: url("../icons/angle-right.svg");
+}
+
+.wx-icon-light-angles-down {
+    -webkit-mask-image: url("../icons/angles-down.svg");
+    mask-image: url("../icons/angles-down.svg");
+}
+
+.wx-icon-light-angles-up {
+    -webkit-mask-image: url("../icons/angles-up.svg");
+    mask-image: url("../icons/angles-up.svg");
+}
+
+.wx-icon-light-angles-left {
+    -webkit-mask-image: url("../icons/angles-left.svg");
+    mask-image: url("../icons/angles-left.svg");
+}
+
+.wx-icon-light-angles-right {
+    -webkit-mask-image: url("../icons/angles-right.svg");
+    mask-image: url("../icons/angles-right.svg");
+}
+
+.wx-icon-light-arrow-down-long {
+    -webkit-mask-image: url("../icons/arrow-down-long.svg");
+    mask-image: url("../icons/arrow-down-long.svg");
+}
+
+.wx-icon-light-arrow-up-long {
+    -webkit-mask-image: url("../icons/arrow-up-long.svg");
+    mask-image: url("../icons/arrow-up-long.svg");
+}
+
+.wx-icon-light-arrow-left-long {
+    -webkit-mask-image: url("../icons/arrow-left-long.svg");
+    mask-image: url("../icons/arrow-left-long.svg");
+}
+
+.wx-icon-light-arrow-right-long {
+    -webkit-mask-image: url("../icons/arrow-right-long.svg");
+    mask-image: url("../icons/arrow-right-long.svg");
+}
+
+.wx-icon-light-down-long {
+    -webkit-mask-image: url("../icons/down-long.svg");
+    mask-image: url("../icons/down-long.svg");
+}
+
+.wx-icon-light-up-long {
+    -webkit-mask-image: url("../icons/up-long.svg");
+    mask-image: url("../icons/up-long.svg");
+}
+
+.wx-icon-light-left-long {
+    -webkit-mask-image: url("../icons/left-long.svg");
+    mask-image: url("../icons/left-long.svg");
+}
+
+.wx-icon-light-right-long {
+    -webkit-mask-image: url("../icons/right-long.svg");
+    mask-image: url("../icons/right-long.svg");
+}
+
+.wx-icon-light-arrow-down-wide-short {
+    -webkit-mask-image: url("../icons/arrow-down-wide-short.svg");
+    mask-image: url("../icons/arrow-down-wide-short.svg");
+}
+
+.wx-icon-light-arrow-down-short-wide {
+    -webkit-mask-image: url("../icons/arrow-down-short-wide.svg");
+    mask-image: url("../icons/arrow-down-short-wide.svg");
+}
+
+.wx-icon-light-arrow-up-wide-short {
+    -webkit-mask-image: url("../icons/arrow-up-wide-short.svg");
+    mask-image: url("../icons/arrow-up-wide-short.svg");
+}
+
+.wx-icon-light-arrow-up-short-wide {
+    -webkit-mask-image: url("../icons/arrow-up-short-wide.svg");
+    mask-image: url("../icons/arrow-up-short-wide.svg");
+}
+
+.wx-icon-light-arrow-down-a-z {
+    -webkit-mask-image: url("../icons/arrow-down-a-z.svg");
+    mask-image: url("../icons/arrow-down-a-z.svg");
+}
+
+.wx-icon-light-arrow-down-z-a {
+    -webkit-mask-image: url("../icons/arrow-down-z-a.svg");
+    mask-image: url("../icons/arrow-down-z-a.svg");
+}
+
+.wx-icon-light-arrow-up-a-z {
+    -webkit-mask-image: url("../icons/arrow-up-a-z.svg");
+    mask-image: url("../icons/arrow-up-a-z.svg");
+}
+
+.wx-icon-light-arrow-up-z-a {
+    -webkit-mask-image: url("../icons/arrow-up-z-a.svg");
+    mask-image: url("../icons/arrow-up-z-a.svg");
+}
+
+.wx-icon-light-arrow-down-1-9 {
+    -webkit-mask-image: url("../icons/arrow-down-1-9.svg");
+    mask-image: url("../icons/arrow-down-1-9.svg");
+}
+
+.wx-icon-light-arrow-down-9-1 {
+    -webkit-mask-image: url("../icons/arrow-down-9-1.svg");
+    mask-image: url("../icons/arrow-down-9-1.svg");
+}
+
+.wx-icon-light-arrow-up-1-9 {
+    -webkit-mask-image: url("../icons/arrow-up-1-9.svg");
+    mask-image: url("../icons/arrow-up-1-9.svg");
+}
+
+.wx-icon-light-arrow-up-9-1 {
+    -webkit-mask-image: url("../icons/arrow-up-9-1.svg");
+    mask-image: url("../icons/arrow-up-9-1.svg");
+}
+
+.wx-icon-light-sort-down {
+    -webkit-mask-image: url("../icons/sort-down.svg");
+    mask-image: url("../icons/sort-down.svg");
+}
+
+.wx-icon-light-sort-up {
+    -webkit-mask-image: url("../icons/sort-up.svg");
+    mask-image: url("../icons/sort-up.svg");
+}
+
+.wx-icon-light-circle-down {
+    -webkit-mask-image: url("../icons/circle-down.svg");
+    mask-image: url("../icons/circle-down.svg");
+}
+
+.wx-icon-light-circle-up {
+    -webkit-mask-image: url("../icons/circle-up.svg");
+    mask-image: url("../icons/circle-up.svg");
+}
+
+.wx-icon-light-circle-left {
+    -webkit-mask-image: url("../icons/circle-left.svg");
+    mask-image: url("../icons/circle-left.svg");
+}
+
+.wx-icon-light-circle-right {
+    -webkit-mask-image: url("../icons/circle-right.svg");
+    mask-image: url("../icons/circle-right.svg");
+}
+
+.wx-icon-light-arrow-rotate-left {
+    -webkit-mask-image: url("../icons/arrow-rotate-left.svg");
+    mask-image: url("../icons/arrow-rotate-left.svg");
+}
+
+.wx-icon-light-arrow-rotate-right {
+    -webkit-mask-image: url("../icons/arrow-rotate-right.svg");
+    mask-image: url("../icons/arrow-rotate-right.svg");
+}
+
+.wx-icon-light-arrows-spin {
+    -webkit-mask-image: url("../icons/arrows-spin.svg");
+    mask-image: url("../icons/arrows-spin.svg");
+}
+
+.wx-icon-light-repeat {
+    -webkit-mask-image: url("../icons/repeat.svg");
+    mask-image: url("../icons/repeat.svg");
+}
+
+.wx-icon-light-retweet {
+    -webkit-mask-image: url("../icons/retweet.svg");
+    mask-image: url("../icons/retweet.svg");
+}
+
+.wx-icon-light-shuffle {
+    -webkit-mask-image: url("../icons/shuffle.svg");
+    mask-image: url("../icons/shuffle.svg");
+}
+
+.wx-icon-light-reply {
+    -webkit-mask-image: url("../icons/reply.svg");
+    mask-image: url("../icons/reply.svg");
+}
+
+.wx-icon-light-reply-all {
+    -webkit-mask-image: url("../icons/reply-all.svg");
+    mask-image: url("../icons/reply-all.svg");
+}
+
+.wx-icon-light-share {
+    -webkit-mask-image: url("../icons/share.svg");
+    mask-image: url("../icons/share.svg");
+}
+
+.wx-icon-light-share-from-square {
+    -webkit-mask-image: url("../icons/share-from-square.svg");
+    mask-image: url("../icons/share-from-square.svg");
+}
+
+.wx-icon-light-arrow-right-from-bracket {
+    -webkit-mask-image: url("../icons/arrow-right-from-bracket.svg");
+    mask-image: url("../icons/arrow-right-from-bracket.svg");
+}
+
+.wx-icon-light-arrow-right-to-bracket {
+    -webkit-mask-image: url("../icons/arrow-right-to-bracket.svg");
+    mask-image: url("../icons/arrow-right-to-bracket.svg");
+}
+
+.wx-icon-light-arrow-up-from-bracket {
+    -webkit-mask-image: url("../icons/arrow-up-from-bracket.svg");
+    mask-image: url("../icons/arrow-up-from-bracket.svg");
+}
+
+.wx-icon-light-arrow-up-right-from-square {
+    -webkit-mask-image: url("../icons/arrow-up-right-from-square.svg");
+    mask-image: url("../icons/arrow-up-right-from-square.svg");
+}
+
+.wx-icon-light-up-right-from-square {
+    -webkit-mask-image: url("../icons/up-right-from-square.svg");
+    mask-image: url("../icons/up-right-from-square.svg");
+}
+
+.wx-icon-light-arrows-left-right {
+    -webkit-mask-image: url("../icons/arrows-left-right.svg");
+    mask-image: url("../icons/arrows-left-right.svg");
+}
+
+.wx-icon-light-arrows-up-down {
+    -webkit-mask-image: url("../icons/arrows-up-down.svg");
+    mask-image: url("../icons/arrows-up-down.svg");
+}
+
+.wx-icon-light-left-right {
+    -webkit-mask-image: url("../icons/left-right.svg");
+    mask-image: url("../icons/left-right.svg");
+}
+
+.wx-icon-light-up-down {
+    -webkit-mask-image: url("../icons/up-down.svg");
+    mask-image: url("../icons/up-down.svg");
+}
+
+.wx-icon-light-arrows-up-down-left-right {
+    -webkit-mask-image: url("../icons/arrows-up-down-left-right.svg");
+    mask-image: url("../icons/arrows-up-down-left-right.svg");
+}
+
+.wx-icon-light-up-down-left-right {
+    -webkit-mask-image: url("../icons/up-down-left-right.svg");
+    mask-image: url("../icons/up-down-left-right.svg");
+}
+
+.wx-icon-light-arrow-right-arrow-left {
+    -webkit-mask-image: url("../icons/arrow-right-arrow-left.svg");
+    mask-image: url("../icons/arrow-right-arrow-left.svg");
+}
+
+.wx-icon-light-right-left {
+    -webkit-mask-image: url("../icons/right-left.svg");
+    mask-image: url("../icons/right-left.svg");
+}
+
+.wx-icon-light-arrows-down-to-line {
+    -webkit-mask-image: url("../icons/arrows-down-to-line.svg");
+    mask-image: url("../icons/arrows-down-to-line.svg");
+}
+
+.wx-icon-light-arrows-up-to-line {
+    -webkit-mask-image: url("../icons/arrows-up-to-line.svg");
+    mask-image: url("../icons/arrows-up-to-line.svg");
+}
+
+.wx-icon-light-arrows-left-right-to-line {
+    -webkit-mask-image: url("../icons/arrows-left-right-to-line.svg");
+    mask-image: url("../icons/arrows-left-right-to-line.svg");
+}
+
+.wx-icon-light-arrows-to-dot {
+    -webkit-mask-image: url("../icons/arrows-to-dot.svg");
+    mask-image: url("../icons/arrows-to-dot.svg");
+}
+
+.wx-icon-light-arrows-to-circle {
+    -webkit-mask-image: url("../icons/arrows-to-circle.svg");
+    mask-image: url("../icons/arrows-to-circle.svg");
+}
+
+.wx-icon-light-arrows-to-eye {
+    -webkit-mask-image: url("../icons/arrows-to-eye.svg");
+    mask-image: url("../icons/arrows-to-eye.svg");
+}
+
+.wx-icon-light-arrows-down-to-people {
+    -webkit-mask-image: url("../icons/arrows-down-to-people.svg");
+    mask-image: url("../icons/arrows-down-to-people.svg");
+}
+
+.wx-icon-light-arrows-split-up-and-left {
+    -webkit-mask-image: url("../icons/arrows-split-up-and-left.svg");
+    mask-image: url("../icons/arrows-split-up-and-left.svg");
+}
+
+.wx-icon-light-arrows-turn-right {
+    -webkit-mask-image: url("../icons/arrows-turn-right.svg");
+    mask-image: url("../icons/arrows-turn-right.svg");
+}
+
+.wx-icon-light-arrows-turn-to-dots {
+    -webkit-mask-image: url("../icons/arrows-turn-to-dots.svg");
+    mask-image: url("../icons/arrows-turn-to-dots.svg");
+}
+
+.wx-icon-light-arrow-trend-up {
+    -webkit-mask-image: url("../icons/arrow-trend-up.svg");
+    mask-image: url("../icons/arrow-trend-up.svg");
+}
+
+.wx-icon-light-arrow-trend-down {
+    -webkit-mask-image: url("../icons/arrow-trend-down.svg");
+    mask-image: url("../icons/arrow-trend-down.svg");
+}
+
+.wx-icon-light-arrow-turn-up {
+    -webkit-mask-image: url("../icons/arrow-turn-up.svg");
+    mask-image: url("../icons/arrow-turn-up.svg");
+}
+
+.wx-icon-light-arrow-turn-down {
+    -webkit-mask-image: url("../icons/arrow-turn-down.svg");
+    mask-image: url("../icons/arrow-turn-down.svg");
+}
+
+.wx-icon-light-turn-up {
+    -webkit-mask-image: url("../icons/turn-up.svg");
+    mask-image: url("../icons/turn-up.svg");
+}
+
+.wx-icon-light-turn-down {
+    -webkit-mask-image: url("../icons/turn-down.svg");
+    mask-image: url("../icons/turn-down.svg");
+}
+
+.wx-icon-light-arrow-pointer {
+    -webkit-mask-image: url("../icons/arrow-pointer.svg");
+    mask-image: url("../icons/arrow-pointer.svg");
+}
+
+.wx-icon-light-arrow-up-right-dots {
+    -webkit-mask-image: url("../icons/arrow-up-right-dots.svg");
+    mask-image: url("../icons/arrow-up-right-dots.svg");
+}
+
+.wx-icon-light-arrow-right-to-city {
+    -webkit-mask-image: url("../icons/arrow-right-to-city.svg");
+    mask-image: url("../icons/arrow-right-to-city.svg");
+}
+
+.wx-icon-light-arrow-up-from-ground-water {
+    -webkit-mask-image: url("../icons/arrow-up-from-ground-water.svg");
+    mask-image: url("../icons/arrow-up-from-ground-water.svg");
+}
+
+.wx-icon-light-arrow-up-from-water-pump {
+    -webkit-mask-image: url("../icons/arrow-up-from-water-pump.svg");
+    mask-image: url("../icons/arrow-up-from-water-pump.svg");
+}
+
+.wx-icon-light-arrow-down-up-across-line {
+    -webkit-mask-image: url("../icons/arrow-down-up-across-line.svg");
+    mask-image: url("../icons/arrow-down-up-across-line.svg");
+}
+
+.wx-icon-light-arrow-down-up-lock {
+    -webkit-mask-image: url("../icons/arrow-down-up-lock.svg");
+    mask-image: url("../icons/arrow-down-up-lock.svg");
+}
+
+.wx-icon-light-backward-step {
+    -webkit-mask-image: url("../icons/backward-step.svg");
+    mask-image: url("../icons/backward-step.svg");
+}
+
+.wx-icon-light-forward-step {
+    -webkit-mask-image: url("../icons/forward-step.svg");
+    mask-image: url("../icons/forward-step.svg");
+}
+
+.wx-icon-light-backward-fast {
+    -webkit-mask-image: url("../icons/backward-fast.svg");
+    mask-image: url("../icons/backward-fast.svg");
+}
+
+.wx-icon-light-forward-fast {
+    -webkit-mask-image: url("../icons/forward-fast.svg");
+    mask-image: url("../icons/forward-fast.svg");
+}
+
+.wx-icon-light-maximize {
+    -webkit-mask-image: url("../icons/maximize.svg");
+    mask-image: url("../icons/maximize.svg");
+}
+
+.wx-icon-light-minimize {
+    -webkit-mask-image: url("../icons/minimize.svg");
+    mask-image: url("../icons/minimize.svg");
+}
+
+.wx-icon-light-up-right-and-down-left-from-center {
+    -webkit-mask-image: url("../icons/up-right-and-down-left-from-center.svg");
+    mask-image: url("../icons/up-right-and-down-left-from-center.svg");
+}
+
+.wx-icon-light-down-left-and-up-right-to-center {
+    -webkit-mask-image: url("../icons/down-left-and-up-right-to-center.svg");
+    mask-image: url("../icons/down-left-and-up-right-to-center.svg");
+}
+
+/*
+ * Light variants added for icon classes that are used in the framework, the
+ * tutorial or an application but had none.
+ */
+
+.wx-icon-light-bandage {
+    -webkit-mask-image: url("../icons/bandage.svg");
+    mask-image: url("../icons/bandage.svg");
+}
+
+.wx-icon-light-bangladeshi-taka-sign {
+    -webkit-mask-image: url("../icons/bangladeshi-taka-sign.svg");
+    mask-image: url("../icons/bangladeshi-taka-sign.svg");
+}
+
+.wx-icon-light-ban-smoking {
+    -webkit-mask-image: url("../icons/ban-smoking.svg");
+    mask-image: url("../icons/ban-smoking.svg");
+}
+
+.wx-icon-light-bell-concierge {
+    -webkit-mask-image: url("../icons/bell-concierge.svg");
+    mask-image: url("../icons/bell-concierge.svg");
+}
+
+.wx-icon-light-bell-slash {
+    -webkit-mask-image: url("../icons/bell-slash.svg");
+    mask-image: url("../icons/bell-slash.svg");
+}
+
+.wx-icon-light-calendar-check {
+    -webkit-mask-image: url("../icons/calendar-check.svg");
+    mask-image: url("../icons/calendar-check.svg");
+}
+
+.wx-icon-light-calendar-day {
+    -webkit-mask-image: url("../icons/calendar-day.svg");
+    mask-image: url("../icons/calendar-day.svg");
+}
+
+.wx-icon-light-calendar-minus {
+    -webkit-mask-image: url("../icons/calendar-minus.svg");
+    mask-image: url("../icons/calendar-minus.svg");
+}
+
+.wx-icon-light-calendar-week {
+    -webkit-mask-image: url("../icons/calendar-week.svg");
+    mask-image: url("../icons/calendar-week.svg");
+}
+
+.wx-icon-light-calendar-xmark {
+    -webkit-mask-image: url("../icons/calendar-xmark.svg");
+    mask-image: url("../icons/calendar-xmark.svg");
+}
+
+.wx-icon-light-check-double {
+    -webkit-mask-image: url("../icons/check-double.svg");
+    mask-image: url("../icons/check-double.svg");
+}
+
+.wx-icon-light-check-to-slot {
+    -webkit-mask-image: url("../icons/check-to-slot.svg");
+    mask-image: url("../icons/check-to-slot.svg");
+}
+
+.wx-icon-light-circle-dot {
+    -webkit-mask-image: url("../icons/circle-dot.svg");
+    mask-image: url("../icons/circle-dot.svg");
+}
+
+.wx-icon-light-circle-half-stroke {
+    -webkit-mask-image: url("../icons/circle-half-stroke.svg");
+    mask-image: url("../icons/circle-half-stroke.svg");
+}
+
+.wx-icon-light-circle-minus {
+    -webkit-mask-image: url("../icons/circle-minus.svg");
+    mask-image: url("../icons/circle-minus.svg");
+}
+
+.wx-icon-light-circle-notch {
+    -webkit-mask-image: url("../icons/circle-notch.svg");
+    mask-image: url("../icons/circle-notch.svg");
+}
+
+.wx-icon-light-circle-plus {
+    -webkit-mask-image: url("../icons/circle-plus.svg");
+    mask-image: url("../icons/circle-plus.svg");
+}
+
+.wx-icon-light-circle-radiation {
+    -webkit-mask-image: url("../icons/circle-radiation.svg");
+    mask-image: url("../icons/circle-radiation.svg");
+}
+
+.wx-icon-light-exclamation {
+    -webkit-mask-image: url("../icons/exclamation.svg");
+    mask-image: url("../icons/exclamation.svg");
+}
+
+.wx-icon-light-eye-dropper {
+    -webkit-mask-image: url("../icons/eye-dropper.svg");
+    mask-image: url("../icons/eye-dropper.svg");
+}
+
+.wx-icon-light-eye-low-vision {
+    -webkit-mask-image: url("../icons/eye-low-vision.svg");
+    mask-image: url("../icons/eye-low-vision.svg");
+}
+
+.wx-icon-light-flag-checkered {
+    -webkit-mask-image: url("../icons/flag-checkered.svg");
+    mask-image: url("../icons/flag-checkered.svg");
+}
+
+.wx-icon-light-flag-usa {
+    -webkit-mask-image: url("../icons/flag-usa.svg");
+    mask-image: url("../icons/flag-usa.svg");
+}
+
+.wx-icon-light-heart-circle-bolt {
+    -webkit-mask-image: url("../icons/heart-circle-bolt.svg");
+    mask-image: url("../icons/heart-circle-bolt.svg");
+}
+
+.wx-icon-light-heart-circle-check {
+    -webkit-mask-image: url("../icons/heart-circle-check.svg");
+    mask-image: url("../icons/heart-circle-check.svg");
+}
+
+.wx-icon-light-heart-circle-exclamation {
+    -webkit-mask-image: url("../icons/heart-circle-exclamation.svg");
+    mask-image: url("../icons/heart-circle-exclamation.svg");
+}
+
+.wx-icon-light-heart-circle-minus {
+    -webkit-mask-image: url("../icons/heart-circle-minus.svg");
+    mask-image: url("../icons/heart-circle-minus.svg");
+}
+
+.wx-icon-light-heart-circle-plus {
+    -webkit-mask-image: url("../icons/heart-circle-plus.svg");
+    mask-image: url("../icons/heart-circle-plus.svg");
+}
+
+.wx-icon-light-heart-circle-xmark {
+    -webkit-mask-image: url("../icons/heart-circle-xmark.svg");
+    mask-image: url("../icons/heart-circle-xmark.svg");
+}
+
+.wx-icon-light-heart-crack {
+    -webkit-mask-image: url("../icons/heart-crack.svg");
+    mask-image: url("../icons/heart-crack.svg");
+}
+
+.wx-icon-light-heart-pulse {
+    -webkit-mask-image: url("../icons/heart-pulse.svg");
+    mask-image: url("../icons/heart-pulse.svg");
+}
+
+.wx-icon-light-hourglass {
+    -webkit-mask-image: url("../icons/hourglass.svg");
+    mask-image: url("../icons/hourglass.svg");
+}
+
+.wx-icon-light-hourglass-start {
+    -webkit-mask-image: url("../icons/hourglass-start.svg");
+    mask-image: url("../icons/hourglass-start.svg");
+}
+
+.wx-icon-light-hourglass-half {
+    -webkit-mask-image: url("../icons/hourglass-half.svg");
+    mask-image: url("../icons/hourglass-half.svg");
+}
+
+.wx-icon-light-hourglass-end {
+    -webkit-mask-image: url("../icons/hourglass-end.svg");
+    mask-image: url("../icons/hourglass-end.svg");
+}
+
+.wx-icon-light-keyboard {
+    -webkit-mask-image: url("../icons/keyboard.svg");
+    mask-image: url("../icons/keyboard.svg");
+}
+
+.wx-icon-light-question {
+    -webkit-mask-image: url("../icons/question.svg");
+    mask-image: url("../icons/question.svg");
+}
+
+.wx-icon-light-shield-cat {
+    -webkit-mask-image: url("../icons/shield-cat.svg");
+    mask-image: url("../icons/shield-cat.svg");
+}
+
+.wx-icon-light-shield-dog {
+    -webkit-mask-image: url("../icons/shield-dog.svg");
+    mask-image: url("../icons/shield-dog.svg");
+}
+
+.wx-icon-light-shield-heart {
+    -webkit-mask-image: url("../icons/shield-heart.svg");
+    mask-image: url("../icons/shield-heart.svg");
+}
+
+.wx-icon-light-shield-virus {
+    -webkit-mask-image: url("../icons/shield-virus.svg");
+    mask-image: url("../icons/shield-virus.svg");
+}
+
+.wx-icon-light-spinner {
+    -webkit-mask-image: url("../icons/spinner.svg");
+    mask-image: url("../icons/spinner.svg");
+}
+
+.wx-icon-light-star-half-alt {
+    -webkit-mask-image: url("../icons/star-half-alt.svg");
+    mask-image: url("../icons/star-half-alt.svg");
+}
+
+.wx-icon-light-star-half-stroke {
+    -webkit-mask-image: url("../icons/star-half-stroke.svg");
+    mask-image: url("../icons/star-half-stroke.svg");
+}
+
+.wx-icon-light-star-of-life {
+    -webkit-mask-image: url("../icons/star-of-life.svg");
+    mask-image: url("../icons/star-of-life.svg");
+}
+
+.wx-icon-light-thumbs-up {
+    -webkit-mask-image: url("../icons/thumbs-up.svg");
+    mask-image: url("../icons/thumbs-up.svg");
+}
+
+.wx-icon-light-thumbs-down {
+    -webkit-mask-image: url("../icons/thumbs-down.svg");
+    mask-image: url("../icons/thumbs-down.svg");
+}
+
+.wx-icon-light-xmarks-lines {
+    -webkit-mask-image: url("../icons/xmarks-lines.svg");
+    mask-image: url("../icons/xmarks-lines.svg");
+}
+
+.wx-icon-light-code-commit {
+    -webkit-mask-image: url("../icons/code-commit.svg");
+    mask-image: url("../icons/code-commit.svg");
+}
+
+.wx-icon-light-code-compare {
+    -webkit-mask-image: url("../icons/code-compare.svg");
+    mask-image: url("../icons/code-compare.svg");
+}
+
+.wx-icon-light-code-fork {
+    -webkit-mask-image: url("../icons/code-fork.svg");
+    mask-image: url("../icons/code-fork.svg");
+}
+
+.wx-icon-light-code-merge {
+    -webkit-mask-image: url("../icons/code-merge.svg");
+    mask-image: url("../icons/code-merge.svg");
+}
+
+.wx-icon-light-code-pull-request {
+    -webkit-mask-image: url("../icons/code-pull-request.svg");
+    mask-image: url("../icons/code-pull-request.svg");
+}
+
+.wx-icon-light-crop {
+    -webkit-mask-image: url("../icons/crop.svg");
+    mask-image: url("../icons/crop.svg");
+}
+
+.wx-icon-light-crop-simple {
+    -webkit-mask-image: url("../icons/crop-simple.svg");
+    mask-image: url("../icons/crop-simple.svg");
+}
+
+.wx-icon-light-link-slash {
+    -webkit-mask-image: url("../icons/link-slash.svg");
+    mask-image: url("../icons/link-slash.svg");
+}
+
+.wx-icon-light-paintbrush {
+    -webkit-mask-image: url("../icons/paintbrush.svg");
+    mask-image: url("../icons/paintbrush.svg");
+}
+
+.wx-icon-light-pen-clip {
+    -webkit-mask-image: url("../icons/pen-clip.svg");
+    mask-image: url("../icons/pen-clip.svg");
+}
+
+.wx-icon-light-pen-fancy {
+    -webkit-mask-image: url("../icons/pen-fancy.svg");
+    mask-image: url("../icons/pen-fancy.svg");
+}
+
+.wx-icon-light-pen-nib {
+    -webkit-mask-image: url("../icons/pen-nib.svg");
+    mask-image: url("../icons/pen-nib.svg");
+}
+
+.wx-icon-light-pen-ruler {
+    -webkit-mask-image: url("../icons/pen-ruler.svg");
+    mask-image: url("../icons/pen-ruler.svg");
+}
+
+.wx-icon-light-quote-left {
+    -webkit-mask-image: url("../icons/quote-left.svg");
+    mask-image: url("../icons/quote-left.svg");
+}
+
+.wx-icon-light-table-cells-column-lock {
+    -webkit-mask-image: url("../icons/table-cells-column-lock.svg");
+    mask-image: url("../icons/table-cells-column-lock.svg");
+}
+
+.wx-icon-light-table-cells-row-lock {
+    -webkit-mask-image: url("../icons/table-cells-row-lock.svg");
+    mask-image: url("../icons/table-cells-row-lock.svg");
+}
+
+.wx-icon-light-table-cells-row-unlock {
+    -webkit-mask-image: url("../icons/table-cells-row-unlock.svg");
+    mask-image: url("../icons/table-cells-row-unlock.svg");
+}
+
+.wx-icon-light-table-list {
+    -webkit-mask-image: url("../icons/table-list.svg");
+    mask-image: url("../icons/table-list.svg");
+}
+
+.wx-icon-light-tablet {
+    -webkit-mask-image: url("../icons/tablet.svg");
+    mask-image: url("../icons/tablet.svg");
+}
+
+.wx-icon-light-tablet-button {
+    -webkit-mask-image: url("../icons/tablet-button.svg");
+    mask-image: url("../icons/tablet-button.svg");
+}
+
+.wx-icon-light-tablet-screen-button {
+    -webkit-mask-image: url("../icons/tablet-screen-button.svg");
+    mask-image: url("../icons/tablet-screen-button.svg");
+}
+
+.wx-icon-light-tablets {
+    -webkit-mask-image: url("../icons/tablets.svg");
+    mask-image: url("../icons/tablets.svg");
+}
+
+.wx-icon-light-table-tennis-paddle-ball {
+    -webkit-mask-image: url("../icons/table-tennis-paddle-ball.svg");
+    mask-image: url("../icons/table-tennis-paddle-ball.svg");
+}
+
+.wx-icon-light-text-slash {
+    -webkit-mask-image: url("../icons/text-slash.svg");
+    mask-image: url("../icons/text-slash.svg");
+}
+
+.wx-icon-light-text-width {
+    -webkit-mask-image: url("../icons/text-width.svg");
+    mask-image: url("../icons/text-width.svg");
+}
+
+/*
+ * Light variants added for icon classes that are used in the framework, the
+ * tutorial or an application but had none.
+ */
+
+.wx-icon-light-battery-empty {
+    -webkit-mask-image: url("../icons/battery-empty.svg");
+    mask-image: url("../icons/battery-empty.svg");
+}
+
+.wx-icon-light-battery-quarter {
+    -webkit-mask-image: url("../icons/battery-quarter.svg");
+    mask-image: url("../icons/battery-quarter.svg");
+}
+
+.wx-icon-light-battery-half {
+    -webkit-mask-image: url("../icons/battery-half.svg");
+    mask-image: url("../icons/battery-half.svg");
+}
+
+.wx-icon-light-battery-three-quarters {
+    -webkit-mask-image: url("../icons/battery-three-quarters.svg");
+    mask-image: url("../icons/battery-three-quarters.svg");
+}
+
+.wx-icon-light-battery-full {
+    -webkit-mask-image: url("../icons/battery-full.svg");
+    mask-image: url("../icons/battery-full.svg");
+}
+
+.wx-icon-light-bug-slash {
+    -webkit-mask-image: url("../icons/bug-slash.svg");
+    mask-image: url("../icons/bug-slash.svg");
+}
+
+.wx-icon-light-bugs {
+    -webkit-mask-image: url("../icons/bugs.svg");
+    mask-image: url("../icons/bugs.svg");
+}
+
+.wx-icon-light-charging-station {
+    -webkit-mask-image: url("../icons/charging-station.svg");
+    mask-image: url("../icons/charging-station.svg");
+}
+
+.wx-icon-light-cloud-rain {
+    -webkit-mask-image: url("../icons/cloud-rain.svg");
+    mask-image: url("../icons/cloud-rain.svg");
+}
+
+.wx-icon-light-cloud-bolt {
+    -webkit-mask-image: url("../icons/cloud-bolt.svg");
+    mask-image: url("../icons/cloud-bolt.svg");
+}
+
+.wx-icon-light-cloud-showers-heavy {
+    -webkit-mask-image: url("../icons/cloud-showers-heavy.svg");
+    mask-image: url("../icons/cloud-showers-heavy.svg");
+}
+
+.wx-icon-light-cloud-showers-water {
+    -webkit-mask-image: url("../icons/cloud-showers-water.svg");
+    mask-image: url("../icons/cloud-showers-water.svg");
+}
+
+.wx-icon-light-cloud-sun {
+    -webkit-mask-image: url("../icons/cloud-sun.svg");
+    mask-image: url("../icons/cloud-sun.svg");
+}
+
+.wx-icon-light-cloud-sun-rain {
+    -webkit-mask-image: url("../icons/cloud-sun-rain.svg");
+    mask-image: url("../icons/cloud-sun-rain.svg");
+}
+
+.wx-icon-light-cloud-moon {
+    -webkit-mask-image: url("../icons/cloud-moon.svg");
+    mask-image: url("../icons/cloud-moon.svg");
+}
+
+.wx-icon-light-cloud-moon-rain {
+    -webkit-mask-image: url("../icons/cloud-moon-rain.svg");
+    mask-image: url("../icons/cloud-moon-rain.svg");
+}
+
+.wx-icon-light-cloud-meatball {
+    -webkit-mask-image: url("../icons/cloud-meatball.svg");
+    mask-image: url("../icons/cloud-meatball.svg");
+}
+
+.wx-icon-light-desktop {
+    -webkit-mask-image: url("../icons/desktop.svg");
+    mask-image: url("../icons/desktop.svg");
+}
+
+.wx-icon-light-ethernet {
+    -webkit-mask-image: url("../icons/ethernet.svg");
+    mask-image: url("../icons/ethernet.svg");
+}
+
+.wx-icon-light-gears {
+    -webkit-mask-image: url("../icons/gears.svg");
+    mask-image: url("../icons/gears.svg");
+}
+
+.wx-icon-light-hard-drive {
+    -webkit-mask-image: url("../icons/hard-drive.svg");
+    mask-image: url("../icons/hard-drive.svg");
+}
+
+.wx-icon-light-laptop-code {
+    -webkit-mask-image: url("../icons/laptop-code.svg");
+    mask-image: url("../icons/laptop-code.svg");
+}
+
+.wx-icon-light-laptop-file {
+    -webkit-mask-image: url("../icons/laptop-file.svg");
+    mask-image: url("../icons/laptop-file.svg");
+}
+
+.wx-icon-light-laptop-medical {
+    -webkit-mask-image: url("../icons/laptop-medical.svg");
+    mask-image: url("../icons/laptop-medical.svg");
+}
+
+.wx-icon-light-memory {
+    -webkit-mask-image: url("../icons/memory.svg");
+    mask-image: url("../icons/memory.svg");
+}
+
+.wx-icon-light-microchip {
+    -webkit-mask-image: url("../icons/microchip.svg");
+    mask-image: url("../icons/microchip.svg");
+}
+
+.wx-icon-light-mobile-button {
+    -webkit-mask-image: url("../icons/mobile-button.svg");
+    mask-image: url("../icons/mobile-button.svg");
+}
+
+.wx-icon-light-mobile-screen {
+    -webkit-mask-image: url("../icons/mobile-screen.svg");
+    mask-image: url("../icons/mobile-screen.svg");
+}
+
+.wx-icon-light-mobile-screen-button {
+    -webkit-mask-image: url("../icons/mobile-screen-button.svg");
+    mask-image: url("../icons/mobile-screen-button.svg");
+}
+
+.wx-icon-light-mobile-retro {
+    -webkit-mask-image: url("../icons/mobile-retro.svg");
+    mask-image: url("../icons/mobile-retro.svg");
+}
+
+.wx-icon-light-plug-circle-bolt {
+    -webkit-mask-image: url("../icons/plug-circle-bolt.svg");
+    mask-image: url("../icons/plug-circle-bolt.svg");
+}
+
+.wx-icon-light-plug-circle-check {
+    -webkit-mask-image: url("../icons/plug-circle-check.svg");
+    mask-image: url("../icons/plug-circle-check.svg");
+}
+
+.wx-icon-light-plug-circle-exclamation {
+    -webkit-mask-image: url("../icons/plug-circle-exclamation.svg");
+    mask-image: url("../icons/plug-circle-exclamation.svg");
+}
+
+.wx-icon-light-plug-circle-minus {
+    -webkit-mask-image: url("../icons/plug-circle-minus.svg");
+    mask-image: url("../icons/plug-circle-minus.svg");
+}
+
+.wx-icon-light-plug-circle-plus {
+    -webkit-mask-image: url("../icons/plug-circle-plus.svg");
+    mask-image: url("../icons/plug-circle-plus.svg");
+}
+
+.wx-icon-light-plug-circle-xmark {
+    -webkit-mask-image: url("../icons/plug-circle-xmark.svg");
+    mask-image: url("../icons/plug-circle-xmark.svg");
+}
+
+.wx-icon-light-power-off {
+    -webkit-mask-image: url("../icons/power-off.svg");
+    mask-image: url("../icons/power-off.svg");
+}
+
+.wx-icon-light-satellite {
+    -webkit-mask-image: url("../icons/satellite.svg");
+    mask-image: url("../icons/satellite.svg");
+}
+
+.wx-icon-light-satellite-dish {
+    -webkit-mask-image: url("../icons/satellite-dish.svg");
+    mask-image: url("../icons/satellite-dish.svg");
+}
+
+.wx-icon-light-screwdriver {
+    -webkit-mask-image: url("../icons/screwdriver.svg");
+    mask-image: url("../icons/screwdriver.svg");
+}
+
+.wx-icon-light-screwdriver-wrench {
+    -webkit-mask-image: url("../icons/screwdriver-wrench.svg");
+    mask-image: url("../icons/screwdriver-wrench.svg");
+}
+
+.wx-icon-light-sd-card {
+    -webkit-mask-image: url("../icons/sd-card.svg");
+    mask-image: url("../icons/sd-card.svg");
+}
+
+.wx-icon-light-sim-card {
+    -webkit-mask-image: url("../icons/sim-card.svg");
+    mask-image: url("../icons/sim-card.svg");
+}
+
+.wx-icon-light-tower-broadcast {
+    -webkit-mask-image: url("../icons/tower-broadcast.svg");
+    mask-image: url("../icons/tower-broadcast.svg");
+}
+
+.wx-icon-light-tower-cell {
+    -webkit-mask-image: url("../icons/tower-cell.svg");
+    mask-image: url("../icons/tower-cell.svg");
+}
+
+.wx-icon-light-tower-observation {
+    -webkit-mask-image: url("../icons/tower-observation.svg");
+    mask-image: url("../icons/tower-observation.svg");
+}
+
+.wx-icon-light-wifi {
+    -webkit-mask-image: url("../icons/wifi.svg");
+    mask-image: url("../icons/wifi.svg");
+}
+
+.wx-icon-light-camera-retro {
+    -webkit-mask-image: url("../icons/camera-retro.svg");
+    mask-image: url("../icons/camera-retro.svg");
+}
+
+.wx-icon-light-camera-rotate {
+    -webkit-mask-image: url("../icons/camera-rotate.svg");
+    mask-image: url("../icons/camera-rotate.svg");
+}
+
+.wx-icon-light-compact-disc {
+    -webkit-mask-image: url("../icons/compact-disc.svg");
+    mask-image: url("../icons/compact-disc.svg");
+}
+
+.wx-icon-light-drum {
+    -webkit-mask-image: url("../icons/drum.svg");
+    mask-image: url("../icons/drum.svg");
+}
+
+.wx-icon-light-drum-steelpan {
+    -webkit-mask-image: url("../icons/drum-steelpan.svg");
+    mask-image: url("../icons/drum-steelpan.svg");
+}
+
+.wx-icon-light-drumstick-bite {
+    -webkit-mask-image: url("../icons/drumstick-bite.svg");
+    mask-image: url("../icons/drumstick-bite.svg");
+}
+
+.wx-icon-light-film {
+    -webkit-mask-image: url("../icons/film.svg");
+    mask-image: url("../icons/film.svg");
+}
+
+.wx-icon-light-guitar {
+    -webkit-mask-image: url("../icons/guitar.svg");
+    mask-image: url("../icons/guitar.svg");
+}
+
+.wx-icon-light-headphones {
+    -webkit-mask-image: url("../icons/headphones.svg");
+    mask-image: url("../icons/headphones.svg");
+}
+
+.wx-icon-light-headphones-simple {
+    -webkit-mask-image: url("../icons/headphones-simple.svg");
+    mask-image: url("../icons/headphones-simple.svg");
+}
+
+.wx-icon-light-masks-theater {
+    -webkit-mask-image: url("../icons/masks-theater.svg");
+    mask-image: url("../icons/masks-theater.svg");
+}
+
+.wx-icon-light-microphone {
+    -webkit-mask-image: url("../icons/microphone.svg");
+    mask-image: url("../icons/microphone.svg");
+}
+
+.wx-icon-light-microphone-slash {
+    -webkit-mask-image: url("../icons/microphone-slash.svg");
+    mask-image: url("../icons/microphone-slash.svg");
+}
+
+.wx-icon-light-microphone-lines {
+    -webkit-mask-image: url("../icons/microphone-lines.svg");
+    mask-image: url("../icons/microphone-lines.svg");
+}
+
+.wx-icon-light-microphone-lines-slash {
+    -webkit-mask-image: url("../icons/microphone-lines-slash.svg");
+    mask-image: url("../icons/microphone-lines-slash.svg");
+}
+
+.wx-icon-light-music {
+    -webkit-mask-image: url("../icons/music.svg");
+    mask-image: url("../icons/music.svg");
+}
+
+.wx-icon-light-play-circle {
+    -webkit-mask-image: url("../icons/play-circle.svg");
+    mask-image: url("../icons/play-circle.svg");
+}
+
+.wx-icon-light-stop-circle {
+    -webkit-mask-image: url("../icons/stop-circle.svg");
+    mask-image: url("../icons/stop-circle.svg");
+}
+
+.wx-icon-light-podcast {
+    -webkit-mask-image: url("../icons/podcast.svg");
+    mask-image: url("../icons/podcast.svg");
+}
+
+.wx-icon-light-radio {
+    -webkit-mask-image: url("../icons/radio.svg");
+    mask-image: url("../icons/radio.svg");
+}
+
+.wx-icon-light-record-vinyl {
+    -webkit-mask-image: url("../icons/record-vinyl.svg");
+    mask-image: url("../icons/record-vinyl.svg");
+}
+
+.wx-icon-light-stopwatch {
+    -webkit-mask-image: url("../icons/stopwatch.svg");
+    mask-image: url("../icons/stopwatch.svg");
+}
+
+.wx-icon-light-stopwatch-20 {
+    -webkit-mask-image: url("../icons/stopwatch-20.svg");
+    mask-image: url("../icons/stopwatch-20.svg");
+}
+
+.wx-icon-light-tv {
+    -webkit-mask-image: url("../icons/tv.svg");
+    mask-image: url("../icons/tv.svg");
+}
+
+.wx-icon-light-video {
+    -webkit-mask-image: url("../icons/video.svg");
+    mask-image: url("../icons/video.svg");
+}
+
+.wx-icon-light-video-slash {
+    -webkit-mask-image: url("../icons/video-slash.svg");
+    mask-image: url("../icons/video-slash.svg");
+}
+
+.wx-icon-light-volume-high {
+    -webkit-mask-image: url("../icons/volume-high.svg");
+    mask-image: url("../icons/volume-high.svg");
+}
+
+.wx-icon-light-volume-low {
+    -webkit-mask-image: url("../icons/volume-low.svg");
+    mask-image: url("../icons/volume-low.svg");
+}
+
+.wx-icon-light-volume-off {
+    -webkit-mask-image: url("../icons/volume-off.svg");
+    mask-image: url("../icons/volume-off.svg");
+}
+
+.wx-icon-light-volume-xmark {
+    -webkit-mask-image: url("../icons/volume-xmark.svg");
+    mask-image: url("../icons/volume-xmark.svg");
+}
+
+/*
+ * Light variants added for icon classes that are used in the framework, the
+ * tutorial or an application but had none.
+ */
+
+.wx-icon-light-id-badge {
+    -webkit-mask-image: url("../icons/id-badge.svg");
+    mask-image: url("../icons/id-badge.svg");
+}
+
+.wx-icon-light-id-card {
+    -webkit-mask-image: url("../icons/id-card.svg");
+    mask-image: url("../icons/id-card.svg");
+}
+
+.wx-icon-light-id-card-clip {
+    -webkit-mask-image: url("../icons/id-card-clip.svg");
+    mask-image: url("../icons/id-card-clip.svg");
+}
+
+.wx-icon-light-user-large {
+    -webkit-mask-image: url("../icons/user-large.svg");
+    mask-image: url("../icons/user-large.svg");
+}
+
+.wx-icon-light-user-large-slash {
+    -webkit-mask-image: url("../icons/user-large-slash.svg");
+    mask-image: url("../icons/user-large-slash.svg");
+}
+
+.wx-icon-light-user-slash {
+    -webkit-mask-image: url("../icons/user-slash.svg");
+    mask-image: url("../icons/user-slash.svg");
+}
+
+.wx-icon-light-user-minus {
+    -webkit-mask-image: url("../icons/user-minus.svg");
+    mask-image: url("../icons/user-minus.svg");
+}
+
+.wx-icon-light-user-clock {
+    -webkit-mask-image: url("../icons/user-clock.svg");
+    mask-image: url("../icons/user-clock.svg");
+}
+
+.wx-icon-light-user-gear {
+    -webkit-mask-image: url("../icons/user-gear.svg");
+    mask-image: url("../icons/user-gear.svg");
+}
+
+.wx-icon-light-user-lock {
+    -webkit-mask-image: url("../icons/user-lock.svg");
+    mask-image: url("../icons/user-lock.svg");
+}
+
+.wx-icon-light-user-tag {
+    -webkit-mask-image: url("../icons/user-tag.svg");
+    mask-image: url("../icons/user-tag.svg");
+}
+
+.wx-icon-light-user-tie {
+    -webkit-mask-image: url("../icons/user-tie.svg");
+    mask-image: url("../icons/user-tie.svg");
+}
+
+.wx-icon-light-user-doctor {
+    -webkit-mask-image: url("../icons/user-doctor.svg");
+    mask-image: url("../icons/user-doctor.svg");
+}
+
+.wx-icon-light-user-nurse {
+    -webkit-mask-image: url("../icons/user-nurse.svg");
+    mask-image: url("../icons/user-nurse.svg");
+}
+
+.wx-icon-light-user-graduate {
+    -webkit-mask-image: url("../icons/user-graduate.svg");
+    mask-image: url("../icons/user-graduate.svg");
+}
+
+.wx-icon-light-user-astronaut {
+    -webkit-mask-image: url("../icons/user-astronaut.svg");
+    mask-image: url("../icons/user-astronaut.svg");
+}
+
+.wx-icon-light-user-ninja {
+    -webkit-mask-image: url("../icons/user-ninja.svg");
+    mask-image: url("../icons/user-ninja.svg");
+}
+
+.wx-icon-light-user-secret {
+    -webkit-mask-image: url("../icons/user-secret.svg");
+    mask-image: url("../icons/user-secret.svg");
+}
+
+.wx-icon-light-user-injured {
+    -webkit-mask-image: url("../icons/user-injured.svg");
+    mask-image: url("../icons/user-injured.svg");
+}
+
+.wx-icon-light-user-group {
+    -webkit-mask-image: url("../icons/user-group.svg");
+    mask-image: url("../icons/user-group.svg");
+}
+
+.wx-icon-light-users-gear {
+    -webkit-mask-image: url("../icons/users-gear.svg");
+    mask-image: url("../icons/users-gear.svg");
+}
+
+.wx-icon-light-users-slash {
+    -webkit-mask-image: url("../icons/users-slash.svg");
+    mask-image: url("../icons/users-slash.svg");
+}
+
+.wx-icon-light-users-line {
+    -webkit-mask-image: url("../icons/users-line.svg");
+    mask-image: url("../icons/users-line.svg");
+}
+
+.wx-icon-light-users-between-lines {
+    -webkit-mask-image: url("../icons/users-between-lines.svg");
+    mask-image: url("../icons/users-between-lines.svg");
+}
+
+.wx-icon-light-users-rays {
+    -webkit-mask-image: url("../icons/users-rays.svg");
+    mask-image: url("../icons/users-rays.svg");
+}
+
+.wx-icon-light-users-rectangle {
+    -webkit-mask-image: url("../icons/users-rectangle.svg");
+    mask-image: url("../icons/users-rectangle.svg");
+}
+
+.wx-icon-light-users-viewfinder {
+    -webkit-mask-image: url("../icons/users-viewfinder.svg");
+    mask-image: url("../icons/users-viewfinder.svg");
+}
+
+/*
+ * Light variants added for icon classes that are used in the framework, the
+ * tutorial or an application but had none.
+ */
+
+.wx-icon-light-money-bill {
+    -webkit-mask-image: url("../icons/money-bill.svg");
+    mask-image: url("../icons/money-bill.svg");
+}
+
+.wx-icon-light-money-bill-1 {
+    -webkit-mask-image: url("../icons/money-bill-1.svg");
+    mask-image: url("../icons/money-bill-1.svg");
+}
+
+.wx-icon-light-money-bills {
+    -webkit-mask-image: url("../icons/money-bills.svg");
+    mask-image: url("../icons/money-bills.svg");
+}
+
+.wx-icon-light-money-bill-wave {
+    -webkit-mask-image: url("../icons/money-bill-wave.svg");
+    mask-image: url("../icons/money-bill-wave.svg");
+}
+
+.wx-icon-light-money-bill-1-wave {
+    -webkit-mask-image: url("../icons/money-bill-1-wave.svg");
+    mask-image: url("../icons/money-bill-1-wave.svg");
+}
+
+.wx-icon-light-money-bill-transfer {
+    -webkit-mask-image: url("../icons/money-bill-transfer.svg");
+    mask-image: url("../icons/money-bill-transfer.svg");
+}
+
+.wx-icon-light-money-bill-trend-up {
+    -webkit-mask-image: url("../icons/money-bill-trend-up.svg");
+    mask-image: url("../icons/money-bill-trend-up.svg");
+}
+
+.wx-icon-light-money-bill-wheat {
+    -webkit-mask-image: url("../icons/money-bill-wheat.svg");
+    mask-image: url("../icons/money-bill-wheat.svg");
+}
+
+.wx-icon-light-money-check {
+    -webkit-mask-image: url("../icons/money-check.svg");
+    mask-image: url("../icons/money-check.svg");
+}
+
+.wx-icon-light-money-check-dollar {
+    -webkit-mask-image: url("../icons/money-check-dollar.svg");
+    mask-image: url("../icons/money-check-dollar.svg");
+}
+
+.wx-icon-light-sack-dollar {
+    -webkit-mask-image: url("../icons/sack-dollar.svg");
+    mask-image: url("../icons/sack-dollar.svg");
+}
+
+.wx-icon-light-sack-xmark {
+    -webkit-mask-image: url("../icons/sack-xmark.svg");
+    mask-image: url("../icons/sack-xmark.svg");
+}
+
+.wx-icon-light-piggy-bank {
+    -webkit-mask-image: url("../icons/piggy-bank.svg");
+    mask-image: url("../icons/piggy-bank.svg");
+}
+
+.wx-icon-light-coins {
+    -webkit-mask-image: url("../icons/coins.svg");
+    mask-image: url("../icons/coins.svg");
+}
+
+.wx-icon-light-credit-card {
+    -webkit-mask-image: url("../icons/credit-card.svg");
+    mask-image: url("../icons/credit-card.svg");
+}
+
+.wx-icon-light-wallet {
+    -webkit-mask-image: url("../icons/wallet.svg");
+    mask-image: url("../icons/wallet.svg");
+}
+
+.wx-icon-light-cash-register {
+    -webkit-mask-image: url("../icons/cash-register.svg");
+    mask-image: url("../icons/cash-register.svg");
+}
+
+.wx-icon-light-calculator {
+    -webkit-mask-image: url("../icons/calculator.svg");
+    mask-image: url("../icons/calculator.svg");
+}
+
+.wx-icon-light-percent {
+    -webkit-mask-image: url("../icons/percent.svg");
+    mask-image: url("../icons/percent.svg");
+}
+
+.wx-icon-light-dollar-sign {
+    -webkit-mask-image: url("../icons/dollar-sign.svg");
+    mask-image: url("../icons/dollar-sign.svg");
+}
+
+.wx-icon-light-euro-sign {
+    -webkit-mask-image: url("../icons/euro-sign.svg");
+    mask-image: url("../icons/euro-sign.svg");
+}
+
+.wx-icon-light-sterling-sign {
+    -webkit-mask-image: url("../icons/sterling-sign.svg");
+    mask-image: url("../icons/sterling-sign.svg");
+}
+
+.wx-icon-light-yen-sign {
+    -webkit-mask-image: url("../icons/yen-sign.svg");
+    mask-image: url("../icons/yen-sign.svg");
+}
+
+.wx-icon-light-briefcase {
+    -webkit-mask-image: url("../icons/briefcase.svg");
+    mask-image: url("../icons/briefcase.svg");
+}
+
+.wx-icon-light-cart-shopping {
+    -webkit-mask-image: url("../icons/cart-shopping.svg");
+    mask-image: url("../icons/cart-shopping.svg");
+}
+
+.wx-icon-light-cart-plus {
+    -webkit-mask-image: url("../icons/cart-plus.svg");
+    mask-image: url("../icons/cart-plus.svg");
+}
+
+.wx-icon-light-cart-arrow-down {
+    -webkit-mask-image: url("../icons/cart-arrow-down.svg");
+    mask-image: url("../icons/cart-arrow-down.svg");
+}
+
+.wx-icon-light-cart-flatbed {
+    -webkit-mask-image: url("../icons/cart-flatbed.svg");
+    mask-image: url("../icons/cart-flatbed.svg");
+}
+
+.wx-icon-light-cart-flatbed-suitcase {
+    -webkit-mask-image: url("../icons/cart-flatbed-suitcase.svg");
+    mask-image: url("../icons/cart-flatbed-suitcase.svg");
+}
+
+.wx-icon-light-bag-shopping {
+    -webkit-mask-image: url("../icons/bag-shopping.svg");
+    mask-image: url("../icons/bag-shopping.svg");
+}
+
+.wx-icon-light-shopping-bag {
+    -webkit-mask-image: url("../icons/shopping-bag.svg");
+    mask-image: url("../icons/shopping-bag.svg");
+}
+
+.wx-icon-light-basket-shopping {
+    -webkit-mask-image: url("../icons/basket-shopping.svg");
+    mask-image: url("../icons/basket-shopping.svg");
+}
+
+.wx-icon-light-basketball {
+    -webkit-mask-image: url("../icons/basketball.svg");
+    mask-image: url("../icons/basketball.svg");
+}
+
+.wx-icon-light-shop {
+    -webkit-mask-image: url("../icons/shop.svg");
+    mask-image: url("../icons/shop.svg");
+}
+
+.wx-icon-light-store {
+    -webkit-mask-image: url("../icons/store.svg");
+    mask-image: url("../icons/store.svg");
+}
+
+.wx-icon-light-shop-slash {
+    -webkit-mask-image: url("../icons/shop-slash.svg");
+    mask-image: url("../icons/shop-slash.svg");
+}
+
+.wx-icon-light-store-slash {
+    -webkit-mask-image: url("../icons/store-slash.svg");
+    mask-image: url("../icons/store-slash.svg");
+}
+
+.wx-icon-light-shop-lock {
+    -webkit-mask-image: url("../icons/shop-lock.svg");
+    mask-image: url("../icons/shop-lock.svg");
+}
+
+.wx-icon-light-landmark {
+    -webkit-mask-image: url("../icons/landmark.svg");
+    mask-image: url("../icons/landmark.svg");
+}
+
+.wx-icon-light-landmark-dome {
+    -webkit-mask-image: url("../icons/landmark-dome.svg");
+    mask-image: url("../icons/landmark-dome.svg");
+}
+
+.wx-icon-light-landmark-flag {
+    -webkit-mask-image: url("../icons/landmark-flag.svg");
+    mask-image: url("../icons/landmark-flag.svg");
+}
+
+.wx-icon-light-chart-column {
+    -webkit-mask-image: url("../icons/chart-column.svg");
+    mask-image: url("../icons/chart-column.svg");
+}
+
+.wx-icon-light-chart-line {
+    -webkit-mask-image: url("../icons/chart-line.svg");
+    mask-image: url("../icons/chart-line.svg");
+}
+
+.wx-icon-light-chart-pie {
+    -webkit-mask-image: url("../icons/chart-pie.svg");
+    mask-image: url("../icons/chart-pie.svg");
+}
+
+.wx-icon-light-chart-simple {
+    -webkit-mask-image: url("../icons/chart-simple.svg");
+    mask-image: url("../icons/chart-simple.svg");
+}
+
+.wx-icon-light-chart-gantt {
+    -webkit-mask-image: url("../icons/chart-gantt.svg");
+    mask-image: url("../icons/chart-gantt.svg");
+}
+
+.wx-icon-light-chart-diagram {
+    -webkit-mask-image: url("../icons/chart-diagram.svg");
+    mask-image: url("../icons/chart-diagram.svg");
+}
+
+/*
+ * Light variants added for icon classes that are used in the framework, the
+ * tutorial or an application but had none.
+ */
+
+.wx-icon-light-building-columns {
+    -webkit-mask-image: url("../icons/building-columns.svg");
+    mask-image: url("../icons/building-columns.svg");
+}
+
+.wx-icon-light-building-flag {
+    -webkit-mask-image: url("../icons/building-flag.svg");
+    mask-image: url("../icons/building-flag.svg");
+}
+
+.wx-icon-light-building-lock {
+    -webkit-mask-image: url("../icons/building-lock.svg");
+    mask-image: url("../icons/building-lock.svg");
+}
+
+.wx-icon-light-building-user {
+    -webkit-mask-image: url("../icons/building-user.svg");
+    mask-image: url("../icons/building-user.svg");
+}
+
+.wx-icon-light-building-shield {
+    -webkit-mask-image: url("../icons/building-shield.svg");
+    mask-image: url("../icons/building-shield.svg");
+}
+
+.wx-icon-light-building-wheat {
+    -webkit-mask-image: url("../icons/building-wheat.svg");
+    mask-image: url("../icons/building-wheat.svg");
+}
+
+.wx-icon-light-building-ngo {
+    -webkit-mask-image: url("../icons/building-ngo.svg");
+    mask-image: url("../icons/building-ngo.svg");
+}
+
+.wx-icon-light-building-un {
+    -webkit-mask-image: url("../icons/building-un.svg");
+    mask-image: url("../icons/building-un.svg");
+}
+
+.wx-icon-light-building-circle-check {
+    -webkit-mask-image: url("../icons/building-circle-check.svg");
+    mask-image: url("../icons/building-circle-check.svg");
+}
+
+.wx-icon-light-building-circle-xmark {
+    -webkit-mask-image: url("../icons/building-circle-xmark.svg");
+    mask-image: url("../icons/building-circle-xmark.svg");
+}
+
+.wx-icon-light-building-circle-exclamation {
+    -webkit-mask-image: url("../icons/building-circle-exclamation.svg");
+    mask-image: url("../icons/building-circle-exclamation.svg");
+}
+
+.wx-icon-light-building-circle-arrow-right {
+    -webkit-mask-image: url("../icons/building-circle-arrow-right.svg");
+    mask-image: url("../icons/building-circle-arrow-right.svg");
+}
+
+.wx-icon-light-hospital {
+    -webkit-mask-image: url("../icons/hospital.svg");
+    mask-image: url("../icons/hospital.svg");
+}
+
+.wx-icon-light-hospital-user {
+    -webkit-mask-image: url("../icons/hospital-user.svg");
+    mask-image: url("../icons/hospital-user.svg");
+}
+
+.wx-icon-light-hotel {
+    -webkit-mask-image: url("../icons/hotel.svg");
+    mask-image: url("../icons/hotel.svg");
+}
+
+.wx-icon-light-warehouse {
+    -webkit-mask-image: url("../icons/warehouse.svg");
+    mask-image: url("../icons/warehouse.svg");
+}
+
+.wx-icon-light-house-chimney {
+    -webkit-mask-image: url("../icons/house-chimney.svg");
+    mask-image: url("../icons/house-chimney.svg");
+}
+
+.wx-icon-light-house-chimney-window {
+    -webkit-mask-image: url("../icons/house-chimney-window.svg");
+    mask-image: url("../icons/house-chimney-window.svg");
+}
+
+.wx-icon-light-house-chimney-user {
+    -webkit-mask-image: url("../icons/house-chimney-user.svg");
+    mask-image: url("../icons/house-chimney-user.svg");
+}
+
+.wx-icon-light-house-chimney-medical {
+    -webkit-mask-image: url("../icons/house-chimney-medical.svg");
+    mask-image: url("../icons/house-chimney-medical.svg");
+}
+
+.wx-icon-light-house-chimney-crack {
+    -webkit-mask-image: url("../icons/house-chimney-crack.svg");
+    mask-image: url("../icons/house-chimney-crack.svg");
+}
+
+.wx-icon-light-house-crack {
+    -webkit-mask-image: url("../icons/house-crack.svg");
+    mask-image: url("../icons/house-crack.svg");
+}
+
+.wx-icon-light-house-user {
+    -webkit-mask-image: url("../icons/house-user.svg");
+    mask-image: url("../icons/house-user.svg");
+}
+
+.wx-icon-light-house-medical {
+    -webkit-mask-image: url("../icons/house-medical.svg");
+    mask-image: url("../icons/house-medical.svg");
+}
+
+.wx-icon-light-house-laptop {
+    -webkit-mask-image: url("../icons/house-laptop.svg");
+    mask-image: url("../icons/house-laptop.svg");
+}
+
+.wx-icon-light-house-signal {
+    -webkit-mask-image: url("../icons/house-signal.svg");
+    mask-image: url("../icons/house-signal.svg");
+}
+
+.wx-icon-light-house-fire {
+    -webkit-mask-image: url("../icons/house-fire.svg");
+    mask-image: url("../icons/house-fire.svg");
+}
+
+.wx-icon-light-house-flag {
+    -webkit-mask-image: url("../icons/house-flag.svg");
+    mask-image: url("../icons/house-flag.svg");
+}
+
+.wx-icon-light-house-lock {
+    -webkit-mask-image: url("../icons/house-lock.svg");
+    mask-image: url("../icons/house-lock.svg");
+}
+
+.wx-icon-light-house-circle-check {
+    -webkit-mask-image: url("../icons/house-circle-check.svg");
+    mask-image: url("../icons/house-circle-check.svg");
+}
+
+.wx-icon-light-house-circle-xmark {
+    -webkit-mask-image: url("../icons/house-circle-xmark.svg");
+    mask-image: url("../icons/house-circle-xmark.svg");
+}
+
+.wx-icon-light-house-circle-exclamation {
+    -webkit-mask-image: url("../icons/house-circle-exclamation.svg");
+    mask-image: url("../icons/house-circle-exclamation.svg");
+}
+
+.wx-icon-light-house-medical-flag {
+    -webkit-mask-image: url("../icons/house-medical-flag.svg");
+    mask-image: url("../icons/house-medical-flag.svg");
+}
+
+.wx-icon-light-house-medical-circle-check {
+    -webkit-mask-image: url("../icons/house-medical-circle-check.svg");
+    mask-image: url("../icons/house-medical-circle-check.svg");
+}
+
+.wx-icon-light-house-medical-circle-xmark {
+    -webkit-mask-image: url("../icons/house-medical-circle-xmark.svg");
+    mask-image: url("../icons/house-medical-circle-xmark.svg");
+}
+
+.wx-icon-light-house-medical-circle-exclamation {
+    -webkit-mask-image: url("../icons/house-medical-circle-exclamation.svg");
+    mask-image: url("../icons/house-medical-circle-exclamation.svg");
+}
+
+.wx-icon-light-house-flood-water {
+    -webkit-mask-image: url("../icons/house-flood-water.svg");
+    mask-image: url("../icons/house-flood-water.svg");
+}
+
+.wx-icon-light-house-flood-water-circle-arrow-right {
+    -webkit-mask-image: url("../icons/house-flood-water-circle-arrow-right.svg");
+    mask-image: url("../icons/house-flood-water-circle-arrow-right.svg");
+}
+
+.wx-icon-light-house-tsunami {
+    -webkit-mask-image: url("../icons/house-tsunami.svg");
+    mask-image: url("../icons/house-tsunami.svg");
+}
+
+.wx-icon-light-igloo {
+    -webkit-mask-image: url("../icons/igloo.svg");
+    mask-image: url("../icons/igloo.svg");
+}
+
+.wx-icon-light-campground {
+    -webkit-mask-image: url("../icons/campground.svg");
+    mask-image: url("../icons/campground.svg");
+}
+
+.wx-icon-light-tent {
+    -webkit-mask-image: url("../icons/tent.svg");
+    mask-image: url("../icons/tent.svg");
+}
+
+.wx-icon-light-tents {
+    -webkit-mask-image: url("../icons/tents.svg");
+    mask-image: url("../icons/tents.svg");
+}
+
+.wx-icon-light-tent-arrow-down-to-line {
+    -webkit-mask-image: url("../icons/tent-arrow-down-to-line.svg");
+    mask-image: url("../icons/tent-arrow-down-to-line.svg");
+}
+
+.wx-icon-light-tent-arrow-left-right {
+    -webkit-mask-image: url("../icons/tent-arrow-left-right.svg");
+    mask-image: url("../icons/tent-arrow-left-right.svg");
+}
+
+.wx-icon-light-tent-arrows-down {
+    -webkit-mask-image: url("../icons/tent-arrows-down.svg");
+    mask-image: url("../icons/tent-arrows-down.svg");
+}
+
+.wx-icon-light-tent-arrow-turn-left {
+    -webkit-mask-image: url("../icons/tent-arrow-turn-left.svg");
+    mask-image: url("../icons/tent-arrow-turn-left.svg");
+}
+
+.wx-icon-light-school {
+    -webkit-mask-image: url("../icons/school.svg");
+    mask-image: url("../icons/school.svg");
+}
+
+.wx-icon-light-school-flag {
+    -webkit-mask-image: url("../icons/school-flag.svg");
+    mask-image: url("../icons/school-flag.svg");
+}
+
+.wx-icon-light-school-lock {
+    -webkit-mask-image: url("../icons/school-lock.svg");
+    mask-image: url("../icons/school-lock.svg");
+}
+
+.wx-icon-light-school-circle-check {
+    -webkit-mask-image: url("../icons/school-circle-check.svg");
+    mask-image: url("../icons/school-circle-check.svg");
+}
+
+.wx-icon-light-school-circle-xmark {
+    -webkit-mask-image: url("../icons/school-circle-xmark.svg");
+    mask-image: url("../icons/school-circle-xmark.svg");
+}
+
+.wx-icon-light-school-circle-exclamation {
+    -webkit-mask-image: url("../icons/school-circle-exclamation.svg");
+    mask-image: url("../icons/school-circle-exclamation.svg");
+}
+
+.wx-icon-light-road {
+    -webkit-mask-image: url("../icons/road.svg");
+    mask-image: url("../icons/road.svg");
+}
+
+.wx-icon-light-road-barrier {
+    -webkit-mask-image: url("../icons/road-barrier.svg");
+    mask-image: url("../icons/road-barrier.svg");
+}
+
+.wx-icon-light-road-bridge {
+    -webkit-mask-image: url("../icons/road-bridge.svg");
+    mask-image: url("../icons/road-bridge.svg");
+}
+
+.wx-icon-light-road-lock {
+    -webkit-mask-image: url("../icons/road-lock.svg");
+    mask-image: url("../icons/road-lock.svg");
+}
+
+.wx-icon-light-road-circle-check {
+    -webkit-mask-image: url("../icons/road-circle-check.svg");
+    mask-image: url("../icons/road-circle-check.svg");
+}
+
+.wx-icon-light-road-circle-xmark {
+    -webkit-mask-image: url("../icons/road-circle-xmark.svg");
+    mask-image: url("../icons/road-circle-xmark.svg");
+}
+
+.wx-icon-light-road-circle-exclamation {
+    -webkit-mask-image: url("../icons/road-circle-exclamation.svg");
+    mask-image: url("../icons/road-circle-exclamation.svg");
+}
+
+.wx-icon-light-road-spikes {
+    -webkit-mask-image: url("../icons/road-spikes.svg");
+    mask-image: url("../icons/road-spikes.svg");
+}
+
+.wx-icon-light-monument {
+    -webkit-mask-image: url("../icons/monument.svg");
+    mask-image: url("../icons/monument.svg");
+}
+
+.wx-icon-light-torii-gate {
+    -webkit-mask-image: url("../icons/torii-gate.svg");
+    mask-image: url("../icons/torii-gate.svg");
+}
+
+.wx-icon-light-vihara {
+    -webkit-mask-image: url("../icons/vihara.svg");
+    mask-image: url("../icons/vihara.svg");
+}
+
+.wx-icon-light-map {
+    -webkit-mask-image: url("../icons/map.svg");
+    mask-image: url("../icons/map.svg");
+}
+
+.wx-icon-light-map-location {
+    -webkit-mask-image: url("../icons/map-location.svg");
+    mask-image: url("../icons/map-location.svg");
+}
+
+.wx-icon-light-map-location-dot {
+    -webkit-mask-image: url("../icons/map-location-dot.svg");
+    mask-image: url("../icons/map-location-dot.svg");
+}
+
+.wx-icon-light-map-pin {
+    -webkit-mask-image: url("../icons/map-pin.svg");
+    mask-image: url("../icons/map-pin.svg");
+}
+
+.wx-icon-light-map-marker {
+    -webkit-mask-image: url("../icons/map-marker.svg");
+    mask-image: url("../icons/map-marker.svg");
+}
+
+.wx-icon-light-location-pin {
+    -webkit-mask-image: url("../icons/location-pin.svg");
+    mask-image: url("../icons/location-pin.svg");
+}
+
+.wx-icon-light-location-dot {
+    -webkit-mask-image: url("../icons/location-dot.svg");
+    mask-image: url("../icons/location-dot.svg");
+}
+
+.wx-icon-light-location-arrow {
+    -webkit-mask-image: url("../icons/location-arrow.svg");
+    mask-image: url("../icons/location-arrow.svg");
+}
+
+.wx-icon-light-location-crosshairs {
+    -webkit-mask-image: url("../icons/location-crosshairs.svg");
+    mask-image: url("../icons/location-crosshairs.svg");
+}
+
+.wx-icon-light-earth-americas {
+    -webkit-mask-image: url("../icons/earth-americas.svg");
+    mask-image: url("../icons/earth-americas.svg");
+}
+
+.wx-icon-light-earth-europe {
+    -webkit-mask-image: url("../icons/earth-europe.svg");
+    mask-image: url("../icons/earth-europe.svg");
+}
+
+.wx-icon-light-earth-africa {
+    -webkit-mask-image: url("../icons/earth-africa.svg");
+    mask-image: url("../icons/earth-africa.svg");
+}
+
+.wx-icon-light-earth-asia {
+    -webkit-mask-image: url("../icons/earth-asia.svg");
+    mask-image: url("../icons/earth-asia.svg");
+}
+
+.wx-icon-light-earth-oceania {
+    -webkit-mask-image: url("../icons/earth-oceania.svg");
+    mask-image: url("../icons/earth-oceania.svg");
+}
+
+/*
+ * Light variants added for icon classes that are used in the framework, the
+ * tutorial or an application but had none.
+ */
+
+.wx-icon-light-truck {
+    -webkit-mask-image: url("../icons/truck.svg");
+    mask-image: url("../icons/truck.svg");
+}
+
+.wx-icon-light-truck-fast {
+    -webkit-mask-image: url("../icons/truck-fast.svg");
+    mask-image: url("../icons/truck-fast.svg");
+}
+
+.wx-icon-light-truck-moving {
+    -webkit-mask-image: url("../icons/truck-moving.svg");
+    mask-image: url("../icons/truck-moving.svg");
+}
+
+.wx-icon-light-truck-front {
+    -webkit-mask-image: url("../icons/truck-front.svg");
+    mask-image: url("../icons/truck-front.svg");
+}
+
+.wx-icon-light-truck-pickup {
+    -webkit-mask-image: url("../icons/truck-pickup.svg");
+    mask-image: url("../icons/truck-pickup.svg");
+}
+
+.wx-icon-light-truck-monster {
+    -webkit-mask-image: url("../icons/truck-monster.svg");
+    mask-image: url("../icons/truck-monster.svg");
+}
+
+.wx-icon-light-truck-medical {
+    -webkit-mask-image: url("../icons/truck-medical.svg");
+    mask-image: url("../icons/truck-medical.svg");
+}
+
+.wx-icon-light-truck-droplet {
+    -webkit-mask-image: url("../icons/truck-droplet.svg");
+    mask-image: url("../icons/truck-droplet.svg");
+}
+
+.wx-icon-light-truck-field {
+    -webkit-mask-image: url("../icons/truck-field.svg");
+    mask-image: url("../icons/truck-field.svg");
+}
+
+.wx-icon-light-truck-field-un {
+    -webkit-mask-image: url("../icons/truck-field-un.svg");
+    mask-image: url("../icons/truck-field-un.svg");
+}
+
+.wx-icon-light-truck-ramp-box {
+    -webkit-mask-image: url("../icons/truck-ramp-box.svg");
+    mask-image: url("../icons/truck-ramp-box.svg");
+}
+
+.wx-icon-light-truck-arrow-right {
+    -webkit-mask-image: url("../icons/truck-arrow-right.svg");
+    mask-image: url("../icons/truck-arrow-right.svg");
+}
+
+.wx-icon-light-truck-plane {
+    -webkit-mask-image: url("../icons/truck-plane.svg");
+    mask-image: url("../icons/truck-plane.svg");
+}
+
+.wx-icon-light-car {
+    -webkit-mask-image: url("../icons/car.svg");
+    mask-image: url("../icons/car.svg");
+}
+
+.wx-icon-light-car-side {
+    -webkit-mask-image: url("../icons/car-side.svg");
+    mask-image: url("../icons/car-side.svg");
+}
+
+.wx-icon-light-car-rear {
+    -webkit-mask-image: url("../icons/car-rear.svg");
+    mask-image: url("../icons/car-rear.svg");
+}
+
+.wx-icon-light-car-on {
+    -webkit-mask-image: url("../icons/car-on.svg");
+    mask-image: url("../icons/car-on.svg");
+}
+
+.wx-icon-light-car-burst {
+    -webkit-mask-image: url("../icons/car-burst.svg");
+    mask-image: url("../icons/car-burst.svg");
+}
+
+.wx-icon-light-car-tunnel {
+    -webkit-mask-image: url("../icons/car-tunnel.svg");
+    mask-image: url("../icons/car-tunnel.svg");
+}
+
+.wx-icon-light-car-battery {
+    -webkit-mask-image: url("../icons/car-battery.svg");
+    mask-image: url("../icons/car-battery.svg");
+}
+
+.wx-icon-light-taxi {
+    -webkit-mask-image: url("../icons/taxi.svg");
+    mask-image: url("../icons/taxi.svg");
+}
+
+.wx-icon-light-caravan {
+    -webkit-mask-image: url("../icons/caravan.svg");
+    mask-image: url("../icons/caravan.svg");
+}
+
+.wx-icon-light-trailer {
+    -webkit-mask-image: url("../icons/trailer.svg");
+    mask-image: url("../icons/trailer.svg");
+}
+
+.wx-icon-light-van-shuttle {
+    -webkit-mask-image: url("../icons/van-shuttle.svg");
+    mask-image: url("../icons/van-shuttle.svg");
+}
+
+.wx-icon-light-bus {
+    -webkit-mask-image: url("../icons/bus.svg");
+    mask-image: url("../icons/bus.svg");
+}
+
+.wx-icon-light-bus-simple {
+    -webkit-mask-image: url("../icons/bus-simple.svg");
+    mask-image: url("../icons/bus-simple.svg");
+}
+
+.wx-icon-light-train {
+    -webkit-mask-image: url("../icons/train.svg");
+    mask-image: url("../icons/train.svg");
+}
+
+.wx-icon-light-train-subway {
+    -webkit-mask-image: url("../icons/train-subway.svg");
+    mask-image: url("../icons/train-subway.svg");
+}
+
+.wx-icon-light-train-tram {
+    -webkit-mask-image: url("../icons/train-tram.svg");
+    mask-image: url("../icons/train-tram.svg");
+}
+
+.wx-icon-light-tractor {
+    -webkit-mask-image: url("../icons/tractor.svg");
+    mask-image: url("../icons/tractor.svg");
+}
+
+.wx-icon-light-motorcycle {
+    -webkit-mask-image: url("../icons/motorcycle.svg");
+    mask-image: url("../icons/motorcycle.svg");
+}
+
+.wx-icon-light-bicycle {
+    -webkit-mask-image: url("../icons/bicycle.svg");
+    mask-image: url("../icons/bicycle.svg");
+}
+
+.wx-icon-light-sleigh {
+    -webkit-mask-image: url("../icons/sleigh.svg");
+    mask-image: url("../icons/sleigh.svg");
+}
+
+.wx-icon-light-wheelchair {
+    -webkit-mask-image: url("../icons/wheelchair.svg");
+    mask-image: url("../icons/wheelchair.svg");
+}
+
+.wx-icon-light-wheelchair-move {
+    -webkit-mask-image: url("../icons/wheelchair-move.svg");
+    mask-image: url("../icons/wheelchair-move.svg");
+}
+
+.wx-icon-light-plane {
+    -webkit-mask-image: url("../icons/plane.svg");
+    mask-image: url("../icons/plane.svg");
+}
+
+.wx-icon-light-plane-up {
+    -webkit-mask-image: url("../icons/plane-up.svg");
+    mask-image: url("../icons/plane-up.svg");
+}
+
+.wx-icon-light-plane-departure {
+    -webkit-mask-image: url("../icons/plane-departure.svg");
+    mask-image: url("../icons/plane-departure.svg");
+}
+
+.wx-icon-light-plane-arrival {
+    -webkit-mask-image: url("../icons/plane-arrival.svg");
+    mask-image: url("../icons/plane-arrival.svg");
+}
+
+.wx-icon-light-plane-slash {
+    -webkit-mask-image: url("../icons/plane-slash.svg");
+    mask-image: url("../icons/plane-slash.svg");
+}
+
+.wx-icon-light-plane-circle-check {
+    -webkit-mask-image: url("../icons/plane-circle-check.svg");
+    mask-image: url("../icons/plane-circle-check.svg");
+}
+
+.wx-icon-light-plane-circle-xmark {
+    -webkit-mask-image: url("../icons/plane-circle-xmark.svg");
+    mask-image: url("../icons/plane-circle-xmark.svg");
+}
+
+.wx-icon-light-plane-circle-exclamation {
+    -webkit-mask-image: url("../icons/plane-circle-exclamation.svg");
+    mask-image: url("../icons/plane-circle-exclamation.svg");
+}
+
+.wx-icon-light-plane-lock {
+    -webkit-mask-image: url("../icons/plane-lock.svg");
+    mask-image: url("../icons/plane-lock.svg");
+}
+
+.wx-icon-light-jet-fighter {
+    -webkit-mask-image: url("../icons/jet-fighter.svg");
+    mask-image: url("../icons/jet-fighter.svg");
+}
+
+.wx-icon-light-jet-fighter-up {
+    -webkit-mask-image: url("../icons/jet-fighter-up.svg");
+    mask-image: url("../icons/jet-fighter-up.svg");
+}
+
+.wx-icon-light-helicopter {
+    -webkit-mask-image: url("../icons/helicopter.svg");
+    mask-image: url("../icons/helicopter.svg");
+}
+
+.wx-icon-light-helicopter-symbol {
+    -webkit-mask-image: url("../icons/helicopter-symbol.svg");
+    mask-image: url("../icons/helicopter-symbol.svg");
+}
+
+.wx-icon-light-shuttle-space {
+    -webkit-mask-image: url("../icons/shuttle-space.svg");
+    mask-image: url("../icons/shuttle-space.svg");
+}
+
+.wx-icon-light-anchor {
+    -webkit-mask-image: url("../icons/anchor.svg");
+    mask-image: url("../icons/anchor.svg");
+}
+
+.wx-icon-light-anchor-lock {
+    -webkit-mask-image: url("../icons/anchor-lock.svg");
+    mask-image: url("../icons/anchor-lock.svg");
+}
+
+.wx-icon-light-anchor-circle-check {
+    -webkit-mask-image: url("../icons/anchor-circle-check.svg");
+    mask-image: url("../icons/anchor-circle-check.svg");
+}
+
+.wx-icon-light-anchor-circle-xmark {
+    -webkit-mask-image: url("../icons/anchor-circle-xmark.svg");
+    mask-image: url("../icons/anchor-circle-xmark.svg");
+}
+
+.wx-icon-light-anchor-circle-exclamation {
+    -webkit-mask-image: url("../icons/anchor-circle-exclamation.svg");
+    mask-image: url("../icons/anchor-circle-exclamation.svg");
+}
+
+.wx-icon-light-ferry {
+    -webkit-mask-image: url("../icons/ferry.svg");
+    mask-image: url("../icons/ferry.svg");
+}
+
+.wx-icon-light-sailboat {
+    -webkit-mask-image: url("../icons/sailboat.svg");
+    mask-image: url("../icons/sailboat.svg");
+}
+
+.wx-icon-light-gas-pump {
+    -webkit-mask-image: url("../icons/gas-pump.svg");
+    mask-image: url("../icons/gas-pump.svg");
+}
+
+.wx-icon-light-route {
+    -webkit-mask-image: url("../icons/route.svg");
+    mask-image: url("../icons/route.svg");
+}
+
+.wx-icon-light-fire-extinguisher {
+    -webkit-mask-image: url("../icons/fire-extinguisher.svg");
+    mask-image: url("../icons/fire-extinguisher.svg");
+}
+
+.wx-icon-light-fire-burner {
+    -webkit-mask-image: url("../icons/fire-burner.svg");
+    mask-image: url("../icons/fire-burner.svg");
+}
+
+.wx-icon-light-fire-flame-simple {
+    -webkit-mask-image: url("../icons/fire-flame-simple.svg");
+    mask-image: url("../icons/fire-flame-simple.svg");
+}
+
+.wx-icon-light-fire-flame-curved {
+    -webkit-mask-image: url("../icons/fire-flame-curved.svg");
+    mask-image: url("../icons/fire-flame-curved.svg");
+}
+
+.wx-icon-light-business-time {
+    -webkit-mask-image: url("../icons/business-time.svg");
+    mask-image: url("../icons/business-time.svg");
+}
+
+.wx-icon-light-carrot {
+    -webkit-mask-image: url("../icons/carrot.svg");
+    mask-image: url("../icons/carrot.svg");
+}
+
+/*
+ * Light variants added for icon classes that are used in the framework, the
+ * tutorial or an application but had none.
+ */
+
+.wx-icon-light-thermometer {
+    -webkit-mask-image: url("../icons/thermometer.svg");
+    mask-image: url("../icons/thermometer.svg");
+}
+
+.wx-icon-light-thermometer-quarter {
+    -webkit-mask-image: url("../icons/thermometer-quarter.svg");
+    mask-image: url("../icons/thermometer-quarter.svg");
+}
+
+.wx-icon-light-temperature-empty {
+    -webkit-mask-image: url("../icons/temperature-empty.svg");
+    mask-image: url("../icons/temperature-empty.svg");
+}
+
+.wx-icon-light-temperature-quarter {
+    -webkit-mask-image: url("../icons/temperature-quarter.svg");
+    mask-image: url("../icons/temperature-quarter.svg");
+}
+
+.wx-icon-light-temperature-half {
+    -webkit-mask-image: url("../icons/temperature-half.svg");
+    mask-image: url("../icons/temperature-half.svg");
+}
+
+.wx-icon-light-temperature-three-quarters {
+    -webkit-mask-image: url("../icons/temperature-three-quarters.svg");
+    mask-image: url("../icons/temperature-three-quarters.svg");
+}
+
+.wx-icon-light-temperature-full {
+    -webkit-mask-image: url("../icons/temperature-full.svg");
+    mask-image: url("../icons/temperature-full.svg");
+}
+
+.wx-icon-light-temperature-arrow-up {
+    -webkit-mask-image: url("../icons/temperature-arrow-up.svg");
+    mask-image: url("../icons/temperature-arrow-up.svg");
+}
+
+.wx-icon-light-temperature-arrow-down {
+    -webkit-mask-image: url("../icons/temperature-arrow-down.svg");
+    mask-image: url("../icons/temperature-arrow-down.svg");
+}
+
+.wx-icon-light-temperature-high {
+    -webkit-mask-image: url("../icons/temperature-high.svg");
+    mask-image: url("../icons/temperature-high.svg");
+}
+
+.wx-icon-light-temperature-low {
+    -webkit-mask-image: url("../icons/temperature-low.svg");
+    mask-image: url("../icons/temperature-low.svg");
+}
+
+.wx-icon-light-droplet {
+    -webkit-mask-image: url("../icons/droplet.svg");
+    mask-image: url("../icons/droplet.svg");
+}
+
+.wx-icon-light-droplet-slash {
+    -webkit-mask-image: url("../icons/droplet-slash.svg");
+    mask-image: url("../icons/droplet-slash.svg");
+}
+
+.wx-icon-light-water {
+    -webkit-mask-image: url("../icons/water.svg");
+    mask-image: url("../icons/water.svg");
+}
+
+.wx-icon-light-water-ladder {
+    -webkit-mask-image: url("../icons/water-ladder.svg");
+    mask-image: url("../icons/water-ladder.svg");
+}
+
+.wx-icon-light-snowflake {
+    -webkit-mask-image: url("../icons/snowflake.svg");
+    mask-image: url("../icons/snowflake.svg");
+}
+
+.wx-icon-light-icicles {
+    -webkit-mask-image: url("../icons/icicles.svg");
+    mask-image: url("../icons/icicles.svg");
+}
+
+.wx-icon-light-snowman {
+    -webkit-mask-image: url("../icons/snowman.svg");
+    mask-image: url("../icons/snowman.svg");
+}
+
+.wx-icon-light-snowplow {
+    -webkit-mask-image: url("../icons/snowplow.svg");
+    mask-image: url("../icons/snowplow.svg");
+}
+
+.wx-icon-light-wind {
+    -webkit-mask-image: url("../icons/wind.svg");
+    mask-image: url("../icons/wind.svg");
+}
+
+.wx-icon-light-tornado {
+    -webkit-mask-image: url("../icons/tornado.svg");
+    mask-image: url("../icons/tornado.svg");
+}
+
+.wx-icon-light-hurricane {
+    -webkit-mask-image: url("../icons/hurricane.svg");
+    mask-image: url("../icons/hurricane.svg");
+}
+
+.wx-icon-light-rainbow {
+    -webkit-mask-image: url("../icons/rainbow.svg");
+    mask-image: url("../icons/rainbow.svg");
+}
+
+.wx-icon-light-smog {
+    -webkit-mask-image: url("../icons/smog.svg");
+    mask-image: url("../icons/smog.svg");
+}
+
+.wx-icon-light-meteor {
+    -webkit-mask-image: url("../icons/meteor.svg");
+    mask-image: url("../icons/meteor.svg");
+}
+
+.wx-icon-light-bolt-lightning {
+    -webkit-mask-image: url("../icons/bolt-lightning.svg");
+    mask-image: url("../icons/bolt-lightning.svg");
+}
+
+.wx-icon-light-fire {
+    -webkit-mask-image: url("../icons/fire.svg");
+    mask-image: url("../icons/fire.svg");
+}
+
+.wx-icon-light-volcano {
+    -webkit-mask-image: url("../icons/volcano.svg");
+    mask-image: url("../icons/volcano.svg");
+}
+
+.wx-icon-light-mountain {
+    -webkit-mask-image: url("../icons/mountain.svg");
+    mask-image: url("../icons/mountain.svg");
+}
+
+.wx-icon-light-mountain-sun {
+    -webkit-mask-image: url("../icons/mountain-sun.svg");
+    mask-image: url("../icons/mountain-sun.svg");
+}
+
+.wx-icon-light-mountain-city {
+    -webkit-mask-image: url("../icons/mountain-city.svg");
+    mask-image: url("../icons/mountain-city.svg");
+}
+
+.wx-icon-light-tree {
+    -webkit-mask-image: url("../icons/tree.svg");
+    mask-image: url("../icons/tree.svg");
+}
+
+.wx-icon-light-tree-city {
+    -webkit-mask-image: url("../icons/tree-city.svg");
+    mask-image: url("../icons/tree-city.svg");
+}
+
+.wx-icon-light-leaf {
+    -webkit-mask-image: url("../icons/leaf.svg");
+    mask-image: url("../icons/leaf.svg");
+}
+
+.wx-icon-light-seedling {
+    -webkit-mask-image: url("../icons/seedling.svg");
+    mask-image: url("../icons/seedling.svg");
+}
+
+.wx-icon-light-plant-wilt {
+    -webkit-mask-image: url("../icons/plant-wilt.svg");
+    mask-image: url("../icons/plant-wilt.svg");
+}
+
+.wx-icon-light-spa {
+    -webkit-mask-image: url("../icons/spa.svg");
+    mask-image: url("../icons/spa.svg");
+}
+
+.wx-icon-light-clover {
+    -webkit-mask-image: url("../icons/clover.svg");
+    mask-image: url("../icons/clover.svg");
+}
+
+.wx-icon-light-wheat-awn {
+    -webkit-mask-image: url("../icons/wheat-awn.svg");
+    mask-image: url("../icons/wheat-awn.svg");
+}
+
+.wx-icon-light-wheat-awn-circle-exclamation {
+    -webkit-mask-image: url("../icons/wheat-awn-circle-exclamation.svg");
+    mask-image: url("../icons/wheat-awn-circle-exclamation.svg");
+}
+
+.wx-icon-light-virus-covid {
+    -webkit-mask-image: url("../icons/virus-covid.svg");
+    mask-image: url("../icons/virus-covid.svg");
+}
+
+.wx-icon-light-virus-slash {
+    -webkit-mask-image: url("../icons/virus-slash.svg");
+    mask-image: url("../icons/virus-slash.svg");
+}
+
+.wx-icon-light-virus-covid-slash {
+    -webkit-mask-image: url("../icons/virus-covid-slash.svg");
+    mask-image: url("../icons/virus-covid-slash.svg");
+}
+
+.wx-icon-light-viruses {
+    -webkit-mask-image: url("../icons/viruses.svg");
+    mask-image: url("../icons/viruses.svg");
+}
+
+.wx-icon-light-bacterium {
+    -webkit-mask-image: url("../icons/bacterium.svg");
+    mask-image: url("../icons/bacterium.svg");
+}
+
+.wx-icon-light-bacteria {
+    -webkit-mask-image: url("../icons/bacteria.svg");
+    mask-image: url("../icons/bacteria.svg");
+}
+
+.wx-icon-light-disease {
+    -webkit-mask-image: url("../icons/disease.svg");
+    mask-image: url("../icons/disease.svg");
+}
+
+.wx-icon-light-paw {
+    -webkit-mask-image: url("../icons/paw.svg");
+    mask-image: url("../icons/paw.svg");
+}
+
+.wx-icon-light-feather {
+    -webkit-mask-image: url("../icons/feather.svg");
+    mask-image: url("../icons/feather.svg");
+}
+
+.wx-icon-light-feather-pointed {
+    -webkit-mask-image: url("../icons/feather-pointed.svg");
+    mask-image: url("../icons/feather-pointed.svg");
+}
+
+.wx-icon-light-crown {
+    -webkit-mask-image: url("../icons/crown.svg");
+    mask-image: url("../icons/crown.svg");
+}
+
+.wx-icon-light-cat {
+    -webkit-mask-image: url("../icons/cat.svg");
+    mask-image: url("../icons/cat.svg");
+}
+
+.wx-icon-light-dog {
+    -webkit-mask-image: url("../icons/dog.svg");
+    mask-image: url("../icons/dog.svg");
+}
+
+.wx-icon-light-cow {
+    -webkit-mask-image: url("../icons/cow.svg");
+    mask-image: url("../icons/cow.svg");
+}
+
+.wx-icon-light-horse {
+    -webkit-mask-image: url("../icons/horse.svg");
+    mask-image: url("../icons/horse.svg");
+}
+
+.wx-icon-light-horse-head {
+    -webkit-mask-image: url("../icons/horse-head.svg");
+    mask-image: url("../icons/horse-head.svg");
+}
+
+.wx-icon-light-hippo {
+    -webkit-mask-image: url("../icons/hippo.svg");
+    mask-image: url("../icons/hippo.svg");
+}
+
+.wx-icon-light-otter {
+    -webkit-mask-image: url("../icons/otter.svg");
+    mask-image: url("../icons/otter.svg");
+}
+
+.wx-icon-light-frog {
+    -webkit-mask-image: url("../icons/frog.svg");
+    mask-image: url("../icons/frog.svg");
+}
+
+.wx-icon-light-fish {
+    -webkit-mask-image: url("../icons/fish.svg");
+    mask-image: url("../icons/fish.svg");
+}
+
+.wx-icon-light-fish-fins {
+    -webkit-mask-image: url("../icons/fish-fins.svg");
+    mask-image: url("../icons/fish-fins.svg");
+}
+
+.wx-icon-light-shrimp {
+    -webkit-mask-image: url("../icons/shrimp.svg");
+    mask-image: url("../icons/shrimp.svg");
+}
+
+.wx-icon-light-worm {
+    -webkit-mask-image: url("../icons/worm.svg");
+    mask-image: url("../icons/worm.svg");
+}
+
+.wx-icon-light-spider {
+    -webkit-mask-image: url("../icons/spider.svg");
+    mask-image: url("../icons/spider.svg");
+}
+
+.wx-icon-light-locust {
+    -webkit-mask-image: url("../icons/locust.svg");
+    mask-image: url("../icons/locust.svg");
+}
+
+.wx-icon-light-mosquito-net {
+    -webkit-mask-image: url("../icons/mosquito-net.svg");
+    mask-image: url("../icons/mosquito-net.svg");
+}
+
+.wx-icon-light-crow {
+    -webkit-mask-image: url("../icons/crow.svg");
+    mask-image: url("../icons/crow.svg");
+}
+
+.wx-icon-light-dove {
+    -webkit-mask-image: url("../icons/dove.svg");
+    mask-image: url("../icons/dove.svg");
+}
+
+.wx-icon-light-kiwi-bird {
+    -webkit-mask-image: url("../icons/kiwi-bird.svg");
+    mask-image: url("../icons/kiwi-bird.svg");
+}
+
+.wx-icon-light-window-maximize {
+    -webkit-mask-image: url("../icons/window-maximize.svg");
+    mask-image: url("../icons/window-maximize.svg");
+}
+
+.wx-icon-light-window-minimize {
+    -webkit-mask-image: url("../icons/window-minimize.svg");
+    mask-image: url("../icons/window-minimize.svg");
+}
+
+.wx-icon-light-window-restore {
+    -webkit-mask-image: url("../icons/window-restore.svg");
+    mask-image: url("../icons/window-restore.svg");
+}
+
+/*
+ * Light variants added for icon classes that are used in the framework, the
+ * tutorial or an application but had none.
+ */
+
+.wx-icon-light-sun-plant-wilt {
+    -webkit-mask-image: url("../icons/sun-plant-wilt.svg");
+    mask-image: url("../icons/sun-plant-wilt.svg");
+}
+
+/*
+ * Light variants added for icon classes that are used in the framework, the
+ * tutorial or an application but had none.
+ */
+
+.wx-icon-light-stethoscope {
+    -webkit-mask-image: url("../icons/stethoscope.svg");
+    mask-image: url("../icons/stethoscope.svg");
+}
+
+.wx-icon-light-syringe {
+    -webkit-mask-image: url("../icons/syringe.svg");
+    mask-image: url("../icons/syringe.svg");
+}
+
+.wx-icon-light-pills {
+    -webkit-mask-image: url("../icons/pills.svg");
+    mask-image: url("../icons/pills.svg");
+}
+
+.wx-icon-light-capsules {
+    -webkit-mask-image: url("../icons/capsules.svg");
+    mask-image: url("../icons/capsules.svg");
+}
+
+.wx-icon-light-prescription {
+    -webkit-mask-image: url("../icons/prescription.svg");
+    mask-image: url("../icons/prescription.svg");
+}
+
+.wx-icon-light-prescription-bottle {
+    -webkit-mask-image: url("../icons/prescription-bottle.svg");
+    mask-image: url("../icons/prescription-bottle.svg");
+}
+
+.wx-icon-light-prescription-bottle-medical {
+    -webkit-mask-image: url("../icons/prescription-bottle-medical.svg");
+    mask-image: url("../icons/prescription-bottle-medical.svg");
+}
+
+.wx-icon-light-mortar-pestle {
+    -webkit-mask-image: url("../icons/mortar-pestle.svg");
+    mask-image: url("../icons/mortar-pestle.svg");
+}
+
+.wx-icon-light-kit-medical {
+    -webkit-mask-image: url("../icons/kit-medical.svg");
+    mask-image: url("../icons/kit-medical.svg");
+}
+
+.wx-icon-light-suitcase-medical {
+    -webkit-mask-image: url("../icons/suitcase-medical.svg");
+    mask-image: url("../icons/suitcase-medical.svg");
+}
+
+.wx-icon-light-hand-holding-medical {
+    -webkit-mask-image: url("../icons/hand-holding-medical.svg");
+    mask-image: url("../icons/hand-holding-medical.svg");
+}
+
+.wx-icon-light-crutch {
+    -webkit-mask-image: url("../icons/crutch.svg");
+    mask-image: url("../icons/crutch.svg");
+}
+
+.wx-icon-light-vial {
+    -webkit-mask-image: url("../icons/vial.svg");
+    mask-image: url("../icons/vial.svg");
+}
+
+.wx-icon-light-vials {
+    -webkit-mask-image: url("../icons/vials.svg");
+    mask-image: url("../icons/vials.svg");
+}
+
+.wx-icon-light-vial-virus {
+    -webkit-mask-image: url("../icons/vial-virus.svg");
+    mask-image: url("../icons/vial-virus.svg");
+}
+
+.wx-icon-light-vial-circle-check {
+    -webkit-mask-image: url("../icons/vial-circle-check.svg");
+    mask-image: url("../icons/vial-circle-check.svg");
+}
+
+.wx-icon-light-microscope {
+    -webkit-mask-image: url("../icons/microscope.svg");
+    mask-image: url("../icons/microscope.svg");
+}
+
+.wx-icon-light-x-ray {
+    -webkit-mask-image: url("../icons/x-ray.svg");
+    mask-image: url("../icons/x-ray.svg");
+}
+
+.wx-icon-light-dna {
+    -webkit-mask-image: url("../icons/dna.svg");
+    mask-image: url("../icons/dna.svg");
+}
+
+.wx-icon-light-bone {
+    -webkit-mask-image: url("../icons/bone.svg");
+    mask-image: url("../icons/bone.svg");
+}
+
+.wx-icon-light-lungs {
+    -webkit-mask-image: url("../icons/lungs.svg");
+    mask-image: url("../icons/lungs.svg");
+}
+
+.wx-icon-light-lungs-virus {
+    -webkit-mask-image: url("../icons/lungs-virus.svg");
+    mask-image: url("../icons/lungs-virus.svg");
+}
+
+.wx-icon-light-tooth {
+    -webkit-mask-image: url("../icons/tooth.svg");
+    mask-image: url("../icons/tooth.svg");
+}
+
+.wx-icon-light-teeth {
+    -webkit-mask-image: url("../icons/teeth.svg");
+    mask-image: url("../icons/teeth.svg");
+}
+
+.wx-icon-light-teeth-open {
+    -webkit-mask-image: url("../icons/teeth-open.svg");
+    mask-image: url("../icons/teeth-open.svg");
+}
+
+.wx-icon-light-staff-snake {
+    -webkit-mask-image: url("../icons/staff-snake.svg");
+    mask-image: url("../icons/staff-snake.svg");
+}
+
+.wx-icon-light-ear-listen {
+    -webkit-mask-image: url("../icons/ear-listen.svg");
+    mask-image: url("../icons/ear-listen.svg");
+}
+
+.wx-icon-light-ear-deaf {
+    -webkit-mask-image: url("../icons/ear-deaf.svg");
+    mask-image: url("../icons/ear-deaf.svg");
+}
+
+.wx-icon-light-head-side-mask {
+    -webkit-mask-image: url("../icons/head-side-mask.svg");
+    mask-image: url("../icons/head-side-mask.svg");
+}
+
+.wx-icon-light-head-side-virus {
+    -webkit-mask-image: url("../icons/head-side-virus.svg");
+    mask-image: url("../icons/head-side-virus.svg");
+}
+
+.wx-icon-light-head-side-cough {
+    -webkit-mask-image: url("../icons/head-side-cough.svg");
+    mask-image: url("../icons/head-side-cough.svg");
+}
+
+.wx-icon-light-head-side-cough-slash {
+    -webkit-mask-image: url("../icons/head-side-cough-slash.svg");
+    mask-image: url("../icons/head-side-cough-slash.svg");
+}
+
+.wx-icon-light-message {
+    -webkit-mask-image: url("../icons/message.svg");
+    mask-image: url("../icons/message.svg");
+}
+
+.wx-icon-light-comment-alt {
+    -webkit-mask-image: url("../icons/comment-alt.svg");
+    mask-image: url("../icons/comment-alt.svg");
+}
+
+.wx-icon-light-comment-dots {
+    -webkit-mask-image: url("../icons/comment-dots.svg");
+    mask-image: url("../icons/comment-dots.svg");
+}
+
+.wx-icon-light-comment-medical {
+    -webkit-mask-image: url("../icons/comment-medical.svg");
+    mask-image: url("../icons/comment-medical.svg");
+}
+
+.wx-icon-light-comment-dollar {
+    -webkit-mask-image: url("../icons/comment-dollar.svg");
+    mask-image: url("../icons/comment-dollar.svg");
+}
+
+.wx-icon-light-comment-sms {
+    -webkit-mask-image: url("../icons/comment-sms.svg");
+    mask-image: url("../icons/comment-sms.svg");
+}
+
+.wx-icon-light-comment-nodes {
+    -webkit-mask-image: url("../icons/comment-nodes.svg");
+    mask-image: url("../icons/comment-nodes.svg");
+}
+
+.wx-icon-light-comment-slash {
+    -webkit-mask-image: url("../icons/comment-slash.svg");
+    mask-image: url("../icons/comment-slash.svg");
+}
+
+.wx-icon-light-comments {
+    -webkit-mask-image: url("../icons/comments.svg");
+    mask-image: url("../icons/comments.svg");
+}
+
+.wx-icon-light-comments-dollar {
+    -webkit-mask-image: url("../icons/comments-dollar.svg");
+    mask-image: url("../icons/comments-dollar.svg");
+}
+
+.wx-icon-light-envelope-open {
+    -webkit-mask-image: url("../icons/envelope-open.svg");
+    mask-image: url("../icons/envelope-open.svg");
+}
+
+.wx-icon-light-envelope-open-text {
+    -webkit-mask-image: url("../icons/envelope-open-text.svg");
+    mask-image: url("../icons/envelope-open-text.svg");
+}
+
+.wx-icon-light-envelopes-bulk {
+    -webkit-mask-image: url("../icons/envelopes-bulk.svg");
+    mask-image: url("../icons/envelopes-bulk.svg");
+}
+
+.wx-icon-light-envelope-circle-check {
+    -webkit-mask-image: url("../icons/envelope-circle-check.svg");
+    mask-image: url("../icons/envelope-circle-check.svg");
+}
+
+.wx-icon-light-paper-plane {
+    -webkit-mask-image: url("../icons/paper-plane.svg");
+    mask-image: url("../icons/paper-plane.svg");
+}
+
+.wx-icon-light-at {
+    -webkit-mask-image: url("../icons/at.svg");
+    mask-image: url("../icons/at.svg");
+}
+
+.wx-icon-light-hashtag {
+    -webkit-mask-image: url("../icons/hashtag.svg");
+    mask-image: url("../icons/hashtag.svg");
+}
+
+.wx-icon-light-bullhorn {
+    -webkit-mask-image: url("../icons/bullhorn.svg");
+    mask-image: url("../icons/bullhorn.svg");
+}
+
+.wx-icon-light-signal {
+    -webkit-mask-image: url("../icons/signal.svg");
+    mask-image: url("../icons/signal.svg");
+}
+
+.wx-icon-light-phone-flip {
+    -webkit-mask-image: url("../icons/phone-flip.svg");
+    mask-image: url("../icons/phone-flip.svg");
+}
+
+.wx-icon-light-phone-slash {
+    -webkit-mask-image: url("../icons/phone-slash.svg");
+    mask-image: url("../icons/phone-slash.svg");
+}
+
+.wx-icon-light-phone-volume {
+    -webkit-mask-image: url("../icons/phone-volume.svg");
+    mask-image: url("../icons/phone-volume.svg");
+}
+
+.wx-icon-light-voicemail {
+    -webkit-mask-image: url("../icons/voicemail.svg");
+    mask-image: url("../icons/voicemail.svg");
+}
+
+.wx-icon-light-fax {
+    -webkit-mask-image: url("../icons/fax.svg");
+    mask-image: url("../icons/fax.svg");
+}
+
+.wx-icon-light-tty {
+    -webkit-mask-image: url("../icons/tty.svg");
+    mask-image: url("../icons/tty.svg");
+}
+
+.wx-icon-light-walkie-talkie {
+    -webkit-mask-image: url("../icons/walkie-talkie.svg");
+    mask-image: url("../icons/walkie-talkie.svg");
+}
+
+/*
+ * Light variants added for icon classes that are used in the framework, the
+ * tutorial or an application but had none.
+ */
+
+.wx-icon-light-hammer {
+    -webkit-mask-image: url("../icons/hammer.svg");
+    mask-image: url("../icons/hammer.svg");
+}
+
+.wx-icon-light-gavel {
+    -webkit-mask-image: url("../icons/gavel.svg");
+    mask-image: url("../icons/gavel.svg");
+}
+
+.wx-icon-light-toolbox {
+    -webkit-mask-image: url("../icons/toolbox.svg");
+    mask-image: url("../icons/toolbox.svg");
+}
+
+.wx-icon-light-magnet {
+    -webkit-mask-image: url("../icons/magnet.svg");
+    mask-image: url("../icons/magnet.svg");
+}
+
+.wx-icon-light-broom {
+    -webkit-mask-image: url("../icons/broom.svg");
+    mask-image: url("../icons/broom.svg");
+}
+
+.wx-icon-light-broom-ball {
+    -webkit-mask-image: url("../icons/broom-ball.svg");
+    mask-image: url("../icons/broom-ball.svg");
+}
+
+.wx-icon-light-brush {
+    -webkit-mask-image: url("../icons/brush.svg");
+    mask-image: url("../icons/brush.svg");
+}
+
+.wx-icon-light-paint-roller {
+    -webkit-mask-image: url("../icons/paint-roller.svg");
+    mask-image: url("../icons/paint-roller.svg");
+}
+
+.wx-icon-light-spray-can {
+    -webkit-mask-image: url("../icons/spray-can.svg");
+    mask-image: url("../icons/spray-can.svg");
+}
+
+.wx-icon-light-spray-can-sparkles {
+    -webkit-mask-image: url("../icons/spray-can-sparkles.svg");
+    mask-image: url("../icons/spray-can-sparkles.svg");
+}
+
+.wx-icon-light-fill {
+    -webkit-mask-image: url("../icons/fill.svg");
+    mask-image: url("../icons/fill.svg");
+}
+
+.wx-icon-light-fill-drip {
+    -webkit-mask-image: url("../icons/fill-drip.svg");
+    mask-image: url("../icons/fill-drip.svg");
+}
+
+.wx-icon-light-bucket {
+    -webkit-mask-image: url("../icons/bucket.svg");
+    mask-image: url("../icons/bucket.svg");
+}
+
+.wx-icon-light-soap {
+    -webkit-mask-image: url("../icons/soap.svg");
+    mask-image: url("../icons/soap.svg");
+}
+
+.wx-icon-light-trowel {
+    -webkit-mask-image: url("../icons/trowel.svg");
+    mask-image: url("../icons/trowel.svg");
+}
+
+.wx-icon-light-trowel-bricks {
+    -webkit-mask-image: url("../icons/trowel-bricks.svg");
+    mask-image: url("../icons/trowel-bricks.svg");
+}
+
+.wx-icon-light-ruler {
+    -webkit-mask-image: url("../icons/ruler.svg");
+    mask-image: url("../icons/ruler.svg");
+}
+
+.wx-icon-light-ruler-horizontal {
+    -webkit-mask-image: url("../icons/ruler-horizontal.svg");
+    mask-image: url("../icons/ruler-horizontal.svg");
+}
+
+.wx-icon-light-ruler-vertical {
+    -webkit-mask-image: url("../icons/ruler-vertical.svg");
+    mask-image: url("../icons/ruler-vertical.svg");
+}
+
+.wx-icon-light-ruler-combined {
+    -webkit-mask-image: url("../icons/ruler-combined.svg");
+    mask-image: url("../icons/ruler-combined.svg");
+}
+
+.wx-icon-light-compass-drafting {
+    -webkit-mask-image: url("../icons/compass-drafting.svg");
+    mask-image: url("../icons/compass-drafting.svg");
+}
+
+.wx-icon-light-marker {
+    -webkit-mask-image: url("../icons/marker.svg");
+    mask-image: url("../icons/marker.svg");
+}
+
+.wx-icon-light-sliders-h {
+    -webkit-mask-image: url("../icons/sliders-h.svg");
+    mask-image: url("../icons/sliders-h.svg");
+}
+
+.wx-icon-light-gauge-simple {
+    -webkit-mask-image: url("../icons/gauge-simple.svg");
+    mask-image: url("../icons/gauge-simple.svg");
+}
+
+.wx-icon-light-gauge-simple-high {
+    -webkit-mask-image: url("../icons/gauge-simple-high.svg");
+    mask-image: url("../icons/gauge-simple-high.svg");
+}
+
+.wx-icon-light-filter-circle-dollar {
+    -webkit-mask-image: url("../icons/filter-circle-dollar.svg");
+    mask-image: url("../icons/filter-circle-dollar.svg");
+}
+
+.wx-icon-light-filter-circle-xmark {
+    -webkit-mask-image: url("../icons/filter-circle-xmark.svg");
+    mask-image: url("../icons/filter-circle-xmark.svg");
+}
+
+.wx-icon-light-toilet {
+    -webkit-mask-image: url("../icons/toilet.svg");
+    mask-image: url("../icons/toilet.svg");
+}
+
+.wx-icon-light-toilet-portable {
+    -webkit-mask-image: url("../icons/toilet-portable.svg");
+    mask-image: url("../icons/toilet-portable.svg");
+}
+
+.wx-icon-light-toilets-portable {
+    -webkit-mask-image: url("../icons/toilets-portable.svg");
+    mask-image: url("../icons/toilets-portable.svg");
+}
+
+.wx-icon-light-toilet-paper {
+    -webkit-mask-image: url("../icons/toilet-paper.svg");
+    mask-image: url("../icons/toilet-paper.svg");
+}
+
+.wx-icon-light-toilet-paper-slash {
+    -webkit-mask-image: url("../icons/toilet-paper-slash.svg");
+    mask-image: url("../icons/toilet-paper-slash.svg");
+}
+
+.wx-icon-light-square {
+    -webkit-mask-image: url("../icons/square.svg");
+    mask-image: url("../icons/square.svg");
+}
+
+.wx-icon-light-square-full {
+    -webkit-mask-image: url("../icons/square-full.svg");
+    mask-image: url("../icons/square-full.svg");
+}
+
+.wx-icon-light-square-check {
+    -webkit-mask-image: url("../icons/square-check.svg");
+    mask-image: url("../icons/square-check.svg");
+}
+
+.wx-icon-light-square-xmark {
+    -webkit-mask-image: url("../icons/square-xmark.svg");
+    mask-image: url("../icons/square-xmark.svg");
+}
+
+.wx-icon-light-square-minus {
+    -webkit-mask-image: url("../icons/square-minus.svg");
+    mask-image: url("../icons/square-minus.svg");
+}
+
+.wx-icon-light-square-plus {
+    -webkit-mask-image: url("../icons/square-plus.svg");
+    mask-image: url("../icons/square-plus.svg");
+}
+
+.wx-icon-light-square-caret-down {
+    -webkit-mask-image: url("../icons/square-caret-down.svg");
+    mask-image: url("../icons/square-caret-down.svg");
+}
+
+.wx-icon-light-square-caret-up {
+    -webkit-mask-image: url("../icons/square-caret-up.svg");
+    mask-image: url("../icons/square-caret-up.svg");
+}
+
+.wx-icon-light-square-caret-left {
+    -webkit-mask-image: url("../icons/square-caret-left.svg");
+    mask-image: url("../icons/square-caret-left.svg");
+}
+
+.wx-icon-light-square-caret-right {
+    -webkit-mask-image: url("../icons/square-caret-right.svg");
+    mask-image: url("../icons/square-caret-right.svg");
+}
+
+.wx-icon-light-square-h {
+    -webkit-mask-image: url("../icons/square-h.svg");
+    mask-image: url("../icons/square-h.svg");
+}
+
+.wx-icon-light-circle-h {
+    -webkit-mask-image: url("../icons/circle-h.svg");
+    mask-image: url("../icons/circle-h.svg");
+}
+
+.wx-icon-light-square-pen {
+    -webkit-mask-image: url("../icons/square-pen.svg");
+    mask-image: url("../icons/square-pen.svg");
+}
+
+.wx-icon-light-square-envelope {
+    -webkit-mask-image: url("../icons/square-envelope.svg");
+    mask-image: url("../icons/square-envelope.svg");
+}
+
+.wx-icon-light-square-phone {
+    -webkit-mask-image: url("../icons/square-phone.svg");
+    mask-image: url("../icons/square-phone.svg");
+}
+
+.wx-icon-light-square-phone-flip {
+    -webkit-mask-image: url("../icons/square-phone-flip.svg");
+    mask-image: url("../icons/square-phone-flip.svg");
+}
+
+.wx-icon-light-square-rss {
+    -webkit-mask-image: url("../icons/square-rss.svg");
+    mask-image: url("../icons/square-rss.svg");
+}
+
+.wx-icon-light-square-share-nodes {
+    -webkit-mask-image: url("../icons/square-share-nodes.svg");
+    mask-image: url("../icons/square-share-nodes.svg");
+}
+
+.wx-icon-light-square-arrow-up-right {
+    -webkit-mask-image: url("../icons/square-arrow-up-right.svg");
+    mask-image: url("../icons/square-arrow-up-right.svg");
+}
+
+.wx-icon-light-square-up-right {
+    -webkit-mask-image: url("../icons/square-up-right.svg");
+    mask-image: url("../icons/square-up-right.svg");
+}
+
+.wx-icon-light-square-poll-vertical {
+    -webkit-mask-image: url("../icons/square-poll-vertical.svg");
+    mask-image: url("../icons/square-poll-vertical.svg");
+}
+
+.wx-icon-light-square-poll-horizontal {
+    -webkit-mask-image: url("../icons/square-poll-horizontal.svg");
+    mask-image: url("../icons/square-poll-horizontal.svg");
+}
+
+.wx-icon-light-square-parking {
+    -webkit-mask-image: url("../icons/square-parking.svg");
+    mask-image: url("../icons/square-parking.svg");
+}
+
+.wx-icon-light-square-virus {
+    -webkit-mask-image: url("../icons/square-virus.svg");
+    mask-image: url("../icons/square-virus.svg");
+}
+
+.wx-icon-light-square-binary {
+    -webkit-mask-image: url("../icons/square-binary.svg");
+    mask-image: url("../icons/square-binary.svg");
+}
+
+.wx-icon-light-square-root-variable {
+    -webkit-mask-image: url("../icons/square-root-variable.svg");
+    mask-image: url("../icons/square-root-variable.svg");
+}
+
+.wx-icon-light-square-nfi {
+    -webkit-mask-image: url("../icons/square-nfi.svg");
+    mask-image: url("../icons/square-nfi.svg");
+}
+
+.wx-icon-light-square-person-confined {
+    -webkit-mask-image: url("../icons/square-person-confined.svg");
+    mask-image: url("../icons/square-person-confined.svg");
+}
+
+.wx-icon-light-toggle-on {
+    -webkit-mask-image: url("../icons/toggle-on.svg");
+    mask-image: url("../icons/toggle-on.svg");
+}
+
+.wx-icon-light-toggle-off {
+    -webkit-mask-image: url("../icons/toggle-off.svg");
+    mask-image: url("../icons/toggle-off.svg");
+}
+
+.wx-icon-light-tag {
+    -webkit-mask-image: url("../icons/tag.svg");
+    mask-image: url("../icons/tag.svg");
+}
+
+.wx-icon-light-tags {
+    -webkit-mask-image: url("../icons/tags.svg");
+    mask-image: url("../icons/tags.svg");
+}
+
+.wx-icon-light-thumbtack-slash {
+    -webkit-mask-image: url("../icons/thumbtack-slash.svg");
+    mask-image: url("../icons/thumbtack-slash.svg");
+}
+
+.wx-icon-light-trophy {
+    -webkit-mask-image: url("../icons/trophy.svg");
+    mask-image: url("../icons/trophy.svg");
+}
+
+.wx-icon-light-medal {
+    -webkit-mask-image: url("../icons/medal.svg");
+    mask-image: url("../icons/medal.svg");
+}
+
+.wx-icon-light-award {
+    -webkit-mask-image: url("../icons/award.svg");
+    mask-image: url("../icons/award.svg");
+}
+
+.wx-icon-light-ribbon {
+    -webkit-mask-image: url("../icons/ribbon.svg");
+    mask-image: url("../icons/ribbon.svg");
+}
+
+.wx-icon-light-certificate {
+    -webkit-mask-image: url("../icons/certificate.svg");
+    mask-image: url("../icons/certificate.svg");
+}
+
+.wx-icon-light-stamp {
+    -webkit-mask-image: url("../icons/stamp.svg");
+    mask-image: url("../icons/stamp.svg");
+}
+
+.wx-icon-light-signature {
+    -webkit-mask-image: url("../icons/signature.svg");
+    mask-image: url("../icons/signature.svg");
+}
+
+.wx-icon-light-barcode {
+    -webkit-mask-image: url("../icons/barcode.svg");
+    mask-image: url("../icons/barcode.svg");
+}
+
+.wx-icon-light-qrcode {
+    -webkit-mask-image: url("../icons/qrcode.svg");
+    mask-image: url("../icons/qrcode.svg");
+}
+
+.wx-icon-light-braille {
+    -webkit-mask-image: url("../icons/braille.svg");
+    mask-image: url("../icons/braille.svg");
+}
+
+.wx-icon-light-bars-progress {
+    -webkit-mask-image: url("../icons/bars-progress.svg");
+    mask-image: url("../icons/bars-progress.svg");
+}
+
+.wx-icon-light-bars-staggered {
+    -webkit-mask-image: url("../icons/bars-staggered.svg");
+    mask-image: url("../icons/bars-staggered.svg");
+}
+
+.wx-icon-light-grip {
+    -webkit-mask-image: url("../icons/grip.svg");
+    mask-image: url("../icons/grip.svg");
+}
+
+.wx-icon-light-grip-lines {
+    -webkit-mask-image: url("../icons/grip-lines.svg");
+    mask-image: url("../icons/grip-lines.svg");
+}
+
+.wx-icon-light-grip-vertical {
+    -webkit-mask-image: url("../icons/grip-vertical.svg");
+    mask-image: url("../icons/grip-vertical.svg");
+}
+
+.wx-icon-light-asterisk {
+    -webkit-mask-image: url("../icons/asterisk.svg");
+    mask-image: url("../icons/asterisk.svg");
+}
+
+.wx-icon-light-slash {
+    -webkit-mask-image: url("../icons/slash.svg");
+    mask-image: url("../icons/slash.svg");
+}
+
+.wx-icon-light-divide {
+    -webkit-mask-image: url("../icons/divide.svg");
+    mask-image: url("../icons/divide.svg");
+}
+
+.wx-icon-light-plus-minus {
+    -webkit-mask-image: url("../icons/plus-minus.svg");
+    mask-image: url("../icons/plus-minus.svg");
+}
+
+.wx-icon-light-not-equal {
+    -webkit-mask-image: url("../icons/not-equal.svg");
+    mask-image: url("../icons/not-equal.svg");
+}
+
+.wx-icon-light-greater-than {
+    -webkit-mask-image: url("../icons/greater-than.svg");
+    mask-image: url("../icons/greater-than.svg");
+}
+
+.wx-icon-light-less-than {
+    -webkit-mask-image: url("../icons/less-than.svg");
+    mask-image: url("../icons/less-than.svg");
+}
+
+.wx-icon-light-greater-than-equal {
+    -webkit-mask-image: url("../icons/greater-than-equal.svg");
+    mask-image: url("../icons/greater-than-equal.svg");
+}
+
+.wx-icon-light-less-than-equal {
+    -webkit-mask-image: url("../icons/less-than-equal.svg");
+    mask-image: url("../icons/less-than-equal.svg");
+}
+
+.wx-icon-light-section {
+    -webkit-mask-image: url("../icons/section.svg");
+    mask-image: url("../icons/section.svg");
+}
+
+.wx-icon-light-registered {
+    -webkit-mask-image: url("../icons/registered.svg");
+    mask-image: url("../icons/registered.svg");
+}
+
+.wx-icon-light-trademark {
+    -webkit-mask-image: url("../icons/trademark.svg");
+    mask-image: url("../icons/trademark.svg");
+}
+
+/*
+ * Light variants added for icon classes that are used in the framework, the
+ * tutorial or an application but had none.
+ */
+
+.wx-icon-light-utensils {
+    -webkit-mask-image: url("../icons/utensils.svg");
+    mask-image: url("../icons/utensils.svg");
+}
+
+.wx-icon-light-burger {
+    -webkit-mask-image: url("../icons/burger.svg");
+    mask-image: url("../icons/burger.svg");
+}
+
+.wx-icon-light-pizza-slice {
+    -webkit-mask-image: url("../icons/pizza-slice.svg");
+    mask-image: url("../icons/pizza-slice.svg");
+}
+
+.wx-icon-light-hotdog {
+    -webkit-mask-image: url("../icons/hotdog.svg");
+    mask-image: url("../icons/hotdog.svg");
+}
+
+.wx-icon-light-bacon {
+    -webkit-mask-image: url("../icons/bacon.svg");
+    mask-image: url("../icons/bacon.svg");
+}
+
+.wx-icon-light-egg {
+    -webkit-mask-image: url("../icons/egg.svg");
+    mask-image: url("../icons/egg.svg");
+}
+
+.wx-icon-light-cheese {
+    -webkit-mask-image: url("../icons/cheese.svg");
+    mask-image: url("../icons/cheese.svg");
+}
+
+.wx-icon-light-bread-slice {
+    -webkit-mask-image: url("../icons/bread-slice.svg");
+    mask-image: url("../icons/bread-slice.svg");
+}
+
+.wx-icon-light-apple-whole {
+    -webkit-mask-image: url("../icons/apple-whole.svg");
+    mask-image: url("../icons/apple-whole.svg");
+}
+
+.wx-icon-light-lemon {
+    -webkit-mask-image: url("../icons/lemon.svg");
+    mask-image: url("../icons/lemon.svg");
+}
+
+.wx-icon-light-pepper-hot {
+    -webkit-mask-image: url("../icons/pepper-hot.svg");
+    mask-image: url("../icons/pepper-hot.svg");
+}
+
+.wx-icon-light-cookie {
+    -webkit-mask-image: url("../icons/cookie.svg");
+    mask-image: url("../icons/cookie.svg");
+}
+
+.wx-icon-light-cookie-bite {
+    -webkit-mask-image: url("../icons/cookie-bite.svg");
+    mask-image: url("../icons/cookie-bite.svg");
+}
+
+.wx-icon-light-candy-cane {
+    -webkit-mask-image: url("../icons/candy-cane.svg");
+    mask-image: url("../icons/candy-cane.svg");
+}
+
+.wx-icon-light-ice-cream {
+    -webkit-mask-image: url("../icons/ice-cream.svg");
+    mask-image: url("../icons/ice-cream.svg");
+}
+
+.wx-icon-light-cake-candles {
+    -webkit-mask-image: url("../icons/cake-candles.svg");
+    mask-image: url("../icons/cake-candles.svg");
+}
+
+.wx-icon-light-stroopwafel {
+    -webkit-mask-image: url("../icons/stroopwafel.svg");
+    mask-image: url("../icons/stroopwafel.svg");
+}
+
+.wx-icon-light-bowl-food {
+    -webkit-mask-image: url("../icons/bowl-food.svg");
+    mask-image: url("../icons/bowl-food.svg");
+}
+
+.wx-icon-light-bowl-rice {
+    -webkit-mask-image: url("../icons/bowl-rice.svg");
+    mask-image: url("../icons/bowl-rice.svg");
+}
+
+.wx-icon-light-plate-wheat {
+    -webkit-mask-image: url("../icons/plate-wheat.svg");
+    mask-image: url("../icons/plate-wheat.svg");
+}
+
+.wx-icon-light-jar {
+    -webkit-mask-image: url("../icons/jar.svg");
+    mask-image: url("../icons/jar.svg");
+}
+
+.wx-icon-light-jar-wheat {
+    -webkit-mask-image: url("../icons/jar-wheat.svg");
+    mask-image: url("../icons/jar-wheat.svg");
+}
+
+.wx-icon-light-mug-hot {
+    -webkit-mask-image: url("../icons/mug-hot.svg");
+    mask-image: url("../icons/mug-hot.svg");
+}
+
+.wx-icon-light-mug-saucer {
+    -webkit-mask-image: url("../icons/mug-saucer.svg");
+    mask-image: url("../icons/mug-saucer.svg");
+}
+
+.wx-icon-light-blender {
+    -webkit-mask-image: url("../icons/blender.svg");
+    mask-image: url("../icons/blender.svg");
+}
+
+.wx-icon-light-blender-phone {
+    -webkit-mask-image: url("../icons/blender-phone.svg");
+    mask-image: url("../icons/blender-phone.svg");
+}
+
+.wx-icon-light-kitchen-set {
+    -webkit-mask-image: url("../icons/kitchen-set.svg");
+    mask-image: url("../icons/kitchen-set.svg");
+}
+
+.wx-icon-light-glass-water {
+    -webkit-mask-image: url("../icons/glass-water.svg");
+    mask-image: url("../icons/glass-water.svg");
+}
+
+.wx-icon-light-glass-water-droplet {
+    -webkit-mask-image: url("../icons/glass-water-droplet.svg");
+    mask-image: url("../icons/glass-water-droplet.svg");
+}
+
+.wx-icon-light-bottle-water {
+    -webkit-mask-image: url("../icons/bottle-water.svg");
+    mask-image: url("../icons/bottle-water.svg");
+}
+
+.wx-icon-light-bottle-droplet {
+    -webkit-mask-image: url("../icons/bottle-droplet.svg");
+    mask-image: url("../icons/bottle-droplet.svg");
+}
+
+.wx-icon-light-wine-bottle {
+    -webkit-mask-image: url("../icons/wine-bottle.svg");
+    mask-image: url("../icons/wine-bottle.svg");
+}
+
+.wx-icon-light-wine-glass {
+    -webkit-mask-image: url("../icons/wine-glass.svg");
+    mask-image: url("../icons/wine-glass.svg");
+}
+
+.wx-icon-light-wine-glass-empty {
+    -webkit-mask-image: url("../icons/wine-glass-empty.svg");
+    mask-image: url("../icons/wine-glass-empty.svg");
+}
+
+.wx-icon-light-martini-glass {
+    -webkit-mask-image: url("../icons/martini-glass.svg");
+    mask-image: url("../icons/martini-glass.svg");
+}
+
+.wx-icon-light-martini-glass-empty {
+    -webkit-mask-image: url("../icons/martini-glass-empty.svg");
+    mask-image: url("../icons/martini-glass-empty.svg");
+}
+
+.wx-icon-light-martini-glass-citrus {
+    -webkit-mask-image: url("../icons/martini-glass-citrus.svg");
+    mask-image: url("../icons/martini-glass-citrus.svg");
+}
+
+.wx-icon-light-whiskey-glass {
+    -webkit-mask-image: url("../icons/whiskey-glass.svg");
+    mask-image: url("../icons/whiskey-glass.svg");
+}
+
+.wx-icon-light-beer-mug-empty {
+    -webkit-mask-image: url("../icons/beer-mug-empty.svg");
+    mask-image: url("../icons/beer-mug-empty.svg");
+}
+
+.wx-icon-light-champagne-glasses {
+    -webkit-mask-image: url("../icons/champagne-glasses.svg");
+    mask-image: url("../icons/champagne-glasses.svg");
+}
+
+.wx-icon-light-glasses {
+    -webkit-mask-image: url("../icons/glasses.svg");
+    mask-image: url("../icons/glasses.svg");
+}
+
+.wx-icon-light-dice-one {
+    -webkit-mask-image: url("../icons/dice-one.svg");
+    mask-image: url("../icons/dice-one.svg");
+}
+
+.wx-icon-light-dice-two {
+    -webkit-mask-image: url("../icons/dice-two.svg");
+    mask-image: url("../icons/dice-two.svg");
+}
+
+.wx-icon-light-dice-three {
+    -webkit-mask-image: url("../icons/dice-three.svg");
+    mask-image: url("../icons/dice-three.svg");
+}
+
+.wx-icon-light-dice-four {
+    -webkit-mask-image: url("../icons/dice-four.svg");
+    mask-image: url("../icons/dice-four.svg");
+}
+
+.wx-icon-light-dice-five {
+    -webkit-mask-image: url("../icons/dice-five.svg");
+    mask-image: url("../icons/dice-five.svg");
+}
+
+.wx-icon-light-dice-six {
+    -webkit-mask-image: url("../icons/dice-six.svg");
+    mask-image: url("../icons/dice-six.svg");
+}
+
+.wx-icon-light-dice-d6 {
+    -webkit-mask-image: url("../icons/dice-d6.svg");
+    mask-image: url("../icons/dice-d6.svg");
+}
+
+.wx-icon-light-dice-d20 {
+    -webkit-mask-image: url("../icons/dice-d20.svg");
+    mask-image: url("../icons/dice-d20.svg");
+}
+
+.wx-icon-light-dice {
+    -webkit-mask-image: url("../icons/dice.svg");
+    mask-image: url("../icons/dice.svg");
+}
+
+.wx-icon-light-chess {
+    -webkit-mask-image: url("../icons/chess.svg");
+    mask-image: url("../icons/chess.svg");
+}
+
+.wx-icon-light-chess-board {
+    -webkit-mask-image: url("../icons/chess-board.svg");
+    mask-image: url("../icons/chess-board.svg");
+}
+
+.wx-icon-light-chess-pawn {
+    -webkit-mask-image: url("../icons/chess-pawn.svg");
+    mask-image: url("../icons/chess-pawn.svg");
+}
+
+.wx-icon-light-chess-rook {
+    -webkit-mask-image: url("../icons/chess-rook.svg");
+    mask-image: url("../icons/chess-rook.svg");
+}
+
+.wx-icon-light-chess-knight {
+    -webkit-mask-image: url("../icons/chess-knight.svg");
+    mask-image: url("../icons/chess-knight.svg");
+}
+
+.wx-icon-light-chess-bishop {
+    -webkit-mask-image: url("../icons/chess-bishop.svg");
+    mask-image: url("../icons/chess-bishop.svg");
+}
+
+.wx-icon-light-chess-queen {
+    -webkit-mask-image: url("../icons/chess-queen.svg");
+    mask-image: url("../icons/chess-queen.svg");
+}
+
+.wx-icon-light-chess-king {
+    -webkit-mask-image: url("../icons/chess-king.svg");
+    mask-image: url("../icons/chess-king.svg");
+}
+
+.wx-icon-light-puzzle-piece {
+    -webkit-mask-image: url("../icons/puzzle-piece.svg");
+    mask-image: url("../icons/puzzle-piece.svg");
+}
+
+.wx-icon-light-football {
+    -webkit-mask-image: url("../icons/football.svg");
+    mask-image: url("../icons/football.svg");
+}
+
+.wx-icon-light-futbol {
+    -webkit-mask-image: url("../icons/futbol.svg");
+    mask-image: url("../icons/futbol.svg");
+}
+
+.wx-icon-light-baseball {
+    -webkit-mask-image: url("../icons/baseball.svg");
+    mask-image: url("../icons/baseball.svg");
+}
+
+.wx-icon-light-baseball-bat-ball {
+    -webkit-mask-image: url("../icons/baseball-bat-ball.svg");
+    mask-image: url("../icons/baseball-bat-ball.svg");
+}
+
+.wx-icon-light-volleyball {
+    -webkit-mask-image: url("../icons/volleyball.svg");
+    mask-image: url("../icons/volleyball.svg");
+}
+
+.wx-icon-light-bowling-ball {
+    -webkit-mask-image: url("../icons/bowling-ball.svg");
+    mask-image: url("../icons/bowling-ball.svg");
+}
+
+.wx-icon-light-golf-ball-tee {
+    -webkit-mask-image: url("../icons/golf-ball-tee.svg");
+    mask-image: url("../icons/golf-ball-tee.svg");
+}
+
+.wx-icon-light-hockey-puck {
+    -webkit-mask-image: url("../icons/hockey-puck.svg");
+    mask-image: url("../icons/hockey-puck.svg");
+}
+
+.wx-icon-light-dumbbell {
+    -webkit-mask-image: url("../icons/dumbbell.svg");
+    mask-image: url("../icons/dumbbell.svg");
+}
+
+.wx-icon-light-weight-hanging {
+    -webkit-mask-image: url("../icons/weight-hanging.svg");
+    mask-image: url("../icons/weight-hanging.svg");
+}
+
+.wx-icon-light-weight-scale {
+    -webkit-mask-image: url("../icons/weight-scale.svg");
+    mask-image: url("../icons/weight-scale.svg");
+}
+
+.wx-icon-light-ranking-star {
+    -webkit-mask-image: url("../icons/ranking-star.svg");
+    mask-image: url("../icons/ranking-star.svg");
+}
+
+/*
+ * Light variants added for icon classes that are used in the framework, the
+ * tutorial or an application but had none.
+ */
+
+.wx-icon-light-circle {
+    -webkit-mask-image: url("../icons/circle.svg");
+    mask-image: url("../icons/circle.svg");
+}
+
+.wx-icon-light-circle-arrow-up {
+    -webkit-mask-image: url("../icons/circle-arrow-up.svg");
+    mask-image: url("../icons/circle-arrow-up.svg");
+}
+
+.wx-icon-light-circle-arrow-down {
+    -webkit-mask-image: url("../icons/circle-arrow-down.svg");
+    mask-image: url("../icons/circle-arrow-down.svg");
+}
+
+.wx-icon-light-circle-arrow-left {
+    -webkit-mask-image: url("../icons/circle-arrow-left.svg");
+    mask-image: url("../icons/circle-arrow-left.svg");
+}
+
+.wx-icon-light-circle-arrow-right {
+    -webkit-mask-image: url("../icons/circle-arrow-right.svg");
+    mask-image: url("../icons/circle-arrow-right.svg");
+}
+
+.wx-icon-light-circle-chevron-up {
+    -webkit-mask-image: url("../icons/circle-chevron-up.svg");
+    mask-image: url("../icons/circle-chevron-up.svg");
+}
+
+.wx-icon-light-circle-chevron-down {
+    -webkit-mask-image: url("../icons/circle-chevron-down.svg");
+    mask-image: url("../icons/circle-chevron-down.svg");
+}
+
+.wx-icon-light-circle-chevron-left {
+    -webkit-mask-image: url("../icons/circle-chevron-left.svg");
+    mask-image: url("../icons/circle-chevron-left.svg");
+}
+
+.wx-icon-light-circle-chevron-right {
+    -webkit-mask-image: url("../icons/circle-chevron-right.svg");
+    mask-image: url("../icons/circle-chevron-right.svg");
+}
+
+.wx-icon-light-circle-play {
+    -webkit-mask-image: url("../icons/circle-play.svg");
+    mask-image: url("../icons/circle-play.svg");
+}
+
+.wx-icon-light-circle-pause {
+    -webkit-mask-image: url("../icons/circle-pause.svg");
+    mask-image: url("../icons/circle-pause.svg");
+}
+
+.wx-icon-light-circle-stop {
+    -webkit-mask-image: url("../icons/circle-stop.svg");
+    mask-image: url("../icons/circle-stop.svg");
+}
+
+.wx-icon-light-circle-nodes {
+    -webkit-mask-image: url("../icons/circle-nodes.svg");
+    mask-image: url("../icons/circle-nodes.svg");
+}
+
+.wx-icon-light-circle-dollar-to-slot {
+    -webkit-mask-image: url("../icons/circle-dollar-to-slot.svg");
+    mask-image: url("../icons/circle-dollar-to-slot.svg");
+}
+
+.wx-icon-light-magnifying-glass-plus {
+    -webkit-mask-image: url("../icons/magnifying-glass-plus.svg");
+    mask-image: url("../icons/magnifying-glass-plus.svg");
+}
+
+.wx-icon-light-magnifying-glass-minus {
+    -webkit-mask-image: url("../icons/magnifying-glass-minus.svg");
+    mask-image: url("../icons/magnifying-glass-minus.svg");
+}
+
+.wx-icon-light-magnifying-glass-chart {
+    -webkit-mask-image: url("../icons/magnifying-glass-chart.svg");
+    mask-image: url("../icons/magnifying-glass-chart.svg");
+}
+
+.wx-icon-light-magnifying-glass-dollar {
+    -webkit-mask-image: url("../icons/magnifying-glass-dollar.svg");
+    mask-image: url("../icons/magnifying-glass-dollar.svg");
+}
+
+.wx-icon-light-magnifying-glass-location {
+    -webkit-mask-image: url("../icons/magnifying-glass-location.svg");
+    mask-image: url("../icons/magnifying-glass-location.svg");
+}
+
+.wx-icon-light-magnifying-glass-arrow-right {
+    -webkit-mask-image: url("../icons/magnifying-glass-arrow-right.svg");
+    mask-image: url("../icons/magnifying-glass-arrow-right.svg");
+}
+
+.wx-icon-light-rectangle-list {
+    -webkit-mask-image: url("../icons/rectangle-list.svg");
+    mask-image: url("../icons/rectangle-list.svg");
+}
+
+.wx-icon-light-rectangle-xmark {
+    -webkit-mask-image: url("../icons/rectangle-xmark.svg");
+    mask-image: url("../icons/rectangle-xmark.svg");
+}
+
+.wx-icon-light-rectangle-ad {
+    -webkit-mask-image: url("../icons/rectangle-ad.svg");
+    mask-image: url("../icons/rectangle-ad.svg");
+}
+
+.wx-icon-light-border-all {
+    -webkit-mask-image: url("../icons/border-all.svg");
+    mask-image: url("../icons/border-all.svg");
+}
+
+.wx-icon-light-border-none {
+    -webkit-mask-image: url("../icons/border-none.svg");
+    mask-image: url("../icons/border-none.svg");
+}
+
+.wx-icon-light-border-top-left {
+    -webkit-mask-image: url("../icons/border-top-left.svg");
+    mask-image: url("../icons/border-top-left.svg");
+}
+
+.wx-icon-light-object-group {
+    -webkit-mask-image: url("../icons/object-group.svg");
+    mask-image: url("../icons/object-group.svg");
+}
+
+.wx-icon-light-object-ungroup {
+    -webkit-mask-image: url("../icons/object-ungroup.svg");
+    mask-image: url("../icons/object-ungroup.svg");
+}
+
+.wx-icon-light-diagram-project {
+    -webkit-mask-image: url("../icons/diagram-project.svg");
+    mask-image: url("../icons/diagram-project.svg");
+}
+
+.wx-icon-light-diagram-next {
+    -webkit-mask-image: url("../icons/diagram-next.svg");
+    mask-image: url("../icons/diagram-next.svg");
+}
+
+.wx-icon-light-diagram-successor {
+    -webkit-mask-image: url("../icons/diagram-successor.svg");
+    mask-image: url("../icons/diagram-successor.svg");
+}
+
+.wx-icon-light-diagram-predecessor {
+    -webkit-mask-image: url("../icons/diagram-predecessor.svg");
+    mask-image: url("../icons/diagram-predecessor.svg");
+}
+
+.wx-icon-light-vector-square {
+    -webkit-mask-image: url("../icons/vector-square.svg");
+    mask-image: url("../icons/vector-square.svg");
+}
+
+.wx-icon-light-draw-polygon {
+    -webkit-mask-image: url("../icons/draw-polygon.svg");
+    mask-image: url("../icons/draw-polygon.svg");
+}
+
+.wx-icon-light-bezier-curve {
+    -webkit-mask-image: url("../icons/bezier-curve.svg");
+    mask-image: url("../icons/bezier-curve.svg");
+}
+
+.wx-icon-light-wave-square {
+    -webkit-mask-image: url("../icons/wave-square.svg");
+    mask-image: url("../icons/wave-square.svg");
+}
+
+.wx-icon-light-delete-left {
+    -webkit-mask-image: url("../icons/delete-left.svg");
+    mask-image: url("../icons/delete-left.svg");
+}
+
+.wx-icon-light-i-cursor {
+    -webkit-mask-image: url("../icons/i-cursor.svg");
+    mask-image: url("../icons/i-cursor.svg");
+}
+
+.wx-icon-light-crosshairs {
+    -webkit-mask-image: url("../icons/crosshairs.svg");
+    mask-image: url("../icons/crosshairs.svg");
+}
+
+.wx-icon-light-bullseye {
+    -webkit-mask-image: url("../icons/bullseye.svg");
+    mask-image: url("../icons/bullseye.svg");
+}
+
+.wx-icon-light-eject {
+    -webkit-mask-image: url("../icons/eject.svg");
+    mask-image: url("../icons/eject.svg");
+}
+
+.wx-icon-light-closed-captioning {
+    -webkit-mask-image: url("../icons/closed-captioning.svg");
+    mask-image: url("../icons/closed-captioning.svg");
+}
+
+.wx-icon-light-spell-check {
+    -webkit-mask-image: url("../icons/spell-check.svg");
+    mask-image: url("../icons/spell-check.svg");
+}
+
+.wx-icon-light-icons {
+    -webkit-mask-image: url("../icons/icons.svg");
+    mask-image: url("../icons/icons.svg");
+}
+
+.wx-icon-light-timeline {
+    -webkit-mask-image: url("../icons/timeline.svg");
+    mask-image: url("../icons/timeline.svg");
+}
+
+.wx-icon-light-universal-access {
+    -webkit-mask-image: url("../icons/universal-access.svg");
+    mask-image: url("../icons/universal-access.svg");
+}
+
+.wx-icon-light-fingerprint {
+    -webkit-mask-image: url("../icons/fingerprint.svg");
+    mask-image: url("../icons/fingerprint.svg");
+}
+
+.wx-icon-light-lightbulb {
+    -webkit-mask-image: url("../icons/lightbulb.svg");
+    mask-image: url("../icons/lightbulb.svg");
+}
+
+.wx-icon-light-life-ring {
+    -webkit-mask-image: url("../icons/life-ring.svg");
+    mask-image: url("../icons/life-ring.svg");
+}
+
+.wx-icon-light-gem {
+    -webkit-mask-image: url("../icons/gem.svg");
+    mask-image: url("../icons/gem.svg");
+}
+
+.wx-icon-light-gift {
+    -webkit-mask-image: url("../icons/gift.svg");
+    mask-image: url("../icons/gift.svg");
+}
+
+.wx-icon-light-gifts {
+    -webkit-mask-image: url("../icons/gifts.svg");
+    mask-image: url("../icons/gifts.svg");
+}
+
+.wx-icon-light-box {
+    -webkit-mask-image: url("../icons/box.svg");
+    mask-image: url("../icons/box.svg");
+}
+
+.wx-icon-light-box-open {
+    -webkit-mask-image: url("../icons/box-open.svg");
+    mask-image: url("../icons/box-open.svg");
+}
+
+.wx-icon-light-recycle {
+    -webkit-mask-image: url("../icons/recycle.svg");
+    mask-image: url("../icons/recycle.svg");
+}
+
+.wx-icon-light-headset {
+    -webkit-mask-image: url("../icons/headset.svg");
+    mask-image: url("../icons/headset.svg");
+}
+
+.wx-icon-light-computer {
+    -webkit-mask-image: url("../icons/computer.svg");
+    mask-image: url("../icons/computer.svg");
+}
+
+.wx-icon-light-display {
+    -webkit-mask-image: url("../icons/display.svg");
+    mask-image: url("../icons/display.svg");
+}
+
+.wx-icon-light-computer-mouse {
+    -webkit-mask-image: url("../icons/computer-mouse.svg");
+    mask-image: url("../icons/computer-mouse.svg");
+}
+
+.wx-icon-light-pager {
+    -webkit-mask-image: url("../icons/pager.svg");
+    mask-image: url("../icons/pager.svg");
+}
+
+.wx-icon-light-street-view {
+    -webkit-mask-image: url("../icons/street-view.svg");
+    mask-image: url("../icons/street-view.svg");
+}
+
+.wx-icon-light-swatchbook {
+    -webkit-mask-image: url("../icons/swatchbook.svg");
+    mask-image: url("../icons/swatchbook.svg");
+}
+
+.wx-icon-light-splotch {
+    -webkit-mask-image: url("../icons/splotch.svg");
+    mask-image: url("../icons/splotch.svg");
+}
+
+.wx-icon-light-wand-magic {
+    -webkit-mask-image: url("../icons/wand-magic.svg");
+    mask-image: url("../icons/wand-magic.svg");
+}
+
+.wx-icon-light-wand-magic-sparkles {
+    -webkit-mask-image: url("../icons/wand-magic-sparkles.svg");
+    mask-image: url("../icons/wand-magic-sparkles.svg");
+}
+
+.wx-icon-light-wand-sparkles {
+    -webkit-mask-image: url("../icons/wand-sparkles.svg");
+    mask-image: url("../icons/wand-sparkles.svg");
+}
+
+.wx-icon-light-mars {
+    -webkit-mask-image: url("../icons/mars.svg");
+    mask-image: url("../icons/mars.svg");
+}
+
+.wx-icon-light-venus {
+    -webkit-mask-image: url("../icons/venus.svg");
+    mask-image: url("../icons/venus.svg");
+}
+
+.wx-icon-light-neuter {
+    -webkit-mask-image: url("../icons/neuter.svg");
+    mask-image: url("../icons/neuter.svg");
+}
+
+.wx-icon-light-genderless {
+    -webkit-mask-image: url("../icons/genderless.svg");
+    mask-image: url("../icons/genderless.svg");
+}
+
+.wx-icon-light-mercury {
+    -webkit-mask-image: url("../icons/mercury.svg");
+    mask-image: url("../icons/mercury.svg");
+}
+
+.wx-icon-light-transgender {
+    -webkit-mask-image: url("../icons/transgender.svg");
+    mask-image: url("../icons/transgender.svg");
+}
+
+.wx-icon-light-mars-double {
+    -webkit-mask-image: url("../icons/mars-double.svg");
+    mask-image: url("../icons/mars-double.svg");
+}
+
+.wx-icon-light-venus-double {
+    -webkit-mask-image: url("../icons/venus-double.svg");
+    mask-image: url("../icons/venus-double.svg");
+}
+
+.wx-icon-light-venus-mars {
+    -webkit-mask-image: url("../icons/venus-mars.svg");
+    mask-image: url("../icons/venus-mars.svg");
+}
+
+.wx-icon-light-mars-and-venus {
+    -webkit-mask-image: url("../icons/mars-and-venus.svg");
+    mask-image: url("../icons/mars-and-venus.svg");
+}
+
+/*
+ * Light variants added for icon classes that are used in the framework, the
+ * tutorial or an application but had none.
+ */
+
+.wx-icon-light-door-closed {
+    -webkit-mask-image: url("../icons/door-closed.svg");
+    mask-image: url("../icons/door-closed.svg");
+}
+
+.wx-icon-light-door-open {
+    -webkit-mask-image: url("../icons/door-open.svg");
+    mask-image: url("../icons/door-open.svg");
+}
+
+.wx-icon-light-stairs {
+    -webkit-mask-image: url("../icons/stairs.svg");
+    mask-image: url("../icons/stairs.svg");
+}
+
+.wx-icon-light-elevator {
+    -webkit-mask-image: url("../icons/elevator.svg");
+    mask-image: url("../icons/elevator.svg");
+}
+
+.wx-icon-light-archway {
+    -webkit-mask-image: url("../icons/archway.svg");
+    mask-image: url("../icons/archway.svg");
+}
+
+.wx-icon-light-bridge {
+    -webkit-mask-image: url("../icons/bridge.svg");
+    mask-image: url("../icons/bridge.svg");
+}
+
+.wx-icon-light-bridge-water {
+    -webkit-mask-image: url("../icons/bridge-water.svg");
+    mask-image: url("../icons/bridge-water.svg");
+}
+
+.wx-icon-light-bridge-circle-check {
+    -webkit-mask-image: url("../icons/bridge-circle-check.svg");
+    mask-image: url("../icons/bridge-circle-check.svg");
+}
+
+.wx-icon-light-bridge-circle-xmark {
+    -webkit-mask-image: url("../icons/bridge-circle-xmark.svg");
+    mask-image: url("../icons/bridge-circle-xmark.svg");
+}
+
+.wx-icon-light-bridge-circle-exclamation {
+    -webkit-mask-image: url("../icons/bridge-circle-exclamation.svg");
+    mask-image: url("../icons/bridge-circle-exclamation.svg");
+}
+
+.wx-icon-light-bridge-lock {
+    -webkit-mask-image: url("../icons/bridge-lock.svg");
+    mask-image: url("../icons/bridge-lock.svg");
+}
+
+.wx-icon-light-bed {
+    -webkit-mask-image: url("../icons/bed.svg");
+    mask-image: url("../icons/bed.svg");
+}
+
+.wx-icon-light-bed-pulse {
+    -webkit-mask-image: url("../icons/bed-pulse.svg");
+    mask-image: url("../icons/bed-pulse.svg");
+}
+
+.wx-icon-light-mattress-pillow {
+    -webkit-mask-image: url("../icons/mattress-pillow.svg");
+    mask-image: url("../icons/mattress-pillow.svg");
+}
+
+.wx-icon-light-couch {
+    -webkit-mask-image: url("../icons/couch.svg");
+    mask-image: url("../icons/couch.svg");
+}
+
+.wx-icon-light-chair {
+    -webkit-mask-image: url("../icons/chair.svg");
+    mask-image: url("../icons/chair.svg");
+}
+
+.wx-icon-light-rug {
+    -webkit-mask-image: url("../icons/rug.svg");
+    mask-image: url("../icons/rug.svg");
+}
+
+.wx-icon-light-bath {
+    -webkit-mask-image: url("../icons/bath.svg");
+    mask-image: url("../icons/bath.svg");
+}
+
+.wx-icon-light-shower {
+    -webkit-mask-image: url("../icons/shower.svg");
+    mask-image: url("../icons/shower.svg");
+}
+
+.wx-icon-light-sink {
+    -webkit-mask-image: url("../icons/sink.svg");
+    mask-image: url("../icons/sink.svg");
+}
+
+.wx-icon-light-faucet {
+    -webkit-mask-image: url("../icons/faucet.svg");
+    mask-image: url("../icons/faucet.svg");
+}
+
+.wx-icon-light-faucet-drip {
+    -webkit-mask-image: url("../icons/faucet-drip.svg");
+    mask-image: url("../icons/faucet-drip.svg");
+}
+
+.wx-icon-light-hot-tub-person {
+    -webkit-mask-image: url("../icons/hot-tub-person.svg");
+    mask-image: url("../icons/hot-tub-person.svg");
+}
+
+.wx-icon-light-restroom {
+    -webkit-mask-image: url("../icons/restroom.svg");
+    mask-image: url("../icons/restroom.svg");
+}
+
+.wx-icon-light-vault {
+    -webkit-mask-image: url("../icons/vault.svg");
+    mask-image: url("../icons/vault.svg");
+}
+
+.wx-icon-light-suitcase {
+    -webkit-mask-image: url("../icons/suitcase.svg");
+    mask-image: url("../icons/suitcase.svg");
+}
+
+.wx-icon-light-suitcase-rolling {
+    -webkit-mask-image: url("../icons/suitcase-rolling.svg");
+    mask-image: url("../icons/suitcase-rolling.svg");
+}
+
+.wx-icon-light-passport {
+    -webkit-mask-image: url("../icons/passport.svg");
+    mask-image: url("../icons/passport.svg");
+}
+
+.wx-icon-light-binoculars {
+    -webkit-mask-image: url("../icons/binoculars.svg");
+    mask-image: url("../icons/binoculars.svg");
+}
+
+.wx-icon-light-panorama {
+    -webkit-mask-image: url("../icons/panorama.svg");
+    mask-image: url("../icons/panorama.svg");
+}
+
+.wx-icon-light-clapperboard {
+    -webkit-mask-image: url("../icons/clapperboard.svg");
+    mask-image: url("../icons/clapperboard.svg");
+}
+
+.wx-icon-light-vr-cardboard {
+    -webkit-mask-image: url("../icons/vr-cardboard.svg");
+    mask-image: url("../icons/vr-cardboard.svg");
+}
+
+.wx-icon-light-solar-panel {
+    -webkit-mask-image: url("../icons/solar-panel.svg");
+    mask-image: url("../icons/solar-panel.svg");
+}
+
+.wx-icon-light-fan {
+    -webkit-mask-image: url("../icons/fan.svg");
+    mask-image: url("../icons/fan.svg");
+}
+
+.wx-icon-light-tape {
+    -webkit-mask-image: url("../icons/tape.svg");
+    mask-image: url("../icons/tape.svg");
+}
+
+.wx-icon-light-stapler {
+    -webkit-mask-image: url("../icons/stapler.svg");
+    mask-image: url("../icons/stapler.svg");
+}
+
+.wx-icon-light-dolly {
+    -webkit-mask-image: url("../icons/dolly.svg");
+    mask-image: url("../icons/dolly.svg");
+}
+
+.wx-icon-light-pallet {
+    -webkit-mask-image: url("../icons/pallet.svg");
+    mask-image: url("../icons/pallet.svg");
+}
+
+.wx-icon-light-boxes-packing {
+    -webkit-mask-image: url("../icons/boxes-packing.svg");
+    mask-image: url("../icons/boxes-packing.svg");
+}
+
+.wx-icon-light-box-tissue {
+    -webkit-mask-image: url("../icons/box-tissue.svg");
+    mask-image: url("../icons/box-tissue.svg");
+}
+
+.wx-icon-light-parachute-box {
+    -webkit-mask-image: url("../icons/parachute-box.svg");
+    mask-image: url("../icons/parachute-box.svg");
+}
+
+.wx-icon-light-dumpster {
+    -webkit-mask-image: url("../icons/dumpster.svg");
+    mask-image: url("../icons/dumpster.svg");
+}
+
+.wx-icon-light-dumpster-fire {
+    -webkit-mask-image: url("../icons/dumpster-fire.svg");
+    mask-image: url("../icons/dumpster-fire.svg");
+}
+
+.wx-icon-light-cubes-stacked {
+    -webkit-mask-image: url("../icons/cubes-stacked.svg");
+    mask-image: url("../icons/cubes-stacked.svg");
+}
+
+.wx-icon-light-cube {
+    -webkit-mask-image: url("../icons/cube.svg");
+    mask-image: url("../icons/cube.svg");
+}
+
+.wx-icon-light-burst {
+    -webkit-mask-image: url("../icons/burst.svg");
+    mask-image: url("../icons/burst.svg");
+}
+
+.wx-icon-light-explosion {
+    -webkit-mask-image: url("../icons/explosion.svg");
+    mask-image: url("../icons/explosion.svg");
+}
+
+.wx-icon-light-bomb {
+    -webkit-mask-image: url("../icons/bomb.svg");
+    mask-image: url("../icons/bomb.svg");
+}
+
+.wx-icon-light-land-mine-on {
+    -webkit-mask-image: url("../icons/land-mine-on.svg");
+    mask-image: url("../icons/land-mine-on.svg");
+}
+
+.wx-icon-light-gun {
+    -webkit-mask-image: url("../icons/gun.svg");
+    mask-image: url("../icons/gun.svg");
+}
+
+.wx-icon-light-radiation {
+    -webkit-mask-image: url("../icons/radiation.svg");
+    mask-image: url("../icons/radiation.svg");
+}
+
+.wx-icon-light-biohazard {
+    -webkit-mask-image: url("../icons/biohazard.svg");
+    mask-image: url("../icons/biohazard.svg");
+}
+
+.wx-icon-light-skull {
+    -webkit-mask-image: url("../icons/skull.svg");
+    mask-image: url("../icons/skull.svg");
+}
+
+.wx-icon-light-skull-crossbones {
+    -webkit-mask-image: url("../icons/skull-crossbones.svg");
+    mask-image: url("../icons/skull-crossbones.svg");
+}
+
+.wx-icon-light-poo {
+    -webkit-mask-image: url("../icons/poo.svg");
+    mask-image: url("../icons/poo.svg");
+}
+
+.wx-icon-light-poop {
+    -webkit-mask-image: url("../icons/poop.svg");
+    mask-image: url("../icons/poop.svg");
+}
+
+.wx-icon-light-poo-storm {
+    -webkit-mask-image: url("../icons/poo-storm.svg");
+    mask-image: url("../icons/poo-storm.svg");
+}
+
+.wx-icon-light-dragon {
+    -webkit-mask-image: url("../icons/dragon.svg");
+    mask-image: url("../icons/dragon.svg");
+}
+
+.wx-icon-light-dungeon {
+    -webkit-mask-image: url("../icons/dungeon.svg");
+    mask-image: url("../icons/dungeon.svg");
+}
+
+.wx-icon-light-hill-avalanche {
+    -webkit-mask-image: url("../icons/hill-avalanche.svg");
+    mask-image: url("../icons/hill-avalanche.svg");
+}
+
+.wx-icon-light-hill-rockslide {
+    -webkit-mask-image: url("../icons/hill-rockslide.svg");
+    mask-image: url("../icons/hill-rockslide.svg");
+}
+
+.wx-icon-light-mound {
+    -webkit-mask-image: url("../icons/mound.svg");
+    mask-image: url("../icons/mound.svg");
+}
+
+.wx-icon-light-bore-hole {
+    -webkit-mask-image: url("../icons/bore-hole.svg");
+    mask-image: url("../icons/bore-hole.svg");
+}
+
+.wx-icon-light-oil-well {
+    -webkit-mask-image: url("../icons/oil-well.svg");
+    mask-image: url("../icons/oil-well.svg");
+}
+
+.wx-icon-light-oil-can {
+    -webkit-mask-image: url("../icons/oil-can.svg");
+    mask-image: url("../icons/oil-can.svg");
+}
+
+.wx-icon-light-flask {
+    -webkit-mask-image: url("../icons/flask.svg");
+    mask-image: url("../icons/flask.svg");
+}
+
+.wx-icon-light-flask-vial {
+    -webkit-mask-image: url("../icons/flask-vial.svg");
+    mask-image: url("../icons/flask-vial.svg");
+}
+
+.wx-icon-light-graduation-cap {
+    -webkit-mask-image: url("../icons/graduation-cap.svg");
+    mask-image: url("../icons/graduation-cap.svg");
+}
+
+.wx-icon-light-chalkboard {
+    -webkit-mask-image: url("../icons/chalkboard.svg");
+    mask-image: url("../icons/chalkboard.svg");
+}
+
+.wx-icon-light-chalkboard-user {
+    -webkit-mask-image: url("../icons/chalkboard-user.svg");
+    mask-image: url("../icons/chalkboard-user.svg");
+}
+
+.wx-icon-light-sign-hanging {
+    -webkit-mask-image: url("../icons/sign-hanging.svg");
+    mask-image: url("../icons/sign-hanging.svg");
+}
+
+.wx-icon-light-signs-post {
+    -webkit-mask-image: url("../icons/signs-post.svg");
+    mask-image: url("../icons/signs-post.svg");
+}
+
+.wx-icon-light-diamond-turn-right {
+    -webkit-mask-image: url("../icons/diamond-turn-right.svg");
+    mask-image: url("../icons/diamond-turn-right.svg");
+}
+
+.wx-icon-light-cable-car {
+    -webkit-mask-image: url("../icons/cable-car.svg");
+    mask-image: url("../icons/cable-car.svg");
+}
+
+.wx-icon-light-tachometer-alt {
+    -webkit-mask-image: url("../icons/tachometer-alt.svg");
+    mask-image: url("../icons/tachometer-alt.svg");
+}
+
+.wx-icon-light-tachograph-digital {
+    -webkit-mask-image: url("../icons/tachograph-digital.svg");
+    mask-image: url("../icons/tachograph-digital.svg");
+}
+
+.wx-icon-light-group-arrows-rotate {
+    -webkit-mask-image: url("../icons/group-arrows-rotate.svg");
+    mask-image: url("../icons/group-arrows-rotate.svg");
+}
+
+.wx-icon-light-hexagon-nodes {
+    -webkit-mask-image: url("../icons/hexagon-nodes.svg");
+    mask-image: url("../icons/hexagon-nodes.svg");
+}
+
+.wx-icon-light-hexagon-nodes-bolt {
+    -webkit-mask-image: url("../icons/hexagon-nodes-bolt.svg");
+    mask-image: url("../icons/hexagon-nodes-bolt.svg");
+}
+
+.wx-icon-light-lines-leaning {
+    -webkit-mask-image: url("../icons/lines-leaning.svg");
+    mask-image: url("../icons/lines-leaning.svg");
+}
+
+.wx-icon-light-audio-description {
+    -webkit-mask-image: url("../icons/audio-description.svg");
+    mask-image: url("../icons/audio-description.svg");
+}
+
+.wx-icon-light-notdef {
+    -webkit-mask-image: url("../icons/notdef.svg");
+    mask-image: url("../icons/notdef.svg");
+}
+
+.wx-icon-light-shirt {
+    -webkit-mask-image: url("../icons/shirt.svg");
+    mask-image: url("../icons/shirt.svg");
+}
+
+.wx-icon-light-t-shirt {
+    -webkit-mask-image: url("../icons/t-shirt.svg");
+    mask-image: url("../icons/t-shirt.svg");
+}
+
+.wx-icon-light-vest {
+    -webkit-mask-image: url("../icons/vest.svg");
+    mask-image: url("../icons/vest.svg");
+}
+
+.wx-icon-light-vest-patches {
+    -webkit-mask-image: url("../icons/vest-patches.svg");
+    mask-image: url("../icons/vest-patches.svg");
+}
+
+.wx-icon-light-socks {
+    -webkit-mask-image: url("../icons/socks.svg");
+    mask-image: url("../icons/socks.svg");
+}
+
+.wx-icon-light-mitten {
+    -webkit-mask-image: url("../icons/mitten.svg");
+    mask-image: url("../icons/mitten.svg");
+}
+
+.wx-icon-light-ring {
+    -webkit-mask-image: url("../icons/ring.svg");
+    mask-image: url("../icons/ring.svg");
+}
+
+.wx-icon-light-hat-cowboy {
+    -webkit-mask-image: url("../icons/hat-cowboy.svg");
+    mask-image: url("../icons/hat-cowboy.svg");
+}
+
+.wx-icon-light-hat-cowboy-side {
+    -webkit-mask-image: url("../icons/hat-cowboy-side.svg");
+    mask-image: url("../icons/hat-cowboy-side.svg");
+}
+
+.wx-icon-light-hat-wizard {
+    -webkit-mask-image: url("../icons/hat-wizard.svg");
+    mask-image: url("../icons/hat-wizard.svg");
+}
+
+.wx-icon-light-helmet-safety {
+    -webkit-mask-image: url("../icons/helmet-safety.svg");
+    mask-image: url("../icons/helmet-safety.svg");
+}
+
+.wx-icon-light-helmet-un {
+    -webkit-mask-image: url("../icons/helmet-un.svg");
+    mask-image: url("../icons/helmet-un.svg");
+}
+
+.wx-icon-light-mask {
+    -webkit-mask-image: url("../icons/mask.svg");
+    mask-image: url("../icons/mask.svg");
+}
+
+.wx-icon-light-mask-face {
+    -webkit-mask-image: url("../icons/mask-face.svg");
+    mask-image: url("../icons/mask-face.svg");
+}
+
+.wx-icon-light-mask-ventilator {
+    -webkit-mask-image: url("../icons/mask-ventilator.svg");
+    mask-image: url("../icons/mask-ventilator.svg");
+}
+
+.wx-icon-light-smoking {
+    -webkit-mask-image: url("../icons/smoking.svg");
+    mask-image: url("../icons/smoking.svg");
+}
+
+.wx-icon-light-bong {
+    -webkit-mask-image: url("../icons/bong.svg");
+    mask-image: url("../icons/bong.svg");
+}
+
+.wx-icon-light-joint {
+    -webkit-mask-image: url("../icons/joint.svg");
+    mask-image: url("../icons/joint.svg");
+}
+
+.wx-icon-light-cannabis {
+    -webkit-mask-image: url("../icons/cannabis.svg");
+    mask-image: url("../icons/cannabis.svg");
+}
+
+.wx-icon-light-holly-berry {
+    -webkit-mask-image: url("../icons/holly-berry.svg");
+    mask-image: url("../icons/holly-berry.svg");
+}
+
+.wx-icon-light-baby {
+    -webkit-mask-image: url("../icons/baby.svg");
+    mask-image: url("../icons/baby.svg");
+}
+
+.wx-icon-light-baby-carriage {
+    -webkit-mask-image: url("../icons/baby-carriage.svg");
+    mask-image: url("../icons/baby-carriage.svg");
+}
+
+.wx-icon-light-shoe-prints {
+    -webkit-mask-image: url("../icons/shoe-prints.svg");
+    mask-image: url("../icons/shoe-prints.svg");
+}
+
+.wx-icon-light-spoon {
+    -webkit-mask-image: url("../icons/spoon.svg");
+    mask-image: url("../icons/spoon.svg");
+}
+
+.wx-icon-light-pump-medical {
+    -webkit-mask-image: url("../icons/pump-medical.svg");
+    mask-image: url("../icons/pump-medical.svg");
+}
+
+.wx-icon-light-pump-soap {
+    -webkit-mask-image: url("../icons/pump-soap.svg");
+    mask-image: url("../icons/pump-soap.svg");
+}
+
+.wx-icon-light-jug-detergent {
+    -webkit-mask-image: url("../icons/jug-detergent.svg");
+    mask-image: url("../icons/jug-detergent.svg");
+}
+
+.wx-icon-light-sheet-plastic {
+    -webkit-mask-image: url("../icons/sheet-plastic.svg");
+    mask-image: url("../icons/sheet-plastic.svg");
+}
+
+.wx-icon-light-tarp {
+    -webkit-mask-image: url("../icons/tarp.svg");
+    mask-image: url("../icons/tarp.svg");
+}
+
+.wx-icon-light-tarp-droplet {
+    -webkit-mask-image: url("../icons/tarp-droplet.svg");
+    mask-image: url("../icons/tarp-droplet.svg");
+}
+
+.wx-icon-light-trash-arrow-up {
+    -webkit-mask-image: url("../icons/trash-arrow-up.svg");
+    mask-image: url("../icons/trash-arrow-up.svg");
+}
+
+.wx-icon-light-trash-can-arrow-up {
+    -webkit-mask-image: url("../icons/trash-can-arrow-up.svg");
+    mask-image: url("../icons/trash-can-arrow-up.svg");
+}
+
+.wx-icon-light-umbrella {
+    -webkit-mask-image: url("../icons/umbrella.svg");
+    mask-image: url("../icons/umbrella.svg");
+}
+
+.wx-icon-light-umbrella-beach {
+    -webkit-mask-image: url("../icons/umbrella-beach.svg");
+    mask-image: url("../icons/umbrella-beach.svg");
+}
+
+.wx-icon-light-yin-yang {
+    -webkit-mask-image: url("../icons/yin-yang.svg");
+    mask-image: url("../icons/yin-yang.svg");
+}
+
+.wx-icon-light-peace {
+    -webkit-mask-image: url("../icons/peace.svg");
+    mask-image: url("../icons/peace.svg");
+}
+
+.wx-icon-light-ankh {
+    -webkit-mask-image: url("../icons/ankh.svg");
+    mask-image: url("../icons/ankh.svg");
+}
+
+.wx-icon-light-om {
+    -webkit-mask-image: url("../icons/om.svg");
+    mask-image: url("../icons/om.svg");
+}
+
+.wx-icon-light-jedi {
+    -webkit-mask-image: url("../icons/jedi.svg");
+    mask-image: url("../icons/jedi.svg");
+}
+
+.wx-icon-light-democrat {
+    -webkit-mask-image: url("../icons/democrat.svg");
+    mask-image: url("../icons/democrat.svg");
+}
+
+.wx-icon-light-republican {
+    -webkit-mask-image: url("../icons/republican.svg");
+    mask-image: url("../icons/republican.svg");
+}
+
+.wx-icon-light-mars-stroke {
+    -webkit-mask-image: url("../icons/mars-stroke.svg");
+    mask-image: url("../icons/mars-stroke.svg");
+}
+
+.wx-icon-light-mars-stroke-right {
+    -webkit-mask-image: url("../icons/mars-stroke-right.svg");
+    mask-image: url("../icons/mars-stroke-right.svg");
+}
+
+.wx-icon-light-mars-stroke-up {
+    -webkit-mask-image: url("../icons/mars-stroke-up.svg");
+    mask-image: url("../icons/mars-stroke-up.svg");
+}
+
+.wx-icon-light-mars-and-venus-burst {
+    -webkit-mask-image: url("../icons/mars-and-venus-burst.svg");
+    mask-image: url("../icons/mars-and-venus-burst.svg");
+}
+
+/*
+ * Light variants added for icon classes that are used in the framework, the
+ * tutorial or an application but had none.
+ */
+
+.wx-icon-light-scale-unbalanced {
+    -webkit-mask-image: url("../icons/scale-unbalanced.svg");
+    mask-image: url("../icons/scale-unbalanced.svg");
+}
+
+.wx-icon-light-scale-unbalanced-flip {
+    -webkit-mask-image: url("../icons/scale-unbalanced-flip.svg");
+    mask-image: url("../icons/scale-unbalanced-flip.svg");
+}

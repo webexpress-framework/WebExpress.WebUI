@@ -1,4 +1,6 @@
-﻿namespace WebExpress.WebUI.WebIcon
+﻿using WebExpress.WebCore.WebIcon;
+
+namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon with a seedling design.
@@ -6,11 +8,30 @@
     public class IconSeedling : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the seedling icon.
+        /// Initializes a new instance of the <see cref="IconSeedling"/> class using the
+        /// <see cref="TypeIconTheme.Default"/> theme.
         /// </summary>
-        /// <value>
-        /// A string representing the CSS class for the seedling icon.
-        /// </value>
-        public override string Class => "fas fa-seedling";
+        public IconSeedling()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IconSeedling"/> class using the
+        /// specified theme.
+        /// </summary>
+        /// <param name="theme">The theme to use when rendering the icon.</param>
+        public IconSeedling(TypeIconTheme theme)
+            : base(theme)
+        {
+        }
+
+        /// <summary>
+        /// Returns the CSS class associated with the icon. In the
+        /// <see cref="TypeIconTheme.Light"/> theme the lightweight SVG variant is rendered;
+        /// otherwise the FontAwesome glyph is used.
+        /// </summary>
+        public override string Class => Theme == TypeIconTheme.Light
+            ? "wx-icon-light wx-icon-light-seedling"
+            : "fas fa-seedling";
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace WebExpress.WebUI.WebIcon
+﻿using WebExpress.WebCore.WebIcon;
+
+namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon for a thumbs-up action.
@@ -6,8 +8,30 @@
     public class IconThumbsUp : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Initializes a new instance of the <see cref="IconThumbsUp"/> class using the
+        /// <see cref="TypeIconTheme.Default"/> theme.
         /// </summary>
-        public override string Class => "fas fa-thumbs-up";
+        public IconThumbsUp()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IconThumbsUp"/> class using the
+        /// specified theme.
+        /// </summary>
+        /// <param name="theme">The theme to use when rendering the icon.</param>
+        public IconThumbsUp(TypeIconTheme theme)
+            : base(theme)
+        {
+        }
+
+        /// <summary>
+        /// Returns the CSS class associated with the icon. In the
+        /// <see cref="TypeIconTheme.Light"/> theme the lightweight SVG variant is rendered;
+        /// otherwise the FontAwesome glyph is used.
+        /// </summary>
+        public override string Class => Theme == TypeIconTheme.Light
+            ? "wx-icon-light wx-icon-light-thumbs-up"
+            : "fas fa-thumbs-up";
     }
 }
