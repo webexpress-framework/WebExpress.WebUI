@@ -6,6 +6,10 @@
  * - webexpress.webui.Event.START_INLINE_EDIT_EVENT: triggered when editing starts.
  * - webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT: triggered when a value is saved.
  * - webexpress.webui.Event.END_INLINE_EDIT_EVENT: triggered when editing is finished (regardless if saved or canceled).
+ *
+ * Persistence is optional: with data-form-action the new value is submitted as
+ * form data, without it the save event is the only outcome and the host decides
+ * how to store the value.
  */
 webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
     _activeEdit = null;
@@ -197,14 +201,26 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
             const newValue = this._getEditorValue(element);
-            const formData = new FormData(form);
+
+            // without a configured action the host owns the persistence and
+            // listens for the save event; posting to the current document
+            // instead would be a request nobody asked for
+            if (!this._formAction) {
+                this._dispatch(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
+                    value: this.value,
+                    status: 200,
+                    statusText: ""
+                });
+                this._finishEditing(true, element, newValue);
+                return;
+            }
 
             this._showEditSpinner(element);
 
             try {
                 const response = await fetch(this._formAction, {
                     method: this._formMethod ?? "PUT",
-                    body: formData
+                    body: new FormData(form)
                 });
 
                 this._dispatch(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
