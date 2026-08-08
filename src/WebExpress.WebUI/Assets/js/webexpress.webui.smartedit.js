@@ -160,12 +160,17 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             form.appendChild(this._editor);
         }
 
+        // the field the edited value is submitted in. it is filled at submit time rather
+        // than here, because here the edit has not happened yet — and it is dropped again
+        // when the editor already contributes a control of the same name, so the value
+        // does not travel twice
+        let valueField = null;
+
         if (this._objectName) {
-            const hidden = document.createElement("input");
-            hidden.type = "hidden";
-            hidden.name = this._objectName;
-            hidden.value = this.id;
-            form.appendChild(hidden);
+            valueField = document.createElement("input");
+            valueField.type = "hidden";
+            valueField.name = this._objectName;
+            form.appendChild(valueField);
         }
 
         if (this._objectId) {
@@ -200,6 +205,11 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
+
+            // the value the editor holds now, which is the one _finishEditing applies and
+            // therefore the one the host is told about and the one submitted. reading the
+            // control's own value instead would report the state from before the edit for
+            // every composite editor, which only adopts typed input on its own events
             const newValue = this._getEditorValue(element);
 
             // without a configured action the host owns the persistence and
@@ -207,7 +217,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             // instead would be a request nobody asked for
             if (!this._formAction) {
                 this._dispatch(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
-                    value: this.value,
+                    value: newValue,
                     status: 200,
                     statusText: ""
                 });
@@ -215,6 +225,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
                 return;
             }
 
+            this._prepareValueField(form, valueField, newValue);
             this._showEditSpinner(element);
 
             try {
@@ -224,7 +235,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
                 });
 
                 this._dispatch(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
-                    value: this.value,
+                    value: newValue,
                     status: response.status,
                     statusText: response.statusText || ""
                 });
@@ -232,7 +243,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
                 // bei erfolg übernimmt _finishEditing(save=true) den neuen wert
             } catch (error) {
                 this._dispatch(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
-                    value: this.value,
+                    value: newValue,
                     status: 500,
                     statusText: error.message || this._i18n("webexpress.webui:smartedit.network.error", "Network Error")
                 });
@@ -321,6 +332,37 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         // edit modus beenden und cache löschen
         this._activeEdit = null;
         this._previousValue = null;
+    }
+
+    /**
+     * Prepares the field the edited value is submitted in, just before the form data is
+     * built.
+     *
+     * An editor that is itself a named form control — a plain input, a select, or a
+     * composite control that keeps a named hidden field of its own — already carries the
+     * value into the form data. The extra field would then send the same name twice, so it
+     * is removed instead of filled.
+     *
+     * @param {HTMLFormElement} form the form being submitted
+     * @param {HTMLInputElement|null} valueField the field reserved for the value
+     * @param {string|string[]|any} value the edited value
+     */
+    _prepareValueField(form, valueField, value) {
+        if (!valueField) {
+            return;
+        }
+
+        const submittedByEditor = Array.from(form.elements)
+            .some((el) => el !== valueField && el.name === valueField.name);
+
+        if (submittedByEditor) {
+            valueField.remove();
+            return;
+        }
+
+        valueField.value = Array.isArray(value)
+            ? value.join(";")
+            : (value ?? "");
     }
 
     /**

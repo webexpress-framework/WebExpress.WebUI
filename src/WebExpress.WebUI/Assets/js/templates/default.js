@@ -1,3 +1,35 @@
+/**
+ * Points the inline editor of a cell at the record of its row, so a finished edit is
+ * written to the endpoint the row carries in "restApi" instead of only announcing itself
+ * through the save event. Without this an editable column can be edited but never saves.
+ *
+ * The payload name is the column name, so the request body is { name: value }. The
+ * SmartEditCtrl drops the field it reserves for the value when the editor already
+ * contributes a control of that name, so an editor may carry the name as well.
+ *
+ * @param {HTMLElement} container - The cell container the SmartEditCtrl is mounted on.
+ * @param {Object} row - The row data.
+ * @param {string} name - The payload name of the column.
+ */
+webexpress.webui.TableTemplates.bindInlineEdit = (container, row, name) => {
+    if (!row) {
+        return;
+    }
+
+    if (row.id !== null && typeof row.id !== "undefined") {
+        container.dataset.objectId = row.id;
+    }
+
+    // without an endpoint the host owns the persistence and listens for the save event
+    if (!row.restApi || !name) {
+        return;
+    }
+
+    container.setAttribute("data-object-name", name);
+    container.setAttribute("data-form-action", row.restApi);
+    container.setAttribute("data-form-method", "PUT");
+};
+
 // Date renderer
 webexpress.webui.TableTemplates.register("date", (val, table, row, cell, name, opts) => {
     // ensure opts is an object to prevent runtime errors
@@ -21,9 +53,7 @@ webexpress.webui.TableTemplates.register("date", (val, table, row, cell, name, o
         inputCtrl._placeholderText = placeholder;
         inputCtrl.value = val;
         container.appendChild(editor);
-        if (row.id) {
-            container.dataset.objectId = row.id;
-        }
+        webexpress.webui.TableTemplates.bindInlineEdit(container, row, name);
         new webexpress.webui.SmartEditCtrl(container);
     } else {
         if (cssColor) {
@@ -62,9 +92,7 @@ webexpress.webui.TableTemplates.register("calendar", (val, table, row, cell, nam
         inputCtrl.format = format;
         inputCtrl._placeholderText = placeholder;
         inputCtrl.value = val;
-        if (row.id) {
-            container.dataset.objectId = row.id;
-        }
+        webexpress.webui.TableTemplates.bindInlineEdit(container, row, name);
         container.appendChild(editor);
         new webexpress.webui.SmartEditCtrl(container);
     } else {
@@ -104,13 +132,9 @@ webexpress.webui.TableTemplates.register("tag", (val, table, row, cell, name, op
         inputCtrl._colorStyle = styleColor;
         inputCtrl._placeholderText = placeholder;
         inputCtrl.value = val;
-        if (row.id) {
-            container.dataset.objectId = row.id;
-        }
         container.id = `${row.id}_${name}`;
         container.appendChild(editor);
-        container.setAttribute("data-form-method", "PATCH");
-        container.setAttribute("data-form-action", row.restApi);
+        webexpress.webui.TableTemplates.bindInlineEdit(container, row, name);
         new webexpress.webui.SmartEditCtrl(container);
 
     } else {
@@ -166,9 +190,7 @@ webexpress.webui.TableTemplates.register("selection", (val, table, row, cell, na
         inputCtrl.value = val;
         editor._wx_controller = inputCtrl;
         container.appendChild(editor);
-        if (row.id) {
-            container.dataset.objectId = row.id;
-        }
+        webexpress.webui.TableTemplates.bindInlineEdit(container, row, name);
         new webexpress.webui.SmartEditCtrl(container);
     } else {
         // read-only
@@ -224,9 +246,7 @@ webexpress.webui.TableTemplates.register("combo", (val, table, row, cell, name, 
             select.appendChild(optionEl);
         });
         container.appendChild(select);
-        if (row.id) {
-            container.dataset.objectId = row.id;
-        }
+        webexpress.webui.TableTemplates.bindInlineEdit(container, row, name);
         new webexpress.webui.SmartEditCtrl(container);
     } else {
         // read-only
@@ -269,9 +289,7 @@ webexpress.webui.TableTemplates.register("text", (val, table, row, cell, name, o
         container.appendChild(input);
 
         // set optional object id for smart edit/save integration
-        if (row && row.id) {
-            container.dataset.objectId = row.id;
-        }
+        webexpress.webui.TableTemplates.bindInlineEdit(container, row, name);
 
         // initialize smarteditctrl so inline-edit lifecycle is available
         new webexpress.webui.SmartEditCtrl(container);
@@ -341,9 +359,7 @@ webexpress.webui.TableTemplates.register("numeric", (val, table, row, cell, name
         container.appendChild(input);
 
         // set optional object id for smart edit/save integration
-        if (row && row.id) {
-            container.dataset.objectId = row.id;
-        }
+        webexpress.webui.TableTemplates.bindInlineEdit(container, row, name);
 
         // initialize smarteditctrl so inline-edit lifecycle is available
         new webexpress.webui.SmartEditCtrl(container);
@@ -406,9 +422,7 @@ webexpress.webui.TableTemplates.register("move", (val, table, row, cell, name, o
         inputCtrl.value = val;
         editor._wx_controller = inputCtrl;
         container.appendChild(editor);
-        if (row.id) {
-            container.dataset.objectId = row.id;
-        }
+        webexpress.webui.TableTemplates.bindInlineEdit(container, row, name);
         new webexpress.webui.SmartEditCtrl(container);
     } else {
         // read-only
@@ -440,9 +454,7 @@ webexpress.webui.TableTemplates.register("rating", (val, table, row, cell, name,
         inputCtrl.value = val;
         editor._wx_controller = inputCtrl;
         container.appendChild(editor);
-        if (row.id) {
-            container.dataset.objectId = row.id;
-        }
+        webexpress.webui.TableTemplates.bindInlineEdit(container, row, name);
         new webexpress.webui.SmartEditCtrl(container);
     } else {
         // read-only
@@ -478,9 +490,7 @@ webexpress.webui.TableTemplates.register("traffic-light", (val, table, row, cell
         inputCtrl.value = val;
         editor._wx_controller = inputCtrl;
         container.appendChild(editor);
-        if (row.id) {
-            container.dataset.objectId = row.id;
-        }
+        webexpress.webui.TableTemplates.bindInlineEdit(container, row, name);
         new webexpress.webui.SmartEditCtrl(container);
     } else {
         // read-only
@@ -513,9 +523,7 @@ webexpress.webui.TableTemplates.register("editor", (val, table, row, cell, name,
         inputCtrl.value = val;
         editor._wx_controller = inputCtrl;
         container.appendChild(editor);
-        if (row.id) {
-            container.dataset.objectId = row.id;
-        }
+        webexpress.webui.TableTemplates.bindInlineEdit(container, row, name);
         new webexpress.webui.SmartEditCtrl(container);
     } else {
         // read-only
@@ -551,9 +559,7 @@ webexpress.webui.TableTemplates.register("color", (val, table, row, cell, name, 
         editor._wx_controller = inputCtrl;
         container.appendChild(editor);
 
-        if (row.id) {
-            container.dataset.objectId = row.id;
-        }
+        webexpress.webui.TableTemplates.bindInlineEdit(container, row, name);
         new webexpress.webui.SmartEditCtrl(container);
     } else {
         // read-only view
