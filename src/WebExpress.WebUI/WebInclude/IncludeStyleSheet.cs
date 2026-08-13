@@ -20,6 +20,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/css/webexpress.webui.calendar.css")]
     [Asset("/assets/css/webexpress.webui.card.css")]
     [Asset("/assets/css/webexpress.webui.cascading.css")]
+    [Asset("/assets/css/webexpress.webui.choice.css")]
     [Asset("/assets/css/webexpress.webui.code.css")]
     [Asset("/assets/css/webexpress.webui.color.css")]
     [Asset("/assets/css/webexpress.webui.dashboard.css")]

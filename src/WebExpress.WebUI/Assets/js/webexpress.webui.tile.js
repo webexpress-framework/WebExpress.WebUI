@@ -281,10 +281,25 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         const list = [];
         root.querySelectorAll(":scope > .wx-tile-card").forEach(div => {
             const id = div.dataset.id || div.id || null;
+
+            // the footer is authored as a child of the card, but is rendered after the
+            // body, so it is taken out of the markup that becomes the body
+            const source = div.cloneNode(true);
+            const footerElement = source.querySelector(".wx-tile-card-footer");
+            const footer = footerElement ? footerElement.innerHTML.trim() : null;
+            if (footerElement) {
+                footerElement.remove();
+            }
+
             list.push({
                 id: id,
                 label: div.dataset.label || "",
-                html: div.innerHTML.trim(),
+                badge: div.dataset.badge || null,
+                badgeColorCss: div.dataset.badgeColorCss || null,
+                badgeColorStyle: div.dataset.badgeColorStyle || null,
+                chip: div.dataset.chip || null,
+                footer: footer,
+                html: source.innerHTML.trim(),
                 class: div.dataset.class || "",
                 icon: div.dataset.icon || null,
                 image: div.dataset.image || null,
@@ -372,6 +387,38 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
             card.appendChild(btn);
         }
 
+        // add the kicker row carrying the kind of the card and its qualifier
+        if (tile.badge || tile.chip) {
+            const kicker = document.createElement("div");
+            kicker.className = "wx-tile-card-kicker";
+
+            if (tile.badge) {
+                const badge = document.createElement("span");
+                badge.className = "wx-tile-card-badge";
+
+                const dot = document.createElement("span");
+                dot.className = "wx-tile-card-badge-dot";
+                if (tile.badgeColorCss) {
+                    dot.classList.add(...tile.badgeColorCss.split(/\s+/).filter(Boolean));
+                }
+                if (tile.badgeColorStyle) {
+                    dot.style.cssText = tile.badgeColorStyle;
+                }
+                badge.appendChild(dot);
+                badge.append(document.createTextNode(tile.badge));
+                kicker.appendChild(badge);
+            }
+
+            if (tile.chip) {
+                const chip = document.createElement("span");
+                chip.className = "wx-tile-card-chip";
+                chip.textContent = tile.chip;
+                kicker.appendChild(chip);
+            }
+
+            card.appendChild(kicker);
+        }
+
         // render header with icon/image/label and supporting large icons
         if (tile.label || tile.icon || tile.image) {
             const header = document.createElement("h5");
@@ -408,6 +455,14 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
             body.innerHTML = tile.html;
         }
         card.appendChild(body);
+
+        // add the metadata footer
+        if (tile.footer) {
+            const footer = document.createElement("div");
+            footer.className = "wx-tile-card-footer";
+            footer.innerHTML = tile.footer;
+            card.appendChild(footer);
+        }
 
         // add drag and drop support if movable
         if (this._movable) {

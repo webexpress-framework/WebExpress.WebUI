@@ -80,6 +80,117 @@
     border-radius: 4px;
 }
 
+/* Grid layout: a fixed number of tiles per row instead of a free flow */
+.wx-tile-container-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--wx-tile-columns, 2), minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.wx-tile-container-grid > .wx-tile-card {
+    width: auto;
+}
+
+/* Kicker row: the kind a card belongs to, plus an optional qualifier */
+.wx-tile-card-kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin: 0.75em 0.85em 0;
+    min-height: 1.1em;
+}
+
+.wx-tile-card-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    font-size: 0.68em;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--wx-secondary-color, #6c757d);
+}
+
+.wx-tile-card-badge-dot {
+    display: inline-block;
+    width: 0.72em;
+    height: 0.72em;
+    border-radius: 2px;
+    background: var(--wx-secondary, #6c757d);
+    flex: 0 0 auto;
+}
+
+.wx-tile-card-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1em 0.45em;
+    border-radius: var(--bs-border-radius-sm, 0.25rem);
+    font-size: 0.62em;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--wx-warning-bg-subtle, #fff3cd);
+    color: var(--wx-warning-text-emphasis, #997404);
+}
+
+/* Metadata footer, separated from the body by a hairline */
+.wx-tile-card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35em 1.1em;
+    padding: 0.5em 0.85em 0.65em;
+    margin: 0 0.85em;
+    border-top: 1px dashed var(--wx-border-color, #dee2e6);
+    font-size: 0.75em;
+    color: var(--wx-secondary-color, #6c757d);
+}
+
+/* Selection: a primary frame over a tinted ground, plus a check badge, so the
+   chosen card stands out clearly while its content stays readable. The badge
+   carries the state independently of colour.
+
+   The selectors carry the card class twice, and the grid variant additionally
+   names its container: `.wx-tile-container > .wx-tile-card` above sets `border`
+   and `box-shadow` as shorthands and `.wx-tile-card:hover` sets `border-color`,
+   all of which would otherwise outrank a single-class rule and erase the frame. */
+.wx-tile-card.wx-tile-card-selected,
+.wx-tile-container > .wx-tile-card.wx-tile-card-selected,
+.wx-tile-container > .wx-tile-card.wx-tile-card-selected:hover {
+    border-color: var(--wx-primary, #0d6efd);
+    box-shadow: 0 0 0 2px var(--wx-primary, #0d6efd) inset, 0 4px 12px rgba(var(--wx-primary-rgb, 13, 110, 253), .18);
+    background-color: var(--wx-primary-bg-subtle, #cfe2ff);
+}
+
+/* the generic title rule below resets the colour to inherit, so the selected
+   variant is written with the extra class to outrank it */
+.wx-tile-card.wx-tile-card-selected .card-title {
+    color: var(--wx-primary-text-emphasis, #052c65);
+}
+
+.wx-tile-card-check {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 1.5em;
+    height: 1.5em;
+    border-radius: 9999px;
+    background: var(--wx-primary, #0d6efd);
+    color: var(--wx-primary-contrast, #fff);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+    line-height: 1;
+    z-index: 2;
+}
+
+/* keep the badge clear of the kicker row and of a card that has none */
+.wx-tile-card .wx-tile-card-kicker,
+.wx-tile-card .card-title {
+    padding-right: 1.9em;
+}
+
 /* Content structure */
 .wx-tile-card .card-title {
     display: inline-flex;
@@ -204,6 +315,32 @@
     background: var(--wx-body-bg);
     padding: 1.2rem 1.5rem;
     min-height: 180px;
+}
+
+/* Search box above the tiles */
+.wx-tile-picker-search {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.wx-tile-picker-search > i {
+    position: absolute;
+    top: 50%;
+    left: 0.85rem;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--wx-secondary-color, #6c757d);
+}
+
+.wx-tile-picker-search > input {
+    padding-left: 2.4rem;
+}
+
+/* Shown when search or filter leaves no tile visible */
+.wx-tile-picker-empty {
+    padding: 2rem 0;
+    text-align: center;
+    color: var(--wx-secondary-color, #6c757d);
 }
 
 /* Tile picker grid */

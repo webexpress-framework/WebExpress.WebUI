@@ -39,7 +39,40 @@ Each tile is defined by an element with the class `.wx-tile-card`.
 | `data-image` | The URL of an image for the tile header. | `data-image="/path/to/icon.png"` |
 | `data-color-css` | A CSS class for color styling. | `data-color-css="bg-primary"` |
 | `data-visible` | Determines if the tile is initially visible. | `data-visible="false"` |
+| `data-badge` | A kicker shown above the title, naming the kind the tile belongs to. `data-badge-color-css` / `data-badge-color-style` colour its marker. | `data-badge="Incident"` |
+| `data-chip` | A short qualifier shown at the trailing end of the kicker row. | `data-chip="Recommended"` |
 | `innerHTML` | The HTML content of the tile body. | `<div>Additional details...</div>` |
+| `.wx-tile-card-footer` | A child element whose content is rendered as a metadata footer below the body instead of inside it. | `<div class="wx-tile-card-footer"><span>9 fields</span></div>` |
+
+A tile card is therefore laid out as kicker, title, body and footer, so the kind a card
+belongs to reads before its name and its metadata after its description. The same anatomy
+is used by the tile picker form control (`wx-webui-input-tile`), which additionally
+supports a search box (`data-searchable`, `data-search-placeholder`), a fixed number of
+tiles per row (`data-columns`), narrowing the visible tiles to the value of another input
+(`data-filter-source` on the picker, `data-filter-value` on the tile), and projecting
+values out of the selected tile (`data-wx-bind-*`, see below).
+
+A tile marked `data-always-visible="true"` is exempt from both the filter and the search.
+Use it for the entry that must never fall away because it is the way on — an "add new" or
+a "none of these" card.
+
+### Selection
+
+The picker marks the chosen tile with the class `wx-tile-card-selected` and with
+`aria-selected`, and adds a check badge (`wx-tile-card-check`) in its corner. The state is
+therefore carried by the frame, the ground and a glyph together rather than by colour
+alone. Because the base rule of a tile card declares `border` and `box-shadow` as
+shorthands from a descendant selector, the stylesheet writes the selected state with a
+selector that outranks it; a single-class rule would be overridden and the frame would
+silently disappear.
+
+### Bound values
+
+A tile of the picker may carry `data-wx-bind-{name}` attributes. When the tile is
+selected, each value is written to the form control of that name, to the text of any
+element carrying `data-wx-bind-text="{name}"`, and toggles the visibility of any element
+carrying `data-wx-bind-visible="{name}"`. This lets a card stand for more than its label —
+the references it selects, or a note about what it implies — without a bespoke script.
 
 ## Programmatic Control
 

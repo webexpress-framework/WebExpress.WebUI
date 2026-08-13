@@ -20,6 +20,31 @@ namespace WebExpress.WebUI.WebControl
         Func<IRenderControlContext, bool> MultiSelect { get; }
 
         /// <summary>
+        /// Gets a value indicating whether a search box is shown above the tiles.
+        /// </summary>
+        Func<IRenderControlContext, bool> Searchable { get; }
+
+        /// <summary>
+        /// Gets the placeholder of the search box.
+        /// </summary>
+        Func<IRenderControlContext, string> SearchPlaceholder { get; }
+
+        /// <summary>
+        /// Gets the number of tiles per row. A value of zero lets the tiles flow.
+        /// </summary>
+        Func<IRenderControlContext, int> Columns { get; }
+
+        /// <summary>
+        /// Gets the name of the input the visible tiles are filtered by.
+        /// </summary>
+        Func<IRenderControlContext, string> FilterSource { get; }
+
+        /// <summary>
+        /// Gets the text shown when no tile is left to choose from.
+        /// </summary>
+        Func<IRenderControlContext, string> EmptyText { get; }
+
+        /// <summary>
         /// Adds one or more items to the tile control.
         /// </summary>
         /// <param name="items">The items to add.</param>

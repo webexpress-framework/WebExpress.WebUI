@@ -36,6 +36,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/webexpress.webui.input.avatar.js")]
     [Asset("/assets/js/webexpress.webui.input.calendar.js")]
     [Asset("/assets/js/webexpress.webui.input.cascading.js")]
+    [Asset("/assets/js/webexpress.webui.input.choice.js")]
     [Asset("/assets/js/webexpress.webui.input.color.js")]
     [Asset("/assets/js/webexpress.webui.input.date.js")]
     [Asset("/assets/js/webexpress.webui.input.move.js")]

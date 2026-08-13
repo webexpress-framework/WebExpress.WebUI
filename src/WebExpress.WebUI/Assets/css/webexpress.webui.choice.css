@@ -1,0 +1,72 @@
+/* segmented choice input, scoped to .wx-choice */
+
+.wx-choice {
+    display: block;
+}
+
+.wx-choice-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.wx-choice .wx-choice-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid var(--wx-border-color, #dee2e6);
+    border-radius: var(--bs-border-radius, 0.375rem);
+    background: var(--wx-body-bg, #fff);
+    color: var(--wx-body-color, #212529);
+    font-size: 0.875rem;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: border-color .15s, box-shadow .15s, background-color .15s;
+}
+
+/* the selected option keeps its primary frame on hover, so the hover rule excludes
+   it rather than outranking it with its extra pseudo-class */
+.wx-choice .wx-choice-option:hover:not(:disabled):not(.wx-choice-option-selected) {
+    border-color: var(--wx-secondary, #6c757d);
+}
+
+.wx-choice .wx-choice-option:focus-visible {
+    outline: 2px solid var(--wx-primary, #0d6efd);
+    outline-offset: 2px;
+}
+
+.wx-choice .wx-choice-option:disabled {
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+/* the selected option reads as active through frame, ground and weight together */
+.wx-choice .wx-choice-option-selected {
+    border-color: var(--wx-primary, #0d6efd);
+    box-shadow: 0 0 0 1px var(--wx-primary, #0d6efd) inset;
+    background-color: var(--wx-primary-bg-subtle, #cfe2ff);
+    color: var(--wx-primary-text-emphasis, #052c65);
+    font-weight: 600;
+}
+
+.wx-choice-option-dot {
+    display: inline-block;
+    width: 0.6em;
+    height: 0.6em;
+    border-radius: 9999px;
+    background: var(--wx-secondary, #6c757d);
+    flex: 0 0 auto;
+}
+
+/* the server-rendered options before the controller takes over */
+.wx-webui-input-choice:not(.wx-choice) > .wx-choice-option {
+    display: none;
+}
+
+@media (forced-colors: active) {
+    .wx-choice .wx-choice-option-selected {
+        border: 2px solid Highlight;
+        box-shadow: none;
+    }
+}

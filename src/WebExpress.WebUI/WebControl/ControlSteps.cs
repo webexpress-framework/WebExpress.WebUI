@@ -25,6 +25,14 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, bool> Vertical { get; set; } = _ => false;
 
         /// <summary>
+        /// Gets or sets a value indicating whether the steps are laid out in a single row
+        /// with the marker beside its label instead of above it, the connectors stretching
+        /// between the steps. This is the shape a dialog header needs. Ignored when
+        /// <see cref="Vertical"/> is set.
+        /// </summary>
+        public Func<IRenderControlContext, bool> Inline { get; set; } = _ => false;
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -56,11 +64,12 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var vertical = Vertical?.Invoke(renderContext) ?? false;
+            var inline = !vertical && (Inline?.Invoke(renderContext) ?? false);
 
             return new HtmlElementTextContentDiv([.. Items.Select((x, i) => x.Render(renderContext, visualTree, i + 1))])
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-steps", vertical ? "wx-steps-vertical" : "", GetClasses(renderContext)),
+                Class = Css.Concatenate("wx-steps", vertical ? "wx-steps-vertical" : "", inline ? "wx-steps-inline" : "", GetClasses(renderContext)),
                 Style = GetStyles(renderContext),
                 Role = Role?.Invoke(renderContext)
             };

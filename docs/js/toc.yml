@@ -14,6 +14,8 @@
   href: cascading.md
 - name: Chart
   href: chart.md
+- name: Choice
+  href: choice.md
 - name: Code
   href: code.md
 - name: Color
@@ -24,6 +26,8 @@
   href: dropdown.md
 - name: Editor
   href: editor.md
+- name: Estimate
+  href: estimate.md
 - name: Expandable
   href: expandable.md
 - name: FileList
@@ -36,6 +40,8 @@
   href: graph.md
 - name: Heat Map
   href: heatmap.md
+- name: Kanban
+  href: kanban.md
 - name: List
   href: list.md
 - name: Modal
@@ -68,12 +74,16 @@
   href: selection.md
 - name: Sidebar
   href: sidebar.md
+- name: SLA
+  href: sla.md
 - name: Slider
   href: slider.md
 - name: SmartEdit
   href: smartedit.md
 - name: SmartView
   href: smartview.md
+- name: Steps
+  href: steps.md
 - name: Split
   href: split.md
 - name: Tab

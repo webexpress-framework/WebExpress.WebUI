@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -24,10 +26,41 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, bool> MultiSelect { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether a large icon is displayed 
+        /// Gets or sets a value indicating whether a large icon is displayed
         /// for the item.
         /// </summary>
         public Func<IRenderControlContext, bool> LargeIcon { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether a search box is shown above the
+        /// tiles. It filters the tiles by their label, kicker and content as it is typed.
+        /// </summary>
+        public Func<IRenderControlContext, bool> Searchable { get; set; }
+
+        /// <summary>
+        /// Gets or sets the placeholder of the search box.
+        /// </summary>
+        public Func<IRenderControlContext, string> SearchPlaceholder { get; set; }
+
+        /// <summary>
+        /// Gets or sets the number of tiles per row. A value of zero, the default,
+        /// lets the tiles flow at their natural width.
+        /// </summary>
+        public Func<IRenderControlContext, int> Columns { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the input the visible tiles are filtered by. Only the
+        /// tiles whose <see cref="ControlTileCard.FilterValue"/> equals the current value
+        /// of that input remain visible; a tile carrying no filter value always does. This
+        /// is what narrows a later step of a form to the choice made in an earlier one.
+        /// </summary>
+        public Func<IRenderControlContext, string> FilterSource { get; set; }
+
+        /// <summary>
+        /// Gets or sets the text shown in place of the tiles when the search or the
+        /// filter leaves none of them visible.
+        /// </summary>
+        public Func<IRenderControlContext, string> EmptyText { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -110,6 +143,9 @@ namespace WebExpress.WebUI.WebControl
             var name = Name?.Invoke(renderContext);
             var disabled = Disabled?.Invoke(renderContext) ?? false;
             var largeIcon = LargeIcon?.Invoke(renderContext) ?? false;
+            var searchable = Searchable?.Invoke(renderContext) ?? false;
+            var columns = Columns?.Invoke(renderContext) ?? 0;
+            var required = Required?.Invoke(renderContext) ?? false;
             var role = Role?.Invoke(renderContext);
 
             if (disabled)
@@ -128,6 +164,12 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-value", value)
                 .AddUserAttribute("data-multiselect", MultiSelect?.Invoke(renderContext) == true ? "true" : null)
                 .AddUserAttribute("data-large-icon", largeIcon ? "true" : null)
+                .AddUserAttribute("data-required", required ? "true" : null)
+                .AddUserAttribute("data-searchable", searchable ? "true" : null)
+                .AddUserAttribute("data-search-placeholder", I18N.Translate(renderContext, SearchPlaceholder?.Invoke(renderContext)))
+                .AddUserAttribute("data-columns", columns > 0 ? columns.ToString(CultureInfo.InvariantCulture) : null)
+                .AddUserAttribute("data-filter-source", FilterSource?.Invoke(renderContext))
+                .AddUserAttribute("data-empty-text", I18N.Translate(renderContext, EmptyText?.Invoke(renderContext)))
                 .Add
                 (
                     _items.Select

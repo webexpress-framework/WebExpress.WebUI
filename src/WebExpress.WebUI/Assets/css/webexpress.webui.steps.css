@@ -27,9 +27,11 @@
     z-index: 0;
 }
 
+/* the connector in front of a reached step is drawn in the completed colour,
+   because the step it comes from has been completed */
 .wx-steps-item-active:not(:first-child)::before,
 .wx-steps-item-completed:not(:first-child)::before {
-    background: var(--wx-primary, #0d6efd);
+    background: var(--wx-success, #198754);
 }
 
 .wx-steps-marker {
@@ -48,11 +50,16 @@
     border: 2px solid var(--wx-border-color, #dee2e6);
 }
 
-.wx-steps-item-active .wx-steps-marker,
-.wx-steps-item-completed .wx-steps-marker {
+.wx-steps-item-active .wx-steps-marker {
     background: var(--wx-primary, #0d6efd);
     color: #fff;
     border-color: var(--wx-primary, #0d6efd);
+}
+
+.wx-steps-item-completed .wx-steps-marker {
+    background: var(--wx-success-bg-subtle, #d1e7dd);
+    color: var(--wx-success, #198754);
+    border-color: var(--wx-success, #198754);
 }
 
 .wx-steps-text {
@@ -75,6 +82,53 @@
     display: block;
     font-size: 0.75rem;
     color: var(--wx-secondary-color, #6c757d);
+}
+
+/* inline layout: one row, marker beside its label, connectors stretching between
+   the steps. The connector is a flex item rather than an absolutely positioned
+   bar, so the steps keep their natural width and the line takes the rest. */
+
+.wx-steps-inline {
+    align-items: center;
+    gap: 0;
+}
+
+.wx-steps-inline .wx-steps-item {
+    flex: 0 1 auto;
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 0.6rem;
+}
+
+.wx-steps-inline .wx-steps-item:not(:first-child)::before {
+    position: static;
+    flex: 1 1 2rem;
+    min-width: 1.5rem;
+    width: auto;
+    top: auto;
+    left: auto;
+    margin-right: 0.75rem;
+}
+
+.wx-steps-inline .wx-steps-item:not(:first-child) {
+    flex: 1 1 auto;
+}
+
+.wx-steps-inline .wx-steps-marker {
+    flex: 0 0 auto;
+}
+
+.wx-steps-inline .wx-steps-text {
+    margin-top: 0;
+    min-width: 0;
+}
+
+.wx-steps-inline .wx-steps-label,
+.wx-steps-inline .wx-steps-description {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* vertical layout */

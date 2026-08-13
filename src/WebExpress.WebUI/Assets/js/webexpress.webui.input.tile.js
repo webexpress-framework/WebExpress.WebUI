@@ -13,6 +13,15 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
     _multiselect = false;
     _lastSelectedIdx = null;
     _largeIcon = false;
+    _searchable = false;
+    _searchPlaceholder = "";
+    _searchTerm = "";
+    _searchInput = null;
+    _columns = 0;
+    _filterSource = null;
+    _filterValue = null;
+    _emptyText = "";
+    _emptyElement = null;
 
     /**
      * Constructs the tile picker input field.
@@ -29,12 +38,24 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         // check for large icon option
         this._largeIcon = element.dataset.largeIcon === "true";
 
+        // search, grid and filter options
+        this._searchable = element.dataset.searchable === "true";
+        this._searchPlaceholder = element.dataset.searchPlaceholder || "";
+        this._columns = parseInt(element.dataset.columns, 10) || 0;
+        this._filterSource = element.dataset.filterSource || null;
+        this._emptyText = element.dataset.emptyText || "";
+
         this._hidden = this._createHiddenInput();
         if (id) {
-            this._hidden.id = id;
+            this._hidden.setAttribute("id", id);
         }
         if (name) {
-            this._hidden.name = name;
+            this._hidden.setAttribute("name", name);
+        }
+        // a hidden input is barred from native constraint validation, so a required
+        // picker declares itself to the form controller instead
+        if (element.dataset.required === "true") {
+            this._hidden.dataset.wxRequired = "true";
         }
 
         // load tile data
@@ -49,7 +70,19 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         element.removeAttribute("id");
         element.removeAttribute("name");
         element.removeAttribute("data-value");
+
+        if (this._searchable) {
+            element.appendChild(this._createSearchBox());
+        }
+
         element.appendChild(this._tileList);
+
+        this._emptyElement = document.createElement("div");
+        this._emptyElement.className = "wx-tile-picker-empty";
+        this._emptyElement.textContent = this._emptyText;
+        this._emptyElement.style.display = "none";
+        element.appendChild(this._emptyElement);
+
         if (name || id) {
             element.appendChild(this._hidden);
         }
@@ -73,6 +106,7 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
             }
         }
 
+        this._attachFilterSource();
         this.render();
     }
 
@@ -134,8 +168,43 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
      */
     _createHiddenInput() {
         const input = document.createElement("input");
-        input.type = "hidden";
+        input.setAttribute("type", "hidden");
         return input;
+    }
+
+    /**
+     * Creates the search box shown above the tiles.
+     * @returns {HTMLElement} The search box wrapper.
+     */
+    _createSearchBox() {
+        const wrapper = document.createElement("div");
+        wrapper.className = "wx-tile-picker-search";
+
+        const icon = document.createElement("i");
+        icon.className = this._iconClass("fas fa-search", "wx-icon-light-search");
+        wrapper.appendChild(icon);
+
+        this._searchInput = document.createElement("input");
+        this._searchInput.type = "search";
+        this._searchInput.className = "form-control";
+        this._searchInput.autocomplete = "off";
+        this._searchInput.placeholder = this._searchPlaceholder;
+        this._searchInput.setAttribute("aria-label", this._searchPlaceholder);
+        this._searchInput.addEventListener("input", () => {
+            this._searchTerm = this._searchInput.value.trim().toLowerCase();
+            this.render();
+        });
+
+        // a search box inside a form must not submit it when enter is pressed
+        this._searchInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+            }
+        });
+
+        wrapper.appendChild(this._searchInput);
+
+        return wrapper;
     }
 
     /**
@@ -151,15 +220,38 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
             if (!label && div.querySelector(".card-title")) {
                 label = div.querySelector(".card-title").textContent.trim();
             }
+
+            // the footer is authored as a child of the card, but is rendered after
+            // the body, so it is taken out of the markup that becomes the body
+            const source = div.cloneNode(true);
+            const footerElement = source.querySelector(".wx-tile-card-footer");
+            const footer = footerElement ? footerElement.innerHTML.trim() : null;
+            if (footerElement) {
+                footerElement.remove();
+            }
+
             tiles.push({
                 id,
                 label: label || id,
-                html: div.innerHTML.trim(),
+                badge: div.dataset.badge || null,
+                badgeColorCss: div.dataset.badgeColorCss || null,
+                badgeColorStyle: div.dataset.badgeColorStyle || null,
+                chip: div.dataset.chip || null,
+                html: source.innerHTML.trim(),
+                footer: footer,
                 class: div.dataset.class || "",
                 icon: div.dataset.icon || null,
                 image: div.dataset.image || null,
                 colorCss: div.dataset.colorCss || div.dataset.color || null,
                 colorStyle: div.dataset.colorStyle || null,
+                filterValue: div.dataset.filterValue || null,
+                alwaysVisible: div.dataset.alwaysVisible === "true",
+
+                // values the tile projects into the surrounding form when selected
+                bindings: Object.fromEntries(Object.entries(div.dataset)
+                    .filter(([k]) => k.startsWith("wxBind"))
+                    .map(([k, v]) => [k.slice(6).toLowerCase(), v])
+                ),
 
                 // parse action attributes
                 primaryAction: div.dataset.wxPrimaryAction || null,
@@ -167,7 +259,13 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
                 primaryUri: div.dataset.wxPrimaryUri || null,
                 secondaryAction: div.dataset.wxSecondaryAction || null,
                 secondaryTarget: div.dataset.wxSecondaryTarget || null,
-                secondaryUri: div.dataset.wxSecondaryUri || null
+                secondaryUri: div.dataset.wxSecondaryUri || null,
+
+                // lowercase haystack, built once, for the search box
+                search: [label, div.dataset.badge, div.dataset.chip, source.textContent]
+                    .filter(Boolean)
+                    .join(" ")
+                    .toLowerCase()
             });
         });
         return tiles;
@@ -242,6 +340,7 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
                 if (this._hidden) {
                     this._hidden.value = id;
                 }
+                this._applyBindings(exist);
                 this.render();
                 this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: id });
             }
@@ -249,9 +348,190 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Returns the form the picker lives in, or the document when it stands alone.
+     * @returns {HTMLElement|Document} The scope bound targets are looked up in.
+     */
+    _scope() {
+        return this._element.closest("form") || document;
+    }
+
+    /**
+     * Looks up a form control by name. A binding key arrives through the dataset api,
+     * which lower-cases it, so the exact match is followed by a case-insensitive scan
+     * rather than requiring the author to spell the target name in lower case.
+     * @param {HTMLElement|Document} scope - The scope to look in.
+     * @param {string} name - The name of the control.
+     * @returns {HTMLElement|null} The control, or null when none carries the name.
+     */
+    _findNamedControl(scope, name) {
+        const exact = scope.querySelector(`[name="${name}"]`);
+        if (exact) {
+            return exact;
+        }
+
+        const lower = name.toLowerCase();
+        return Array.from(scope.querySelectorAll("[name]"))
+            .find(el => el.getAttribute("name").toLowerCase() === lower) || null;
+    }
+
+    /**
+     * Projects the values a tile carries into the surrounding form: a form control of
+     * the bound name receives the value, an element carrying data-wx-bind-text of that
+     * name receives it as its text, and an element carrying data-wx-bind-visible of
+     * that name is shown only while the value is present. Clearing the selection
+     * (tile === null) resets all three.
+     * @param {Object|null} tile - The selected tile, or null when nothing is selected.
+     */
+    _applyBindings(tile) {
+        const names = new Set();
+        for (const t of this._tiles) {
+            Object.keys(t.bindings || {}).forEach(k => names.add(k));
+        }
+        if (!names.size) {
+            return;
+        }
+
+        const scope = this._scope();
+
+        for (const name of names) {
+            const value = (tile && tile.bindings && tile.bindings[name]) || "";
+
+            scope.querySelectorAll(`[data-wx-bind-text="${name}"]`).forEach(el => {
+                el.textContent = value;
+            });
+
+            scope.querySelectorAll(`[data-wx-bind-visible="${name}"]`).forEach(el => {
+                el.style.display = value ? "" : "none";
+            });
+        }
+
+        // the targets are written twice: a control that narrows its own options to the
+        // value of another one (a priority to its class) rejects a value that is not
+        // offered yet, and only the first pass puts that other value in place
+        this._writeBindingTargets(scope, names, tile);
+        this._writeBindingTargets(scope, names, tile);
+    }
+
+    /**
+     * Writes the bound values into the form controls that carry the bound names.
+     * @param {HTMLElement|Document} scope - The scope the targets are looked up in.
+     * @param {Set<string>} names - The bound names.
+     * @param {Object|null} tile - The selected tile, or null when nothing is selected.
+     */
+    _writeBindingTargets(scope, names, tile) {
+        for (const name of names) {
+            const value = (tile && tile.bindings && tile.bindings[name]) || "";
+            const input = this._findNamedControl(scope, name);
+
+            if (!input) {
+                continue;
+            }
+
+            // a control is registered against its root element, not against the hidden
+            // input it submits through, so the lookup walks up from the input
+            const ctrl = webexpress.webui.Controller.getClosestInstance(input);
+
+            if (ctrl && typeof ctrl.value !== "undefined") {
+                ctrl.value = value;
+            } else if (input.value !== value) {
+                input.value = value;
+                input.dispatchEvent(new CustomEvent("change", { bubbles: true }));
+            }
+        }
+    }
+
+    /**
+     * Binds the picker to the input its visible tiles are filtered by. The bound input
+     * is usually written programmatically by another control, which does not raise a
+     * native change event, so the bubbling value change event is listened for as well.
+     */
+    _attachFilterSource() {
+        if (!this._filterSource) {
+            return;
+        }
+
+        const scope = this._scope();
+        const read = () => {
+            const source = this._findNamedControl(scope, this._filterSource);
+            const ctrl = source ? webexpress.webui.Controller.getClosestInstance(source) : null;
+            const next = source
+                ? ((ctrl && typeof ctrl.value !== "undefined") ? ctrl.value : source.value) || null
+                : null;
+
+            if (next === this._filterValue) {
+                return;
+            }
+
+            this._filterValue = next;
+            this._dropSelectionOutsideFilter();
+            this.render();
+        };
+
+        scope.addEventListener("change", read);
+        scope.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, read);
+
+        read();
+    }
+
+    /**
+     * Clears the selection when the tile it points at is no longer visible, so a
+     * choice made before the filter changed cannot be submitted unseen.
+     */
+    _dropSelectionOutsideFilter() {
+        if (this._multiselect) {
+            const kept = (this._value || []).filter(id => {
+                const tile = this._tiles.find(t => t.id === id);
+                return tile && this._matchesFilter(tile);
+            });
+            if (kept.length !== (this._value || []).length) {
+                this._value = kept;
+                if (this._hidden) {
+                    this._hidden.value = kept.join(";");
+                }
+                this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: kept.join(";") });
+            }
+            return;
+        }
+
+        const selected = this._tiles.find(t => t.id === this._value);
+        if (this._value && (!selected || !this._matchesFilter(selected))) {
+            this._value = null;
+            if (this._hidden) {
+                this._hidden.value = "";
+            }
+            this._applyBindings(null);
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: "" });
+        }
+    }
+
+    /**
+     * Checks a tile against the bound filter. A tile without a filter value is
+     * always shown, so an entry that applies everywhere needs no marking, and a
+     * tile marked as always visible passes unconditionally.
+     * @param {Object} tile - The tile to check.
+     * @returns {boolean} True when the tile passes the filter.
+     */
+    _matchesFilter(tile) {
+        if (tile.alwaysVisible || !this._filterSource || !this._filterValue) {
+            return true;
+        }
+        return !tile.filterValue || tile.filterValue === this._filterValue;
+    }
+
+    /**
+     * Checks a tile against the current search term. A tile marked as always visible
+     * is not something the user searches for and stays regardless of the term.
+     * @param {Object} tile - The tile to check.
+     * @returns {boolean} True when the tile matches.
+     */
+    _matchesSearch(tile) {
+        return tile.alwaysVisible || !this._searchTerm || (tile.search || "").includes(this._searchTerm);
+    }
+
+    /**
      * Constructs a tile card element with selection highlighting and event listeners.
-     * Handles proper background class assignment for selection.
-     * Fügt große Icon-Option hinzu, falls aktiviert.
+     * The card is laid out as kicker, title, body and footer, so the kind a card
+     * belongs to reads before its name and its metadata after its description.
      * @param {Object} tile - The tile data.
      * @param {number} idx - The tile index in the list.
      * @returns {HTMLDivElement} The complete tile card element.
@@ -300,13 +580,56 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         }
         if (isSelected) {
             removeBackgroundClasses();
-            card.classList.add("bg-primary", "text-white");
+            card.classList.add("wx-tile-card-selected");
         } else {
             removeBackgroundClasses();
             if (tile.colorCss) {
                 card.classList.add(...tile.colorCss.split(/\s+/).filter(Boolean));
             }
-            card.classList.remove("bg-primary", "text-white");
+            card.classList.remove("wx-tile-card-selected");
+        }
+        card.setAttribute("aria-selected", isSelected ? "true" : "false");
+
+        // the selection is marked by a check badge as well as by the frame, so it
+        // reads without relying on colour alone
+        if (isSelected) {
+            const check = document.createElement("span");
+            check.className = "wx-tile-card-check";
+            check.setAttribute("aria-hidden", "true");
+            check.innerHTML = `<i class="${this._iconClass("fas fa-check", "wx-icon-light-check")}"></i>`;
+            card.appendChild(check);
+        }
+
+        // add the kicker row carrying the kind of the card and its qualifier
+        if (tile.badge || tile.chip) {
+            const kicker = document.createElement("div");
+            kicker.className = "wx-tile-card-kicker";
+
+            if (tile.badge) {
+                const badge = document.createElement("span");
+                badge.className = "wx-tile-card-badge";
+
+                const dot = document.createElement("span");
+                dot.className = "wx-tile-card-badge-dot";
+                if (tile.badgeColorCss) {
+                    dot.classList.add(...tile.badgeColorCss.split(/\s+/).filter(Boolean));
+                }
+                if (tile.badgeColorStyle) {
+                    dot.style.cssText = tile.badgeColorStyle;
+                }
+                badge.appendChild(dot);
+                badge.append(document.createTextNode(tile.badge));
+                kicker.appendChild(badge);
+            }
+
+            if (tile.chip) {
+                const chip = document.createElement("span");
+                chip.className = "wx-tile-card-chip";
+                chip.textContent = tile.chip;
+                kicker.appendChild(chip);
+            }
+
+            card.appendChild(kicker);
         }
 
         // add card header with optional icon/image and label
@@ -347,6 +670,14 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
             body.innerHTML = tile.html;
         }
         card.appendChild(body);
+
+        // add the metadata footer
+        if (tile.footer) {
+            const footer = document.createElement("div");
+            footer.className = "wx-tile-card-footer";
+            footer.innerHTML = tile.footer;
+            card.appendChild(footer);
+        }
 
         // handle click and keyboard selection (support for Ctrl and Shift)
         card.addEventListener("click", (e) => {
@@ -416,12 +747,27 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         }
         const container = document.createElement("div");
         container.className = "wx-tile-container";
+
+        if (this._columns > 0) {
+            container.classList.add("wx-tile-container-grid");
+            container.style.setProperty("--wx-tile-columns", this._columns);
+        }
+
+        let visible = 0;
         this._tiles.forEach((tile, idx) => {
+            if (!this._matchesFilter(tile) || !this._matchesSearch(tile)) {
+                return;
+            }
             container.appendChild(this._createTileCard(tile, idx));
+            visible++;
         });
         this._tileList.appendChild(container);
+
+        if (this._emptyElement) {
+            this._emptyElement.style.display = (visible === 0 && this._emptyText) ? "" : "none";
+        }
     }
 };
 
-// register controller class
+// register the class in the controller
 webexpress.webui.Controller.registerClass("wx-webui-input-tile", webexpress.webui.InputTileCtrl);
