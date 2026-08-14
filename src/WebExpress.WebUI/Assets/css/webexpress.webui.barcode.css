@@ -1,0 +1,70 @@
+/* Barcode.
+   The symbol is drawn from currentColor, so coloring the host colors the
+   modules and nothing else has to know about it. Both colors are stated as
+   defaults of a custom property rather than as plain values, so a color set on
+   the host - a palette class or an explicit one - wins without needing
+   !important to outrank this rule.
+
+   Scanners need dark-on-light, so the quiet zone is painted rather than left
+   transparent: on a dark surface an unpainted symbol would be light bars on
+   dark and read as inverted. */
+.wx-barcode {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 100%;
+    color: var(--wx-barcode-color, var(--wx-black, #000));
+    background-color: var(--wx-barcode-bg, var(--wx-white, #fff));
+    padding: 0.25rem;
+    border-radius: var(--bs-border-radius-sm, 0.25rem);
+}
+
+.wx-barcode-graphic {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+/* A value that cannot be encoded is stated, not drawn: a symbol that does not
+   scan is worse than none, because it fails only at the scanner. The control
+   withdraws the configured colors in this state - they were chosen for a
+   symbol, and a light one would leave the message unreadable. */
+.wx-barcode-invalid {
+    background-color: transparent;
+    color: var(--wx-danger);
+}
+
+.wx-barcode-error {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* The form input pairs the text field with a live preview of the symbol. */
+.wx-input-barcode {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
+.wx-input-barcode-preview {
+    min-height: 2rem;
+}
+
+.wx-input-barcode-field {
+    width: 100%;
+}
+
+@media (forced-colors: active) {
+    /* the symbol must keep its own contrast; a forced palette would invert it */
+    .wx-barcode {
+        forced-color-adjust: none;
+    }
+}
+
+@media print {
+    .wx-barcode {
+        background-color: #fff;
+        color: #000;
+    }
+}

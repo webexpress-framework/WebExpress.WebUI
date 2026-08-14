@@ -466,6 +466,49 @@ webexpress.webui.TableTemplates.register("rating", (val, table, row, cell, name,
     return container;
 });
 
+// Barcode renderer
+webexpress.webui.TableTemplates.register("barcode", (val, table, row, cell, name, opts) => {
+    opts = opts || {};
+
+    if ((val === null || val === undefined || val === "") && !opts.editable) {
+        return "";
+    }
+
+    const container = document.createElement("div");
+    const editable = opts.editable === true || opts.editable === "true";
+    const type = opts.barcodeType || opts.type || "code128";
+    const level = opts.level || "M";
+    const colors = [
+        ["data-color-css", opts.colorCss],
+        ["data-color-style", opts.colorStyle],
+        ["data-bgcolor-css", opts.bgcolorCss],
+        ["data-bgcolor-style", opts.bgcolorStyle]
+    ].filter(([, value]) => value);
+
+    if (editable) {
+        const editor = document.createElement("div");
+        editor.id = "wx_" + Math.random().toString(36).slice(2, 7);
+        colors.forEach(([attribute, value]) => editor.setAttribute(attribute, value));
+        const inputCtrl = new webexpress.webui.InputBarcodeCtrl(editor);
+        inputCtrl.type = type;
+        inputCtrl.level = level;
+        inputCtrl.value = val;
+        editor._wx_controller = inputCtrl;
+        container.appendChild(editor);
+        webexpress.webui.TableTemplates.bindInlineEdit(container, row, name);
+        new webexpress.webui.SmartEditCtrl(container);
+    } else {
+        // read-only
+        colors.forEach(([attribute, value]) => container.setAttribute(attribute, value));
+        const ctrl = new webexpress.webui.BarcodeCtrl(container);
+        ctrl.level = level;
+        ctrl.type = type;
+        ctrl.value = val;
+    }
+
+    return container;
+});
+
 // Traffic light renderer
 webexpress.webui.TableTemplates.register("traffic-light", (val, table, row, cell, name, opts) => {
     opts = opts || {};

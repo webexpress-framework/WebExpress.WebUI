@@ -104,6 +104,9 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "list.sort.title": "Sortieren",
     "list.handle.title": "Verschieben",
 
+    "barcode": "Strichcode",
+    "barcode.invalid": "Der Wert kann nicht kodiert werden.",
+
     "masterdetail.back": "Zurück zur Liste",
     "masterdetail.close": "Detailansicht ausblenden",
 

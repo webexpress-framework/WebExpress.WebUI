@@ -376,7 +376,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             return (element.querySelector("[data-value]")?.getAttribute("data-value")) || element.textContent.trim();
         }
         const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
-        if (ctrl && ctrl instanceof webexpress.webui.EditorCtrl) {
+        if (ctrl && this._isCtrl(ctrl, "EditorCtrl")) {
             return ctrl._editorElement?.innerHTML;
         }
         if (["INPUT", "TEXTAREA"].includes(this._editor.tagName)) {
@@ -397,6 +397,23 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Returns whether the editor control is an instance of the named control.
+     *
+     * The class is resolved by name at call time on purpose: a page does not
+     * have to ship every input control this read view knows about, and a plain
+     * instanceof against an undefined class throws - which would take the whole
+     * read view down for every editor as soon as one control is missing.
+     *
+     * @param {object} ctrl the editor control to test
+     * @param {string} name the control name inside the webexpress.webui namespace
+     * @returns {boolean} true when the control is an instance of it
+     */
+    _isCtrl(ctrl, name) {
+        const type = webexpress.webui[name];
+        return typeof type === "function" && ctrl instanceof type;
+    }
+
+    /**
      * Builds a read-only view node for a given value based on the editor type.
      * @param {string|string[]|any} value value to display
      * @returns {HTMLElement} read-only view node
@@ -410,49 +427,59 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
 
         const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
 
-        if (ctrl instanceof webexpress.webui.InputSelectionCtrl) {
+        if (this._isCtrl(ctrl, "InputSelectionCtrl")) {
             const container = document.createElement("div");
             const selection = new webexpress.webui.SelectionCtrl(container);
             const ids = Array.isArray(value) ? value : String(value || "").split(";");
             selection.options = ctrl.options;
             selection.value = ids;
             return container;
-        } else if (ctrl instanceof webexpress.webui.InputMoveCtrl) {
+        } else if (this._isCtrl(ctrl, "InputMoveCtrl")) {
             const container = document.createElement("div");
             const move = new webexpress.webui.MoveCtrl(container);
             const ids = Array.isArray(value) ? value : String(value || "").split(";");
             move.options = ctrl.options;
             move.value = ids;
             return container;
-        } else if (ctrl instanceof webexpress.webui.InputCalendarCtrl) {
+        } else if (this._isCtrl(ctrl, "InputCalendarCtrl")) {
             const container = document.createElement("div");
             const date = new webexpress.webui.DateCtrl(container);
             date.format = ctrl.format;
             date.value = value;
             return container;
-        } else if (ctrl instanceof webexpress.webui.InputDateCtrl) {
+        } else if (this._isCtrl(ctrl, "InputDateCtrl")) {
             const container = document.createElement("div");
             const date = new webexpress.webui.DateCtrl(container);
             date.format = ctrl.format;
             date.value = value;
             return container;
-        } else if (ctrl instanceof webexpress.webui.InputTagCtrl) {
+        } else if (this._isCtrl(ctrl, "InputTagCtrl")) {
             const container = document.createElement("div");
             const tag = new webexpress.webui.TagCtrl(container);
             tag.value = value;
             return container;
-        } else if (ctrl instanceof webexpress.webui.InputRatingCtrl) {
+        } else if (this._isCtrl(ctrl, "InputRatingCtrl")) {
             const container = document.createElement("div");
             const rating = new webexpress.webui.RatingCtrl(container);
             rating.stars = ctrl.stars;
             rating.value = value;
             return container;
-        } else if (ctrl instanceof webexpress.webui.InputColorCtrl) {
+        } else if (this._isCtrl(ctrl, "InputColorCtrl")) {
             const container = document.createElement("div");
             const color = new webexpress.webui.ColorCtrl(container);
             color.value = value;
             return container;
-        } else if (ctrl instanceof webexpress.webui.InputTrafficLightCtrl) {
+        } else if (this._isCtrl(ctrl, "InputBarcodeCtrl")) {
+            // the read view is the symbol alone; without this case it would fall
+            // through to the raw value, which is the one thing a barcode is not
+            const container = document.createElement("div");
+            (ctrl.colors || []).forEach(([attribute, color]) => container.setAttribute(attribute, color));
+            const barcode = new webexpress.webui.BarcodeCtrl(container);
+            barcode.level = ctrl.level;
+            barcode.type = ctrl.type;
+            barcode.value = value;
+            return container;
+        } else if (this._isCtrl(ctrl, "InputTrafficLightCtrl")) {
             // without this case the display state falls through to the raw token
             // text; mirror the read-only representation of the traffic-light table
             // template so the value shows as a dimmed signal instead
@@ -468,7 +495,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             const light = new webexpress.webui.TrafficLightCtrl(container);
             light.value = value;
             return container;
-        } else if (ctrl instanceof webexpress.webui.EditorCtrl) {
+        } else if (this._isCtrl(ctrl, "EditorCtrl")) {
             const span = document.createElement("span");
             span.innerHTML = value ?? "";
             return span;

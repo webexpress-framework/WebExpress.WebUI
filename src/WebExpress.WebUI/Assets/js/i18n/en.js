@@ -104,6 +104,9 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "list.sort.title": "Sort",
     "list.handle.title": "Move",
 
+    "barcode": "Barcode",
+    "barcode.invalid": "The value cannot be encoded.",
+
     "masterdetail.back": "Back to the list",
     "masterdetail.close": "Hide the detail view",
 
