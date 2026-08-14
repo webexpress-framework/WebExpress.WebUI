@@ -55,6 +55,15 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, int> SidePanelMaxSize { get; set; } = _ => -1;
 
         /// <summary>
+        /// Gets or sets whether the side panel may be collapsed out of sight, by
+        /// dragging the splitter past it or by double-clicking the splitter.
+        /// Turn it off for a side panel that carries the only navigation of a
+        /// view, where a collapse would strand the user; the minimum size then
+        /// bounds the drag instead.
+        /// </summary>
+        public Func<IRenderControlContext, bool> Collapsible { get; set; } = _ => true;
+
+        /// <summary>
         /// Return or sets the order in which the main and side components are arranged.
         /// </summary>
         public Func<IRenderControlContext, TypeSplitOrder> Order { get; set; } = _ => TypeSplitOrder.Default;
@@ -194,6 +203,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-min-side", (SidePanelMinSize?.Invoke(renderContext) ?? -1) >= 0 ? (SidePanelMinSize?.Invoke(renderContext) ?? -1).ToString() : null)
                 .AddUserAttribute("data-size", (SidePanelInitialSize?.Invoke(renderContext) ?? -1) >= 0 ? (SidePanelInitialSize?.Invoke(renderContext) ?? -1).ToString() : null)
                 .AddUserAttribute("data-max-side", (SidePanelMaxSize?.Invoke(renderContext) ?? -1) >= 0 ? (SidePanelMaxSize?.Invoke(renderContext) ?? -1).ToString() : null)
+                .AddUserAttribute("data-collapsible", (Collapsible?.Invoke(renderContext) ?? true) ? null : "false")
                 .AddUserAttribute("data-splitter-size", (SplitterSize?.Invoke(renderContext) ?? -1) >= 0 ? (SplitterSize?.Invoke(renderContext) ?? -1).ToString() : null)
                 .AddUserAttribute("data-splitter-class", (SplitterColor?.Invoke(renderContext) ?? new PropertyColorBackground(TypeColorBackground.Default)).ToClass())
                 .AddUserAttribute("data-splitter-style", (SplitterColor?.Invoke(renderContext) ?? new PropertyColorBackground(TypeColorBackground.Default)).ToStyle())

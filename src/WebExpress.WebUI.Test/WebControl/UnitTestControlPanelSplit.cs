@@ -282,5 +282,31 @@ namespace WebExpress.WebUI.Test.WebControl
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
+
+        /// <summary>
+        /// Tests the collapsible property of the panel split control. Only the
+        /// suppressed state is emitted, because a collapsible pane is the default.
+        /// </summary>
+        [Theory]
+        [InlineData(true, @"<div class=""wx-webui-split"" data-orientation=""horizontal"">*</div>")]
+        [InlineData(false, @"<div * data-collapsible=""false""*>*</div>")]
+        public void Collapsible(bool collapsible, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlPanelSplit()
+            {
+                Collapsible = _ => collapsible,
+            };
+            control.AddSidePanel(new ControlText() { Text = _ => "p1" });
+            control.AddMainPanel(new ControlText() { Text = _ => "p2" });
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
     }
 }

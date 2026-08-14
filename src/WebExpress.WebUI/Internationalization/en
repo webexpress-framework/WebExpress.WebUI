@@ -41,3 +41,6 @@ fileupload.file.validation.error.nofile=No file was specified.
 
 darkmode.text.light=Activate dark mode
 darkmode.text.dark=Activate light mode
+
+masterdetail.empty.title=No item selected
+masterdetail.empty.message=Please select an item from the list.

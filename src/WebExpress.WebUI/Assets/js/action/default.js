@@ -96,6 +96,34 @@
         }
     });
 
+    // master-detail selection: hands the item to the composite instead of
+    // writing to its frame, so the composite stays the single owner of the
+    // selection state
+    webexpress.webui.Actions.register("master-detail", {
+        execute: function (element, prefix, controller) {
+            const target = getActionAttribute(element, prefix, "target");
+            const instance = controller.getInstance(target);
+            if (instance && typeof instance.select === "function") {
+                instance.select({
+                    id: getActionAttribute(element, prefix, "item"),
+                    uri: getActionAttribute(element, prefix, "uri"),
+                    element: element
+                });
+            }
+        }
+    });
+
+    // master-detail detail toggle, mirroring how the "split" action toggles a split
+    webexpress.webui.Actions.register("master-detail-toggle", {
+        execute: function (element, prefix, controller) {
+            const target = getActionAttribute(element, prefix, "target");
+            const instance = controller.getInstance(target);
+            if (instance && typeof instance.toggleDetail === "function") {
+                instance.toggleDetail();
+            }
+        }
+    });
+
     // css fullscreen toggle
     webexpress.webui.Actions.register("fullscreen", {
         execute: function (element, prefix, controller, e) {

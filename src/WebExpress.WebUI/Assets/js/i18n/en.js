@@ -104,6 +104,9 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "list.sort.title": "Sort",
     "list.handle.title": "Move",
 
+    "masterdetail.back": "Back to the list",
+    "masterdetail.close": "Hide the detail view",
+
     "overflow.submenu": "Submenu",
 
     "sidebar.toggle": "Toggle sidebar",

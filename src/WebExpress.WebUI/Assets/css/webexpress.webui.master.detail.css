@@ -1,0 +1,247 @@
+/* Master-detail container.
+   The height is a variable rather than a fixed value: the two columns scroll
+   independently, which only works against a definite height, and the host
+   rarely has one. Override --wx-master-detail-height (for example with
+   Styles = ["--wx-master-detail-height: 100%;"]) wherever the parent does. */
+.wx-master-detail {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: var(--wx-master-detail-height, 70vh);
+    min-height: 12rem;
+    overflow: hidden;
+    border: 1px solid var(--wx-border-color);
+    border-radius: var(--bs-border-radius, 10px);
+    background-color: var(--wx-body-bg);
+    color: var(--wx-body-color);
+}
+
+.wx-master-detail > .wx-split {
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
+}
+
+/* The split makes its main pane a scroll container of its own (an inline
+   overflow:auto, hence the !important). Here that scroller is redundant - the
+   master and the detail body scroll themselves - and harmful: its scrollbar
+   gutter sits between the pane edge and the content, so the detail stops short
+   of the full pane width. */
+.wx-master-detail .wx-side-pane,
+.wx-master-detail .wx-main-pane {
+    overflow: hidden !important;
+}
+
+/* Both columns get their own scroll context so long content on one side never
+   grows the page or drags the other side along. The width is stated rather than
+   left to auto, so a pane that is itself sized in pixels cannot leave a gap. */
+.wx-master-detail .wx-master,
+.wx-master-detail .wx-detail {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.wx-master-detail .wx-master {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* The pane is the positioning context of the floating close button. */
+.wx-master-detail .wx-detail {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--wx-body-bg);
+}
+
+/* No padding of its own: the detail content is a page in its own right and gets
+   the full width, bringing whatever spacing it wants. */
+.wx-master-detail .wx-detail-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+/* Swapping the detail from one item to the next. The frame keeps the previous
+   detail on screen until the next one is ready, so the two exchange in one step
+   and only the arrival is animated - a short rise into place that reads as a
+   transition rather than as a jump. */
+@keyframes wx-detail-enter {
+    from {
+        opacity: 0;
+        transform: translateY(0.5rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.wx-master-detail .wx-detail-swap {
+    animation: wx-detail-enter 0.22s ease-out;
+}
+
+/* The close button floats in the top right corner instead of sitting in a bar
+   of its own, so the detail content keeps the full width. Its look comes from
+   the framework's .wx-button-close, which the modal and the dismissible panel
+   use as well; only the modal-header margins that class carries are reset. */
+.wx-master-detail .wx-detail-close {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    z-index: 4;
+    margin: 0;
+    padding: 0.25rem 0.5rem;
+    line-height: 1;
+}
+
+.wx-master-detail .wx-detail-close:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 var(--bs-focus-ring-width, 0.25rem) var(--bs-focus-ring-color, rgba(var(--wx-primary-rgb), 0.25));
+}
+
+/* The back button carries a label and must not sit on top of the content it
+   leads away from, so it keeps a bar - which only the sequential mode shows. */
+.wx-master-detail .wx-detail-header {
+    display: none;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    border-bottom: var(--bs-border-width) solid var(--wx-border-color);
+    background-color: var(--wx-tertiary-bg);
+}
+
+.wx-master-detail .wx-detail-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: none;
+    background: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--bs-border-radius-sm);
+    color: var(--wx-primary);
+    font-size: 0.9375rem;
+    line-height: 1.4;
+    cursor: pointer;
+}
+
+.wx-master-detail .wx-detail-back:hover {
+    background-color: rgba(var(--wx-primary-rgb), 0.1);
+}
+
+.wx-master-detail .wx-detail-back:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 var(--bs-focus-ring-width, 0.25rem) var(--bs-focus-ring-color, rgba(var(--wx-primary-rgb), 0.25));
+}
+
+/* Embedded collection controls draw a card frame of their own, which inside the
+   already framed panes of this control reads as a frame within a frame. The
+   host border and the splitter do the framing here, so the embedded ones go. */
+.wx-master-detail .wx-list,
+.wx-master-detail .wx-table {
+    border: none;
+    border-radius: 0;
+}
+
+/* Selected item.
+   The accent is painted with an inset shadow instead of a border because the
+   master may hold any control: a border would shift its item content by its own
+   width, and only a control that compensates for it (as the list does) would
+   stay aligned. */
+.wx-master-detail .wx-master .wx-md-item-active {
+    background-color: var(--wx-primary-bg-subtle, rgba(var(--wx-primary-rgb), 0.12));
+    box-shadow: inset 3px 0 0 0 var(--wx-primary);
+}
+
+.wx-master-detail .wx-master [role="option"] {
+    cursor: pointer;
+}
+
+.wx-master-detail .wx-master [role="option"]:focus-visible {
+    outline: 0;
+    box-shadow: inset 0 0 0 2px var(--wx-primary);
+}
+
+/* Sequential (single column) mode.
+   The class is set by the controller from the measured container width, so a
+   configured breakpoint applies even when the viewport is far wider than the
+   container. The size overrides have to win against the inline sizes the split
+   writes while dragging and on every resize. */
+.wx-master-detail.wx-md-compact > .wx-split {
+    position: relative;
+}
+
+.wx-master-detail.wx-md-compact .wx-side-pane {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.wx-master-detail.wx-md-compact .wx-splitter {
+    display: none !important;
+}
+
+.wx-master-detail.wx-md-compact .wx-main-pane {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    width: 100% !important;
+    height: 100% !important;
+    background-color: var(--wx-body-bg);
+    transform: translateX(100%);
+    visibility: hidden;
+    transition: transform 0.25s ease, visibility 0.25s;
+}
+
+.wx-master-detail.wx-md-compact.wx-md-detail-open .wx-main-pane {
+    transform: translateX(0);
+    visibility: visible;
+}
+
+/* In the sequential mode the back button replaces the close button: both lead
+   out of the detail side, and two controls for one action only confuse. */
+.wx-master-detail.wx-md-compact .wx-detail-header {
+    display: flex;
+}
+
+.wx-master-detail.wx-md-compact .wx-detail-close {
+    display: none;
+}
+
+/* Fallback for a host the client has not upgraded yet: the marker class is
+   consumed on upgrade, so these rules can never fight the controller. */
+@media (max-width: 767.98px) {
+    .wx-webui-master-detail .wx-split {
+        flex-direction: column;
+    }
+
+    .wx-webui-master-detail .wx-side-pane,
+    .wx-webui-master-detail .wx-main-pane {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wx-master-detail.wx-md-compact .wx-main-pane {
+        transition: none;
+    }
+
+    .wx-master-detail .wx-detail-swap {
+        animation: none;
+    }
+}
+
+@media (forced-colors: active) {
+    .wx-master-detail .wx-master .wx-md-item-active {
+        background-color: transparent;
+        box-shadow: none;
+        outline: 2px solid Highlight;
+        outline-offset: -2px;
+    }
+}

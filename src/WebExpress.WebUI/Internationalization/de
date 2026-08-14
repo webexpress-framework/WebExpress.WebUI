@@ -42,3 +42,6 @@ fileupload.file.validation.error.nofile=Es wurde keine Datei angegeben.
 
 darkmode.text.light=Dunkelmodus aktivieren
 darkmode.text.dark=Hellmodus aktivieren
+
+masterdetail.empty.title=Kein Element ausgewählt
+masterdetail.empty.message=Bitte wählen Sie ein Element aus der Liste aus.

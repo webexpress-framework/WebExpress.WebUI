@@ -1,5 +1,12 @@
 /**
  * An inline page embedding controller (iFrame alternative) that loads HTML into a regular div.
+ *
+ * A load into an empty frame shows a skeleton placeholder while the content is
+ * on its way. A load into a frame that already holds content shows none: the
+ * outgoing content stays until its replacement is ready, so swapping from one
+ * page to the next is a single exchange rather than a flash through an empty
+ * frame.
+ *
  * The following events are triggered:
  * - webexpress.webui.Event.DATA_REQUESTED_EVENT
  * - webexpress.webui.Event.DATA_ARRIVED_EVENT
@@ -184,16 +191,20 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
      * Dispatches DATA_REQUESTED_EVENT before fetching, and DATA_ARRIVED_EVENT after successful update.
      */
     load() {
-        this._element.innerHTML = "";
-
-        // guard against empty uri
+        // an empty uri is a request to show nothing
         if (!this._uri) {
+            this._element.innerHTML = "";
             return;
         }
 
-        // show a simple loading placeholder
-        const placeholder = this._createPlaceholder();
-        this._element.appendChild(placeholder);
+        // the placeholder only earns its place while there is nothing to look
+        // at. Swapping content that is already on screen for a skeleton says
+        // nothing the content does not already say and costs a visible flash on
+        // every reload, so the outgoing content stays until its replacement is
+        // ready and _update() exchanges the two in one step.
+        if (!this._element.firstChild) {
+            this._element.appendChild(this._createPlaceholder());
+        }
 
         // notify that data fetching starts
         this._dispatch(webexpress.webui.Event.DATA_REQUESTED_EVENT, { uri: this._uri });

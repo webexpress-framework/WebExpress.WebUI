@@ -44,6 +44,7 @@ The initialization and behavior of the `SplitCtrl` are controlled entirely via `
 | `data-min-side`       | The minimum size of the side pane in pixels, which cannot be undercut when dragging.
 | `data-max-side`       | The maximum size of the side pane in pixels, which cannot be exceeded when dragging.
 | `data-collapse-to`    | The size in pixels a collapse leaves behind. Defaults to `0`, which hides the side pane and the splitter entirely; a positive value leaves a rail. This is deliberately separate from `data-min-side`: that bounds a *drag*, and using it as the collapse target would mean a pane with a sensible drag minimum could never actually be hidden.
+| `data-collapsible`    | `"false"` forbids collapsing the side pane at all - neither by dragging past it nor by double-clicking the splitter, and `collapseSidePane()` refuses too. The drag then stops at `data-min-side`. Use it for a side pane that carries the only navigation of a view, where a collapse would strand the user. Default is `"true"`.
 | `data-splitter-class` | One or more CSS classes that are added to the splitter element.
 | `data-splitter-style` | Inline CSS styles that are applied to the splitter element.
 | `data-splitter-size`  | The width (for horizontal orientation) or height (for vertical orientation) of the splitter in pixels.
@@ -54,7 +55,7 @@ The `SplitCtrl` is designed as a self-contained component that manages its own u
 
 During initialization, the component identifies the two child elements `.wx-main-pane` and `.wx-side-pane`. It dynamically creates a splitter element and arranges these three elements within the host container based on `data-order`. The core logic for resizing is located in the `_setPaneSizes` method, which calculates the size of the main pane based on the total size of the container, the size of the side pane, and the size of the splitter.
 
-Interaction occurs by dragging the splitter (`mousedown` and `mousemove`), where the new size is applied in real-time, respecting `min-` and `max-` limits. A double-click on the splitter toggles the side pane: it is either collapsed to its minimum size (or 0) or restored to its previous size. If the host element has an `id`, the component automatically saves the size of the side pane in a cookie to maintain the user's setting on future visits. Communication is handled via global custom events to ensure loose coupling.
+Interaction occurs by dragging the splitter (`mousedown` and `mousemove`), where the new size is applied in real-time, respecting `min-` and `max-` limits. A double-click on the splitter toggles the side pane: it is either collapsed to its minimum size (or 0) or restored to its previous size. A split marked `data-collapsible="false"` skips the collapse path entirely and clamps the drag to `data-min-side`, so its side pane always stays on screen. If the host element has an `id`, the component automatically saves the size of the side pane in a cookie to maintain the user's setting on future visits. Communication is handled via global custom events to ensure loose coupling.
 
 ## Programmatic Control
 

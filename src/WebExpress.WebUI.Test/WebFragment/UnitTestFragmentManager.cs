@@ -93,6 +93,33 @@ namespace WebExpress.WebUI.Test.WebFragment
         }
 
         /// <summary>
+        /// Test the render function of the fragment manager for TestSectionFragmentControlMasterDetail.
+        /// </summary>
+        [Fact]
+        public void Render_TestSectionFragmentControlMasterDetail()
+        {
+            // arrange
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolmasterdetail"" class=""wx-webui-master-detail"" data-breakpoint=""768"">" +
+                @"<div id=""webexpress-webui-test-testfragmentcontrolmasterdetail-split"" class=""wx-webui-split""*>" +
+                @"<div * class=""wx-side-pane""><div * class=""wx-master""><div class=""wx-webui-list"" data-selectable=""true""*></div></div></div>" +
+                @"<div * class=""wx-main-pane""><div * class=""wx-detail""><div class=""wx-detail-body"">" +
+                @"<div class=""wx-empty-state""><span class=""wx-empty-state-title"">TestFragmentControlMasterDetail</span></div>" +
+                @"<div * class=""wx-webui-frame""></div></div></div></div></div></div>";
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+
+            // act
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlMasterDetail));
+
+            // validation
+            Assert.NotNull(html);
+            Assert.NotEmpty(html);
+            AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
+        }
+
+        /// <summary>
         /// Test the render function of the fragment manager for TestSectionFragmentControlList.
         /// </summary>
         [Fact]

@@ -30,13 +30,14 @@ contract({
  * @param {object} options - { size, minSide, collapseTo, unit, width }.
  * @returns {object} The controller plus element handles and a show() helper.
  */
-function makeSplit(rt, { size, minSide, collapseTo, unit, width = 0 } = {}) {
+function makeSplit(rt, { size, minSide, collapseTo, collapsible, unit, width = 0 } = {}) {
     const el = rt.createElement("div");
     el.classList.add("wx-webui-split");
     el.setAttribute("data-orientation", "horizontal");
     if (size != null) { el.setAttribute("data-size", String(size)); }
     if (minSide != null) { el.setAttribute("data-min-side", String(minSide)); }
     if (collapseTo != null) { el.setAttribute("data-collapse-to", String(collapseTo)); }
+    if (collapsible === false) { el.setAttribute("data-collapsible", "false"); }
     if (unit != null) { el.setAttribute("data-unit", String(unit)); }
 
     const side = rt.createElement("div");
@@ -168,6 +169,25 @@ test("collapsing hides the side pane and the splitter with it", () => {
     assert.equal(s.ctrl._sidePaneCollapsed, false, "the pane comes back");
     assert.notEqual(s.side.style.display, "none", "the side pane is visible again");
     assert.notEqual(s.ctrl._splitter.style.display, "none", "the divider is visible again");
+});
+
+test("a non-collapsible side pane stops at its minimum instead of vanishing", () => {
+    const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.split.js"] });
+    const s = makeSplit(rt, { size: 300, minSide: 180, collapsible: false, width: 800 });
+
+    // dragging past the minimum, far enough that a collapsible pane would close
+    s.ctrl._dragging = true;
+    s.el.getBoundingClientRect = () => ({ left: 0, top: 0, right: 800, bottom: 600, width: 800, height: 600 });
+    s.ctrl._onDragMove({ clientX: 5, clientY: 300 }, null, 0);
+
+    assert.equal(s.ctrl._sidePaneCollapsed, false, "the pane does not collapse");
+    assert.equal(s.ctrl._sideSize, 180, "it stops at the configured minimum");
+    assert.notEqual(s.side.style.display, "none", "and stays on screen");
+
+    // neither the api nor the splitter double click may take it away
+    s.ctrl.collapseSidePane();
+    assert.equal(s.ctrl._sidePaneCollapsed, false, "collapsing is refused outright");
+    assert.notEqual(s.side.style.display, "none");
 });
 
 test("a collapse target leaves the configured rail behind", () => {

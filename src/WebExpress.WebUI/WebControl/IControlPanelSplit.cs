@@ -51,6 +51,11 @@ namespace WebExpress.WebUI.WebControl
         Func<IRenderControlContext, int> SidePanelMaxSize { get; }
 
         /// <summary>
+        /// Gets or sets whether the side panel may be collapsed out of sight.
+        /// </summary>
+        Func<IRenderControlContext, bool> Collapsible { get; }
+
+        /// <summary>
         /// Return or sets the order in which the main and side components are arranged.
         /// </summary>
         Func<IRenderControlContext, TypeSplitOrder> Order { get; }

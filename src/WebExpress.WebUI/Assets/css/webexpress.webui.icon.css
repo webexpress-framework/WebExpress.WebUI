@@ -2143,6 +2143,11 @@
     mask-image: url("../icons/control-login.svg");
 }
 
+.wx-icon-light-control-master-detail {
+    -webkit-mask-image: url("../icons/control-master-detail.svg");
+    mask-image: url("../icons/control-master-detail.svg");
+}
+
 .wx-icon-light-control-multiple-progress-bar {
     -webkit-mask-image: url("../icons/control-multiple-progress-bar.svg");
     mask-image: url("../icons/control-multiple-progress-bar.svg");

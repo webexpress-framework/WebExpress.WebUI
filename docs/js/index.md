@@ -28,6 +28,7 @@ This section documents the JavaScript UI controllers and components of `WebExpre
 - [Graph](graph.md)
 - [Kanban](kanban.md)
 - [List](list.md)
+- [Master Detail](master-detail.md)
 - [Modal](modal.md)
 - [Move](move.md)
 - [Overflow](overflow.md)

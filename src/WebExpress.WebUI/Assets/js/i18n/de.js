@@ -104,6 +104,9 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "list.sort.title": "Sortieren",
     "list.handle.title": "Verschieben",
 
+    "masterdetail.back": "Zurück zur Liste",
+    "masterdetail.close": "Detailansicht ausblenden",
+
     "overflow.submenu": "Untermenü",
 
     "sidebar.toggle": "Seitenleiste umschalten",

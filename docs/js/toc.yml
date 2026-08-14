@@ -44,6 +44,8 @@
   href: kanban.md
 - name: List
   href: list.md
+- name: Master Detail
+  href: master-detail.md
 - name: Modal
   href: modal.md
 - name: Move

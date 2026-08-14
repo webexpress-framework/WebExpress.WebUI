@@ -16,14 +16,14 @@ Initialization and behavior are controlled exclusively via `data-` attributes on
 
 Additional behavior:
 - Requests use `fetch()` with `credentials: "same-origin"`.
-- While loading, a skeleton placeholder is inserted (`placeholder`, `placeholder-glow`, and other utility classes).
+- While loading **into an empty frame**, a skeleton placeholder is inserted (`placeholder`, `placeholder-glow`, and other utility classes). A frame that already holds content shows no placeholder: the outgoing content stays until its replacement is ready, so a swap from one page to the next is a single exchange instead of a flash through an empty frame.
 - In case of errors, a collapsible error box is shown via `ExpandableCtrl` with internationalized texts.
 
 ## Functionality
 
 During construction, `data-uri`, `data-selector`, and `data-autoload` are read and then removed from the host element. If autoload is enabled, `load()` is executed immediately.
 
-The `load()` method first inserts a placeholder and emits `webexpress.webui.Event.DATA_REQUESTED_EVENT`. The resource is loaded using `fetch(this._uri, { credentials: "same-origin" })`. Upon a successful response, the HTML text is parsed, the desired area is determined via `this._selector` (fallback: `document.body`), and its `innerHTML` is transferred to the host element. Afterwards, `webexpress.webui.Event.DATA_ARRIVED_EVENT` is emitted.
+The `load()` method inserts a placeholder when the frame is empty - it is skipped when there is content to keep on screen - and emits `webexpress.webui.Event.DATA_REQUESTED_EVENT`. The resource is loaded using `fetch(this._uri, { credentials: "same-origin" })`. Upon a successful response, the HTML text is parsed, the desired area is determined via `this._selector` (fallback: `document.body`), and its `innerHTML` is transferred to the host element. Afterwards, `webexpress.webui.Event.DATA_ARRIVED_EVENT` is emitted.
 
 If an error occurs (network error or `!response.ok`), the container is cleared and a collapsible error alert with headline, details, and stacktrace is shown. The alert uses i18n keys:
 - `webexpress.webui:page.contentNotLoaded.label` (default: "Content could not be loaded.")

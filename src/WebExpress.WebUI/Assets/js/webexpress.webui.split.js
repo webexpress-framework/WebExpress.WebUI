@@ -25,6 +25,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     _orientation = "horizontal";
     _minSide = null;
     _maxSide = null;
+    _collapsible = true;
     _collapseTo = 0;
     _paneOrder = "side-main";
     _unit = "px";
@@ -80,6 +81,11 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         this._minSide = this._parseAttrInt(element, "data-min-side");
         this._maxSide = this._parseAttrInt(element, "data-max-side");
 
+        // whether the side pane may vanish at all. A pane that carries the only
+        // navigation of a view strands the user once it is gone, so such a split
+        // opts out and keeps data-min-side standing instead.
+        this._collapsible = element.getAttribute("data-collapsible") !== "false";
+
         // the extent a collapse leaves behind. It is deliberately separate from
         // data-min-side: that is the smallest size a *drag* may reach, and using
         // it as the collapse target means a pane with a sensible drag minimum
@@ -108,7 +114,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
 
         // cleanup attributes
         const attrs = [
-            "data-orientation", "data-min-side", "data-max-side", "data-collapse-to", "data-size",
+            "data-orientation", "data-min-side", "data-max-side", "data-collapsible", "data-collapse-to", "data-size",
             "data-splitter-class", "data-splitter-style", "data-splitter-size",
             "data-order", "data-unit"
         ];
@@ -291,14 +297,19 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
                 : ev.clientX - currentRect.left - offset;
         }
 
-        // collapse check
-        const effectiveMin = this._minSide !== null ? this._minSide : 0;
-        if (newSideSize <= (effectiveMin + this._collapseThreshold) && effectiveMin === 0) {
-             // only auto-collapse via drag if min is 0 or very small
-             // or if logic dictates allowing collapse below min
+        // a pane that may not collapse is only clamped to its minimum, so a drag
+        // to the edge leaves the configured minimum standing instead of taking
+        // the pane off screen
+        if (!this._collapsible) {
+            if (this._minSide !== null) newSideSize = Math.max(this._minSide, newSideSize);
+            if (this._maxSide !== null) newSideSize = Math.min(this._maxSide, newSideSize);
+
+            this._setPaneSizes(Math.max(0, newSideSize), true);
+            this._setStateCookie({ size: this._sideSize, collapsed: false });
+            return;
         }
 
-        // Simpler collapse logic: if dragged below threshold (absolute or relative to min)
+        // collapse check: dragged below the threshold (absolute or relative to min)
         if (newSideSize <= Math.max(0, (this._minSide || 0) - this._collapseThreshold)) {
              // dragged to "close"
              if (!this._sidePaneCollapsed) {
@@ -415,7 +426,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
      * Collapses the side pane.
      */
     collapseSidePane() {
-        if (this._sidePaneCollapsed) return;
+        if (this._sidePaneCollapsed || !this._collapsible) return;
 
         const isVert = this._orientation === "vertical";
         this._sidePanePrevSize = this._sidePane[isVert ? "offsetHeight" : "offsetWidth"];
@@ -643,6 +654,16 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         }
         // initial pass once the browser has had a chance to apply styles
         schedule();
+    }
+
+    /**
+     * Re-evaluates the content visibility of both panes immediately. A caller
+     * that hides or shows pane content itself already knows the new state and
+     * would otherwise have to wait for the observer's next frame, which is
+     * visible as a flicker in the layout it triggers.
+     */
+    refreshContentVisibility() {
+        this._applyContentVisibility();
     }
 
     /**
