@@ -48,7 +48,11 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
     // .wx-table-row and rendered as .wx-grid-row), plus the two neutral hooks
     // for markup that belongs to none of them
     static DEFAULT_ITEM_SELECTOR = ".wx-list-item, .wx-tile-card, .wx-table-row, .wx-grid-row, .wx-kanban-card, "
-        + "[data-bind-uri], [data-wx-primary-action='master-detail']";
+        + ".wx-scrum-row, [data-bind-uri], [data-wx-primary-action='master-detail']";
+
+    // the controls an item may contain that carry a meaning of their own. a click
+    // on one of them operates that control instead of selecting the item
+    static NON_SELECTING = "button, input, textarea, select, [contenteditable='true']";
 
     static ACTIVE_CLASS = "wx-md-item-active";
     static CLOSABLE_CLASS = "wx-md-closable";
@@ -61,6 +65,7 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
     _itemSelector = webexpress.webui.MasterDetailCtrl.DEFAULT_ITEM_SELECTOR;
     _detailUriTemplate = null;
     _closable = true;
+    _revealOnDoubleClick = false;
 
     // elements
     _masterPane = null;
@@ -153,8 +158,9 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
      * identical no matter whether the click, the keyboard or the master control
      * triggered it.
      * @param {object} selection - { id, uri, element, reveal }. Missing parts are
-     *     resolved from the item element; reveal:false keeps a hidden detail side
-     *     hidden.
+     *     resolved from the item element. reveal:false keeps a hidden detail side
+     *     hidden, reveal:true opens it whatever the reveal mode says, and leaving
+     *     reveal out lets the mode decide - which is what a pointer selection does.
      */
     select(selection) {
         const source = selection || {};
@@ -180,9 +186,19 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
 
         this._applyActiveItem(element);
 
-        if (source.reveal !== false) {
+        // in the dblclick reveal mode a closed detail stays closed for a plain
+        // selection, so a single click only moves the highlight through the master
+        // and the double click is what opens the detail. Once it is open the mode
+        // is irrelevant and every selection swaps the content.
+        const reveal = source.reveal === true
+            || (source.reveal !== false && !(this._revealOnDoubleClick && this._detailHidden));
+
+        if (reveal) {
             this.showDetail();
         }
+
+        // a hidden detail fetches nothing, so a selection made while it is closed
+        // costs no round trip; opening it later syncs the content
         this._syncDetailContent();
 
         this._dispatch(webexpress.webui.Event.SELECT_ITEM_EVENT, {
@@ -193,11 +209,13 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Selects the item with the given id.
+     * Selects the item with the given id and shows it. A programmatic selection is
+     * not a pointer gesture, so it opens a closed detail rather than waiting for a
+     * double click; pass reveal:false to select without opening.
      * @param {string} id - The item id.
      */
     selectItem(id) {
-        this.select({ id: id });
+        this.select({ id: id, reveal: true });
     }
 
     /**
@@ -229,6 +247,12 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
         }
         this._detailHidden = false;
         this._applyDetailVisibility();
+
+        // a selection made while the detail was closed fetched nothing, so the
+        // content is caught up here - opening through the toggle action or the api
+        // shows the selected item rather than an empty frame
+        this._syncDetailContent();
+
         this._dispatch(webexpress.webui.Event.SHOW_EVENT, { compact: this._compact });
     }
 
@@ -301,8 +325,9 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
         this._detailUriTemplate = element.getAttribute("data-detail-uri") || null;
         this._detailHidden = element.getAttribute("data-detail-visible") === "false";
         this._closable = element.getAttribute("data-closable") !== "false";
+        this._revealOnDoubleClick = element.getAttribute("data-reveal") === "dblclick";
 
-        ["data-breakpoint", "data-item", "data-detail-uri", "data-detail-visible", "data-closable"]
+        ["data-breakpoint", "data-item", "data-detail-uri", "data-detail-visible", "data-closable", "data-reveal"]
             .forEach((attr) => element.removeAttribute(attr));
     }
 
@@ -393,6 +418,7 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
     _bindEvents() {
         if (this._masterPane) {
             this._masterPane.addEventListener("click", (e) => this._onMasterClick(e));
+            this._masterPane.addEventListener("dblclick", (e) => this._onMasterDoubleClick(e));
             this._masterPane.addEventListener("keydown", (e) => this._onMasterKeyDown(e));
 
             // the master control may select on its own - through its keyboard
@@ -447,14 +473,51 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
      * Handles a click anywhere on the master side. Delegation is used instead of
      * per-item listeners so items that appear later are covered without a
      * re-binding pass.
+     *
+     * A click that landed on a control inside an item - a row menu, an inline
+     * editor, a link - operates that control and must not also change the
+     * selection, which would load a detail behind the action the user actually
+     * asked for. The master controls guard their own row handlers the same way.
      * @param {MouseEvent} e - The click event.
      */
     _onMasterClick(e) {
+        const target = e?.target;
+        if (target && typeof target.closest === "function"
+            && target.closest(webexpress.webui.MasterDetailCtrl.NON_SELECTING)) {
+            return;
+        }
+
         const item = this._itemFromEvent(e);
         if (!item || this._isDisabled(item)) {
             return;
         }
         this.select({ element: item });
+    }
+
+    /**
+     * Opens the detail side on a double click. It is the counterpart of the
+     * dblclick reveal mode, where a single click only moves the selection while
+     * the detail is closed; with the detail already open the double click adds
+     * nothing, because its first click has selected the item already.
+     * @param {MouseEvent} e - The double click event.
+     */
+    _onMasterDoubleClick(e) {
+        const target = e?.target;
+        if (target && typeof target.closest === "function"
+            && target.closest(webexpress.webui.MasterDetailCtrl.NON_SELECTING)) {
+            return;
+        }
+
+        const item = this._itemFromEvent(e);
+        if (!item || this._isDisabled(item)) {
+            return;
+        }
+
+        // a double click would otherwise select the item's text, which reads as a
+        // rendering fault next to the row that just opened
+        e.preventDefault?.();
+
+        this.select({ element: item, reveal: true });
     }
 
     /**
@@ -503,7 +566,11 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
                     return;
                 }
                 e.preventDefault();
-                this.select({ element: item });
+
+                // the keyboard counterpart of the double click: activation is
+                // deliberate, and there is no second Enter to wait for, so it opens
+                // a closed detail in every reveal mode
+                this.select({ element: item, reveal: true });
                 break;
             }
             case "Escape": {
@@ -582,7 +649,10 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Reads the id of an item.
+     * Reads the id of an item. The list covers the item markup of the built-in
+     * enumeration controls, so a master that renders its own items (a kanban board
+     * writes data-card-id, a backlog data-item-id) resolves without the host having
+     * to restate the id.
      * @param {HTMLElement} item - The item element.
      * @returns {string|null} The id, or null.
      */
@@ -593,6 +663,8 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
         return item.getAttribute("data-bind-id")
             || item.getAttribute("data-wx-primary-item")
             || item.getAttribute("data-tile-id")
+            || item.getAttribute("data-card-id")
+            || item.getAttribute("data-item-id")
             || item.id
             || null;
     }

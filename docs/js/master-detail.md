@@ -89,10 +89,11 @@ The behavior is controlled entirely via `data-` attributes on the host element. 
 | Attribute              | Description
 |------------------------|-------------------------------------------------------------------------------------------------------------------------
 | `data-breakpoint`      | The container width in pixels below which the control switches to the sequential single-column mode. Default is `768`; `0` disables the mode. The width of the *container* is measured, not of the viewport, so a control inside a narrow column behaves like one on a narrow screen.
-| `data-item`            | The css selector identifying a selectable item inside the master side. Default is `.wx-list-item, .wx-tile-card, .wx-table-row, .wx-grid-row, .wx-kanban-card, [data-bind-uri], [data-wx-primary-action='master-detail']` - the item markup of the built-in controls both as authored on the server and as those controls re-render it, plus the two neutral hooks.
+| `data-item`            | The css selector identifying a selectable item inside the master side. Default is `.wx-list-item, .wx-tile-card, .wx-table-row, .wx-grid-row, .wx-kanban-card, .wx-scrum-row, [data-bind-uri], [data-wx-primary-action='master-detail']` - the item markup of the built-in controls both as authored on the server and as those controls re-render it, plus the two neutral hooks.
 | `data-detail-uri`      | The uri template used for items that carry an id but no uri of their own. The placeholder `{id}` is replaced by the (uri-encoded) item id.
 | `data-detail-visible`  | `"false"` starts with a hidden detail side - the master alone, without a splitter. Any other value (or none) starts with both sides visible.
 | `data-closable`        | `"false"` omits the close button, for a view whose detail side must always stay open. Hiding it through the toggle action or the api remains possible either way.
+| `data-reveal`          | The gesture that opens a *hidden* detail side. The default opens it on any selection; `"dblclick"` waits for a double click, so a single click only moves the selection while the detail is closed. Once the detail is open the mode no longer applies and a single click swaps its content.
 
 ## Item contract
 
@@ -101,21 +102,28 @@ A selectable item is an element that matches the item selector and carries at le
 | Purpose    | Attributes (in order)                                             |
 |------------|-------------------------------------------------------------------|
 | Detail uri | `data-bind-uri`, `data-wx-primary-uri`, `data-uri`, `data-href`    |
-| Item id    | `data-bind-id`, `data-wx-primary-item`, `data-tile-id`, `id`       |
+| Item id    | `data-bind-id`, `data-wx-primary-item`, `data-tile-id`, `data-card-id`, `data-item-id`, `id` |
+
+The id list covers the item markup the built-in enumeration controls write for themselves - a kanban board labels its cards `data-card-id`, a backlog its rows `data-item-id` - so those masters resolve without the host having to restate the id.
 
 An item that carries only an id resolves its uri through `data-detail-uri`, so the master can stay free of routing knowledge. Items marked with `disabled`, `aria-disabled="true"` or the class `disabled` are neither selectable nor reachable with the keyboard.
 
 ## Selection routing
 
-Selections arrive through three channels that all funnel into `select()`, so the state transition is identical no matter what triggered it:
+Selections arrive through four channels that all funnel into `select()`, so the state transition is identical no matter what triggered it:
 
 1. **A delegated click** on the master side. Delegation is used instead of per-item listeners, so items rendered later are covered without a re-binding pass.
-2. **Keyboard activation** with `Enter` or `Space`.
-3. **The selection events of the master control itself** - `SELECT_ITEM_EVENT` and `SELECT_ROW_EVENT` - which keep the state in sync when that control selects on its own, for example when a selectable list auto-selects its first row.
+2. **A delegated double click**, which selects and always opens the detail side. It is the gesture `data-reveal="dblclick"` waits for.
+3. **Keyboard activation** with `Enter` or `Space`.
+4. **The selection events of the master control itself** - `SELECT_ITEM_EVENT` and `SELECT_ROW_EVENT` - which keep the state in sync when that control selects on its own, for example when a selectable list auto-selects its first row.
+
+A click that lands on a control inside an item - `button`, `input`, `textarea`, `select` or a `contenteditable` - operates that control and changes no selection, so a row menu never loads a detail behind the action the user asked for.
+
+Whether a selection opens a *hidden* detail side is decided per call: `reveal: true` always opens it, `reveal: false` never does, and leaving it out lets `data-reveal` decide. The pointer channels leave it out, so they follow the mode; keyboard activation and the programmatic `selectItem()` pass `reveal: true`, because both are deliberate and have no second gesture to wait for.
 
 A selection that is already present when the controller initializes (an item carrying `aria-selected="true"` or the class `active`) is adopted, but does not override a configured `data-detail-visible="false"`.
 
-Selecting the item that is already selected does **not** fetch again; call `reload()` for an explicit refresh.
+Selecting the item that is already selected does **not** fetch again; call `reload()` for an explicit refresh. A selection made while the detail is hidden fetches nothing at all - opening the detail later syncs the content, so a closed detail costs no round trips.
 
 Content that arrives in the detail frame is animated in (a short rise into place, `wx-detail-enter`), so a swap from one item to the next reads as a transition rather than as a jump. The frame keeps the previous detail on screen while the next one is on its way - no skeleton in between - so the two exchange in a single step. Only the *arrival* is animated, which also means a failed load can never leave the detail stuck invisible. The animation is suppressed under `prefers-reduced-motion`.
 
@@ -204,7 +212,7 @@ Two actions are registered so a control can drive the composite without custom J
 
 | Class                  | Purpose
 |------------------------|--------------------------------------------------------------------------
-| `.wx-master-detail`    | The host, once the controller has upgraded it.
+| `.wx-master-detail`    | The host, once the controller has upgraded it. It draws no frame of its own - no border, no radius: the control is a layout region rather than a card, so the page around it brings whatever framing it wants and the splitter alone divides the two columns.
 | `.wx-master`           | The master column. Scrolls on its own (`overflow-y: auto`).
 | `.wx-detail`           | The detail column. It fills the whole main pane: the stylesheet takes back the `overflow: auto` the split writes onto that pane, because its scrollbar gutter would otherwise sit between the pane edge and the detail.
 | `.wx-detail-body`      | The scrolling part of the detail column, and the only part that scrolls. A `padding-left` of `--wx-master-detail-gap` (default `0.75rem`) keeps the content clear of the splitter, so it does not start right against the drag handle. The gap sits here rather than on `.wx-detail`, because the header bar above has to run edge to edge. Beyond that gap the body carries no padding: the detail content is a page in its own right, gets the full width and brings whatever spacing it wants.
@@ -215,7 +223,7 @@ Two actions are registered so a control can drive the composite without custom J
 | `.wx-md-item-active`   | The selected item. The accent is an inset shadow rather than a border, because a border would shift the item content of any master that does not compensate for it.
 | `.wx-md-closable`      | Set on the host while the detail carries a close button. Its absence lets the stylesheet hide a header bar that would be empty outside the sequential mode.
 | `.wx-md-compact`       | Set on the host while the sequential mode is active. The detail then covers the whole container, so the gap to the splitter goes with it.
-| (embedded controls)    | A `.wx-list` or `.wx-table` inside the control loses its own border and radius: the host border and the splitter already frame the panes, and a second frame inside them reads as a rendering fault.
+| (embedded controls)    | A `.wx-list` or `.wx-table` inside the control loses its own border and radius: the composite is frameless, so a card inside it would be the only border in the view - a stray box around the master rather than the plain column the layout asks for.
 | `.wx-md-detail-open`   | Set on the host while the detail overlay is on screen.
 
 The two columns scroll independently, which only works against a definite height. The host therefore has one, taken from `--wx-master-detail-height` (default `70vh`). Override it wherever the parent has a height of its own:

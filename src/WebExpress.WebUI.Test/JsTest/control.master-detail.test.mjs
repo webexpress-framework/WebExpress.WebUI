@@ -109,6 +109,7 @@ function makeMasterDetail(rt, options = {}) {
     if (options.detailUri) { host.setAttribute("data-detail-uri", options.detailUri); }
     if (options.detailVisible === false) { host.setAttribute("data-detail-visible", "false"); }
     if (options.closable === false) { host.setAttribute("data-closable", "false"); }
+    if (options.reveal) { host.setAttribute("data-reveal", options.reveal); }
     if (options.itemSelector) { host.setAttribute("data-item", options.itemSelector); }
 
     const split = rt.createElement("div");
@@ -187,6 +188,11 @@ function makeMasterDetail(rt, options = {}) {
         split: rt.wx.Controller.getInstanceByElement(split),
         items: () => Array.from(list.children),
         click: (element) => master.dispatchEvent({ type: "click", target: element }),
+        dblclick: (element) => master.dispatchEvent({
+            type: "dblclick",
+            target: element,
+            preventDefault() { }
+        }),
         key: (key, target) => master.dispatchEvent({
             type: "keydown",
             key,
@@ -223,6 +229,125 @@ test("an item that carries only an id resolves its uri through the template", ()
 
     assert.equal(md.ctrl.selectedId, "1024");
     assert.equal(md.rt.wx.Controller.getInstanceByElement(md.frame).uri, "/apps/details?id=1024", "the template fills in the item id");
+});
+
+test("the id of a master that labels its own items is read", () => {
+    // a kanban board writes data-card-id onto its cards and a backlog
+    // data-item-id onto its rows; both belong to the item contract, so those
+    // masters resolve without the host having to restate the id
+    for (const [attribute, id] of [["data-card-id", "c1"], ["data-item-id", "r1"]]) {
+        const md = makeMasterDetail(loadRuntime(), {
+            detailUri: "/apps/details?id={id}",
+            items: [{ text: "Entry" }]
+        });
+
+        const item = md.items()[0];
+        item.setAttribute(attribute, id);
+
+        md.click(item);
+
+        assert.equal(md.ctrl.selectedId, id, attribute + " resolves the item id");
+        assert.equal(md.rt.wx.Controller.getInstanceByElement(md.frame).uri, "/apps/details?id=" + id);
+    }
+});
+
+test("a click on a control inside an item does not change the selection", () => {
+    const md = makeMasterDetail(loadRuntime());
+
+    md.click(md.items()[0]);
+
+    // a row menu, an inline editor or a link inside the item carries its own
+    // meaning; selecting as well would load a detail behind the user's action
+    const button = md.rt.createElement("button");
+    md.items()[1].appendChild(button);
+    md.click(button);
+
+    assert.equal(md.ctrl.selectedId, "1", "the earlier selection stands");
+});
+
+test("in the dblclick reveal mode a single click selects without opening the detail", () => {
+    const md = makeMasterDetail(loadRuntime(), { detailVisible: false, reveal: "dblclick" });
+
+    const frame = md.rt.wx.Controller.getInstanceByElement(md.frame);
+    let loads = 0;
+    frame.load = () => { loads++; };
+
+    md.click(md.items()[1]);
+
+    assert.equal(md.ctrl.selectedId, "2", "the selection follows the click");
+    assert.equal(md.ctrl.detailHidden, true, "the detail stays closed");
+    assert.equal(loads, 0, "a closed detail fetches nothing");
+});
+
+test("in the dblclick reveal mode a double click opens the detail and loads it", () => {
+    const md = makeMasterDetail(loadRuntime(), { detailVisible: false, reveal: "dblclick" });
+
+    md.dblclick(md.items()[1]);
+
+    assert.equal(md.ctrl.detailHidden, false, "the detail is revealed");
+    assert.equal(md.rt.wx.Controller.getInstanceByElement(md.frame).uri, "/apps/details?id=2");
+});
+
+test("a single click that preceded the double click does not stop it from opening", () => {
+    const md = makeMasterDetail(loadRuntime(), { detailVisible: false, reveal: "dblclick" });
+
+    // the browser fires click twice before dblclick, and both resolve the same
+    // item; the dedupe must not swallow the reveal
+    md.click(md.items()[0]);
+    md.click(md.items()[0]);
+    md.dblclick(md.items()[0]);
+
+    assert.equal(md.ctrl.detailHidden, false);
+    assert.equal(md.rt.wx.Controller.getInstanceByElement(md.frame).uri, "/apps/details?id=1");
+});
+
+test("once the detail is open a single click swaps its content", () => {
+    const md = makeMasterDetail(loadRuntime(), { detailVisible: false, reveal: "dblclick" });
+
+    md.dblclick(md.items()[0]);
+    md.click(md.items()[2]);
+
+    assert.equal(md.ctrl.selectedId, "3");
+    assert.equal(md.ctrl.detailHidden, false, "the detail stays open");
+    assert.equal(md.rt.wx.Controller.getInstanceByElement(md.frame).uri, "/apps/details?id=3");
+});
+
+test("closing the detail returns the view to its double-click state", () => {
+    const md = makeMasterDetail(loadRuntime(), { detailVisible: false, reveal: "dblclick" });
+
+    md.dblclick(md.items()[0]);
+    md.ctrl.hideDetail();
+    md.click(md.items()[1]);
+
+    assert.equal(md.ctrl.selectedId, "2", "the selection still follows the click");
+    assert.equal(md.ctrl.detailHidden, true, "but a single click no longer opens the detail");
+});
+
+test("keyboard activation opens the detail whatever the reveal mode", () => {
+    const md = makeMasterDetail(loadRuntime(), { detailVisible: false, reveal: "dblclick" });
+
+    // there is no second Enter to wait for, so an explicit activation reveals
+    md.key("Enter", md.items()[1]);
+
+    assert.equal(md.ctrl.detailHidden, false);
+    assert.equal(md.ctrl.selectedId, "2");
+});
+
+test("the default reveal mode opens the detail on a single click", () => {
+    const md = makeMasterDetail(loadRuntime(), { detailVisible: false });
+
+    md.click(md.items()[1]);
+
+    assert.equal(md.ctrl.detailHidden, false, "without the mode a selection reveals as before");
+});
+
+test("opening a detail selected while it was hidden syncs its content", () => {
+    const md = makeMasterDetail(loadRuntime(), { detailVisible: false, reveal: "dblclick" });
+
+    md.click(md.items()[2]);
+    md.ctrl.showDetail();
+
+    assert.equal(md.rt.wx.Controller.getInstanceByElement(md.frame).uri, "/apps/details?id=3", "the toggle catches the content up");
 });
 
 test("the selected item is the only active option", () => {

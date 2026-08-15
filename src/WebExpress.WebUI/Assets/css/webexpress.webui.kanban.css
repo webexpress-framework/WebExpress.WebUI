@@ -243,6 +243,24 @@
     cursor: pointer;
 }
 
+/* The selected card. The accent is an inset shadow rather than a border, because a
+   border would shift the card content against its unselected neighbours — the same
+   reason the master-detail marks its active item that way. It is drawn on all sides
+   except the top, which already carries the column color strip. */
+.wx-kanban-card.wx-kanban-card-active {
+    box-shadow: inset 0 0 0 2px var(--wx-primary, #0d6efd), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+[data-bs-theme="dark"] .wx-kanban-card.wx-kanban-card-active {
+    box-shadow: inset 0 0 0 2px var(--wx-primary, #0d6efd), 0 2px 10px rgba(0, 0, 0, 0.21);
+}
+
+/* a selectable board marks its cards as clickable; the grab cursor stays on the
+   drag affordance the card already is */
+.wx-kanban:not([data-selectable="false"]) .wx-kanban-card {
+    cursor: pointer;
+}
+
 .wx-kanban-card.wx-dragging {
     opacity: 0.5;
     box-shadow: 0 4px 12px rgba(13,110,253,0.15);

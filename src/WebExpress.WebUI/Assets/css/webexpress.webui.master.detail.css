@@ -2,7 +2,11 @@
    The height is a variable rather than a fixed value: the two columns scroll
    independently, which only works against a definite height, and the host
    rarely has one. Override --wx-master-detail-height (for example with
-   Styles = ["--wx-master-detail-height: 100%;"]) wherever the parent does. */
+   Styles = ["--wx-master-detail-height: 100%;"]) wherever the parent does.
+
+   The container draws no frame of its own. It is a layout region rather than a
+   card: the page it sits on brings whatever framing it wants, and a border here
+   would sit inside that one. The splitter alone separates the two columns. */
 .wx-master-detail {
     position: relative;
     display: flex;
@@ -11,8 +15,6 @@
     height: var(--wx-master-detail-height, 70vh);
     min-height: 12rem;
     overflow: hidden;
-    border: 1px solid var(--wx-border-color);
-    border-radius: var(--bs-border-radius, 10px);
     background-color: var(--wx-body-bg);
     color: var(--wx-body-color);
 }
@@ -159,9 +161,10 @@
     box-shadow: 0 0 0 var(--bs-focus-ring-width, 0.25rem) var(--bs-focus-ring-color, rgba(var(--wx-primary-rgb), 0.25));
 }
 
-/* Embedded collection controls draw a card frame of their own, which inside the
-   already framed panes of this control reads as a frame within a frame. The
-   host border and the splitter do the framing here, so the embedded ones go. */
+/* Embedded collection controls draw a card frame of their own. The composite is
+   frameless on purpose, and a card inside it would be the only border in the
+   view - a stray box around the master rather than the plain column the layout
+   asks for. The splitter alone divides the two sides. */
 .wx-master-detail .wx-list,
 .wx-master-detail .wx-table {
     border: none;

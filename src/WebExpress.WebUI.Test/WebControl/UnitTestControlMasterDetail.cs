@@ -274,6 +274,31 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the reveal property of the master-detail control. Only the
+        /// double-click mode is emitted, because opening on any selection is the
+        /// default.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeMasterDetailReveal.Click, @"<div class=""wx-webui-master-detail"" data-breakpoint=""768"">*</div>")]
+        [InlineData(TypeMasterDetailReveal.DoubleClick, @"<div * data-reveal=""dblclick"">*</div>")]
+        public void Reveal(TypeMasterDetailReveal reveal, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlMasterDetail()
+            {
+                Reveal = _ => reveal
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests that the master sizes are handed to the split, which owns the
         /// splitter behaviour.
         /// </summary>

@@ -61,6 +61,13 @@ namespace WebExpress.WebUI.WebControl
         Func<IRenderControlContext, bool> DetailVisible { get; }
 
         /// <summary>
+        /// Gets or sets the gesture that opens the detail side while it is hidden.
+        /// The double-click mode turns a view that starts hidden into a plain list
+        /// until the user asks for the detail.
+        /// </summary>
+        Func<IRenderControlContext, TypeMasterDetailReveal> Reveal { get; }
+
+        /// <summary>
         /// Gets or sets whether the detail side carries a close button.
         /// </summary>
         Func<IRenderControlContext, bool> Closable { get; }

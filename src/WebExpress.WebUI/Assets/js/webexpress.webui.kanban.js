@@ -1,17 +1,35 @@
 /**
  * Kanban board control using a dashboard-style CSS grid layout.
  * Supports optional swimlanes, pixel-perfect drag & drop, icons, images, and wx-actions.
+ *
+ * Card selection mirrors the list and the backlog: a click marks the card active and
+ * announces the selection, so a board can drive a master-detail view the same way those
+ * controls do. Selection survives a re-render, because the card element is rebuilt from
+ * the retained selected id rather than from the dom.
+ *
  * The following events are triggered:
  * - webexpress.webui.Event.MOVE_EVENT
  * - webexpress.webui.Event.CHANGE_VALUE_EVENT
+ * - webexpress.webui.Event.SELECT_ITEM_EVENT
  */
 webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
+
+    static ACTIVE_CLASS = "wx-kanban-card-active";
+
+    // the interactive parts of a card and its surroundings. a click on one of them
+    // operates that control instead of selecting the card
+    static NON_SELECTING = "button, a, input, textarea, select, [contenteditable='true'], "
+        + ".wx-kanban-card-menu, .wx-kanban-grip";
 
     _columns = [];
     _swimlanes = [];
     _cards = [];
 
     _dragCard = null;
+
+    // card selection
+    _selectable = true;
+    _selectedCardId = null;
 
     // column header editing / reordering / deleting
     _editableColumn = false;
@@ -61,13 +79,119 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
         this._filter = element.dataset.filter || "";
 
+        // card selection is on unless the host opts out, matching the list, whose
+        // selectable default is what a board embedded in a master-detail needs
+        this._selectable = element.dataset.selectable !== "false";
+
         // a single document listener closes any open board / column / swimlane
         // dropdown when the click lands outside its own menu container
         this._onDocClick = (e) => this._closeMenusOnOutsideClick(e);
         document.addEventListener("click", this._onDocClick);
 
+        // delegated, because render() rebuilds every card: a listener on the host
+        // survives that, per-card listeners would have to be re-bound each time
+        element.addEventListener("click", (e) => this._onCardClick(e));
+
         this._parseStaticConfig();
         this.render();
+    }
+
+    /**
+     * Gets the id of the currently selected card.
+     * @returns {string|null} The selected card id.
+     */
+    get selectedId() {
+        return this._selectedCardId;
+    }
+
+    /**
+     * Selects the card with the given id, or clears the selection for null.
+     * @param {string|null} value - The card id.
+     */
+    set selectedId(value) {
+        this.selectCard(value, null);
+    }
+
+    /**
+     * Selects a card and announces the change. This is the single entry point for
+     * every selection channel, so the state transition is identical no matter
+     * whether a click or a programmatic call triggered it.
+     * @param {string|null} id - The card id, or null to clear the selection.
+     * @param {Event} [originalEvent=null] - The dom event that triggered the selection.
+     * @param {boolean} [dispatch=true] - Whether to fire the selection event.
+     */
+    selectCard(id, originalEvent = null, dispatch = true) {
+        const next = id != null ? String(id) : null;
+
+        if (next === this._selectedCardId) {
+            return;
+        }
+
+        this._selectedCardId = next;
+        this._applySelectionClasses();
+
+        if (dispatch) {
+            this._dispatch(webexpress.webui.Event.SELECT_ITEM_EVENT, {
+                itemId: this._selectedCardId,
+                originalEvent: originalEvent
+            });
+        }
+    }
+
+    /**
+     * Clears the card selection.
+     */
+    clearSelection() {
+        this.selectCard(null);
+    }
+
+    /**
+     * Selects the card a click landed on. Clicks on the interactive parts of a card
+     * are left to those controls, and a click outside every card leaves the
+     * selection alone rather than clearing it, so the detail of a master-detail
+     * does not close on an incidental click on the board background.
+     * @param {MouseEvent} e - The click event.
+     */
+    _onCardClick(e) {
+        if (!this._selectable) {
+            return;
+        }
+
+        const target = e.target;
+        if (!target || typeof target.closest !== "function") {
+            return;
+        }
+
+        if (target.closest(webexpress.webui.KanbanCtrl.NON_SELECTING)) {
+            return;
+        }
+
+        const cardEl = target.closest(".wx-kanban-card");
+        if (!cardEl || !this._element.contains(cardEl)) {
+            return;
+        }
+
+        this.selectCard(cardEl.dataset.cardId, e);
+    }
+
+    /**
+     * Reflects the selection on the rendered cards, so exactly one card carries the
+     * active marker.
+     */
+    _applySelectionClasses() {
+        for (const cardEl of this._element.querySelectorAll(".wx-kanban-card")) {
+            const active = this._selectedCardId != null
+                && cardEl.dataset.cardId === this._selectedCardId;
+
+            cardEl.classList.toggle(webexpress.webui.KanbanCtrl.ACTIVE_CLASS, active);
+            cardEl.classList.toggle("active", active);
+
+            if (active) {
+                cardEl.setAttribute("aria-selected", "true");
+            } else {
+                cardEl.removeAttribute("aria-selected");
+            }
+        }
     }
 
     /**
@@ -1632,6 +1756,13 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         cardEl.className = "wx-kanban-card";
         cardEl.dataset.cardId = card.id;
         cardEl.setAttribute("draggable", "true");
+
+        // restore the selection state: render() rebuilds every card, so the active
+        // marker has to come from the retained id rather than from the old element
+        if (this._selectable && this._selectedCardId != null && String(card.id) === this._selectedCardId) {
+            cardEl.classList.add("active", webexpress.webui.KanbanCtrl.ACTIVE_CLASS);
+            cardEl.setAttribute("aria-selected", "true");
+        }
 
         // map bootstrap colors to hex for the top border highlight
         const colorCss = card.colorCss || "";

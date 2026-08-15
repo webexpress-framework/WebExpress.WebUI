@@ -72,6 +72,17 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, bool> DetailVisible { get; set; } = _ => true;
 
         /// <summary>
+        /// Gets or sets the gesture that opens the detail side while it is hidden.
+        /// </summary>
+        /// <remarks>
+        /// Paired with <see cref="DetailVisible"/> set to false, the double-click mode
+        /// gives a view that starts as a plain list: a single click moves the selection,
+        /// a double click brings the detail in, and from then on a single click swaps its
+        /// content. Closing the detail returns the view to that starting state.
+        /// </remarks>
+        public Func<IRenderControlContext, TypeMasterDetailReveal> Reveal { get; set; } = _ => TypeMasterDetailReveal.Click;
+
+        /// <summary>
         /// Gets or sets whether the detail side carries a close button. Turn it
         /// off for a view whose detail side must always stay open; hiding it
         /// through the toggle action remains possible either way.
@@ -169,6 +180,7 @@ namespace WebExpress.WebUI.WebControl
             var closable = Closable?.Invoke(renderContext) ?? true;
             var itemSelector = ItemSelector?.Invoke(renderContext);
             var detailUriTemplate = DetailUriTemplate?.Invoke(renderContext);
+            var reveal = (Reveal?.Invoke(renderContext) ?? TypeMasterDetailReveal.Click).ToValue();
 
             var masterPanel = new ControlPanel($"{Id}-master", [.. _master])
             {
@@ -214,7 +226,8 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-item", itemSelector)
                 .AddUserAttribute("data-detail-uri", detailUriTemplate)
                 .AddUserAttribute("data-detail-visible", detailVisible ? null : "false")
-                .AddUserAttribute("data-closable", closable ? null : "false");
+                .AddUserAttribute("data-closable", closable ? null : "false")
+                .AddUserAttribute("data-reveal", reveal);
         }
     }
 }
