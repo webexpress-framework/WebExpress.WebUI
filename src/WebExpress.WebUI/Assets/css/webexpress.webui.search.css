@@ -1,5 +1,9 @@
-/* Main container for the search field */
+/* Main container for the search field.
+   It is the containing block of the suggestion menu below, which is positioned
+   absolutely: without it the menu anchors to whatever positioned ancestor the
+   surrounding page happens to have and lands far from the box. */
 .wx-search {
+    position: relative;
 }
 
 /* Styling for the search box container */

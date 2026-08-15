@@ -2226,6 +2226,13 @@ webexpress.webui.PopperCtrl = class extends webexpress.webui.Ctrl {
             ],
         });
 
+        // keep the instance reachable per menu. popper measures when it is told to,
+        // and the first measurement happens while the menu is still display:none -
+        // an element without a box and without an offset parent. a control that
+        // opens its menu itself has to ask for the position again afterwards.
+        this._popperInstances = this._popperInstances || new Map();
+        this._popperInstances.set(dropdownmenu, popperInstance);
+
         // hide the suggestion box when clicking outside of it
         document.addEventListener("click", (event) => {
             if (!this._element.contains(event.target)) {
@@ -2296,6 +2303,27 @@ webexpress.webui.PopperCtrl = class extends webexpress.webui.Ctrl {
         dropdownmenu.addEventListener("hide", () => {
             dropdownmenu.hide();
         });
+    }
+
+    /**
+     * Re-measures an open menu against the control it belongs to. A control that
+     * opens its menu by making it visible - rather than through the show() helper
+     * this class installs - has to call this once the menu is on screen and its
+     * content is in place, because the position popper computed while the menu was
+     * still hidden refers to an element that had neither a box nor an offset
+     * parent, and would place the menu far from its control.
+     * @param {HTMLElement} dropdownmenu - The menu to reposition.
+     */
+    _repositionMenu(dropdownmenu) {
+        const instance = this._popperInstances?.get(dropdownmenu);
+
+        if (!instance) {
+            return;
+        }
+
+        // the menu spans its control, whose width is only known once laid out
+        dropdownmenu.style.width = this._element.offsetWidth + "px";
+        instance.update();
     }
 }
 

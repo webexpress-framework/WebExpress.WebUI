@@ -138,6 +138,32 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests that the footer control is rendered into the marked element the client lifts
+        /// into the suggestion menu.
+        /// </summary>
+        [Fact]
+        public void Footer()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+
+            var control = new ControlSearch()
+            {
+                Footer = new ControlText("footer")
+                {
+                    Text = _ => "more"
+                }
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-search""><div class=""wx-search-footer"">*more*</div></div>", html);
+        }
+
+        /// <summary>
         /// Tests the value property of the search control.
         /// </summary>
         [Theory]

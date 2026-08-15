@@ -272,6 +272,8 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
 
         if (suggestionBox.children.length > 0) {
             this._suggestionMenu.style.display = "flex";
+            // the menu is only measurable once it is visible and filled
+            this._repositionMenu(this._suggestionMenu);
             this._triggerDropdownShow();
         } else {
             this._suggestionMenu.style.display = "none";

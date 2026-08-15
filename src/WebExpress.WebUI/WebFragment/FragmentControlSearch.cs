@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebFragment
     /// Base class for a search box that is contributed as a fragment, so the framework can insert it
     /// into a designated search section of a page from a plugin without the page knowing about it in advance.
     /// </summary>
-    public abstract class FragmentControlSearch : ControlSearch, IFragmentControl<ControlSearch>
+    public abstract class FragmentControlSearch : ControlSearch, IFragmentControl<ControlSearch>, IFragmentControlSearch
     {
         /// <summary>
         /// Gets the context of the fragment.
