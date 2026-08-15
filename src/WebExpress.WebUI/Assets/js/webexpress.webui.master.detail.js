@@ -26,8 +26,8 @@
  * detail side is hidden by hiding its content, which makes the split drop the
  * splitter, hand the whole container to the master, and restore the previous
  * splitter position once the detail comes back. The detail side carries both
- * ways out of it: a close button floating in its corner in the two-column
- * layout, and a labelled back button in the sequential one.
+ * ways out of it in a fixed header bar above its scrolling body: a close button
+ * in the two-column layout, and a labelled back button in the sequential one.
  *
  * Content arriving in the detail frame is animated in, so a swap from one item
  * to the next reads as a transition rather than as a jump.
@@ -51,6 +51,7 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
         + "[data-bind-uri], [data-wx-primary-action='master-detail']";
 
     static ACTIVE_CLASS = "wx-md-item-active";
+    static CLOSABLE_CLASS = "wx-md-closable";
     static COMPACT_CLASS = "wx-md-compact";
     static DETAIL_OPEN_CLASS = "wx-md-detail-open";
     static SWAP_CLASS = "wx-detail-swap";
@@ -332,10 +333,10 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
      * layout mode, which the client alone decides on; css shows the one that fits
      * and keeps the other out of the way.
      *
-     * The close button is placed directly on the pane rather than in a bar of its
-     * own, so it can float in the corner and leave the whole width to the detail
-     * content. The back button does need a bar, because it carries a label and
-     * must not sit on top of the content it leads away from.
+     * Both live in a header bar of their own, which is a sibling of the scrolling
+     * body rather than part of it. A button floating over the content would cover
+     * whatever the loaded detail places in that corner and would scroll out of
+     * reach with the body; from the bar neither can happen.
      */
     _buildControls() {
         if (!this._detailPane) {
@@ -360,27 +361,30 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
         back.addEventListener("click", () => this.hideDetail());
 
         header.appendChild(back);
+
+        if (this._closable) {
+            // the same button the modal and the dismissible panel use, so a close
+            // is the same affordance everywhere in the framework
+            const closeLabel = this._i18n("webexpress.webui:masterdetail.close", "Hide the detail view");
+            const close = document.createElement("button");
+            close.type = "button";
+            close.className = "btn wx-button-close wx-detail-close";
+            close.title = closeLabel;
+            close.setAttribute("aria-label", closeLabel);
+            close.innerHTML = `<i class="${this._iconClass("fas fa-times", "wx-icon-light-xmark")}"></i>`;
+            close.addEventListener("click", () => this.hideDetail());
+
+            header.appendChild(close);
+            this._closeButton = close;
+
+            // without the close button the bar stays empty outside the sequential
+            // mode; the marker lets css leave that stray line out
+            this._element.classList.add(webexpress.webui.MasterDetailCtrl.CLOSABLE_CLASS);
+        }
+
         this._detailPane.prepend(header);
         this._headerElement = header;
         this._backButton = back;
-
-        if (!this._closable) {
-            return;
-        }
-
-        // the same button the modal and the dismissible panel use, so a close is
-        // the same affordance everywhere in the framework
-        const closeLabel = this._i18n("webexpress.webui:masterdetail.close", "Hide the detail view");
-        const close = document.createElement("button");
-        close.type = "button";
-        close.className = "btn wx-button-close wx-detail-close";
-        close.title = closeLabel;
-        close.setAttribute("aria-label", closeLabel);
-        close.innerHTML = `<i class="${this._iconClass("fas fa-times", "wx-icon-light-xmark")}"></i>`;
-        close.addEventListener("click", () => this.hideDetail());
-
-        this._detailPane.prepend(close);
-        this._closeButton = close;
     }
 
     /**

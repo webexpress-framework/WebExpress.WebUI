@@ -52,18 +52,21 @@
     overflow-x: hidden;
 }
 
-/* The pane is the positioning context of the floating close button. */
 .wx-master-detail .wx-detail {
-    position: relative;
     overflow: hidden;
     background-color: var(--wx-body-bg);
 }
 
-/* No padding of its own: the detail content is a page in its own right and gets
-   the full width, bringing whatever spacing it wants. */
+/* The gap to the splitter is carried by the body alone, not by the whole
+   column: the header is a bar and has to run edge to edge, while the content
+   must not start right against the drag handle, where a click meant for it
+   would be a hair away from grabbing the splitter. Beyond that gap the body
+   brings no padding - the detail content is a page in its own right and
+   supplies whatever spacing it wants. */
 .wx-master-detail .wx-detail-body {
     flex: 1 1 auto;
     min-height: 0;
+    padding-left: var(--wx-master-detail-gap, 0.75rem);
     overflow-y: auto;
 }
 
@@ -87,16 +90,41 @@
     animation: wx-detail-enter 0.22s ease-out;
 }
 
-/* The close button floats in the top right corner instead of sitting in a bar
-   of its own, so the detail content keeps the full width. Its look comes from
-   the framework's .wx-button-close, which the modal and the dismissible panel
-   use as well; only the modal-header margins that class carries are reset. */
+/* Both ways out of the detail sit in a bar of their own rather than floating
+   over the content: a floating button covers whatever the loaded detail places
+   in that corner, and being part of the scroll area it would leave with the
+   first scroll. The bar is a sibling of the scrolling body, so it stays put.
+   The bar carries neither a background nor a rule of its own: it reserves the
+   space its buttons need and nothing more, so the detail reads as one surface
+   that a band in another shade or a line across it would cut in two. It stays
+   as low as that leaves room for - the minimum height only has to clear the
+   taller of the two buttons, the labelled back one, so the bar does not change
+   height when the layout mode swaps one button for the other. */
+.wx-master-detail .wx-detail-header {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.125rem;
+    padding: 0.125rem 0.5rem;
+    background-color: transparent;
+}
+
+/* A detail that may not be closed has nothing to put in the bar outside the
+   sequential mode, where the back button takes over; an empty bar would be a
+   stray line above the content. */
+.wx-master-detail:not(.wx-md-closable):not(.wx-md-compact) .wx-detail-header {
+    display: none;
+}
+
+/* The close button's look comes from the framework's .wx-button-close, which
+   the modal and the dismissible panel use as well; the margin-left: auto of
+   that class is what pushes it to the trailing edge of the bar, so only the
+   modal-header margins around it are reset. */
 .wx-master-detail .wx-detail-close {
-    position: absolute;
-    top: 0.25rem;
-    right: 0.25rem;
-    z-index: 4;
-    margin: 0;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
     padding: 0.25rem 0.5rem;
     line-height: 1;
 }
@@ -106,20 +134,10 @@
     box-shadow: 0 0 0 var(--bs-focus-ring-width, 0.25rem) var(--bs-focus-ring-color, rgba(var(--wx-primary-rgb), 0.25));
 }
 
-/* The back button carries a label and must not sit on top of the content it
-   leads away from, so it keeps a bar - which only the sequential mode shows. */
-.wx-master-detail .wx-detail-header {
-    display: none;
-    flex: 0 0 auto;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.25rem 0.5rem;
-    border-bottom: var(--bs-border-width) solid var(--wx-border-color);
-    background-color: var(--wx-tertiary-bg);
-}
-
+/* The back button leads a whole screen back, which only exists in the
+   sequential mode; the two-column layout closes instead. */
 .wx-master-detail .wx-detail-back {
-    display: inline-flex;
+    display: none;
     align-items: center;
     gap: 0.4rem;
     border: none;
@@ -204,10 +222,16 @@
     visibility: visible;
 }
 
+/* There is no splitter to keep clear here: the detail covers the whole
+   container and takes the full width. */
+.wx-master-detail.wx-md-compact .wx-detail-body {
+    padding-left: 0;
+}
+
 /* In the sequential mode the back button replaces the close button: both lead
    out of the detail side, and two controls for one action only confuse. */
-.wx-master-detail.wx-md-compact .wx-detail-header {
-    display: flex;
+.wx-master-detail.wx-md-compact .wx-detail-back {
+    display: inline-flex;
 }
 
 .wx-master-detail.wx-md-compact .wx-detail-close {

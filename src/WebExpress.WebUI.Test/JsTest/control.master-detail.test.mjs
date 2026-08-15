@@ -26,6 +26,31 @@ import { contract } from "./controls.contract.mjs";
 
 const DEPS = ["webexpress.webui.split.js", "webexpress.webui.frame.js", "webexpress.webui.master.detail.js"];
 
+const CSS_PATH = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    "..", "..", "WebExpress.WebUI", "Assets", "css", "webexpress.webui.master.detail.css"
+);
+
+/**
+ * Returns the declarations of the rule carrying exactly the given selector list.
+ * A few of the traits under test are pure layout - the pane the split hands over,
+ * the gap to the splitter, the header that stays out of the scroll area - and the
+ * dom stub has no cascade to ask about them, so the stylesheet is read instead.
+ * @param {string} selector - The selector list as authored, whitespace-normalized.
+ * @returns {string|null} The declaration block, or null when no rule matches.
+ */
+function cssRule(selector) {
+    const css = fs.readFileSync(CSS_PATH, "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+
+    for (const rule of css.matchAll(/([^{}]+)\{([^}]*)\}/g)) {
+        if (rule[1].trim().replace(/\s*\n\s*/g, " ") === selector) {
+            return rule[2];
+        }
+    }
+
+    return null;
+}
+
 contract({
     file: "webexpress.webui.master.detail.js",
     selector: "wx-webui-master-detail",
@@ -264,7 +289,6 @@ test("the built-in close button hides the detail side", () => {
     assert.ok(close, "the detail side carries a close button of its own");
     assert.ok(close.getAttribute("aria-label"), "and it is labelled for screen readers");
     assert.equal(close.classList.contains("wx-button-close"), true, "it is the framework's close button");
-    assert.equal(md.detail.firstElementChild, close, "it floats on the pane rather than sitting in a bar");
 
     md.click(md.items()[0]);
     assert.equal(md.ctrl.detailHidden, false);
@@ -284,15 +308,62 @@ test("the built-in close button hides the detail side", () => {
     assert.equal(md.ctrl.detailHidden, false, "selecting again reopens it");
 });
 
+test("both ways out sit in a header that is no part of the scrolling body", () => {
+    const md = makeMasterDetail(loadRuntime());
+
+    const header = md.detail.querySelector(".wx-detail-header");
+    const body = md.detail.querySelector(".wx-detail-body");
+
+    assert.ok(header, "the detail side carries a header bar");
+    assert.equal(md.detail.firstElementChild, header, "which sits above the content rather than on top of it");
+    assert.equal(md.detail.querySelector(".wx-detail-close").parentElement, header, "the close button lives in the bar");
+    assert.equal(md.detail.querySelector(".wx-detail-back").parentElement, header, "and so does the back button");
+
+    // only the body scrolls, so a bar outside it cannot travel away with the
+    // content - which a button placed on the pane itself would have done
+    assert.equal(body.parentElement, md.detail, "the bar and the scrolling body are siblings");
+    assert.match(cssRule(".wx-master-detail .wx-detail-body"), /overflow-y:\s*auto/, "the body owns the scrolling");
+    assert.doesNotMatch(cssRule(".wx-master-detail .wx-detail-header"), /position:\s*absolute/, "and the bar is laid out, not floated");
+
+    assert.equal(md.host.classList.contains("wx-md-closable"), true, "the marker tells css the bar has content of its own");
+});
+
 test("a control that may not be closed carries no close button", () => {
     const md = makeMasterDetail(loadRuntime(), { closable: false });
 
     assert.equal(md.detail.querySelector(".wx-detail-close"), null, "no close button is built");
     assert.ok(md.detail.querySelector(".wx-detail-back"), "the sequential back button stays");
 
+    // outside the sequential mode the bar would be empty, and css hides it by
+    // the absent marker rather than leaving a stray line above the content
+    assert.equal(md.host.classList.contains("wx-md-closable"), false, "the host is not marked closable");
+    assert.match(
+        cssRule(".wx-master-detail:not(.wx-md-closable):not(.wx-md-compact) .wx-detail-header"),
+        /display:\s*none/,
+        "and the stylesheet acts on it");
+
     // hiding through the api and the toggle action remains possible
     md.ctrl.toggleDetail();
     assert.equal(md.ctrl.detailHidden, true);
+});
+
+test("the gap to the splitter is the body's alone, not the header's", () => {
+    assert.match(
+        cssRule(".wx-master-detail .wx-detail-body"),
+        /padding-left:\s*var\(--wx-master-detail-gap/,
+        "the two-column layout offsets the detail content from the drag handle");
+
+    // the header is a bar and has to run edge to edge, so the gap must not sit
+    // on the column that holds both
+    assert.doesNotMatch(cssRule(".wx-master-detail .wx-detail"), /padding/, "the column itself carries no inset");
+    assert.doesNotMatch(cssRule(".wx-master-detail .wx-detail-header"), /padding-left:\s*var\(--wx-master-detail-gap/, "and neither does the bar");
+
+    // the sequential mode has no splitter at all: the detail is an overlay over
+    // the whole container and an inset would only cut its width
+    assert.match(
+        cssRule(".wx-master-detail.wx-md-compact .wx-detail-body"),
+        /padding-left:\s*0/,
+        "the sequential overlay takes the full width");
 });
 
 test("arriving detail content is animated in, and the animation is replayed on every swap", () => {
@@ -339,14 +410,10 @@ test("the detail fills the pane: the split's own scroller is taken back", () => 
     // take that scroller back - and only !important outranks an inline style.
     assert.equal(md.mainPane.style.overflow, "auto", "the split still writes the inline overflow");
 
-    const css = fs.readFileSync(
-        path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "WebExpress.WebUI", "Assets", "css", "webexpress.webui.master.detail.css"),
-        "utf8"
-    );
-    const rule = /\.wx-master-detail \.wx-side-pane,\s*\.wx-master-detail \.wx-main-pane\s*\{([^}]*)\}/.exec(css);
+    const rule = cssRule(".wx-master-detail .wx-side-pane, .wx-master-detail .wx-main-pane");
 
     assert.ok(rule, "the stylesheet counters it for both panes");
-    assert.match(rule[1], /overflow:\s*hidden\s*!important/, "and does so with a declaration that beats the inline style");
+    assert.match(rule, /overflow:\s*hidden\s*!important/, "and does so with a declaration that beats the inline style");
 });
 
 test("the master side cannot be dragged out of sight", () => {

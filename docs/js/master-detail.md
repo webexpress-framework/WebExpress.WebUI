@@ -8,22 +8,25 @@ The component is a composite. It owns the layout and the selected id but none of
 
 The splitter is not reimplemented. The host wraps a `SplitCtrl`, so dragging, the persisted size and the min/max constraints all come from there. Hiding the detail side hides its content, which makes the split drop the splitter, hand the whole container to the master and restore the previous splitter position once the detail comes back. The master side is rendered non-collapsible (`data-collapsible="false"` on the split): it carries the only navigation of the view, so the splitter stops at `data-min-side` instead of dragging it out of sight.
 
-The detail side carries its own way out: a close button in the two-column layout and a back button in the sequential one.
+The detail side carries its own way out, in a header bar that sits above its scrolling body: a close button in the two-column layout and a back button in the sequential one. The bar is no part of the scroll area, so neither button can cover the detail content or scroll out of reach with it.
 
 ```
    // two-column mode (>= breakpoint)
    ┌───────────────────┬───┬──────────────────────────────┐
-   │ ▸ Entry 1         │ ░ │                            × │
-   │ ▪ Entry 2         │ S │  Detail                      │
+   │ ▸ Entry 1         │ ░ │                            × │ 
+   │ ▪ Entry 2         │ S │   Detail                     │
    │ ▸ Entry 3         │ p │                              │
-   │ ▸ Entry 4         │ l │  loaded on demand through    │
-   │                   │ i │  the frame, over the full    │
-   │   .wx-master      │ t │  width of the pane           │
-   │   scrolls on      │ t │                              │
-   │   its own         │ e │        .wx-detail            │
-   │                   │ r │        scrolls on its own    │
+   │ ▸ Entry 4         │ l │   loaded on demand           │
+   │                   │ i │   through the frame          │
+   │                   │ t │                              │
+   │                   │ t │                              │
+   │                   │ e │                              │
+   │                   │ r │                              │
+   │                   │ ░ │                              │
    └───────────────────┴───┴──────────────────────────────┘
-     ↑ never dragged away: the splitter stops at data-min-side
+     ↑ never dragged away:  ↑ gap to the splitter, on the
+       the splitter stops     body only (--wx-master-detail-gap)
+       at data-min-side
 
    // sequential mode (< breakpoint)
    ┌────────────────────┐        ┌────────────────────┐
@@ -62,10 +65,22 @@ The controller binds to a fixed structure, which `ControlMasterDetail` renders o
 </div>
 ```
 
-The two ways out of the detail side are created by the controller, because which of them applies depends on the layout mode that only the client knows:
+The two ways out of the detail side are created by the controller, because which of them applies depends on the layout mode that only the client knows. Both go into `.wx-detail-header`, which the controller prepends to `.wx-detail`:
 
-- `.wx-detail-close` - the framework's standard close button (`btn wx-button-close`, the same one the modal and the dismissible panel use), floating in the top right corner of the pane. It is placed directly on `.wx-detail` rather than in a bar of its own, so the detail content keeps the full width of the pane.
-- `.wx-detail-back` - a labelled back button inside `.wx-detail-header`. A labelled control must not sit on top of the content it leads away from, so this one does get a bar, and only the sequential mode shows it.
+```html
+<div id="myMasterDetail-detail" class="wx-detail">
+    <div class="wx-detail-header">
+        <button class="wx-detail-back">…</button>
+        <button class="btn wx-button-close wx-detail-close">×</button>
+    </div>
+    <div class="wx-detail-body">…</div>
+</div>
+```
+
+- `.wx-detail-close` - the framework's standard close button (`btn wx-button-close`, the same one the modal and the dismissible panel use), at the trailing edge of the bar. Shown in the two-column layout. It sits in the bar rather than floating over the pane, so it can neither cover what the loaded detail places in that corner nor scroll away with it.
+- `.wx-detail-back` - a labelled back button at the leading edge of the same bar. Shown in the sequential mode, where it replaces the close button.
+
+The bar is a sibling of `.wx-detail-body` and only the body scrolls, so the bar stays put. With `data-closable="false"` it has nothing to show outside the sequential mode; the controller then leaves the marker class `wx-md-closable` off the host and the stylesheet hides the empty bar.
 
 ## Configuration
 
@@ -191,14 +206,15 @@ Two actions are registered so a control can drive the composite without custom J
 |------------------------|--------------------------------------------------------------------------
 | `.wx-master-detail`    | The host, once the controller has upgraded it.
 | `.wx-master`           | The master column. Scrolls on its own (`overflow-y: auto`).
-| `.wx-detail`           | The detail column, and the positioning context of the floating close button. It fills the whole main pane: the stylesheet takes back the `overflow: auto` the split writes onto that pane, because its scrollbar gutter would otherwise sit between the pane edge and the detail.
-| `.wx-detail-body`      | The scrolling part of the detail column. It carries no padding of its own: the detail content is a page in its own right, gets the full width and brings whatever spacing it wants.
+| `.wx-detail`           | The detail column. It fills the whole main pane: the stylesheet takes back the `overflow: auto` the split writes onto that pane, because its scrollbar gutter would otherwise sit between the pane edge and the detail.
+| `.wx-detail-body`      | The scrolling part of the detail column, and the only part that scrolls. A `padding-left` of `--wx-master-detail-gap` (default `0.75rem`) keeps the content clear of the splitter, so it does not start right against the drag handle. The gap sits here rather than on `.wx-detail`, because the header bar above has to run edge to edge. Beyond that gap the body carries no padding: the detail content is a page in its own right, gets the full width and brings whatever spacing it wants.
 | `.wx-detail-swap`      | Set on the frame while freshly arrived content plays its enter animation, and removed again on `animationend` so the next swap can restart it.
-| `.wx-detail-close`     | The close button, floating in the top right corner. Shown in the two-column layout.
-| `.wx-detail-header`    | The bar holding the back button. Shown in the sequential mode only.
-| `.wx-detail-back`      | The back button; in the sequential mode it replaces the close button.
+| `.wx-detail-header`    | The fixed bar above the scrolling body, holding the close and the back button. It has neither a background nor a border, so the detail reads as one surface, and stays only as tall as its buttons need. The minimum height clears the taller of the two, so the bar does not change height when the layout mode swaps one button for the other.
+| `.wx-detail-close`     | The close button, at the trailing edge of the bar. Shown in the two-column layout.
+| `.wx-detail-back`      | The back button, at the leading edge of the same bar. Shown in the sequential mode, where it replaces the close button.
 | `.wx-md-item-active`   | The selected item. The accent is an inset shadow rather than a border, because a border would shift the item content of any master that does not compensate for it.
-| `.wx-md-compact`       | Set on the host while the sequential mode is active.
+| `.wx-md-closable`      | Set on the host while the detail carries a close button. Its absence lets the stylesheet hide a header bar that would be empty outside the sequential mode.
+| `.wx-md-compact`       | Set on the host while the sequential mode is active. The detail then covers the whole container, so the gap to the splitter goes with it.
 | (embedded controls)    | A `.wx-list` or `.wx-table` inside the control loses its own border and radius: the host border and the splitter already frame the panes, and a second frame inside them reads as a rendering fault.
 | `.wx-md-detail-open`   | Set on the host while the detail overlay is on screen.
 
@@ -208,6 +224,15 @@ The two columns scroll independently, which only works against a definite height
 new ControlMasterDetail("myMasterDetail")
 {
     Styles = ["--wx-master-detail-height: 100%;"]
+};
+```
+
+The gap between the splitter and the detail content is a variable of its own, so a detail that loads a full-bleed page can take it back. It applies to `.wx-detail-body` only; the header bar always runs the full width of the pane:
+
+```csharp
+new ControlMasterDetail("myMasterDetail")
+{
+    Styles = ["--wx-master-detail-gap: 0;"]
 };
 ```
 
