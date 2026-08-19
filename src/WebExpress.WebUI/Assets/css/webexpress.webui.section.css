@@ -1,0 +1,272 @@
+/*
+ * Flat collapsible section rendered by webexpress.webui.SectionCtrl.
+ *
+ * A card separates by drawing a box; a section separates by typography and whitespace. There
+ * is deliberately no background, no border and no radius on the section itself - the only line
+ * it draws is the vertical guide down the left of its body, which ties the content back to its
+ * label without enclosing it. All colours come from the bootstrap CSS variables that ship with
+ * WebExpress.WebUI, so a section follows the light / dark switch without extra rules.
+ */
+
+.wx-section {
+    --wx-section-gap: 1.75rem;
+    --wx-section-label-size: 0.75rem;
+    --wx-section-label-spacing: 0.08em;
+    --wx-section-guide-offset: 0.3rem;
+    --wx-section-guide-gap: 1rem;
+    --wx-section-duration: 0.18s;
+
+    display: block;
+    margin: 0 0 var(--wx-section-gap) 0;
+}
+
+.wx-section:last-child {
+    margin-bottom: 0;
+}
+
+/* ---------------------------------------------------------------- header */
+
+.wx-section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    width: 100%;
+    padding: 0.15rem 0;
+    margin: 0;
+    border: 0;
+    background: none;
+    color: var(--wx-secondary-color);
+    text-align: left;
+    cursor: default;
+}
+
+.wx-section-collapsible > .wx-section-header {
+    cursor: pointer;
+}
+
+.wx-section-collapsible > .wx-section-header:hover,
+.wx-section-collapsible > .wx-section-header:focus-visible {
+    color: var(--wx-body-color);
+}
+
+.wx-section-collapsible > .wx-section-header:focus-visible {
+    outline: 2px solid var(--wx-primary);
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+.wx-section-title {
+    font-size: var(--wx-section-label-size);
+    font-weight: 600;
+    letter-spacing: var(--wx-section-label-spacing);
+    text-transform: uppercase;
+    line-height: 1.4;
+}
+
+/* the note stays readable while the section is folded, so a closed section can still report
+   what is inside it */
+.wx-section-note {
+    margin-left: auto;
+    font-size: var(--wx-section-label-size);
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.8;
+}
+
+.wx-section-note:empty,
+.wx-section-note.hide {
+    display: none;
+}
+
+.wx-section-icon {
+    font-size: var(--wx-section-label-size);
+    line-height: 1;
+    flex: none;
+}
+
+img.wx-section-icon {
+    width: 1em;
+    height: 1em;
+    object-fit: contain;
+}
+
+/* a chevron drawn from two borders: it inherits the header colour, so it dims and brightens
+   with the label instead of needing its own palette */
+.wx-section-chevron {
+    flex: none;
+    width: 0.42rem;
+    height: 0.42rem;
+    margin-right: 0.1rem;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: translateY(-0.12em) rotate(45deg);
+    transition: transform var(--wx-section-duration) ease;
+}
+
+.wx-section-collapsed > .wx-section-header > .wx-section-chevron {
+    transform: translateX(-0.06em) rotate(-45deg);
+}
+
+/* ------------------------------------------------------------------ body */
+
+/* the 1fr/0fr grid gives the fold a height to animate that no fixed value could know in
+   advance, and degrades to an instant fold where the transition does not run */
+.wx-section-wrapper {
+    display: grid;
+    grid-template-rows: 1fr;
+    transition: grid-template-rows var(--wx-section-duration) ease;
+}
+
+.wx-section-collapsed > .wx-section-wrapper {
+    grid-template-rows: 0fr;
+}
+
+.wx-section-body {
+    min-height: 0;
+    padding-top: 0.5rem;
+    overflow: visible;
+}
+
+/* clipped only while folded or moving - an open section must let a dropdown out */
+.wx-section-collapsed > .wx-section-wrapper > .wx-section-body,
+.wx-section-animating > .wx-section-wrapper > .wx-section-body {
+    overflow: hidden;
+}
+
+/* the guide sits on the wrapper rather than on the body, for two reasons: the wrapper is what
+   shrinks to nothing when the section folds, so the line disappears with it and needs no rule
+   of its own, and the wrapper does not reset its text color, so the line can follow an accent
+   through currentColor */
+.wx-section-guided > .wx-section-wrapper {
+    margin-left: var(--wx-section-guide-offset);
+    padding-left: var(--wx-section-guide-gap);
+    border-left: 1px solid var(--wx-border-color);
+}
+
+/* a label that is a name or a sentence keeps the spelling and the size it was given: upper
+   case makes a word read as structure, which is exactly wrong for content */
+.wx-section-verbatim > .wx-section-header > .wx-section-title {
+    font-size: inherit;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+/* ----------------------------------------------------------------- accent */
+
+/* the accent is set on the host, so the label row and the guide inherit it */
+.wx-section-accented > .wx-section-header,
+.wx-section-accented.wx-section-collapsible > .wx-section-header:hover,
+.wx-section-accented.wx-section-collapsible > .wx-section-header:focus-visible {
+    color: inherit;
+}
+
+.wx-section-accented.wx-section-guided > .wx-section-wrapper {
+    border-left-color: currentColor;
+}
+
+/* the content is not what was accented - a whole paragraph in the accent color says something
+   the author did not mean to say */
+.wx-section-accented > .wx-section-wrapper > .wx-section-body {
+    color: var(--wx-body-color);
+}
+
+/* ------------------------------------------------------------------ badge */
+
+.wx-section-badge {
+    flex: none;
+    font-size: calc(var(--wx-section-label-size) - 0.02rem);
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    line-height: 1.3;
+    padding: 0.1em 0.55em;
+}
+
+/* a badge without a declared color takes a neutral fill rather than the transparent one a bare
+   .badge would leave behind */
+.wx-section-badge:not([class*="text-bg-"]):not([style*="background"]) {
+    background: var(--wx-secondary-bg);
+    color: var(--wx-secondary-color);
+}
+
+.wx-section-badge:empty,
+.wx-section-badge.hide {
+    display: none;
+}
+
+/* ------------------------------------------------------- layout: aside */
+
+/* the label moves into a column of its own and the guide becomes the divider between the two.
+   the layout needs the width, so it is declared from a breakpoint up; below it the section
+   falls back to the stacked layout it was built on */
+@media (min-width: 48rem) {
+    .wx-section-aside {
+        display: grid;
+        grid-template-columns: var(--wx-section-aside-column, minmax(6rem, 12rem)) minmax(0, 1fr);
+        align-items: start;
+    }
+
+    .wx-section-aside > .wx-section-header {
+        flex-wrap: wrap;
+        padding-top: 0.6rem;
+        padding-right: 0.75rem;
+    }
+
+    /* in one narrow column the note reads as a second line under the label rather than as a
+       trailing one, so it stops being pushed to the far edge */
+    .wx-section-aside > .wx-section-header > .wx-section-note {
+        margin-left: 0;
+        flex-basis: 100%;
+    }
+
+    .wx-section-aside > .wx-section-wrapper > .wx-section-body {
+        padding-top: 0.35rem;
+    }
+}
+
+/* -------------------------------------------------------- layout: rule */
+
+/* the hairline runs from the label to the far edge; the note follows it, so a section can be
+   labelled on the left and dated on the right across one line */
+.wx-section-rule > .wx-section-header > .wx-section-rule-line {
+    flex: 1;
+    height: 1px;
+    min-width: 1rem;
+    margin: 0 0.35rem;
+    background: var(--wx-border-color);
+}
+
+.wx-section-accented.wx-section-rule > .wx-section-header > .wx-section-rule-line {
+    background: currentColor;
+    opacity: 0.45;
+}
+
+.wx-section-rule > .wx-section-header > .wx-section-note {
+    margin-left: 0;
+}
+
+/* the rule already separates, so the guide would be a second line saying the same thing */
+.wx-section-rule.wx-section-guided > .wx-section-wrapper {
+    margin-left: 0;
+    padding-left: 0;
+    border-left: 0;
+}
+
+/* the hairline exists in every layout so the header row keeps one shape; only the rule layout
+   gives it a size */
+.wx-section-rule-line {
+    display: none;
+}
+
+.wx-section-rule > .wx-section-header > .wx-section-rule-line {
+    display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wx-section-wrapper,
+    .wx-section-chevron {
+        transition: none;
+    }
+}

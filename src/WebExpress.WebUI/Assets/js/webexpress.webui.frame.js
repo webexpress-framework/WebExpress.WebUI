@@ -153,13 +153,17 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
     _renderError(error) {
         this._element.innerHTML = "";
 
-        // create the expandable error container using ExpandableCtrl
-        const expandableDiv = document.createElement("div");
-        expandableDiv.setAttribute("data-header", this._i18n("webexpress.webui:page.contentNotLoaded.label", "Content could not be loaded."));
-        expandableDiv.setAttribute("data-headercss", "fw-bold text-danger");
-        expandableDiv.setAttribute("data-icon", "fa-solid fa-triangle-exclamation text-warning me-2");
-        expandableDiv.setAttribute("data-expanded", "false");
-        expandableDiv.className = "mb-2 alert alert-danger";
+        // the error box is a section: a headline that says what failed, over a body with the
+        // detail a reader only wants when they are debugging. the alert supplies the surface,
+        // so the section stays flat and draws no guide line inside it
+        const errorSection = document.createElement("section");
+        errorSection.setAttribute("data-header", this._i18n("webexpress.webui:page.contentNotLoaded.label", "Content could not be loaded."));
+        errorSection.setAttribute("data-label-css", "fw-bold");
+        errorSection.setAttribute("data-header-icon-css", "fa-solid fa-triangle-exclamation text-warning");
+        errorSection.setAttribute("data-expanded", "false");
+        errorSection.setAttribute("data-guide", "false");
+        errorSection.setAttribute("data-persist", "false");
+        errorSection.className = "mb-2 alert alert-danger wx-section-verbatim";
 
         // prepare error message
         const messageDiv = document.createElement("div");
@@ -175,15 +179,15 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
             stackDiv.textContent = String(error);
         }
 
-        // add message and stacktrace to expandable content
-        expandableDiv.appendChild(messageDiv);
-        expandableDiv.appendChild(stackDiv);
+        // add message and stacktrace to the section content
+        errorSection.appendChild(messageDiv);
+        errorSection.appendChild(stackDiv);
 
-        // initialize the ExpandableCtrl
-        new webexpress.webui.ExpandableCtrl(expandableDiv);
+        // initialize the SectionCtrl
+        new webexpress.webui.SectionCtrl(errorSection);
 
-        // render the expandable error container
-        this._element.appendChild(expandableDiv);
+        // render the error container
+        this._element.appendChild(errorSection);
     }
 
     /**

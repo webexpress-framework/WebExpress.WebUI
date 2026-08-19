@@ -438,13 +438,19 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             const laneWrapper = document.createElement("div");
             laneWrapper.className = "wx-kanban-swimlane";
 
-            // setup expandable parameters if swimlanes are configured. the header
-            // label deliberately opts out of the bootstrap text-primary default,
-            // whose !important would beat the inline accent color of a colored lane
+            // setup section parameters if swimlanes are configured. the header label
+            // deliberately opts out of the bootstrap text-primary default, whose !important
+            // would beat the inline accent color of a colored lane. a lane name is a name, so
+            // it keeps its spelling instead of taking the upper case of a structural label, and
+            // the board owns the collapsed state, so the section does not remember one of its
+            // own
             if (hasSwimlanes) {
+                laneWrapper.classList.add("wx-section-verbatim");
                 laneWrapper.dataset.header = lane.label;
-                laneWrapper.dataset.headercss = "wx-kanban-swimlane-header";
+                laneWrapper.dataset.labelCss = "wx-kanban-swimlane-header";
                 laneWrapper.dataset.expanded = lane.expanded ? "true" : "false";
+                laneWrapper.dataset.guide = "false";
+                laneWrapper.dataset.persist = "false";
             }
 
             // create the grid row for the drop zones
@@ -511,9 +517,9 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             laneWrapper.appendChild(row);
             el.appendChild(laneWrapper);
 
-            // convert lane wrapper into an expandable component and sync state
+            // convert lane wrapper into a collapsible section and sync state
             if (hasSwimlanes) {
-                const laneCtrl = new webexpress.webui.ExpandableCtrl(laneWrapper);
+                const laneCtrl = new webexpress.webui.SectionCtrl(laneWrapper);
                 this._appendSwimlaneBadge(laneCtrl, lane);
                 this._applySwimlaneColor(laneCtrl, lane);
                 this._decorateSwimlaneHeader(laneCtrl, s);
@@ -1362,10 +1368,13 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     // ---- swimlane "…" menu ----------------------------------------------------
 
     /**
-     * Inserts the optional trailing badge into a swimlane header (built by the
-     * ExpandableCtrl), placed just before the lane content so it reads at the end
-     * of the header row.
-     * @param {object} laneCtrl - The ExpandableCtrl of the swimlane.
+     * Appends the optional trailing badge to a swimlane header, at the end of the
+     * header row.
+     *
+     * The badge is built by the shared _makeBadge, which columns, cards and lanes
+     * all use, so it carries the kanban badge classes rather than the plain text
+     * pill the section offers of its own.
+     * @param {object} laneCtrl - The SectionCtrl of the swimlane.
      * @param {object} lane - The swimlane data object.
      */
     _appendSwimlaneBadge(laneCtrl, lane) {
@@ -1374,9 +1383,9 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             return;
         }
 
-        const headerSpan = laneCtrl && laneCtrl._header;
-        if (headerSpan && headerSpan.parentNode) {
-            headerSpan.parentNode.insertBefore(badge, laneCtrl._content || null);
+        const header = laneCtrl && laneCtrl.headerElement;
+        if (header) {
+            header.appendChild(badge);
         }
     }
 
@@ -1384,27 +1393,26 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
      * Tints a swimlane header with its optional accent color, so a colored lane
      * reads as a labelled group the same way a colored column reads as a
      * labelled stage.
-     * @param {object} laneCtrl - The ExpandableCtrl of the swimlane.
+     * @param {object} laneCtrl - The SectionCtrl of the swimlane.
      * @param {object} lane - The swimlane data object.
      */
     _applySwimlaneColor(laneCtrl, lane) {
-        const headerSpan = laneCtrl && laneCtrl._header;
-        if (!headerSpan || !lane.color) {
+        const label = laneCtrl && laneCtrl.titleElement;
+        if (!label || !lane.color) {
             return;
         }
-        headerSpan.style.color = lane.color;
-        if (headerSpan.parentNode) {
-            headerSpan.parentNode.classList.add("wx-kanban-swimlane-has-color");
+        label.style.color = lane.color;
+        if (laneCtrl.headerElement) {
+            laneCtrl.headerElement.classList.add("wx-kanban-swimlane-has-color");
         }
     }
 
     /**
-     * Decorates a swimlane header (built by the ExpandableCtrl) with a "…" menu
-     * offering rename, color, settings, move and delete, depending on the
-     * enabled swimlane flags. The menu is inserted next to the header label so
-     * it flows in the header row; color drills into the same dropdown so no
-     * nested flyout positioning is needed.
-     * @param {object} laneCtrl - The ExpandableCtrl of the swimlane.
+     * Decorates a swimlane header with a "…" menu offering rename, color,
+     * settings, move and delete, depending on the enabled swimlane flags. The
+     * menu is appended to the header row so it flows with the label; color
+     * drills into the same dropdown so no nested flyout positioning is needed.
+     * @param {object} laneCtrl - The SectionCtrl of the swimlane.
      * @param {number} index - The swimlane index in this._swimlanes.
      */
     _decorateSwimlaneHeader(laneCtrl, index) {
@@ -1412,12 +1420,13 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             return;
         }
 
-        const headerSpan = laneCtrl && laneCtrl._header;
-        if (!headerSpan || !headerSpan.parentNode) {
+        const headerSpan = laneCtrl && laneCtrl.titleElement;
+        const header = laneCtrl && laneCtrl.headerElement;
+        if (!headerSpan || !header) {
             return;
         }
 
-        headerSpan.parentNode.classList.add("wx-kanban-swimlane-configurable");
+        header.classList.add("wx-kanban-swimlane-configurable");
 
         const container = document.createElement("span");
         container.className = "wx-kanban-menu wx-kanban-swimlane-menu position-relative";
@@ -1445,9 +1454,8 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         container.appendChild(button);
         container.appendChild(menu);
 
-        // place the menu at the end of the header row (after the label and any
-        // badge), just before the lane content
-        headerSpan.parentNode.insertBefore(container, laneCtrl._content || null);
+        // place the menu at the end of the header row, after the label and any badge
+        header.appendChild(container);
     }
 
     /**

@@ -17,7 +17,7 @@ Initialization and behavior are controlled exclusively via `data-` attributes on
 Additional behavior:
 - Requests use `fetch()` with `credentials: "same-origin"`.
 - While loading, a skeleton placeholder is inserted (`placeholder`, `placeholder-glow`, and other utility classes).
-- In case of errors, a collapsible error box is shown via `ExpandableCtrl` with internationalized texts.
+- In case of errors, a collapsible error box is shown via [`SectionCtrl`](section.md) with internationalized texts.
 
 ## Functionality
 

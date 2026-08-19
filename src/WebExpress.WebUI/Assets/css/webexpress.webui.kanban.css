@@ -160,6 +160,20 @@
     border-bottom-color: var(--wx-border-color, #495057);
 }
 
+/* the surface of a swimlane. it used to come from the expandable container the lane was built
+   on; the lane is a section now, and a section is flat by construction, so the lane carries the
+   surface it always had itself. the section gap replaces the margin the container supplied. */
+.wx-kanban-swimlane {
+    --wx-section-gap: 1em;
+
+    background-color: var(--wx-body-bg);
+    color: var(--wx-body-color);
+    border-radius: var(--bs-border-radius, 0.25rem);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.025);
+    padding: 0.75rem 1rem;
+    transition: background 0.15s, box-shadow 0.15s;
+}
+
 /* the swimlane header label. it carries the primary tint the bootstrap
    text-primary utility used to supply, but without the !important that would
    beat the inline accent color a colored lane sets */

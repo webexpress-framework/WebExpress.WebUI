@@ -17,7 +17,7 @@ Initialization and behavior are controlled exclusively via `data-` attributes on
 Additional behavior:
 - Requests use `fetch()` with `credentials: "same-origin"`.
 - While loading **into an empty frame**, a skeleton placeholder is inserted (`placeholder`, `placeholder-glow`, and other utility classes). A frame that already holds content shows no placeholder: the outgoing content stays until its replacement is ready, so a swap from one page to the next is a single exchange instead of a flash through an empty frame.
-- In case of errors, a collapsible error box is shown via `ExpandableCtrl` with internationalized texts.
+- In case of errors, a collapsible error box is shown via [`SectionCtrl`](section.md) with internationalized texts.
 
 ## Functionality
 

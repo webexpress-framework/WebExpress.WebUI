@@ -19,11 +19,11 @@ function load() {
 
 /**
  * Loads a runtime with the kanban control and its swimlane dependency, needed
- * once a board renders swimlanes (each becomes an ExpandableCtrl).
+ * once a board renders swimlanes (each becomes a SectionCtrl).
  * @returns {object} The loaded runtime.
  */
 function loadFull() {
-    return loadWebUi({ extraFiles: [webuiAsset("webexpress.webui.expandable.js"), webuiAsset("webexpress.webui.kanban.js")] });
+    return loadWebUi({ extraFiles: [webuiAsset("webexpress.webui.section.js"), webuiAsset("webexpress.webui.kanban.js")] });
 }
 
 /**
@@ -318,9 +318,11 @@ test("the swimlane menu applies a color", () => {
     clickEntry(menu.querySelector(".wx-board-col-swatch"));
     assert.ok(ctrl._swimlanes[0].color, "a swimlane color is set");
 
-    // the header label is tinted with the chosen color
+    // the header label is tinted with the chosen color. the label is addressed by its own
+    // class rather than as "the first span in the row": the section the lane is built on puts
+    // the chevron there, and the position of a decoration is not what this test is about
     const header = host.querySelector(".wx-kanban-swimlane-configurable");
-    const label = header.querySelector("span");
+    const label = header.querySelector(".wx-kanban-swimlane-header");
     assert.equal(label.style.color, ctrl._swimlanes[0].color);
 
     // the label must not carry the bootstrap text-primary utility: its

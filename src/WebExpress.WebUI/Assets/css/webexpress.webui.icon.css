@@ -2213,6 +2213,11 @@
     mask-image: url("../icons/control-search-content.svg");
 }
 
+.wx-icon-light-control-section {
+    -webkit-mask-image: url("../icons/control-section.svg");
+    mask-image: url("../icons/control-section.svg");
+}
+
 .wx-icon-light-control-selection {
     -webkit-mask-image: url("../icons/control-selection.svg");
     mask-image: url("../icons/control-selection.svg");
