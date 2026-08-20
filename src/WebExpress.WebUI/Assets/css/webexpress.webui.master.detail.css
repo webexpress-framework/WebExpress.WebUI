@@ -2,7 +2,15 @@
    The height is a variable rather than a fixed value: the two columns scroll
    independently, which only works against a definite height, and the host
    rarely has one. Override --wx-master-detail-height (for example with
-   Styles = ["--wx-master-detail-height: 100%;"]) wherever the parent does.
+   Styles = ["--wx-master-detail-height: 24rem;"]) to size the region for the
+   page it sits on, or give the control Fill = _ => true where it is the view
+   rather than one block on a page of them.
+
+   max-height keeps a viewport-relative height from reaching past a host that
+   does have a definite one. Inside an application shell that would put a
+   scrollbar on the pane around a region that already scrolls internally, which
+   is the double scrolling the shell exists to avoid. Against an auto-height
+   host the percentage stays unresolved and the declaration does nothing.
 
    The container draws no frame of its own. It is a layout region rather than a
    card: the page it sits on brings whatever framing it wants, and a border here
@@ -13,10 +21,32 @@
     flex-direction: column;
     width: 100%;
     height: var(--wx-master-detail-height, 70vh);
+    max-height: 100%;
     min-height: 12rem;
     overflow: hidden;
     background-color: var(--wx-body-bg);
     color: var(--wx-body-color);
+}
+
+/* Fill mode: the region takes the height its host offers instead of bringing
+   one of its own, which is what an application shell asks of the content of a
+   pane. A flex column host drives it: the region grows into the free space and
+   shrinks with it, so it ends up at exactly what the host has left over.
+
+   Only the flex basis is restated, not the height. Everything the two columns
+   do depends on the region having a definite height - take that away and the
+   scrollports go with it, and the pane around them starts scrolling instead. So
+   where a host hands nothing down, the region must still land on a height that
+   comes from the environment rather than from the content, and the basis is
+   that height: the viewport-relative default of the base rule, capped by
+   max-height wherever the host does have an extent of its own. A height of 100%
+   would read better here but resolves to auto against an auto-height host,
+   which is the content - the one answer this mode must never give.
+
+   The 12rem floor of the base rule stands, so a host too short to hold the two
+   columns scrolls rather than crushing them. */
+.wx-master-detail-fill {
+    flex: 1 1 var(--wx-master-detail-height, 70vh);
 }
 
 .wx-master-detail > .wx-split {
@@ -241,15 +271,22 @@
     display: none;
 }
 
-/* Fallback for a host the client has not upgraded yet: the marker class is
-   consumed on upgrade, so these rules can never fight the controller. */
+/* Fallback for a host the client has not upgraded yet. The upgrade adds
+   .wx-master-detail but keeps the marker class, so the :not() is what actually
+   retires these rules - without it the viewport query outlives the upgrade and
+   stacks the split behind the controller's back, while the controller decides
+   the layout mode from the width of the *container* and would keep it in the
+   two-column mode. The two answers differ wherever the container is narrower or
+   wider than the viewport, which is the case the container measurement exists
+   for. */
 @media (max-width: 767.98px) {
-    .wx-webui-master-detail .wx-split {
+    .wx-webui-master-detail:not(.wx-master-detail) .wx-split,
+    .wx-webui-master-detail:not(.wx-master-detail) .wx-webui-split {
         flex-direction: column;
     }
 
-    .wx-webui-master-detail .wx-side-pane,
-    .wx-webui-master-detail .wx-main-pane {
+    .wx-webui-master-detail:not(.wx-master-detail) .wx-side-pane,
+    .wx-webui-master-detail:not(.wx-master-detail) .wx-main-pane {
         width: 100%;
     }
 }

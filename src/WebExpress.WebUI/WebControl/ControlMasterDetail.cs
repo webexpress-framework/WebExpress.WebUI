@@ -90,6 +90,28 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, bool> Closable { get; set; } = _ => true;
 
         /// <summary>
+        /// Gets or sets whether the control takes the height its host offers
+        /// instead of bringing one of its own.
+        /// </summary>
+        /// <remarks>
+        /// The two columns scroll independently, which needs a definite height,
+        /// and a host rarely has one - hence the default of a self-imposed
+        /// <c>70vh</c>, adjustable through the <c>--wx-master-detail-height</c>
+        /// custom property. That is the right shape for one block among many on a
+        /// page. Where the master-detail *is* the view, it is the wrong one: a
+        /// region with a height of its own inside an application-shell pane either
+        /// leaves dead space below it or reaches past the pane, and the pane then
+        /// scrolls around columns that already scroll themselves.
+        ///
+        /// A host that is a flex column - which the WebApp content panel becomes
+        /// on its own for a filling region - drives the height. A host that hands
+        /// nothing down falls back to the self-imposed height, never to the
+        /// content: the two scrollports only exist while the region is bounded,
+        /// so the fallback has to come from the environment as well.
+        /// </remarks>
+        public Func<IRenderControlContext, bool> Fill { get; set; } = _ => false;
+
+        /// <summary>
         /// Gets or sets the initial size of the master side. The value is
         /// interpreted in the configured <see cref="Unit"/>, which defaults to
         /// percent, so the master takes roughly a third of the available width.
@@ -218,7 +240,12 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementTextContentDiv(split.Render(renderContext, visualTree))
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-master-detail", GetClasses(renderContext)),
+                Class = Css.Concatenate
+                (
+                    "wx-webui-master-detail",
+                    (Fill?.Invoke(renderContext) ?? false) ? "wx-master-detail-fill" : null,
+                    GetClasses(renderContext)
+                ),
                 Style = GetStyles(renderContext),
                 Role = Role?.Invoke(renderContext)
             }

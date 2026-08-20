@@ -274,6 +274,31 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the fill property of the master-detail control. Only the filling
+        /// state is emitted, because a region that brings its own height is the
+        /// default; the class is what lets the host hand a height down instead.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-webui-master-detail"" data-breakpoint=""768"">*</div>")]
+        [InlineData(true, @"<div class=""wx-webui-master-detail wx-master-detail-fill"" data-breakpoint=""768"">*</div>")]
+        public void Fill(bool fill, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlMasterDetail()
+            {
+                Fill = _ => fill
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests the reveal property of the master-detail control. Only the
         /// double-click mode is emitted, because opening on any selection is the
         /// default.

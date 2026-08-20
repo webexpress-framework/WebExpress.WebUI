@@ -225,15 +225,43 @@ Two actions are registered so a control can drive the composite without custom J
 | `.wx-md-compact`       | Set on the host while the sequential mode is active. The detail then covers the whole container, so the gap to the splitter goes with it.
 | (embedded controls)    | A `.wx-list` or `.wx-table` inside the control loses its own border and radius: the composite is frameless, so a card inside it would be the only border in the view - a stray box around the master rather than the plain column the layout asks for.
 | `.wx-md-detail-open`   | Set on the host while the detail overlay is on screen.
+| `.wx-master-detail-fill` | Set on the host by `Fill = _ => true`. The region then takes the height its host offers instead of bringing one of its own.
 
-The two columns scroll independently, which only works against a definite height. The host therefore has one, taken from `--wx-master-detail-height` (default `70vh`). Override it wherever the parent has a height of its own:
+### Height
+
+The two columns scroll independently, which only works against a definite height, and a host rarely has one. There are two ways to give the region a height, and which one is right follows from what the region is on the page.
+
+**One block among many.** The host brings its own height, taken from `--wx-master-detail-height` (default `70vh`). Size it for the page:
 
 ```csharp
 new ControlMasterDetail("myMasterDetail")
 {
-    Styles = ["--wx-master-detail-height: 100%;"]
+    Styles = ["--wx-master-detail-height: 24rem;"]
 };
 ```
+
+**The view itself.** Inside an application shell the page does not scroll; the panes do. A region with a height of its own then either leaves dead space below it or reaches past the pane, and the pane scrolls around two columns that already scroll themselves - two scrollbars for one gesture. `Fill` takes the height from the host instead:
+
+```csharp
+new ControlMasterDetail("myMasterDetail")
+{
+    Fill = _ => true
+};
+```
+
+A flex column host drives the region: it grows into the free space and shrinks with it, landing at exactly what the host has left over. In a `WebExpress.WebApp` shell the content panel becomes one on its own as soon as a filling region is on the page - it opens the chain of panels between itself and that region - so `Fill` is all a page there has to set. Elsewhere, make the host a flex column:
+
+```css
+.my-view {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+```
+
+A host that hands nothing down leaves the region at `--wx-master-detail-height` (default `70vh`), **never at its content height**. That matters more than it looks: the two columns are scrollports, and a scrollport only exists while its container is bounded. A region sized by its content has no scrollports at all - both columns grow to their full length, and the pane around them starts scrolling instead, which is the one behaviour the mode exists to prevent. The fallback therefore comes from the environment as well.
+
+Either way the region never grows past a host that does have a definite height: `max-height: 100%` caps it.
 
 The gap between the splitter and the detail content is a variable of its own, so a detail that loads a full-bleed page can take it back. It applies to `.wx-detail-body` only; the header bar always runs the full width of the pane:
 
