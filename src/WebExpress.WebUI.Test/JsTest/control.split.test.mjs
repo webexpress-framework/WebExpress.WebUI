@@ -152,7 +152,7 @@ test("the split-fit action fits the side pane of its target split", () => {
 });
 
 
-test("collapsing hides the side pane and the splitter with it", () => {
+test("collapsing hides the side pane but keeps the splitter as the way back", () => {
     const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.split.js"] });
     // a drag minimum is not a collapse target: a pane with a sensible minimum
     // has to remain fully hideable
@@ -162,7 +162,10 @@ test("collapsing hides the side pane and the splitter with it", () => {
 
     assert.equal(s.ctrl._sidePaneCollapsed, true, "the pane is collapsed");
     assert.equal(s.side.style.display, "none", "nothing of the side pane is left");
-    assert.equal(s.ctrl._splitter.style.display, "none", "the divider goes with it");
+    // the splitter is the only handle a fully hidden pane leaves behind - a
+    // toggle button hosted inside the pane goes down with it, so a splitter
+    // that vanished too would strand the user
+    assert.notEqual(s.ctrl._splitter.style.display, "none", "the divider stays grabbable");
 
     s.ctrl.expandSidePane();
 
@@ -199,4 +202,32 @@ test("a collapse target leaves the configured rail behind", () => {
     assert.equal(s.side.style.width, "48px", "the rail keeps its configured width");
     assert.notEqual(s.side.style.display, "none", "the rail stays visible");
     assert.notEqual(s.ctrl._splitter.style.display, "none", "the divider stays grabbable");
+});
+
+test("a drag that ends in a collapse restores the width the pane had before the drag", () => {
+    const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.split.js"] });
+    const s = makeSplit(rt, { size: 300, minSide: 260, collapseTo: 48, width: 800 });
+
+    // the stub reports every extent as zero, so the pane's laid-out width is
+    // derived from what the control wrote to it
+    Object.defineProperty(s.side, "offsetWidth", {
+        configurable: true,
+        get: () => parseInt(s.side.style.width, 10) || 0
+    });
+    s.el.getBoundingClientRect = () => ({ left: 0, top: 0, right: 800, bottom: 600, width: 800, height: 600 });
+
+    s.ctrl._onDragStart({ button: 0, clientX: 300, clientY: 300, preventDefault() { } });
+
+    // the drag pushes the pane down to its minimum before it crosses the
+    // collapse threshold, so by the time the collapse runs the current width is
+    // already the shrunken one
+    s.ctrl._onDragMove({ clientX: 265, clientY: 300 }, null, 0);
+    s.ctrl._onDragMove({ clientX: 5, clientY: 300 }, null, 0);
+    rt.sandbox.window.dispatchEvent({ type: "mouseup" });
+
+    assert.equal(s.ctrl._sidePaneCollapsed, true, "the drag collapses the pane");
+
+    s.ctrl.expandSidePane();
+
+    assert.equal(s.ctrl._sideSize, 300, "expanding returns to the pre-drag width, not to the rail");
 });

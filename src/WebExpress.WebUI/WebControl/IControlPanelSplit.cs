@@ -56,6 +56,12 @@ namespace WebExpress.WebUI.WebControl
         Func<IRenderControlContext, bool> Collapsible { get; }
 
         /// <summary>
+        /// Gets or sets the size the side panel keeps when it is collapsed. Zero takes
+        /// the side panel off screen, a positive value leaves a rail behind.
+        /// </summary>
+        Func<IRenderControlContext, int> SidePanelCollapseSize { get; }
+
+        /// <summary>
         /// Return or sets the order in which the main and side components are arranged.
         /// </summary>
         Func<IRenderControlContext, TypeSplitOrder> Order { get; }

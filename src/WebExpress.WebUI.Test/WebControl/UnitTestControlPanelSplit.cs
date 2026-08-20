@@ -178,6 +178,32 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the SidePanelCollapseSize property of the panel split control.
+        /// </summary>
+        [Theory]
+        [InlineData(-1, @"<div class=""wx-webui-split"" *>*</div>")]
+        [InlineData(0, @"<div * data-collapse-to=""0"">*</div>")]
+        [InlineData(45, @"<div * data-collapse-to=""45"">*</div>")]
+        public void SidePanelCollapseSize(int size, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlPanelSplit()
+            {
+                SidePanelCollapseSize = _ => size,
+            };
+            control.AddSidePanel(new ControlText() { Text = _ => "p1" });
+            control.AddMainPanel(new ControlText() { Text = _ => "p2" });
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests the SidePanelInitialSize property of the panel split control.
         /// </summary>
         [Theory]

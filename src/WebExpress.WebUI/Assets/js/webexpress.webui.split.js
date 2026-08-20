@@ -247,6 +247,13 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         const isMainSide = this._paneOrder === "main-side";
         const sideDim = isVert ? this._sidePane.offsetHeight : this._sidePane.offsetWidth;
 
+        // a drag that ends in a collapse has already shrunk the pane to its
+        // minimum, so the size a later expand restores has to be taken here,
+        // before the drag overwrites it
+        if (!this._sidePaneCollapsed) {
+            this._sidePanePrevSize = sideDim;
+        }
+
         // calculate constant offset based on layout
         let offset;
         if (isVert) {
@@ -314,14 +321,12 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
              // dragged to "close"
              if (!this._sidePaneCollapsed) {
                  this.collapseSidePane();
-                 this._setStateCookie({ size: this._sideSize, collapsed: true });
              }
              return;
         } else if (newSideSize <= this._collapseThreshold && this._minSide === null) {
              // dragged near 0 without minside
              if (!this._sidePaneCollapsed) {
                  this.collapseSidePane();
-                 this._setStateCookie({ size: this._sideSize, collapsed: true });
              }
              return;
         }
@@ -429,7 +434,10 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         if (this._sidePaneCollapsed || !this._collapsible) return;
 
         const isVert = this._orientation === "vertical";
-        this._sidePanePrevSize = this._sidePane[isVert ? "offsetHeight" : "offsetWidth"];
+        if (!this._dragging) {
+            // a drag already recorded the pre-drag size at its start
+            this._sidePanePrevSize = this._sidePane[isVert ? "offsetHeight" : "offsetWidth"];
+        }
         this._sidePaneCollapsed = true;
 
         const collapseTo = this._collapseTo;
@@ -437,24 +445,28 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         const minProp = isVert ? "minHeight" : "minWidth";
 
         if (collapseTo === 0) {
-            // a fully collapsed pane leaves no rail to grab, so the splitter goes
-            // with it; a visible divider against nothing reads as a rendering
-            // fault, and the pane is brought back through the toolbar toggle
             this._sidePane.style.display = "none";
-            this._splitter.style.display = "none";
         } else {
             this._sidePane.style[prop] = `${collapseTo}px`;
             this._sidePane.style[minProp] = `${collapseTo}px`;
             this._sidePane.style.display = "";
         }
 
+        // the splitter outlives the collapse even when no rail is left: it is
+        // the only handle that can bring the pane back, and a toggle button
+        // living inside the pane goes down with it, so hiding the splitter too
+        // would strand the user with no way to restore the pane
+        this._splitter.style.display = "";
+
         // main pane takes remaining
-        const splitSize = collapseTo === 0 ? 0 : this._getSplitterSize();
+        const splitSize = this._getSplitterSize();
         if (this._mainPane) {
             this._mainPane.style[prop] = `calc(100% - ${splitSize}px - ${collapseTo}px)`;
         }
 
-        this._setStateCookie({ size: this._sideSize, collapsed: true });
+        // persist the size to come back to, not the shrunken one, so a reload of
+        // a collapsed split can still expand to what the user had before
+        this._setStateCookie({ size: this._sidePanePrevSize || this._sideSize, collapsed: true });
         this._dispatch(webexpress.webui.Event.HIDE_EVENT, {});
     }
 
@@ -469,6 +481,14 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         const total = isVert ? this._element.clientHeight : this._element.clientWidth;
 
         let targetSize = size || this._sidePanePrevSize || Math.floor(total / 2);
+
+        // a pane collapsed to a rail already sits at collapseTo, so a remembered
+        // size that does not pass it would "expand" to the same rail and read as
+        // a dead toggle. an explicit size comes from a drag and is left alone,
+        // because snapping to the configured size mid-drag fights the pointer
+        if (!size && targetSize <= this._collapseTo) {
+            targetSize = this._parseInitialSideSize(this._initialSideAttr) || Math.floor(total / 2);
+        }
 
         // reset the constraints a collapse may have set
         const minProp = isVert ? "minHeight" : "minWidth";
@@ -726,14 +746,15 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
                 const splitSize = this._getSplitterSize();
                 const collapseTo = this._collapseTo;
                 if (collapseTo === 0) {
+                    // the splitter stays, mirroring collapseSidePane: it is the
+                    // handle the collapse must leave behind
                     this._sidePane.style.display = "none";
-                    this._splitter.style.display = "none";
                 } else {
                     this._sidePane.style[prop] = `${collapseTo}px`;
                     this._sidePane.style[minProp] = `${collapseTo}px`;
                 }
                 if (this._mainPane) {
-                    this._mainPane.style[prop] = `calc(100% - ${collapseTo === 0 ? 0 : splitSize}px - ${collapseTo}px)`;
+                    this._mainPane.style[prop] = `calc(100% - ${splitSize}px - ${collapseTo}px)`;
                 }
             } else {
                 this._setPaneSizes(this._sideSize);

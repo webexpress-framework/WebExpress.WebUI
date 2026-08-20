@@ -64,6 +64,16 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, bool> Collapsible { get; set; } = _ => true;
 
         /// <summary>
+        /// Gets or sets the size the side panel keeps when it is collapsed. It is
+        /// deliberately separate from <see cref="SidePanelMinSize"/>, which bounds a
+        /// drag: a value of zero takes the side panel off screen, a positive value
+        /// leaves a rail behind. A side panel whose only way back is a control it
+        /// hosts itself - a toggle button in its toolbar, for instance - needs such
+        /// a rail, otherwise the collapse takes the way back with it.
+        /// </summary>
+        public Func<IRenderControlContext, int> SidePanelCollapseSize { get; set; } = _ => -1;
+
+        /// <summary>
         /// Return or sets the order in which the main and side components are arranged.
         /// </summary>
         public Func<IRenderControlContext, TypeSplitOrder> Order { get; set; } = _ => TypeSplitOrder.Default;
@@ -204,6 +214,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-size", (SidePanelInitialSize?.Invoke(renderContext) ?? -1) >= 0 ? (SidePanelInitialSize?.Invoke(renderContext) ?? -1).ToString() : null)
                 .AddUserAttribute("data-max-side", (SidePanelMaxSize?.Invoke(renderContext) ?? -1) >= 0 ? (SidePanelMaxSize?.Invoke(renderContext) ?? -1).ToString() : null)
                 .AddUserAttribute("data-collapsible", (Collapsible?.Invoke(renderContext) ?? true) ? null : "false")
+                .AddUserAttribute("data-collapse-to", (SidePanelCollapseSize?.Invoke(renderContext) ?? -1) >= 0 ? (SidePanelCollapseSize?.Invoke(renderContext) ?? -1).ToString() : null)
                 .AddUserAttribute("data-splitter-size", (SplitterSize?.Invoke(renderContext) ?? -1) >= 0 ? (SplitterSize?.Invoke(renderContext) ?? -1).ToString() : null)
                 .AddUserAttribute("data-splitter-class", (SplitterColor?.Invoke(renderContext) ?? new PropertyColorBackground(TypeColorBackground.Default)).ToClass())
                 .AddUserAttribute("data-splitter-style", (SplitterColor?.Invoke(renderContext) ?? new PropertyColorBackground(TypeColorBackground.Default)).ToStyle())
