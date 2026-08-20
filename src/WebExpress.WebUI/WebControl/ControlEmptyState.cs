@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.WebPage;
@@ -27,12 +28,14 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, IIcon> Icon { get; set; }
 
         /// <summary>
-        /// Gets or sets the headline.
+        /// Gets or sets the headline. The value may be an internationalization key, which
+        /// is resolved against the culture of the request.
         /// </summary>
         public Func<IRenderControlContext, string> Title { get; set; }
 
         /// <summary>
-        /// Gets or sets the explanatory message.
+        /// Gets or sets the explanatory message. The value may be an internationalization
+        /// key, which is resolved against the culture of the request.
         /// </summary>
         public Func<IRenderControlContext, string> Message { get; set; }
 
@@ -68,8 +71,8 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var icon = Icon?.Invoke(renderContext);
-            var title = Title?.Invoke(renderContext);
-            var message = Message?.Invoke(renderContext);
+            var title = I18N.Translate(renderContext, Title?.Invoke(renderContext));
+            var message = I18N.Translate(renderContext, Message?.Invoke(renderContext));
 
             var html = new HtmlElementTextContentDiv()
             {
