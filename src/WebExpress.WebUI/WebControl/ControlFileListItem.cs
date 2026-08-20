@@ -1,6 +1,7 @@
 using System;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebTheme;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.Internationalization;
 using WebExpress.WebUI.WebIcon;
@@ -81,7 +82,10 @@ namespace WebExpress.WebUI.WebControl
             {
                 Class = "wx-webui-file",
             }
-                .AddUserAttribute("data-file-icon", (Icon?.Invoke(renderContext) as Icon)?.Class)
+                // the icon travels to the client as a bare class string, so it has
+                // to carry the page's theme with it; without this the preview was
+                // the one place a light page still drew a FontAwesome glyph
+                .AddUserAttribute("data-file-icon", (Icon?.Invoke(renderContext)?.ApplyIconTheme(visualTree?.IconTheme ?? TypeIconTheme.Default) as Icon)?.Class)
                 .AddUserAttribute("data-file-image", Image?.Invoke(renderContext)?.ToString() ?? (Icon?.Invoke(renderContext) as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-file-uri", Uri?.Invoke(renderContext)?.ToString())
                 .AddUserAttribute("data-file-size", (Size?.Invoke(renderContext) ?? long.MinValue) >= 0 ? size : null)

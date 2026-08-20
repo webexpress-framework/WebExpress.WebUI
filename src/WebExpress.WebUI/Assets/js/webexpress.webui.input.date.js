@@ -106,7 +106,7 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         dropdown.appendChild(this._input);
 
         const icon = document.createElement("span");
-        icon.className = "wx-date-calendar-icon fa-solid fa-calendar-days";
+        icon.className = `wx-date-calendar-icon ${this._iconClass("fa-solid fa-calendar-days", "calendar")}`;
         icon.setAttribute("aria-hidden", "true");
         icon.style.marginLeft = "0.5em";
         // the icon is the fixed part of the field; the text gives way, not it

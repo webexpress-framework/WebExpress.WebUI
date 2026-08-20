@@ -44,11 +44,12 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Returns a Font Awesome icon class based on the file extension.
-     * The light icon set has no file-type glyphs, so the map stays on
-     * FontAwesome in both themes instead of resolving through IconTheme.
+     * Returns the icon class for a file extension, in the icon theme the page
+     * carries. The map is written in FontAwesome names because that is the
+     * vocabulary a caller reads a file glyph in; resolveFa derives the light
+     * counterpart, so the two sets stay declared in one place.
      * @param {string} filename - The name of the file (e.g., "report.pdf").
-     * @returns {string} - The corresponding Font Awesome icon class (e.g., "fas fa-file-pdf").
+     * @returns {string} - The icon class for the active theme.
      */
     _getIconForFilename(filename) {
         const ext = filename.split(".").pop().toLowerCase();
@@ -62,20 +63,20 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
             ppt: "fas fa-file-powerpoint",
             pptx: "fas fa-file-powerpoint",
             pdf: "fas fa-file-pdf",
-            txt: "fas fa-file-alt",
+            txt: "fas fa-file-lines",
             jpg: "fas fa-file-image",
             jpeg: "fas fa-file-image",
             png: "fas fa-file-image",
             gif: "fas fa-file-image",
-            zip: "fas fa-file-archive",
-            rar: "fas fa-file-archive",
+            zip: "fas fa-file-zipper",
+            rar: "fas fa-file-zipper",
             mp3: "fas fa-file-audio",
             wav: "fas fa-file-audio",
             mp4: "fas fa-file-video",
             mov: "fas fa-file-video"
         };
 
-        return iconMap[ext] || "fas fa-file";
+        return webexpress.webui.IconTheme.resolveFa(iconMap[ext] || "fas fa-file");
     }
 
     /**
@@ -100,7 +101,10 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
 
             if (file.icon) {
                 const icon = document.createElement("i");
-                icon.className = file.icon || "fas fa-file";
+                // the class may arrive from the server or from stored data, in
+                // either vocabulary; resolveFa converts a FontAwesome name and
+                // hands a light class straight back, so both end up themed
+                icon.className = webexpress.webui.IconTheme.resolveFa(file.icon || "fas fa-file");
                 divLeft.appendChild(icon);
             }
 

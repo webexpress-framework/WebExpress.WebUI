@@ -1490,7 +1490,22 @@ webexpress.webui.IconTheme = new class {
             "tag": "label",
             "exclamation-triangle": "triangle-exclamation",
             "grip-vertical": "grip-lines-vertical",
-            "calendar-day": "calendar",
+            // FontAwesome names the month grid "calendar-days"; the light set
+            // publishes that same grid as plain "calendar" and keeps
+            // "calendar-day" for the single highlighted day, so only the plural
+            // needs redirecting. The mapping mirrors IconCalendarDays and
+            // IconCalendarDay on the server, which is where a page that mixes
+            // server- and client-built icons would otherwise show two different
+            // calendars side by side.
+            "calendar-days": "calendar",
+            // the light set follows FontAwesome 6 for the file glyphs, where
+            // file-alt became file-lines and file-archive became file-zipper. It
+            // publishes no file-lines of its own - IconFileLines maps that one to
+            // plain "file" - and the two retired names still reach here from
+            // callers and from stored data, so all three are redirected.
+            "file-lines": "file",
+            "file-alt": "file",
+            "file-archive": "file-zipper",
             "trash-alt": "trash"
         };
         const match = /fa-([a-z0-9-]+)/.exec(faClass || "");
