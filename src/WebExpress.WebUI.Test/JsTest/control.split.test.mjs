@@ -4,11 +4,13 @@
  * registers correctly and survives a construct / teardown lifecycle.
  *
  * The behavior tests below cover the pane-sizing logic that the contract does
- * not exercise: surviving construction inside a zero-width (hidden) container
- * and fitting the side pane to its content. Because the headless DOM stub
- * reports every layout dimension as zero, the tests shadow clientWidth /
- * scrollWidth per element to simulate a real layout, and drive the resize path
- * by hand since the ResizeObserver stub never fires on its own.
+ * not exercise: surviving construction inside a zero-width (hidden) container,
+ * fitting the side pane to its content, and following a stylesheet that stacks
+ * the split at a breakpoint. Because the headless DOM stub reports every layout
+ * dimension as zero and answers every computed style with "", the tests shadow
+ * clientWidth / clientHeight / scrollWidth per element and getComputedStyle per
+ * runtime to simulate a real layout, and drive the resize path by hand since
+ * the ResizeObserver stub never fires on its own.
  */
 import { test } from "node:test";
 import assert from "node:assert";
@@ -27,12 +29,14 @@ contract({
  * (zero-width) tab and later shown. The container starts at the given width
  * (0 = hidden); call show(width) to reveal it.
  * @param {object} rt - The loaded runtime.
- * @param {object} options - { size, minSide, collapseTo, unit, width }.
- * @returns {object} The controller plus element handles and a show() helper.
+ * @param {object} options - { size, minSide, collapseTo, collapsible, unit, width, height, id }.
+ * @returns {object} The controller plus element handles, a show() helper and a
+ * stack() helper that answers the container's computed flex-direction.
  */
-function makeSplit(rt, { size, minSide, collapseTo, collapsible, unit, width = 0 } = {}) {
+function makeSplit(rt, { size, minSide, collapseTo, collapsible, unit, width = 0, height = 0, id } = {}) {
     const el = rt.createElement("div");
     el.classList.add("wx-webui-split");
+    if (id) { el.id = id; }
     el.setAttribute("data-orientation", "horizontal");
     if (size != null) { el.setAttribute("data-size", String(size)); }
     if (minSide != null) { el.setAttribute("data-min-side", String(minSide)); }
@@ -56,9 +60,23 @@ function makeSplit(rt, { size, minSide, collapseTo, collapsible, unit, width = 0
     // (or intentionally absent) layout width
     let laidOutWidth = width;
     Object.defineProperty(el, "clientWidth", { configurable: true, get: () => laidOutWidth });
+    Object.defineProperty(el, "clientHeight", { configurable: true, get: () => height });
 
     const ctrl = new rt.wx.SplitCtrl(el);
-    return { ctrl, el, side, main, show: (w) => { laidOutWidth = w; } };
+
+    // the split reads the axis off the container's computed flex-direction; the
+    // stub answers every property with "", so a test that wants the stacked
+    // layout has to say so explicitly
+    const stack = (stacked) => {
+        rt.sandbox.window.getComputedStyle = (node) => new Proxy({}, {
+            get: (_, property) => (node === el && property === "flexDirection")
+                ? (stacked ? "column" : "row")
+                : "",
+            has: () => true
+        });
+    };
+
+    return { ctrl, el, side, main, stack, show: (w) => { laidOutWidth = w; } };
 }
 
 test("split rendered while hidden keeps its desired side size and applies it once shown", () => {
@@ -230,4 +248,57 @@ test("a drag that ends in a collapse restores the width the pane had before the 
     s.ctrl.expandSidePane();
 
     assert.equal(s.ctrl._sideSize, 300, "expanding returns to the pre-drag width, not to the rail");
+});
+
+test("a stylesheet that stacks the split moves the layout onto the vertical axis", () => {
+    const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.split.js"] });
+    const s = makeSplit(rt, { size: 200, width: 800, height: 600 });
+
+    assert.equal(s.side.style.width, "200px", "side by side, the pane is sized across");
+
+    // the breakpoint reaches the control as a resize
+    s.stack(true);
+    s.ctrl._handleResize();
+
+    assert.equal(s.ctrl._axis, "vertical", "the control follows the stacked container");
+    assert.equal(s.side.style.width, "", "the extent of the abandoned axis is dropped");
+    assert.equal(s.side.style.height, "200px", "the size on record is re-applied on the new axis");
+    assert.equal(s.main.style.height, "400px", "the main pane takes the rest of the stack");
+    assert.ok(
+        s.ctrl._splitter.classList.contains("wx-splitter-vertical"),
+        "the divider turns into a bar across the stack"
+    );
+});
+
+test("collapsing a stacked split takes the pane down on the stacked axis", () => {
+    const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.split.js"] });
+    const s = makeSplit(rt, { size: 200, collapseTo: 45, width: 800, height: 600 });
+
+    s.stack(true);
+    s.ctrl._handleResize();
+    s.ctrl.collapseSidePane();
+
+    assert.equal(s.side.style.height, "45px", "the rail is left standing across the stack");
+    assert.equal(s.side.style.width, "", "nothing constrains the pane across the old axis");
+    assert.notEqual(s.ctrl._splitter.style.display, "none", "the divider stays as the way back");
+});
+
+test("a stacked split leaves the side size on record for the side-by-side layout", () => {
+    const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.split.js"] });
+    const s = makeSplit(rt, { id: "shell", size: 200, width: 800, height: 600 });
+
+    // a drag while side by side is what puts a size on record
+    s.ctrl._setPaneSizes(320, true);
+    s.ctrl._setStateCookie({ size: 320, collapsed: false });
+
+    s.stack(true);
+    s.ctrl._handleResize();
+
+    // a drag on the stacked axis reports an extent measured top to bottom,
+    // which means nothing to the side-by-side layout the cookie is read back in
+    s.ctrl._setStateCookie({ size: 240, collapsed: true });
+
+    const state = s.ctrl._getStateFromCookie();
+    assert.equal(state.size, 320, "the width from the side-by-side layout survives");
+    assert.equal(state.collapsed, true, "the collapse itself is axis-independent and is kept");
 });

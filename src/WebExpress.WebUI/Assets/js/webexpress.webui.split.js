@@ -8,6 +8,9 @@
  * - Min/Max constraints.
  * - Collapsible side pane (double click or drag beyond threshold).
  * - Automatic resizing via ResizeObserver.
+ * - Responsive: the axis follows the container's computed flex-direction, so a
+ *   stylesheet that stacks the split at a breakpoint moves dragging, collapsing
+ *   and pane sizing onto the new axis with it.
  * - Content-visibility aware: if all children of the side or main pane become
  *   invisible (display:none, visibility:hidden, the hidden attribute, or an
  *   empty pane), the splitter and that pane are hidden rather than removed
@@ -31,6 +34,11 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     _unit = "px";
 
     // state
+    // the axis the panes are currently laid out on. It starts at the configured
+    // orientation but follows the container, which a stylesheet may stack at a
+    // breakpoint; every measurement and every extent written below reads this,
+    // never the configuration, so the two never drift apart
+    _axis = "horizontal";
     _sideSize = 0;
     _sidePaneCollapsed = false;
     _sidePanePrevSize = null;
@@ -65,6 +73,10 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         this._setupDom(element);
         this._initEvents();
 
+        // a stylesheet may already stack the split at the width it is built at,
+        // so the axis is resolved before any extent is written
+        this._syncAxis();
+
         // restore state or set initial defaults
         this._restoreState(element);
 
@@ -78,6 +90,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
      */
     _readConfig(element) {
         this._orientation = element.getAttribute("data-orientation") === "vertical" ? "vertical" : "horizontal";
+        this._axis = this._orientation;
         this._minSide = this._parseAttrInt(element, "data-min-side");
         this._maxSide = this._parseAttrInt(element, "data-max-side");
 
@@ -174,6 +187,109 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Reads the axis the panes are actually laid out on. A stylesheet may stack
+     * a horizontal split at a breakpoint, and the computed flex-direction is the
+     * only place that decision surfaces, so it - not the configured orientation -
+     * is what the layout has to follow. Note that the container's own
+     * orientation class is never rewritten from here: it is what produces the
+     * direction being read, so changing it would feed back into the answer.
+     * @returns {string} Either "vertical" or "horizontal".
+     */
+    _readAxis() {
+        if (typeof window.getComputedStyle !== "function") return this._orientation;
+
+        const direction = window.getComputedStyle(this._element).flexDirection || "";
+
+        return direction.startsWith("column") ? "vertical" : "horizontal";
+    }
+
+    /**
+     * Moves the layout onto the axis the container currently uses. The extent
+     * that was in force belonged to the other dimension, so it is dropped and
+     * the size the split has on record takes its place - what the user last
+     * settled on side by side, or else the configured size. Carrying the
+     * previous extent over as a fraction of the container was tried and reads
+     * badly in the direction that matters: a navigation strip that is a sensible
+     * share of the height comes back as a sidebar taking half the width.
+     * @returns {boolean} True when the axis changed.
+     */
+    _syncAxis() {
+        const axis = this._readAxis();
+        if (axis === this._axis) return false;
+
+        this._axis = axis;
+        this._clearPaneSizes();
+        this._applyAxisClasses();
+
+        const recorded = this._getStateFromCookie();
+        const size = (recorded && typeof recorded.size === "number")
+            ? recorded.size
+            : this._parseInitialSideSize(this._initialSideAttr);
+
+        // a stacked layout that finds the recorded extent too generous caps it
+        // in CSS, which leaves the divider free to size the pane below the cap
+        if (size != null) this._sideSize = size;
+
+        return true;
+    }
+
+    /**
+     * Drops the inline extents of both panes. Called when the axis changes,
+     * where the sizes left behind constrain the dimension the layout no longer
+     * runs on and would hold the panes at the extent of the abandoned axis.
+     */
+    _clearPaneSizes() {
+        for (const pane of [this._sidePane, this._mainPane]) {
+            if (!pane) continue;
+            pane.style.width = "";
+            pane.style.height = "";
+            pane.style.minWidth = "";
+            pane.style.minHeight = "";
+        }
+    }
+
+    /**
+     * Points the splitter and its grip at the current axis, so the divider is
+     * a bar across the stack rather than a sliver beside it, and offers the
+     * matching resize cursor.
+     */
+    _applyAxisClasses() {
+        const previous = this._axis === "vertical" ? "horizontal" : "vertical";
+
+        this._splitter.classList.remove(`wx-splitter-${previous}`);
+        this._splitter.classList.add(`wx-splitter-${this._axis}`);
+
+        const indicator = this._splitter.firstElementChild;
+        if (indicator) {
+            indicator.classList.remove(`wx-splitter-indicator-${previous}`);
+            indicator.classList.add(`wx-splitter-indicator-${this._axis}`);
+        }
+    }
+
+    /**
+     * Writes the extents a collapsed side pane holds. Shared by the collapse
+     * itself, by the axis switch and by the return from single-pane mode, so
+     * the three cannot drift apart on what "collapsed" looks like.
+     */
+    _applyCollapsedSizes() {
+        const prop = this._axis === "vertical" ? "height" : "width";
+        const minProp = this._axis === "vertical" ? "minHeight" : "minWidth";
+        const collapseTo = this._collapseTo;
+
+        if (collapseTo === 0) {
+            this._sidePane.style.display = "none";
+        } else {
+            this._sidePane.style[prop] = `${collapseTo}px`;
+            this._sidePane.style[minProp] = `${collapseTo}px`;
+            this._sidePane.style.display = "";
+        }
+
+        if (this._mainPane) {
+            this._mainPane.style[prop] = `calc(100% - ${this._getSplitterSize()}px - ${collapseTo}px)`;
+        }
+    }
+
+    /**
      * Restore state from cookie or calculate initial values.
      * @param {HTMLElement} element Host element.
      */
@@ -186,7 +302,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
 
         // default fallback: 50%
         if (initialSide == null) {
-            const dim = this._orientation === "vertical" ? element.clientHeight : element.clientWidth;
+            const dim = this._axis === "vertical" ? element.clientHeight : element.clientWidth;
             if (dim > 0) {
                 initialSide = Math.floor(dim / 2);
             } else {
@@ -243,7 +359,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         document.body.classList.add("wx-split-noselect");
 
         const rect = this._element.getBoundingClientRect();
-        const isVert = this._orientation === "vertical";
+        const isVert = this._axis === "vertical";
         const isMainSide = this._paneOrder === "main-side";
         const sideDim = isVert ? this._sidePane.offsetHeight : this._sidePane.offsetWidth;
 
@@ -290,7 +406,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
 
         // recalculate rect in case of scrolling/layout shifts during drag
         const currentRect = this._element.getBoundingClientRect();
-        const isVert = this._orientation === "vertical";
+        const isVert = this._axis === "vertical";
         const isMainSide = this._paneOrder === "main-side";
 
         let newSideSize;
@@ -350,15 +466,29 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
      * Handles container resize.
      */
     _handleResize() {
-        const isVert = this._orientation === "vertical";
+        // a breakpoint that stacks the split reaches the control as a resize,
+        // so the axis is re-read here before anything is measured against it
+        const axisChanged = this._syncAxis();
+
+        const isVert = this._axis === "vertical";
         const total = isVert ? this._element.clientHeight : this._element.clientWidth;
         if (total <= 0) return;
 
-        if (this._sidePaneCollapsed) return;
+        if (this._sidePaneCollapsed) {
+            // the collapse was written on the axis that has just been left, and
+            // _syncAxis cleared it, so the pane needs it back on the new one
+            if (axisChanged) this._applyCollapsedSizes();
+            return;
+        }
 
         // in single-pane mode the visible pane already fills 100% of the
         // container, so the normal two-pane sizing must not run.
-        if (this._sideContentHidden || this._mainContentHidden) return;
+        if (this._sideContentHidden || this._mainContentHidden) {
+            if (axisChanged) {
+                this._fillContainer(this._sideContentHidden ? this._mainPane : this._sidePane);
+            }
+            return;
+        }
 
         const splitterSize = this._getSplitterSize();
         let sideSize = this._sideSize;
@@ -385,7 +515,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
      * @param {boolean} fireEvent Fire change event.
      */
     _setPaneSizes(sideSize, fireEvent = false) {
-        const isVert = this._orientation === "vertical";
+        const isVert = this._axis === "vertical";
         const total = isVert ? this._element.clientHeight : this._element.clientWidth;
         const splitterSize = this._getSplitterSize();
 
@@ -422,7 +552,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
             this._dispatch(webexpress.webui.Event.SIZE_CHANGE_EVENT, {
                 mainSize,
                 sideSize,
-                orientation: this._orientation
+                orientation: this._axis
             });
         }
     }
@@ -433,36 +563,20 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     collapseSidePane() {
         if (this._sidePaneCollapsed || !this._collapsible) return;
 
-        const isVert = this._orientation === "vertical";
+        const isVert = this._axis === "vertical";
         if (!this._dragging) {
             // a drag already recorded the pre-drag size at its start
             this._sidePanePrevSize = this._sidePane[isVert ? "offsetHeight" : "offsetWidth"];
         }
         this._sidePaneCollapsed = true;
 
-        const collapseTo = this._collapseTo;
-        const prop = isVert ? "height" : "width";
-        const minProp = isVert ? "minHeight" : "minWidth";
-
-        if (collapseTo === 0) {
-            this._sidePane.style.display = "none";
-        } else {
-            this._sidePane.style[prop] = `${collapseTo}px`;
-            this._sidePane.style[minProp] = `${collapseTo}px`;
-            this._sidePane.style.display = "";
-        }
+        this._applyCollapsedSizes();
 
         // the splitter outlives the collapse even when no rail is left: it is
         // the only handle that can bring the pane back, and a toggle button
         // living inside the pane goes down with it, so hiding the splitter too
         // would strand the user with no way to restore the pane
         this._splitter.style.display = "";
-
-        // main pane takes remaining
-        const splitSize = this._getSplitterSize();
-        if (this._mainPane) {
-            this._mainPane.style[prop] = `calc(100% - ${splitSize}px - ${collapseTo}px)`;
-        }
 
         // persist the size to come back to, not the shrunken one, so a reload of
         // a collapsed split can still expand to what the user had before
@@ -477,7 +591,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     expandSidePane(size) {
         if (!this._sidePaneCollapsed) return;
 
-        const isVert = this._orientation === "vertical";
+        const isVert = this._axis === "vertical";
         const total = isVert ? this._element.clientHeight : this._element.clientWidth;
 
         let targetSize = size || this._sidePanePrevSize || Math.floor(total / 2);
@@ -522,7 +636,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     fitSidePaneToContent() {
         if (!this._sidePane || this._sidePaneCollapsed) return;
 
-        const isVert = this._orientation === "vertical";
+        const isVert = this._axis === "vertical";
         const prop = isVert ? "height" : "width";
         const pane = this._sidePane;
 
@@ -570,7 +684,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
             const v = parseInt(this._splitterSize, 10);
             if (!isNaN(v)) return v;
         }
-        return this._orientation === "vertical" ? this._splitter.offsetHeight : this._splitter.offsetWidth || 6;
+        return this._axis === "vertical" ? this._splitter.offsetHeight : this._splitter.offsetWidth || 6;
     }
 
     /**
@@ -601,7 +715,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
 
         switch (this._sideUnit(attr)) {
             case "%": {
-                const total = this._orientation === "vertical" ? this._element.clientHeight : this._element.clientWidth;
+                const total = this._axis === "vertical" ? this._element.clientHeight : this._element.clientWidth;
                 return Math.round((val / 100) * total);
             }
             case "em":
@@ -636,9 +750,18 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
      */
     _setStateCookie(state) {
         if (!this._cookieName) return;
+
+        // while a stylesheet stacks the split, the side extent is measured on
+        // the other axis; storing it would come back as a nonsensical width the
+        // next time the split is wide enough to sit side by side. The size on
+        // record is therefore left alone and only the collapsed flag, which is
+        // axis-independent, follows the stacked layout.
+        const stacked = this._axis !== this._orientation;
+        const size = stacked ? (this._getStateFromCookie()?.size ?? state.size) : state.size;
+
         const payload = {
             v: 1,
-            size: Math.round(state.size),
+            size: Math.round(size),
             collapsed: !!state.collapsed
         };
         const date = new Date();
@@ -741,21 +864,9 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
             this._showNode(this._mainPane);
 
             if (this._sidePaneCollapsed) {
-                const prop = this._orientation === "vertical" ? "height" : "width";
-                const minProp = this._orientation === "vertical" ? "minHeight" : "minWidth";
-                const splitSize = this._getSplitterSize();
-                const collapseTo = this._collapseTo;
-                if (collapseTo === 0) {
-                    // the splitter stays, mirroring collapseSidePane: it is the
-                    // handle the collapse must leave behind
-                    this._sidePane.style.display = "none";
-                } else {
-                    this._sidePane.style[prop] = `${collapseTo}px`;
-                    this._sidePane.style[minProp] = `${collapseTo}px`;
-                }
-                if (this._mainPane) {
-                    this._mainPane.style[prop] = `calc(100% - ${splitSize}px - ${collapseTo}px)`;
-                }
+                // the splitter stays, mirroring collapseSidePane: it is the
+                // handle the collapse must leave behind
+                this._applyCollapsedSizes();
             } else {
                 this._setPaneSizes(this._sideSize);
             }
@@ -830,7 +941,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
      */
     _fillContainer(pane) {
         if (!pane) return;
-        if (this._orientation === "vertical") {
+        if (this._axis === "vertical") {
             pane.style.height = "100%";
             pane.style.minHeight = "";
             pane.style.width = "";

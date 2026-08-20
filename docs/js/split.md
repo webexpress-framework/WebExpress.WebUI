@@ -57,6 +57,20 @@ During initialization, the component identifies the two child elements `.wx-main
 
 Interaction occurs by dragging the splitter (`mousedown` and `mousemove`), where the new size is applied in real-time, respecting `min-` and `max-` limits. A double-click on the splitter toggles the side pane: it is either collapsed to `data-collapse-to` (0 by default) or restored to its previous size. The splitter itself survives a collapse, so it stays available as the handle that brings the pane back. A split marked `data-collapsible="false"` skips the collapse path entirely and clamps the drag to `data-min-side`, so its side pane always stays on screen. If the host element has an `id`, the component automatically saves the size of the side pane in a cookie to maintain the user's setting on future visits. Communication is handled via global custom events to ensure loose coupling.
 
+## Responsive Stacking
+
+`data-orientation` states the orientation the split is *built* with; the axis it actually lays out on follows the container's computed `flex-direction`. A stylesheet may therefore stack a horizontal split at a breakpoint, and the component moves with it - the divider becomes a bar across the stack with a row-resize cursor, dragging measures top to bottom, and a collapse takes the pane down rather than sideways.
+
+```css
+@media (max-width: 767.98px) {
+    #my-split-container {
+        flex-direction: column;
+    }
+}
+```
+
+Two details are worth knowing when using this. The extent in force belongs to one dimension, so on a switch it is dropped and replaced by the size the split has on record - the size the user last settled on in the configured orientation, or else `data-size`. A stacked layout that finds that too generous caps it in CSS with `max-height`, which still leaves the divider free to size the pane below the cap. And while stacked, only the collapsed flag is persisted, not the size: an extent measured along the stack would come back as a nonsensical width the next time the split is wide enough to sit side by side.
+
 ## Programmatic Control
 
 After initialization, the component can be controlled programmatically via its JavaScript instance.
