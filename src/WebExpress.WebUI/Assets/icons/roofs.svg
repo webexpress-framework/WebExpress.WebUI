@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
- <style>.st1 {display:none}
-		.st2 {fill:#000000;stroke:#000000;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.749998}
-		.st3 {fill:none;fill-rule:evenodd;font-size:12px;overflow:visible;stroke-linecap:square;stroke-miterlimit:3}</style>
- <g transform="matrix(.96041 0 0 .96041 .41572 .41476)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3015">
-  <path d="m1.0199 11.425 5.3987-5.3394 8.9082 8.8299"/>
-  <path d="m11.406 7.5556 1.5306-1.4696 7.0431 7.1144"/>
-  <path d="m16.914 7.9856v2.1182"/>
+ <g fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
+  <path d="m2.6 11 4.6-4.4 4.6 4.4"/>
+  <path d="m4.4 11v6.4h5.6v-6.4"/>
+  <path d="m10.6 13.6 3.4-3.2 3.4 3.2"/>
+  <path d="m12 13.6v3.8h4v-3.8"/>
+  <path d="m2.6 17.4h15.8"/>
  </g>
 </svg>

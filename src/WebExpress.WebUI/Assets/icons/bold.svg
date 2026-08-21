@@ -1,1 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><text x="12" y="18.5" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="800" text-anchor="middle" fill="#000">B</text></svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+ <g fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
+  <path d="m6.6 3.4h5.2a3.5 3.5 0 0 1 0 7h-5.2z"/>
+  <path d="m6.6 10.4h6a3.6 3.6 0 0 1 0 7.2h-6z"/>
+ </g>
+</svg>

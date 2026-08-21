@@ -129,5 +129,73 @@ namespace WebExpress.WebUI.Test.WebIcon
 
             Assert.True(offenders.Count == 0, $"icons still rendering a FontAwesome class: {string.Join(", ", offenders)}");
         }
+
+        /// <summary>
+        /// No drawing is a filled silhouette.
+        /// </summary>
+        /// <remarks>
+        /// The stylesheet applies each drawing as a mask over currentColor, so everything
+        /// opaque becomes one solid shape. A drawing with fills and no strokes therefore
+        /// paints as a black block among the line icons - it renders, it is not an error,
+        /// and it looks like a different icon set. 169 drawings were in that state before
+        /// they were redrawn as strokes.
+        /// </remarks>
+        /// <summary>
+        /// Drawings kept as silhouettes on purpose, because the stroke redraw offered for
+        /// them was judged worse than the original. Each entry is a deliberate exception,
+        /// not a backlog item - shrinking the list means someone drew a better icon.
+        /// </summary>
+        private static readonly HashSet<string> SilhouettesKeptOnPurpose = ["iam"];
+
+        [Fact]
+        public void NoDrawingRendersAsASilhouette()
+        {
+            var assembly = typeof(Icon).Assembly;
+
+            var silhouettes = assembly.GetManifestResourceNames()
+                .Where(x => x.StartsWith(IconPrefix) && x.EndsWith(".svg"))
+                .Select(x => new { Name = x[IconPrefix.Length..^".svg".Length], Body = ReadResource(assembly, x) })
+                .Where(x => !HasStroke(x.Body) && HasFill(x.Body))
+                .Select(x => x.Name)
+                .Where(x => !SilhouettesKeptOnPurpose.Contains(x))
+                .Order()
+                .ToList();
+
+            Assert.True(silhouettes.Count == 0, $"drawings that paint as a solid silhouette: {string.Join(", ", silhouettes)}");
+        }
+
+        /// <summary>
+        /// Reads an embedded resource as text.
+        /// </summary>
+        /// <param name="assembly">The assembly holding the resource.</param>
+        /// <param name="name">The full resource name.</param>
+        /// <returns>The resource content.</returns>
+        private static string ReadResource(System.Reflection.Assembly assembly, string name)
+        {
+            using var stream = assembly.GetManifestResourceStream(name);
+            using var reader = new StreamReader(stream!);
+            return reader.ReadToEnd();
+        }
+
+        /// <summary>
+        /// Returns whether the markup paints any stroke.
+        /// </summary>
+        /// <param name="svg">The drawing markup.</param>
+        /// <returns>True when a stroke other than none is set.</returns>
+        private static bool HasStroke(string svg)
+        {
+            return Regex.IsMatch(svg, @"strokes*[:=]s*""?s*(?!none)[^"";s>]+");
+        }
+
+        /// <summary>
+        /// Returns whether the markup paints any fill.
+        /// </summary>
+        /// <param name="svg">The drawing markup.</param>
+        /// <returns>True when a fill other than none is set.</returns>
+        private static bool HasFill(string svg)
+        {
+            return Regex.Matches(svg, @"fills*[:=]s*""?s*([^"";s>]+)")
+                .Any(x => x.Groups[1].Value != "none");
+        }
     }
 }

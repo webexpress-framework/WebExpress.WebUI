@@ -1,19 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
- <style>.st1 {display:none}
-		.st2 {fill:#000000;stroke:#000000;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.749999}
-		.st3 {fill:none;fill-rule:evenodd;font-size:12px;overflow:visible;stroke-linecap:square;stroke-miterlimit:3}</style>
- <g transform="matrix(.1316 0 0 .1316 -8.2137 -8.1494)" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="9.4984">
-  <g>
-   <path d="m72.45 141.71h139.5"/>
-   <path d="m138.84 120.23v17.18"/>
-   <path d="m104.47 146v17.19"/>
-   <path d="m173.21 146v17.19"/>
-  </g>
-  <g fill="none">
-   <rect x="114.44" y="84.134" width="48.793" height="36.097" rx=".2516"/>
-   <rect x="80.073" y="163.19" width="48.793" height="36.097" rx=".2516"/>
-   <rect x="148.81" y="163.19" width="48.793" height="36.097" rx=".2516"/>
-  </g>
+ <g fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
+  <rect x="7.6" y="2.6" width="5.8" height="4" rx="0.6"/>
+  <rect x="2.6" y="14.4" width="5" height="4" rx="0.6"/>
+  <rect x="12.4" y="14.4" width="5" height="4" rx="0.6"/>
+  <path d="m10.5 6.6v3.8"/>
+  <path d="m5.1 14.4v-2.6h10.8v2.6"/>
+  <path d="m3.4 10.4h14.2"/>
  </g>
 </svg>

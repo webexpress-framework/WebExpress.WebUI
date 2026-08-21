@@ -9,8 +9,8 @@
  * Usage:  <i class="wx-icon-light wx-icon-light-address-book"></i>
  *
  * The matching CSS classes are emitted automatically by the Icon classes
- * in WebExpress.WebUI.WebIcon when the icon is constructed with
- * IconTheme.Light.
+ * in WebExpress.WebUI.WebIcon, which resolve their symbolic name
+ * against this set.
  */
 
 .wx-icon-light {

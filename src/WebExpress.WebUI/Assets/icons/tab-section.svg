@@ -1,16 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
- <style>.st1 {display:none}
-		.st2 {fill:#000000;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.25}
-		.st3 {fill:#000000;stroke:none;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.24}
-		.st4 {fill:none;fill-rule:evenodd;font-size:12px;overflow:visible;stroke-linecap:square;stroke-miterlimit:3}</style>
- <g fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
-  <g stroke-width="1.25">
-   <path d="m3.7937 10.838h11.466"/>
-   <path d="m3.7823 15.453h12.738"/>
-   <path d="m1.9734 18.337-0.00584-15.648 4.8944-0.026022 0.00955 3.0818 12.159-0.026021 0.0015 12.619z"/>
-  </g>
-  <path d="m7.0987 3.3653 5.0301-0.00857 4.61e-4 2.3766" stroke-width="1.25"/>
-  <path d="m12.129 3.3568 5.0301-0.00857 4.61e-4 2.3766" stroke-width="1.25"/>
+ <g fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
+  <path d="m2.6 7.4h5.4v-3.2h5.4v3.2h5v9.4h-15.8z"/>
+  <path d="m5.6 11h9.8"/>
+  <path d="m5.6 13.8h6.4"/>
  </g>
 </svg>

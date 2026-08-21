@@ -1,15 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
- <style>.st1 {display:none}
-		.st2 {fill:#000000;stroke:#000000;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.24}
-		.st3 {fill:none;fill-rule:evenodd;font-size:12px;overflow:visible;stroke-linecap:square;stroke-miterlimit:3}</style>
- <g transform="matrix(.12456 0 0 .1263 -6.7899 -7.6683)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="9.9659">
-  <circle cx="108.88" cy="125.07" r="16.908"/>
-  <circle cx="185.63" cy="93.69" r="16.908"/>
-  <circle cx="173.34" cy="163.44" r="16.908"/>
-  <circle cx="91.992" cy="194" r="16.908"/>
-  <path d="m107.4 187.03 50.373-16.996"/>
-  <path d="m161.03 151.84-36.725-19.846"/>
-  <path d="m122.78 115.44 47.236-15.267"/>
+ <g fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
+  <path d="m3.4 17.6c0-4.2 4.4-3.4 4.4-7s-4.4-2.8-4.4-7"/>
+  <circle cx="3.4" cy="3.6" r="1.6"/>
+  <circle cx="17" cy="17.4" r="1.6"/>
+  <path d="m7.8 10.6h9.2v5.2"/>
  </g>
 </svg>

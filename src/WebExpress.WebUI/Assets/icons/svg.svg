@@ -1,19 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
- <style>.st1 {display:none}
-		.st2 {fill:#000000;stroke:#000000;stroke-linecap:round;stroke-linejoin:round;stroke-width:0.75}
-		.st3 {fill:none;fill-rule:evenodd;font-size:12px;overflow:visible;stroke-linecap:square;stroke-miterlimit:3}</style>
- <g transform="matrix(.91615 0 0 .91615 .33799 2.4298)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3644">
-  <circle cx="2.1684" cy="13.103" r=".97045"/>
-  <circle cx="4.6461" cy="7.348" r=".97045"/>
-  <path d="m10.863 9.7225a3.3359 3.9024 0 0 0-3.3069 3.399h6.6139a3.3359 3.9024 0 0 0-3.3069-3.399z"/>
-  <circle cx="10.863" cy="4.515" r=".97045"/>
-  <circle cx="17.035" cy="7.348" r=".97045"/>
-  <circle cx="20.016" cy="13.103" r=".97045"/>
-  <path d="m3.1388 13.103 4.4171 0.018815"/>
-  <path d="m14.17 13.122 4.8756-0.01882"/>
-  <path d="m16.29 7.9698-3.092 2.8698"/>
-  <path d="m10.863 5.4855v4.237"/>
-  <path d="m5.3104 8.0555 3.1128 2.9093"/>
+ <g fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
+  <path d="m5.4 2.8h6.6l3.6 3.6v11.8h-10.2z"/>
+  <path d="m12 2.8v3.6h3.6"/>
+  <path d="m7 12.2-1.2 1.4 1.2 1.4"/>
+  <path d="m14 12.2 1.2 1.4-1.2 1.4"/>
+  <path d="m11.6 11.4-2.2 5"/>
  </g>
 </svg>
