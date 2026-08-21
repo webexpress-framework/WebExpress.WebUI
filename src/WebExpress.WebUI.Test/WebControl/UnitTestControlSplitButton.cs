@@ -166,7 +166,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""btn-group""><button class=""btn""></button>*</div>")]
-        [InlineData(typeof(IconStar), @"<div class=""btn-group""><button class=""btn""><i class=""fas fa-star""></i></button>*</div>")]
+        [InlineData(typeof(IconStar), @"<div class=""btn-group""><button class=""btn""><i class=""wx-icon-light wx-icon-light-star""></i></button>*</div>")]
         public void Icon(Type icon, string expected)
         {
             // arrange

@@ -98,12 +98,12 @@ namespace WebExpress.WebUI.WebControl
             var role = Role?.Invoke(renderContext);
             var theme = Theme?.Invoke(renderContext) ?? TypeTheme.None;
             var header = Header?.Invoke(renderContext);
-            var headerIcon = HeaderIcon?.Invoke(renderContext)?.ApplyIconTheme(visualTree?.IconTheme ?? TypeIconTheme.Default);
+            var headerIcon = HeaderIcon?.Invoke(renderContext);
             var headerBg = HeaderBackgroundColor?.Invoke(renderContext);
             var headerColor = HeaderTextColor?.Invoke(renderContext);
             var headline = Headline?.Invoke(renderContext);
             var footer = Footer?.Invoke(renderContext);
-            var footerIcon = FooterIcon?.Invoke(renderContext)?.ApplyIconTheme(visualTree?.IconTheme ?? TypeIconTheme.Default);
+            var footerIcon = FooterIcon?.Invoke(renderContext);
             var footerBg = FooterBackgroundColor?.Invoke(renderContext);
             var footerColor = FooterTextColor?.Invoke(renderContext);
 

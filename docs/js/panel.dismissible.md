@@ -27,7 +27,7 @@ The component is initialised declaratively from `data-` attributes on the host e
 ### Features
 
 - **Toggleable visibility**: `show()`, `hide()`, and `toggle()` allow programmatic control of the panel state.
-- **Dismiss button**: A Font Awesome `fa-xmark` button styled with the same `wx-button-close` class the `Alert` / `Modal` close buttons use, including the hover-to-danger colour transition. The button is pinned to the right edge of the header via the `ms-auto` flex utility.
+- **Dismiss button**: An `xmark` button styled with the same `wx-button-close` class the `Alert` / `Modal` close buttons use, including the hover-to-danger colour transition. The button is pinned to the right edge of the header via the `ms-auto` flex utility.
 - **Fade animation**: Show/hide go through Bootstrap's `.fade` + `.show` opacity transition (same pattern as `Alert` / `Toast`); the panel only becomes `d-none` after the fade-out completes, so the dismiss is visibly animated. `SHOW_EVENT` / `HIDE_EVENT` fire at the end of the animation.
 - **Data-binding ready**: External controls (lists, tiles, trees) can re-open the panel by emitting `SELECT_ITEM_EVENT` and being referenced through the [`show` bind](#data-bind-show).
 - **Arbitrary body content**: Any HTML nested inside the host element on initialisation becomes the body of the panel.

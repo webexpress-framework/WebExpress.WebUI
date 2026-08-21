@@ -4,7 +4,7 @@
  * Encapsulates the lightweight, line-style SVG variants shipped under
  * Assets/icons. The icons are rendered as CSS masks so that they take on
  * the surrounding text color (currentColor) and scale relative to the
- * font size, which keeps them visually consistent with FontAwesome glyphs.
+ * font size, which keeps them consistent with the surrounding text.
  *
  * Usage:  <i class="wx-icon-light wx-icon-light-address-book"></i>
  *
@@ -31,16 +31,36 @@
 /*
  * Image icon emitted by webexpress.webui.Icon.create for an image spec. It is
  * sized to the surrounding text like a font glyph so an image can stand in for
- * a FontAwesome icon anywhere a control places one.
+ * a drawn icon anywhere a control places one.
  */
 .wx-icon-img {
     display: inline-block;
     /* slightly larger than 1em so an image icon reads at the same visual size as
-       a FontAwesome glyph, which fills less of its em box */
+       a drawn icon, which fills less of its em box */
     width: 1.15em;
     height: 1.15em;
     object-fit: contain;
     vertical-align: -0.2em;
+}
+
+/*
+ * Rotation for icons used as a busy indicator. The mask keeps the drawing static, so the
+ * animation has to run on the element itself.
+ */
+
+@keyframes wx-icon-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.wx-icon-spin {
+    animation: wx-icon-spin 1.6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wx-icon-spin {
+        animation: none;
+    }
 }
 
 .wx-icon-light-add-column-above {
@@ -7538,11 +7558,6 @@
     mask-image: url("../icons/mars-and-venus-burst.svg");
 }
 
-/*
- * Light variants added for icon classes that are used in the framework, the
- * tutorial or an application but had none.
- */
-
 .wx-icon-light-scale-unbalanced {
     -webkit-mask-image: url("../icons/scale-unbalanced.svg");
     mask-image: url("../icons/scale-unbalanced.svg");
@@ -7551,4 +7566,959 @@
 .wx-icon-light-scale-unbalanced-flip {
     -webkit-mask-image: url("../icons/scale-unbalanced-flip.svg");
     mask-image: url("../icons/scale-unbalanced-flip.svg");
+}
+
+.wx-icon-light-0 {
+    -webkit-mask-image: url("../icons/0.svg");
+    mask-image: url("../icons/0.svg");
+}
+
+.wx-icon-light-1 {
+    -webkit-mask-image: url("../icons/1.svg");
+    mask-image: url("../icons/1.svg");
+}
+
+.wx-icon-light-2 {
+    -webkit-mask-image: url("../icons/2.svg");
+    mask-image: url("../icons/2.svg");
+}
+
+.wx-icon-light-3 {
+    -webkit-mask-image: url("../icons/3.svg");
+    mask-image: url("../icons/3.svg");
+}
+
+.wx-icon-light-4 {
+    -webkit-mask-image: url("../icons/4.svg");
+    mask-image: url("../icons/4.svg");
+}
+
+.wx-icon-light-5 {
+    -webkit-mask-image: url("../icons/5.svg");
+    mask-image: url("../icons/5.svg");
+}
+
+.wx-icon-light-6 {
+    -webkit-mask-image: url("../icons/6.svg");
+    mask-image: url("../icons/6.svg");
+}
+
+.wx-icon-light-7 {
+    -webkit-mask-image: url("../icons/7.svg");
+    mask-image: url("../icons/7.svg");
+}
+
+.wx-icon-light-8 {
+    -webkit-mask-image: url("../icons/8.svg");
+    mask-image: url("../icons/8.svg");
+}
+
+.wx-icon-light-9 {
+    -webkit-mask-image: url("../icons/9.svg");
+    mask-image: url("../icons/9.svg");
+}
+
+.wx-icon-light-a {
+    -webkit-mask-image: url("../icons/a.svg");
+    mask-image: url("../icons/a.svg");
+}
+
+.wx-icon-light-austral-sign {
+    -webkit-mask-image: url("../icons/austral-sign.svg");
+    mask-image: url("../icons/austral-sign.svg");
+}
+
+.wx-icon-light-b {
+    -webkit-mask-image: url("../icons/b.svg");
+    mask-image: url("../icons/b.svg");
+}
+
+.wx-icon-light-baht-sign {
+    -webkit-mask-image: url("../icons/baht-sign.svg");
+    mask-image: url("../icons/baht-sign.svg");
+}
+
+.wx-icon-light-bitcoin-sign {
+    -webkit-mask-image: url("../icons/bitcoin-sign.svg");
+    mask-image: url("../icons/bitcoin-sign.svg");
+}
+
+.wx-icon-light-brazilian-real-sign {
+    -webkit-mask-image: url("../icons/brazilian-real-sign.svg");
+    mask-image: url("../icons/brazilian-real-sign.svg");
+}
+
+.wx-icon-light-c {
+    -webkit-mask-image: url("../icons/c.svg");
+    mask-image: url("../icons/c.svg");
+}
+
+.wx-icon-light-cedi-sign {
+    -webkit-mask-image: url("../icons/cedi-sign.svg");
+    mask-image: url("../icons/cedi-sign.svg");
+}
+
+.wx-icon-light-cent-sign {
+    -webkit-mask-image: url("../icons/cent-sign.svg");
+    mask-image: url("../icons/cent-sign.svg");
+}
+
+.wx-icon-light-child {
+    -webkit-mask-image: url("../icons/child.svg");
+    mask-image: url("../icons/child.svg");
+}
+
+.wx-icon-light-child-combatant {
+    -webkit-mask-image: url("../icons/child-combatant.svg");
+    mask-image: url("../icons/child-combatant.svg");
+}
+
+.wx-icon-light-child-dress {
+    -webkit-mask-image: url("../icons/child-dress.svg");
+    mask-image: url("../icons/child-dress.svg");
+}
+
+.wx-icon-light-child-reaching {
+    -webkit-mask-image: url("../icons/child-reaching.svg");
+    mask-image: url("../icons/child-reaching.svg");
+}
+
+.wx-icon-light-children {
+    -webkit-mask-image: url("../icons/children.svg");
+    mask-image: url("../icons/children.svg");
+}
+
+.wx-icon-light-colon-sign {
+    -webkit-mask-image: url("../icons/colon-sign.svg");
+    mask-image: url("../icons/colon-sign.svg");
+}
+
+.wx-icon-light-cruzeiro-sign {
+    -webkit-mask-image: url("../icons/cruzeiro-sign.svg");
+    mask-image: url("../icons/cruzeiro-sign.svg");
+}
+
+.wx-icon-light-d {
+    -webkit-mask-image: url("../icons/d.svg");
+    mask-image: url("../icons/d.svg");
+}
+
+.wx-icon-light-dong-sign {
+    -webkit-mask-image: url("../icons/dong-sign.svg");
+    mask-image: url("../icons/dong-sign.svg");
+}
+
+.wx-icon-light-e {
+    -webkit-mask-image: url("../icons/e.svg");
+    mask-image: url("../icons/e.svg");
+}
+
+.wx-icon-light-f {
+    -webkit-mask-image: url("../icons/f.svg");
+    mask-image: url("../icons/f.svg");
+}
+
+.wx-icon-light-face-angry {
+    -webkit-mask-image: url("../icons/face-angry.svg");
+    mask-image: url("../icons/face-angry.svg");
+}
+
+.wx-icon-light-face-dizzy {
+    -webkit-mask-image: url("../icons/face-dizzy.svg");
+    mask-image: url("../icons/face-dizzy.svg");
+}
+
+.wx-icon-light-face-flushed {
+    -webkit-mask-image: url("../icons/face-flushed.svg");
+    mask-image: url("../icons/face-flushed.svg");
+}
+
+.wx-icon-light-face-frown {
+    -webkit-mask-image: url("../icons/face-frown.svg");
+    mask-image: url("../icons/face-frown.svg");
+}
+
+.wx-icon-light-face-frown-open {
+    -webkit-mask-image: url("../icons/face-frown-open.svg");
+    mask-image: url("../icons/face-frown-open.svg");
+}
+
+.wx-icon-light-face-grimace {
+    -webkit-mask-image: url("../icons/face-grimace.svg");
+    mask-image: url("../icons/face-grimace.svg");
+}
+
+.wx-icon-light-face-grin {
+    -webkit-mask-image: url("../icons/face-grin.svg");
+    mask-image: url("../icons/face-grin.svg");
+}
+
+.wx-icon-light-face-grin-beam {
+    -webkit-mask-image: url("../icons/face-grin-beam.svg");
+    mask-image: url("../icons/face-grin-beam.svg");
+}
+
+.wx-icon-light-face-grin-beam-sweat {
+    -webkit-mask-image: url("../icons/face-grin-beam-sweat.svg");
+    mask-image: url("../icons/face-grin-beam-sweat.svg");
+}
+
+.wx-icon-light-face-grin-hearts {
+    -webkit-mask-image: url("../icons/face-grin-hearts.svg");
+    mask-image: url("../icons/face-grin-hearts.svg");
+}
+
+.wx-icon-light-face-grin-squint {
+    -webkit-mask-image: url("../icons/face-grin-squint.svg");
+    mask-image: url("../icons/face-grin-squint.svg");
+}
+
+.wx-icon-light-face-grin-squint-tears {
+    -webkit-mask-image: url("../icons/face-grin-squint-tears.svg");
+    mask-image: url("../icons/face-grin-squint-tears.svg");
+}
+
+.wx-icon-light-face-grin-stars {
+    -webkit-mask-image: url("../icons/face-grin-stars.svg");
+    mask-image: url("../icons/face-grin-stars.svg");
+}
+
+.wx-icon-light-face-grin-tears {
+    -webkit-mask-image: url("../icons/face-grin-tears.svg");
+    mask-image: url("../icons/face-grin-tears.svg");
+}
+
+.wx-icon-light-face-grin-tongue {
+    -webkit-mask-image: url("../icons/face-grin-tongue.svg");
+    mask-image: url("../icons/face-grin-tongue.svg");
+}
+
+.wx-icon-light-face-grin-tongue-squint {
+    -webkit-mask-image: url("../icons/face-grin-tongue-squint.svg");
+    mask-image: url("../icons/face-grin-tongue-squint.svg");
+}
+
+.wx-icon-light-face-grin-tongue-wink {
+    -webkit-mask-image: url("../icons/face-grin-tongue-wink.svg");
+    mask-image: url("../icons/face-grin-tongue-wink.svg");
+}
+
+.wx-icon-light-face-grin-wide {
+    -webkit-mask-image: url("../icons/face-grin-wide.svg");
+    mask-image: url("../icons/face-grin-wide.svg");
+}
+
+.wx-icon-light-face-grin-wink {
+    -webkit-mask-image: url("../icons/face-grin-wink.svg");
+    mask-image: url("../icons/face-grin-wink.svg");
+}
+
+.wx-icon-light-face-kiss {
+    -webkit-mask-image: url("../icons/face-kiss.svg");
+    mask-image: url("../icons/face-kiss.svg");
+}
+
+.wx-icon-light-face-kiss-beam {
+    -webkit-mask-image: url("../icons/face-kiss-beam.svg");
+    mask-image: url("../icons/face-kiss-beam.svg");
+}
+
+.wx-icon-light-face-kiss-wink-heart {
+    -webkit-mask-image: url("../icons/face-kiss-wink-heart.svg");
+    mask-image: url("../icons/face-kiss-wink-heart.svg");
+}
+
+.wx-icon-light-face-laugh {
+    -webkit-mask-image: url("../icons/face-laugh.svg");
+    mask-image: url("../icons/face-laugh.svg");
+}
+
+.wx-icon-light-face-laugh-beam {
+    -webkit-mask-image: url("../icons/face-laugh-beam.svg");
+    mask-image: url("../icons/face-laugh-beam.svg");
+}
+
+.wx-icon-light-face-laugh-squint {
+    -webkit-mask-image: url("../icons/face-laugh-squint.svg");
+    mask-image: url("../icons/face-laugh-squint.svg");
+}
+
+.wx-icon-light-face-laugh-wink {
+    -webkit-mask-image: url("../icons/face-laugh-wink.svg");
+    mask-image: url("../icons/face-laugh-wink.svg");
+}
+
+.wx-icon-light-face-meh {
+    -webkit-mask-image: url("../icons/face-meh.svg");
+    mask-image: url("../icons/face-meh.svg");
+}
+
+.wx-icon-light-face-meh-blank {
+    -webkit-mask-image: url("../icons/face-meh-blank.svg");
+    mask-image: url("../icons/face-meh-blank.svg");
+}
+
+.wx-icon-light-face-rolling-eyes {
+    -webkit-mask-image: url("../icons/face-rolling-eyes.svg");
+    mask-image: url("../icons/face-rolling-eyes.svg");
+}
+
+.wx-icon-light-face-sad-cry {
+    -webkit-mask-image: url("../icons/face-sad-cry.svg");
+    mask-image: url("../icons/face-sad-cry.svg");
+}
+
+.wx-icon-light-face-sad-tear {
+    -webkit-mask-image: url("../icons/face-sad-tear.svg");
+    mask-image: url("../icons/face-sad-tear.svg");
+}
+
+.wx-icon-light-face-smile-beam {
+    -webkit-mask-image: url("../icons/face-smile-beam.svg");
+    mask-image: url("../icons/face-smile-beam.svg");
+}
+
+.wx-icon-light-face-smile-wink {
+    -webkit-mask-image: url("../icons/face-smile-wink.svg");
+    mask-image: url("../icons/face-smile-wink.svg");
+}
+
+.wx-icon-light-face-surprise {
+    -webkit-mask-image: url("../icons/face-surprise.svg");
+    mask-image: url("../icons/face-surprise.svg");
+}
+
+.wx-icon-light-face-tired {
+    -webkit-mask-image: url("../icons/face-tired.svg");
+    mask-image: url("../icons/face-tired.svg");
+}
+
+.wx-icon-light-florin-sign {
+    -webkit-mask-image: url("../icons/florin-sign.svg");
+    mask-image: url("../icons/florin-sign.svg");
+}
+
+.wx-icon-light-franc-sign {
+    -webkit-mask-image: url("../icons/franc-sign.svg");
+    mask-image: url("../icons/franc-sign.svg");
+}
+
+.wx-icon-light-g {
+    -webkit-mask-image: url("../icons/g.svg");
+    mask-image: url("../icons/g.svg");
+}
+
+.wx-icon-light-guarani-sign {
+    -webkit-mask-image: url("../icons/guarani-sign.svg");
+    mask-image: url("../icons/guarani-sign.svg");
+}
+
+.wx-icon-light-h {
+    -webkit-mask-image: url("../icons/h.svg");
+    mask-image: url("../icons/h.svg");
+}
+
+.wx-icon-light-hand {
+    -webkit-mask-image: url("../icons/hand.svg");
+    mask-image: url("../icons/hand.svg");
+}
+
+.wx-icon-light-hand-back-fist {
+    -webkit-mask-image: url("../icons/hand-back-fist.svg");
+    mask-image: url("../icons/hand-back-fist.svg");
+}
+
+.wx-icon-light-hand-dots {
+    -webkit-mask-image: url("../icons/hand-dots.svg");
+    mask-image: url("../icons/hand-dots.svg");
+}
+
+.wx-icon-light-hand-fist {
+    -webkit-mask-image: url("../icons/hand-fist.svg");
+    mask-image: url("../icons/hand-fist.svg");
+}
+
+.wx-icon-light-hand-holding {
+    -webkit-mask-image: url("../icons/hand-holding.svg");
+    mask-image: url("../icons/hand-holding.svg");
+}
+
+.wx-icon-light-hand-holding-dollar {
+    -webkit-mask-image: url("../icons/hand-holding-dollar.svg");
+    mask-image: url("../icons/hand-holding-dollar.svg");
+}
+
+.wx-icon-light-hand-holding-droplet {
+    -webkit-mask-image: url("../icons/hand-holding-droplet.svg");
+    mask-image: url("../icons/hand-holding-droplet.svg");
+}
+
+.wx-icon-light-hand-holding-hand {
+    -webkit-mask-image: url("../icons/hand-holding-hand.svg");
+    mask-image: url("../icons/hand-holding-hand.svg");
+}
+
+.wx-icon-light-hand-lizard {
+    -webkit-mask-image: url("../icons/hand-lizard.svg");
+    mask-image: url("../icons/hand-lizard.svg");
+}
+
+.wx-icon-light-hand-middle-finger {
+    -webkit-mask-image: url("../icons/hand-middle-finger.svg");
+    mask-image: url("../icons/hand-middle-finger.svg");
+}
+
+.wx-icon-light-hand-paper {
+    -webkit-mask-image: url("../icons/hand-paper.svg");
+    mask-image: url("../icons/hand-paper.svg");
+}
+
+.wx-icon-light-hand-peace {
+    -webkit-mask-image: url("../icons/hand-peace.svg");
+    mask-image: url("../icons/hand-peace.svg");
+}
+
+.wx-icon-light-hand-point-down {
+    -webkit-mask-image: url("../icons/hand-point-down.svg");
+    mask-image: url("../icons/hand-point-down.svg");
+}
+
+.wx-icon-light-hand-point-left {
+    -webkit-mask-image: url("../icons/hand-point-left.svg");
+    mask-image: url("../icons/hand-point-left.svg");
+}
+
+.wx-icon-light-hand-point-right {
+    -webkit-mask-image: url("../icons/hand-point-right.svg");
+    mask-image: url("../icons/hand-point-right.svg");
+}
+
+.wx-icon-light-hand-point-up {
+    -webkit-mask-image: url("../icons/hand-point-up.svg");
+    mask-image: url("../icons/hand-point-up.svg");
+}
+
+.wx-icon-light-hand-pointer {
+    -webkit-mask-image: url("../icons/hand-pointer.svg");
+    mask-image: url("../icons/hand-pointer.svg");
+}
+
+.wx-icon-light-hand-scissors {
+    -webkit-mask-image: url("../icons/hand-scissors.svg");
+    mask-image: url("../icons/hand-scissors.svg");
+}
+
+.wx-icon-light-hand-sparkles {
+    -webkit-mask-image: url("../icons/hand-sparkles.svg");
+    mask-image: url("../icons/hand-sparkles.svg");
+}
+
+.wx-icon-light-hand-spock {
+    -webkit-mask-image: url("../icons/hand-spock.svg");
+    mask-image: url("../icons/hand-spock.svg");
+}
+
+.wx-icon-light-handcuffs {
+    -webkit-mask-image: url("../icons/handcuffs.svg");
+    mask-image: url("../icons/handcuffs.svg");
+}
+
+.wx-icon-light-hands {
+    -webkit-mask-image: url("../icons/hands.svg");
+    mask-image: url("../icons/hands.svg");
+}
+
+.wx-icon-light-hands-asl-interpreting {
+    -webkit-mask-image: url("../icons/hands-asl-interpreting.svg");
+    mask-image: url("../icons/hands-asl-interpreting.svg");
+}
+
+.wx-icon-light-hands-bound {
+    -webkit-mask-image: url("../icons/hands-bound.svg");
+    mask-image: url("../icons/hands-bound.svg");
+}
+
+.wx-icon-light-hands-bubbles {
+    -webkit-mask-image: url("../icons/hands-bubbles.svg");
+    mask-image: url("../icons/hands-bubbles.svg");
+}
+
+.wx-icon-light-hands-clapping {
+    -webkit-mask-image: url("../icons/hands-clapping.svg");
+    mask-image: url("../icons/hands-clapping.svg");
+}
+
+.wx-icon-light-hands-holding {
+    -webkit-mask-image: url("../icons/hands-holding.svg");
+    mask-image: url("../icons/hands-holding.svg");
+}
+
+.wx-icon-light-hands-holding-child {
+    -webkit-mask-image: url("../icons/hands-holding-child.svg");
+    mask-image: url("../icons/hands-holding-child.svg");
+}
+
+.wx-icon-light-hands-holding-circle {
+    -webkit-mask-image: url("../icons/hands-holding-circle.svg");
+    mask-image: url("../icons/hands-holding-circle.svg");
+}
+
+.wx-icon-light-handshake {
+    -webkit-mask-image: url("../icons/handshake.svg");
+    mask-image: url("../icons/handshake.svg");
+}
+
+.wx-icon-light-handshake-angle {
+    -webkit-mask-image: url("../icons/handshake-angle.svg");
+    mask-image: url("../icons/handshake-angle.svg");
+}
+
+.wx-icon-light-handshake-simple {
+    -webkit-mask-image: url("../icons/handshake-simple.svg");
+    mask-image: url("../icons/handshake-simple.svg");
+}
+
+.wx-icon-light-handshake-simple-slash {
+    -webkit-mask-image: url("../icons/handshake-simple-slash.svg");
+    mask-image: url("../icons/handshake-simple-slash.svg");
+}
+
+.wx-icon-light-handshake-slash {
+    -webkit-mask-image: url("../icons/handshake-slash.svg");
+    mask-image: url("../icons/handshake-slash.svg");
+}
+
+.wx-icon-light-hryvnia-sign {
+    -webkit-mask-image: url("../icons/hryvnia-sign.svg");
+    mask-image: url("../icons/hryvnia-sign.svg");
+}
+
+.wx-icon-light-i {
+    -webkit-mask-image: url("../icons/i.svg");
+    mask-image: url("../icons/i.svg");
+}
+
+.wx-icon-light-indian-rupee-sign {
+    -webkit-mask-image: url("../icons/indian-rupee-sign.svg");
+    mask-image: url("../icons/indian-rupee-sign.svg");
+}
+
+.wx-icon-light-j {
+    -webkit-mask-image: url("../icons/j.svg");
+    mask-image: url("../icons/j.svg");
+}
+
+.wx-icon-light-k {
+    -webkit-mask-image: url("../icons/k.svg");
+    mask-image: url("../icons/k.svg");
+}
+
+.wx-icon-light-kip-sign {
+    -webkit-mask-image: url("../icons/kip-sign.svg");
+    mask-image: url("../icons/kip-sign.svg");
+}
+
+.wx-icon-light-l {
+    -webkit-mask-image: url("../icons/l.svg");
+    mask-image: url("../icons/l.svg");
+}
+
+.wx-icon-light-lari-sign {
+    -webkit-mask-image: url("../icons/lari-sign.svg");
+    mask-image: url("../icons/lari-sign.svg");
+}
+
+.wx-icon-light-lira-sign {
+    -webkit-mask-image: url("../icons/lira-sign.svg");
+    mask-image: url("../icons/lira-sign.svg");
+}
+
+.wx-icon-light-litecoin-sign {
+    -webkit-mask-image: url("../icons/litecoin-sign.svg");
+    mask-image: url("../icons/litecoin-sign.svg");
+}
+
+.wx-icon-light-m {
+    -webkit-mask-image: url("../icons/m.svg");
+    mask-image: url("../icons/m.svg");
+}
+
+.wx-icon-light-manat-sign {
+    -webkit-mask-image: url("../icons/manat-sign.svg");
+    mask-image: url("../icons/manat-sign.svg");
+}
+
+.wx-icon-light-mill-sign {
+    -webkit-mask-image: url("../icons/mill-sign.svg");
+    mask-image: url("../icons/mill-sign.svg");
+}
+
+.wx-icon-light-n {
+    -webkit-mask-image: url("../icons/n.svg");
+    mask-image: url("../icons/n.svg");
+}
+
+.wx-icon-light-naira-sign {
+    -webkit-mask-image: url("../icons/naira-sign.svg");
+    mask-image: url("../icons/naira-sign.svg");
+}
+
+.wx-icon-light-o {
+    -webkit-mask-image: url("../icons/o.svg");
+    mask-image: url("../icons/o.svg");
+}
+
+.wx-icon-light-p {
+    -webkit-mask-image: url("../icons/p.svg");
+    mask-image: url("../icons/p.svg");
+}
+
+.wx-icon-light-people-arrows {
+    -webkit-mask-image: url("../icons/people-arrows.svg");
+    mask-image: url("../icons/people-arrows.svg");
+}
+
+.wx-icon-light-people-carry-box {
+    -webkit-mask-image: url("../icons/people-carry-box.svg");
+    mask-image: url("../icons/people-carry-box.svg");
+}
+
+.wx-icon-light-people-group {
+    -webkit-mask-image: url("../icons/people-group.svg");
+    mask-image: url("../icons/people-group.svg");
+}
+
+.wx-icon-light-people-line {
+    -webkit-mask-image: url("../icons/people-line.svg");
+    mask-image: url("../icons/people-line.svg");
+}
+
+.wx-icon-light-people-pulling {
+    -webkit-mask-image: url("../icons/people-pulling.svg");
+    mask-image: url("../icons/people-pulling.svg");
+}
+
+.wx-icon-light-people-robbery {
+    -webkit-mask-image: url("../icons/people-robbery.svg");
+    mask-image: url("../icons/people-robbery.svg");
+}
+
+.wx-icon-light-people-roof {
+    -webkit-mask-image: url("../icons/people-roof.svg");
+    mask-image: url("../icons/people-roof.svg");
+}
+
+.wx-icon-light-person {
+    -webkit-mask-image: url("../icons/person.svg");
+    mask-image: url("../icons/person.svg");
+}
+
+.wx-icon-light-person-arrow-down-to-line {
+    -webkit-mask-image: url("../icons/person-arrow-down-to-line.svg");
+    mask-image: url("../icons/person-arrow-down-to-line.svg");
+}
+
+.wx-icon-light-person-arrow-up-from-line {
+    -webkit-mask-image: url("../icons/person-arrow-up-from-line.svg");
+    mask-image: url("../icons/person-arrow-up-from-line.svg");
+}
+
+.wx-icon-light-person-biking {
+    -webkit-mask-image: url("../icons/person-biking.svg");
+    mask-image: url("../icons/person-biking.svg");
+}
+
+.wx-icon-light-person-booth {
+    -webkit-mask-image: url("../icons/person-booth.svg");
+    mask-image: url("../icons/person-booth.svg");
+}
+
+.wx-icon-light-person-breastfeeding {
+    -webkit-mask-image: url("../icons/person-breastfeeding.svg");
+    mask-image: url("../icons/person-breastfeeding.svg");
+}
+
+.wx-icon-light-person-burst {
+    -webkit-mask-image: url("../icons/person-burst.svg");
+    mask-image: url("../icons/person-burst.svg");
+}
+
+.wx-icon-light-person-cane {
+    -webkit-mask-image: url("../icons/person-cane.svg");
+    mask-image: url("../icons/person-cane.svg");
+}
+
+.wx-icon-light-person-chalkboard {
+    -webkit-mask-image: url("../icons/person-chalkboard.svg");
+    mask-image: url("../icons/person-chalkboard.svg");
+}
+
+.wx-icon-light-person-circle-check {
+    -webkit-mask-image: url("../icons/person-circle-check.svg");
+    mask-image: url("../icons/person-circle-check.svg");
+}
+
+.wx-icon-light-person-circle-exclamation {
+    -webkit-mask-image: url("../icons/person-circle-exclamation.svg");
+    mask-image: url("../icons/person-circle-exclamation.svg");
+}
+
+.wx-icon-light-person-circle-minus {
+    -webkit-mask-image: url("../icons/person-circle-minus.svg");
+    mask-image: url("../icons/person-circle-minus.svg");
+}
+
+.wx-icon-light-person-circle-plus {
+    -webkit-mask-image: url("../icons/person-circle-plus.svg");
+    mask-image: url("../icons/person-circle-plus.svg");
+}
+
+.wx-icon-light-person-circle-question {
+    -webkit-mask-image: url("../icons/person-circle-question.svg");
+    mask-image: url("../icons/person-circle-question.svg");
+}
+
+.wx-icon-light-person-circle-xmark {
+    -webkit-mask-image: url("../icons/person-circle-xmark.svg");
+    mask-image: url("../icons/person-circle-xmark.svg");
+}
+
+.wx-icon-light-person-digging {
+    -webkit-mask-image: url("../icons/person-digging.svg");
+    mask-image: url("../icons/person-digging.svg");
+}
+
+.wx-icon-light-person-dots-from-line {
+    -webkit-mask-image: url("../icons/person-dots-from-line.svg");
+    mask-image: url("../icons/person-dots-from-line.svg");
+}
+
+.wx-icon-light-person-dress {
+    -webkit-mask-image: url("../icons/person-dress.svg");
+    mask-image: url("../icons/person-dress.svg");
+}
+
+.wx-icon-light-person-dress-burst {
+    -webkit-mask-image: url("../icons/person-dress-burst.svg");
+    mask-image: url("../icons/person-dress-burst.svg");
+}
+
+.wx-icon-light-person-drowning {
+    -webkit-mask-image: url("../icons/person-drowning.svg");
+    mask-image: url("../icons/person-drowning.svg");
+}
+
+.wx-icon-light-person-falling {
+    -webkit-mask-image: url("../icons/person-falling.svg");
+    mask-image: url("../icons/person-falling.svg");
+}
+
+.wx-icon-light-person-falling-burst {
+    -webkit-mask-image: url("../icons/person-falling-burst.svg");
+    mask-image: url("../icons/person-falling-burst.svg");
+}
+
+.wx-icon-light-person-half-dress {
+    -webkit-mask-image: url("../icons/person-half-dress.svg");
+    mask-image: url("../icons/person-half-dress.svg");
+}
+
+.wx-icon-light-person-harassing {
+    -webkit-mask-image: url("../icons/person-harassing.svg");
+    mask-image: url("../icons/person-harassing.svg");
+}
+
+.wx-icon-light-person-hiking {
+    -webkit-mask-image: url("../icons/person-hiking.svg");
+    mask-image: url("../icons/person-hiking.svg");
+}
+
+.wx-icon-light-person-military-pointing {
+    -webkit-mask-image: url("../icons/person-military-pointing.svg");
+    mask-image: url("../icons/person-military-pointing.svg");
+}
+
+.wx-icon-light-person-military-rifle {
+    -webkit-mask-image: url("../icons/person-military-rifle.svg");
+    mask-image: url("../icons/person-military-rifle.svg");
+}
+
+.wx-icon-light-person-military-to-person {
+    -webkit-mask-image: url("../icons/person-military-to-person.svg");
+    mask-image: url("../icons/person-military-to-person.svg");
+}
+
+.wx-icon-light-person-pregnant {
+    -webkit-mask-image: url("../icons/person-pregnant.svg");
+    mask-image: url("../icons/person-pregnant.svg");
+}
+
+.wx-icon-light-person-rays {
+    -webkit-mask-image: url("../icons/person-rays.svg");
+    mask-image: url("../icons/person-rays.svg");
+}
+
+.wx-icon-light-person-rifle {
+    -webkit-mask-image: url("../icons/person-rifle.svg");
+    mask-image: url("../icons/person-rifle.svg");
+}
+
+.wx-icon-light-person-running {
+    -webkit-mask-image: url("../icons/person-running.svg");
+    mask-image: url("../icons/person-running.svg");
+}
+
+.wx-icon-light-person-shelter {
+    -webkit-mask-image: url("../icons/person-shelter.svg");
+    mask-image: url("../icons/person-shelter.svg");
+}
+
+.wx-icon-light-person-skating {
+    -webkit-mask-image: url("../icons/person-skating.svg");
+    mask-image: url("../icons/person-skating.svg");
+}
+
+.wx-icon-light-person-skiing {
+    -webkit-mask-image: url("../icons/person-skiing.svg");
+    mask-image: url("../icons/person-skiing.svg");
+}
+
+.wx-icon-light-person-skiing-nordic {
+    -webkit-mask-image: url("../icons/person-skiing-nordic.svg");
+    mask-image: url("../icons/person-skiing-nordic.svg");
+}
+
+.wx-icon-light-person-snowboarding {
+    -webkit-mask-image: url("../icons/person-snowboarding.svg");
+    mask-image: url("../icons/person-snowboarding.svg");
+}
+
+.wx-icon-light-person-swimming {
+    -webkit-mask-image: url("../icons/person-swimming.svg");
+    mask-image: url("../icons/person-swimming.svg");
+}
+
+.wx-icon-light-person-through-window {
+    -webkit-mask-image: url("../icons/person-through-window.svg");
+    mask-image: url("../icons/person-through-window.svg");
+}
+
+.wx-icon-light-person-walking {
+    -webkit-mask-image: url("../icons/person-walking.svg");
+    mask-image: url("../icons/person-walking.svg");
+}
+
+.wx-icon-light-person-walking-arrow-loop-left {
+    -webkit-mask-image: url("../icons/person-walking-arrow-loop-left.svg");
+    mask-image: url("../icons/person-walking-arrow-loop-left.svg");
+}
+
+.wx-icon-light-person-walking-arrow-right {
+    -webkit-mask-image: url("../icons/person-walking-arrow-right.svg");
+    mask-image: url("../icons/person-walking-arrow-right.svg");
+}
+
+.wx-icon-light-person-walking-dashed-line-arrow-right {
+    -webkit-mask-image: url("../icons/person-walking-dashed-line-arrow-right.svg");
+    mask-image: url("../icons/person-walking-dashed-line-arrow-right.svg");
+}
+
+.wx-icon-light-person-walking-luggage {
+    -webkit-mask-image: url("../icons/person-walking-luggage.svg");
+    mask-image: url("../icons/person-walking-luggage.svg");
+}
+
+.wx-icon-light-person-walking-with-cane {
+    -webkit-mask-image: url("../icons/person-walking-with-cane.svg");
+    mask-image: url("../icons/person-walking-with-cane.svg");
+}
+
+.wx-icon-light-peseta-sign {
+    -webkit-mask-image: url("../icons/peseta-sign.svg");
+    mask-image: url("../icons/peseta-sign.svg");
+}
+
+.wx-icon-light-peso-sign {
+    -webkit-mask-image: url("../icons/peso-sign.svg");
+    mask-image: url("../icons/peso-sign.svg");
+}
+
+.wx-icon-light-q {
+    -webkit-mask-image: url("../icons/q.svg");
+    mask-image: url("../icons/q.svg");
+}
+
+.wx-icon-light-r {
+    -webkit-mask-image: url("../icons/r.svg");
+    mask-image: url("../icons/r.svg");
+}
+
+.wx-icon-light-ruble-sign {
+    -webkit-mask-image: url("../icons/ruble-sign.svg");
+    mask-image: url("../icons/ruble-sign.svg");
+}
+
+.wx-icon-light-rupee-sign {
+    -webkit-mask-image: url("../icons/rupee-sign.svg");
+    mask-image: url("../icons/rupee-sign.svg");
+}
+
+.wx-icon-light-rupiah-sign {
+    -webkit-mask-image: url("../icons/rupiah-sign.svg");
+    mask-image: url("../icons/rupiah-sign.svg");
+}
+
+.wx-icon-light-s {
+    -webkit-mask-image: url("../icons/s.svg");
+    mask-image: url("../icons/s.svg");
+}
+
+.wx-icon-light-t {
+    -webkit-mask-image: url("../icons/t.svg");
+    mask-image: url("../icons/t.svg");
+}
+
+.wx-icon-light-tenge-sign {
+    -webkit-mask-image: url("../icons/tenge-sign.svg");
+    mask-image: url("../icons/tenge-sign.svg");
+}
+
+.wx-icon-light-turkish-lira-sign {
+    -webkit-mask-image: url("../icons/turkish-lira-sign.svg");
+    mask-image: url("../icons/turkish-lira-sign.svg");
+}
+
+.wx-icon-light-u {
+    -webkit-mask-image: url("../icons/u.svg");
+    mask-image: url("../icons/u.svg");
+}
+
+.wx-icon-light-v {
+    -webkit-mask-image: url("../icons/v.svg");
+    mask-image: url("../icons/v.svg");
+}
+
+.wx-icon-light-w {
+    -webkit-mask-image: url("../icons/w.svg");
+    mask-image: url("../icons/w.svg");
+}
+
+.wx-icon-light-won-sign {
+    -webkit-mask-image: url("../icons/won-sign.svg");
+    mask-image: url("../icons/won-sign.svg");
+}
+
+.wx-icon-light-x {
+    -webkit-mask-image: url("../icons/x.svg");
+    mask-image: url("../icons/x.svg");
+}
+
+.wx-icon-light-y {
+    -webkit-mask-image: url("../icons/y.svg");
+    mask-image: url("../icons/y.svg");
+}
+
+.wx-icon-light-z {
+    -webkit-mask-image: url("../icons/z.svg");
+    mask-image: url("../icons/z.svg");
 }

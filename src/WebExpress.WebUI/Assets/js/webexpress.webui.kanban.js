@@ -618,14 +618,14 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         button.className = "wx-kanban-menu-btn";
         button.title = this._i18n("webexpress.webapp:kanban.menu", "Options");
         button.setAttribute("aria-label", button.title);
-        button.innerHTML = `<i class="${this._iconClass("fas fa-ellipsis-vertical", "more")}"></i>`;
+        button.innerHTML = `<i class="${this._iconClass("more")}"></i>`;
 
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu dropdown-menu-end";
 
         if (this._configurableBoard) {
             menu.appendChild(this._buildMenuEntry(
-                this._iconClass("fas fa-gear", "gear"),
+                this._iconClass("gear"),
                 this._i18n("webexpress.webapp:board.settings", "Settings"),
                 null,
                 () => this._openBoardSettings()
@@ -641,7 +641,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
             if (this._addableColumn) {
                 menu.appendChild(this._buildMenuEntry(
-                    this._iconClass("fas fa-table-columns", "table-columns"),
+                    this._iconClass("table-columns"),
                     this._i18n("webexpress.webapp:column.add", "New column"),
                     null,
                     () => this._addColumn()
@@ -650,7 +650,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
             if (this._addableSwimlane) {
                 menu.appendChild(this._buildMenuEntry(
-                    this._iconClass("fas fa-bars", "bars"),
+                    this._iconClass("bars"),
                     this._i18n("webexpress.webapp:swimlane.add", "New swimlane"),
                     null,
                     () => this._addSwimlane()
@@ -734,7 +734,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         }
 
         const check = document.createElement("i");
-        check.className = active ? this._iconClass("fas fa-check", "check") : "";
+        check.className = active ? this._iconClass("check") : "";
         check.style.width = "1.25em";
         button.appendChild(check);
         button.appendChild(document.createTextNode(label));
@@ -987,7 +987,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         button.className = "wx-kanban-menu-btn";
         button.title = this._i18n("webexpress.webapp:column.menu", "Column options");
         button.setAttribute("aria-label", button.title);
-        button.innerHTML = `<i class="${this._iconClass("fas fa-ellipsis-vertical", "more")}"></i>`;
+        button.innerHTML = `<i class="${this._iconClass("more")}"></i>`;
 
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu dropdown-menu-end";
@@ -1019,18 +1019,18 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
         if (this._editableColumn) {
             menu.appendChild(this._buildMenuEntry(
-                this._iconClass("fas fa-pencil", "pen"),
+                this._iconClass("pen"),
                 this._i18n("webexpress.webapp:column.edit", "Rename column"),
                 null,
                 () => this._startColumnEdit(headerEl, index)
             ));
             menu.appendChild(this._buildSubmenuEntry(
-                this._iconClass("fas fa-ruler", "expand"),
+                this._iconClass("expand"),
                 this._i18n("webexpress.webapp:column.size", "Size"),
                 (m) => this._populateColumnMenuSizes(m, headerEl, index)
             ));
             menu.appendChild(this._buildSubmenuEntry(
-                this._iconClass("fas fa-palette", "palette"),
+                this._iconClass("palette"),
                 this._i18n("webexpress.webapp:column.color", "Color"),
                 (m) => this._populateColumnMenuColors(m, headerEl, index)
             ));
@@ -1043,7 +1043,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 menu.appendChild(divider);
             }
             menu.appendChild(this._buildMenuEntry(
-                this._iconClass("fas fa-trash", "trash"),
+                this._iconClass("trash"),
                 this._i18n("webexpress.webapp:column.delete", "Delete column"),
                 null,
                 () => this._deleteColumn(index)
@@ -1075,7 +1075,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         button.appendChild(document.createTextNode(label));
 
         const chevron = document.createElement("i");
-        chevron.className = this._iconClass("fas fa-chevron-right", "chevron-right") + " ms-auto ps-3";
+        chevron.className = this._iconClass("chevron-right") + " ms-auto ps-3";
         button.appendChild(chevron);
 
         button.addEventListener("click", (e) => {
@@ -1101,7 +1101,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         const button = document.createElement("button");
         button.type = "button";
         button.className = "dropdown-item text-muted d-flex align-items-center";
-        button.innerHTML = `<i class="${this._iconClass("fas fa-chevron-left", "chevron-left")} me-2"></i>`;
+        button.innerHTML = `<i class="${this._iconClass("chevron-left")} me-2"></i>`;
         button.appendChild(document.createTextNode(this._i18n("webexpress.webapp:back", "Back")));
         button.addEventListener("click", (e) => {
             e.preventDefault();
@@ -1436,7 +1436,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         button.className = "wx-kanban-menu-btn";
         button.title = this._i18n("webexpress.webapp:swimlane.menu", "Swimlane options");
         button.setAttribute("aria-label", button.title);
-        button.innerHTML = `<i class="${this._iconClass("fas fa-ellipsis-vertical", "more")}"></i>`;
+        button.innerHTML = `<i class="${this._iconClass("more")}"></i>`;
 
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu dropdown-menu-end";
@@ -1469,13 +1469,13 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
         if (this._editableSwimlane) {
             menu.appendChild(this._buildMenuEntry(
-                this._iconClass("fas fa-pencil", "pen"),
+                this._iconClass("pen"),
                 this._i18n("webexpress.webapp:swimlane.edit", "Rename swimlane"),
                 null,
                 () => this._startSwimlaneEdit(headerSpan, index)
             ));
             menu.appendChild(this._buildSubmenuEntry(
-                this._iconClass("fas fa-palette", "palette"),
+                this._iconClass("palette"),
                 this._i18n("webexpress.webapp:swimlane.color", "Color"),
                 (m) => this._populateSwimlaneMenuColors(m, headerSpan, index)
             ));
@@ -1483,7 +1483,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
         if (this._configurableSwimlane) {
             menu.appendChild(this._buildMenuEntry(
-                this._iconClass("fas fa-gear", "gear"),
+                this._iconClass("gear"),
                 this._i18n("webexpress.webapp:swimlane.settings", "Settings"),
                 null,
                 () => this._openSwimlaneSettings(index)
@@ -1495,7 +1495,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             // dead entry at the first or last lane
             if (index > 0) {
                 menu.appendChild(this._buildMenuEntry(
-                    this._iconClass("fas fa-arrow-up", "arrow-up"),
+                    this._iconClass("arrow-up"),
                     this._i18n("webexpress.webapp:swimlane.moveup", "Move up"),
                     null,
                     () => this._moveSwimlane(index, -1)
@@ -1503,7 +1503,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             }
             if (index < this._swimlanes.length - 1) {
                 menu.appendChild(this._buildMenuEntry(
-                    this._iconClass("fas fa-arrow-down", "arrow-down"),
+                    this._iconClass("arrow-down"),
                     this._i18n("webexpress.webapp:swimlane.movedown", "Move down"),
                     null,
                     () => this._moveSwimlane(index, 1)
@@ -1518,7 +1518,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 menu.appendChild(divider);
             }
             menu.appendChild(this._buildMenuEntry(
-                this._iconClass("fas fa-trash", "trash"),
+                this._iconClass("trash"),
                 this._i18n("webexpress.webapp:swimlane.delete", "Delete swimlane"),
                 null,
                 () => this._deleteSwimlane(index)

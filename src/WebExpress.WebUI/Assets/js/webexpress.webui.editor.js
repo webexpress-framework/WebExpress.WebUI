@@ -3642,8 +3642,8 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         historyGroup.className = "wx-editor-btn-group";
         historyGroup.style.marginLeft = "auto";
 
-        const undoBtn = this._createHistoryButton("undo", webexpress.webui.I18N.translate("webexpress.webui:editor.undo"), "fas fa-undo");
-        const redoBtn = this._createHistoryButton("redo", webexpress.webui.I18N.translate("webexpress.webui:editor.redo"), "fas fa-redo");
+        const undoBtn = this._createHistoryButton("undo", webexpress.webui.I18N.translate("webexpress.webui:editor.undo"), "undo");
+        const redoBtn = this._createHistoryButton("redo", webexpress.webui.I18N.translate("webexpress.webui:editor.redo"), "redo");
 
         historyGroup.appendChild(undoBtn);
         historyGroup.appendChild(redoBtn);
@@ -3680,7 +3680,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         btn.setAttribute("aria-pressed", "false");
         btn.setAttribute("data-wx-primary-action", "fullscreen");
         btn.setAttribute("data-wx-primary-target", "#" + this._uiContainer.id);
-        btn.innerHTML = '<i class="fas fa-expand"></i>';
+        btn.innerHTML = '<i class="expand"></i>';
         return btn;
     }
 
@@ -3697,7 +3697,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         btn.title = title;
         btn.setAttribute("aria-label", title);
         btn.dataset.command = command;
-        btn.innerHTML = `<i class="${webexpress.webui.IconTheme.resolveFa(iconClass)}"></i>`;
+        btn.innerHTML = `<i class="${webexpress.webui.IconSet.resolve(iconClass)}"></i>`;
         btn.type = "button";
 
         btn.addEventListener("click", () => {

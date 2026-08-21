@@ -165,7 +165,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item""></div></div>")]
-        [InlineData(typeof(IconFolder), @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-icon=""fas fa-folder""></div></div>")]
+        [InlineData(typeof(IconFolder), @"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-icon=""wx-icon-light wx-icon-light-folder""></div></div>")]
         public void Icon(Type iconType, string expected)
         {
             // arrange

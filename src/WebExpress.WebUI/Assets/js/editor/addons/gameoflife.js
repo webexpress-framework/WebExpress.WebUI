@@ -1,7 +1,7 @@
 // register game of life add-on
 webexpress.webui.EditorAddOns.register("game-of-life", {
     label: "Game of Life",
-    icon: "fas fa-gamepad",
+    icon: "gamepad",
     type: "block",
     isContainer: false, // canvas handles its own interaction
     description: "Interactive Game of Life simulation.",

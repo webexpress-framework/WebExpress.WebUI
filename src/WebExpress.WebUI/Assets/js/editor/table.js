@@ -84,7 +84,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                 table.classList.add("table", "table-striped", "table-striped-columns", "table-bordered", "wx-native-table");
 
                 const uniqueId = "table-" + Date.now() + "-" + Math.floor(Math.random() * 10000);
-                const dragHandle = `<span class="wx-addon-drag-handle" contenteditable="false"><i class="${webexpress.webui.IconTheme.resolveFa("fas fa-grip-vertical")}"></i></span>`;
+                const dragHandle = `<span class="wx-addon-drag-handle" contenteditable="false"><i class="${webexpress.webui.IconSet.resolve("grip-lines-vertical")}"></i></span>`;
 
                 frame = document.createElement("div");
                 frame.className = "wx-addon-frame card my-3 shadow-sm";
@@ -101,7 +101,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                     <div class="card-header py-1 px-2 d-flex justify-content-between align-items-center" contenteditable="false">
                         <div class="small text-muted fw-bold d-flex align-items-center">
                             ${dragHandle}
-                            <i class="${webexpress.webui.IconTheme.resolveFa("fas fa-table")} me-2"></i>
+                            <i class="${webexpress.webui.IconSet.resolve("table")} me-2"></i>
                             <span>Table</span>
                         </div>
                     </div>
@@ -438,7 +438,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         customLabel.style.cursor = "pointer";
         customLabel.style.border = "1px solid #ccc";
         customLabel.style.borderRadius = "4px";
-        customLabel.innerHTML = `<i class="${webexpress.webui.IconTheme.resolveFa("fas fa-plus")}" style="font-size: 10px;"></i>`;
+        customLabel.innerHTML = `<i class="${webexpress.webui.IconSet.resolve("plus")}" style="font-size: 10px;"></i>`;
 
         const customInput = document.createElement("input");
         customInput.type = "color";
@@ -495,7 +495,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         button.className = "wx-editor-btn dropdown-toggle";
         button.type = "button";
         button.setAttribute("data-bs-toggle", "dropdown");
-        button.innerHTML = `<i class="${webexpress.webui.IconTheme.resolveFa("fas fa-table")}"></i>`;
+        button.innerHTML = `<i class="${webexpress.webui.IconSet.resolve("table")}"></i>`;
 
         const menu = document.createElement("div");
         menu.className = "dropdown-menu p-3";
@@ -637,7 +637,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         tableHtml += "</tbody></table>";
 
         const uniqueId = "table-" + Date.now();
-        const dragHandle = `<span class="wx-addon-drag-handle" contenteditable="false"><i class="${webexpress.webui.IconTheme.resolveFa("fas fa-grip-vertical")}"></i></span>`;
+        const dragHandle = `<span class="wx-addon-drag-handle" contenteditable="false"><i class="${webexpress.webui.IconSet.resolve("grip-lines-vertical")}"></i></span>`;
 
         const frameHtml = `
             <div class="wx-addon-frame card my-3 shadow-sm"
@@ -649,7 +649,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                 <div class="card-header py-1 px-2 d-flex justify-content-between align-items-center" contenteditable="false">
                     <div class="small text-muted fw-bold d-flex align-items-center">
                         ${dragHandle}
-                        <i class="${webexpress.webui.IconTheme.resolveFa("fas fa-table")} me-2"></i>
+                        <i class="${webexpress.webui.IconSet.resolve("table")} me-2"></i>
                         <span>Table</span>
                     </div>
                 </div>

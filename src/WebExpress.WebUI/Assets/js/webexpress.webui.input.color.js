@@ -120,7 +120,7 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.PopperCtrl {
         this._colorPreview = colorPreview;
 
         const expandIcon = document.createElement("i");
-        expandIcon.className = "fas fa-angle-down";
+        expandIcon.className = "angle-down";
         expandIcon.style.color = "#666";
 
         dropdown.appendChild(colorPreview);
@@ -207,7 +207,7 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.PopperCtrl {
         // the visible button with a "+" icon or similar
         const customBtn = document.createElement("div");
         customBtn.className = "wx-color-custom-btn";
-        customBtn.innerHTML = '<i class="fas fa-palette"></i>';
+        customBtn.innerHTML = '<i class="palette"></i>';
 
         // the actual native input, invisible but clickable
         const nativePicker = document.createElement("input");

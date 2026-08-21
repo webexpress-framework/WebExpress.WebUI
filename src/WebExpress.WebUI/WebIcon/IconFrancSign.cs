@@ -6,8 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconFrancSign : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-franc-sign";
+        public override string Symbol => "franc-sign";
     }
 }

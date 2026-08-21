@@ -274,7 +274,7 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
         toggle.setAttribute("tabindex", "0");
         toggle.setAttribute("aria-haspopup", "true");
         toggle.setAttribute("aria-label", this._i18n("webexpress.webui:quickfilter.options", "Filter options"));
-        toggle.appendChild(webexpress.webui.Icon.create(webexpress.webui.IconTheme.resolveFa("fas fa-ellipsis-v")));
+        toggle.appendChild(webexpress.webui.Icon.create("more"));
 
         const menu = document.createElement("div");
         menu.className = "wx-quickfilter-menu dropdown-menu";
@@ -284,7 +284,7 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
         if (this._editAction) {
             menu.appendChild(this._editMenuItem(config));
         }
-        menu.appendChild(this._menuItem("fas fa-trash", "webexpress.webui:remove", "Remove", () => this._confirmDeleteFilter(config)));
+        menu.appendChild(this._menuItem("trash", "webexpress.webui:remove", "Remove", () => this._confirmDeleteFilter(config)));
 
         // the toggle sits inside the chip, whose click toggles the filter; the
         // menu must not do that, so every interaction stops here
@@ -315,7 +315,7 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Builds a single entry of the options menu.
-     * @param {string} icon - the FontAwesome class of the entry.
+     * @param {string} icon - the icon reference of the entry.
      * @param {string} key - the i18n key of the label.
      * @param {string} fallback - the label used when no translation exists.
      * @param {Function} action - the action invoked on click.
@@ -325,7 +325,7 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
         const item = document.createElement("button");
         item.type = "button";
         item.className = "dropdown-item";
-        item.appendChild(webexpress.webui.Icon.create(webexpress.webui.IconTheme.resolveFa(icon)));
+        item.appendChild(webexpress.webui.Icon.create(icon));
         item.appendChild(document.createTextNode(" " + this._i18n(key, fallback)));
         item.addEventListener("click", (e) => {
             e.stopPropagation();
@@ -345,7 +345,7 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
      * @returns {HTMLElement} the menu entry.
      */
     _editMenuItem(config) {
-        const item = this._menuItem("fas fa-pen", "webexpress.webui:edit", "Edit", () => { });
+        const item = this._menuItem("pen", "webexpress.webui:edit", "Edit", () => { });
 
         for (const [key, value] of Object.entries(this._editAction)) {
             item.dataset[key] = value;
@@ -466,7 +466,7 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
         // the chip is recognized by its plus sign rather than by a label, so one
         // is drawn even when the author supplied no icon; an authored icon already
         // arrives resolved for the active theme, this fallback does not
-        btnElem.dataset.icon = config.icon || webexpress.webui.IconTheme.resolveFa("fas fa-plus");
+        btnElem.dataset.icon = config.icon || webexpress.webui.IconSet.resolve("plus");
         if (config.image) {
             btnElem.dataset.image = config.image;
         }
@@ -609,7 +609,7 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
         }
         const label = document.createElement("span");
         toggle.appendChild(label);
-        const caret = webexpress.webui.Icon.create("fas fa-caret-down", "wx-quickfilter-dropdown-caret");
+        const caret = webexpress.webui.Icon.create("caret-down", "wx-quickfilter-dropdown-caret");
         toggle.appendChild(caret);
 
         const menu = document.createElement("div");
@@ -673,7 +673,7 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
                 item.className = "dropdown-item" + (!multi && isActive ? " active" : "");
 
                 if (multi) {
-                    const check = webexpress.webui.Icon.create(isActive ? "fas fa-check-square" : "far fa-square", "wx-quickfilter-multiselect-check");
+                    const check = webexpress.webui.Icon.create(isActive ? "square-check" : "card", "wx-quickfilter-multiselect-check");
                     if (check) {
                         if (isActive) {
                             check.classList.add("wx-checked");

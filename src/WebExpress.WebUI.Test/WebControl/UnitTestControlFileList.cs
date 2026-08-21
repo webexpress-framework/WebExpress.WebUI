@@ -66,7 +66,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-file-list""><div class=""wx-webui-file""></div></div>")]
-        [InlineData(typeof(IconHome), @"<div class=""wx-webui-file-list""><div class=""wx-webui-file"" data-file-icon=""fas fa-home""></div></div>")]
+        [InlineData(typeof(IconHome), @"<div class=""wx-webui-file-list""><div class=""wx-webui-file"" data-file-icon=""wx-icon-light wx-icon-light-home""></div></div>")]
         public void Icon(Type icon, string expected)
         {
             // arrange

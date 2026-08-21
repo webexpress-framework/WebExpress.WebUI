@@ -1,6 +1,4 @@
-﻿using WebExpress.WebCore.WebIcon;
-
-namespace WebExpress.WebUI.WebIcon
+﻿namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon for a temperature-three-quarters.
@@ -8,30 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconTemperatureThreeQuarters : Icon
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="IconTemperatureThreeQuarters"/> class using the
-        /// <see cref="TypeIconTheme.Default"/> theme.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public IconTemperatureThreeQuarters()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="IconTemperatureThreeQuarters"/> class using the
-        /// specified theme.
-        /// </summary>
-        /// <param name="theme">The theme to use when rendering the icon.</param>
-        public IconTemperatureThreeQuarters(TypeIconTheme theme)
-            : base(theme)
-        {
-        }
-
-        /// <summary>
-        /// Returns the CSS class associated with the icon. In the
-        /// <see cref="TypeIconTheme.Light"/> theme the lightweight SVG variant is rendered;
-        /// otherwise the FontAwesome glyph is used.
-        /// </summary>
-        public override string Class => Theme == TypeIconTheme.Light
-            ? "wx-icon-light wx-icon-light-temperature-three-quarters"
-            : "fas fa-temperature-three-quarters";
+        public override string Symbol => "temperature-three-quarters";
     }
 }

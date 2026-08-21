@@ -2,7 +2,7 @@
 // CONTAINER BLOCK: Allows text and other addons inside
 webexpress.webui.EditorAddOns.register("info-box", {
     label: "Info Container",
-    icon: "fas fa-info-circle",
+    icon: "circle-info",
     type: "block",
     category: "Widgets",
     isContainer: true,
@@ -12,7 +12,7 @@ webexpress.webui.EditorAddOns.register("info-box", {
 
 webexpress.webui.EditorAddOns.register("warning-box", {
     label: "Warning Widget",
-    icon: "fas fa-exclamation-triangle",
+    icon: "triangle-exclamation",
     type: "block",
     category: "Widgets",
     isContainer: false,
@@ -23,7 +23,7 @@ webexpress.webui.EditorAddOns.register("warning-box", {
     // --- Layout ---
 webexpress.webui.EditorAddOns.register("card-container", {
     label: "Card Container",
-    icon: "far fa-square",
+    icon: "card",
     type: "block",
     category: "Layout",
     isContainer: true,
@@ -33,7 +33,7 @@ webexpress.webui.EditorAddOns.register("card-container", {
 
 webexpress.webui.EditorAddOns.register("hr-styled", {
     label: "Styled Line",
-    icon: "fas fa-minus",
+    icon: "minus",
     type: "block",
     category: "Layout",
     content: '<hr style="border: 0; height: 1px; background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0)); margin:0;">',
@@ -43,7 +43,7 @@ webexpress.webui.EditorAddOns.register("hr-styled", {
     // --- Inline Elements ---
 webexpress.webui.EditorAddOns.register("badge-primary", {
     label: "Badge (Blue)",
-    icon: "fas fa-tag",
+    icon: "label",
     type: "inline",
     category: "Inline",
     properties: [{ name: "text", label: "Text", default: "New" }],

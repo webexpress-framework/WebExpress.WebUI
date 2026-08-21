@@ -5,7 +5,7 @@ webexpress.webui.DialogPanels.register("editor-addon", {
     id: "editor-addon-page",
     parentId: null,
     title: webexpress.webui.I18N.translate("webexpress.webui:editor.addon.title"),
-    iconClass: "fas fa-puzzle-piece",
+    iconClass: "puzzle",
 
     /**
      * Renders the unified page ui for add-on selection.
@@ -81,7 +81,7 @@ webexpress.webui.DialogPanels.register("editor-addon", {
             tile.dataset.id = addon.id;
 
             const icon = document.createElement("i");
-            icon.className = webexpress.webui.IconTheme.resolveFa(addon.icon || "fas fa-puzzle-piece") + " wx-addon-tile-icon";
+            icon.className = webexpress.webui.IconSet.resolve(addon.icon || "puzzle") + " wx-addon-tile-icon";
             tile.appendChild(icon);
 
             const bodyEl = document.createElement("div");

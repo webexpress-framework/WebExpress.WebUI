@@ -500,7 +500,7 @@ webexpress.webui.DialogPanels.register("key", {
     id: "info-pane",
     parentId: null,
     title: "Example Page",
-    iconClass: "fas fa-info-circle",
+    iconClass: "circle-info",
     render: function(pane, ctrl) {
         // render content for this page
         pane.innerHTML = '<div class="p-2"><p>This is an example page loaded via DialogPanels.register().</p></div>';

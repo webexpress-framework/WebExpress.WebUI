@@ -78,7 +78,7 @@ webexpress.webui.EditorPlugins.register("emojis", 2000, {
         btn.className = "wx-editor-btn dropdown-toggle";
         btn.type = "button";
         btn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.insert.emoji");
-        btn.innerHTML = `<i class="${webexpress.webui.IconTheme.resolveFa("far fa-smile")}"></i>`;
+        btn.innerHTML = `<i class="${webexpress.webui.IconSet.resolve("smile")}"></i>`;
         btn.setAttribute("data-bs-toggle", "dropdown");
         btn.setAttribute("aria-expanded", "false");
 
@@ -113,7 +113,7 @@ webexpress.webui.EditorPlugins.register("emojis", 2000, {
         searchWrap.className = "wx-emoji-search-wrap";
 
         const searchIcon = document.createElement("i");
-        searchIcon.className = webexpress.webui.IconTheme.resolveFa("fas fa-search") + " wx-emoji-search-icon";
+        searchIcon.className = webexpress.webui.IconSet.resolve("search") + " wx-emoji-search-icon";
         searchWrap.appendChild(searchIcon);
 
         const searchInput = document.createElement("input");

@@ -384,23 +384,22 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
 
         /**
          * Adds one control button.
-         * @param {string} faClass - The FontAwesome icon class.
-         * @param {string} lightClass - The light-theme icon name.
+         * @param {string} icon - The symbolic icon name.
          * @param {string} title - The tooltip and accessible name.
          * @param {Function} action - The click handler.
          * @returns {HTMLButtonElement} The button.
          */
-        const add = (faClass, lightClass, title, action) => {
+        const add = (icon, title, action) => {
             const btn = document.createElement("button");
             btn.type = "button";
             btn.className = "wx-graph-fit-button";
             btn.title = title;
             btn.setAttribute("aria-label", title);
 
-            const icon = document.createElement("i");
-            icon.className = this._iconClass(faClass, lightClass);
-            icon.setAttribute("aria-hidden", "true");
-            btn.appendChild(icon);
+            const iconElement = document.createElement("i");
+            iconElement.className = this._iconClass(icon);
+            iconElement.setAttribute("aria-hidden", "true");
+            btn.appendChild(iconElement);
 
             this._addElementListener(btn, "click", (e) => {
                 e.stopPropagation();
@@ -410,19 +409,19 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             return btn;
         };
 
-        this._fitBtn = add("fas fa-expand", "expand",
+        this._fitBtn = add("expand",
             this._i18n("webexpress.webui:graph.fit.view", "Fit to view"),
             () => this._fitToView());
 
-        add("fas fa-crosshairs", "crosshairs",
+        add("crosshairs",
             this._i18n("webexpress.webui:graph.center.view", "Centre the view"),
             () => this._centerView());
 
-        add("fas fa-magnifying-glass-plus", "zoom-in",
+        add("magnifying-glass-plus",
             this._i18n("webexpress.webui:graph.zoom.in", "Zoom in"),
             () => this._zoomAt(1.2));
 
-        add("fas fa-magnifying-glass-minus", "zoom-out",
+        add("magnifying-glass-minus",
             this._i18n("webexpress.webui:graph.zoom.out", "Zoom out"),
             () => this._zoomAt(1 / 1.2));
 

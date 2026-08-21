@@ -184,7 +184,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-input-move"" *><div class=""wx-webui-move-option""></div></div>")]
-        [InlineData(typeof(IconFolder), @"<div class=""wx-webui-input-move"" *><div class=""wx-webui-move-option"" data-icon=""fas fa-folder""></div></div>")]
+        [InlineData(typeof(IconFolder), @"<div class=""wx-webui-input-move"" *><div class=""wx-webui-move-option"" data-icon=""wx-icon-light wx-icon-light-folder""></div></div>")]
         public void Icon(Type iconType, string expected)
         {
             // arrange

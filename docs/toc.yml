@@ -4,6 +4,8 @@
   href: user-guide.md
 - name: MarkDown Guide
   href: md-guide.md
+- name: Icons
+  href: icons.md
 - name: API Documentation
   href: api/
 - name: JavaScript UI Documentation

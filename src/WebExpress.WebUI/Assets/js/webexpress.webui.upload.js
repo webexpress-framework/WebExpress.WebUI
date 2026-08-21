@@ -179,7 +179,7 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
         previewElement.appendChild(text);
 
         const removeBtn = document.createElement("button");
-        removeBtn.className = this._iconClass("fas fa-times", "xmark");
+        removeBtn.className = this._iconClass("xmark");
         removeBtn.title = this._i18n("webexpress.webui:upload.remove.file", "Remove file");
         removeBtn.onclick = (e) => {
             e.stopPropagation();
@@ -307,8 +307,8 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Returns the icon class for a file extension, in the icon theme the page
-     * carries. The map is written in FontAwesome names because that is the
-     * vocabulary a caller reads a file glyph in; resolveFa derives the light
+     * carries. The map is written in the legacy names because that is the
+     * vocabulary a caller reads a file glyph in; the icon set derives the light
      * counterpart, so the two sets stay declared in one place.
      * @param {string} filename The name of the file (e.g., "report.pdf").
      * @returns {string} The icon class for the active theme.
@@ -316,27 +316,27 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
     _getIconForFilename(filename) {
         const ext = filename.split(".").pop().toLowerCase();
         const iconMap = {
-            "doc": "fas fa-file-word",
-            "docx": "fas fa-file-word",
-            "xls": "fas fa-file-excel",
-            "xlsx": "fas fa-file-excel",
-            "csv": "fas fa-file-csv",
-            "ppt": "fas fa-file-powerpoint",
-            "pptx": "fas fa-file-powerpoint",
-            "pdf": "fas fa-file-pdf",
-            "txt": "fas fa-file-lines",
-            "jpg": "fas fa-file-image",
-            "jpeg": "fas fa-file-image",
-            "png": "fas fa-file-image",
-            "gif": "fas fa-file-image",
-            "zip": "fas fa-file-zipper",
-            "rar": "fas fa-file-zipper",
-            "mp3": "fas fa-file-audio",
-            "wav": "fas fa-file-audio",
-            "mp4": "fas fa-file-video",
-            "mov": "fas fa-file-video"
+            "doc": "file-word",
+            "docx": "file-word",
+            "xls": "file-excel",
+            "xlsx": "file-excel",
+            "csv": "file-csv",
+            "ppt": "file-powerpoint",
+            "pptx": "file-powerpoint",
+            "pdf": "file-pdf",
+            "txt": "file",
+            "jpg": "file-image",
+            "jpeg": "file-image",
+            "png": "file-image",
+            "gif": "file-image",
+            "zip": "file-zipper",
+            "rar": "file-zipper",
+            "mp3": "file-audio",
+            "wav": "file-audio",
+            "mp4": "file-video",
+            "mov": "file-video"
         };
-        return webexpress.webui.IconTheme.resolveFa(iconMap[ext] || "fas fa-file");
+        return webexpress.webui.IconSet.resolve(iconMap[ext] || "file");
     }
 };
 

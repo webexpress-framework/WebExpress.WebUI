@@ -384,14 +384,14 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         button.className = "wx-dashboard-menu-btn";
         button.title = this._i18n("webexpress.webapp:dashboard.menu", "Options");
         button.setAttribute("aria-label", button.title);
-        button.innerHTML = `<i class="${this._iconClass("fas fa-ellipsis-vertical", "more")}"></i>`;
+        button.innerHTML = `<i class="${this._iconClass("more")}"></i>`;
 
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu dropdown-menu-end";
 
         if (this._addableColumn) {
             menu.appendChild(this._buildMenuEntry(
-                this._iconClass("fas fa-table-columns", "table-columns"),
+                this._iconClass("table-columns"),
                 this._i18n("webexpress.webapp:column.add", "New column"),
                 null,
                 () => this._addColumn()
@@ -419,7 +419,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
                     // to the registered widget definition when not overridden
                     const definition = webexpress.webui.DashboardWidgets.get(widget.id) || {};
                     const iconClass = widget.icon || definition.icon;
-                    const icon = iconClass ? webexpress.webui.IconTheme.resolveFa(iconClass) : null;
+                    const icon = iconClass ? webexpress.webui.IconSet.resolve(iconClass) : null;
                     menu.appendChild(this._buildMenuEntry(
                         icon,
                         widget.title || definition.title || widget.id,
@@ -708,7 +708,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         button.className = "wx-dashboard-menu-btn";
         button.title = this._i18n("webexpress.webapp:column.menu", "Column options");
         button.setAttribute("aria-label", button.title);
-        button.innerHTML = `<i class="${this._iconClass("fas fa-ellipsis-vertical", "more")}"></i>`;
+        button.innerHTML = `<i class="${this._iconClass("more")}"></i>`;
 
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu dropdown-menu-end";
@@ -740,18 +740,18 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
 
         if (this._editableColumn) {
             menu.appendChild(this._buildMenuEntry(
-                this._iconClass("fas fa-pencil", "pen"),
+                this._iconClass("pen"),
                 this._i18n("webexpress.webapp:column.edit", "Rename column"),
                 null,
                 () => this._startColumnEdit(headerEl, index)
             ));
             menu.appendChild(this._buildColumnSubmenuEntry(
-                this._iconClass("fas fa-ruler", "expand"),
+                this._iconClass("expand"),
                 this._i18n("webexpress.webapp:column.size", "Size"),
                 (m) => this._populateColumnMenuSizes(m, headerEl, index)
             ));
             menu.appendChild(this._buildColumnSubmenuEntry(
-                this._iconClass("fas fa-palette", "palette"),
+                this._iconClass("palette"),
                 this._i18n("webexpress.webapp:column.color", "Color"),
                 (m) => this._populateColumnMenuColors(m, headerEl, index)
             ));
@@ -764,7 +764,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
                 menu.appendChild(divider);
             }
             menu.appendChild(this._buildMenuEntry(
-                this._iconClass("fas fa-trash", "trash"),
+                this._iconClass("trash"),
                 this._i18n("webexpress.webapp:column.delete", "Delete column"),
                 null,
                 () => this._deleteColumn(index)
@@ -795,7 +795,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         button.appendChild(document.createTextNode(label));
 
         const chevron = document.createElement("i");
-        chevron.className = this._iconClass("fas fa-chevron-right", "chevron-right") + " ms-auto ps-3";
+        chevron.className = this._iconClass("chevron-right") + " ms-auto ps-3";
         button.appendChild(chevron);
 
         button.addEventListener("click", (e) => {
@@ -821,7 +821,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         const button = document.createElement("button");
         button.type = "button";
         button.className = "dropdown-item text-muted d-flex align-items-center";
-        button.innerHTML = `<i class="${this._iconClass("fas fa-chevron-left", "chevron-left")} me-2"></i>`;
+        button.innerHTML = `<i class="${this._iconClass("chevron-left")} me-2"></i>`;
         button.appendChild(document.createTextNode(this._i18n("webexpress.webapp:back", "Back")));
         button.addEventListener("click", (e) => {
             e.preventDefault();
@@ -926,7 +926,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         }
 
         const check = document.createElement("i");
-        check.className = active ? this._iconClass("fas fa-check", "check") : "";
+        check.className = active ? this._iconClass("check") : "";
         check.style.width = "1.25em";
         button.appendChild(check);
         button.appendChild(document.createTextNode(label));
@@ -1137,7 +1137,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         if (isWidgetMovable) {
             const dragHandle = document.createElement("span");
             dragHandle.className = "text-muted wx-drag-handle";
-            dragHandle.innerHTML = `<i class="${this._iconClass("fas fa-grip-horizontal", "wx-icon-light-drag")}"></i>`;
+            dragHandle.innerHTML = `<i class="${this._iconClass("drag")}"></i>`;
             leftArea.appendChild(dragHandle);
 
             cardEl.setAttribute("draggable", "true");
@@ -1270,14 +1270,14 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         button.className = "wx-dashboard-menu-btn wx-dashboard-widget-menu-btn";
         button.title = this._i18n("webexpress.webapp:dashboard.widget.menu", "Options");
         button.setAttribute("aria-label", button.title);
-        button.innerHTML = `<i class="${this._iconClass("fas fa-ellipsis-vertical", "more")}"></i>`;
+        button.innerHTML = `<i class="${this._iconClass("more")}"></i>`;
 
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu dropdown-menu-end";
 
         if (canConfigure) {
             menu.appendChild(this._buildMenuEntry(
-                this._iconClass("fas fa-gear", "gear"),
+                this._iconClass("gear"),
                 this._i18n("webexpress.webapp:dashboard.widget.settings", "Settings"),
                 null,
                 () => this._openWidgetSettings(colIdx, widgetData.instanceId)
@@ -1286,7 +1286,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
 
         if (canRemove) {
             menu.appendChild(this._buildMenuEntry(
-                this._iconClass("fas fa-trash", "trash"),
+                this._iconClass("trash"),
                 this._i18n("webexpress.webui:remove", "Remove"),
                 null,
                 () => this._removeWidget(colIdx, widgetData.instanceId)

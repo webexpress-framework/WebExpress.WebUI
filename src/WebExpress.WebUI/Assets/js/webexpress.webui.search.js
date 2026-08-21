@@ -20,7 +20,7 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
         // extract configuration from DOM attributes and children
         const name = element.getAttribute("name");
         const placeholder = element.getAttribute("placeholder") || null;
-        const icon = element.dataset.icon || "fas fa-search";
+        const icon = element.dataset.icon || "search";
         const suggestions = this._extractSuggestions(element);
         const footerElem = element.querySelector(".wx-search-footer");
         const footer = footerElem ? footerElem.innerHTML : null;
@@ -138,7 +138,7 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
     _createSearchClearButton() {
         const searchClear = document.createElement("span");
         const icon = document.createElement("i");
-        icon.className = "fas fa-times";
+        icon.className = "xmark";
         searchClear.appendChild(icon);
         searchClear.style.cursor = "pointer";
         searchClear.addEventListener("click", () => {
@@ -225,7 +225,7 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
             // star for favoriting
             if (this._favorited) {
                 const favoriteIcon = document.createElement("i");
-                favoriteIcon.className = suggestion.favorited ? "fas fa-star text-warning" : "far fa-star text-muted";
+                favoriteIcon.className = suggestion.favorited ? "wx-icon-light wx-icon-light-star text-warning" : "wx-icon-light wx-icon-light-star text-muted";
                 favoriteIcon.style.cursor = "pointer";
                 favoriteIcon.addEventListener("click", (event) => {
                     event.stopPropagation();

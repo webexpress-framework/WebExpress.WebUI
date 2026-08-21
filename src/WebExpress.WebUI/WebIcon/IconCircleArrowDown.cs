@@ -1,6 +1,4 @@
-﻿using WebExpress.WebCore.WebIcon;
-
-namespace WebExpress.WebUI.WebIcon
+﻿namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon for a circle-arrow-down.
@@ -8,30 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconCircleArrowDown : Icon
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="IconCircleArrowDown"/> class using the
-        /// <see cref="TypeIconTheme.Default"/> theme.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public IconCircleArrowDown()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="IconCircleArrowDown"/> class using the
-        /// specified theme.
-        /// </summary>
-        /// <param name="theme">The theme to use when rendering the icon.</param>
-        public IconCircleArrowDown(TypeIconTheme theme)
-            : base(theme)
-        {
-        }
-
-        /// <summary>
-        /// Returns the CSS class associated with the icon. In the
-        /// <see cref="TypeIconTheme.Light"/> theme the lightweight SVG variant is rendered;
-        /// otherwise the FontAwesome glyph is used.
-        /// </summary>
-        public override string Class => Theme == TypeIconTheme.Light
-            ? "wx-icon-light wx-icon-light-circle-arrow-down"
-            : "fas fa-circle-arrow-down";
+        public override string Symbol => "circle-arrow-down";
     }
 }

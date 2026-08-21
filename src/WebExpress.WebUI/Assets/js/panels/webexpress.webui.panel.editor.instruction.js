@@ -5,7 +5,7 @@ webexpress.webui.DialogPanels.register("editor-instruction", {
     id: "editor-instruction-page",
     parentId: null,
     title: webexpress.webui.I18N.translate("webexpress.webui:editor.instruction.title"),
-    iconClass: "fas fa-info-circle",
+    iconClass: "circle-info",
 
     /**
      * Renders the page ui.
@@ -143,7 +143,7 @@ webexpress.webui.DialogPanels.register("editor-instruction", {
         };
 
         const safeText = escapeHtml(textVal);
-        const innerHtml = `<i class="${webexpress.webui.IconTheme.resolveFa("fas fa-info-circle")}"></i> ${safeText}`;
+        const innerHtml = `<i class="${webexpress.webui.IconSet.resolve("circle-info")}"></i> ${safeText}`;
 
         const root = typeof editor.getEditorElement === "function" ? editor.getEditorElement() : null;
         const target = modal._instructionTarget;

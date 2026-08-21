@@ -1,5 +1,3 @@
-using WebExpress.WebCore.WebIcon;
-
 namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
@@ -8,16 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconGitPull : Icon
     {
         /// <summary>
-        /// Initializes a new instance of the class.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public IconGitPull()
-            : base(TypeIconTheme.Light)
-        {
-        }
-
-        /// <summary>
-        /// Returns the CSS class associated with the icon.
-        /// </summary>
-        public override string Class => "wx-icon-light wx-icon-light-git-pull";
+        public override string Symbol => "git-pull";
     }
 }

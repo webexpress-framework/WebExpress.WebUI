@@ -39,7 +39,7 @@ The initialization and behaviour of the `ListCtrl` are controlled via `data-` at
 | `data-color`                | A Bootstrap or custom CSS class added to the `<li>` element (e.g. `"text-danger"`). |
 | `data-editable`             | Set to `"true"` to make the item content inline-editable via `SmartEditCtrl`. |
 | `data-image`                | URL of an image to show in the item content area. |
-| `data-icon`                 | CSS class of a Font Awesome icon to prepend (e.g. `"fa-solid fa-star"`). |
+| `data-icon`                 | Name of an icon to prepend (e.g. `"star"`). |
 | `data-uri`                  | Link target URI rendered inside the item content. |
 | `data-target`               | Link target (`_blank`, `_self`, …). |
 | `data-modal`                | Modal selector to open on click. |
@@ -180,13 +180,13 @@ el.addEventListener(webexpress.webui.Event.ROW_REORDER_EVENT, (e) => {
 
     <!-- global options menu entries (shared by all items) -->
     <div class="wx-list-options">
-        <div data-icon="fa-solid fa-pen" data-uri="/edit">Edit</div>
-        <div data-icon="fa-solid fa-trash" data-uri="/delete">Delete</div>
+        <div data-icon="pen" data-uri="/edit">Edit</div>
+        <div data-icon="trash" data-uri="/delete">Delete</div>
     </div>
 
     <!-- list items -->
     <div class="wx-list-item" id="char-1"
-         data-icon="fa-solid fa-user"
+         data-icon="user"
          data-wx-primary-action="frame"
          data-wx-primary-target="#detail-frame"
          data-wx-primary-uri="/characters/1">
@@ -194,7 +194,7 @@ el.addEventListener(webexpress.webui.Event.ROW_REORDER_EVENT, (e) => {
     </div>
 
     <div class="wx-list-item" id="char-2"
-         data-icon="fa-solid fa-user"
+         data-icon="user"
          data-wx-primary-action="frame"
          data-wx-primary-target="#detail-frame"
          data-wx-primary-uri="/characters/2">
@@ -202,7 +202,7 @@ el.addEventListener(webexpress.webui.Event.ROW_REORDER_EVENT, (e) => {
     </div>
 
     <div class="wx-list-item" id="char-3"
-         data-icon="fa-solid fa-user"
+         data-icon="user"
          data-wx-primary-action="frame"
          data-wx-primary-target="#detail-frame"
          data-wx-primary-uri="/characters/3">

@@ -404,7 +404,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             const instance = webexpress.webui.Controller.getInstanceByElement(element);
             if (instance) {
                 this._more = element;
-                instance.icon = "fas fa-ellipsis-h";
+                instance.icon = "more";
                 instance.menuCSS = "wx-toolbar-more-menu";
             } else {
                 this._more = this._createMoreDropdownWithController();
@@ -891,7 +891,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
         dropdownContainer.className = "wx-toolbar-more";
         const dropdownCtrl = new webexpress.webui.DropdownCtrl(dropdownContainer);
         dropdownCtrl.label = null;
-        dropdownCtrl.icon = "fas fa-ellipsis-h";
+        dropdownCtrl.icon = "more";
         dropdownCtrl.menuCSS = "wx-toolbar-more-menu";
         dropdownCtrl.buttonCss = "btn";
         dropdownCtrl.items = items;

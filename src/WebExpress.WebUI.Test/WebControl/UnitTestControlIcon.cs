@@ -1,8 +1,8 @@
-﻿using WebExpress.WebCore.WebIcon;
-using WebExpress.WebUI.Test.Fixture;
+﻿using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
+using WebExpress.WebCore.WebIcon;
 
 namespace WebExpress.WebUI.Test.WebControl
 {
@@ -16,8 +16,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the icon control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<i class=""fas fa-star""></i>")]
-        [InlineData("id", @"<i id=""id"" class=""fas fa-star""></i>")]
+        [InlineData(null, @"<i class=""wx-icon-light wx-icon-light-star""></i>")]
+        [InlineData("id", @"<i id=""id"" class=""wx-icon-light wx-icon-light-star""></i>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -39,8 +39,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the title property of the icon control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<i class=""fas fa-star""></i>")]
-        [InlineData("abc", @"<i class=""fas fa-star"" title=""abc""></i>")]
+        [InlineData(null, @"<i class=""wx-icon-light wx-icon-light-star""></i>")]
+        [InlineData("abc", @"<i class=""wx-icon-light wx-icon-light-star"" title=""abc""></i>")]
         public void Title(string title, string expected)
         {
             // arrange
@@ -64,7 +64,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"")]
-        [InlineData(typeof(IconStar), @"<i class=""fas fa-star""></i>")]
+        [InlineData(typeof(IconStar), @"<i class=""wx-icon-light wx-icon-light-star""></i>")]
         public void Icon(Type icon, string expected)
         {
             // arrange
@@ -86,11 +86,11 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the size property of the icon control.
         /// </summary>
         [Theory]
-        [InlineData(TypeSizeText.Default, @"<i class=""fas fa-star""></i>")]
-        [InlineData(TypeSizeText.ExtraSmall, @"<i class=""fas fa-star wx-esm""></i>")]
-        [InlineData(TypeSizeText.Small, @"<i class=""fas fa-star wx-sm""></i>")]
-        [InlineData(TypeSizeText.Large, @"<i class=""fas fa-star wx-lg""></i>")]
-        [InlineData(TypeSizeText.ExtraLarge, @"<i class=""fas fa-star wx-elg""></i>")]
+        [InlineData(TypeSizeText.Default, @"<i class=""wx-icon-light wx-icon-light-star""></i>")]
+        [InlineData(TypeSizeText.ExtraSmall, @"<i class=""wx-icon-light wx-icon-light-star wx-esm""></i>")]
+        [InlineData(TypeSizeText.Small, @"<i class=""wx-icon-light wx-icon-light-star wx-sm""></i>")]
+        [InlineData(TypeSizeText.Large, @"<i class=""wx-icon-light wx-icon-light-star wx-lg""></i>")]
+        [InlineData(TypeSizeText.ExtraLarge, @"<i class=""wx-icon-light wx-icon-light-star wx-elg""></i>")]
         public void Size(TypeSizeText size, string expected)
         {
             // arrange
@@ -113,11 +113,11 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the vertical alignment property of the icon control.
         /// </summary>
         [Theory]
-        [InlineData(TypeVerticalAlignment.Default, @"<i class=""fas fa-star""></i>")]
-        [InlineData(TypeVerticalAlignment.Middle, @"<i class=""fas fa-star align-middle""></i>")]
-        [InlineData(TypeVerticalAlignment.TextTop, @"<i class=""fas fa-star align-text-top""></i>")]
-        [InlineData(TypeVerticalAlignment.TextBottom, @"<i class=""fas fa-star align-text-bottom""></i>")]
-        [InlineData(TypeVerticalAlignment.Bottom, @"<i class=""fas fa-star align-bottom""></i>")]
+        [InlineData(TypeVerticalAlignment.Default, @"<i class=""wx-icon-light wx-icon-light-star""></i>")]
+        [InlineData(TypeVerticalAlignment.Middle, @"<i class=""wx-icon-light wx-icon-light-star align-middle""></i>")]
+        [InlineData(TypeVerticalAlignment.TextTop, @"<i class=""wx-icon-light wx-icon-light-star align-text-top""></i>")]
+        [InlineData(TypeVerticalAlignment.TextBottom, @"<i class=""wx-icon-light wx-icon-light-star align-text-bottom""></i>")]
+        [InlineData(TypeVerticalAlignment.Bottom, @"<i class=""wx-icon-light wx-icon-light-star align-bottom""></i>")]
         public void VerticalAlignment(TypeVerticalAlignment verticalAlignment, string expected)
         {
             // arrange
@@ -137,14 +137,11 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests that the parameterless constructor selects the default theme and
-        /// that an explicit <see cref="TypeIconTheme"/> argument switches the rendered
-        /// CSS class to the light SVG variant.
+        /// Tests that an icon renders the css class pair of the light set, which is the
+        /// only set the framework ships since FontAwesome was removed.
         /// </summary>
-        [Theory]
-        [InlineData(TypeIconTheme.Default, @"<i class=""fas fa-star""></i>")]
-        [InlineData(TypeIconTheme.Light, @"<i class=""wx-icon-light wx-icon-light-star""></i>")]
-        public void Theme(TypeIconTheme theme, string expected)
+        [Fact]
+        public void RendersLightClass()
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -152,35 +149,28 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlIcon()
             {
-                Icon = _ => new IconStar(theme)
+                Icon = _ => new IconStar()
             };
 
             // act
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<i class=""wx-icon-light wx-icon-light-star""></i>", html.Trim());
         }
 
         /// <summary>
-        /// Tests that omitting the constructor argument falls back to
-        /// <see cref="TypeIconTheme.Default"/> and that the icon's <see cref="Icon.Theme"/>
-        /// property reflects the selected value.
+        /// Tests that the symbolic name drives the css class, so a renamed or missing
+        /// drawing surfaces as a wrong class rather than as a silently empty icon.
         /// </summary>
         [Fact]
-        public void ThemeDefaultsToDefault()
+        public void SymbolDrivesClass()
         {
             // arrange
-            var implicitDefault = new IconStar();
-            var explicitDefault = new IconStar(TypeIconTheme.Default);
-            var light = new IconStar(TypeIconTheme.Light);
+            var icon = new IconStar();
 
             // assert
-            Assert.Equal(TypeIconTheme.Default, implicitDefault.Theme);
-            Assert.Equal(TypeIconTheme.Default, explicitDefault.Theme);
-            Assert.Equal(TypeIconTheme.Light, light.Theme);
-            Assert.Equal("fas fa-star", implicitDefault.Class);
-            Assert.Equal("fas fa-star", explicitDefault.Class);
-            Assert.Equal("wx-icon-light wx-icon-light-star", light.Class);
+            Assert.Equal("star", icon.Symbol);
+            Assert.Equal("wx-icon-light wx-icon-light-star", icon.Class);
         }
     }
 }

@@ -46,7 +46,7 @@ Nodes are defined by elements with the class `.wx-graph-node`.
 |`data-uri`             |URL or path associated with the node.
 |`data-x` / `data-y`    |Explicit coordinates. If omitted, the node will be positioned by the physics engine.
 |`data-shape`           |The shape of the node background. Options: `rect` (default), `circle`.
-|`data-icon`            |A CSS class string for a font icon (e.g., `fas fa-server`).
+|`data-icon`            |A CSS class string for a font icon (e.g., `server`).
 |`data-image`           |URL to an image to display inside the node.
 |`data-background-color`|Hex color or standard color name for the node background fill.
 |`data-background-css`  |CSS class to append to the node shape for styling via stylesheets.
@@ -153,8 +153,8 @@ if (graphCtrl) {
     // update the graph model completely
     graphCtrl.model = {
         nodes: [
-            { id: 'n1', label: 'Server', icon: 'fas fa-server', x: 100, y: 100 },
-            { id: 'n2', label: 'Client', icon: 'fas fa-laptop', x: 300, y: 100 }
+            { id: 'n1', label: 'Server', icon: 'server', x: 100, y: 100 },
+            { id: 'n2', label: 'Client', icon: 'laptop', x: 300, y: 100 }
         ],
         edges: [
             { from: 'n1', to: 'n2', label: 'Connection', color: 'blue' }
@@ -177,8 +177,8 @@ const graphCtrl = new webexpress.webui.GraphViewerCtrl(container);
 // set the graph data directly
 graphCtrl.model = {
     nodes: [
-        { id: 'node-1', label: 'First Node', icon: 'fas fa-circle', x: 120, y: 180, backgroundColor: '#e3f2fd' },
-        { id: 'node-2', label: 'Second Node', icon: 'fas fa-square', x: 270, y: 200 }
+        { id: 'node-1', label: 'First Node', icon: 'circle', x: 120, y: 180, backgroundColor: '#e3f2fd' },
+        { id: 'node-2', label: 'Second Node', icon: 'card', x: 270, y: 200 }
     ],
     edges: [
         { from: 'node-1', to: 'node-2', label: 'Link', color: '#607d8b' }
@@ -216,7 +216,7 @@ The following example creates a simple network diagram with three nodes. "Server
     <div id="srv-01" 
          class="wx-graph-node" 
          data-label="Main Server" 
-         data-icon="fas fa-server"
+         data-icon="server"
          data-x="100" data-y="150"
          data-background-color="#e0f7fa"></div>
 
@@ -224,14 +224,14 @@ The following example creates a simple network diagram with three nodes. "Server
          class="wx-graph-node" 
          data-label="Database" 
          data-shape="circle"
-         data-icon="fas fa-database"
+         data-icon="database"
          data-x="100" data-y="300"
          data-background-color="#fff9c4"></div>
 
     <div id="client-01" 
          class="wx-graph-node" 
          data-label="User Client" 
-         data-icon="fas fa-laptop"></div>
+         data-icon="laptop"></div>
 
     <!-- Edges -->
     <div class="wx-graph-edge" 

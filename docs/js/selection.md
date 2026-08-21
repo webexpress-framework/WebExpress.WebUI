@@ -74,10 +74,10 @@ The following HTML demonstrates how to display a list of user roles, with "Admin
      data-value="role-admin;role-editor">
 
     <!-- Each option is declared as a child element. -->
-    <div id="role-admin" class="wx-selection-item" data-icon="fas fa-user-shield">Administrator</div>
-    <div id="role-editor" class="wx-selection-item" data-icon="fas fa-user-edit">Editor</div>
-    <div id="role-viewer" class="wx-selection-item" data-icon="fas fa-user">Viewer</div>
-    <div id="role-guest" class="wx-selection-item" data-icon="fas fa-question-circle" disabled>Guest (Disabled)</div>
+    <div id="role-admin" class="wx-selection-item" data-icon="user-shield">Administrator</div>
+    <div id="role-editor" class="wx-selection-item" data-icon="user-pen">Editor</div>
+    <div id="role-viewer" class="wx-selection-item" data-icon="user">Viewer</div>
+    <div id="role-guest" class="wx-selection-item" data-icon="circle-question" disabled>Guest (Disabled)</div>
 </div>
 ```
 
@@ -172,7 +172,7 @@ if (selectionCtrl) {
     // update the available options
     selectionCtrl.options = [
         { id: 'new1', label: 'New Option 1' },
-        { id: 'new2', label: 'New Option 2', icon: 'fas fa-star' }
+        { id: 'new2', label: 'New Option 2', icon: 'star' }
     ];
 }
 ```
@@ -209,11 +209,11 @@ The component dispatches several events to allow for external interactions.
      placeholder="Select categories...">
 
     <div class="wx-selection-header">Group 1</div>
-    <div id="cat-1" class="wx-selection-item" data-icon="fas fa-tag">Category 1</div>
-    <div id="cat-2" class="wx-selection-item" data-icon="fas fa-tag" data-label-color="bg-primary">Category 2</div>
+    <div id="cat-1" class="wx-selection-item" data-icon="label">Category 1</div>
+    <div id="cat-2" class="wx-selection-item" data-icon="label" data-label-color="bg-primary">Category 2</div>
     <div class="wx-selection-divider"></div>
     <div class="wx-selection-header">Group 2</div>
-    <div id="cat-3" class="wx-selection-item" data-icon="fas fa-tag" disabled>Category 3 (Disabled)</div>
+    <div id="cat-3" class="wx-selection-item" data-icon="label" disabled>Category 3 (Disabled)</div>
     <div id="cat-4"
          class="wx-selection-item"
          data-render="(item) => `<strong>${item.label}</strong><br><small>Custom Render</small>`"

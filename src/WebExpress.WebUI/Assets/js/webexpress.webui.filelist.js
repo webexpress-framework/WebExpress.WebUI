@@ -45,8 +45,8 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Returns the icon class for a file extension, in the icon theme the page
-     * carries. The map is written in FontAwesome names because that is the
-     * vocabulary a caller reads a file glyph in; resolveFa derives the light
+     * carries. The map is written in the legacy names because that is the
+     * vocabulary a caller reads a file glyph in; the icon set derives the light
      * counterpart, so the two sets stay declared in one place.
      * @param {string} filename - The name of the file (e.g., "report.pdf").
      * @returns {string} - The icon class for the active theme.
@@ -55,28 +55,28 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
         const ext = filename.split(".").pop().toLowerCase();
 
         const iconMap = {
-            doc: "fas fa-file-word",
-            docx: "fas fa-file-word",
-            xls: "fas fa-file-excel",
-            xlsx: "fas fa-file-excel",
-            csv: "fas fa-file-csv",
-            ppt: "fas fa-file-powerpoint",
-            pptx: "fas fa-file-powerpoint",
-            pdf: "fas fa-file-pdf",
-            txt: "fas fa-file-lines",
-            jpg: "fas fa-file-image",
-            jpeg: "fas fa-file-image",
-            png: "fas fa-file-image",
-            gif: "fas fa-file-image",
-            zip: "fas fa-file-zipper",
-            rar: "fas fa-file-zipper",
-            mp3: "fas fa-file-audio",
-            wav: "fas fa-file-audio",
-            mp4: "fas fa-file-video",
-            mov: "fas fa-file-video"
+            doc: "file-word",
+            docx: "file-word",
+            xls: "file-excel",
+            xlsx: "file-excel",
+            csv: "file-csv",
+            ppt: "file-powerpoint",
+            pptx: "file-powerpoint",
+            pdf: "file-pdf",
+            txt: "file",
+            jpg: "file-image",
+            jpeg: "file-image",
+            png: "file-image",
+            gif: "file-image",
+            zip: "file-zipper",
+            rar: "file-zipper",
+            mp3: "file-audio",
+            wav: "file-audio",
+            mp4: "file-video",
+            mov: "file-video"
         };
 
-        return webexpress.webui.IconTheme.resolveFa(iconMap[ext] || "fas fa-file");
+        return webexpress.webui.IconSet.resolve(iconMap[ext] || "file");
     }
 
     /**
@@ -102,9 +102,9 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
             if (file.icon) {
                 const icon = document.createElement("i");
                 // the class may arrive from the server or from stored data, in
-                // either vocabulary; resolveFa converts a FontAwesome name and
+                // either vocabulary; the icon set converts a legacy name and
                 // hands a light class straight back, so both end up themed
-                icon.className = webexpress.webui.IconTheme.resolveFa(file.icon || "fas fa-file");
+                icon.className = webexpress.webui.IconSet.resolve(file.icon || "file");
                 divLeft.appendChild(icon);
             }
 
@@ -124,7 +124,7 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
 
             if (file.description) {
                 const descIcon = document.createElement("i");
-                descIcon.className = `${this._iconClass("fas fa-info-circle", "circle-info")} text-muted`;
+                descIcon.className = `${this._iconClass("circle-info")} text-muted`;
                 divMiddle.appendChild(descIcon);
                 divMiddle.appendChild(document.createTextNode(file.description));
             }
@@ -138,7 +138,7 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
             if (file.size) {
                 const size = document.createElement("span");
                 const sizeIcon = document.createElement("i");
-                sizeIcon.className = `${this._iconClass("fas fa-database", "database")} text-muted`;
+                sizeIcon.className = `${this._iconClass("database")} text-muted`;
                 size.appendChild(sizeIcon);
                 size.appendChild(document.createTextNode(file.size));
                 divRight.appendChild(size);
@@ -147,7 +147,7 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
             if (file.date) {
                 const date = document.createElement("span");
                 const dateIcon = document.createElement("i");
-                dateIcon.className = `${this._iconClass("fas fa-calendar-alt", "calendar")} text-muted`;
+                dateIcon.className = `${this._iconClass("calendar")} text-muted`;
                 date.appendChild(dateIcon);
                 date.appendChild(document.createTextNode(file.date));
                 divRight.appendChild(date);

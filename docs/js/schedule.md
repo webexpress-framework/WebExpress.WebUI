@@ -65,7 +65,7 @@ Items are elements with the class `.wx-schedule-item`.
 | `data-all-day`       | `true` puts the item in the all-day lane instead of onto the time axis.
 | `data-category`      | The category, carried through to the entry as a `data-category` attribute for the stylesheet.
 | `data-color-css` / `data-color-style` | The colour, as a CSS class (system colour) or an inline declaration (user-defined colour).
-| `data-icon`          | A CSS class rendered in front of the title, for example `fas fa-anchor`.
+| `data-icon`          | A CSS class rendered in front of the title, for example `anchor`.
 | `data-uri`           | Turns the entry into a link.
 | `data-meta`          | Free-form JSON that reaches the click events and the custom renderer unchanged.
 
@@ -230,7 +230,7 @@ State classes are additive, so a holiday on a weekend keeps both marks: `wx-sche
          data-title="Standup"
          data-start="2026-08-12T09:00:00"
          data-end="2026-08-12T09:15:00"
-         data-icon="fas fa-users"></div>
+         data-icon="users"></div>
 
     <div id="voyage" class="wx-schedule-item"
          data-title="Voyage"

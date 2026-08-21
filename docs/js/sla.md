@@ -371,11 +371,11 @@ sla.update();
     </div>
     <div class="wx-sla-actions">
         <button type="button" class="wx-sla-action" title="Pause"
-                aria-label="Pause" data-wx-sla-action="pause"><i class="fas fa-pause"></i></button>
+                aria-label="Pause" data-wx-sla-action="pause"><i class="pause"></i></button>
         <button type="button" class="wx-sla-action" title="Resume"
-                aria-label="Resume" data-wx-sla-action="resume" disabled><i class="fas fa-play"></i></button>
+                aria-label="Resume" data-wx-sla-action="resume" disabled><i class="play"></i></button>
         <button type="button" class="wx-sla-action" title="Mark as fulfilled"
-                aria-label="Mark as fulfilled" data-wx-sla-action="fulfill"><i class="fas fa-check"></i></button>
+                aria-label="Mark as fulfilled" data-wx-sla-action="fulfill"><i class="check"></i></button>
     </div>
 </div>
 ```

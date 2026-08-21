@@ -211,7 +211,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-dropdown"" role=""button""></div>")]
-        [InlineData(typeof(IconStar), @"<div class=""wx-webui-dropdown"" role=""button"" data-icon=""fas fa-star""></div>")]
+        [InlineData(typeof(IconStar), @"<div class=""wx-webui-dropdown"" role=""button"" data-icon=""wx-icon-light wx-icon-light-star""></div>")]
         public void Icon(Type icon, string expected)
         {
             // arrange

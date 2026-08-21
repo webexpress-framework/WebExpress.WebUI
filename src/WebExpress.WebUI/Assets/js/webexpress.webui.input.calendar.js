@@ -131,7 +131,7 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
         todayBtn.title = webexpress.webui.I18N
             ? this._i18n("webexpress.webui:calendar.today")
             : "Today";
-        todayBtn.innerHTML = `<i class="${this._iconClass("fa-solid fa-calendar-day", "calendar-day")}"></i>`;
+        todayBtn.innerHTML = `<i class="${this._iconClass("calendar-day")}"></i>`;
         todayBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             const now = new Date();
@@ -155,7 +155,7 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
         clearBtn.title = webexpress.webui.I18N
             ? this._i18n("webexpress.webui:calendar.clear_range", "Clear range")
             : "Clear range";
-        clearBtn.innerHTML = `<i class="${this._iconClass("fa-solid fa-trash", "trash")}"></i>`;
+        clearBtn.innerHTML = `<i class="${this._iconClass("trash")}"></i>`;
         clearBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             if (this._rangeMode) {
@@ -177,7 +177,7 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
         copyBtn.title = webexpress.webui.I18N
             ? this._i18n("webexpress.webui:copy", "Copy")
             : "Copy";
-        copyBtn.innerHTML = `<i class="${this._iconClass("fa-solid fa-clone", "clone")}"></i>`;
+        copyBtn.innerHTML = `<i class="${this._iconClass("clone")}"></i>`;
         copyBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             let copyText = "";

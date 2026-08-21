@@ -188,7 +188,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-dropdown-item""></div>")]
-        [InlineData(typeof(IconStar), @"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>")]
+        [InlineData(typeof(IconStar), @"<div class=""wx-dropdown-item"" data-icon=""wx-icon-light wx-icon-light-star""></div>")]
         public void Icon(Type icon, string expected)
         {
             // arrange
@@ -238,12 +238,12 @@ namespace WebExpress.WebUI.Test.WebControl
             var html5 = control5.Render(context, visualTree);
             var html6 = control6.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>", html1.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>", html2.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>", html3.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>", html4.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>", html5.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>", html6.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""wx-icon-light wx-icon-light-star""></div>", html1.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""wx-icon-light wx-icon-light-star""></div>", html2.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""wx-icon-light wx-icon-light-star""></div>", html3.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""wx-icon-light wx-icon-light-star""></div>", html4.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""wx-icon-light wx-icon-light-star""></div>", html5.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""wx-icon-light wx-icon-light-star""></div>", html6.Trim());
         }
     }
 }

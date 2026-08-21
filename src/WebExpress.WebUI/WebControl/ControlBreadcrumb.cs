@@ -109,7 +109,7 @@ namespace WebExpress.WebUI.WebControl
                 }
 
                 var displayText = path.GetDisplayText(renderContext);
-                var pathIcon = path.GetIcon(renderContext)?.ApplyIconTheme(visualTree.IconTheme);
+                var pathIcon = path.GetIcon(renderContext);
 
                 if (last?.IsHidden ?? false)
                 {
@@ -141,7 +141,7 @@ namespace WebExpress.WebUI.WebControl
                 else if (endpointContext is PageContext page)
                 {
                     var display = I18N.Translate(renderContext.Request?.Culture, page.PageTitle);
-                    var icon = page?.PageIcon?.ApplyIconTheme(visualTree.IconTheme);
+                    var icon = page?.PageIcon;
 
                     html.Add
                     (

@@ -13,12 +13,20 @@ import { test } from "node:test";
 import assert from "node:assert";
 import { loadWebUi } from "./harness.mjs";
 
-test("a css class spec yields an <i> carrying the class", () => {
+test("a symbolic spec yields an <i> carrying the resolved classes", () => {
     const { wx } = loadWebUi();
-    const icon = wx.Icon.create("fas fa-plus");
+    const icon = wx.Icon.create("plus");
     assert.equal(icon.tagName, "I");
-    assert.ok(icon.classList.contains("fas"));
-    assert.ok(icon.classList.contains("fa-plus"));
+    assert.ok(icon.classList.contains("wx-icon-light"), "the base class carries the mask geometry");
+    assert.ok(icon.classList.contains("wx-icon-light-plus"), "the second class selects the drawing");
+});
+
+test("a legacy FontAwesome spec still lands on the icon set", () => {
+    const { wx } = loadWebUi();
+    // such strings survive in stored dashboards and addon definitions
+    const icon = wx.Icon.create("fas fa-plus");
+    assert.ok(icon.classList.contains("wx-icon-light-plus"));
+    assert.ok(!icon.classList.contains("fas"), "the FontAwesome class is not carried through");
 });
 
 test("an image spec yields an <img> with the source and the image class", () => {
@@ -35,8 +43,8 @@ test("an image spec yields an <img> with the source and the image class", () => 
 test("the extra class is added to both icon kinds", () => {
     const { wx } = loadWebUi();
 
-    const i = wx.Icon.create("fas fa-trash", "me-2");
-    assert.ok(i.classList.contains("fas") && i.classList.contains("fa-trash") && i.classList.contains("me-2"));
+    const i = wx.Icon.create("trash", "me-2");
+    assert.ok(i.classList.contains("wx-icon-light-trash") && i.classList.contains("me-2"));
 
     const img = wx.Icon.create("/x.svg", "me-2");
     assert.ok(img.classList.contains("wx-icon-img") && img.classList.contains("me-2"));

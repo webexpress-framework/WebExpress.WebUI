@@ -92,7 +92,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-tree-node""></div>")]
-        [InlineData(typeof(IconFolder), @"<div class=""wx-tree-node"" data-icon=""fas fa-folder""></div>")]
+        [InlineData(typeof(IconFolder), @"<div class=""wx-tree-node"" data-icon=""wx-icon-light wx-icon-light-folder""></div>")]
         public void Icon(Type iconType, string expected)
         {
             // arrange
@@ -117,7 +117,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, null, @"<div class=""wx-tree-node""></div>")]
-        [InlineData(typeof(IconFolderOpen), typeof(IconFolder), @"<div class=""wx-tree-node"" data-icon-opened=""fas fa-folder-open"" data-icon-closed=""fas fa-folder-open""></div>")]
+        [InlineData(typeof(IconFolderOpen), typeof(IconFolder), @"<div class=""wx-tree-node"" data-icon-opened=""wx-icon-light wx-icon-light-folder-open"" data-icon-closed=""wx-icon-light wx-icon-light-folder-open""></div>")]
         public void IconOpenClose(Type iconOpenType, Type iconCloseType, string expected)
         {
             // arrange

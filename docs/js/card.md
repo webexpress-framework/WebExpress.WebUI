@@ -24,7 +24,7 @@ The component is initialised declaratively from `data-` attributes on the host e
 | Attribute                    | Description
 |------------------------------|-------------
 | `data-header`                | Header label text (i18n-translated server-side).
-| `data-header-icon-css`       | CSS class for the header icon (e.g. `"fas fa-user"`). Rendered as `<i>`.
+| `data-header-icon-css`       | CSS class for the header icon (e.g. `"user"`). Rendered as `<i>`.
 | `data-header-icon-image`     | Image URL for the header icon. Rendered as `<img class="wx-icon">`. Mutually exclusive with `data-header-icon-css`; if both are set, the image variant wins.
 | `data-header-bg-class`       | CSS class for the header background (e.g. `"bg-primary"`). Applied to `.wx-card-header`.
 | `data-header-bg-style`       | Inline style for a user-defined header background (e.g. `"background:gold;"`).
@@ -56,7 +56,7 @@ The controller is registered against the `wx-webui-panel-card` class. After init
 const card = webexpress.webui.Controller.getInstanceByElement(document.getElementById("statusCard"));
 
 card.header = "Database";                // change header text
-card.headerIconCss = "fas fa-database";   // swap header icon for a glyph
+card.headerIconCss = "database";   // swap header icon for a glyph
 card.headerBgClass = "bg-danger";         // tint the header
 card.headerColorClass = "text-white";     // and its text
 card.headline = "Online";                 // change the body headline
@@ -88,10 +88,10 @@ A small status card whose header label, body headline and footer icon are update
 <div id="statusCard"
      class="wx-webui-card border"
      data-header="Database"
-     data-header-icon-css="fas fa-database"
+     data-header-icon-css="database"
      data-headline="Online"
      data-footer="updated just now"
-     data-footer-icon-css="fas fa-clock">
+     data-footer-icon-css="clock">
     <p>Pick a service on the left.</p>
 </div>
 
@@ -104,7 +104,7 @@ document.getElementById("services").addEventListener(
     webexpress.webui.Event.SELECT_ITEM_EVENT,
     (e) => {
         card.header = e.detail.text;
-        card.headerIconCss = "fas fa-" + e.detail.itemId;
+        card.headerIconCss = e.detail.itemId;
     }
 );
 </script>

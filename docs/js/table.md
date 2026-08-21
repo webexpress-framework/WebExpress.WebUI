@@ -69,9 +69,9 @@ The following example illustrates a minimal declarative setup, showing how colum
     </div>
     <div data-id="status" data-label="Status">
       <template data-type="move">
-        <div id="open" data-icon="far fa-circle">Open</div>
-        <div id="shipped" data-icon="fas fa-truck">Shipped</div>
-        <div id="closed" data-icon="fas fa-check">Closed</div>
+        <div id="open" data-icon="circle">Open</div>
+        <div id="shipped" data-icon="truck">Shipped</div>
+        <div id="closed" data-icon="check">Closed</div>
       </template>
     </div>
   </div>
@@ -184,9 +184,9 @@ The following example demonstrates a minimal yet fully functional table control 
     <div data-id="customer" data-label="Customer"></div>
     <div data-id="status" data-label="Status">
       <template data-type="move">
-        <div id="open" data-icon="far fa-circle">Open</div>
-        <div id="shipped" data-icon="fas fa-truck">Shipped</div>
-        <div id="closed" data-icon="fas fa-check">Closed</div>
+        <div id="open" data-icon="circle">Open</div>
+        <div id="shipped" data-icon="truck">Shipped</div>
+        <div id="closed" data-icon="check">Closed</div>
       </template>
     </div>
   </div>

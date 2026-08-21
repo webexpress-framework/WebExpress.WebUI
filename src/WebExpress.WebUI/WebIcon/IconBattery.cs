@@ -1,5 +1,3 @@
-using WebExpress.WebCore.WebIcon;
-
 namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
@@ -9,16 +7,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconBattery : Icon
     {
         /// <summary>
-        /// Initializes a new instance of the class with the default theme.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public IconBattery()
-            : base(TypeIconTheme.Light)
-        {
-        }
-
-        /// <summary>
-        /// Gets the CSS class for the battery icon, depending on the selected theme.
-        /// </summary>
-        public override string Class => "wx-icon-light wx-icon-light-battery";
+        public override string Symbol => "battery";
     }
 }

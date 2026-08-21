@@ -84,8 +84,8 @@ namespace WebExpress.WebUI.WebControl
             }
                 // the icon travels to the client as a bare class string, so it has
                 // to carry the page's theme with it; without this the preview was
-                // the one place a light page still drew a FontAwesome glyph
-                .AddUserAttribute("data-file-icon", (Icon?.Invoke(renderContext)?.ApplyIconTheme(visualTree?.IconTheme ?? TypeIconTheme.Default) as Icon)?.Class)
+                // the class is handed to the client, which renders the icon itself
+                .AddUserAttribute("data-file-icon", (Icon?.Invoke(renderContext) as Icon)?.Class)
                 .AddUserAttribute("data-file-image", Image?.Invoke(renderContext)?.ToString() ?? (Icon?.Invoke(renderContext) as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-file-uri", Uri?.Invoke(renderContext)?.ToString())
                 .AddUserAttribute("data-file-size", (Size?.Invoke(renderContext) ?? long.MinValue) >= 0 ? size : null)

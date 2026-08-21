@@ -194,9 +194,9 @@
     webexpress.webui.Binds.register("darkmode", {
         bind(element) {
             const iconLight = element.getAttribute("data-wx-bind-icon-light") ||
-                webexpress.webui.IconTheme.resolve("fas fa-moon", "wx-icon-light-moon");
+                webexpress.webui.IconSet.resolve("moon");
             const iconDark  = element.getAttribute("data-wx-bind-icon-dark")  ||
-                webexpress.webui.IconTheme.resolve("fas fa-sun", "wx-icon-light-lightbulb-on");
+                webexpress.webui.IconSet.resolve("lightbulb-on");
             const textLight = element.getAttribute("data-wx-bind-text-light");
             const textDark  = element.getAttribute("data-wx-bind-text-dark");
 

@@ -374,7 +374,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         if (this._allowRemove) {
             const btn = document.createElement("button");
             btn.type = "button";
-            btn.className = "wx-tile-remove-btn fas fa-times";
+            btn.className = "wx-tile-remove-btn wx-icon-light wx-icon-light-xmark";
             btn.setAttribute("aria-label", this._i18n("webexpress.webui:tile.close", "Close tile"));
             btn.addEventListener("click", e => {
                 e.stopPropagation();

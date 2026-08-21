@@ -239,7 +239,7 @@ webexpress.webui.PanelDismissibleCtrl = class extends webexpress.webui.Ctrl {
         this._dismissBtn.className = "btn wx-button-close wx-panel-dismissible-close ms-auto";
         this._dismissBtn.setAttribute("aria-label", dismissAria);
         this._dismissBtn.appendChild(Object.assign(document.createElement("i"), {
-            className: this._iconClass("fas fa-xmark", "wx-icon-light-xmark")
+            className: this._iconClass("xmark")
         }));
         this._dismissBtn.addEventListener("click", (e) => {
             e.preventDefault();

@@ -6,7 +6,6 @@ using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebComponent;
 using WebExpress.WebCore.WebEndpoint;
 using WebExpress.WebCore.WebHtml;
-using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebMessage;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebCore.WebTheme;
@@ -58,13 +57,6 @@ namespace WebExpress.WebUI.WebPage
         /// when the application has no theme.
         /// </summary>
         public IThemeContext Theme { get; protected set; }
-
-        /// <summary>
-        /// Gets the icon theme for the page. Mirrors <see cref="Theme"/> /
-        /// <c>Theme.IconTheme</c>; falls back to
-        /// <see cref="TypeIconTheme.Default"/> when no theme is registered.
-        /// </summary>
-        public TypeIconTheme IconTheme => Theme?.IconTheme ?? TypeIconTheme.Default;
 
         /// <summary>
         /// Returns the favicons.
@@ -135,8 +127,7 @@ namespace WebExpress.WebUI.WebPage
             //   2. Otherwise fall back to the first theme registered for the
             //      application (preserves the long-standing "default = first"
             //      convention documented in the Theme model).
-            //   3. Otherwise leave Theme null - downstream IconTheme falls back
-            //      to TypeIconTheme.Default.
+            //   3. Otherwise leave Theme null.
             // Per-user theme overrides are wired by application code: the
             // page's Process override calls UseTheme<T>() based on whatever
             // store the application maintains (session, identity profile, …).

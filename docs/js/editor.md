@@ -233,7 +233,7 @@ Rich embeddable blocks register with `webexpress.webui.EditorAddOns`:
 ```javascript
 webexpress.webui.EditorAddOns.register("alert-box", {
     label: "Alert",
-    icon: "fas fa-exclamation-triangle",
+    icon: "triangle-exclamation",
     type: "block",
     category: "Widgets",
     isContainer: false,

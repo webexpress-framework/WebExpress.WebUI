@@ -130,7 +130,7 @@ test("the footer renders one chip per entry with label, icon, color and tooltip"
     const { host } = build(runtime, {
         footer: JSON.stringify([
             { label: "P1", colorCss: "text-bg-danger", title: "Priority" },
-            { label: "8", icon: "fas fa-star" }
+            { label: "8", icon: "star" }
         ])
     });
 
@@ -144,7 +144,7 @@ test("the footer renders one chip per entry with label, icon, color and tooltip"
     assert.equal(chips[1].textContent, "8");
     const icon = chips[1].childNodes.find((n) => n.tagName === "I");
     assert.ok(icon, "the chip icon exists");
-    assert.equal(icon.className, "fas fa-star");
+    assert.equal(icon.className, "wx-icon-light wx-icon-light-star");
 });
 
 test("a user-defined chip color is applied as an inline style", () => {

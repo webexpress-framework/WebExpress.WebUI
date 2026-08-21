@@ -80,13 +80,12 @@ namespace WebExpress.WebUI.WebControl
             var title = Title?.Invoke(renderContext);
             var scroll = Scroll?.Invoke(renderContext) ?? false;
             var backdrop = Backdrop?.Invoke(renderContext) ?? true;
-            var iconTheme = visualTree?.IconTheme ?? WebCore.WebIcon.TypeIconTheme.Default;
 
             var close = new HtmlElementFieldButton()
             {
                 Class = "btn wx-button-close"
             }
-                .Add(new HtmlElementTextSemanticsI() { Class = new IconXmark(iconTheme).Class })
+                .Add(new HtmlElementTextSemanticsI() { Class = new IconXmark().Class })
                 .AddUserAttribute("data-bs-dismiss", "offcanvas")
                 .AddUserAttribute("aria-label", "close");
 

@@ -105,7 +105,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             Assert.Contains(@"class=""wx-webui-card border""", html);
-            Assert.Contains(@"data-header-icon-css=""fas fa-home""", html);
+            Assert.Contains(@"data-header-icon-css=""wx-icon-light wx-icon-light-home""", html);
             Assert.DoesNotContain("data-header-icon-image", html);
         }
 
@@ -201,7 +201,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             Assert.Contains(@"class=""wx-webui-card border""", html);
-            Assert.Contains(@"data-footer-icon-css=""fas fa-home""", html);
+            Assert.Contains(@"data-footer-icon-css=""wx-icon-light wx-icon-light-home""", html);
             Assert.DoesNotContain("data-footer-icon-image", html);
         }
 

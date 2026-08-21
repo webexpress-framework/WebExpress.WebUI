@@ -6,8 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconHandshakeSimpleSlash : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-handshake-simple-slash";
+        public override string Symbol => "handshake-simple-slash";
     }
 }

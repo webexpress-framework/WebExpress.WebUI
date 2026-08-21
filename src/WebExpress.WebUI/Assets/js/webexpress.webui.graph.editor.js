@@ -407,15 +407,15 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
         // the canvas itself (lower left), so no key is offered for them here
         const builders = {
             "undo": () => {
-                this._btnUndo = createBtn("btn-undo", this._iconClass("fas fa-undo", "undo"),
+                this._btnUndo = createBtn("btn-undo", this._iconClass("undo"),
                     this._i18n("webexpress.webui:graph.undo", "Undo"), () => this._undo());
             },
             "redo": () => {
-                this._btnRedo = createBtn("btn-redo", this._iconClass("fas fa-redo", "redo"),
+                this._btnRedo = createBtn("btn-redo", this._iconClass("redo"),
                     this._i18n("webexpress.webui:graph.redo", "Redo"), () => this._redo());
             },
             "add-node": () => {
-                createBtn("btn-add-node", "fas fa-plus-circle",
+                createBtn("btn-add-node", "circle-plus",
                     this._i18n("webexpress.webui:graph.add.node", "Add Node"), () => {
                         this._addNode();
                         if (this._isAddEdgeMode) {
@@ -424,27 +424,27 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
                     });
             },
             "add-edge": () => {
-                this._btnEdgeMode = createBtn("btn-add-edge", this._iconClass("fas fa-share-alt", "share"),
+                this._btnEdgeMode = createBtn("btn-add-edge", this._iconClass("share"),
                     this._i18n("webexpress.webui:graph.add.edge", "Add Edge (Toggle)"), () => {
                         this._toggleAddEdgeMode(!this._isAddEdgeMode);
                     }, true);
             },
             "edit": () => {
-                this._btnEdit = createBtn("btn-edit", this._iconClass("fas fa-pen", "pen"),
+                this._btnEdit = createBtn("btn-edit", this._iconClass("pen"),
                     this._i18n("webexpress.webui:graph.edit.properties", "Edit Properties"), () => {
                         this._openPropertiesModal();
                     });
                 this._btnEdit.disabled = true;
             },
             "delete": () => {
-                this._btnDelete = createBtn("btn-delete", this._iconClass("fas fa-trash", "trash"),
+                this._btnDelete = createBtn("btn-delete", this._iconClass("trash"),
                     this._i18n("webexpress.webui:graph.delete.selected", "Delete Selected"), () => {
                         this._requestDelete();
                     });
                 this._btnDelete.disabled = true;
             },
             "export": () => {
-                createBtn("btn-export", "fas fa-file-export",
+                createBtn("btn-export", "file-export",
                     this._i18n("webexpress.webui:graph.export.svg", "Export SVG"), () => this.exportSvg());
             }
         };

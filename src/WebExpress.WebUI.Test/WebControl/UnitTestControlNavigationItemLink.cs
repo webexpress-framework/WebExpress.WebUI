@@ -170,7 +170,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<a class=""wx-link""></a>")]
-        [InlineData(typeof(IconStar), @"<a class=""wx-link""><i class=""fas fa-star""></i></a>")]
+        [InlineData(typeof(IconStar), @"<a class=""wx-link""><i class=""wx-icon-light wx-icon-light-star""></i></a>")]
         public void Icon(Type icon, string expected)
         {
             // arrange
@@ -233,9 +233,9 @@ namespace WebExpress.WebUI.Test.WebControl
             var html3 = control3.Render(context, visualTree);
 
             // validation
-            Assert.Equal(@"<a class=""wx-link""><i class=""fas fa-star""></i></a>", html1.Trim());
-            Assert.Equal(@"<a class=""wx-link""><i class=""fas fa-star""></i></a>", html2.Trim());
-            Assert.Equal(@"<a class=""wx-link""><i class=""fas fa-star""></i></a>", html3.Trim());
+            Assert.Equal(@"<a class=""wx-link""><i class=""wx-icon-light wx-icon-light-star""></i></a>", html1.Trim());
+            Assert.Equal(@"<a class=""wx-link""><i class=""wx-icon-light wx-icon-light-star""></i></a>", html2.Trim());
+            Assert.Equal(@"<a class=""wx-link""><i class=""wx-icon-light wx-icon-light-star""></i></a>", html3.Trim());
         }
     }
 }

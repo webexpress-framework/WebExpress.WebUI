@@ -67,7 +67,6 @@ namespace WebExpress.WebUI.WebControl
             var h = Head?.Invoke(renderContext);
             var text = Text?.Invoke(renderContext);
             var dismissibility = Dismissibility?.Invoke(renderContext);
-            var iconTheme = visualTree?.IconTheme ?? WebCore.WebIcon.TypeIconTheme.Default;
 
             var head = new HtmlElementTextSemanticsStrong
             (
@@ -79,7 +78,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 Class = "btn wx-button-close"
             }
-                .Add(new HtmlElementTextSemanticsI() { Class = new IconXmark(iconTheme).Class })
+                .Add(new HtmlElementTextSemanticsI() { Class = new IconXmark().Class })
                 .AddUserAttribute("data-bs-dismiss", "alert")
                 .AddUserAttribute("aria-label", "close");
 

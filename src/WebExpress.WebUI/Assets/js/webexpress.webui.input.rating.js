@@ -102,7 +102,7 @@ webexpress.webui.InputRatingCtrl = class extends webexpress.webui.Ctrl {
 
             // create icon element with regular (outline) star by default
             const icon = document.createElement("i");
-            icon.className = "far fa-star wx-rating-icon";
+            icon.className = "wx-icon-light wx-icon-light-star wx-rating-icon";
             star.appendChild(icon);
 
             // hover preview

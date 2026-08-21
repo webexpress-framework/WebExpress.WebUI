@@ -166,7 +166,7 @@ test("wx-webui-quickfilter renders the add chip with its action and the plus def
     assert.ok(chip.classList.contains("wx-quickfilter-add"), "the chip keeps its add class");
     assert.ok(chip.classList.contains("wx-quickfilter-btn-chip"), "the chip looks like the other chips");
     assert.ok(chip.textContent.includes("New filter"), "the chip carries the authored label");
-    assert.ok(chip.querySelector("i.fa-plus"), "the chip falls back to the plus icon");
+    assert.ok(chip.querySelector("i.wx-icon-light-plus"), "the chip falls back to the plus icon");
     assert.equal(chip.dataset.wxPrimaryTarget, "#newfilter", "the authored action survives the rebuild");
 });
 

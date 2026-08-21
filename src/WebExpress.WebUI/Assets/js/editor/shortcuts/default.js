@@ -4,7 +4,7 @@
 webexpress.webui.EditorShortcuts.register("block.paragraph", {
     label: "Paragraph",
     description: "Plain text paragraph",
-    icon: "fas fa-paragraph",
+    icon: "paragraph",
     category: "Text",
     keywords: ["p", "text", "absatz"],
     tag: "P"
@@ -13,7 +13,7 @@ webexpress.webui.EditorShortcuts.register("block.paragraph", {
 webexpress.webui.EditorShortcuts.register("block.heading1", {
     label: "Heading 1",
     description: "Large section heading",
-    icon: "fas fa-heading",
+    icon: "heading",
     category: "Text",
     keywords: ["h1", "title", "überschrift"],
     tag: "H1"
@@ -22,7 +22,7 @@ webexpress.webui.EditorShortcuts.register("block.heading1", {
 webexpress.webui.EditorShortcuts.register("block.heading2", {
     label: "Heading 2",
     description: "Medium section heading",
-    icon: "fas fa-heading",
+    icon: "heading",
     category: "Text",
     keywords: ["h2"],
     tag: "H2"
@@ -31,7 +31,7 @@ webexpress.webui.EditorShortcuts.register("block.heading2", {
 webexpress.webui.EditorShortcuts.register("block.heading3", {
     label: "Heading 3",
     description: "Small section heading",
-    icon: "fas fa-heading",
+    icon: "heading",
     category: "Text",
     keywords: ["h3"],
     tag: "H3"
@@ -40,7 +40,7 @@ webexpress.webui.EditorShortcuts.register("block.heading3", {
 webexpress.webui.EditorShortcuts.register("block.heading4", {
     label: "Heading 4",
     description: "Sub-heading",
-    icon: "fas fa-heading",
+    icon: "heading",
     category: "Text",
     keywords: ["h4"],
     tag: "H4"
@@ -49,7 +49,7 @@ webexpress.webui.EditorShortcuts.register("block.heading4", {
 webexpress.webui.EditorShortcuts.register("block.heading5", {
     label: "Heading 5",
     description: "Minor heading",
-    icon: "fas fa-heading",
+    icon: "heading",
     category: "Text",
     keywords: ["h5"],
     tag: "H5"
@@ -58,7 +58,7 @@ webexpress.webui.EditorShortcuts.register("block.heading5", {
 webexpress.webui.EditorShortcuts.register("block.heading6", {
     label: "Heading 6",
     description: "Smallest heading",
-    icon: "fas fa-heading",
+    icon: "heading",
     category: "Text",
     keywords: ["h6"],
     tag: "H6"
@@ -67,7 +67,7 @@ webexpress.webui.EditorShortcuts.register("block.heading6", {
 webexpress.webui.EditorShortcuts.register("block.quote", {
     label: "Quote",
     description: "Block quote",
-    icon: "fas fa-quote-right",
+    icon: "quote-right",
     category: "Text",
     keywords: ["zitat", "blockquote", ">"],
     tag: "BLOCKQUOTE"
@@ -76,7 +76,7 @@ webexpress.webui.EditorShortcuts.register("block.quote", {
 webexpress.webui.EditorShortcuts.register("block.code", {
     label: "Code Block",
     description: "Monospaced code block",
-    icon: "fas fa-code",
+    icon: "code",
     category: "Text",
     keywords: ["code", "pre", "```"],
     tag: "PRE"
@@ -86,7 +86,7 @@ webexpress.webui.EditorShortcuts.register("block.code", {
 webexpress.webui.EditorShortcuts.register("list.bullet", {
     label: "Bullet",
     description: "Unordered list",
-    icon: "fas fa-list-ul",
+    icon: "list-ul",
     category: "List",
     keywords: ["ul", "bullet", "liste", "punkt", "-"],
     cmd: "insertUnorderedList"
@@ -95,7 +95,7 @@ webexpress.webui.EditorShortcuts.register("list.bullet", {
 webexpress.webui.EditorShortcuts.register("list.number", {
     label: "Numbered list",
     description: "Ordered list",
-    icon: "fas fa-list-ol",
+    icon: "list-ol",
     category: "List",
     keywords: ["ol", "number", "nummerierung", "1."],
     cmd: "insertOrderedList"
@@ -105,7 +105,7 @@ webexpress.webui.EditorShortcuts.register("list.number", {
 webexpress.webui.EditorShortcuts.register("insert.date", {
     label: "Date",
     description: "Insert today's date",
-    icon: "fas fa-calendar-day",
+    icon: "calendar-day",
     category: "Insert",
     keywords: ["date", "today", "heute", "datum"],
     execute: (editor) => {
@@ -118,7 +118,7 @@ webexpress.webui.EditorShortcuts.register("insert.date", {
 webexpress.webui.EditorShortcuts.register("insert.datetime", {
     label: "Date & time",
     description: "Insert current date and time",
-    icon: "fas fa-clock",
+    icon: "clock",
     category: "Insert",
     keywords: ["now", "jetzt", "zeit", "time"],
     execute: (editor) => {
@@ -131,7 +131,7 @@ webexpress.webui.EditorShortcuts.register("insert.datetime", {
 webexpress.webui.EditorShortcuts.register("insert.hr", {
     label: "Horizontal Rule",
     description: "Horizontal divider line",
-    icon: "fas fa-minus",
+    icon: "minus",
     category: "Insert",
     keywords: ["hr", "divider", "trennlinie", "linie", "---"],
     html: "<hr><p><br></p>"
@@ -140,7 +140,7 @@ webexpress.webui.EditorShortcuts.register("insert.hr", {
 webexpress.webui.EditorShortcuts.register("insert.link", {
     label: "Insert Link",
     description: "Add a hyperlink",
-    icon: "fas fa-link",
+    icon: "link",
     category: "Insert",
     keywords: ["link", "url", "anchor", "verweis"],
     execute: (editor) => {
@@ -159,7 +159,7 @@ webexpress.webui.EditorShortcuts.register("insert.link", {
 webexpress.webui.EditorShortcuts.register("insert.image", {
     label: "Insert Image",
     description: "Embed an image by URL",
-    icon: "fas fa-image",
+    icon: "image",
     category: "Insert",
     keywords: ["image", "img", "picture", "bild", "foto"],
     execute: (editor) => {
@@ -177,7 +177,7 @@ webexpress.webui.EditorShortcuts.register("insert.image", {
 webexpress.webui.EditorShortcuts.register("insert.addon", {
     label: "Insert AddOn",
     description: "Open the AddOn library",
-    icon: "fas fa-puzzle-piece",
+    icon: "puzzle",
     category: "Insert",
     keywords: ["addon", "widget", "embed", "einfügen"],
     execute: (editor) => {
@@ -192,7 +192,7 @@ webexpress.webui.EditorShortcuts.register("insert.addon", {
 webexpress.webui.EditorShortcuts.register("format.clear", {
     label: "Clear Format",
     description: "Remove all formatting from selection",
-    icon: "fas fa-eraser",
+    icon: "eraser",
     category: "Format",
     keywords: ["clear", "remove", "format", "entfernen"],
     cmd: "removeFormat"

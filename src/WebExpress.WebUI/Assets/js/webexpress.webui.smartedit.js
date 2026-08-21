@@ -75,7 +75,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         }
         const pencil = document.createElement("button");
         const icon = document.createElement("i");
-        icon.className = "fas fa-pencil";
+        icon.className = "pencil";
         icon.title = this._i18n("webexpress.webui:edit", "Edit");
         pencil.classList.add("pencil");
         pencil.appendChild(icon);
@@ -191,14 +191,14 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
 
         const btnOk = document.createElement("button");
         const iconOk = document.createElement("i");
-        iconOk.className = "fas fa-check text-success";
+        iconOk.className = "wx-icon-light wx-icon-light-check text-success";
         btnOk.type = "submit";
         btnOk.appendChild(iconOk);
         btnOk.title = this._i18n("webexpress.webui:save", "Save");
 
         const btnCancel = document.createElement("button");
         const iconCancel = document.createElement("i");
-        iconCancel.className = "fas fa-times text-danger";
+        iconCancel.className = "wx-icon-light wx-icon-light-xmark text-danger";
         btnCancel.type = "button";
         btnCancel.appendChild(iconCancel);
         btnCancel.title = this._i18n("webexpress.webui:cancel", "Cancel");

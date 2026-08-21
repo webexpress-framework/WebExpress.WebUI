@@ -35,7 +35,7 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
         btnLink.type = "button";
         btnLink.title = webexpress.webui.I18N.translate("webexpress.webui:editor.insert.link");
         btnLink.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.insert.link"));
-        btnLink.innerHTML = `<i class="${webexpress.webui.IconTheme.resolveFa("fas fa-link")}"></i>`;
+        btnLink.innerHTML = `<i class="${webexpress.webui.IconSet.resolve("link")}"></i>`;
 
         // save selection firmly before focus shifts away from the editor
         btnLink.addEventListener("mousedown", (e) => {
@@ -64,7 +64,7 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
         btnImg.type = "button";
         btnImg.title = webexpress.webui.I18N.translate("webexpress.webui:editor.insert.image");
         btnImg.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.insert.image"));
-        btnImg.innerHTML = `<i class="${webexpress.webui.IconTheme.resolveFa("fas fa-image")}"></i>`;
+        btnImg.innerHTML = `<i class="${webexpress.webui.IconSet.resolve("image")}"></i>`;
 
         btnImg.addEventListener("mousedown", (e) => {
             e.preventDefault(); // prevent losing focus
@@ -99,7 +99,7 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
         if (target && target.nodeName === "IMG") {
             items.push({
                 label: webexpress.webui.I18N.translate("webexpress.webui:editor.edit.image"),
-                icon: "fas fa-edit",
+                icon: "edit",
                 action: () => {
                     const sel = window.getSelection();
                     let activeRange = null;
@@ -126,7 +126,7 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
 
             items.push({
                 label: webexpress.webui.I18N.translate("webexpress.webui:editor.remove.image"),
-                icon: "fas fa-trash",
+                icon: "trash",
                 action: () => {
                     target.remove();
                     if (typeof editor._syncValue === "function") {
@@ -148,7 +148,7 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
         if (anchor && anchor.nodeName === "A") {
             items.push({
                 label: webexpress.webui.I18N.translate("webexpress.webui:editor.edit.link"),
-                icon: "fas fa-edit",
+                icon: "edit",
                 action: () => {
                     const sel = window.getSelection();
                     let activeRange = null;
@@ -175,7 +175,7 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
 
             items.push({
                 label: webexpress.webui.I18N.translate("webexpress.webui:editor.remove.link"),
-                icon: "fas fa-unlink",
+                icon: "unlink",
                 action: () => {
                     const sel = window.getSelection();
                     if (sel) {

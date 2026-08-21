@@ -30,7 +30,7 @@ Within the host element, you can define static filter buttons. These are element
 |`data-wx-primary-target`  |The unique ID of the filter this button controls.
 |`data-wx-primary-group`   |Optional. Assigns the filter to a specific group. Groups can be configured in the registry to be exclusive.
 |`data-wx-primary-reset`   |Optional boolean (`true`). If set, the button acts as a reset trigger for its assigned group and will appear active when no other filters in that group are active.
-|`data-icon`               |Optional. The icon rendered ahead of the label of a button or dropdown option, as a CSS class (e.g., `fas fa-star`). Authored in C# through the `Icon` property (`IIcon`); an image icon is emitted as `data-image` instead.
+|`data-icon`               |Optional. The icon rendered ahead of the label of a button or dropdown option, as a CSS class (e.g., `star`). Authored in C# through the `Icon` property (`IIcon`); an image icon is emitted as `data-image` instead.
 |`data-image`              |Optional. An image uri rendered in place of a CSS icon.
 |`data-color`              |Optional. The chip color as a button css class (e.g., `btn-danger`), derived from the C# `BackgroundColor` property for a system color. The chip keeps its outline-to-filled behavior in that hue.
 |`data-color-value`        |Optional. A raw css color (e.g., `#7c3aed`), derived from the C# `BackgroundColor` property for a user-defined color; the client feeds it into the chip accent.

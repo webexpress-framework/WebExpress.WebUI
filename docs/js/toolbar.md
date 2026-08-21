@@ -41,7 +41,7 @@ Individual elements are configured via `data-` attributes in the HTML. These att
 | Attribute          | Description                                                                             | Example
 |--------------------|-----------------------------------------------------------------------------------------|----------------------
 | `data-label`       | Sets the visible text for buttons, comboboxes, or text items.                           | `data-label="Save"`
-| `data-icon`        | Assigns a CSS icon class to a button.                                                   | `data-icon="fas fa-save"`
+| `data-icon`        | Assigns a CSS icon class to a button.                                                   | `data-icon="floppy-disk"`
 | `data-title`       | Adds a tooltip to a button, displayed on mouseover.                                     | `data-title="Save changes"`
 | `data-color-css`   | Applies a predefined color class to an element.                                         | `data-color-css="btn-primary"`
 | `data-color-style` | Applies a direct CSS style to an element.                                               | `data-color-style="background-color: #ff0000;"`
@@ -105,10 +105,10 @@ The following HTML example demonstrates declarative configuration of a toolbar w
 <div id="example-toolbar" class="wx-webui-toolbar">
   
   <!-- A button with icon and label -->
-  <div class="wx-toolbar-button" data-label="Home" data-icon="fas fa-home"></div>
+  <div class="wx-toolbar-button" data-label="Home" data-icon="home"></div>
   
   <!-- A button with only icon and tooltip -->
-  <div class="wx-toolbar-button" data-icon="fas fa-cog" data-title="Settings"></div>
+  <div class="wx-toolbar-button" data-icon="cog" data-title="Settings"></div>
   
   <!-- A separator for grouping -->
   <div class="wx-toolbar-separator"></div>

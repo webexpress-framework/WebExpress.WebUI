@@ -115,7 +115,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-input-cascading""><div class=""wx-cascading-item""></div></div>")]
-        [InlineData(typeof(IconFolder), @"<div class=""wx-webui-input-cascading""><div class=""wx-cascading-item"" data-icon=""fas fa-folder""></div></div>")]
+        [InlineData(typeof(IconFolder), @"<div class=""wx-webui-input-cascading""><div class=""wx-cascading-item"" data-icon=""wx-icon-light wx-icon-light-folder""></div></div>")]
         public void Icon(Type iconType, string expected)
         {
             // arrange

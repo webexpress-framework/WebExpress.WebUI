@@ -5,7 +5,7 @@ webexpress.webui.DialogPanels.register("editor-link", {
     id: "editor-link-page",
     parentId: null,
     title: webexpress.webui.I18N.translate("webexpress.webui:editor.link.title"),
-    iconClass: "fas fa-link",
+    iconClass: "link",
 
     /**
      * Renders the page ui.

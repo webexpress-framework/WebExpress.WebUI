@@ -35,7 +35,7 @@ Each tile is defined by an element with the class `.wx-tile-card`.
 | :--- | :--- | :--- |
 | `data-id` | A unique ID for the tile. | `data-id="tile-profile"` |
 | `data-label` | The title of the tile. | `data-label="User Profile"` |
-| `data-icon` | A CSS class for an icon. | `data-icon="fas fa-user"` |
+| `data-icon` | A CSS class for an icon. | `data-icon="user"` |
 | `data-image` | The URL of an image for the tile header. | `data-image="/path/to/icon.png"` |
 | `data-color-css` | A CSS class for color styling. | `data-color-css="bg-primary"` |
 | `data-visible` | Determines if the tile is initially visible. | `data-visible="false"` |
@@ -111,7 +111,7 @@ dynamicTileCtrl.insertTile({
     id: 'new-tile',
     label: 'Newly Added Tile',
     html: '<p>This tile was added via code.</p>',
-    icon: 'fas fa-plus'
+    icon: 'plus'
 });
 ```
 
@@ -133,17 +133,17 @@ The following example shows the declarative configuration of a tile container.
 <div id="dashboard" class="wx-webui-tile" data-movable="true" data-persist-key="dashboard-state" data-allow-remove="true">
 
     <!-- A tile with an icon and title -->
-    <div class="wx-tile-card" data-id="profile" data-icon="fas fa-user" data-label="Profile">
+    <div class="wx-tile-card" data-id="profile" data-icon="user" data-label="Profile">
         View your user profile.
     </div>
 
     <!-- A tile that is initially hidden -->
-    <div class="wx-tile-card" data-id="settings" data-icon="fas fa-cog" data-label="Settings" data-visible="false">
+    <div class="wx-tile-card" data-id="settings" data-icon="cog" data-label="Settings" data-visible="false">
         Adjust application settings.
     </div>
 
     <!-- Another tile -->
-    <div class="wx-tile-card" data-id="mail" data-icon="fas fa-envelope" data-label="Messages">
+    <div class="wx-tile-card" data-id="mail" data-icon="envelope" data-label="Messages">
         Check your inbox.
     </div>
 </div>

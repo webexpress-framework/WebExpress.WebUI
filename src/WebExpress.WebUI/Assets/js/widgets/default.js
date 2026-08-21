@@ -3,7 +3,7 @@
  */
 webexpress.webui.DashboardWidgets.register("widget_stats", {
     title: webexpress.webui.I18N.translate("webexpress.webui:widget.stats.title"),
-    icon: "fas fa-server",
+    icon: "server",
 
     /**
      * Renders the widget content.
@@ -32,7 +32,7 @@ webexpress.webui.DashboardWidgets.register("widget_stats", {
  */
 webexpress.webui.DashboardWidgets.register("widget_chart", {
     title: webexpress.webui.I18N.translate("webexpress.webui:widget.chart.title"),
-    icon: "fas fa-chart-line",
+    icon: "chart-line",
 
     /**
      * Renders the widget content.
@@ -97,7 +97,7 @@ webexpress.webui.DashboardWidgets.register("widget_chart", {
  */
 webexpress.webui.DashboardWidgets.register("widget_alerts", {
     title: webexpress.webui.I18N.translate("webexpress.webui:widget.alerts.title"),
-    icon: "fas fa-bell",
+    icon: "bell",
 
     /**
      * Renders the widget content.
@@ -133,7 +133,7 @@ webexpress.webui.DashboardWidgets.register("widget_alerts", {
  */
 webexpress.webui.DashboardWidgets.register("widget_info", {
     title: webexpress.webui.I18N.translate("webexpress.webui:widget.info.title"),
-    icon: "fas fa-info-circle",
+    icon: "circle-info",
 
     /**
      * Renders a simple informational card with optional title/desc.
@@ -160,7 +160,7 @@ webexpress.webui.DashboardWidgets.register("widget_info", {
  */
 webexpress.webui.DashboardWidgets.register("widget_progress", {
     title: webexpress.webui.I18N.translate("webexpress.webui:widget.progress.title"),
-    icon: "fas fa-tasks",
+    icon: "list-check",
     /**
      * Renders a simple progress bar.
      * @param {HTMLElement} container - The container element to render into.
@@ -192,7 +192,7 @@ webexpress.webui.DashboardWidgets.register("widget_progress", {
  */
 webexpress.webui.DashboardWidgets.register("widget_avatar", {
     title: webexpress.webui.I18N.translate("webexpress.webui:widget.avatar.title"),
-    icon: "fas fa-user",
+    icon: "user",
 
     /**
      * Renders a user/character avatar with name and optional caption.
@@ -230,7 +230,7 @@ webexpress.webui.DashboardWidgets.register("widget_avatar", {
  */
 webexpress.webui.DashboardWidgets.register("widget_list", {
     title: webexpress.webui.I18N.translate("webexpress.webui:widget.list.title"),
-    icon: "fas fa-list",
+    icon: "list",
 
     /**
      * Renders a list of arbitrary items.
@@ -257,7 +257,7 @@ webexpress.webui.DashboardWidgets.register("widget_list", {
  */
 webexpress.webui.DashboardWidgets.register("widget_bignumber", {
     title: webexpress.webui.I18N.translate("webexpress.webui:widget.bignumber.title"),
-    icon: "fas fa-hashtag",
+    icon: "hashtag",
 
     /**
      * Renders a large numeric value with label (e.g., for KPIs).

@@ -30,7 +30,7 @@ webexpress.webui.EditorPlugins.register("instruction", 5000, {
         return [
             {
                 label: webexpress.webui.I18N.translate("webexpress.webui:editor.edit"),
-                icon: "fas fa-edit",
+                icon: "edit",
                 action: () => {
                     // current text without the leading icon
                     const text = (instruction.textContent || "").trim();
@@ -41,7 +41,7 @@ webexpress.webui.EditorPlugins.register("instruction", 5000, {
             },
             {
                 label: webexpress.webui.I18N.translate("webexpress.webui:editor.remove"),
-                icon: "fas fa-trash",
+                icon: "trash",
                 action: () => {
                     instruction.remove();
                     if (typeof editor._syncValue === "function") {
@@ -69,7 +69,7 @@ webexpress.webui.EditorPlugins.register("instruction", 5000, {
         btn.type = "button";
         btn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.instruction.title");
         btn.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.instruction.title"));
-        btn.innerHTML = `<i class="${webexpress.webui.IconTheme.resolveFa("fas fa-info-circle")}"></i>`;
+        btn.innerHTML = `<i class="${webexpress.webui.IconSet.resolve("circle-info")}"></i>`;
 
         btn.addEventListener("mousedown", (e) => {
             e.preventDefault(); // prevent losing focus

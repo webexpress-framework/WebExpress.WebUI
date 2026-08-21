@@ -1,6 +1,4 @@
-﻿using WebExpress.WebCore.WebIcon;
-
-namespace WebExpress.WebUI.WebIcon
+﻿namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon for a file-powerpoint.
@@ -8,30 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconFilePowerpoint : Icon
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="IconFilePowerpoint"/> class using the
-        /// <see cref="TypeIconTheme.Default"/> theme.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public IconFilePowerpoint()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="IconFilePowerpoint"/> class using the
-        /// specified theme.
-        /// </summary>
-        /// <param name="theme">The theme to use when rendering the icon.</param>
-        public IconFilePowerpoint(TypeIconTheme theme)
-            : base(theme)
-        {
-        }
-
-        /// <summary>
-        /// Returns the CSS class associated with the icon. In the
-        /// <see cref="TypeIconTheme.Light"/> theme the lightweight SVG variant is rendered;
-        /// otherwise the FontAwesome glyph is used.
-        /// </summary>
-        public override string Class => Theme == TypeIconTheme.Light
-            ? "wx-icon-light wx-icon-light-file-powerpoint"
-            : "fas fa-file-powerpoint";
+        public override string Symbol => "file-powerpoint";
     }
 }

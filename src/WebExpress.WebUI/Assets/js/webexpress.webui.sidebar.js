@@ -440,7 +440,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             const removeBtn = document.createElement("button");
             removeBtn.className = "btn wx-button-close";
             removeBtn.title = this._i18n ? this._i18n("webexpress.webui:remove", "Remove") : "Remove";
-            removeBtn.innerHTML = `<i class="${this._iconClass("fas fa-times", "wx-icon-light-xmark")}"></i>`;
+            removeBtn.innerHTML = `<i class="${this._iconClass("xmark")}"></i>`;
             removeBtn.addEventListener("click", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -459,7 +459,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
         if (item.options && item.options.length) {
             const options = document.createElement("div");
             options.className = "wx-sidebar-options";
-            options.dataset.icon = this._iconClass("fas fa-ellipsis-h", "wx-icon-light-more");
+            options.dataset.icon = this._iconClass("more");
             options.dataset.size = "btn-sm";
             options.dataset.border = "false";
             wrapper.appendChild(options);
@@ -503,7 +503,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
         caret.type = "button";
         caret.className = "wx-sidebar-caret btn";
         caret.setAttribute("aria-label", this._i18n ? this._i18n("webexpress.webui:sidebar.toggle", "Toggle") : "Toggle");
-        caret.innerHTML = `<i class="${this._iconClass("fas fa-chevron-right", "wx-icon-light-chevron-right")}"></i>`;
+        caret.innerHTML = `<i class="${this._iconClass("chevron-right")}"></i>`;
         caret.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -565,7 +565,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             editBtn.type = "button";
             editBtn.className = "wx-sidebar-icon-edit";
             editBtn.title = this._i18n("webexpress.webui:edit", "Edit");
-            editBtn.innerHTML = `<i class="${this._iconClass("fas fa-pen", "wx-icon-light-pen")}"></i>`;
+            editBtn.innerHTML = `<i class="${this._iconClass("pen")}"></i>`;
             if (item.uri) {
                 editBtn.setAttribute("data-wx-uri", item.uri);
             }

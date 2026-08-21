@@ -402,7 +402,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
         item.dataset.index = String(index);
 
         const icon = document.createElement("i");
-        icon.className = webexpress.webui.IconTheme.resolveFa(def.icon || "fas fa-bolt");
+        icon.className = webexpress.webui.IconSet.resolve(def.icon || "bolt");
         item.appendChild(icon);
 
         const body = document.createElement("div");
@@ -839,12 +839,12 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
         return [
             {
                 label: this._i18n("webexpress.webui:editor.edit", "Edit"),
-                icon: "fas fa-edit",
+                icon: "edit",
                 action: () => this._editDate(editor, dateEl)
             },
             {
                 label: this._i18n("webexpress.webui:editor.remove", "Remove"),
-                icon: "fas fa-trash",
+                icon: "trash",
                 action: () => {
                     dateEl.remove();
                     editor._syncValue?.();
@@ -1039,7 +1039,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
                 item.appendChild(img);
             } else {
                 const icon = document.createElement("i");
-                icon.className = webexpress.webui.IconTheme.resolveFa("fas fa-user");
+                icon.className = webexpress.webui.IconSet.resolve("user");
                 item.appendChild(icon);
             }
 

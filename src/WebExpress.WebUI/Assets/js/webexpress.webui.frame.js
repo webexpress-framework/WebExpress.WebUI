@@ -159,7 +159,7 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
         const errorSection = document.createElement("section");
         errorSection.setAttribute("data-header", this._i18n("webexpress.webui:page.contentNotLoaded.label", "Content could not be loaded."));
         errorSection.setAttribute("data-label-css", "fw-bold");
-        errorSection.setAttribute("data-header-icon-css", "fa-solid fa-triangle-exclamation text-warning");
+        errorSection.setAttribute("data-header-icon-css", "wx-icon-light wx-icon-light-triangle-exclamation text-warning");
         errorSection.setAttribute("data-expanded", "false");
         errorSection.setAttribute("data-guide", "false");
         errorSection.setAttribute("data-persist", "false");

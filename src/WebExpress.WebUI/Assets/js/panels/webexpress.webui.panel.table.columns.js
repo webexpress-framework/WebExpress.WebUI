@@ -6,7 +6,7 @@ webexpress.webui.DialogPanels.register("table-columns", {
     id: "table-columns-pane",
     parentId: null,
     title: "Columns",
-    iconClass: "fas fa-columns",
+    iconClass: "columns",
 
     /**
      * Renders the panel UI.

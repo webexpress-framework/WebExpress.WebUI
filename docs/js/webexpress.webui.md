@@ -19,7 +19,7 @@ The file `webexpress.webui.js` is the core of the WebExpress.WebUI JavaScript fr
 |`webexpress.webui.DialogPanels`     |Singleton |Registry for modal dialog panel definitions.
 |`webexpress.webui.DashboardWidgets` |Singleton |Registry for dashboard widget definitions.
 |`webexpress.webui.TableTemplates`   |Singleton |Registry for table cell renderer templates.
-|`webexpress.webui.IconTheme`        |Singleton |Resolves icon classes against the page-wide `<html data-icon-theme>` setting and provides cross-theme fallback.
+|`webexpress.webui.IconSet`          |Singleton |Resolves an icon reference - a symbolic name, a class string or a legacy FontAwesome class - to the CSS classes of the active icon set.
 |`webexpress.webui.Ctrl`             |Class     |Abstract base class for all UI controls.
 |`webexpress.webui.PopperCtrl`       |Class     |Base class for controls that use Popper.js for dropdown positioning.
 |`webexpress.webui.Event`            |Class     |Utility class that defines all event name constants.
@@ -551,7 +551,7 @@ The `DashboardWidgets` singleton manages dashboard widget definitions. The `Dash
 |Field          |Description
 |---------------|--------------------------------------------------------------
 |`title`        |Display title (usually an i18n string).
-|`icon`         |FontAwesome class shown in the header and the add menu.
+|`icon`         |Symbolic icon name shown in the header and the add menu.
 |`description`  |Optional line shown under the add-menu entry.
 |`removable`    |`false` hides the **Delete** entry for this type (default `true`).
 |`configurable` |`false` hides the **Settings** entry for this type (default `true`).
@@ -563,7 +563,7 @@ Each `settings` field is `{ key, label, type, default? }` with `type` one of `te
 ```javascript
 webexpress.webui.DashboardWidgets.register("widget_scrum_velocity", {
     title: webexpress.webui.I18N.translate("webexpress.webapp:dashboard.widget.scrum_velocity.title"),
-    icon: "fas fa-chart-column",
+    icon: "chart-column",
     settings: [
         { key: "maxSprints", label: "Number of sprints", type: "number", min: 1, max: 20, default: "6" }
     ],
@@ -599,53 +599,50 @@ webexpress.webui.TableTemplates.register("currency", function (val, table, row, 
 }, { decimals: 2, symbol: "€" });
 ```
 
-## IconTheme
+## IconSet
 
-The `IconTheme` singleton resolves icon classes against the page-wide
-icon theme that the server emits on the root `<html>` element.
+The `IconSet` singleton turns an icon reference into the CSS classes that draw it.
+The framework ships one set - the light set - whose drawings live under
+`Assets/icons` and are applied as CSS masks by `webexpress.webui.icon.css`.
 
-- **Default theme** - the attribute is absent (or set to anything other than
-  `"light"`). Controls render the bundled FontAwesome glyphs (`fas fa-*` etc.).
-- **Light theme** - `<html data-icon-theme="light">`. Controls render the
-  lightweight SVG variants defined in `webexpress.webui.icon.css` (the
-  `wx-icon-light wx-icon-light-*` class pair).
+An icon is identified by its **symbolic name**, which is the file name of its
+drawing without the extension: `"anchor"`, `"calendar-day"`, `"user-pen"`.
+Resolving `"anchor"` yields the class pair `wx-icon-light wx-icon-light-anchor`;
+the first class carries the mask geometry and the sizing, the second selects the
+drawing.
 
-The C# side picks the theme up from the active `IThemeContext` (resolved
-by `VisualTreeControl` from the first theme registered for the request's
-application via `ThemeManager.Themes`). Themes declare their icon-theme
-via `[IconTheme(...)]` on the theme class, next to `[ThemeMode]` and
-`[ThemeStyle]`. The `<html data-icon-theme>` attribute is emitted by
-`VisualTreeWebApp` / `VisualTreeWebAppLogin`; individual controls no
-longer need to mirror the theme through per-control `data-icon-theme`
-attributes. Server-side `Icon` Funcs that only have a render context use
-the `IRenderContext.GetIconTheme()` extension to arrive at the same value.
+`resolve` also accepts a string that is already a resolved class pair, and a
+legacy FontAwesome class such as `"fas fa-calendar-days"`. The latter is kept on
+purpose: such strings survive in stored dashboards, add-on definitions and other
+user data written before the set changed, and are mapped onto the current name
+(here, `calendar`).
 
 ### Methods
 
-|Method                       |Description
-|-----------------------------|--------------------------------------------------------------
-|`current()`                  |Returns the active theme: `"light"` or `"default"`.
-|`resolve(faClass, lightClass)` |Returns the CSS class string for the current theme. When the preferred variant is missing or empty, falls back to the other one. The light value accepts either the full class (`"wx-icon-light wx-icon-light-pen"`), just the modifier (`"wx-icon-light-pen"`) or the bare icon name (`"pen"`); the `"wx-icon-light "` prefix is added automatically.
+|Method            |Description
+|------------------|--------------------------------------------------------------
+|`resolve(icon)`   |Returns the CSS class string for an icon reference - a symbolic name, an already resolved class string, or a legacy FontAwesome class. Returns `""` for an empty reference.
 
 ### Usage from controls
 
-Controls should not read `document.documentElement.dataset.iconTheme`
-directly - the inherited `_iconClass()` / `_iconTheme()` helpers on
-[`Ctrl`](#ctrl) forward to the singleton:
+Controls should not build class names themselves - the inherited `_iconClass()`
+helper on [`Ctrl`](#ctrl) forwards to the singleton:
 
 ```javascript
 const xmark = document.createElement("i");
-xmark.className = this._iconClass("fas fa-xmark", "wx-icon-light-xmark");
-// default theme -> "fas fa-xmark"
-// light theme   -> "wx-icon-light wx-icon-light-xmark"
-// light theme with no light variant supplied -> falls back to "fas fa-xmark"
+xmark.className = this._iconClass("xmark");
+// -> "wx-icon-light wx-icon-light-xmark"
 ```
 
 Stand-alone code (binds, utilities) calls the singleton directly:
 
 ```javascript
-const moonIcon = webexpress.webui.IconTheme.resolve("fas fa-moon", "wx-icon-light-moon");
+const moonIcon = webexpress.webui.IconSet.resolve("moon");
 ```
+
+Anything that builds a whole icon element should go through
+[`Icon.create`](#icon) instead, which resolves the reference itself and decides
+between an `<i>` and an `<img>`.
 
 ## Ctrl
 
@@ -662,8 +659,7 @@ The `Ctrl` class is the abstract base class for all WebExpress.WebUI controls. I
 |`_dispatch(type, detail)`       |Dispatches a custom event from the control's element.
 |`_i18n(key, fallback)`          |Returns the translated text for an i18n key, or the fallback.
 |`_isVisible()`                  |Returns `true` if the control's element is currently visible.
-|`_iconTheme()`                  |Returns the active icon theme (`"light"` or `"default"`) as read from `<html data-icon-theme>`.
-|`_iconClass(faClass, lightClass)`|Resolves an icon CSS class for the active theme. Falls back to the other variant when the preferred one is missing - see [IconTheme](#icontheme).
+|`_iconClass(icon)`              |Resolves an icon reference to the CSS classes of the active icon set - see [IconSet](#iconset).
 
 ### Usage
 

@@ -66,7 +66,7 @@ The optional footer carries small, application-defined facts — for example the
 | Field        | Description
 |--------------|-----------------------------------------------------------------------
 | `label`      | Text shown inside the chip.
-| `icon`       | Icon of the chip, either a CSS class (`fas fa-star`) or an image uri.
+| `icon`       | Icon of the chip, either a CSS class (`star`) or an image uri.
 | `colorCss`   | CSS class of a system color (e.g. `text-bg-danger`).
 | `colorStyle` | Inline style declaration of a user-defined color (e.g. `background:#ff8800;`).
 | `title`      | Tooltip explaining the chip (e.g. "Story points").
@@ -133,7 +133,7 @@ var kanban = new ControlKanban("board")
         "badge": "#42", "badgeColor": "text-bg-primary",
         "footer": [
             { "label": "P1", "colorCss": "text-bg-danger", "title": "Priority" },
-            { "label": "8", "icon": "fas fa-star", "title": "Story points" }
+            { "label": "8", "icon": "star", "title": "Story points" }
         ]
     }]
 }

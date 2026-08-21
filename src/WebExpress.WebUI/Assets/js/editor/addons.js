@@ -446,7 +446,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
         btn.className = "wx-editor-btn";
         btn.type = "button";
         btn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.insert.addon.tooltip");
-        btn.innerHTML = `<i class="${webexpress.webui.IconTheme.resolveFa("fas fa-puzzle-piece")}"></i>`;
+        btn.innerHTML = `<i class="${webexpress.webui.IconSet.resolve("puzzle")}"></i>`;
 
         btn.addEventListener("mousedown", (e) => {
             e.preventDefault();
@@ -663,7 +663,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
         if (hasProps) {
             items.push({
                 label: "Properties...",
-                icon: "fas fa-cog",
+                icon: "cog",
                 action: () => {
                     this._openSettingsForNode(editor, wrapper);
                 }
@@ -672,7 +672,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
 
         items.push({
             label: "Remove",
-            icon: "fas fa-trash-alt",
+            icon: "trash",
             action: () => {
                 wrapper.remove();
                 if (editor._syncValue) {
@@ -988,10 +988,10 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
                 </span>`;
         } else {
             const settingsBtn = hasProps
-                ? `<span class="wx-addon-settings-btn" title="Settings"><i class="${webexpress.webui.IconTheme.resolveFa("fas fa-cog")}"></i></span>`
+                ? `<span class="wx-addon-settings-btn" title="Settings"><i class="${webexpress.webui.IconSet.resolve("cog")}"></i></span>`
                 : "";
 
-            const dragHandle = `<span class="wx-addon-drag-handle"><i class="${webexpress.webui.IconTheme.resolveFa("fas fa-grip-vertical")}"></i></span>`;
+            const dragHandle = `<span class="wx-addon-drag-handle"><i class="${webexpress.webui.IconSet.resolve("grip-lines-vertical")}"></i></span>`;
 
             const bodyEditable = isContainer ? "true" : "false";
             const bodyClass = isContainer ? "wx-addon-body-container" : "wx-addon-body-widget";
@@ -1008,7 +1008,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
                     <div class="card-header py-1 px-2 d-flex justify-content-between align-items-center">
                         <div class="small text-muted fw-bold d-flex align-items-center">
                             ${dragHandle}
-                            <i class="${webexpress.webui.IconTheme.resolveFa(addonDef.icon)} me-2"></i>
+                            <i class="${webexpress.webui.IconSet.resolve(addonDef.icon)} me-2"></i>
                             <span>${addonDef.label}</span>
                         </div>
                         <div>${settingsBtn}</div>

@@ -28,7 +28,7 @@ The appearance and behavior of the main dropdown button are controlled by the fo
 | Attribute          | Description                                                        | Example
 |--------------------|--------------------------------------------------------------------|-----------------------------------------
 | `data-label`       | The text label displayed on the button.                            | `data-label="Actions"`
-| `data-icon`        | A CSS class for an icon to be displayed on the button.             | `data-icon="fas fa-cog"`
+| `data-icon`        | A CSS class for an icon to be displayed on the button.             | `data-icon="cog"`
 | `data-image`       | The URL of an image to be displayed on the button.                 | `data-image="/path/to/image.png"`
 | `data-color`       | A color class (e.g., from a CSS framework) for styling the button. | `data-color="btn-primary"`
 | `data-buttoncss`   | Additional CSS classes to be applied to the button.                | `data-buttoncss="btn-sm custom-style"`
@@ -93,15 +93,15 @@ The following code demonstrates how to create a `DropdownCtrl` using a declarati
 
 ```html
 <!-- The main container for the dropdown button control -->
-<div id="mainDropdown" class="wx-webui-dropdown" data-label="Actions" data-icon="fas fa-ellipsis-v" data-color="btn-secondary">
+<div id="mainDropdown" class="wx-webui-dropdown" data-label="Actions" data-icon="more" data-color="btn-secondary">
 
     <!-- A header for the first group of items -->
-    <div class="wx-dropdown-header" data-icon="fas fa-cog">
+    <div class="wx-dropdown-header" data-icon="cog">
         Settings
     </div>
 
     <!-- A clickable item with an icon and a text color class -->
-    <a id="home-item" class="wx-dropdown-item text-primary" data-icon="fas fa-home">
+    <a id="home-item" class="wx-dropdown-item text-primary" data-icon="home">
         Home
     </a>
 
@@ -114,7 +114,7 @@ The following code demonstrates how to create a `DropdownCtrl` using a declarati
     <div class="wx-dropdown-divider"></div>
 
     <!-- A disabled item that cannot be clicked -->
-    <a id="logout-item" class="wx-dropdown-item" data-icon="fas fa-sign-out-alt" disabled>
+    <a id="logout-item" class="wx-dropdown-item" data-icon="arrow-right-from-bracket" disabled>
         Logout
     </a>
 </div>

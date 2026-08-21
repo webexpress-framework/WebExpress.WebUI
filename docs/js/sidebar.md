@@ -47,7 +47,7 @@ Supported attributes:
 | Attribute           | Description
 |---------------------|-------------------------------------------------------------
 | `data-mode`         | Controls compact mode ("hide" hides the element, "overlay" shows an overlay)
-| `data-icon`         | Icon class for the element (e.g. `fas fa-cog`)
+| `data-icon`         | Icon class for the element (e.g. `cog`)
 | `data-image`        | Image URL for the element
 | `data-label`        | Label text of the element
 | `data-uri`          | Target URI for links
@@ -115,21 +115,21 @@ The following example shows the declaration of a sidebar with various element ty
      data-breakpoint="800">
 
     <div class="wx-sidebar-header" data-label="Navigation"></div>
-    <div class="wx-sidebar-link" data-icon="fas fa-home" data-label="Home" data-uri="/"></div>
-    <div class="wx-sidebar-link" data-icon="fas fa-user" data-label="Profile" data-uri="/profile" data-removeable="true"></div>
+    <div class="wx-sidebar-link" data-icon="home" data-label="Home" data-uri="/"></div>
+    <div class="wx-sidebar-link" data-icon="user" data-label="Profile" data-uri="/profile" data-removeable="true"></div>
 
     <!-- a link tinted with a background color and carrying a hover-revealed "..." menu -->
-    <div class="wx-sidebar-link" data-icon="fas fa-inbox" data-label="Inbox" data-uri="/inbox"
+    <div class="wx-sidebar-link" data-icon="inbox" data-label="Inbox" data-uri="/inbox"
          data-background-color-css="bg-primary">
         <div class="wx-sidebar-options">
-            <div class="wx-dropdown-item" data-icon="fas fa-pen" data-uri="/inbox/edit">Edit</div>
+            <div class="wx-dropdown-item" data-icon="pen" data-uri="/inbox/edit">Edit</div>
             <div class="wx-dropdown-divider"></div>
-            <div class="wx-dropdown-item" data-icon="fas fa-trash" data-uri="/inbox/delete">Delete</div>
+            <div class="wx-dropdown-item" data-icon="trash" data-uri="/inbox/delete">Delete</div>
         </div>
     </div>
 
     <div class="wx-sidebar-separator"></div>
-    <div class="wx-sidebar-panel" data-icon="fas fa-cog" data-label="Settings" data-mode="overlay">
+    <div class="wx-sidebar-panel" data-icon="cog" data-label="Settings" data-mode="overlay">
         <div>
             <!-- Panel content for overlay -->
             <form>

@@ -81,7 +81,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             var html = control.Render(context, visualTree);
-            var expected = @"*<button id=""status"" type=""button"" class=""wx-quickfilter-button"" data-icon=""fas fa-home"" data-badge=""42"" data-badge-color=""text-bg-danger"" data-wx-primary-action=""filter"">Status</button>*";
+            var expected = @"*<button id=""status"" type=""button"" class=""wx-quickfilter-button"" data-icon=""wx-icon-light wx-icon-light-home"" data-badge=""42"" data-badge-color=""text-bg-danger"" data-wx-primary-action=""filter"">Status</button>*";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
@@ -173,7 +173,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             var html = control.Render(context, visualTree);
-            var expected = @"*<button id=""add"" type=""button"" class=""wx-quickfilter-add"" title=""Create a new filter"" data-text=""New filter"" data-icon=""fas fa-plus""*>New filter</button>*";
+            var expected = @"*<button id=""add"" type=""button"" class=""wx-quickfilter-add"" title=""Create a new filter"" data-text=""New filter"" data-icon=""wx-icon-light wx-icon-light-plus""*>New filter</button>*";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
@@ -199,7 +199,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             var html = control.Render(context, visualTree);
-            var expected = @"*<button id=""add"" type=""button"" class=""wx-quickfilter-add"" data-icon=""fas fa-home""></button>*";
+            var expected = @"*<button id=""add"" type=""button"" class=""wx-quickfilter-add"" data-icon=""wx-icon-light wx-icon-light-home""></button>*";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
@@ -225,7 +225,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             var html = control.Render(context, visualTree);
-            var expected = @"*<button id=""add"" type=""button"" class=""wx-quickfilter-add"" data-icon=""fas fa-plus"" data-wx-primary-action=""modal"" data-wx-primary-target=""#filtereditor""></button>*";
+            var expected = @"*<button id=""add"" type=""button"" class=""wx-quickfilter-add"" data-icon=""wx-icon-light wx-icon-light-plus"" data-wx-primary-action=""modal"" data-wx-primary-target=""#filtereditor""></button>*";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }

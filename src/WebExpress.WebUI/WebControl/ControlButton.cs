@@ -166,7 +166,7 @@ namespace WebExpress.WebUI.WebControl
         {
             var text = Text?.Invoke(renderContext);
             var value = Value?.Invoke(renderContext);
-            var icon = Icon?.Invoke(renderContext)?.ApplyIconTheme(visualTree?.IconTheme ?? TypeIconTheme.Default);
+            var icon = Icon?.Invoke(renderContext);
             var outline = Outline?.Invoke(renderContext) ?? false;
             var primaryAction = PrimaryAction?.Invoke(renderContext);
             var secondaryAction = SecondaryAction?.Invoke(renderContext);

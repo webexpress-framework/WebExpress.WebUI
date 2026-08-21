@@ -200,7 +200,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-list-item-link""></div>")]
-        [InlineData(typeof(IconStar), @"<div class=""wx-list-item-link"" data-icon=""fas fa-star""></div>")]
+        [InlineData(typeof(IconStar), @"<div class=""wx-list-item-link"" data-icon=""wx-icon-light wx-icon-light-star""></div>")]
         public void Icon(Type icon, string expected)
         {
             // arrange
@@ -321,12 +321,12 @@ namespace WebExpress.WebUI.Test.WebControl
             var html6 = control6.Render(context, visualTree);
 
             // validation
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-list-item-link""><i class=""fas fa-star""></i></div>", html1);
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-list-item-link""><i class=""fas fa-star""></i></div>", html2);
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-list-item-link""><i class=""fas fa-star""></i></div>", html3);
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-list-item-link""><i class=""fas fa-star""></i></div>", html4);
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-list-item-link""><i class=""fas fa-star""></i></div>", html5);
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-list-item-link""><i class=""fas fa-star""></i></div>", html6);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-list-item-link""><i class=""wx-icon-light wx-icon-light-star""></i></div>", html1);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-list-item-link""><i class=""wx-icon-light wx-icon-light-star""></i></div>", html2);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-list-item-link""><i class=""wx-icon-light wx-icon-light-star""></i></div>", html3);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-list-item-link""><i class=""wx-icon-light wx-icon-light-star""></i></div>", html4);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-list-item-link""><i class=""wx-icon-light wx-icon-light-star""></i></div>", html5);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-list-item-link""><i class=""wx-icon-light wx-icon-light-star""></i></div>", html6);
         }
     }
 }

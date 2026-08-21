@@ -156,7 +156,7 @@ namespace WebExpress.WebUI.WebControl
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
             var header = Header?.Invoke(renderContext);
-            var headerIcon = HeaderIcon?.Invoke(renderContext)?.ApplyIconTheme(visualTree?.IconTheme ?? TypeIconTheme.Default);
+            var headerIcon = HeaderIcon?.Invoke(renderContext);
             var note = Note?.Invoke(renderContext);
             var badge = Badge?.Invoke(renderContext);
             var badgeColor = BadgeColor?.Invoke(renderContext);

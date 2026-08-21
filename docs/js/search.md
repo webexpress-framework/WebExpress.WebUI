@@ -31,7 +31,7 @@ The entire configuration of the search field is done declaratively via HTML attr
 |------------------|---------------------------------------------------------------------------------------------------
 | `name`           | The name for the `<input>` element, relevant for form submissions.
 | `placeholder`    | The placeholder text displayed in the empty search field.
-| `data-icon`      | The CSS class for the icon displayed at the beginning of the search field (e.g., `fas fa-search`).
+| `data-icon`      | The CSS class for the icon displayed at the beginning of the search field (e.g., `search`).
 | `data-favorited` | If set to `"true"`, the favorites feature (star icon) is enabled for the suggestions.
 | `data-value`     | The initial value of the search field.
 

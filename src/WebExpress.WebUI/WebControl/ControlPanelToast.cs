@@ -74,7 +74,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 Class = "btn"
             }
-                .Add(new HtmlElementTextSemanticsI() { Class = "fas fa-xmark" })
+                .Add(new HtmlElementTextSemanticsI() { Class = "wx-icon-light wx-icon-light-xmark" })
                 .AddUserAttribute("data-bs-dismiss", "alert")
                 .AddUserAttribute("aria-label", "close");
 

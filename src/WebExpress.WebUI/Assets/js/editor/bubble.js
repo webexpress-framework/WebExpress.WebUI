@@ -247,23 +247,23 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
         bubble.innerHTML = "";
 
         if (state.hasSelection) {
-            bubble.appendChild(this._makeBtn("fas fa-bold",
+            bubble.appendChild(this._makeBtn("bold",
                 this._i18n("webexpress.webui:editor.bold", "Bold"),
                 () => { this._execOnCurrent("bold"); this._reposition(); }));
-            bubble.appendChild(this._makeBtn("fas fa-italic",
+            bubble.appendChild(this._makeBtn("italic",
                 this._i18n("webexpress.webui:editor.italic", "Italic"),
                 () => { this._execOnCurrent("italic"); this._reposition(); }));
-            bubble.appendChild(this._makeBtn("fas fa-underline",
+            bubble.appendChild(this._makeBtn("underline",
                 this._i18n("webexpress.webui:editor.underline", "Underline"),
                 () => { this._execOnCurrent("underline"); this._reposition(); }));
-            bubble.appendChild(this._makeBtn("fas fa-strikethrough",
+            bubble.appendChild(this._makeBtn("strikethrough",
                 this._i18n("webexpress.webui:editor.strike", "Strike"),
                 () => { this._execOnCurrent("strikeThrough"); this._reposition(); }));
             bubble.appendChild(this._makeSep());
-            bubble.appendChild(this._makeBtn("fas fa-link",
+            bubble.appendChild(this._makeBtn("link",
                 this._i18n("webexpress.webui:editor.insert.link", "Insert Link"),
                 () => { this._openLinkDialog(); }));
-            bubble.appendChild(this._makeBtn("fas fa-eraser",
+            bubble.appendChild(this._makeBtn("eraser",
                 this._i18n("webexpress.webui:editor.clearformat", "Clear Format"),
                 () => { this._execOnCurrent("removeFormat"); this._reposition(); }));
         }
@@ -272,7 +272,7 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
             if (state.hasSelection) {
                 bubble.appendChild(this._makeSep());
             }
-            const ctxBtn = this._makeBtn("fas fa-ellipsis-v",
+            const ctxBtn = this._makeBtn("more",
                 this._i18n("webexpress.webui:editor.actions", "Actions"),
                 () => this._toggleFlyout(editor, state.target));
             ctxBtn.classList.add("wx-editor-bubble-context-btn");
@@ -282,7 +282,7 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
 
     /**
      * Builds a single toolbar button for the bubble.
-     * @param {string} icon - FontAwesome class.
+     * @param {string} icon - Symbolic icon name.
      * @param {string} title - Tooltip / aria-label.
      * @param {Function} onActivate - Click handler.
      * @returns {HTMLButtonElement}
@@ -293,7 +293,7 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
         b.className = "wx-editor-bubble-btn";
         b.title = title;
         b.setAttribute("aria-label", title);
-        b.innerHTML = `<i class="${webexpress.webui.IconTheme.resolveFa(icon)}"></i>`;
+        b.innerHTML = `<i class="${webexpress.webui.IconSet.resolve(icon)}"></i>`;
         // keep the editor selection alive and up to date for execCommand
         b.addEventListener("mousedown", (e) => {
             e.preventDefault();
@@ -482,7 +482,7 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
     /**
      * Creates a clickable flyout row with an optional icon.
      * @param {string} label - The row label.
-     * @param {string} icon - Optional FontAwesome/wx-icon class.
+     * @param {string} icon - Optional icon reference.
      * @returns {HTMLButtonElement}
      */
     _makeFlyoutRow: function(label, icon) {
@@ -491,7 +491,7 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
         row.className = "wx-editor-bubble-menu-item";
         if (icon) {
             const i = document.createElement("i");
-            i.className = webexpress.webui.IconTheme.resolveFa(icon);
+            i.className = webexpress.webui.IconSet.resolve(icon);
             row.appendChild(i);
         }
         const span = document.createElement("span");

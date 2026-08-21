@@ -1,6 +1,4 @@
-﻿using WebExpress.WebCore.WebIcon;
-
-namespace WebExpress.WebUI.WebIcon
+﻿namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon for a bridge-water.
@@ -8,30 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconBridgeWater : Icon
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="IconBridgeWater"/> class using the
-        /// <see cref="TypeIconTheme.Default"/> theme.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public IconBridgeWater()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="IconBridgeWater"/> class using the
-        /// specified theme.
-        /// </summary>
-        /// <param name="theme">The theme to use when rendering the icon.</param>
-        public IconBridgeWater(TypeIconTheme theme)
-            : base(theme)
-        {
-        }
-
-        /// <summary>
-        /// Returns the CSS class associated with the icon. In the
-        /// <see cref="TypeIconTheme.Light"/> theme the lightweight SVG variant is rendered;
-        /// otherwise the FontAwesome glyph is used.
-        /// </summary>
-        public override string Class => Theme == TypeIconTheme.Light
-            ? "wx-icon-light wx-icon-light-bridge-water"
-            : "fas fa-bridge-water";
+        public override string Symbol => "bridge-water";
     }
 }

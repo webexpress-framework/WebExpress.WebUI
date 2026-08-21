@@ -27,7 +27,7 @@
         id: "image-web",
         parentId: null,
         title: webexpress.webui.I18N.translate("webexpress.webui:editor.image.web.title"),
-        iconClass: "fas fa-globe",
+        iconClass: "globe",
 
         /**
          * Renders the page ui.
@@ -214,7 +214,7 @@
         id: "image-site",
         parentId: null,
         title: webexpress.webui.I18N.translate("webexpress.webui:editor.image.site.title"),
-        iconClass: "fas fa-image",
+        iconClass: "image",
 
         /**
          * Renders the page ui.

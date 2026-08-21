@@ -97,7 +97,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
 
         const selection = document.createElement("ul");
         const expandIcon = document.createElement("a");
-        expandIcon.className = "fas fa-angle-down";
+        expandIcon.className = "angle-down";
         expandIcon.href = "javascript:void(0);";
 
         dropdown.appendChild(selection);
@@ -186,7 +186,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         filterInput.setAttribute("aria-label", this._i18n("webexpress.webui:selection.filter", "Filter"));
 
         const clearButton = document.createElement("a");
-        clearButton.className = "fas fa-times";
+        clearButton.className = "xmark";
         clearButton.setAttribute("aria-label", this._i18n("webexpress.webui:selection.filter.clear", "Clear Filter"));
         clearButton.setAttribute("role", "button");
         clearButton.style.cursor = "pointer";
@@ -350,7 +350,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
 
                 if (!isStickyActive) {
                     const closeButton = document.createElement("a");
-                    closeButton.className = "fas fa-times";
+                    closeButton.className = "xmark";
                     closeButton.style.cursor = "pointer";
                     closeButton.addEventListener("click", (e) => {
                         e.stopPropagation();

@@ -80,7 +80,7 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
         }
 
         // add predecessor button
-        const predecessor = this._createPageItem("<span class='fas fa-angle-left'></span>", Math.max(this._page - 1, 0));
+        const predecessor = this._createPageItem("<span class='wx-icon-light wx-icon-light-angle-left'></span>", Math.max(this._page - 1, 0));
         if (this._page === 0) {
             predecessor.classList.add("disabled");
         }
@@ -90,7 +90,7 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
         this._addPageItems();
 
         // add successor button
-        const successor = this._createPageItem("<span class='fas fa-angle-right'></span>", Math.min(this._page + 1, this._count - 1));
+        const successor = this._createPageItem("<span class='wx-icon-light wx-icon-light-angle-right'></span>", Math.min(this._page + 1, this._count - 1));
         if (this._page === this._count - 1) {
             successor.classList.add("disabled");
         }

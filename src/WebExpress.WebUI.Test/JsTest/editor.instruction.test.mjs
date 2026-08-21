@@ -41,7 +41,7 @@ function loadInstruction() {
                 EditorPlugins: { register(name, position, definition) { plugin = definition; } },
                 DialogPanels: { register(key, definition) { panels.set(key, definition); } },
                 I18N: { translate: (key) => key },
-                IconTheme: { resolveFa: (cls) => cls },
+                IconSet: { resolve: (icon) => icon },
                 ModalSidebarPanelCtrl: class {
                     constructor(element) { this.element = element; }
                     show() { this.shown = true; }

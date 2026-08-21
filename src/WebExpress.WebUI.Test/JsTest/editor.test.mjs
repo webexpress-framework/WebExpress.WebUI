@@ -44,7 +44,7 @@ function loadEditor() {
                 Controller: { registerClass() { } },
                 Event: { CHANGE_VALUE_EVENT: "wx-change-value" },
                 I18N: { translate: (key) => key },
-                IconTheme: { resolveFa: (cls) => cls }
+                IconSet: { resolve: (icon) => icon }
             }
         }
     };

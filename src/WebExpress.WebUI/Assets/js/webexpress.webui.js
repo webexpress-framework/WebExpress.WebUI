@@ -1403,132 +1403,83 @@ webexpress.webui.Binds = new class {
 };
 
 /**
- * Global icon-theme registry.
+ * Global icon registry.
  *
- * The active theme is bound to the document root via
- * <c>&lt;html data-icon-theme="light"&gt;</c>. When the attribute is missing
- * or set to anything other than "light", the page is rendered in the
- * default theme (FontAwesome glyphs). The light theme switches to the
- * lightweight SVG variants defined in webexpress.webui.icon.css
- * (the <c>wx-icon-light wx-icon-light-*</c> class pair).
- *
- * Controls should not read the document attribute directly; both
- * <see cref="webexpress.webui.Ctrl#_iconTheme">_iconTheme()</see> and
- * <see cref="webexpress.webui.Ctrl#_iconClass">_iconClass(fa, light)</see>
- * are forwarded to this singleton, which also implements the
- * cross-theme fallback (use FontAwesome when no light variant exists
- * and vice versa).
+ * The framework ships one icon set - the light set - whose drawings are applied as css
+ * masks by webexpress.webui.icon.css. Controls resolve icons through here rather than
+ * writing class names themselves, so the day a second set is registrable only this
+ * resolver changes.
  */
-webexpress.webui.IconTheme = new class {
+webexpress.webui.IconSet = new class {
     /**
-     * Returns the active icon theme as read from
-     * <c>document.documentElement.dataset.iconTheme</c>.
-     * @returns {"light" | "default"} The current icon theme.
+     * The css class prefix the light set publishes its icons under.
      */
-    current() {
-        const root = (typeof document !== "undefined") ? document.documentElement : null;
-        const value = (root?.dataset?.iconTheme || "").trim().toLowerCase();
-        return value === "light" ? "light" : "default";
-    }
+    PREFIX = "wx-icon-light";
 
     /**
-     * Resolves an icon CSS class for the active theme with cross-theme
-     * fallback. When the active theme is "light", the light class is
-     * preferred; the FontAwesome class is used as a fallback when no light
-     * variant has been supplied. The reverse applies for the default theme.
-     *
-     * The light argument accepts either a full class string
-     * ("wx-icon-light wx-icon-light-pen") or the bare icon name
-     * ("pen"); in the latter case the "wx-icon-light wx-icon-light-"
-     * prefix is added automatically.
-     *
-     * @param {string|null|undefined} faClass - FontAwesome class string.
-     * @param {string|null|undefined} lightClass - Light-theme class or name.
-     * @returns {string} The resolved CSS class, or "" when both are empty.
+     * FontAwesome names the light set publishes under a different name. Kept because such
+     * names still arrive from stored dashboards, addon definitions and user data. A legacy
+     * name that matches a drawing one to one needs no entry - it resolves to itself.
      */
-    resolve(faClass, lightClass) {
-        const fa = (faClass || "").trim();
-        const lightFull = this._normalizeLight(lightClass);
+    ALIAS = {
+        "info-circle": "circle-info",
+        "ellipsis-v": "more",
+        "ellipsis-vertical": "more",
+        "exclamation-triangle": "triangle-exclamation",
+        "calendar-days": "calendar",
+        "file-lines": "file",
+        "file-alt": "file",
+        "file-archive": "file-zipper",
+        "trash-alt": "trash",
+        "save": "floppy-disk",
+        "tasks": "list-check",
+        "map-marked-alt": "map-location-dot",
+        "map-marker-alt": "location-dot"
+    };
 
-        if (this.current() === "light") {
-            return lightFull || fa || "";
+    /**
+     * Resolves an icon reference to the css class pair of the active set. Accepts a
+     * symbolic name ("anchor"), an already resolved class string, or a legacy FontAwesome
+     * class, because icon references reach the client from control code, server payloads
+     * and stored user data alike.
+     * @param {string|null|undefined} icon - The icon reference.
+     * @returns {string} The class string, or "" when nothing was passed.
+     */
+    resolve(icon) {
+        const value = (icon || "").trim();
+        if (!value) {
+            return "";
         }
-        return fa || lightFull || "";
-    }
 
-    /**
-     * Normalises a light-theme value into a full CSS class string. Accepts
-     * either an already-prefixed class ("wx-icon-light wx-icon-light-foo"),
-     * just the modifier class ("wx-icon-light-foo") or the bare icon name
-     * ("foo").
-     * @param {string|null|undefined} value - Raw light-theme value.
-     * @returns {string} The full class string or "".
-     */
-    _normalizeLight(value) {
-        const v = (value || "").trim();
-        if (!v) return "";
-        if (v.startsWith("wx-icon-light ")) return v;
-        if (v.startsWith("wx-icon-light-")) return `wx-icon-light ${v}`;
-        return `wx-icon-light wx-icon-light-${v}`;
-    }
-
-    /**
-     * Resolves a FontAwesome class to the theme-appropriate class by deriving
-     * the matching light-theme icon name from the FontAwesome name. A small
-     * alias map covers icons whose light variant is published under a different
-     * name. This lets callers pass only the familiar FontAwesome class.
-     * @param {string} faClass - FontAwesome class string, e.g. "fas fa-bold".
-     * @returns {string} The resolved CSS class for the active theme.
-     */
-    resolveFa(faClass) {
-        const alias = {
-            "info-circle": "circle-info",
-            "puzzle-piece": "puzzle",
-            "ellipsis-v": "more",
-            "ellipsis-vertical": "more",
-            "square": "card",
-            "tag": "label",
-            "exclamation-triangle": "triangle-exclamation",
-            "grip-vertical": "grip-lines-vertical",
-            // FontAwesome names the month grid "calendar-days"; the light set
-            // publishes that same grid as plain "calendar" and keeps
-            // "calendar-day" for the single highlighted day, so only the plural
-            // needs redirecting. The mapping mirrors IconCalendarDays and
-            // IconCalendarDay on the server, which is where a page that mixes
-            // server- and client-built icons would otherwise show two different
-            // calendars side by side.
-            "calendar-days": "calendar",
-            // the light set follows FontAwesome 6 for the file glyphs, where
-            // file-alt became file-lines and file-archive became file-zipper. It
-            // publishes no file-lines of its own - IconFileLines maps that one to
-            // plain "file" - and the two retired names still reach here from
-            // callers and from stored data, so all three are redirected.
-            "file-lines": "file",
-            "file-alt": "file",
-            "file-archive": "file-zipper",
-            "trash-alt": "trash"
-        };
-        const match = /fa-([a-z0-9-]+)/.exec(faClass || "");
-        const base = match ? match[1] : "";
-        if (!base) {
-            return faClass || "";
+        const prefix = this.PREFIX;
+        if (value.startsWith(prefix + " ")) {
+            return value;
         }
-        return this.resolve(faClass, alias[base] || base);
+        if (value.startsWith(prefix + "-")) {
+            return prefix + " " + value;
+        }
+
+        // the style token (fa-solid, fa-regular, fa-brands) is not the icon name
+        const legacy = /\bfa-(?!solid\b|regular\b|brands\b)([a-z0-9-]+)/.exec(value);
+        const name = legacy
+            ? (this.ALIAS[legacy[1]] ?? legacy[1])
+            : value;
+
+        return prefix + " " + prefix + "-" + name;
     }
 };
 
 /**
  * Single factory for assigning icons to controls built in JavaScript. It
  * unifies the two icon kinds a control may use: a CSS/font icon (a class string
- * such as "fas fa-plus", rendered as an <i>) and an image icon (a path, URL or
+ * such as "plus", rendered as an <i>) and an image icon (a path, URL or
  * data URI, rendered as an <img>). Controls should build every icon through
  * this factory instead of writing raw markup or unicode glyphs, so an image can
  * be substituted for a font glyph anywhere without touching the control.
  *
- * This concern is deliberately independent of webexpress.webui.IconTheme: the
- * theme only switches between the FontAwesome and the light CSS variants, while
- * this factory decides between a CSS icon and an image. A caller that wants the
- * theme variant resolves the class first and passes the result here.
+ * This concern is deliberately independent of webexpress.webui.IconSet, which turns an
+ * icon reference into css classes; this factory decides between a css icon and an image.
+ * A caller that has a symbolic name resolves it first and passes the result here.
  */
 webexpress.webui.Icon = new class {
     /**
@@ -1559,7 +1510,9 @@ webexpress.webui.Icon = new class {
         }
 
         const i = document.createElement("i");
-        i.className = (value + " " + extra).trim();
+        // a spec may be a symbolic name, an already resolved class string or a legacy
+        // FontAwesome class; the set decides which, so callers never have to
+        i.className = (webexpress.webui.IconSet.resolve(value) + " " + extra).trim();
         return i;
     }
 
@@ -1647,7 +1600,7 @@ webexpress.webui.EditorAddOns = new class {
      * @param {string} id - Unique identifier for the add-on.
      * @param {object} definition - The add-on definition object.
      * @param {string} definition.label - Display name used in the UI.
-     * @param {string} definition.icon - Icon CSS class (e.g., 'fas fa-star').
+     * @param {string} definition.icon - Icon CSS class (e.g., 'wx-icon-light wx-icon-light-star').
      * @param {string} [definition.category] - Category group (e.g., 'Widgets', 'Layout'). Defaults to 'General'.
      * @param {string} [definition.type] - Layout type: 'block' (default) or 'inline'.
      * @param {boolean} [definition.isContainer] - If true, the body is editable (for nesting).
@@ -1727,7 +1680,7 @@ webexpress.webui.EditorShortcuts = new class {
      * @param {object} definition - The shortcut definition object.
      * @param {string} definition.label - Display name shown in the slash menu.
      * @param {string} [definition.description] - Optional secondary line.
-     * @param {string} [definition.icon] - FontAwesome icon class. Defaults to 'fas fa-bolt'.
+     * @param {string} [definition.icon] - Icon name. Defaults to 'bolt'.
      * @param {string} [definition.category] - Group header in the menu. Defaults to 'General'.
      * @param {Array<string>} [definition.keywords] - Extra search terms.
      * @param {Function} [definition.execute] - Handler called with (editor).
@@ -2175,37 +2128,16 @@ webexpress.webui.Ctrl = class {
     }
 
     /**
-     * Returns the active icon theme as read from the root <html data-icon-theme>
-     * attribute. Possible values are "light" (lightweight SVG variants from
-     * webexpress.webui.icon.css) or "default" (FontAwesome glyphs, also used
-     * when the attribute is missing).
+     * Resolves an icon reference to the css classes of the active icon set. Derived
+     * controls go through here instead of writing class names, so a control keeps working
+     * when the set behind the name changes.
      *
-     * Derived controls should use this together with {@link _iconClass} to
-     * stay in sync with whatever theme the page sets, instead of mirroring
-     * the theme on every individual control via a per-control data attribute.
-     *
-     * @returns {"light" | "default"} The current icon theme.
-     */
-    _iconTheme() {
-        return webexpress.webui.IconTheme.current();
-    }
-
-    /**
-     * Resolves an icon CSS class for the active theme. Falls back to the
-     * other variant whenever the preferred one is missing - so passing only
-     * the FontAwesome name still produces a sensible result under the light
-     * theme, and vice versa.
-     *
-     * @param {string|null|undefined} faClass - The FontAwesome class string,
-     *     e.g. "fas fa-pen".
-     * @param {string|null|undefined} lightClass - The light-theme class
-     *     string, e.g. "wx-icon-light wx-icon-light-pen". Pass just the
-     *     icon name (e.g. "pen") and the "wx-icon-light wx-icon-light-"
-     *     prefix is added automatically.
+     * @param {string|null|undefined} icon - A symbolic name such as "pen", an already
+     *     resolved class string, or a legacy FontAwesome class.
      * @returns {string} The CSS class string to apply to the icon element.
      */
-    _iconClass(faClass, lightClass) {
-        return webexpress.webui.IconTheme.resolve(faClass, lightClass);
+    _iconClass(icon) {
+        return webexpress.webui.IconSet.resolve(icon);
     }
 }
 

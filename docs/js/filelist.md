@@ -22,7 +22,7 @@ File Entry Attributes:
 |Attribute          |Description
 |-------------------|--------------------------- 
 |`data-file-uri`    |The URL or path to the file. Used as the link target.
-|`data-file-icon`   |Optional Font Awesome icon class (e.g., fas fa-file-pdf). If not set, an icon is inferred from the file extension.
+|`data-file-icon`   |Optional icon name (e.g., `file-pdf`). If not set, an icon is inferred from the file extension.
 |`data-file-image`  |Optional image URL for thumbnail preview.
 |`data-file-size`   |File size string (e.g., 1.2 MB).
 |`data-file-date`   |Date string (e.g., 2025-08-01).

@@ -12,8 +12,8 @@ webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCt
 
         // read properties from data attributes, fallback to null, use defaults for icons if not set
         this._label = element.dataset.label || null;
-        this._iconCollapse = element.dataset.iconCollapse || "fas fa-angles-left";
-        this._iconExpand = element.dataset.iconExpand || "fas fa-angles-right";
+        this._iconCollapse = element.dataset.iconCollapse || "angles-left";
+        this._iconExpand = element.dataset.iconExpand || "angles-right";
         this._imageCollapse = element.dataset.imageCollapse || null;
         this._imageExpand = element.dataset.imageExpand || null;
 

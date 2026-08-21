@@ -175,7 +175,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             var html = control.Render(context, visualTree);
-            var expected = @"<div class=""wx-webui-kanban""><div class=""wx-kanban-card"" data-footer=""[{&quot;label&quot;:&quot;P1&quot;,&quot;colorCss&quot;:&quot;text-bg-danger&quot;,&quot;title&quot;:&quot;Priority&quot;},{&quot;label&quot;:&quot;8&quot;,&quot;icon&quot;:&quot;fas fa-star&quot;},{&quot;label&quot;:&quot;5&quot;,&quot;colorStyle&quot;:&quot;background:#ff8800;&quot;}]""></div></div>";
+            var expected = @"<div class=""wx-webui-kanban""><div class=""wx-kanban-card"" data-footer=""[{&quot;label&quot;:&quot;P1&quot;,&quot;colorCss&quot;:&quot;text-bg-danger&quot;,&quot;title&quot;:&quot;Priority&quot;},{&quot;label&quot;:&quot;8&quot;,&quot;icon&quot;:&quot;wx-icon-light wx-icon-light-star&quot;},{&quot;label&quot;:&quot;5&quot;,&quot;colorStyle&quot;:&quot;background:#ff8800;&quot;}]""></div></div>";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }

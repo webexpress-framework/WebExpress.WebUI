@@ -26,7 +26,7 @@ The component is configured declaratively using `data-` attributes. The initial 
 
 The core purpose of the `DateCtrl` is the static, standardized presentation of date strings, completely abstracted from input mechanics.
 
-- **DOM Structuring**: Upon initialization, the component clears its host element, adds the `wx-date` class, and injects a neatly structured `<span>`. This wrapper contains a FontAwesome calendar icon (`fa-solid fa-calendar-days`) followed by the formatted date text.
+- **DOM Structuring**: Upon initialization, the component clears its host element, adds the `wx-date` class, and injects a neatly structured `<span>`. This wrapper contains the `calendar` icon of the active icon set, followed by the formatted date text.
 - **Smart Parsing**: The component intelligently parses its initial text content or programmatically assigned values. It can detect single dates or date ranges provided as objects, arrays, or delimited strings (using semicolons or dashes). 
 - **Range Handling**: If a valid start and end date are detected, they are rendered using the configured `data-separator`. If the start and end dates fall on the exact same calendar day, the component smartly collapses the display to show just the single date.
 - **Read-Only**: The component is strictly for display purposes. It does not spawn hidden input fields for forms and does not trigger user interaction events.

@@ -181,7 +181,7 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         wrapper.className = "wx-tile-picker-search";
 
         const icon = document.createElement("i");
-        icon.className = this._iconClass("fas fa-search", "wx-icon-light-search");
+        icon.className = this._iconClass("search");
         wrapper.appendChild(icon);
 
         this._searchInput = document.createElement("input");
@@ -596,7 +596,7 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
             const check = document.createElement("span");
             check.className = "wx-tile-card-check";
             check.setAttribute("aria-hidden", "true");
-            check.innerHTML = `<i class="${this._iconClass("fas fa-check", "wx-icon-light-check")}"></i>`;
+            check.innerHTML = `<i class="${this._iconClass("check")}"></i>`;
             card.appendChild(check);
         }
 

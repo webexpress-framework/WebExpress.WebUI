@@ -378,7 +378,7 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
         back.title = backLabel;
         back.setAttribute("aria-label", backLabel);
 
-        const backIcon = webexpress.webui.Icon.create(this._iconClass("fas fa-arrow-left", "wx-icon-light-arrow-left"));
+        const backIcon = webexpress.webui.Icon.create("arrow-left");
         if (backIcon) {
             back.appendChild(backIcon);
         }
@@ -396,7 +396,7 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
             close.className = "btn wx-button-close wx-detail-close";
             close.title = closeLabel;
             close.setAttribute("aria-label", closeLabel);
-            close.innerHTML = `<i class="${this._iconClass("fas fa-times", "wx-icon-light-xmark")}"></i>`;
+            close.innerHTML = `<i class="${this._iconClass("xmark")}"></i>`;
             close.addEventListener("click", () => this.hideDetail());
 
             header.appendChild(close);

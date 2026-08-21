@@ -343,7 +343,6 @@ namespace WebExpress.WebUI.WebControl
             var evaluation = SlaEvaluator.Evaluate(definition, moment);
             var label = Label?.Invoke(renderContext);
             var description = Description?.Invoke(renderContext);
-            var iconTheme = visualTree?.IconTheme ?? TypeIconTheme.Default;
 
             var html = new HtmlElementTextContentDiv()
             {
@@ -366,7 +365,7 @@ namespace WebExpress.WebUI.WebControl
                 : null);
             html.Add(RenderMeter(evaluation));
             html.Add(RenderFooter(evaluation));
-            html.Add((ShowActions?.Invoke(renderContext) ?? true) ? RenderActions(evaluation, iconTheme) : null);
+            html.Add((ShowActions?.Invoke(renderContext) ?? true) ? RenderActions(evaluation) : null);
 
             return html;
         }
@@ -539,14 +538,13 @@ namespace WebExpress.WebUI.WebControl
         /// agreement moves between the states.
         /// </remarks>
         /// <param name="evaluation">The result of the evaluation.</param>
-        /// <param name="iconTheme">The icon theme of the page.</param>
         /// <returns>The actions element.</returns>
-        protected static IHtmlElement RenderActions(SlaEvaluation evaluation, TypeIconTheme iconTheme)
+        protected static IHtmlElement RenderActions(SlaEvaluation evaluation)
         {
             return new HtmlElementTextContentDiv() { Class = "wx-sla-actions" }
-                .Add(RenderAction("pause", "Pause", new IconPause(iconTheme), evaluation.IsPaused))
-                .Add(RenderAction("resume", "Resume", new IconPlay(iconTheme), !evaluation.IsPaused))
-                .Add(RenderAction("fulfill", "Mark as fulfilled", new IconCheck(iconTheme), evaluation.IsSettled));
+                .Add(RenderAction("pause", "Pause", new IconPause(), evaluation.IsPaused))
+                .Add(RenderAction("resume", "Resume", new IconPlay(), !evaluation.IsPaused))
+                .Add(RenderAction("fulfill", "Mark as fulfilled", new IconCheck(), evaluation.IsSettled));
         }
 
         /// <summary>
