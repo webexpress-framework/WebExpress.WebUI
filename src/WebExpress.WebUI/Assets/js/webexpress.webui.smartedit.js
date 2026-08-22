@@ -75,7 +75,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         }
         const pencil = document.createElement("button");
         const icon = document.createElement("i");
-        icon.className = "pencil";
+        icon.className = this._iconClass("pencil");
         icon.title = this._i18n("webexpress.webui:edit", "Edit");
         pencil.classList.add("pencil");
         pencil.appendChild(icon);

@@ -159,6 +159,36 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the background colour of the icon control.
+        /// </summary>
+        /// <remarks>
+        /// The colour has to end up on a wrapper: a drawn icon is painted by masking
+        /// background-color, so putting it on the icon itself would recolour the glyph
+        /// instead of backing it. The default colour paints nothing and must not wrap.
+        /// </remarks>
+        [Theory]
+        [InlineData(TypeColorBackground.Default, @"<i class=""wx-icon-light wx-icon-light-star""></i>")]
+        [InlineData(TypeColorBackground.Primary, @"<span class=""wx-icon-backdrop bg-primary""><i class=""wx-icon-light wx-icon-light-star""></i></span>")]
+        [InlineData(TypeColorBackground.Danger, @"<span class=""wx-icon-backdrop bg-danger""><i class=""wx-icon-light wx-icon-light-star""></i></span>")]
+        public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlIcon()
+            {
+                Icon = _ => new IconStar(),
+                BackgroundColor = _ => new PropertyColorBackground(backgroundColor)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
+        }
+
+        /// <summary>
         /// Tests that the symbolic name drives the css class, so a renamed or missing
         /// drawing surfaces as a wrong class rather than as a silently empty icon.
         /// </summary>

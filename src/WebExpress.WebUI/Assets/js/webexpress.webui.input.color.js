@@ -120,7 +120,7 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.PopperCtrl {
         this._colorPreview = colorPreview;
 
         const expandIcon = document.createElement("i");
-        expandIcon.className = "angle-down";
+        expandIcon.className = this._iconClass("angle-down");
         expandIcon.style.color = "#666";
 
         dropdown.appendChild(colorPreview);

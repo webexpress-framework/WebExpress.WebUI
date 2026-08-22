@@ -69,7 +69,7 @@ webexpress.webui.RatingCtrl = class extends webexpress.webui.Ctrl {
 
             const icon = document.createElement("i");
             const active = i <= this._value;
-            icon.className = (active ? "star" : "star") + " wx-rating-icon";
+            icon.className = this._iconClass("star") + " wx-rating-icon";
             star.classList.toggle("active", active);
 
             star.appendChild(icon);

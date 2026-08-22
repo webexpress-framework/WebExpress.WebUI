@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
  <g fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
-  <path d="m10.5 2.6 2.4 4.9 5.4.8-3.9 3.8.9 5.3-4.8-2.5-4.8 2.5.9-5.3-3.9-3.8 5.4-.8z"/>
-  <path d="m10.5 2.6v14.8"/>
-  <path d="m10.5 5.6 1.5 3 3.3.5-2.4 2.3.6 3.3-3-1.6"/>
+  <path d="M10.5 3L12.44 8.33L18.11 8.53L13.64 12.02L15.2 17.47L10.5 14.3L5.8 17.47L7.36 12.02L2.89 8.53L8.56 8.33Z"/>
+  <path d="M10.5 3L10.5 17.6"/>
  </g>
 </svg>

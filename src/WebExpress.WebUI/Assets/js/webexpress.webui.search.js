@@ -138,7 +138,7 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
     _createSearchClearButton() {
         const searchClear = document.createElement("span");
         const icon = document.createElement("i");
-        icon.className = "xmark";
+        icon.className = this._iconClass("xmark");
         searchClear.appendChild(icon);
         searchClear.style.cursor = "pointer";
         searchClear.addEventListener("click", () => {

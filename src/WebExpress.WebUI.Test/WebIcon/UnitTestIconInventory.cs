@@ -142,10 +142,10 @@ namespace WebExpress.WebUI.Test.WebIcon
         /// </remarks>
         /// <summary>
         /// Drawings kept as silhouettes on purpose, because the stroke redraw offered for
-        /// them was judged worse than the original. Each entry is a deliberate exception,
-        /// not a backlog item - shrinking the list means someone drew a better icon.
+        /// them was judged worse than the original. Empty is the goal: an entry here means a
+        /// drawing is knowingly out of step with the rest of the set.
         /// </summary>
-        private static readonly HashSet<string> SilhouettesKeptOnPurpose = ["iam"];
+        private static readonly HashSet<string> SilhouettesKeptOnPurpose = [];
 
         [Fact]
         public void NoDrawingRendersAsASilhouette()
@@ -184,7 +184,7 @@ namespace WebExpress.WebUI.Test.WebIcon
         /// <returns>True when a stroke other than none is set.</returns>
         private static bool HasStroke(string svg)
         {
-            return Regex.IsMatch(svg, @"strokes*[:=]s*""?s*(?!none)[^"";s>]+");
+            return Regex.IsMatch(svg, @"stroke\s*[:=]\s*""?\s*(?!none)[^"";\s>]+");
         }
 
         /// <summary>
@@ -194,8 +194,35 @@ namespace WebExpress.WebUI.Test.WebIcon
         /// <returns>True when a fill other than none is set.</returns>
         private static bool HasFill(string svg)
         {
-            return Regex.Matches(svg, @"fills*[:=]s*""?s*([^"";s>]+)")
+            return Regex.Matches(svg, @"fill\s*[:=]\s*""?\s*([^"";\s>]+)")
                 .Any(x => x.Groups[1].Value != "none");
+        }
+
+        /// <summary>
+        /// No script picks a drawing by its bare name.
+        /// </summary>
+        /// <remarks>
+        /// A drawing is selected by the class pair the icon set produces, never by the name
+        /// alone: <c>element.className = "copy"</c> yields an element no rule matches, so it
+        /// renders as empty space instead of failing. Eleven call sites shipped that way, and
+        /// nothing noticed because an invisible icon looks like a layout choice.
+        /// </remarks>
+        [Fact]
+        public void NoScriptPicksADrawingByBareName()
+        {
+            var assembly = typeof(Icon).Assembly;
+            var drawings = GetDrawings();
+            var pattern = new Regex(@"classNames*=s*""([a-z][a-z0-9-]{2,})""");
+
+            var offenders = assembly.GetManifestResourceNames()
+                .Where(x => x.EndsWith(".js"))
+                .SelectMany(x => pattern.Matches(ReadResource(assembly, x))
+                    .Where(m => drawings.Contains(m.Groups[1].Value))
+                    .Select(m => $"{x.Split(char.Parse(@"\")).Last()}: {m.Value}"))
+                .Order()
+                .ToList();
+
+            Assert.True(offenders.Count == 0, $"scripts picking a drawing by bare name: {string.Join(", ", offenders)}");
         }
     }
 }

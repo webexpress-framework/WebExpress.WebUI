@@ -197,7 +197,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             this._moreButton.textContent = label;
         } else {
             const icon = document.createElement("i");
-            icon.className = "chevron-down";
+            icon.className = this._iconClass("chevron-down");
             this._moreButton.appendChild(icon);
         }
 
@@ -615,7 +615,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             button.dataset.itemId = item.id;
 
             const icon = document.createElement("i");
-            icon.className = "chevron-right";
+            icon.className = this._iconClass("chevron-right");
             button.appendChild(icon);
 
             // event listeners for submenu

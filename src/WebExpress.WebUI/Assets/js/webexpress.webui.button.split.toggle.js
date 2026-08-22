@@ -55,7 +55,7 @@ webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCt
         // select icon based on collapsed state
         if (this._collapsed ? this._iconExpand : this._iconCollapse) {
             const icon = document.createElement("i");
-            icon.className = this._collapsed ? this._iconExpand : this._iconCollapse;
+            icon.className = this._iconClass(this._collapsed ? this._iconExpand : this._iconCollapse);
             this._element.appendChild(icon);
         }
 

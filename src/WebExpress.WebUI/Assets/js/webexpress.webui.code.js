@@ -72,7 +72,7 @@ webexpress.webui.CodeCtrl = class extends webexpress.webui.Ctrl {
     _createCopyButton() {
         const copyButton = document.createElement("button");
         const icon = document.createElement("i");
-        icon.className = "copy";
+        icon.className = this._iconClass("copy");
         copyButton.classList.add("btn", "btn-sm");
         copyButton.title = this._i18n("webexpress.webui:copy", "Copy");
         copyButton.appendChild(icon);

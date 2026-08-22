@@ -63,6 +63,23 @@
     }
 }
 
+/*
+ * Backdrop for an icon that carries a background colour.
+ *
+ * A drawn icon is painted by masking background-color, so that property is the ink and
+ * cannot also be the backing. ControlIcon therefore puts the colour on this wrapper, which
+ * sizes itself to the glyph and keeps it centred.
+ */
+.wx-icon-backdrop {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75em;
+    height: 1.75em;
+    border-radius: 0.25em;
+    vertical-align: -0.375em;
+}
+
 .wx-icon-light-add-column-above {
     -webkit-mask-image: url("../icons/add-column-above.svg");
     mask-image: url("../icons/add-column-above.svg");
@@ -5581,11 +5598,6 @@
 .wx-icon-light-message {
     -webkit-mask-image: url("../icons/message.svg");
     mask-image: url("../icons/message.svg");
-}
-
-.wx-icon-light-comment-alt {
-    -webkit-mask-image: url("../icons/comment-alt.svg");
-    mask-image: url("../icons/comment-alt.svg");
 }
 
 .wx-icon-light-comment-dots {
