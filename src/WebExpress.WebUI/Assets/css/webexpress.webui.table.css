@@ -27,6 +27,53 @@
     --bs-table-border-color: var(--wx-border-color);
 }
 
+/* --- Fill mode ---
+   The table takes the height its host offers instead of growing with its rows,
+   which is what an application shell asks of the content of a pane. What it buys
+   is the column header staying while the rows scroll, and a table wider than the
+   pane scrolling inside itself instead of pushing the pane sideways.
+
+   The rule reaches the host rather than the table, because the host is what the
+   control marks and the table is what the controller builds inside it - `:has`
+   is what lets one rule serve both the WebUI and the WebApp host. Both the basis
+   and the height are stated: a flex column host drives the basis, and where a
+   host hands nothing down the height still has to come from the environment
+   rather than from the content. 100% would resolve to auto against an
+   auto-height host, which is the content - the one answer this mode must not
+   give. */
+.wx-fill:has(> .wx-table) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 var(--wx-table-height, 70vh);
+    height: var(--wx-table-height, 70vh);
+    max-height: 100%;
+    min-height: 12rem;
+}
+
+/* The table is the scrollport on both axes. Its fit-content minimum has to go
+   for that: a scrollport as wide as its widest row never scrolls, it grows - the
+   rows keep that minimum and are what overflows now. */
+.wx-fill > .wx-table {
+    flex: 1 1 auto;
+    min-height: 0;
+    min-width: 0;
+    overflow: auto;
+}
+
+/* the header stays at the top edge while the rows pass under it, and moves with
+   them sideways, so a column and its header never come apart */
+.wx-fill > .wx-table > .wx-table-header-group {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+}
+
+/* the pager, the info line and the progress bar the data table keeps beside the
+   table are bands: they hold their height and leave the squeeze to the rows */
+.wx-fill:has(> .wx-table) > *:not(.wx-table) {
+    flex: 0 0 auto;
+}
+
 /* --- Row Structure (Grid) --- */
 .wx-table-row,
 .wx-grid-row {

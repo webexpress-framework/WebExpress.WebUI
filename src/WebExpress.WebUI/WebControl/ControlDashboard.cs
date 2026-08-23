@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -17,6 +18,25 @@ namespace WebExpress.WebUI.WebControl
         /// Returns the collection of widgets.
         /// </summary>
         public IEnumerable<IControlDashboardWidget> Widgets => _widgets;
+
+        /// <summary>
+        /// Gets or sets whether the board takes the height its host offers
+        /// instead of growing with its longest column.
+        /// </summary>
+        /// <remarks>
+        /// A board that grows is the right shape for one block among others on a
+        /// page. Where the board *is* the view, it is the wrong one: the page
+        /// scrolls around it and takes the "…" menu above the columns along, so
+        /// the way to add a column or a widget leaves the screen. Filling bounds
+        /// the board, and the widgets scroll below a menu bar that stays.
+        ///
+        /// A host that is a flex column - which the WebApp content panel becomes
+        /// on its own for a filling control - drives the height. A host that hands
+        /// nothing down falls back to the self-imposed default of the
+        /// <c>--wx-dashboard-height</c> custom property, never to the content: the
+        /// columns only scroll while the board is bounded.
+        /// </remarks>
+        public Func<IRenderControlContext, bool> Fill { get; set; } = _ => false;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -133,7 +153,7 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-dashboard", GetClasses(renderContext)),
+                Class = Css.Concatenate("wx-webui-dashboard", (Fill?.Invoke(renderContext) ?? false) ? "wx-fill" : null, GetClasses(renderContext)),
                 Style = GetStyles(renderContext)
             }
                 .Add(columns.Select(x => x.Render(renderContext, visualTree)))

@@ -4,6 +4,38 @@
 .wx-dashboard {
 }
 
+/* Fill mode: the board takes the height its host offers instead of growing with
+   its longest column, which is what an application shell asks of the content of
+   a pane. The "…" menu above the columns then stays reachable while the widgets
+   scroll, instead of leaving the screen with the page.
+
+   Both the basis and the height are stated: a flex column host drives the basis,
+   and where a host hands nothing down the height still has to come from the
+   environment rather than from the content. 100% would resolve to auto against
+   an auto-height host, which is the content - the one answer this mode must not
+   give. */
+.wx-dashboard.wx-fill {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 var(--wx-dashboard-height, 70vh);
+    height: var(--wx-dashboard-height, 70vh);
+    max-height: 100%;
+    min-height: 12rem;
+    overflow: hidden;
+}
+
+.wx-dashboard.wx-fill > .wx-dashboard-toolbar {
+    flex: 0 0 auto;
+}
+
+/* the columns are what scrolls, all of them together: they are read as one board
+   rather than as lanes with a scrollbar each */
+.wx-dashboard.wx-fill > .wx-dashboard-row {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
+
 /* board "…" menu bar, right aligned above the columns, sharing the tab-add feel */
 .wx-dashboard-toolbar {
     display: flex;

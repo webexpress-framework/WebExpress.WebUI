@@ -20,6 +20,47 @@
     overflow: hidden;
 }
 
+/* Fill mode: the calendar takes the height its host offers instead of growing
+   with its content, which is what an application shell asks of the content of a
+   pane. The base rule keeps the grid off the page's scrollbar already - it
+   clips - but only a bounded calendar hands the overflow to its own body, so
+   this mode is what turns the clipping into scrolling.
+
+   Both the basis and the height are stated: a flex column host drives the
+   basis, and where a host hands nothing down the height still has to come from
+   the environment rather than from the content. 100% would resolve to auto
+   against an auto-height host and give exactly the content answer this mode
+   exists to avoid, hence the viewport-relative default. The floor keeps a pane
+   too short for the toolbar and a week of the grid scrolling rather than
+   crushing them. */
+.wx-schedule.wx-fill {
+    flex: 1 1 var(--wx-schedule-height, 70vh);
+    height: var(--wx-schedule-height, 70vh);
+    max-height: 100%;
+    min-height: 12rem;
+}
+
+/* the toolbar is a band: it keeps its intrinsic height in a short pane and lets
+   the grid below it take the squeeze, which is the part that can scroll */
+.wx-schedule.wx-fill > .wx-schedule-toolbar {
+    flex: 0 0 auto;
+}
+
+/* A month is as tall as its cells, which in a filled pane would leave the space
+   below the last week empty. So the weeks share what the pane has instead. They
+   only ever grow: the minimum height of a day cell stands, so a pane too short
+   for the month keeps the cells readable and hands the rest to the body's
+   scrollbar. The weekday header is not a week and keeps its own height. */
+.wx-schedule.wx-fill .wx-schedule-month {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+.wx-schedule.wx-fill .wx-schedule-month > .wx-schedule-week {
+    flex: 1 1 auto;
+}
+
 /* toolbar ---------------------------------------------------------------- */
 
 .wx-schedule-toolbar {

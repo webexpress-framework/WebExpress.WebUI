@@ -56,6 +56,26 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, bool> SuppressHeaders { get; set; } = _ => false;
 
         /// <summary>
+        /// Gets or sets whether the table takes the height its host offers
+        /// instead of growing with its rows.
+        /// </summary>
+        /// <remarks>
+        /// A table that grows is the right shape for one block among others on a
+        /// page. Where the table *is* the view, it is the wrong one: the page
+        /// scrolls around it and takes the column header along, so the reader
+        /// loses what the columns mean, and a table wider than the pane pushes
+        /// the pane sideways instead of scrolling itself. Filling bounds the
+        /// table, and the rows then scroll under a header that stays.
+        ///
+        /// A host that is a flex column - which the WebApp content panel becomes
+        /// on its own for a filling control - drives the height. A host that hands
+        /// nothing down falls back to the self-imposed default of the
+        /// <c>--wx-table-height</c> custom property, never to the content: the
+        /// rows only scroll while the table is bounded.
+        /// </remarks>
+        public Func<IRenderControlContext, bool> Fill { get; set; } = _ => false;
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -168,7 +188,7 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-table", classes),
+                Class = Css.Concatenate("wx-webui-table", [(Fill?.Invoke(renderContext) ?? false) ? "wx-fill" : null, .. classes]),
                 Style = GetStyles(renderContext),
                 Role = role
             }

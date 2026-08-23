@@ -141,6 +141,25 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, bool> Editable { get; set; }
 
         /// <summary>
+        /// Gets or sets whether the calendar takes the height its host offers
+        /// instead of growing with the period it shows.
+        /// </summary>
+        /// <remarks>
+        /// A calendar that grows is the right shape for one block among others on
+        /// a page. Where the calendar *is* the view, it is the wrong one: the page
+        /// scrolls around it and takes the toolbar and the weekday header along,
+        /// so the reader loses the period he is navigating. Filling bounds the
+        /// calendar instead, and the grid scrolls below a toolbar that stays.
+        ///
+        /// A host that is a flex column - which the WebApp content panel becomes
+        /// on its own for a filling control - drives the height. A host that hands
+        /// nothing down falls back to the self-imposed default of the
+        /// <c>--wx-schedule-height</c> custom property, never to the content: the
+        /// grid only scrolls while the calendar is bounded.
+        /// </remarks>
+        public Func<IRenderControlContext, bool> Fill { get; set; } = _ => false;
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -210,7 +229,7 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate(cssClass, GetClasses(renderContext)),
+                Class = Css.Concatenate(cssClass, (Fill?.Invoke(renderContext) ?? false) ? "wx-fill" : null, GetClasses(renderContext)),
                 Style = GetStyles(renderContext),
                 Role = Role?.Invoke(renderContext) ?? "region"
             };

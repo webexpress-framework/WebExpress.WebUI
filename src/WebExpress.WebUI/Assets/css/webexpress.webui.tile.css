@@ -10,6 +10,39 @@
     line-height: var(--bs-body-line-height);
 }
 
+/* Fill mode: the tiles take the height their host offers instead of growing with
+   their number, which is what an application shell asks of the content of a
+   pane. The pager and the info line below the tiles then stay in place while the
+   tiles scroll, rather than sitting at the end of a list the pane scrolls past.
+
+   The wrapping has to go: a column that wraps answers a height it cannot fill by
+   starting a second column beside the first, so the tiles would spread sideways
+   instead of overflowing downwards. The container below wraps as before - that
+   is the wrapping the layout is actually built on.
+
+   Both the basis and the height are stated: a flex column host drives the basis,
+   and where a host hands nothing down the height still has to come from the
+   environment rather than from the content. */
+.wx-tile.wx-fill {
+    flex-wrap: nowrap;
+    flex: 1 1 var(--wx-tile-height, 70vh);
+    height: var(--wx-tile-height, 70vh);
+    max-height: 100%;
+    min-height: 12rem;
+    overflow: hidden;
+}
+
+.wx-tile.wx-fill > .wx-tile-container {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+/* whatever else the host carries - the pager, the info line - is a band */
+.wx-tile.wx-fill > *:not(.wx-tile-container) {
+    flex: 0 0 auto;
+}
+
 .wx-tile-container {
     display: flex;
     flex-wrap: wrap;

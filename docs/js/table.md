@@ -151,6 +151,19 @@ Beyond its core functionality, the table control component offers a range of adv
 - **Action/Options Column:** Automatically handled; supports per-row or global action dropdowns for contextual table actions.
 - **All base features:** Hierarchy, cell templates, flexible, responsive rendering.
 
+## Filling the pane
+
+Growing with its rows is right for a table among other blocks on a page. Where the table *is* the view, it is wrong: inside an application shell the page does not scroll, the panes do, and a growing table takes the column header out of view with the page — the reader then scrolls through rows whose columns no longer say what they hold. A table wider than the pane pushes the pane sideways for the same reason. `Fill` takes the height from the host instead — on `ControlTable` as on the REST-backed `ControlDataTable`:
+
+```csharp
+new ControlDataTable("items")
+{
+    Fill = _ => true
+};
+```
+
+The host is marked `wx-fill`, and a flex column host then drives the table: it grows into the free space and shrinks with it, and the rows scroll under a header that stays, sideways as well as down. Anything the data table keeps beside the table — the pager, the info line, the progress bar — holds its height. In a `WebExpress.WebApp` shell the content panel becomes a flex column on its own as soon as a filling control is on the page, so `Fill` is all a page there has to set; elsewhere, make the host a flex column with `min-height: 0`. A host that hands nothing down leaves the table at `--wx-table-height` (default `70vh`), **never at its content height** — the rows only scroll while the table is bounded. `max-height: 100%` keeps it inside a host that does have an extent.
+
 ## Additional Configuration
 
 In addition to its interactive features, the table control component can be further tailored through several optional configuration attributes that extend behavior, persistence, and integration with external UI elements.

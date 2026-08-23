@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -11,6 +13,12 @@ namespace WebExpress.WebUI.WebControl
         /// Gets the collection of cards.
         /// </summary>
         IEnumerable<IControlKanbanCard> Cards { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the board takes the height its host
+        /// offers instead of growing with its longest column.
+        /// </summary>
+        Func<IRenderControlContext, bool> Fill { get; }
 
         /// <summary>
         /// Adds one or more columns to the kanban control.

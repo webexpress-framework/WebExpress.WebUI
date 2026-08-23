@@ -94,6 +94,12 @@ namespace WebExpress.WebUI.WebControl
         Func<IRenderControlContext, bool> Editable { get; }
 
         /// <summary>
+        /// Gets a value indicating whether the calendar takes the height its host
+        /// offers instead of growing with the period it shows.
+        /// </summary>
+        Func<IRenderControlContext, bool> Fill { get; }
+
+        /// <summary>
         /// Adds one or more items to the schedule.
         /// </summary>
         /// <param name="items">The items to add.</param>

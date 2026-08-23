@@ -10,6 +10,68 @@
     padding-bottom: 1rem; /* reserve space for the scrollbar */
 }
 
+/* Fill mode: the board takes the height its host offers instead of growing with
+   its longest column, which is what an application shell asks of the content of
+   a pane. The board is its own scrollport on both axes already - the horizontal
+   overflow above makes it one - so all this mode adds is the bound that gives it
+   something to scroll: without a height the board simply grows and the pane
+   around it scrolls instead, dragging the column headers out of view.
+
+   Both the basis and the height are stated: a flex column host drives the basis,
+   and where a host hands nothing down the height still has to come from the
+   environment rather than from the content. 100% would resolve to auto against
+   an auto-height host, which is the content - the one answer this mode must not
+   give. The floor keeps a pane too short for a card scrolling rather than
+   crushing the columns. */
+.wx-kanban.wx-fill {
+    flex: 1 1 var(--wx-kanban-height, 70vh);
+    height: var(--wx-kanban-height, 70vh);
+    max-height: 100%;
+    min-height: 12rem;
+    overflow: auto;
+}
+
+/* The column headers are what a board is read by, so they stay while the cards
+   below them scroll. They only carry a background here: over the page they sit
+   on nothing, over scrolling cards they have to cover them. The toolbar above is
+   left to scroll away - it is reached once, and pinning it too would mean
+   knowing its height to offset the headers by. */
+.wx-kanban.wx-fill > .wx-kanban-headers {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--wx-body-bg);
+}
+
+/* A board without swimlanes has no header band: each column carries its own
+   header inside the single row. Those stay the same way, against the board that
+   is the scrollport either way. */
+.wx-kanban.wx-fill > .wx-kanban-swimlane .wx-kanban-column-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--wx-body-bg);
+}
+
+/* The columns of such a board run to the bottom of the pane rather than ending
+   under the last card, so the drop zone is the column the user sees. Swimlanes
+   are left alone: a lane is as tall as its cards, and lanes sharing the pane
+   equally would say the opposite. The header band is what tells the two apart -
+   it exists only where there are swimlanes. */
+.wx-kanban.wx-fill:not(:has(> .wx-kanban-headers)) > .wx-kanban-swimlane {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+
+/* the height only reaches the columns if the row hands it on; the cells fill the
+   row on their own, the grid stretches them. Neither is allowed to shrink below
+   its cards - that is what turns a board too tall for the pane into a scrolling
+   one instead of a clipped one */
+.wx-kanban.wx-fill:not(:has(> .wx-kanban-headers)) > .wx-kanban-swimlane > .wx-kanban-row {
+    flex: 1 1 auto;
+}
+
 /* Kanban grid row keeps all columns in one horizontal line */
 .wx-kanban-row {
     display: grid;

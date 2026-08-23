@@ -116,6 +116,19 @@ var kanban = new ControlKanban("board")
             new ControlKanbanCardChip { Label = _ => "8", Icon = _ => new IconStar(), Title = _ => "Story points" }));
 ```
 
+## Filling the pane
+
+Growing with its longest column is right for a board among other blocks on a page. Where the board *is* the view, it is wrong: inside an application shell the page does not scroll, the panes do, and a growing board takes its column headers out of view with the page - the very thing the board is read by. `Fill` takes the height from the host instead - on `ControlKanban` as on the REST-backed `ControlDataKanban`:
+
+```csharp
+new ControlKanban("board")
+{
+    Fill = _ => true
+};
+```
+
+The host is marked `wx-fill`, and a flex column host then drives the board: it grows into the free space and shrinks with it, and the cards scroll under headers that stay. In a `WebExpress.WebApp` shell the content panel becomes one on its own as soon as a filling control is on the page, so `Fill` is all a page there has to set; elsewhere, make the host a flex column with `min-height: 0`. A host that hands nothing down leaves the board at `--wx-kanban-height` (default `70vh`), **never at its content height** - the board is its own scrollport, and a scrollport only exists while its container is bounded. `max-height: 100%` keeps the board inside a host that does have an extent.
+
 ## REST boards
 
 `ControlDataKanban` (WebExpress.WebApp, `wx-webapp-kanban`) loads the same board from a REST endpoint and persists card moves, column, swimlane and settings changes. The load response mirrors the DOM fields and echoes the active filter:

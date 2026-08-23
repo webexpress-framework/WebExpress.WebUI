@@ -115,6 +115,21 @@ dynamicTileCtrl.insertTile({
 });
 ```
 
+## Filling the pane
+
+Growing with the number of tiles is right for a set among other blocks on a page. Where the tiles *are* the view, it is wrong: inside an application shell the page does not scroll, the panes do, and anything the control keeps below the tiles — the pager, the info line of the REST-backed variant — then sits at the end of a scroll rather than in reach. `Fill` takes the height from the host instead — on `ControlTile` as on `ControlDataTile`:
+
+```csharp
+new ControlDataTile("catalog")
+{
+    Fill = _ => true
+};
+```
+
+The host is marked `wx-fill`, and a flex column host then drives the control: the tiles scroll above chrome that stays. In a `WebExpress.WebApp` shell the content panel becomes a flex column on its own as soon as a filling control is on the page, so `Fill` is all a page there has to set; elsewhere, make the host a flex column with `min-height: 0`. A host that hands nothing down leaves the control at `--wx-tile-height` (default `70vh`), **never at its content height** — the tiles only scroll while the control is bounded. `max-height: 100%` keeps it inside a host that does have an extent.
+
+Fill mode also turns the wrapping of the host itself off. A wrapping column answers a height it cannot fill by starting a second column beside the first, which would spread the tiles sideways rather than let them overflow downwards; the tile container below keeps wrapping as before.
+
 ## Events
 
 The component dispatches standardized events to inform the application about interactions.

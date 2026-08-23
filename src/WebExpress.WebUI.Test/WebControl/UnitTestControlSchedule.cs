@@ -203,6 +203,31 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests that the fill mode marks the host, which is what makes a shell
+        /// hand a height down to the calendar instead of letting it grow.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-webui-schedule"" role=""region""></div>")]
+        [InlineData(true, @"<div class=""wx-webui-schedule wx-fill"" role=""region""></div>")]
+        public void Fill(bool fill, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlSchedule()
+            {
+                Fill = _ => fill
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests that the initial date is emitted as a bare date.
         /// </summary>
         [Fact]

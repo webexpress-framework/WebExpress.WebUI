@@ -34,6 +34,31 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests that the fill mode marks the host, which is what makes a shell
+        /// hand a height down to the table instead of letting it grow.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-webui-table""><div class=""wx-table-columns""></div></div>")]
+        [InlineData(true, @"<div class=""wx-webui-table wx-fill""><div class=""wx-table-columns""></div></div>")]
+        public void Fill(bool fill, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTable()
+            {
+                Fill = _ => fill
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests the table border property of the table control.
         /// </summary>
         [Theory]

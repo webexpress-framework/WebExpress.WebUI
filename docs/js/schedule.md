@@ -215,6 +215,19 @@ State classes are additive, so a holiday on a weekend keeps both marks: `wx-sche
 
 `wx-schedule-today` marks the current **day cell** and its rule is scoped to the cells, so it cannot be picked up by a control that happens to share the name. The toolbar buttons are `wx-schedule-btn` plus `wx-schedule-prev`, `wx-schedule-nav-today`, `wx-schedule-next` and `wx-schedule-view-{view}`; the active view additionally carries `wx-schedule-view-active`.
 
+### Filling the pane
+
+Growing with the period it shows is right for a calendar among other blocks on a page. Where the calendar *is* the view, it is wrong: inside an application shell the page does not scroll, the panes do, and a growing calendar takes the toolbar and the weekday header out of view with the page. `Fill` takes the height from the host instead - on `ControlSchedule` as on the REST-backed `ControlDataSchedule`:
+
+```csharp
+new ControlSchedule("calendar")
+{
+    Fill = _ => true
+};
+```
+
+The host is marked `wx-fill`, and a flex column host then drives the calendar: it grows into the free space and shrinks with it, and the grid scrolls below a toolbar that stays. In a `WebExpress.WebApp` shell the content panel becomes one on its own as soon as a filling control is on the page, so `Fill` is all a page there has to set; elsewhere, make the host a flex column with `min-height: 0`. A host that hands nothing down leaves the calendar at `--wx-schedule-height` (default `70vh`), **never at its content height** - the grid is a scrollport, and a scrollport only exists while its container is bounded. `max-height: 100%` keeps the calendar inside a host that does have an extent.
+
 ## Use Case Example
 
 ```html

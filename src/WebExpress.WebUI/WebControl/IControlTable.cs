@@ -51,6 +51,12 @@ namespace WebExpress.WebUI.WebControl
         Func<IRenderControlContext, bool> SuppressHeaders { get; }
 
         /// <summary>
+        /// Gets a value indicating whether the table takes the height its host
+        /// offers instead of growing with its rows.
+        /// </summary>
+        Func<IRenderControlContext, bool> Fill { get; }
+
+        /// <summary>
         /// Adds a column to the table.
         /// </summary>
         /// <param name="name">The header of the column.</param>
