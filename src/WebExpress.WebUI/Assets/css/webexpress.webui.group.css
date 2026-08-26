@@ -1,0 +1,86 @@
+/* items read as one statement, scoped to .wx-group */
+
+.wx-group {
+    --wx-group-bg: var(--wx-body-bg, #fff);
+    --wx-group-border: var(--wx-border-color, #dee2e6);
+    --wx-group-padding: 0;
+
+    display: grid;
+    grid-template-columns: repeat(var(--wx-group-columns, 4), minmax(0, 1fr));
+    background: var(--wx-group-bg);
+    border: 1px solid var(--wx-group-border);
+    border-radius: var(--wx-card-border-radius, 0.5rem);
+    overflow: hidden;
+}
+
+/* dark theme: the surface follows the body palette, the same way a card does. the token is
+   named rather than the declaration repeated, so the two themes cannot drift apart */
+[data-bs-theme="dark"] .wx-group {
+    --wx-group-bg: var(--wx-dark, #212529);
+}
+
+/* a group inside something that already frames it drops its own surface, so the two frames
+   do not double up */
+.wx-group-bare {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+}
+
+/* the room a field gives its content. a field holding a control needs none of its own - the
+   control brings its padding - while bare text needs what a card would give it */
+.wx-group-narrow {
+    --wx-group-padding: 0.5rem 0.75rem;
+}
+
+.wx-group-wide {
+    --wx-group-padding: 1.25rem 1.5rem;
+}
+
+.wx-group-none {
+    --wx-group-padding: 0;
+}
+
+.wx-group-field {
+    padding: var(--wx-group-padding);
+    border-left: 1px solid var(--wx-group-border);
+    min-width: 0;
+}
+
+/* the field that starts a row carries no divider on its left - it would run into empty space.
+   which field that is comes from the controller, because it depends on the laid-out geometry
+   rather than on the position in the markup */
+.wx-group-field.wx-group-row-start {
+    border-left: 0;
+}
+
+/* every field below the first row is separated from the one above it. marking the first row
+   rather than the row starts is what makes the rule run the full width: separating only the
+   first field of a row would draw the line under one column and leave the rest open */
+.wx-group-field:not(.wx-group-first-row) {
+    border-top: 1px solid var(--wx-group-border);
+}
+
+/* the empty fields that complete a short last row hold nothing, so they take no padding of
+   their own - the row is as tall as the fields that carry content */
+.wx-group-filler {
+    padding: 0;
+}
+
+/* a control that is inline on its own has to take the width of the field it is given */
+.wx-group-field > .wx-stat {
+    display: flex;
+    width: 100%;
+}
+
+@media (max-width: 62rem) {
+    .wx-group {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 34rem) {
+    .wx-group {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

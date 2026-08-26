@@ -78,6 +78,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/webexpress.webui.smartedit.js")]
     [Asset("/assets/js/webexpress.webui.smartview.js")]
     [Asset("/assets/js/webexpress.webui.split.js")]
+    [Asset("/assets/js/webexpress.webui.group.js")]
     [Asset("/assets/js/webexpress.webui.tab.js")]
     [Asset("/assets/js/webexpress.webui.table.js")]
     [Asset("/assets/js/webexpress.webui.table.reorderable.js")]

@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -11,7 +12,8 @@ namespace WebExpress.WebUI.WebControl
     public class ControlPanelCallout : ControlPanel
     {
         /// <summary>
-        /// Gets or sets the title.
+        /// Gets or sets the title. Accepts a resource key, which is resolved against the
+        /// culture of the request like every other caption.
         /// </summary>
         public Func<IRenderControlContext, string> Title { get; set; }
 
@@ -44,7 +46,10 @@ namespace WebExpress.WebUI.WebControl
         {
             var role = Role?.Invoke(renderContext);
             var theme = Theme?.Invoke(renderContext) ?? TypeTheme.None;
-            var title = Title?.Invoke(renderContext);
+            // the caption is resolved here rather than left to the caller: every other control
+            // takes a resource key, and a caption that renders its key verbatim is a fault
+            // nothing reports - the page simply shows the key
+            var title = I18N.Translate(renderContext, Title?.Invoke(renderContext));
 
             var html = new HtmlElementTextContentDiv()
             {

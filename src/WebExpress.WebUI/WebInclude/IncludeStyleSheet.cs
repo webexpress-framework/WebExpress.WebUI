@@ -55,6 +55,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/css/webexpress.webui.input.estimate.css")]
     [Asset("/assets/css/webexpress.webui.slider.css")]
     [Asset("/assets/css/webexpress.webui.stat.css")]
+    [Asset("/assets/css/webexpress.webui.group.css")]
     [Asset("/assets/css/webexpress.webui.steps.css")]
     [Asset("/assets/css/webexpress.webui.smartedit.css")]
     [Asset("/assets/css/webexpress.webui.smartview.css")]
