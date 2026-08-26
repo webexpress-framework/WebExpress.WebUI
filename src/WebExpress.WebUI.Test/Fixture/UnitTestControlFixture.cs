@@ -200,6 +200,21 @@ namespace WebExpress.WebUI.Test.Fixture
         }
 
         /// <summary>
+        /// Creates a mock render context for a request that asks for the given language.
+        /// The plain mock request carries no Accept-Language, so its culture collapses to
+        /// the server culture; a control whose text has to follow the reader rather than
+        /// the server can only be told apart from one that does not when the two differ.
+        /// </summary>
+        /// <param name="culture">The culture the request asks for.</param>
+        /// <returns>A mock render context for testing.</returns>
+        public static IRenderControlContext CreateRenderContextMock(CultureInfo culture)
+        {
+            var request = CreateRequestMock($"GET / HTTP/1.1\r\nAccept-Language: {culture.Name}\r\n\r\n");
+
+            return new RenderControlContext(null, CreatePageContextMock(), request);
+        }
+
+        /// <summary>
         /// Create a fake page context for unit testing.
         /// </summary>
         /// <param name="applicationContext">The application context. If null, defaults to null.</param>

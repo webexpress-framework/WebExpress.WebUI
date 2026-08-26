@@ -138,28 +138,37 @@ namespace WebExpress.WebUI.WebPage
 
             _favicons.Add(new Favicon(RouteEndpoint.Combine(contextPath, WebEx.Favicon)));
 
+            // an include names a file of its plugin, not a route - only the asset manager
+            // knows where that plugin's assets are mounted for this application, and a
+            // route composed here instead would drift from the mount silently: the browser
+            // takes the html 404 page as a stylesheet with no rules.
             foreach (var include in _componentHub?.IncludeManager
                 .GetIncludes(pageContext.ApplicationContext))
             {
                 if (!include.Scopes.Any() || pageContext.Scopes.Intersect(include.Scopes).Any())
                 {
-                    var includeBaseUri = RouteEndpoint.Combine(contextPath, include.PluginContext.PluginId.ToString());
-                    foreach (var file in include.Files.Where(x => x.Type == WebCore.WebInclude.TypeInclude.StyleSheet))
+                    foreach (var file in include.Files)
                     {
-                        _cssLinks.Add(RouteEndpoint.Combine(includeBaseUri, file.FileName));
-                    }
-                }
-            }
+                        var route = _componentHub?.AssetManager?.GetAssetRoute
+                        (
+                            pageContext.ApplicationContext,
+                            include.PluginContext,
+                            file.FileName
+                        )?.ToString();
 
-            foreach (var include in _componentHub?.IncludeManager
-                .GetIncludes(pageContext.ApplicationContext))
-            {
-                if (!include.Scopes.Any() || pageContext.Scopes.Intersect(include.Scopes).Any())
-                {
-                    var includeBaseUri = RouteEndpoint.Combine(contextPath, include.PluginContext.PluginId.ToString());
-                    foreach (var file in include.Files.Where(x => x.Type == WebCore.WebInclude.TypeInclude.JavaScript))
-                    {
-                        _headerScriptLinks.Add(RouteEndpoint.Combine(includeBaseUri, file.FileName));
+                        if (route is null)
+                        {
+                            continue;
+                        }
+
+                        if (file.Type == WebCore.WebInclude.TypeInclude.StyleSheet)
+                        {
+                            _cssLinks.Add(route);
+                        }
+                        else if (file.Type == WebCore.WebInclude.TypeInclude.JavaScript)
+                        {
+                            _headerScriptLinks.Add(route);
+                        }
                     }
                 }
             }

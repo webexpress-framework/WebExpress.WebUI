@@ -112,7 +112,7 @@ namespace WebExpress.WebUI.WebControl
             }
                 .AddUserAttribute("data-icon", (icon as Icon)?.Class)
                 .AddUserAttribute("data-image", image?.ToString() ?? (icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-tooltip", tooltip)
+                .AddUserAttribute("data-tooltip", I18N.Translate(renderContext, tooltip))
                 .AddUserAttribute("data-color", color?.ToClass())
                 .AddUserAttribute("data-uri", uri?.ToString())
                 .AddUserAttribute("data-target", target?.ToValue());

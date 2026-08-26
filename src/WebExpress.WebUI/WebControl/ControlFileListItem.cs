@@ -1,4 +1,5 @@
 using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebTheme;
@@ -78,7 +79,10 @@ namespace WebExpress.WebUI.WebControl
                 Culture = renderContext?.Request?.Culture
             }, "{0:fs}", (Size?.Invoke(renderContext) ?? long.MinValue) >= 0 ? (Size?.Invoke(renderContext) ?? long.MinValue) : 0);
 
-            return new HtmlElementTextContentDiv(new HtmlText(Name?.Invoke(renderContext)))
+            var name = I18N.Translate(renderContext, Name?.Invoke(renderContext));
+            var description = I18N.Translate(renderContext, Description?.Invoke(renderContext));
+
+            return new HtmlElementTextContentDiv(new HtmlText(name))
             {
                 Class = "wx-webui-file",
             }
@@ -90,7 +94,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-file-uri", Uri?.Invoke(renderContext)?.ToString())
                 .AddUserAttribute("data-file-size", (Size?.Invoke(renderContext) ?? long.MinValue) >= 0 ? size : null)
                 .AddUserAttribute("data-file-date", (Date?.Invoke(renderContext) ?? DateTime.MinValue) != DateTime.MinValue ? (Date?.Invoke(renderContext) ?? DateTime.MinValue).ToShortDateString() : null)
-                .AddUserAttribute("data-description", !string.IsNullOrWhiteSpace(Description?.Invoke(renderContext)) ? Description?.Invoke(renderContext) : null);
+                .AddUserAttribute("data-description", !string.IsNullOrWhiteSpace(description) ? description : null);
         }
     }
 }

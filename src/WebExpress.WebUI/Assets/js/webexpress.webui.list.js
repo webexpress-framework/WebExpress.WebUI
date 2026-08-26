@@ -541,6 +541,8 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                 bgColorCss: ds.bgcolorCss || null,
                 bgColorStyle: ds.bgcolorStyle || null,
                 target: ds.target || null,
+                title: ds.title || null,
+                tooltip: ds.tooltip || null,
                 itemType: itemType,
                 disabled: div.hasAttribute("disabled") || ds.disabled === "true",
                 options: null,
@@ -626,6 +628,8 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             disabled: !!data.disabled,
             uri: data.uri || data.href || null,
             target: data.target || null,
+            title: data.title || null,
+            tooltip: data.tooltip || null,
             options: Array.isArray(data.options) ? data.options : null,
             _anchorLi: null,
             // action attributes
@@ -859,6 +863,14 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                     actionEl.setAttribute("aria-disabled", "true");
                     actionEl.disabled = true;
                 }
+            }
+
+            // the hover text belongs on the interactive element when there is one, so
+            // it also surfaces on keyboard focus; title wins over tooltip, the same
+            // precedence ControlLink applies
+            const hoverText = it.title || it.tooltip;
+            if (hoverText) {
+                (actionEl || li).setAttribute("title", hoverText);
             }
 
             const body = document.createElement("div");

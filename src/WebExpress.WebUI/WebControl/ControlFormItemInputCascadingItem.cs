@@ -130,7 +130,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-cascading-item"),
             }
-                .AddUserAttribute("data-label", I18N.Translate(text))
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, text))
                 .AddUserAttribute("data-icon", icon is Icon ? (icon as Icon).Class : null)
                 .AddUserAttribute("data-image", image?.ToString() ?? (icon is ImageIcon imageIcon ? imageIcon.Uri?.ToString() : null))
                 .AddUserAttribute("data-label-color", labelColor != TypeColorSelection.Default

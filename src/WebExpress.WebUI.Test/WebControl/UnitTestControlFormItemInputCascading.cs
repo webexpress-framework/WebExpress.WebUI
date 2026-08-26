@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebIcon;
+﻿using System.Globalization;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebIcon;
@@ -158,6 +159,33 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that the label of a cascading item resolves against the culture the page is requested in. The mock
+        /// server is configured en while the mock request asks for German, so a text resolved
+        /// against the server default answers in the wrong language while its neighbours on
+        /// the same page stay German.
+        /// </summary>
+        [Fact]
+        public void TextFollowsTheRequestCulture()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(CultureInfo.GetCultureInfo("de")), form);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputCascading(null, new ControlFormItemInputCascadingItem(null)
+            {
+                Text = _ => "webexpress.webui:form.submit.label"
+            });
+
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-input-cascading""><div class=""wx-cascading-item"" data-label=""Speichern""></div></div>", html);
         }
 
         /// <summary>

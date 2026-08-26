@@ -130,7 +130,7 @@ namespace WebExpress.WebUI.WebControl
             var nameValue = Name?.Invoke(renderContext);
             var nameColor = NameColor?.Invoke(renderContext);
 
-            var name = new HtmlElementTextSemanticsSpan(new HtmlText(I18N.Translate(nameValue)))
+            var name = new HtmlElementTextSemanticsSpan(new HtmlText(I18N.Translate(renderContext, nameValue)))
             {
                 Id = string.IsNullOrWhiteSpace(Id) ? string.Empty : $"{Id}_name",
                 Class = nameColor?.ToClass()

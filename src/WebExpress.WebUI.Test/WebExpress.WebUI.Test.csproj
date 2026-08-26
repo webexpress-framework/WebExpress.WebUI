@@ -23,12 +23,29 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
-		<PackageReference Include="WebExpress.WebCore" Version="2.0.0-alpha" />
 		<PackageReference Include="xunit.v3" Version="3.2.2" />
+	</ItemGroup>
+
+	<!-- mirrors WebExpress.WebUI: DebugLocal builds against the WebCore sources next door,
+	     so a test can exercise a WebCore change; every other configuration takes the
+	     published package. Without the split the package copy wins in the test output and
+	     the tests silently run against the released WebCore instead of the local one. -->
+	<ItemGroup Condition="'$(Configuration)' != 'DebugLocal'">
+		<PackageReference Include="WebExpress.WebCore" Version="2.0.0-alpha" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(Configuration)' == 'DebugLocal'">
+		<ProjectReference Include="..\..\..\WebExpress.WebCore\src\WebExpress.WebCore\WebExpress.WebCore.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\WebExpress.WebUI\WebExpress.WebUI.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="Assets/**/*.*">
+			<LogicalName>$(MSBuildProjectName).Assets.%(RecursiveDir)%(Filename)%(Extension)</LogicalName>
+		</EmbeddedResource>
 	</ItemGroup>
 
 	<ItemGroup>

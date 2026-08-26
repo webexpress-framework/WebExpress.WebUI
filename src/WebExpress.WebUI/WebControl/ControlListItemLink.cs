@@ -25,12 +25,16 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeTarget> Target { get; set; }
 
         /// <summary>
-        /// Gets or sets the tooltip.
+        /// Gets or sets the hover text of the row. It takes precedence over
+        /// <see cref="Tooltip"/>, mirroring <see cref="ControlLink"/>, so a row can carry a
+        /// specific label where the shared tooltip would say less. This is not the row's
+        /// visible text - that is <see cref="ControlListItem.Text"/>.
         /// </summary>
         public Func<IRenderControlContext, string> Title { get; set; }
 
         /// <summary>
-        /// Gets or sets a tooltip text.
+        /// Gets or sets a tooltip text, used as the row's hover text when no
+        /// <see cref="Title"/> is set.
         /// </summary>
         public Func<IRenderControlContext, string> Tooltip { get; set; }
 

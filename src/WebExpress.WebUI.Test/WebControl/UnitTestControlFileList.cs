@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebIcon;
+﻿using System.Globalization;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebIcon;
@@ -42,6 +43,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-file-list""><div class=""wx-webui-file""></div></div>")]
         [InlineData("name", @"<div class=""wx-webui-file-list""><div class=""wx-webui-file"">name</div></div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-file-list""><div class=""wx-webui-file"">WebExpress.WebUI</div></div>")]
         public void Name(string name, string expected)
         {
             // arrange
@@ -59,6 +61,37 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that both texts of the file list item control resolve against the culture the
+        /// page is requested in. The mock server is configured en while the mock request asks
+        /// for German, so a text resolved against the server default answers in the wrong
+        /// language while its neighbours on the same page stay German.
+        /// </summary>
+        [Fact]
+        public void NameAndDescriptionFollowTheRequestCulture()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock(CultureInfo.GetCultureInfo("de"));
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFileList()
+                .Add(new ControlFileListItem()
+                {
+                    Name = _ => "webexpress.webui:form.submit.label",
+                    Description = _ => "webexpress.webui:form.cancel.label"
+                });
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders
+            (
+                @"<div class=""wx-webui-file-list""><div class=""wx-webui-file"" data-description=""Abbrechen"">Speichern</div></div>",
+                html
+            );
         }
 
         /// <summary>
@@ -119,6 +152,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-file-list""><div class=""wx-webui-file""></div></div>")]
         [InlineData("description", @"<div class=""wx-webui-file-list""><div class=""wx-webui-file"" data-description=""description""></div></div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-file-list""><div class=""wx-webui-file"" data-description=""WebExpress.WebUI""></div></div>")]
         public void Description(string description, string expected)
         {
             // arrange

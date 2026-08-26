@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebIcon;
+﻿using System.Globalization;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebIcon;
@@ -256,6 +257,31 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that both halves of the buttonlink control resolve their text against
+        /// the culture the page is requested in. The mock server is configured en while
+        /// the mock request asks for German, so a half that falls back to the server
+        /// default answers in the wrong language while its neighbours stay German.
+        /// </summary>
+        [Fact]
+        public void TextAndTooltipFollowTheRequestCulture()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock(CultureInfo.GetCultureInfo("de"));
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlButtonLink()
+            {
+                Text = _ => "webexpress.webui:form.submit.label",
+                Tooltip = _ => "webexpress.webui:form.cancel.label"
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            Assert.Equal(@"<a class=""btn"" title=""Abbrechen"" data-bs-toggle=""tooltip"">Speichern</a>", html.Trim());
         }
 
         /// <summary>

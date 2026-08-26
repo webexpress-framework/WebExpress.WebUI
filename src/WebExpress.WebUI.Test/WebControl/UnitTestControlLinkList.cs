@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebIcon;
+﻿using System.Globalization;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebIcon;
@@ -89,6 +90,32 @@ namespace WebExpress.WebUI.Test.WebControl
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that the name of the link list control resolves against the culture the page is requested in. The mock
+        /// server is configured en while the mock request asks for German, so a text resolved
+        /// against the server default answers in the wrong language while its neighbours on
+        /// the same page stay German.
+        /// </summary>
+        [Fact]
+        public void NameFollowsTheRequestCulture()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock(CultureInfo.GetCultureInfo("de"));
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlLinkList()
+            {
+                Name = _ => "webexpress.webui:form.submit.label"
+            };
+
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(@"<div><span>Speichern</span></div>", html);
         }
 
         /// <summary>

@@ -150,7 +150,7 @@ namespace WebExpress.WebUI.WebControl
             var closeLabel = CloseLabel?.Invoke(renderContext);
             var scrollable = Scrollable?.Invoke(renderContext) ?? true;
 
-            var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(title)))
+            var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, title)))
             {
                 Class = "wx-modal-header"
             };
@@ -171,7 +171,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("wx-webui-modal", GetClasses(renderContext))
             }
                 .AddUserAttribute("data-size", size.ToClass())
-                .AddUserAttribute("data-close-label", I18N.Translate(closeLabel));
+                .AddUserAttribute("data-close-label", I18N.Translate(renderContext, closeLabel));
 
             // only emit the attribute when opting out; absent means scrollable (the js default)
             if (!scrollable)

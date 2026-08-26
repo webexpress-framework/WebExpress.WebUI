@@ -43,7 +43,7 @@ namespace WebExpress.WebUI.WebControl
             var text = Text?.Invoke(renderContext);
             var role = Role?.Invoke(renderContext);
 
-            text = I18N.Translate(text);
+            text = I18N.Translate(renderContext, text);
 
             var html = new HtmlElementTextSemanticsA()
             {

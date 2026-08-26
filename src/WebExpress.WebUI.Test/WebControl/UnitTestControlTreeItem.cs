@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+﻿using System.Globalization;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.Test.Fixture;
@@ -88,6 +89,36 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests that both texts of the tree item control resolve against the culture the page
+        /// is requested in. The mock server is configured en while the mock request asks for
+        /// German, so a text resolved against the server default answers in the wrong language
+        /// while its neighbours on the same page stay German.
+        /// </summary>
+        [Fact]
+        public void TextAndTooltipFollowTheRequestCulture()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock(CultureInfo.GetCultureInfo("de"));
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTreeItem()
+            {
+                Text = _ => "webexpress.webui:form.submit.label",
+                Tooltip = _ => "webexpress.webui:form.cancel.label"
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders
+            (
+                @"<div class=""wx-tree-node"" data-label=""Speichern"" data-tooltip=""Abbrechen""></div>",
+                html
+            );
+        }
+
+        /// <summary>
         /// Tests the icon property of the tree item control.
         /// </summary>
         [Theory]
@@ -169,6 +200,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Theory]
         [InlineData(null, @"<div class=""wx-tree-node""></div>")]
         [InlineData("abc", @"<div class=""wx-tree-node"" data-tooltip=""abc""></div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-tree-node"" data-tooltip=""WebExpress.WebUI""></div>")]
         public void Tooltip(string tooltip, string expected)
         {
             // arrange

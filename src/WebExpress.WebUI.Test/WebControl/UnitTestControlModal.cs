@@ -1,4 +1,5 @@
-﻿using WebExpress.WebUI.Test.Fixture;
+﻿using System.Globalization;
+using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
 
@@ -54,6 +55,35 @@ namespace WebExpress.WebUI.Test.WebControl
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
+        }
+
+        /// <summary>
+        /// Tests that both texts of the modal control resolve against the culture the page is
+        /// requested in. The close label matters most: it defaults to a resource key, so every
+        /// modal in the framework carries it and a modal resolved against the server default
+        /// offers to close in a language the reader did not ask for.
+        /// </summary>
+        [Fact]
+        public void HeaderAndCloseLabelFollowTheRequestCulture()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock(CultureInfo.GetCultureInfo("de"));
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlModal(null)
+            {
+                Header = _ => "webexpress.webui:form.submit.label"
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders
+            (
+                @"<div class=""wx-webui-modal"" data-close-label=""Schließen""><div class=""wx-modal-header"">Speichern</div>*</div>",
+                html
+            );
         }
 
         /// <summary>
