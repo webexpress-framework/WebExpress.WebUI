@@ -108,6 +108,8 @@ A dashboard that shows more than one agreement should show them as one thing. Re
 
 Neither rendering draws a box of its own. The frame belongs to whatever hosts the widget - a card, a dashboard tile - because a widget that brought its own would nest a second frame inside the host's. The **tile** does carry a coloured left edge: it repeats the status the badge shows, so it stays readable for a visitor who cannot separate the badge colours. The **panel** carries none. Every tile already marks its own agreement, and a second accent spanning all of them would repeat the worst status without saying which agreement it belongs to - which is the summary's job, and the summary says it in words.
 
+The panel gives up its own horizontal inset when it is the body of a `ControlSection`, which already steps its body in from the label: two insets read as a nesting the panel does not have, since it draws no box for the second one to sit inside of.
+
 The panel takes the colour of its **worst** agreement, because one that showed the best of them would hide what it exists to surface. `paused` only wins when *every* agreement is paused: a single stopped clock among running ones says nothing about the set.
 
 | Element                | Description

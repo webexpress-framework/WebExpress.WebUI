@@ -68,7 +68,7 @@ The layout is a class on the host element rather than a `data-` attribute, becau
 |-----------|---------------------|--------------------------------------------------------------------------
 | `Stacked` | *(none)*            | Label row above the body, which hangs off the vertical guide line. The default: it reads top to bottom and survives any column width.
 | `Aside`   | `wx-section-aside`  | The label moves into a column of its own beside the body, and the guide line becomes the divider between the two — a definition list at section scale. It needs the width, so below `48rem` it falls back to the stacked layout.
-| `Rule`    | `wx-section-rule`   | The label is followed by a hairline running across the remaining width, and the body sits below it without a guide. The strongest horizontal break of the three, for a long page whose sections a reader scrolls past rather than compares. The guide is not drawn here — the rule already separates.
+| `Rule`    | `wx-section-rule`   | The label is followed by a hairline running across the remaining width, and the body sits indented below it without a guide. The strongest horizontal break of the three, for a long page whose sections a reader scrolls past rather than compares. The guide line is not drawn here — the rule already separates — but the body keeps the step the guide would have given it, so it still reads as belonging to its label.
 
 ### Label
 
@@ -137,6 +137,7 @@ All colours come from the bootstrap CSS variables shipped with `WebExpress.WebUI
 | `--wx-section-label-spacing`  | The letter spacing of the upper-case label.
 | `--wx-section-guide-offset`   | The distance between the label column and the guide line.
 | `--wx-section-guide-gap`      | The distance between the guide line and the body.
+| `--wx-section-rule-indent`    | The indent of the body in the `Rule` layout, which draws no guide. Defaults to the step the guide would have made.
 | `--wx-section-duration`       | The length of the fold.
 | `--wx-section-aside-column`   | The width of the label column in the `Aside` layout.
 

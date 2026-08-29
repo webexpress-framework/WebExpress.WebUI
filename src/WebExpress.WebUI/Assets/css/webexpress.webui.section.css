@@ -14,6 +14,7 @@
     --wx-section-label-spacing: 0.08em;
     --wx-section-guide-offset: 0.3rem;
     --wx-section-guide-gap: 1rem;
+    --wx-section-rule-indent: calc(var(--wx-section-guide-offset) + var(--wx-section-guide-gap));
     --wx-section-duration: 0.18s;
 
     display: block;
@@ -247,9 +248,13 @@ img.wx-section-icon {
     margin-left: 0;
 }
 
-/* the rule already separates, so the guide would be a second line saying the same thing */
-.wx-section-rule.wx-section-guided > .wx-section-wrapper {
-    margin-left: 0;
+/* the rule already separates, so the guide would be a second line saying the same thing. the
+   body is still indented, because the label is what it belongs to: without the step it starts
+   under the chevron and reads as the next block of the page rather than as the content of this
+   section. the step is the one the guide would have drawn, so a rule section lines up with a
+   stacked one beside it */
+.wx-section-rule > .wx-section-wrapper {
+    margin-left: var(--wx-section-rule-indent);
     padding-left: 0;
     border-left: 0;
 }

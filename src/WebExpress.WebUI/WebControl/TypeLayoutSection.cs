@@ -21,8 +21,8 @@ namespace WebExpress.WebUI.WebControl
 
         /// <summary>
         /// The label is followed by a hairline running across the remaining width, and the body
-        /// sits below it without a guide. The strongest horizontal break of the three, for a
-        /// long page whose sections a reader scrolls past rather than compares.
+        /// sits indented below it without a guide. The strongest horizontal break of the three,
+        /// for a long page whose sections a reader scrolls past rather than compares.
         /// </summary>
         Rule
     }

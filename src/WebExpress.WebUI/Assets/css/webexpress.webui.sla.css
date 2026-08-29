@@ -206,6 +206,14 @@
   color: var(--wx-secondary-color, #6c757d);
 }
 
+/* a section already steps its body in from the label. the panel adding its own step
+   on top of that reads as a nesting the panel does not have - it draws no box, so
+   there is nothing for the second inset to sit inside of */
+.wx-section-body > .wx-sla-group {
+  padding-left: 0;
+  padding-right: 0;
+}
+
 .wx-sla-group-items {
   display: flex;
   flex-direction: column;

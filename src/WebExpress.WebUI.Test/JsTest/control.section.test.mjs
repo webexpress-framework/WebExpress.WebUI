@@ -438,8 +438,22 @@ test("a verbatim label keeps the spelling and the size it was given", () => {
 
 test("the rule layout replaces the guide with its hairline", () => {
     assert.match(cssRule(".wx-section-rule > .wx-section-header > .wx-section-rule-line"), /flex:\s*1/);
-    assert.match(cssRule(".wx-section-rule.wx-section-guided > .wx-section-wrapper"), /border-left:\s*0/);
+    assert.match(cssRule(".wx-section-rule > .wx-section-wrapper"), /border-left:\s*0/);
     assert.match(cssRule(".wx-section-rule-line"), /display:\s*none/, "the hairline is inert in the other layouts");
+});
+
+test("the rule layout keeps the indent the guide would have made", () => {
+    // without the step the body starts under the chevron and reads as the next block of the
+    // page rather than as the content of the section it belongs to
+    assert.match(
+        cssRule(".wx-section-rule > .wx-section-wrapper"),
+        /margin-left:\s*var\(--wx-section-rule-indent\)/
+    );
+    assert.match(
+        cssRule(".wx-section"),
+        /--wx-section-rule-indent:\s*calc\(var\(--wx-section-guide-offset\) \+ var\(--wx-section-guide-gap\)\)/,
+        "the step is the one the guide would have drawn"
+    );
 });
 
 test("the fold animates the grid the body sits in", () => {

@@ -126,7 +126,8 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets a value indicating whether the body carries the vertical guide line
         /// that ties it to its label. Switch it off for a body that draws its own structure
         /// (a table, a board) and would read as doubly framed. Has no effect under
-        /// <see cref="TypeLayoutSection.Rule"/>, where the hairline already separates.
+        /// <see cref="TypeLayoutSection.Rule"/>, where the hairline already separates and the
+        /// body is indented regardless.
         /// </summary>
         public Func<IRenderControlContext, bool> Guide { get; set; } = _ => true;
 
