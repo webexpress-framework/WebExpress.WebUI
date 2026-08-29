@@ -8,6 +8,14 @@
 webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
     static ICON_SIZE = 28;
 
+    // a node that carries a description or a state is measured from its text,
+    // so the text is cut first and the rectangle then fits it exactly; without
+    // the cut a long title would either overflow its box or stretch it across
+    // the canvas
+    static NODE_LABEL_LENGTH = 24;
+    static NODE_DESCRIPTION_LENGTH = 34;
+    static NODE_STATE_LENGTH = 14;
+
     // the simulation is considered at rest once no free node moves faster than
     // this many units per frame; below that the positions no longer change
     // visibly, so continuing to integrate only burns cpu
@@ -642,9 +650,13 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                 const layoutVal = typeof s.layout === "string" ? s.layout : (typeof s.nodeLayout === "string" ? s.nodeLayout : "");
                 const layout = (layoutVal || defaultLayout || "").toLowerCase();
 
+                const detailed = Boolean(s.description) || Boolean(s.state);
+
                 return {
                     id: s.id || "",
-                    label: s.label || s.id || "",
+                    label: detailed
+                        ? this._fit(s.label || s.id, webexpress.webui.GraphViewerCtrl.NODE_LABEL_LENGTH)
+                        : (s.label || s.id || ""),
                     x: hasPosition ? rawX : 0,
                     y: hasPosition ? rawY : 0,
                     hasPosition,
@@ -656,7 +668,13 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                     image: typeof s.image === "string" ? s.image : "",
                     shape: typeof s.shape === "string" ? s.shape.toLowerCase() : (typeof s.nodeShape === "string" ? s.nodeShape.toLowerCase() : ""),
                     layout,
-                    uri: typeof s.uri === "string" ? s.uri : ""
+                    uri: typeof s.uri === "string" ? s.uri : "",
+                    // a node may say more than its name: a second line naming
+                    // what it is, and a state shown as a dot with its caption
+                    description: this._fit(s.description, webexpress.webui.GraphViewerCtrl.NODE_DESCRIPTION_LENGTH),
+                    state: this._fit(s.state, webexpress.webui.GraphViewerCtrl.NODE_STATE_LENGTH),
+                    stateCss: typeof s.stateCss === "string" ? s.stateCss : "",
+                    stateColor: typeof s.stateColor === "string" ? s.stateColor : ""
                 };
             });
 
@@ -723,7 +741,11 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                 image: el.dataset.image || "",
                 shape: (el.dataset.shape || el.dataset.nodeShape || "").toLowerCase(),
                 layout: (el.dataset.nodeStyle || this._nodeStyle || "").toLowerCase(),
-                uri: el.dataset.uri || ""
+                uri: el.dataset.uri || "",
+                description: el.dataset.description || "",
+                state: el.dataset.state || "",
+                stateCss: el.dataset.stateCss || "",
+                stateColor: el.dataset.stateColor || ""
             };
         });
 
@@ -747,6 +769,124 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
         });
 
         return { nodes, edges };
+    }
+
+    /**
+     * Cuts a text to the number of characters a node can show, ending it with
+     * an ellipsis when something was left out.
+     * @param {string} text - The text, may be absent.
+     * @param {number} length - The maximum number of characters.
+     * @returns {string} The text as it fits.
+     */
+    _fit(text, length) {
+        const value = typeof text === "string" ? text : "";
+
+        return value.length > length
+            ? value.slice(0, length - 1).trimEnd() + "…"
+            : value;
+    }
+
+    /**
+     * Builds the two optional parts of a node that says more than its name: the
+     * description line below the label and the state, drawn as a coloured dot
+     * with its caption. A node that carries neither renders exactly as before.
+     * @param {object} data - The node data.
+     * @returns {{description: SVGElement|null, state: {dot: SVGElement, text: SVGElement}|null}} The parts.
+     */
+    _createNodeDetail(data) {
+        let description = null;
+        let state = null;
+
+        if (data.description) {
+            description = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            description.setAttribute("class", "wx-graph-node-description");
+            description.setAttribute("pointer-events", "none");
+            description.textContent = data.description;
+        }
+
+        if (data.state) {
+            const badge = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            badge.setAttribute("class", ["wx-graph-node-state-badge", data.stateCss].filter(Boolean).join(" "));
+            badge.setAttribute("rx", 8);
+            badge.setAttribute("ry", 8);
+            badge.setAttribute("height", 16);
+            badge.setAttribute("pointer-events", "none");
+            this._applyPaint(badge, "fill", data.stateColor);
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("class", ["wx-graph-node-state", data.stateCss].filter(Boolean).join(" "));
+            text.setAttribute("pointer-events", "none");
+            text.textContent = data.state;
+            this._applyPaint(text, "fill", data.stateColor);
+
+            state = { badge: badge, text: text };
+        }
+
+        return { description: description, state: state };
+    }
+
+    /**
+     * Returns the parts of an already rendered node, so the geometry update
+     * moves the same elements the first render created.
+     * @param {SVGElement} g - The node group.
+     * @returns {object} The parts.
+     */
+    _readNodeDetail(g) {
+        const badge = g.querySelector("rect.wx-graph-node-state-badge");
+        const text = g.querySelector("text.wx-graph-node-state");
+
+        return {
+            description: g.querySelector("text.wx-graph-node-description"),
+            state: badge && text ? { badge: badge, text: text } : null
+        };
+    }
+
+    /**
+     * Places the label, the optional description and the optional state of a
+     * node inside its rectangle: the icon on the left, the two lines of text
+     * left aligned beside it and the state at the right edge of the first line.
+     * The geometry lives in one place because the first render and every
+     * simulation frame have to agree on it.
+     * @param {object} n - The node.
+     * @param {object} parts - The icon, the label, the description and the state.
+     */
+    _placeNodeDetail(n, parts) {
+        const iconBoxSize = webexpress.webui.GraphViewerCtrl.ICON_SIZE;
+        const hasIcon = Boolean(n.data.image) || Boolean(n.data.icon);
+        const rectW = n.rectWidth || n.width;
+        const left = n.x - rectW / 2 + 14 + (hasIcon ? iconBoxSize + 6 : 0);
+        const right = n.x + rectW / 2 - 12;
+        const line = n.data.description ? n.y - 3 : n.y + 4;
+
+        if (parts.icon) {
+            parts.icon.setAttribute("x", n.x - rectW / 2 + 12);
+            parts.icon.setAttribute("y", n.y - iconBoxSize / 2);
+        }
+
+        parts.label.setAttribute("x", left);
+        parts.label.setAttribute("y", line);
+        parts.label.setAttribute("text-anchor", "start");
+        parts.label.removeAttribute("dominant-baseline");
+
+        if (parts.description) {
+            parts.description.setAttribute("x", left);
+            parts.description.setAttribute("y", n.y + 14);
+            parts.description.setAttribute("text-anchor", "start");
+        }
+
+        if (parts.state) {
+            // the caption is right aligned and the plate is laid under it,
+            // so the badge grows to the left and never leaves the box
+            const captionW = n.data.state.length * 6;
+            const padding = 6;
+
+            parts.state.text.setAttribute("x", right - padding);
+            parts.state.text.setAttribute("y", line);
+            parts.state.text.setAttribute("text-anchor", "end");
+            parts.state.badge.setAttribute("x", right - captionW - padding * 2);
+            parts.state.badge.setAttribute("y", line - 12);
+            parts.state.badge.setAttribute("width", captionW + padding * 2);
+        }
     }
 
     /**
@@ -781,9 +921,22 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
         const paddingH = 14;
         const paddingV = 10;
         const iconPad = data.image || data.icon ? 8 : 0;
+        const shape = (data.shape || "").toLowerCase();
+
+        // a node that carries a description or a state needs room for a
+        // second line and for the state caption next to the label
+        if (data.description || data.state) {
+            const descriptionW = (data.description || "").length * 6;
+            const stateW = data.state ? (data.state.length * 6 + 12) : 0;
+            const contentW = Math.max(textW + (stateW ? stateW + 12 : 0), descriptionW);
+            const detailW = Math.max(minW + 40, paddingH * 2 + (iconW ? iconW + iconPad : 0) + contentW);
+            const detailH = data.description ? 52 : 40;
+
+            return { width: detailW, height: detailH, shape: "rect", rectWidth: detailW, rectHeight: detailH };
+        }
+
         const widthRect = Math.max(minW, paddingH * 2 + (iconW ? iconW + iconPad : 0) + textW);
         const heightRect = Math.max(minH, paddingV * 2 + 20);
-        const shape = (data.shape || "").toLowerCase();
 
         if (shape === "circle") {
             const d = Math.max(widthRect, heightRect) * 0.7;
@@ -1341,6 +1494,9 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                 text.classList.add("wx-graph-node-link");
             }
 
+            const detail = this._createNodeDetail(n.data);
+            const hasDetail = Boolean(detail.description) || Boolean(detail.state);
+
             if (layout === "label-below") {
                 const centerX = n.x;
                 let iconY = n.y - rectH / 2 + (rectH - iconBoxSize) / 2;
@@ -1360,15 +1516,35 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             } else {
                 g.appendChild(shapeEl);
                 if (iconEl) {
-                    iconEl.setAttribute("x", n.x - n.width / 2 + 12);
-                    iconEl.setAttribute("y", n.y - iconBoxSize / 2);
                     g.appendChild(iconEl);
                 }
-                const textX = hasIcon ? n.x + iconBoxSize * 0.4 : n.x;
-                text.setAttribute("x", textX);
-                text.setAttribute("y", n.y + 5);
                 text.removeAttribute("dominant-baseline");
                 g.appendChild(text);
+
+                if (hasDetail) {
+                    if (detail.description) {
+                        g.appendChild(detail.description);
+                    }
+                    if (detail.state) {
+                        g.appendChild(detail.state.badge);
+                        g.appendChild(detail.state.text);
+                    }
+
+                    this._placeNodeDetail(n, {
+                        icon: iconEl,
+                        label: text,
+                        description: detail.description,
+                        state: detail.state
+                    });
+                } else {
+                    if (iconEl) {
+                        iconEl.setAttribute("x", n.x - n.width / 2 + 12);
+                        iconEl.setAttribute("y", n.y - iconBoxSize / 2);
+                    }
+                    const textX = hasIcon ? n.x + iconBoxSize * 0.4 : n.x;
+                    text.setAttribute("x", textX);
+                    text.setAttribute("y", n.y + 5);
+                }
             }
 
             this._nodeLayer.appendChild(g);
@@ -1768,10 +1944,23 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                 text.setAttribute("y", textY);
                 text.setAttribute("dominant-baseline", "hanging");
             } else {
-                const textX = hasIcon ? n.x + iconBoxSize * 0.4 : n.x;
-                text.setAttribute("x", textX);
-                text.setAttribute("y", n.y + 5);
-                text.removeAttribute("dominant-baseline");
+                const detail = this._readNodeDetail(g);
+
+                if (detail.description || detail.state) {
+                    // the icon is placed by the block below, which knows the
+                    // sizes of the two icon kinds
+                    this._placeNodeDetail(n, {
+                        icon: null,
+                        label: text,
+                        description: detail.description,
+                        state: detail.state
+                    });
+                } else {
+                    const textX = hasIcon ? n.x + iconBoxSize * 0.4 : n.x;
+                    text.setAttribute("x", textX);
+                    text.setAttribute("y", n.y + 5);
+                    text.removeAttribute("dominant-baseline");
+                }
 
                 if (imgIcon) {
                     // center image icon vertically based on its own size

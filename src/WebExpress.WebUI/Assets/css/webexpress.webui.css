@@ -335,6 +335,22 @@ pre {
     gap: clamp(0.2em, 0.5vw, 0.5em);
 }
 
+/* a rule is drawn as the top border of the element, so how it is drawn is the
+   style of that border; the opacity of the theme is deliberately left alone, so
+   a dashed rule sits at the same weight as a solid one */
+
+.wx-line-solid {
+    border-top-style: solid;
+}
+
+.wx-line-dashed {
+    border-top-style: dashed;
+}
+
+.wx-line-dotted {
+    border-top-style: dotted;
+}
+
 img.wx-icon {
     height: 1.2em;
     min-width: 1em;

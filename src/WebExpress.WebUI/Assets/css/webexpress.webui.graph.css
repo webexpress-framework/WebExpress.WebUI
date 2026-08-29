@@ -96,6 +96,11 @@
 }
 
 /* --- Graph Elements: Nodes --- */
+.wx-graph-node-rect,
+.wx-graph-node-circle {
+    fill: var(--wx-body-bg);
+}
+
 .wx-graph-node-rect {
     stroke: var(--wx-secondary);
     stroke-width: 1;
@@ -146,6 +151,30 @@
     fill: var(--wx-body-color);
     stroke-width: 0;
     pointer-events: none;
+}
+
+/* a node may carry a second line naming what it is, and a state drawn as a dot
+   with its caption; both stay quieter than the label so the name still leads */
+.wx-graph-node-description {
+    fill: var(--wx-secondary-color);
+    font-size: 11px;
+    stroke-width: 0;
+    pointer-events: none;
+}
+
+.wx-graph-node-state {
+    fill: var(--wx-secondary-color);
+    font-size: 10.5px;
+    stroke-width: 0;
+    pointer-events: none;
+}
+
+/* the plate carries the same colour as its caption, kept faint so the caption
+   stays the thing that is read */
+.wx-graph-node-state-badge {
+    fill: var(--wx-secondary-color);
+    fill-opacity: 0.16;
+    stroke: none;
 }
 
 .wx-graph-node-icon {

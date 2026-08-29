@@ -24,6 +24,17 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Gets or sets how the line is drawn. A dashed or dotted rule separates
+        /// more quietly than a solid one, for a break inside a group rather than
+        /// between groups.
+        /// </summary>
+        public Func<IRenderControlContext, TypeStyleLine> LineStyle
+        {
+            get => (Func<IRenderControlContext, TypeStyleLine>)GetPropertyObjectValue();
+            set => SetProperty(value, (renderContext) => (value?.Invoke(renderContext) ?? TypeStyleLine.Default).ToClass());
+        }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>

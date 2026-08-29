@@ -402,3 +402,82 @@ test("an edge between unknown nodes is skipped rather than rendered broken", () 
 
     assert.equal(renderedEdges(ctrl).length, 0, "the dangling edge is not drawn");
 });
+
+const DETAILED = {
+    nodes: [
+        {
+            id: "chg",
+            label: "CHG-00045",
+            description: "Change · Firmware update",
+            state: "Approved",
+            stateCss: "wx-demo-success",
+            x: 0,
+            y: 0
+        },
+        { id: "plain", label: "Beta", x: 300, y: 0 }
+    ],
+    edges: [{ id: "e1", from: "chg", to: "plain" }]
+};
+
+test("a node that carries a description and a state renders both", () => {
+    const { ctrl } = createViewer({});
+    ctrl.model = DETAILED;
+
+    const [detailed] = renderedNodes(ctrl);
+
+    assert.equal(detailed.querySelectorAll("text.wx-graph-node-description").length, 1);
+    assert.equal(detailed.querySelectorAll("text.wx-graph-node-state").length, 1);
+
+    // the state is a badge: a plate laid under its caption, not a bare dot
+    const badge = detailed.querySelector("rect.wx-graph-node-state-badge");
+    assert.ok(badge, "the state carries a badge");
+    assert.ok(badge.getAttribute("class").includes("wx-demo-success"), "the badge takes the colour of the state");
+});
+
+test("a node without a description or a state renders as it always did", () => {
+    const { ctrl } = createViewer({});
+    ctrl.model = DETAILED;
+
+    const plain = renderedNodes(ctrl)[1];
+
+    assert.equal(plain.querySelectorAll("text.wx-graph-node-description").length, 0);
+    assert.equal(plain.querySelectorAll("rect.wx-graph-node-state-badge").length, 0);
+    assert.equal(plain.querySelectorAll("text.wx-graph-node-label").length, 1);
+});
+
+test("the text of a detailed node stays inside its rectangle", () => {
+    const { ctrl } = createViewer({});
+    ctrl.model = {
+        nodes: [{
+            id: "long",
+            label: "a key far longer than any node should try to show at once",
+            description: "a description that runs on well past the width a node can give it",
+            state: "a state caption nobody would ever write",
+            x: 0,
+            y: 0
+        }],
+        edges: []
+    };
+
+    const node = ctrl._nodes[0];
+    const caps = ctrl.constructor;
+
+    assert.ok(node.data.label.length <= caps.NODE_LABEL_LENGTH, "the label is cut to what fits");
+    assert.ok(node.data.description.length <= caps.NODE_DESCRIPTION_LENGTH);
+    assert.ok(node.data.state.length <= caps.NODE_STATE_LENGTH);
+    assert.ok(node.data.label.endsWith("…"), "what was left out is marked");
+
+    // the rectangle is measured from the cut text, so the badge cannot reach
+    // past the right edge and the two lines cannot reach past the left one
+    const [group] = renderedNodes(ctrl);
+    const rect = group.querySelector("rect.wx-graph-node-rect");
+    const left = Number(rect.getAttribute("x"));
+    const right = left + Number(rect.getAttribute("width"));
+    const badge = group.querySelector("rect.wx-graph-node-state-badge");
+    const description = group.querySelector("text.wx-graph-node-description");
+
+    assert.ok(Number(badge.getAttribute("x")) > left, "the badge starts inside the box");
+    assert.ok(Number(badge.getAttribute("x")) + Number(badge.getAttribute("width")) <= right,
+        "the badge ends inside the box");
+    assert.ok(Number(description.getAttribute("x")) > left, "the description starts inside the box");
+});
