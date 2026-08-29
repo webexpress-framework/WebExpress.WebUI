@@ -18,6 +18,13 @@ Configuration is done declaratively via `data-*` attributes on the HTML element.
 | `data-object-name` | The name of the data object being edited.
 | `data-form-action` | The URL to which the form data is sent upon saving.
 | `data-form-method` | The HTTP method for the request (e.g., `PUT`, `POST`). Defaults to `PUT`.
+| `data-placeholder` | Text the read view shows for an empty value. Falls back to the `placeholder` attribute of the editor itself.
+
+### Empty Values
+
+An empty value would leave an empty read view: nothing to hover, nothing to click, and therefore no way to reach the editor — on exactly the values that most need one. The read view falls back to the placeholder instead, shown muted (`wx-smart-edit-placeholder`), which both names the field and gives the pencil an area to appear in. A control whose editor carries no placeholder and whose host declares none keeps the empty read view it always had.
+
+Note that the pencil is pinned to the right edge of the control's own box (`position: absolute; right: 1em`). A host that lets the box shrink to the width of its text therefore gets the pencil inside the sentence rather than at the end of the column; give the box the width of the space it should own.
 
 ### Functionality
 

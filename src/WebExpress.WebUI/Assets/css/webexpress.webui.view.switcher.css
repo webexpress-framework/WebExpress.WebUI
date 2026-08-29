@@ -1,0 +1,66 @@
+/* The presentation switch shared by every control that offers several views of
+   one subject. One look, so a user who learned the switch on one surface
+   recognises it on the next.
+
+   Every colour resolves through the framework tokens, with a --wx-view-switcher-*
+   override in front, so a surface with a palette of its own re-skins the switch
+   without restating its layout. */
+
+.wx-view-switcher {
+    --wx-view-switcher-track: var(--wx-border-color, #dee2e6);
+    --wx-view-switcher-surface: var(--wx-body-bg, #fff);
+    --wx-view-switcher-text: var(--wx-body-color, #212529);
+    --wx-view-switcher-muted: var(--wx-secondary-color, #6c757d);
+    --wx-view-switcher-radius: 5px;
+
+    display: inline-flex;
+    /* the switch collects the free space of the toolbar itself, so it stays on
+       the right even where the host renders no heading beside it */
+    margin-left: auto;
+    padding: 2px;
+    border-radius: var(--wx-view-switcher-radius);
+    background: var(--wx-view-switcher-track);
+}
+
+.wx-view-switcher[hidden] {
+    display: none;
+}
+
+.wx-view-switcher-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border: 0;
+    border-radius: var(--wx-view-switcher-radius);
+    background: transparent;
+    color: var(--wx-view-switcher-muted);
+    font-size: 12.5px;
+    line-height: 1.4;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.wx-view-switcher-item.wx-view-switcher-active {
+    background: var(--wx-view-switcher-surface);
+    color: var(--wx-view-switcher-text);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .08);
+}
+
+.wx-view-switcher-item img {
+    height: 14px;
+    width: auto;
+}
+
+/* On a narrow toolbar the glyph carries the entry alone. The caption stays in
+   the markup rather than being dropped, so the title attribute the switch sets
+   still names the presentation. */
+@media (max-width: 576px) {
+    .wx-view-switcher-item > span {
+        display: none;
+    }
+
+    .wx-view-switcher-item:not(:has(i)):not(:has(img)) > span {
+        display: inline;
+    }
+}

@@ -27,6 +27,12 @@ namespace WebExpress.WebUI.WebControl
         Func<IRenderControlContext, string> Name { get; }
 
         /// <summary>
+        /// Gets the version of the file, which orders it among the other entries
+        /// of the same name. Zero means the file has one version only.
+        /// </summary>
+        Func<IRenderControlContext, int> Version { get; }
+
+        /// <summary>
         /// Gets the uri of the file.
         /// </summary>
         Func<IRenderControlContext, IUri> Uri { get; }

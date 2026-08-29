@@ -20,6 +20,12 @@
     margin-left: 0.5em;
 }
 
+/* the stand-in for an unset value, which names the field the editor edits */
+.wx-smart-edit-placeholder {
+    color: var(--wx-secondary-color);
+    font-style: italic;
+}
+
 .wx-smart-edit button {
     padding-left: 0.5em;
     padding-right: 0.5em;

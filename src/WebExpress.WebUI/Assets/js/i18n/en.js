@@ -114,6 +114,8 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
 
     "sidebar.toggle": "Toggle sidebar",
 
+    "filelist.versions": "Earlier versions",
+
     "upload.button": "Upload Files",
     "upload.remove.file": "Remove file",
 

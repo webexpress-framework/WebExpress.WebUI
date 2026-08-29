@@ -89,6 +89,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/webexpress.webui.traffic.light.js")]
     [Asset("/assets/js/webexpress.webui.tree.js")]
     [Asset("/assets/js/webexpress.webui.upload.js")]
+    [Asset("/assets/js/webexpress.webui.view.switcher.js")]
     [Asset("/assets/js/webexpress.webui.view.js")]
     [Asset("/assets/js/action/default.js")]
     [Asset("/assets/js/bind/default.js")]

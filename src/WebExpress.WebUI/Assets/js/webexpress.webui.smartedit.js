@@ -32,11 +32,22 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
 
         this._editor = this._detachElement(element.firstElementChild);
 
+        // the text the read view shows for an empty value. an empty value would
+        // otherwise leave an empty view - nothing to hover and nothing to click -
+        // so exactly the value that most needs an editor would have no way to
+        // reach one. the editor's own placeholder names the field
+        this._placeholder = element.getAttribute("data-placeholder")
+            || (this._editor && typeof this._editor.getAttribute === "function"
+                ? this._editor.getAttribute("placeholder")
+                : null)
+            || null;
+
         // bereinige dom
         element.removeAttribute("data-form-action");
         element.removeAttribute("data-form-method");
         element.removeAttribute("data-object-id");
         element.removeAttribute("data-object-name");
+        element.removeAttribute("data-placeholder");
         element.classList.add("wx-smart-edit");
 
         // events
@@ -420,9 +431,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
      */
     _getView(value) {
         if (!this._editor) {
-            const span = document.createElement("span");
-            span.textContent = value ?? "";
-            return span;
+            return this._textView(value);
         }
 
         const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
@@ -510,8 +519,27 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             return span;
         }
 
+        return this._textView(value);
+    }
+
+    /**
+     * Builds the plain text read view, falling back to the placeholder when the
+     * value is empty, so an unset value still names the field and still offers
+     * the area the pencil appears over.
+     * @param {string|any} value value to display
+     * @returns {HTMLElement} read-only view node
+     */
+    _textView(value) {
         const span = document.createElement("span");
-        span.textContent = value ?? "";
+        const text = value == null ? "" : String(value);
+
+        if (text.length === 0 && this._placeholder) {
+            span.className = "wx-smart-edit-placeholder";
+            span.textContent = this._placeholder;
+            return span;
+        }
+
+        span.textContent = text;
         return span;
     }
 

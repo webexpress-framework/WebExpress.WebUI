@@ -38,6 +38,12 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, string> Name { get; set; }
 
         /// <summary>
+        /// Gets or sets the version of the file, which orders it among the other
+        /// entries of the same name. Zero means the file has one version only.
+        /// </summary>
+        public Func<IRenderControlContext, int> Version { get; set; } = _ => 0;
+
+        /// <summary>
         /// Gets or sets the uri of the file.
         /// </summary>
         public Func<IRenderControlContext, IUri> Uri { get; set; }
@@ -86,6 +92,11 @@ namespace WebExpress.WebUI.WebControl
             {
                 Class = "wx-webui-file",
             }
+                // the id travels with the entry so a host that persists a change
+                // to one file - an inline edited description - can name the file
+                // it is talking about
+                .AddUserAttribute("data-file-id", _id)
+                .AddUserAttribute("data-file-version", (Version?.Invoke(renderContext) ?? 0) > 0 ? Version.Invoke(renderContext).ToString() : null)
                 // the icon travels to the client as a bare class string, so it has
                 // to carry the page's theme with it; without this the preview was
                 // the class is handed to the client, which renders the icon itself

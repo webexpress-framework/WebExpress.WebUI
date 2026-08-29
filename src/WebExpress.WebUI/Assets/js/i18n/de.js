@@ -114,6 +114,8 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
 
     "sidebar.toggle": "Seitenleiste umschalten",
 
+    "filelist.versions": "Frühere Versionen",
+
     "upload.button": "Dateien hochladen",
     "upload.remove.file": "Datei entfernen",
 

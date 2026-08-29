@@ -9,5 +9,5 @@ contract({
     file: "webexpress.webui.view.js",
     selector: "wx-webui-view",
     ctrl: "ViewCtrl",
-    deps: ["webexpress.webui.dropdown.js"]
+    deps: ["webexpress.webui.dropdown.js", "webexpress.webui.view.switcher.js"]
 });
