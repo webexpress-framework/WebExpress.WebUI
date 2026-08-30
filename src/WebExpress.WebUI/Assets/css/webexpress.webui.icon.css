@@ -280,6 +280,11 @@
     mask-image: url("../icons/caret-up.svg");
 }
 
+.wx-icon-light-ccs {
+    -webkit-mask-image: url("../icons/ccs.svg");
+    mask-image: url("../icons/ccs.svg");
+}
+
 .wx-icon-light-chart {
     -webkit-mask-image: url("../icons/chart.svg");
     mask-image: url("../icons/chart.svg");
